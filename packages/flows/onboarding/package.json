@@ -24,7 +24,7 @@
     "@matriz/foundation-utils": "workspace:^",
     "@matriz/integration-api-contracts": "workspace:^",
     "@matriz/platform-storage": "workspace:^",
-    "react": "19.0.0",
+    "react": "19.2.5",
     "zod": "3.23.8"
   }
 }

@@ -1,42 +1,20 @@
 [?9001h[?1004h[?25l[2J[m[2;1H> @matriz/app-contracts@0.0.0 build C:\Apps\V0 POC MATRIZ\apps\contracts
-> next build[6;1H]0;C:\WINDOWS\system32\cmd.exe[?25h[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[?25l   [38;2;173;127;168m[1m▲ Next.js 16.0.0[m (Turbopack)[11;1H[?25h [37m[1m [m Creating an optimized production build ...
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
- [32m[1m✓[m Compiled successfully in 2.2s
- [37m[1m [m Running TypeScript  [36m.[?25l[m [37m[1m [m Running TypeScript  [36m..[K[34C[m [37m[1m [m Running TypeScript  [36m...[K[33C[m [37m[1m [m Running TypeScript  [36m.[K[35C[m [37m[1m [m Running TypeScript  [36m..[K[34C[m [37m[1m [m Running TypeScript  [36m...[K[33C[m [37m[1m [m Running TypeScript  [36m.[K[35C[m [37m[1m [m Running TypeScript  [36m..[K[34C[m [37m[1m [m Running TypeScript  [36m...[K[33C[m [37m[1m [m Running TypeScript  [36m.[K[35C[m [37m[1m [m Running TypeScript  [36m..[K[34C[m [37m[1m [m Running TypeScript  [36m...[K[33C[m [37m[1m [m Running TypeScript  [36m.[K[35C[m [37m[1m [m Running TypeScript  [36m..[K[34C[m [37m[1m [m Running TypeScript  [36m...[K[33C[m [37m[1m [m Running TypeScript  [36m.[K[35C[m [37m[1m [m Running TypeScript  [36m..[K[34C[m [37m[1m [m Running TypeScript  [36m...[K[33C[m [37m[1m [m Running TypeScript  [36m.[K[35C[m [37m[1m [m Running TypeScript  [36m..[K[34C[m [37m[1m [m Running TypeScript  [36m...[K[33C[m [37m[1m [m Running TypeScript  [36m.[K[35C[m [32m[1m✓[m Finished TypeScript in 4.5s[K
- [37m[1m [m Collecting page data  [36m.[m [37m[1m [m Collecting page data  [36m..[K[32C[m[17;28H[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
-[baseline-browser-mapping] The data in this module is over 
-[22;59H two months old.  To ensure accurate Baseline data, please u
-[22;59Hupdate: `npm i baseline-browser-mapping@latest -D`[10C
-[59C [37m[1m [m Collecting page data  [36m...[m[baseline-browser-mapping] The 
-[22;59H data in this module is over two months old.  To ensure accu
-[22;59Hurate Baseline data, please update: `npm i baseline-browser-
-[22;59H-mapping@latest -D`[41C
-[baseline-browser-mapping] The data in this module is over 
-[22;59H two months old.  To ensure accurate Baseline data, please u
-[22;59Hupdate: `npm i baseline-browser-mapping@latest -D`[10C
-[59C[baseline-browser-mapping] The data in this module is over 
-[22;59H two months old.  To ensure accurate Baseline data, please u
-[22;59Hupdate: `npm i baseline-browser-mapping@latest -D`[10C
-[baseline-browser-mapping] The data in this module is over 
-[22;59H two months old.  To ensure accurate Baseline data, please u
-[22;59Hupdate: `npm i baseline-browser-mapping@latest -D`[10C
-[59C [37m[1m [m Collecting page data  [36m.[K[33C[m [37m[1m [m Collecting page data  [36m..[K[32C[m [37m[1m [m Collecting page data  [36m...[K[31C[m [32m[1m✓[m Collecting page data in 1058.6ms[K[?25h
- [37m[1m [m Generating static pages (0/7)  [36m[    ][?25l[m [37m[1m [m Generating static pages (0/7)  [36m[=   ][K[19C[m[baseline-browser-mapping] The data in this module is over [?25h
-[22;59H two months old.  To ensure accurate Baseline data, please u
-[22;59Hupdate: `npm i baseline-browser-mapping@latest -D`
- [32m[1m✓[m Generating static pages (7/7) in 1118.5ms
- [32m[1m✓[m Finalizing page optimization in 11.0ms[K
-
-[4mRoute (app)[24m[K
+> next build[6;1H]0;C:\WINDOWS\system32\cmd.exe[?25h[?25l[38;2;173;127;168m[1m▲ Next.js 16.2.4[m (Turbopack)[8;1H[?25h[37m[1m [m Creating an optimized production build ...
+[32m[1m✓[m Compiled successfully in 9.6s
+[?25l[37m[1m [m Running TypeScript  [36m.[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[K[59C[?25h[?25l[37m[1m [m Finished TypeScript in 10.5s  [36m.[m[K[59C[32m[1m✓[m Finished TypeScript in 10.5s    
+[?25h[?25l[37m[1m [m Collecting page data using 8 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m...[m[37m[1m [m Collecting page data using 8 workers  [36m.[K[18C[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 8 workers  [36m.[m[37m[1m [m Collecting page data using 8 workers  [36m..[K[17C[m[32m[1m✓[m Collecting page data using 8 workers in 5.1s[K
+[?25h[37m[1m [m Generating static pages using 8 workers (0/7)  [36m[    ][?25l[m[37m[1m[11;1H [m Generating static pages using 8 workers (0/7)  [36m[=   ]    [m
+[K[59C[37m[1m[10;1H [m Generating static pages using 8 workers (0/7)  [36m[==  ]    [m
+[K[59C[37m[1m[9;1H [m Generating static pages using 8 workers (0/7)  [36m[=== ]    [m
+[K[59C[37m[1m[8;1H [m Generating static pages using 8 workers (0/7)  [36m[ ===]    [m
+[K[59C[37m[1m[7;1H [m Generating static pages using 8 workers (0/7)  [36m[  ==]    [m
+[K[59C[37m[1m[6;1H [m Generating static pages using 8 workers (0/7)  [36m[   =]    [m
+[K[59C[37m[1m[5;1H [m Generating static pages using 8 workers (0/7)  [36m[    ]    [m
+[K[59C[32m[1m[4;1H✓[m Generating static pages using 8 workers (7/7) in 1664ms  
+[K[59C[37m[1m [m Finalizing page optimization  [36m.[m[32m[1m✓[m Finalizing page optimization in 25ms[K[4m[7;1HRoute (app)[24m
 ┌ ○ /
 ├ ○ /_not-found
 ├ ○ /contracts
 ├ ○ /login
 ├ ○ /onboarding
-└ ○ /templates
-
-
-○  (Static)  prerendered as static content
-
+└ ○ /templates[16;1H○  (Static)  prerendered as static content[18;1H[?25h

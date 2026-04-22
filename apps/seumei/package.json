@@ -27,9 +27,9 @@
     "@matriz/platform-config": "workspace:*",
     "@matriz/platform-storage": "workspace:*",
     "@matriz/platform-telemetry": "workspace:*",
-    "next": "16.0.0",
-    "react": "19.0.0",
-    "react-dom": "19.0.0",
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
     "zod": "3.23.8",
     "zustand": "5.0.0-rc.2"
   },

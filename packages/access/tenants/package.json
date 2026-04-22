@@ -21,6 +21,6 @@
   "dependencies": {
     "@matriz/foundation-constants": "workspace:^",
     "@matriz/foundation-types": "workspace:^",
-    "react": "19.0.0"
+    "react": "19.2.5"
   }
 }
