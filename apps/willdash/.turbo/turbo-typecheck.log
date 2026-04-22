@@ -1,4 +1,4 @@
 
-> @matriz/app-willdash@0.0.0 typecheck /vercel/share/v0-project/apps/willdash
+> @matriz/app-willdash@0.0.0 typecheck C:\Apps\V0 POC MATRIZ\apps\willdash
 > tsc --noEmit
 

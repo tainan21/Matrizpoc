@@ -1,4 +1,4 @@
 
-> @matriz/integration-registry-core@0.0.0 lint /vercel/share/v0-project/packages/integration/registry-core
+> @matriz/integration-registry-core@0.0.0 lint C:\Apps\V0 POC MATRIZ\packages\integration\registry-core
 > eslint src
 

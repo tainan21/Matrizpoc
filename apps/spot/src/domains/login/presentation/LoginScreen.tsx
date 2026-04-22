@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { useAuth, type OtpStartOutput } from "@matriz/platform-auth"
+import { useAuth, type OtpStartOutput } from "@matriz/platform-auth/client"
 import {
   Alert,
   Badge,

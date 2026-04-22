@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { useAuth, type MagicLinkStartOutput } from "@matriz/platform-auth"
+import { useAuth, type MagicLinkStartOutput } from "@matriz/platform-auth/client"
 import { contractsLoginCopy } from "../../../auth/config"
 
 type Phase = "email" | "token" | "signed-in"

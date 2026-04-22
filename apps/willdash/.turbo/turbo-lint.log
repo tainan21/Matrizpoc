@@ -1,4 +1,4 @@
 
-> @matriz/app-willdash@0.0.0 lint /vercel/share/v0-project/apps/willdash
+> @matriz/app-willdash@0.0.0 lint C:\Apps\V0 POC MATRIZ\apps\willdash
 > eslint . --max-warnings 0
 

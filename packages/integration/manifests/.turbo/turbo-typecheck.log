@@ -1,4 +1,4 @@
 
-> @matriz/integration-manifests@0.0.0 typecheck /vercel/share/v0-project/packages/integration/manifests
+> @matriz/integration-manifests@0.0.0 typecheck C:\Apps\V0 POC MATRIZ\packages\integration\manifests
 > tsc --noEmit
 

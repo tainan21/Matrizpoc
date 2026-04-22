@@ -1,4 +1,4 @@
 
-> @matriz/platform-storage@0.0.0 typecheck /vercel/share/v0-project/packages/platform/storage
+> @matriz/platform-storage@0.0.0 typecheck C:\Apps\V0 POC MATRIZ\packages\platform\storage
 > tsc --noEmit
 

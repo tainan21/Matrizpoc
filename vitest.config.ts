@@ -27,6 +27,8 @@ export default defineConfig({
       "@matriz/foundation-constants": resolve(__dirname, "./packages/foundation/constants/src/index.ts"),
       "@matriz/foundation-schemas": resolve(__dirname, "./packages/foundation/schemas/src/index.ts"),
       "@matriz/platform-storage": resolve(__dirname, "./packages/platform/storage/src/index.ts"),
+      "@matriz/platform-auth/client": resolve(__dirname, "./packages/platform/auth/src/client.ts"),
+      "@matriz/platform-auth/server": resolve(__dirname, "./packages/platform/auth/src/server.ts"),
       "@matriz/platform-auth/v1": resolve(__dirname, "./packages/platform/auth/src/v1/index.ts"),
       "@matriz/platform-auth": resolve(__dirname, "./packages/platform/auth/src/index.ts"),
       "@matriz/access-tenants": resolve(__dirname, "./packages/access/tenants/src/index.ts"),

@@ -153,5 +153,14 @@ export function themeToCssVars(theme: AppThemeTokens): Record<string, string> {
     "--muted": theme.muted,
     "--muted-fg": theme.mutedFg,
     "--border": theme.border,
+    "--color-background": theme.muted,
+    "--color-foreground": theme.surfaceFg,
+    "--color-surface": theme.surface,
+    "--color-surface-foreground": theme.surfaceFg,
+    "--color-muted": theme.muted,
+    "--color-muted-foreground": theme.mutedFg,
+    "--color-border": theme.border,
+    "--color-primary": theme.brandAccent,
+    "--color-primary-foreground": theme.brandAccentFg,
   }
 }

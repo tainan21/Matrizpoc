@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { themeToCssVars, appThemes } from "@matriz/design-system"
 import { bootstrapMatrizHub } from "../src/bootstrap"
 import { HubAuthAdoption } from "../src/auth/provider"
+import "./globals.css"
 
 bootstrapMatrizHub()
 

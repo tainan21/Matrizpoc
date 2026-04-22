@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth"
-import { TenantProvider } from "@matriz/access-tenants"
+import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
+import { TenantProvider } from "@matriz/access-tenants/client"
 import { seumeiAuthConfig } from "./config"
 import { AppShell } from "../ui/components/AppShell"
 import { LoginLayoutFrame } from "../domains/login/presentation/LoginLayoutFrame"

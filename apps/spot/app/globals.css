@@ -1,3 +1,5 @@
+@import "../../../packages/design/ui/src/utility-shim.css";
+
 /* Spot global styles.
  *
  * Placeholder minimo. CP dedicado ao preview runtime conecta tailwind v4.

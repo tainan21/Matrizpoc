@@ -8,7 +8,9 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./v1": "./src/v1/index.ts"
+    "./v1": "./src/v1/index.ts",
+    "./client": "./src/client.ts",
+    "./server": "./src/server.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

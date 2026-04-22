@@ -1,4 +1,4 @@
 
-> @matriz/access-tenants@0.0.0 typecheck /vercel/share/v0-project/packages/access/tenants
+> @matriz/access-tenants@0.0.0 typecheck C:\Apps\V0 POC MATRIZ\packages\access\tenants
 > tsc --noEmit
 

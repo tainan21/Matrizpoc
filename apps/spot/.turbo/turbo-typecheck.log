@@ -1,4 +1,4 @@
 
-> @matriz/app-spot@0.0.0 typecheck /vercel/share/v0-project/apps/spot
+> @matriz/app-spot@0.0.0 typecheck C:\Apps\V0 POC MATRIZ\apps\spot
 > tsc --noEmit
 

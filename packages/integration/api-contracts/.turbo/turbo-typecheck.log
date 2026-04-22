@@ -1,4 +1,4 @@
 
-> @matriz/integration-api-contracts@0.0.0 typecheck /vercel/share/v0-project/packages/integration/api-contracts
+> @matriz/integration-api-contracts@0.0.0 typecheck C:\Apps\V0 POC MATRIZ\packages\integration\api-contracts
 > tsc --noEmit
 

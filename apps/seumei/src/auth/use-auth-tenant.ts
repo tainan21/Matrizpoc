@@ -1,7 +1,7 @@
 "use client"
 
-import { useAuth } from "@matriz/platform-auth"
-import { useTenant } from "@matriz/access-tenants"
+import { useAuth } from "@matriz/platform-auth/client"
+import { useTenant } from "@matriz/access-tenants/client"
 import {
   toSeumeiSessionViewModel,
   type SeumeiSessionViewModel,
