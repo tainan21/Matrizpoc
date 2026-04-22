@@ -89,6 +89,28 @@ pnpm tsx tooling/scripts/check-readiness.ts              # score 100/100
 - [audit/v1.1-baseline.md](./docs/audit/v1.1-baseline.md)
 - [adr/0001-auth-v1.1.md](./docs/adr/0001-auth-v1.1.md)
 
+## Camada institucional V1.2 (novo)
+
+Sobre a base técnica V1.1, a V1.2 introduz uma **camada institucional**
+que transforma o `matriz-hub` em **control plane** do ecossistema
+Matriz: capaz de consumir, classificar, consolidar e exibir projetos
+heterogêneos (apps internos, fontes externas, legados, MCP, registries
+institucionais).
+
+- [control-plane-overview.md](./docs/control-plane-overview.md) — **leia primeiro**
+- [project-intelligence-contracts.md](./docs/project-intelligence-contracts.md)
+- [source-classification.md](./docs/source-classification.md)
+- [ingestion-model.md](./docs/ingestion-model.md)
+- [telemetry-institutional-model.md](./docs/telemetry-institutional-model.md)
+- [public-site-automation-model.md](./docs/public-site-automation-model.md)
+- [theming-governance.md](./docs/theming-governance.md)
+- [cross-repo-integration-model.md](./docs/cross-repo-integration-model.md)
+- [mcp-capabilities-model.md](./docs/mcp-capabilities-model.md)
+- [wallet-future-notes.md](./docs/wallet-future-notes.md)
+- [circular-benefits-model.md](./docs/circular-benefits-model.md)
+- [migration-strategy-v1-to-real-products.md](./docs/migration-strategy-v1-to-real-products.md)
+- [audit/v1.2-institutional.md](./docs/audit/v1.2-institutional.md)
+
 ## Status V1.1
 
 - [x] **Auth compartilhada real** com 2 estratégias (OTP, magic link)

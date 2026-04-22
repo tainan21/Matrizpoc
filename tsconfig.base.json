@@ -44,6 +44,8 @@
       "@matriz/access-permissions": ["./packages/access/permissions/src/index.ts"],
       "@matriz/integration-events": ["./packages/integration/events/src/index.ts"],
       "@matriz/integration-registry-core": ["./packages/integration/registry-core/src/index.ts"],
+      "@matriz/integration-registry-core/institutional": ["./packages/integration/registry-core/src/institutional-registry.ts"],
+      "@matriz/integration-ingestion": ["./packages/integration/ingestion/src/index.ts"],
       "@matriz/integration-manifests": ["./packages/integration/manifests/src/index.ts"],
       "@matriz/integration-external-links": ["./packages/integration/external-links/src/index.ts"],
       "@matriz/integration-api-contracts": ["./packages/integration/api-contracts/src/index.ts"],
