@@ -1,0 +1,4 @@
+
+> @matriz/foundation-schemas@0.0.0 typecheck /vercel/share/v0-project/packages/foundation/schemas
+> tsc --noEmit
+

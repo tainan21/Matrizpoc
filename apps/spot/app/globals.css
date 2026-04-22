@@ -1,0 +1,32 @@
+/* Spot global styles.
+ *
+ * Placeholder minimo. CP dedicado ao preview runtime conecta tailwind v4.
+ * Por enquanto as classes utilitarias sao strings inertes — o que garante
+ * typecheck + lint + smoke verdes e deixa espaco para ativacao visual.
+ */
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    sans-serif;
+  background: var(--surface, #ffffff);
+  color: var(--surface-fg, #0f172a);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
+}

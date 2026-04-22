@@ -1,0 +1,4 @@
+
+> @matriz/app-spot@0.0.0 typecheck /vercel/share/v0-project/apps/spot
+> tsc --noEmit
+

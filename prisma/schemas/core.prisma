@@ -1,0 +1,215 @@
+// ============================================================================
+// Matriz — Core Prisma Schema
+// ----------------------------------------------------------------------------
+// Authority: this schema models the shared/core concerns of the Matriz
+// ecosystem (tenants, users, memberships, app registrations, external links,
+// onboarding progress, optional sessions and telemetry).
+//
+// Architectural Laws in force:
+//   L1 — schema per app is the V1 unit of isolation (core + 4 app schemas).
+//   L5 — repositories use these shapes as the future real persistence layer.
+//   L7 — changes to fields must be versioned in lockstep with public DTOs.
+//
+// V1 note: NO database is connected. This schema exists to be validated and
+// to mirror the future real architecture. Field types, enums and relations
+// are chosen to be realistic without over-committing to implementation
+// details we do not yet need.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/core"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("CORE_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Tenant — the isolation boundary for every customer of the Matriz platform.
+// ---------------------------------------------------------------------------
+model Tenant {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  brandColor  String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users               User[]
+  memberships         Membership[]
+  appRegistrations    AppRegistration[]
+  externalLinks       ExternalLink[]
+  onboardingProgress  OnboardingProgress[]
+  sharedSessions      SharedSession[]
+  telemetryRecords    TelemetryRecord[]
+
+  @@map("tenants")
+}
+
+// ---------------------------------------------------------------------------
+// User — platform-level identity. Apps refer to users through memberships.
+// ---------------------------------------------------------------------------
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  displayName String
+  avatarUrl   String?
+  tenantId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  memberships      Membership[]
+  sharedSessions   SharedSession[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
+// Membership — user ↔ tenant ↔ app with role. One user may be active on
+// several apps within one tenant.
+// ---------------------------------------------------------------------------
+model Membership {
+  id        String         @id @default(cuid())
+  tenantId  String
+  userId    String
+  appId     String
+  role      MembershipRole @default(MEMBER)
+  createdAt DateTime       @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId, appId])
+  @@index([tenantId])
+  @@index([userId])
+  @@map("memberships")
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+// ---------------------------------------------------------------------------
+// AppRegistration — records which apps are enabled for a tenant. Drives the
+// Hub catalog and feature-flags (L10) lookups.
+// ---------------------------------------------------------------------------
+model AppRegistration {
+  id              String   @id @default(cuid())
+  tenantId        String
+  appId           String
+  manifestVersion String
+  contractVersion String   @default("v1")
+  enabled         Boolean  @default(true)
+  enabledAt       DateTime @default(now())
+  disabledAt      DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, appId])
+  @@index([appId])
+  @@map("app_registrations")
+}
+
+// ---------------------------------------------------------------------------
+// ExternalLink — the canonical shape that lets any entity in any app point
+// at any other entity in any other app without direct FK coupling.
+// Mirrors packages/integration/external-links types exactly.
+// ---------------------------------------------------------------------------
+model ExternalLink {
+  id                 String   @id @default(cuid())
+  tenantId           String
+  localApp           String
+  localEntityType    String
+  localEntityId      String
+  externalApp        String
+  externalEntityType String
+  externalEntityId   String
+  relationType       String
+  snapshot           Json?
+  createdAt          DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, localApp, localEntityType, localEntityId])
+  @@index([tenantId, externalApp, externalEntityType, externalEntityId])
+  @@map("external_links")
+}
+
+// ---------------------------------------------------------------------------
+// OnboardingProgress — tracks the shared onboarding flow per tenant per app.
+// Used by Hub to show "onboarding status by tenant/app".
+// ---------------------------------------------------------------------------
+model OnboardingProgress {
+  id             String             @id @default(cuid())
+  tenantId       String
+  appId          String
+  status         OnboardingStatus   @default(NOT_STARTED)
+  currentStepId  String?
+  sharedPayload  Json?
+  appPayload     Json?
+  completedSteps String[]
+  startedAt      DateTime?
+  completedAt    DateTime?
+  updatedAt      DateTime           @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, appId])
+  @@index([tenantId])
+  @@map("onboarding_progress")
+}
+
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  SKIPPED
+}
+
+// ---------------------------------------------------------------------------
+// SharedSession — future-ready representation of a cross-app navigation
+// session. Not strictly required in V1 but declared to reserve the shape.
+// ---------------------------------------------------------------------------
+model SharedSession {
+  id           String   @id @default(cuid())
+  tenantId     String
+  userId       String
+  currentAppId String?
+  lastSeenAt   DateTime @default(now())
+  context      Json?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId])
+  @@map("shared_sessions")
+}
+
+// ---------------------------------------------------------------------------
+// TelemetryRecord — envelope for every telemetry event emitted by any app.
+// Shape mirrors TelemetryEventDTO v1.
+// ---------------------------------------------------------------------------
+model TelemetryRecord {
+  id         String   @id @default(cuid())
+  tenantId   String
+  appId      String
+  eventName  String
+  eventVersion String @default("v1")
+  properties Json?
+  occurredAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, appId])
+  @@index([tenantId, eventName])
+  @@index([occurredAt])
+  @@map("telemetry_records")
+}

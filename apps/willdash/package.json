@@ -1,0 +1,42 @@
+{
+  "name": "@matriz/app-willdash",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3004",
+    "build": "next build",
+    "start": "next start -p 3004",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@matriz/access-tenants": "workspace:*",
+    "@matriz/design-system": "workspace:*",
+    "@matriz/design-ui": "workspace:*",
+    "@matriz/flows-onboarding": "workspace:*",
+    "@matriz/foundation-constants": "workspace:*",
+    "@matriz/foundation-schemas": "workspace:*",
+    "@matriz/foundation-types": "workspace:*",
+    "@matriz/foundation-utils": "workspace:*",
+    "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-events": "workspace:*",
+    "@matriz/integration-external-links": "workspace:*",
+    "@matriz/integration-manifests": "workspace:*",
+    "@matriz/integration-registry-core": "workspace:*",
+    "@matriz/platform-config": "workspace:*",
+    "@matriz/platform-pdf": "workspace:^",
+    "@matriz/platform-storage": "workspace:*",
+    "@matriz/platform-telemetry": "workspace:*",
+    "next": "16.0.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "zod": "3.23.8",
+    "zustand": "5.0.0-rc.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.5",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "typescript": "5.6.3"
+  }
+}

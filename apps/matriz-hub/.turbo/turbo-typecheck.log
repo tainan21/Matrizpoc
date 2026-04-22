@@ -1,0 +1,4 @@
+
+> @matriz/app-matriz-hub@0.0.0 typecheck /vercel/share/v0-project/apps/matriz-hub
+> tsc --noEmit
+

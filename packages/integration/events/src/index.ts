@@ -1,0 +1,186 @@
+/**
+ * @matriz/integration-events
+ *
+ * Event bus interno mock. Envelope carrega version: "v1" (L7). Os 6 eventos
+ * obrigatorios da POC estao tipados aqui. Apps emitem via createEventBus ou
+ * pelo singleton globalEventBus; o Hub le historico para visualizacao.
+ */
+import { z } from "zod"
+import type { AppId } from "@matriz/foundation-types"
+import { CONTRACT_VERSION_V1, MATRIZ_EVENT_NAMES } from "@matriz/foundation-constants"
+import { generateId, nowIso } from "@matriz/foundation-utils"
+
+// ---------- envelope ----------
+
+export const eventNameSchema = z.enum(MATRIZ_EVENT_NAMES)
+export type MatrizEventName = z.infer<typeof eventNameSchema>
+
+export const eventEnvelopeSchema = z.object({
+  id: z.string().min(1),
+  name: eventNameSchema,
+  version: z.literal(CONTRACT_VERSION_V1),
+  sourceApp: z.string().min(1),
+  tenantId: z.string().min(1),
+  occurredAt: z.string().datetime(),
+  payload: z.record(z.string(), z.unknown()),
+})
+export type EventEnvelope<T = unknown> = {
+  id: string
+  name: MatrizEventName
+  version: typeof CONTRACT_VERSION_V1
+  sourceApp: AppId
+  tenantId: string
+  occurredAt: string
+  payload: T
+}
+
+// ---------- typed payload map ----------
+
+export interface MatrizEventPayloads {
+  "onboarding.completed": {
+    tenantId: string
+    appId: AppId
+    completedSteps: readonly string[]
+  }
+  "spot.gig.created": {
+    gigId: string
+    tenantId: string
+    title: string
+    bandName: string
+    venueName: string
+  }
+  "seumei.establishment.selected": {
+    establishmentId: string
+    tenantId: string
+    name: string
+  }
+  "contract.created": {
+    contractId: string
+    tenantId: string
+    originApp: AppId
+    title: string
+  }
+  "contract.linked": {
+    contractId: string
+    tenantId: string
+    externalLinkId: string
+    linksTo: { app: AppId; entityType: string; entityId: string }
+  }
+  "hub.app.opened": {
+    appId: AppId
+    tenantId: string
+  }
+  "willdash.goal.opened": {
+    goalId: string
+    tenantId: string
+    title: string
+  }
+  "willdash.activity.logged": {
+    activityId: string
+    tenantId: string
+    goalId?: string
+    kind: string
+  }
+}
+
+// ---------- event bus ----------
+
+type Handler<T> = (envelope: EventEnvelope<T>) => void | Promise<void>
+
+export interface EventBus {
+  emit<N extends MatrizEventName>(
+    name: N,
+    opts: {
+      sourceApp: AppId
+      tenantId: string
+      payload: MatrizEventPayloads[N]
+    },
+  ): EventEnvelope<MatrizEventPayloads[N]>
+  on<N extends MatrizEventName>(
+    name: N,
+    handler: Handler<MatrizEventPayloads[N]>,
+  ): () => void
+  once<N extends MatrizEventName>(
+    name: N,
+    handler: Handler<MatrizEventPayloads[N]>,
+  ): () => void
+  off<N extends MatrizEventName>(
+    name: N,
+    handler: Handler<MatrizEventPayloads[N]>,
+  ): void
+  history(): readonly EventEnvelope<unknown>[]
+  clear(): void
+}
+
+export function createEventBus(): EventBus {
+  const handlers = new Map<MatrizEventName, Set<Handler<unknown>>>()
+  const log: EventEnvelope<unknown>[] = []
+
+  const getSet = (name: MatrizEventName) => {
+    let set = handlers.get(name)
+    if (!set) {
+      set = new Set()
+      handlers.set(name, set)
+    }
+    return set
+  }
+
+  return {
+    emit(name, opts) {
+      const envelope: EventEnvelope<(typeof opts)["payload"]> = {
+        id: generateId("evt"),
+        name,
+        version: CONTRACT_VERSION_V1,
+        sourceApp: opts.sourceApp,
+        tenantId: opts.tenantId,
+        occurredAt: nowIso(),
+        payload: opts.payload,
+      }
+      log.push(envelope as EventEnvelope<unknown>)
+      const set = handlers.get(name)
+      if (set) {
+        for (const h of set) {
+          void Promise.resolve().then(() => (h as Handler<unknown>)(envelope as EventEnvelope<unknown>))
+        }
+      }
+      return envelope
+    },
+    on(name, handler) {
+      const set = getSet(name)
+      set.add(handler as Handler<unknown>)
+      return () => set.delete(handler as Handler<unknown>)
+    },
+    once(name, handler) {
+      const off = this.on(name, (env) => {
+        off()
+        void (handler as Handler<unknown>)(env)
+      })
+      return off
+    },
+    off(name, handler) {
+      handlers.get(name)?.delete(handler as Handler<unknown>)
+    },
+    history() {
+      return log.slice()
+    },
+    clear() {
+      log.length = 0
+      handlers.clear()
+    },
+  }
+}
+
+// ---------- singleton ----------
+
+const GLOBAL_KEY = Symbol.for("matriz.integration.eventBus")
+type Globals = { [K: symbol]: EventBus | undefined }
+const globals = globalThis as unknown as Globals
+
+export function getGlobalEventBus(): EventBus {
+  if (!globals[GLOBAL_KEY]) {
+    globals[GLOBAL_KEY] = createEventBus()
+  }
+  return globals[GLOBAL_KEY]!
+}
+
+export const INTEGRATION_EVENTS_VERSION = "1.0.0" as const

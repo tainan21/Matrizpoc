@@ -1,0 +1,126 @@
+// ============================================================================
+// Matriz — Seumei Prisma Schema
+// ----------------------------------------------------------------------------
+// Authority: Seumei app owns the domain of establishments (restaurants,
+// venues, operations units), their profiles, order drafts and preferences.
+// No cross-schema FKs — cross-app references flow through ExternalLink
+// records in core.prisma (L1).
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/seumei"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SEUMEI_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Establishment — the core operation entity in Seumei.
+// ---------------------------------------------------------------------------
+model Establishment {
+  id          String              @id @default(cuid())
+  tenantId    String
+  name        String
+  slug        String
+  type        EstablishmentType
+  status      EstablishmentStatus @default(ACTIVE)
+  addressLine String?
+  city        String
+  country     String              @default("BR")
+  phone       String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  profile      EstablishmentProfile?
+  orderDrafts  OrderDraft[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@index([tenantId, type])
+  @@map("establishments")
+}
+
+enum EstablishmentType {
+  RESTAURANT
+  BAR
+  CAFE
+  VENUE
+  FOODTRUCK
+  OTHER
+}
+
+enum EstablishmentStatus {
+  ACTIVE
+  PAUSED
+  CLOSED
+}
+
+// ---------------------------------------------------------------------------
+// EstablishmentProfile — extended branding and operational profile.
+// ---------------------------------------------------------------------------
+model EstablishmentProfile {
+  id              String   @id @default(cuid())
+  establishmentId String   @unique
+  tenantId        String
+  displayName     String
+  description     String?
+  capacity        Int?
+  openingHours    Json?
+  tags            String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  establishment Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("establishment_profiles")
+}
+
+// ---------------------------------------------------------------------------
+// OrderDraft — optional mock of commercial orders being prepared for an
+// establishment. Reserved for future real persistence.
+// ---------------------------------------------------------------------------
+model OrderDraft {
+  id               String           @id @default(cuid())
+  tenantId         String
+  establishmentId  String
+  reference        String
+  status           OrderDraftStatus @default(DRAFT)
+  totalCents       Int              @default(0)
+  currency         String           @default("BRL")
+  items            Json?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  establishment Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([establishmentId])
+  @@map("order_drafts")
+}
+
+enum OrderDraftStatus {
+  DRAFT
+  READY
+  SUBMITTED
+  CANCELLED
+}
+
+// ---------------------------------------------------------------------------
+// SeumeiPreference — tenant-scoped preferences for the Seumei app.
+// ---------------------------------------------------------------------------
+model SeumeiPreference {
+  id                  String   @id @default(cuid())
+  tenantId            String   @unique
+  defaultType         String?
+  operationsModel     String?
+  preferredCurrency   String   @default("BRL")
+  enableDeliveryZones Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("seumei_preferences")
+}

@@ -1,0 +1,4 @@
+
+> @matriz/access-permissions@0.0.0 typecheck /vercel/share/v0-project/packages/access/permissions
+> tsc --noEmit
+

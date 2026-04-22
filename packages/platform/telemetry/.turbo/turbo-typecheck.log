@@ -1,0 +1,4 @@
+
+> @matriz/platform-telemetry@0.0.0 typecheck /vercel/share/v0-project/packages/platform/telemetry
+> tsc --noEmit
+

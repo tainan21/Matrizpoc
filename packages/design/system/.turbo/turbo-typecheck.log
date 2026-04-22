@@ -1,0 +1,4 @@
+
+> @matriz/design-system@0.0.0 typecheck /vercel/share/v0-project/packages/design/system
+> tsc --noEmit
+

@@ -1,0 +1,2 @@
+# Reserved for future Prisma migrations per app.
+# V1 has NO database connected — see docs/architectural-laws.md (L1).

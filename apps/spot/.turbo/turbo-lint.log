@@ -1,0 +1,4 @@
+
+> @matriz/app-spot@0.0.0 lint /vercel/share/v0-project/apps/spot
+> eslint . --max-warnings 0
+

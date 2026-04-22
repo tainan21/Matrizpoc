@@ -1,0 +1,146 @@
+// ============================================================================
+// Matriz — Spot Prisma Schema
+// ----------------------------------------------------------------------------
+// Authority: Spot app owns the domain of bands, artists, gigs and bookings.
+// No cross-schema foreign keys to core/* — references to Tenant/User are
+// kept as plain String fields (tenantId, userId) and resolved at the
+// application layer. This upholds L1 (schema-per-app isolation).
+//
+// Cross-app references (e.g. a Gig generating a Contract) are recorded via
+// the ExternalLink shape in core.prisma, NOT via FKs here.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/spot"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("SPOT_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Band — the core artistic entity in Spot.
+// ---------------------------------------------------------------------------
+model Band {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  slug        String
+  genre       String
+  bio         String?
+  avatarUrl   String?
+  memberCount Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profiles ArtistProfile[]
+  gigs     Gig[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("bands")
+}
+
+// ---------------------------------------------------------------------------
+// ArtistProfile — a member/artist associated with one or more bands.
+// ---------------------------------------------------------------------------
+model ArtistProfile {
+  id           String   @id @default(cuid())
+  tenantId     String
+  bandId       String
+  userId       String?
+  stageName    String
+  role         String
+  instrument   String?
+  bio          String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  band Band @relation(fields: [bandId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([bandId])
+  @@map("artist_profiles")
+}
+
+// ---------------------------------------------------------------------------
+// Gig — a scheduled performance. Main entity that feeds Contracts generation.
+// ---------------------------------------------------------------------------
+model Gig {
+  id           String     @id @default(cuid())
+  tenantId     String
+  bandId       String
+  title        String
+  description  String?
+  venueName    String
+  venueCity    String
+  venueCountry String     @default("BR")
+  scheduledFor DateTime
+  durationMin  Int        @default(60)
+  feeCents     Int        @default(0)
+  currency     String     @default("BRL")
+  status       GigStatus  @default(DRAFT)
+  createdBy    String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  band     Band         @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  bookings GigBooking[]
+
+  @@index([tenantId])
+  @@index([bandId])
+  @@index([tenantId, status])
+  @@map("gigs")
+}
+
+enum GigStatus {
+  DRAFT
+  PUBLISHED
+  CONFIRMED
+  PERFORMED
+  CANCELLED
+}
+
+// ---------------------------------------------------------------------------
+// GigBooking — confirmation / booking state for a gig.
+// ---------------------------------------------------------------------------
+model GigBooking {
+  id         String        @id @default(cuid())
+  tenantId   String
+  gigId      String
+  status     BookingStatus @default(PENDING)
+  notes      String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  gig Gig @relation(fields: [gigId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([gigId])
+  @@map("gig_bookings")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+// ---------------------------------------------------------------------------
+// SpotPreference — tenant-scoped preferences for the Spot app.
+// Fed by the Spot-specific onboarding step.
+// ---------------------------------------------------------------------------
+model SpotPreference {
+  id                 String   @id @default(cuid())
+  tenantId           String   @unique
+  primaryGenre       String?
+  artisticFocus      String?
+  averageGigFeeCents Int?
+  preferredCurrency  String   @default("BRL")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("spot_preferences")
+}

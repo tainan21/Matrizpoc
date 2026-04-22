@@ -1,0 +1,8 @@
+{
+  "name": "@matriz/vitest-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./base.mjs",
+  "files": ["base.mjs"]
+}

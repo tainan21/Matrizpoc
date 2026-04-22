@@ -1,0 +1,4 @@
+
+> @matriz/app-seumei@0.0.0 typecheck /vercel/share/v0-project/apps/seumei
+> tsc --noEmit
+
