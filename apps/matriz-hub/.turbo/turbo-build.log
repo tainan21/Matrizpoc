@@ -12,7 +12,7 @@ https://nextjs.org/telemetry
 
    Creating an optimized production build ...
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
- ✓ Compiled successfully in 3.9s
+ ✓ Compiled successfully in 4.4s
    Running TypeScript ...
    Collecting page data ...
 [baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
@@ -21,7 +21,7 @@ https://nextjs.org/telemetry
    Generating static pages (2/10) 
    Generating static pages (4/10) 
    Generating static pages (7/10) 
- ✓ Generating static pages (10/10) in 484.7ms
+ ✓ Generating static pages (10/10) in 522.1ms
    Finalizing page optimization ...
 
 Route (app)

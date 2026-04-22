@@ -1,0 +1,64 @@
+name: split-apps
+
+# Manual-only. Exports a single app into its own destination repository
+# using tooling/scripts/export-app.ts. Useful when an app matures enough
+# to move out of the monorepo without losing history of the source tree.
+#
+# Required secret: SPLIT_REPO_PAT (GitHub PAT with repo scope on the
+# destination org). The destination repo must already exist and be empty,
+# or accept a force-push on the split branch.
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: "App to split"
+        required: true
+        type: choice
+        options: [matriz-hub, spot, seumei, contracts, willdash]
+      destination:
+        description: "Destination repo (e.g. matriz/spot)"
+        required: true
+        type: string
+      branch:
+        description: "Branch to push on destination"
+        required: true
+        default: "split"
+        type: string
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - name: Verify boundaries (fail fast)
+        run: pnpm tsx tooling/scripts/verify-app-boundaries.ts ${{ inputs.app }}
+      - name: Export ${{ inputs.app }}
+        run: pnpm tsx tooling/scripts/export-app.ts ${{ inputs.app }} ./dist/split/${{ inputs.app }}
+      - name: Push export to ${{ inputs.destination }}
+        if: ${{ secrets.SPLIT_REPO_PAT != '' }}
+        env:
+          PAT: ${{ secrets.SPLIT_REPO_PAT }}
+        run: |
+          cd dist/split/${{ inputs.app }}
+          git init -b ${{ inputs.branch }}
+          git config user.email "split@matriz.dev"
+          git config user.name "matriz-split-bot"
+          git add .
+          git commit -m "chore: split ${{ inputs.app }} from monorepo"
+          git remote add origin "https://x-access-token:${PAT}@github.com/${{ inputs.destination }}.git"
+          git push -f origin ${{ inputs.branch }}
+      - name: Upload artifact (fallback when PAT missing)
+        if: ${{ secrets.SPLIT_REPO_PAT == '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.app }}-split
+          path: dist/split/${{ inputs.app }}

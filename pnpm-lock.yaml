@@ -32,6 +32,9 @@ importers:
       eslint:
         specifier: 9.12.0
         version: 9.12.0
+      next:
+        specifier: 16.0.0
+        version: 16.0.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       prettier:
         specifier: 3.3.3
         version: 3.3.3
@@ -92,6 +95,9 @@ importers:
       '@matriz/integration-registry-core':
         specifier: workspace:*
         version: link:../../packages/integration/registry-core
+      '@matriz/platform-auth':
+        specifier: workspace:*
+        version: link:../../packages/platform/auth
       '@matriz/platform-config':
         specifier: workspace:*
         version: link:../../packages/platform/config
@@ -174,9 +180,15 @@ importers:
       '@matriz/integration-registry-core':
         specifier: workspace:*
         version: link:../../packages/integration/registry-core
+      '@matriz/platform-auth':
+        specifier: workspace:*
+        version: link:../../packages/platform/auth
       '@matriz/platform-config':
         specifier: workspace:*
         version: link:../../packages/platform/config
+      '@matriz/platform-storage':
+        specifier: workspace:*
+        version: link:../../packages/platform/storage
       '@matriz/platform-telemetry':
         specifier: workspace:*
         version: link:../../packages/platform/telemetry
@@ -244,6 +256,9 @@ importers:
       '@matriz/integration-registry-core':
         specifier: workspace:*
         version: link:../../packages/integration/registry-core
+      '@matriz/platform-auth':
+        specifier: workspace:*
+        version: link:../../packages/platform/auth
       '@matriz/platform-config':
         specifier: workspace:*
         version: link:../../packages/platform/config
@@ -323,6 +338,9 @@ importers:
       '@matriz/integration-registry-core':
         specifier: workspace:*
         version: link:../../packages/integration/registry-core
+      '@matriz/platform-auth':
+        specifier: workspace:*
+        version: link:../../packages/platform/auth
       '@matriz/platform-config':
         specifier: workspace:*
         version: link:../../packages/platform/config
@@ -402,6 +420,9 @@ importers:
       '@matriz/integration-registry-core':
         specifier: workspace:*
         version: link:../../packages/integration/registry-core
+      '@matriz/platform-auth':
+        specifier: workspace:*
+        version: link:../../packages/platform/auth
       '@matriz/platform-config':
         specifier: workspace:*
         version: link:../../packages/platform/config
@@ -706,6 +727,9 @@ importers:
       '@matriz/foundation-types':
         specifier: workspace:^
         version: link:../../foundation/types
+      '@matriz/platform-storage':
+        specifier: workspace:^
+        version: link:../storage
       react:
         specifier: 19.2.0
         version: 19.2.0

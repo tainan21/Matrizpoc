@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { appThemes, themeToCssVars } from "@matriz/design-system"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
+import { WilldashAuthAdoption } from "../src/auth/provider"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function WilldashRootLayout({ children }: { children: ReactNode }
         }}
       >
         <BootstrapGuard />
-        {children}
+        <WilldashAuthAdoption>{children}</WilldashAuthAdoption>
       </body>
     </html>
   )

@@ -64,22 +64,54 @@ Ver `app-communication.md` e `events-conventions.md`.
 
 ## Validacao automatica
 
-- **Typecheck**: 27 projetos (22 packages + 5 apps).
-- **Lint**: ESLint com `no-restricted-paths` proibindo imports
-  `apps/*/src/**` fora do proprio app (L3/L4).
-- **Smoke tests** (Vitest, 32 testes):
+- **Typecheck**: 31 projetos (22 packages + 5 apps + tooling).
+- **Lint**: ESLint flat config com `no-restricted-imports` proibindo
+  imports `apps/*/src/**` fora do proprio app (L3/L4), presentation
+  acessando domain (L6) e auth tocando domain (L12).
+- **Smoke tests** (Vitest, 11 suites / 53 testes):
   - `dtos.test.ts` — Zod em DTOs v1.
-  - `events.test.ts` — envelope envelope + pub/sub.
+  - `events.test.ts` — envelope + pub/sub.
   - `external-links.test.ts` — store idempotente.
   - `manifests.test.ts` — todos os 5 manifests validos.
   - `registry.test.ts` — registro + lookup.
-  - `application-flow.test.ts` — fluxos Spot->Contracts, Seumei->Contracts, multi-tenant isolation.
+  - `application-flow.test.ts` — fluxos cross-app + multi-tenant.
+  - `auth.test.ts` — superficie publica do platform-auth V1.1.
+  - `auth-strategies.test.ts` — OTP + magic link start/verify.
+  - `session-storage.test.ts` — namespacing e round-trip.
+  - `app-boundaries.test.ts` — L3/L4/L12 por varredura de arquivos.
+  - `public-contracts.test.ts` — L3 (manifest-only).
+
+## Auth V1.1 (novo)
+
+Auth compartilhada real em `packages/platform/auth/v1`:
+
+- Motor (provider, hooks, guards, strategies, storage adapter, services,
+  mappers) no package.
+- UI + copy + branding ficam em `apps/<app>/src/domains/login/presentation/`.
+- Estratégias pluggáveis: `createOtpStrategy()` e
+  `createMagicLinkStrategy()`, selecionadas em `apps/<app>/src/auth/config.ts`.
+- Sessão namespaced por `appId` via `createAppSessionStorage(appId)`.
+
+Detalhe em [adr/0001-auth-v1.1.md](./adr/0001-auth-v1.1.md).
+
+## Deploy e split
+
+Cada app é uma unidade de deploy Vercel independente, com `vercel.json`
+próprio. Workflows em `.github/workflows/`:
+
+- `ci.yml` — typecheck + lint + smoke + boundaries + readiness.
+- `deploy-apps.yml` — deploy hooks por app, em matrix.
+- `split-apps.yml` — export + push para repositório externo.
+
+Detalhes em `build-deploy-model.md`, `vercel-deployment-map.md`,
+`app-extraction-model.md`.
 
 ## Comandos
 
 ```bash
-pnpm typecheck       # 27/27
-pnpm lint            # 27/27, 0 warnings
-pnpm test:smoke      # 32 testes
+pnpm -r typecheck       # 31/31
+pnpm lint               # 27/27
+pnpm test:smoke         # 53/53
 pnpm --filter @matriz/app-<app> dev
+pnpm tsx tooling/scripts/check-readiness.ts   # score 100/100
 ```

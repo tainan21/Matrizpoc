@@ -1,8 +1,8 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { themeToCssVars, appThemes } from "@matriz/design-system"
-import { AppShell } from "../src/ui/components/AppShell"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
+import { SpotAuthAdoption } from "../src/auth/provider"
 import { bootstrapSpot } from "../src/bootstrap"
 import "./globals.css"
 
@@ -25,7 +25,7 @@ export default function SpotRootLayout({ children }: { children: ReactNode }) {
     <html lang="pt-BR" style={spotVars as Record<string, string>}>
       <body className="bg-surface text-surface-fg antialiased">
         <BootstrapGuard>
-          <AppShell>{children}</AppShell>
+          <SpotAuthAdoption>{children}</SpotAuthAdoption>
         </BootstrapGuard>
       </body>
     </html>

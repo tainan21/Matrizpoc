@@ -1,0 +1,75 @@
+name: deploy-apps
+
+# One workflow, one matrix row per app.
+# Each app has its own Vercel project + its own Deploy Hook.
+# Deploy hooks are the simplest way to deploy from CI without
+# pulling the Vercel CLI inside every matrix row.
+#
+# Required repository secrets (see docs/build-deploy-model.md):
+#   VERCEL_DEPLOY_HOOK_MATRIZ_HUB
+#   VERCEL_DEPLOY_HOOK_SPOT
+#   VERCEL_DEPLOY_HOOK_SEUMEI
+#   VERCEL_DEPLOY_HOOK_CONTRACTS
+#   VERCEL_DEPLOY_HOOK_WILLDASH
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: "App to deploy (or 'all')"
+        required: true
+        default: "all"
+        type: choice
+        options: [all, matriz-hub, spot, seumei, contracts, willdash]
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+
+jobs:
+  gate:
+    name: pre-deploy gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r typecheck
+      - run: pnpm lint
+      - run: pnpm test:smoke
+      - run: pnpm tsx tooling/scripts/verify-app-boundaries.ts
+
+  deploy:
+    name: deploy ${{ matrix.app }}
+    needs: gate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [matriz-hub, spot, seumei, contracts, willdash]
+    steps:
+      - name: Select deploy hook for ${{ matrix.app }}
+        id: hook
+        run: |
+          case "${{ matrix.app }}" in
+            matriz-hub) echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_MATRIZ_HUB }}" >> "$GITHUB_OUTPUT" ;;
+            spot)       echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_SPOT }}"       >> "$GITHUB_OUTPUT" ;;
+            seumei)     echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_SEUMEI }}"     >> "$GITHUB_OUTPUT" ;;
+            contracts)  echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_CONTRACTS }}"  >> "$GITHUB_OUTPUT" ;;
+            willdash)   echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_WILLDASH }}"   >> "$GITHUB_OUTPUT" ;;
+          esac
+      - name: Skip if hook is not configured
+        if: steps.hook.outputs.url == ''
+        run: |
+          echo "::warning::No deploy hook configured for ${{ matrix.app }} — skipping."
+      - name: Fire Vercel deploy hook
+        if: steps.hook.outputs.url != '' && (inputs.app == 'all' || inputs.app == matrix.app || github.event_name == 'push')
+        run: curl -fsSL -X POST "${{ steps.hook.outputs.url }}"

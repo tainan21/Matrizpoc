@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import "./globals.css"
 import { themeToCssVars, appThemes } from "@matriz/design-system"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
-import { AppShell } from "../src/ui/components/AppShell"
+import { SeumeiAuthAdoption } from "../src/auth/provider"
 
 export const metadata: Metadata = {
   title: "Seumei — Matriz",
@@ -23,7 +23,7 @@ export default function SeumeiRootLayout({ children }: { children: ReactNode }) 
       </head>
       <body style={{ margin: 0, background: "var(--color-background)", color: "var(--color-foreground)" }}>
         <BootstrapGuard>
-          <AppShell>{children}</AppShell>
+          <SeumeiAuthAdoption>{children}</SeumeiAuthAdoption>
         </BootstrapGuard>
       </body>
     </html>

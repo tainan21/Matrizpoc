@@ -2,9 +2,8 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { themeToCssVars, appThemes } from "@matriz/design-system"
 import { bootstrapMatrizHub } from "../src/bootstrap"
-import { HubShell } from "../src/ui/components/HubShell"
+import { HubAuthAdoption } from "../src/auth/provider"
 
-// Bootstrap e idempotente. Roda no servidor/client uma vez.
 bootstrapMatrizHub()
 
 export const metadata: Metadata = {
@@ -31,7 +30,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           minHeight: "100vh",
         }}
       >
-        <HubShell>{children}</HubShell>
+        <HubAuthAdoption>{children}</HubAuthAdoption>
       </body>
     </html>
   )
