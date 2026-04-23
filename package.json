@@ -17,6 +17,11 @@
     "prisma:validate:seumei": "prisma validate --schema prisma/schemas/seumei.prisma",
     "prisma:validate:contracts": "prisma validate --schema prisma/schemas/contracts.prisma",
     "prisma:validate:willdash": "prisma validate --schema prisma/schemas/willdash.prisma",
+    "prisma:generate": "pnpm prisma:generate:core && pnpm prisma:generate:hub && pnpm prisma:generate:seumei && pnpm prisma:generate:contracts",
+    "prisma:generate:core": "prisma generate --schema prisma/schemas/core.prisma",
+    "prisma:generate:hub": "prisma generate --schema prisma/schemas/hub.prisma",
+    "prisma:generate:seumei": "prisma generate --schema prisma/schemas/seumei.prisma",
+    "prisma:generate:contracts": "prisma generate --schema prisma/schemas/contracts.prisma",
     "test:smoke": "vitest run --config vitest.config.ts",
     "test:smoke:watch": "vitest --config vitest.config.ts",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --ignore-path .gitignore"
@@ -49,6 +54,8 @@
     }
   },
   "dependencies": {
-    "@prisma/client": "5.20.0"
+    "@prisma/client": "5.20.0",
+    "@types/bcryptjs": "^3.0.0",
+    "bcryptjs": "^3.0.3"
   }
 }
