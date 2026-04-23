@@ -49,7 +49,7 @@ async function ensureDemoTenant(): Promise<string> {
   const existing = await core.tenant.findUnique({ where: { slug } })
   if (existing) return existing.id
   const created = await core.tenant.create({
-    data: { slug, name: "Demo Studio", status: "active" },
+    data: { slug, name: "Demo Studio", brandColor: "#0B5FFF" },
   })
   return created.id
 }
