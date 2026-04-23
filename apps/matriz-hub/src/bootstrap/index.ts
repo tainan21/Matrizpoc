@@ -24,9 +24,11 @@ import {
   registerTelemetryClient,
   type TelemetryClient,
 } from "@matriz/platform-telemetry"
+import { runInstitutionalIngestion } from "../institutional/bootstrap"
 
 const HUB_APP_ID = asAppId("matriz-hub")
 let isBootstrapped = false
+let institutionalBootstrapped = false
 let telemetry: TelemetryClient | undefined
 
 export function getHubTelemetry(): TelemetryClient {
@@ -86,3 +88,15 @@ export function bootstrapMatrizHub(): HubBootstrapResult {
     registeredApps: registry.listEnabled().map((e) => e.manifest.appId),
   }
 }
+
+/**
+ * V1.2: ensure institutional ingestion ran at least once per process.
+ * Idempotente: chame em RSC boundaries que consomem o InstitutionalRegistry.
+ */
+export async function ensureInstitutionalBootstrapped(): Promise<void> {
+  if (institutionalBootstrapped) return
+  await runInstitutionalIngestion()
+  institutionalBootstrapped = true
+}
+
+export { runInstitutionalIngestion }
