@@ -71,6 +71,7 @@ export function bootstrapMatrizHub(): HubBootstrapResult {
         tenantId: asTenantId(env.tenantId),
         type: "hub.app.opened",
         properties: { appId: env.payload.appId },
+        category: "ecosystem",
       })
     })
     bus.on("onboarding.completed", (env) => {
@@ -78,6 +79,7 @@ export function bootstrapMatrizHub(): HubBootstrapResult {
         tenantId: asTenantId(env.tenantId),
         type: "onboarding.completed",
         properties: { appId: env.payload.appId, steps: env.payload.completedSteps.length },
+        category: "adoption",
       })
     })
     isBootstrapped = true

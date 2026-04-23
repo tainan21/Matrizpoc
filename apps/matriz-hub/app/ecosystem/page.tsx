@@ -12,6 +12,7 @@ import {
 import { getGlobalInstitutionalRegistry } from "@matriz/integration-registry-core/institutional"
 import { ensureInstitutionalBootstrapped } from "../../src/bootstrap"
 import { toEcosystemVM } from "../../src/institutional/presenters"
+import { RefreshEcosystemButton } from "../../src/institutional/components/RefreshEcosystemButton"
 
 export const dynamic = "force-dynamic"
 
@@ -22,12 +23,15 @@ export default async function EcosystemPage() {
 
   return (
     <Stack gap={6}>
-      <div>
-        <Heading level={1}>Ecosystem</Heading>
-        <Text tone="muted">
-          Relacoes institucionais entre projetos. Exibe eventos compartilhados,
-          distribuicao por source e trust, e mapa de quem produz/consome o que.
-        </Text>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <Heading level={1}>Ecosystem</Heading>
+          <Text tone="muted">
+            Relacoes institucionais entre projetos. Exibe eventos compartilhados,
+            distribuicao por source e trust, e mapa de quem produz/consome o que.
+          </Text>
+        </div>
+        <RefreshEcosystemButton />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">

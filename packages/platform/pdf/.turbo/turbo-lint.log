@@ -1,4 +1,4 @@
 
-> @matriz/platform-pdf@0.0.0 lint C:\Apps\V0 POC MATRIZ\packages\platform\pdf
+> @matriz/platform-pdf@0.0.0 lint /vercel/share/v0-project/packages/platform/pdf
 > eslint src
 

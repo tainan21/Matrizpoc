@@ -47,6 +47,18 @@ const DECORATIONS: Record<string, Decoration> = {
       ],
       lastActivityAt: new Date().toISOString(),
     },
+    telemetry: {
+      window: "7d",
+      categories: {
+        operational: { count: 98, lastEventAt: new Date().toISOString() },
+        ecosystem: { count: 74, lastEventAt: new Date().toISOString() },
+        institutional: { count: 42, lastEventAt: new Date().toISOString() },
+      },
+      topEvents: [
+        { name: "hub.app.opened", count: 74 },
+        { name: "institutional.ingestion.completed", count: 42 },
+      ],
+    },
   },
   spot: {
     projectId: "matriz:spot",
@@ -71,6 +83,20 @@ const DECORATIONS: Record<string, Decoration> = {
       ],
       lastActivityAt: new Date().toISOString(),
     },
+    telemetry: {
+      window: "7d",
+      categories: {
+        operational: { count: 312, lastEventAt: new Date().toISOString() },
+        commercial: { count: 684, lastEventAt: new Date().toISOString() },
+        adoption: { count: 318, lastEventAt: new Date().toISOString() },
+        ecosystem: { count: 106, lastEventAt: new Date().toISOString() },
+      },
+      topEvents: [
+        { name: "booking.completed", count: 312 },
+        { name: "listing.viewed", count: 684 },
+        { name: "user.signed_up", count: 318 },
+      ],
+    },
   },
   seumei: {
     projectId: "matriz:seumei",
@@ -93,6 +119,20 @@ const DECORATIONS: Record<string, Decoration> = {
         { key: "contracts_month", label: "Contratos/mes", value: 21, unit: "count" },
       ],
       lastActivityAt: new Date().toISOString(),
+    },
+    telemetry: {
+      window: "7d",
+      categories: {
+        operational: { count: 241, lastEventAt: new Date().toISOString() },
+        commercial: { count: 198, lastEventAt: new Date().toISOString() },
+        financial: { count: 164, lastEventAt: new Date().toISOString() },
+        adoption: { count: 212, lastEventAt: new Date().toISOString() },
+        ecosystem: { count: 77, lastEventAt: new Date().toISOString() },
+      },
+      topEvents: [
+        { name: "establishment.created", count: 63 },
+        { name: "contract.signed", count: 21 },
+      ],
     },
   },
   contracts: {
@@ -117,6 +157,19 @@ const DECORATIONS: Record<string, Decoration> = {
       ],
       lastActivityAt: new Date().toISOString(),
     },
+    telemetry: {
+      window: "7d",
+      categories: {
+        operational: { count: 142, lastEventAt: new Date().toISOString() },
+        financial: { count: 188, lastEventAt: new Date().toISOString() },
+        institutional: { count: 96, lastEventAt: new Date().toISOString() },
+        ecosystem: { count: 86, lastEventAt: new Date().toISOString() },
+      },
+      topEvents: [
+        { name: "contract.generated", count: 312 },
+        { name: "contract.signed", count: 198 },
+      ],
+    },
   },
   willdash: {
     projectId: "matriz:willdash",
@@ -139,6 +192,18 @@ const DECORATIONS: Record<string, Decoration> = {
         { key: "goal_completion", label: "Conclusao de metas", value: 62, unit: "percent" },
       ],
       lastActivityAt: new Date().toISOString(),
+    },
+    telemetry: {
+      window: "7d",
+      categories: {
+        operational: { count: 94, lastEventAt: new Date().toISOString() },
+        adoption: { count: 182, lastEventAt: new Date().toISOString() },
+        ecosystem: { count: 70, lastEventAt: new Date().toISOString() },
+      },
+      topEvents: [
+        { name: "goal.completed", count: 62 },
+        { name: "user.active_week", count: 89 },
+      ],
     },
   },
 }
