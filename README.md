@@ -111,6 +111,32 @@ institucionais).
 - [migration-strategy-v1-to-real-products.md](./docs/migration-strategy-v1-to-real-products.md)
 - [audit/v1.2-institutional.md](./docs/audit/v1.2-institutional.md)
 
+## Backend real V1.3 (novo)
+
+Sobre a V1.2, a V1.3 transforma a Matrizpoc em **ecossistema persistente
+real**: identidade global no Core, control plane persistido no Hub,
+auth real cross-app, identity linking automático por email, e primeiro
+servidor MCP real (1 resource + 1 tool) exposto pelo Hub.
+
+- [audit/v1.3-backend-real-plan.md](./docs/audit/v1.3-backend-real-plan.md) — plano faseado
+- [audit/v1.3-delivery.md](./docs/audit/v1.3-delivery.md) — **entrega final, leia primeiro**
+
+### Status V1.3
+
+- [x] **Schemas evoluídos**: `core.prisma` com `User` global, `AuthAccount`,
+      `AuthVerificationChallenge`, `AppSession`, `TelemetryRecord.category`
+- [x] **`hub.prisma` novo**: `InstitutionalProject`, `InstitutionalSource`,
+      `IngestionRun`, `HealthSnapshot`, `PublicMetricsSnapshot`
+- [x] **`@matriz/platform-db`**: 4 clients (core/hub/seumei/contracts)
+      + 14 repositórios reais (funções puras, zero singleton global)
+- [x] **`@matriz/platform-auth/server-db`**: 8 primitivas reais
+      (issue/verify challenge, resolve identity, issue/read/revoke session)
+- [x] **Identity linking automático** por email normalizado cross-app
+- [x] **MCP real no Hub**: `POST /api/mcp` JSON-RPC 2.0 com resource
+      `matriz://projects/{projectId}` e tool `refresh_project_ingestion`
+- [x] **Prova executável**: `pnpm demo:flows` (4 fluxos ponta-a-ponta)
+- [x] **114/114 testes** passando, typecheck 100% limpo, 6 schemas válidos
+
 ## Status V1.1
 
 - [x] **Auth compartilhada real** com 2 estratégias (OTP, magic link)
