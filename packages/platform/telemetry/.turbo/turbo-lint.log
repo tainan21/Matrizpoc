@@ -1,4 +1,4 @@
 
-> @matriz/platform-telemetry@0.0.0 lint C:\Apps\V0 POC MATRIZ\packages\platform\telemetry
+> @matriz/platform-telemetry@0.0.0 lint /vercel/share/v0-project/packages/platform/telemetry
 > eslint src
 

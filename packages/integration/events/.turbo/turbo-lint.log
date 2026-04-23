@@ -1,4 +1,4 @@
 
-> @matriz/integration-events@0.0.0 lint C:\Apps\V0 POC MATRIZ\packages\integration\events
+> @matriz/integration-events@0.0.0 lint /vercel/share/v0-project/packages/integration/events
 > eslint src
 

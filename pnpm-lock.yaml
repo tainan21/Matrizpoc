@@ -174,6 +174,9 @@ importers:
       '@matriz/integration-external-links':
         specifier: workspace:*
         version: link:../../packages/integration/external-links
+      '@matriz/integration-ingestion':
+        specifier: workspace:*
+        version: link:../../packages/integration/ingestion
       '@matriz/integration-manifests':
         specifier: workspace:*
         version: link:../../packages/integration/manifests
@@ -667,6 +670,19 @@ importers:
       zod:
         specifier: 3.23.8
         version: 3.23.8
+    devDependencies:
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
+  packages/integration/ingestion:
+    dependencies:
+      '@matriz/foundation-utils':
+        specifier: workspace:^
+        version: link:../../foundation/utils
+      '@matriz/integration-api-contracts':
+        specifier: workspace:^
+        version: link:../api-contracts
     devDependencies:
       typescript:
         specifier: 5.6.3

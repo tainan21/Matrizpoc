@@ -1,0 +1,123 @@
+{
+  "version": "v1",
+  "projects": [
+    {
+      "projectId": "ventures:north-star-labs",
+      "displayName": "North Star Labs",
+      "sourceType": "institutional_source",
+      "trustLevel": "trusted",
+      "ingestMode": "snapshot_pull",
+      "contractVersion": "v1",
+      "brand": {
+        "brandName": "North Star Labs",
+        "tagline": "Research studio for institutional experiments",
+        "primaryColor": "#1f4d4a",
+        "accentColor": "#e8a33d",
+        "logoText": "NSL",
+        "tone": "institutional"
+      },
+      "capabilities": {
+        "produces": [
+          { "kind": "event", "name": "research.report.published", "version": "v1" },
+          { "kind": "page", "name": "Public reports", "path": "/reports" }
+        ],
+        "consumes": [],
+        "exposes": [
+          { "kind": "page", "name": "Home", "path": "/" },
+          { "kind": "page", "name": "Portfolio", "path": "/portfolio" }
+        ],
+        "requires": []
+      },
+      "health": {
+        "status": "healthy",
+        "readinessScore": 92,
+        "lastCheckAt": "2026-04-20T14:30:00.000Z",
+        "checks": [
+          { "name": "snapshot.freshness", "status": "pass" },
+          { "name": "public-site", "status": "pass" }
+        ],
+        "uptimeWindow": "30d",
+        "uptimePercent": 99.6
+      },
+      "metrics": {
+        "publishedItems": 42,
+        "reach": 18,
+        "customMetrics": [
+          { "key": "reports_published", "label": "Relatorios publicados", "value": 42, "unit": "count" },
+          { "key": "portfolio_clients", "label": "Clientes em portfolio", "value": 18, "unit": "count" },
+          { "key": "satisfaction", "label": "Satisfacao", "value": 96, "unit": "percent" }
+        ],
+        "lastActivityAt": "2026-04-20T14:30:00.000Z"
+      },
+      "institutionalTags": ["public", "ventures", "research"],
+      "ownership": {
+        "owner": "matriz-ventures",
+        "contact": "ventures@matriz.example",
+        "repo": "https://github.com/matriz-ventures/north-star-labs"
+      },
+      "links": [
+        { "kind": "site", "url": "https://ventures.matriz.example/north-star-labs", "label": "Site publico" },
+        { "kind": "docs", "url": "https://ventures.matriz.example/north-star-labs/docs", "label": "Docs" }
+      ],
+      "ingestedAt": "2026-04-20T14:30:00.000Z"
+    },
+    {
+      "projectId": "ventures:praca-digital",
+      "displayName": "Praca Digital",
+      "sourceType": "institutional_source",
+      "trustLevel": "trusted",
+      "ingestMode": "snapshot_pull",
+      "contractVersion": "v1",
+      "brand": {
+        "brandName": "Praca Digital",
+        "tagline": "Marketplace institucional de servicos locais",
+        "primaryColor": "#2a3d66",
+        "accentColor": "#f2c14e",
+        "logoText": "PD",
+        "tone": "product"
+      },
+      "capabilities": {
+        "produces": [
+          { "kind": "event", "name": "marketplace.order.created", "version": "v1" }
+        ],
+        "consumes": [
+          { "kind": "event", "name": "catalog.updated", "version": "v1" }
+        ],
+        "exposes": [
+          { "kind": "page", "name": "Catalogo", "path": "/catalog" }
+        ],
+        "requires": [
+          { "kind": "auth", "name": "shared" }
+        ]
+      },
+      "health": {
+        "status": "degraded",
+        "readinessScore": 68,
+        "lastCheckAt": "2026-04-21T09:15:00.000Z",
+        "checks": [
+          { "name": "onboarding.conversion", "status": "warn", "detail": "Abaixo da meta em 8pp" },
+          { "name": "support.backlog", "status": "pass" }
+        ],
+        "uptimeWindow": "30d",
+        "uptimePercent": 97.2
+      },
+      "metrics": {
+        "reach": 214,
+        "customMetrics": [
+          { "key": "merchants", "label": "Comerciantes", "value": 214, "unit": "count" },
+          { "key": "monthly_volume_brl", "label": "Volume mensal (BRL)", "value": 128500, "unit": "count" }
+        ],
+        "lastActivityAt": "2026-04-21T09:15:00.000Z"
+      },
+      "institutionalTags": ["public", "ventures", "marketplace"],
+      "ownership": {
+        "owner": "matriz-ventures",
+        "contact": "ventures@matriz.example"
+      },
+      "links": [
+        { "kind": "site", "url": "https://ventures.matriz.example/praca-digital", "label": "Site publico" }
+      ],
+      "ingestedAt": "2026-04-21T09:15:00.000Z"
+    }
+  ]
+}

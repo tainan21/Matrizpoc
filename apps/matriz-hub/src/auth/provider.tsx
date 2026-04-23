@@ -82,8 +82,14 @@ function HubSessionBar() {
 function HubAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLoginRoute = (pathname ?? "").startsWith("/login")
+  const isPublicRoute = (pathname ?? "").startsWith("/public")
   if (isLoginRoute) {
     return <LoginLayoutFrame>{children}</LoginLayoutFrame>
+  }
+  if (isPublicRoute) {
+    // V1.2: superficie publica institucional nao requer autenticacao
+    // nem adota HubShell. Renderiza o page.tsx diretamente.
+    return <>{children}</>
   }
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>

@@ -115,3 +115,34 @@ pnpm test:smoke         # 53/53
 pnpm --filter @matriz/app-<app> dev
 pnpm tsx tooling/scripts/check-readiness.ts   # score 100/100
 ```
+
+## Camada institucional V1.2
+
+Sobre a base técnica descrita acima, a V1.2 introduz uma **camada
+institucional** que não substitui nada e não cria exceções a L1–L12.
+Ela adiciona:
+
+- **Contracts institucionais** em
+  `packages/integration/api-contracts/src/v1/institutional/`
+  (`ProjectManifest`, `ProjectHealthSnapshot`, `ProjectPublicMetrics`,
+  `ProjectTelemetrySummary`, `ProjectIntegrationCapabilities`,
+  `ProjectBrandIdentity`, `ProjectMcpCapabilities`, `SourceClassification`).
+- **Institutional registry** em
+  `packages/integration/registry-core/src/institutional-registry.ts`.
+- **Ingestion pipeline** em `packages/integration/ingestion/` com 3
+  adapters funcionais (`StaticSeedAdapter`, `LocalContractImportAdapter`,
+  `SnapshotPullAdapter`) e 3 scaffolds (`ApiPullAdapter`,
+  `WebhookPushAdapter`, `ManualRegistrationAdapter`).
+- **Hub como control plane**: páginas `/projects`, `/projects/[id]`,
+  `/health`, `/ecosystem`, `/intelligence`.
+- **Superfície pública institucional**: `/public` consumindo branding,
+  métricas e capabilities de projetos classificados como públicos.
+- **Telemetria institucional** com 6 categorias
+  (`operational` | `commercial` | `financial` | `adoption` | `ecosystem`
+  | `institutional`).
+- **Fonte externa simulada**: `Matriz Ventures Registry`
+  (`institutional_source`, `snapshot_pull`) provando consumo
+  heterogêneo sem dependência de rede real.
+
+Para detalhes, começar por
+[control-plane-overview.md](./control-plane-overview.md).

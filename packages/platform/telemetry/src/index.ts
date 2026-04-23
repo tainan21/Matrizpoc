@@ -19,6 +19,31 @@ export const PLATFORM_TELEMETRY_VERSION = "0.1.0" as const
 // Envelope
 // ---------------------------------------------------------------------------
 
+/**
+ * Categoria institucional V1.2 (sincronizada com
+ * `@matriz/integration-api-contracts/v1/institutional` -> TelemetryCategory).
+ *
+ * Duplicacao intencional: platform-telemetry nao importa de integration-*
+ * para preservar direcao da dependencia (platform e nivel-3 neutro, nao pode
+ * depender de layer institucional).
+ */
+export type InstitutionalTelemetryCategory =
+  | "operational"
+  | "commercial"
+  | "financial"
+  | "adoption"
+  | "ecosystem"
+  | "institutional"
+
+export const INSTITUTIONAL_TELEMETRY_CATEGORIES: readonly InstitutionalTelemetryCategory[] = [
+  "operational",
+  "commercial",
+  "financial",
+  "adoption",
+  "ecosystem",
+  "institutional",
+]
+
 export interface TelemetryEnvelope<P extends Record<string, unknown> = Record<string, unknown>> {
   readonly id: string
   readonly version: "v1"
@@ -27,6 +52,11 @@ export interface TelemetryEnvelope<P extends Record<string, unknown> = Record<st
   readonly type: string
   readonly occurredAt: string
   readonly properties: P
+  /**
+   * V1.2: categoria institucional opcional. Nao afeta clientes pre-existentes
+   * que nao declararam categoria (ficam sem agregacao institucional).
+   */
+  readonly category?: InstitutionalTelemetryCategory
 }
 
 export const telemetryEnvelopeSchema = z.object({
@@ -37,6 +67,9 @@ export const telemetryEnvelopeSchema = z.object({
   type: z.string().min(1),
   occurredAt: z.string(),
   properties: z.record(z.string(), z.unknown()),
+  category: z
+    .enum(["operational", "commercial", "financial", "adoption", "ecosystem", "institutional"])
+    .optional(),
 })
 
 // ---------------------------------------------------------------------------
@@ -49,6 +82,7 @@ export interface TelemetryClient {
     tenantId: TenantId
     type: string
     properties?: P
+    category?: InstitutionalTelemetryCategory
   }): TelemetryEnvelope
   list(): readonly TelemetryEnvelope[]
   clear(): void
@@ -61,7 +95,7 @@ export function createTelemetryClient(appId: MatrizAppId): TelemetryClient {
 
   return {
     appId,
-    track({ tenantId, type, properties }) {
+    track({ tenantId, type, properties, category }) {
       const env: TelemetryEnvelope = {
         id: generateId("tel"),
         version: "v1",
@@ -70,6 +104,7 @@ export function createTelemetryClient(appId: MatrizAppId): TelemetryClient {
         type,
         occurredAt: nowIso(),
         properties: properties ?? {},
+        ...(category ? { category } : {}),
       }
       events.unshift(env)
       for (const l of listeners) l(env)
@@ -104,4 +139,51 @@ export function collectAllTelemetry(): readonly TelemetryEnvelope[] {
   const all: TelemetryEnvelope[] = []
   for (const client of _globalClients.values()) all.push(...client.list())
   return all.sort((a, b) => (a.occurredAt < b.occurredAt ? 1 : -1))
+}
+
+// ---------------------------------------------------------------------------
+// V1.2: institutional summary helpers
+// ---------------------------------------------------------------------------
+
+export interface InstitutionalCategoryBucket {
+  readonly count: number
+  readonly lastEventAt?: string
+}
+
+export interface InstitutionalAppSummary {
+  readonly appId: MatrizAppId
+  readonly total: number
+  readonly byCategory: Partial<Record<InstitutionalTelemetryCategory, InstitutionalCategoryBucket>>
+  readonly lastEventAt?: string
+}
+
+export function summarizeTelemetryByApp(
+  envelopes: readonly TelemetryEnvelope[],
+): readonly InstitutionalAppSummary[] {
+  const byApp = new Map<MatrizAppId, TelemetryEnvelope[]>()
+  for (const env of envelopes) {
+    const bucket = byApp.get(env.appId) ?? []
+    bucket.push(env)
+    byApp.set(env.appId, bucket)
+  }
+  const result: InstitutionalAppSummary[] = []
+  for (const [appId, list] of byApp) {
+    const byCategory: Partial<Record<InstitutionalTelemetryCategory, InstitutionalCategoryBucket>> =
+      {}
+    let lastEventAt: string | undefined
+    for (const env of list) {
+      if (!lastEventAt || env.occurredAt > lastEventAt) lastEventAt = env.occurredAt
+      if (!env.category) continue
+      const prev = byCategory[env.category]
+      byCategory[env.category] = {
+        count: (prev?.count ?? 0) + 1,
+        lastEventAt:
+          !prev?.lastEventAt || env.occurredAt > prev.lastEventAt
+            ? env.occurredAt
+            : prev.lastEventAt,
+      }
+    }
+    result.push({ appId, total: list.length, byCategory, lastEventAt })
+  }
+  return result
 }

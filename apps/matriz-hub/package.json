@@ -21,6 +21,7 @@
     "@matriz/integration-api-contracts": "workspace:*",
     "@matriz/integration-events": "workspace:*",
     "@matriz/integration-external-links": "workspace:*",
+    "@matriz/integration-ingestion": "workspace:*",
     "@matriz/integration-manifests": "workspace:*",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-auth": "workspace:*",
