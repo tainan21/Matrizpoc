@@ -38,40 +38,41 @@ model Tenant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  users               User[]
   memberships         Membership[]
   appRegistrations    AppRegistration[]
   externalLinks       ExternalLink[]
   onboardingProgress  OnboardingProgress[]
-  sharedSessions      SharedSession[]
+  appSessions         AppSession[]
   telemetryRecords    TelemetryRecord[]
 
   @@map("tenants")
 }
 
 // ---------------------------------------------------------------------------
-// User — platform-level identity. Apps refer to users through memberships.
+// User — platform-level GLOBAL identity. Belongs to multiple tenants through
+// memberships. No direct tenantId FK; isolation happens at Membership level.
 // ---------------------------------------------------------------------------
 model User {
   id          String   @id @default(cuid())
   email       String   @unique
   displayName String
   avatarUrl   String?
-  tenantId    String
+  locale      String?  // e.g., "pt-BR", "en-US" — future cross-app UI locale
+  timezone    String?  // e.g., "America/Sao_Paulo" — for scheduling/timestamps
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  tenant           Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   memberships      Membership[]
-  sharedSessions   SharedSession[]
+  authAccounts     AuthAccount[]
+  appSessions      AppSession[]
 
-  @@index([tenantId])
   @@map("users")
 }
 
 // ---------------------------------------------------------------------------
 // Membership — user ↔ tenant ↔ app with role. One user may be active on
-// several apps within one tenant.
+// several apps within one tenant. This is THE JOIN between global User and
+// scoped tenants.
 // ---------------------------------------------------------------------------
 model Membership {
   id        String         @id @default(cuid())
@@ -79,6 +80,8 @@ model Membership {
   userId    String
   appId     String
   role      MembershipRole @default(MEMBER)
+  invitedAt DateTime?
+  lastActiveAt DateTime?
   createdAt DateTime       @default(now())
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -175,27 +178,95 @@ enum OnboardingStatus {
 }
 
 // ---------------------------------------------------------------------------
-// SharedSession — future-ready representation of a cross-app navigation
-// session. Not strictly required in V1 but declared to reserve the shape.
+// AuthAccount — Links a User to an authentication provider (OTP, Magic Link,
+// OAuth, password, etc). One user can have multiple accounts (different
+// providers or sub-identities). This is the JOIN for identity linking.
 // ---------------------------------------------------------------------------
-model SharedSession {
-  id           String   @id @default(cuid())
-  tenantId     String
-  userId       String
-  currentAppId String?
-  lastSeenAt   DateTime @default(now())
-  context      Json?
+model AuthAccount {
+  id              String       @id @default(cuid())
+  userId          String
+  provider        AuthProvider
+  providerSubject String       // email hash for OTP/Magic Link, OAuth sub, etc.
+  email           String?
+  emailVerifiedAt DateTime?
+  metadata        Json?        // provider-specific data (OAuth tokens, etc.)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerSubject])
+  @@index([userId])
+  @@index([email])
+  @@map("auth_accounts")
+}
+
+enum AuthProvider {
+  MAGIC_LINK
+  OTP
+  OAUTH_GOOGLE
+  OAUTH_GITHUB
+  PASSWORD
+}
+
+// ---------------------------------------------------------------------------
+// AuthVerificationChallenge — Persistent OTP/magic-link challenges.
+// Replaces in-memory Map<token, ...> from V1.1 strategies.
+// ---------------------------------------------------------------------------
+model AuthVerificationChallenge {
+  id          String              @id @default(cuid())
+  kind        AuthChallengeKind
+  email       String
+  codeHash    String              // bcrypt(otp) or hash(magic-link-token)
+  attempts    Int                 @default(0)
+  maxAttempts Int                 @default(5)
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime            @default(now())
+  ipHash      String?
+  userAgent   String?
+
+  @@index([email, kind])
+  @@index([expiresAt])
+  @@map("auth_verification_challenges")
+}
+
+enum AuthChallengeKind {
+  OTP
+  MAGIC_LINK
+}
+
+// ---------------------------------------------------------------------------
+// AppSession — Real server-side session. Replaces SharedSession with full
+// auth lifecycle: token hash, expiry, revocation, last-seen tracking.
+// ---------------------------------------------------------------------------
+model AppSession {
+  id         String    @id @default(cuid())
+  userId     String
+  tenantId   String
+  appId      String    // app where session was issued (spot, seumei, contracts, ...)
+  strategyId String    // "magic-link", "otp", "oauth-google", ...
+  tokenHash  String    @unique  // SHA-256(session cookie token)
+  issuedAt   DateTime
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  lastSeenAt DateTime  @default(now())
+  ipHash     String?
+  userAgent  String?
+
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId, userId])
-  @@map("shared_sessions")
+  @@index([userId])
+  @@index([tenantId, appId])
+  @@index([expiresAt])
+  @@map("app_sessions")
 }
 
 // ---------------------------------------------------------------------------
 // TelemetryRecord — envelope for every telemetry event emitted by any app.
-// Shape mirrors TelemetryEventDTO v1.
+// Shape mirrors TelemetryEventDTO v1. V1.3 adds `category` for Institutional
+// Telemetry Classification.
 // ---------------------------------------------------------------------------
 model TelemetryRecord {
   id         String   @id @default(cuid())
@@ -203,6 +274,7 @@ model TelemetryRecord {
   appId      String
   eventName  String
   eventVersion String @default("v1")
+  category   String?  // InstitutionalTelemetryCategory string, e.g., "adoption", "health"
   properties Json?
   occurredAt DateTime @default(now())
 
@@ -210,6 +282,8 @@ model TelemetryRecord {
 
   @@index([tenantId, appId])
   @@index([tenantId, eventName])
+  @@index([tenantId, category])
+  @@index([occurredAt, category])
   @@index([occurredAt])
   @@map("telemetry_records")
 }

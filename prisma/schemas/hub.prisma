@@ -1,0 +1,130 @@
+// ============================================================================
+// Matriz — Hub Prisma Schema
+// ----------------------------------------------------------------------------
+// Authority: this schema models the institutional control plane — project
+// registry, ingestion runs, health/metrics snapshots.
+//
+// Architectural Laws in force:
+//   L1 — schema per app: hub has its own isolated schema.
+//   L3 — no cross-schema FK: projectId is a string, not FK to core or apps.
+//   L12 — domain-free platform package: Hub stores institutional metadata,
+//         not app-specific domain (gig/establishment/contract/goal).
+//
+// V1.3 note: This schema is append-only and JSON-first. Hyper-normalization
+// is explicitly deferred to a future phase. `manifestJson`, `reportJson`,
+// `snapshotJson`, `metricsJson` are typed as Json to avoid premature
+// schema churn as ProjectManifest and contracts evolve.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/hub"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("HUB_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// InstitutionalProject — One project in the institutional registry.
+// Mirrors `ProjectManifest` from api-contracts/institutional.
+// ---------------------------------------------------------------------------
+model InstitutionalProject {
+  id                 String   @id @default(cuid())
+  projectId          String   @unique  // e.g., "matriz:hub", "matriz:ventures-registry"
+  sourceType         String              // enum SourceClassification (string-backed)
+  trustLevel         String              // enum TrustLevel (string-backed)
+  ingestMode         String              // enum IngestMode (string-backed)
+  institutionalTags  String[]
+  manifestJson       Json                // Full ProjectManifest snapshot
+  lastSeenAt         DateTime
+  firstSeenAt        DateTime
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  healthSnapshots          InstitutionalHealthSnapshot[]
+  publicMetricsSnapshots   InstitutionalPublicMetricsSnapshot[]
+
+  @@index([sourceType])
+  @@index([trustLevel])
+  @@index([lastSeenAt])
+  @@map("institutional_projects")
+}
+
+// ---------------------------------------------------------------------------
+// InstitutionalSource — One ingestion source (static seed, API, webhook, etc.)
+// ---------------------------------------------------------------------------
+model InstitutionalSource {
+  id          String   @id @default(cuid())
+  sourceId    String   @unique  // e.g., "local:matriz-monorepo", "snapshot:ventures"
+  sourceType  String              // enum SourceClassification
+  ingestMode  String              // enum IngestMode
+  displayName String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ingestionRuns InstitutionalIngestionRun[]
+
+  @@index([sourceType])
+  @@map("institutional_sources")
+}
+
+// ---------------------------------------------------------------------------
+// InstitutionalIngestionRun — Audit log of every ingestion pipeline run.
+// Stores the full `IngestionPipelineRun` contract as JSON.
+// ---------------------------------------------------------------------------
+model InstitutionalIngestionRun {
+  id         String   @id @default(cuid())
+  sourceId   String   // FK to InstitutionalSource
+  startedAt  DateTime
+  finishedAt DateTime
+  durationMs Int
+  accepted   Int
+  rejected   Int
+  errorsJson Json?               // Array of error summaries
+  reportJson Json                // Full IngestionPipelineRun snapshot
+  createdAt  DateTime @default(now())
+
+  source InstitutionalSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId, startedAt])
+  @@index([startedAt])
+  @@map("institutional_ingestion_runs")
+}
+
+// ---------------------------------------------------------------------------
+// InstitutionalHealthSnapshot — Time-series health check per project.
+// ---------------------------------------------------------------------------
+model InstitutionalHealthSnapshot {
+  id             String   @id @default(cuid())
+  projectId      String   // light reference, no FK (cross-schema forbidden)
+  capturedAt     DateTime
+  status         String   // "healthy" | "degraded" | "offline" | "unknown"
+  readinessScore Int
+  uptimePercent  Float?
+  snapshotJson   Json     // Full health details (checks, dependencies, etc.)
+
+  project InstitutionalProject @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+
+  @@index([projectId, capturedAt])
+  @@index([capturedAt])
+  @@map("institutional_health_snapshots")
+}
+
+// ---------------------------------------------------------------------------
+// InstitutionalPublicMetricsSnapshot — Time-series public metrics per project.
+// ---------------------------------------------------------------------------
+model InstitutionalPublicMetricsSnapshot {
+  id          String   @id @default(cuid())
+  projectId   String
+  capturedAt  DateTime
+  metricsJson Json     // Full public metrics (counts, aggregates, KPIs)
+
+  project InstitutionalProject @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
+
+  @@index([projectId, capturedAt])
+  @@index([capturedAt])
+  @@map("institutional_public_metrics_snapshots")
+}
