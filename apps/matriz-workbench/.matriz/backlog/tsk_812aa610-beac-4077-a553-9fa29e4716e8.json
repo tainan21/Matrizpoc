@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_812aa610-beac-4077-a553-9fa29e4716e8",
+  "projectId": "matriz-workbench",
+  "title": "Disponibilizar token 1234 para testes locais",
+  "description": "Atalho de autenticação exclusivamente para desenvolvimento e testes locais. O token 1234 não é aceito em produção e esta entrega não compõe o score 0–100.",
+  "status": "review",
+  "priority": "medium",
+  "tags": [
+    "auth",
+    "local-test",
+    "non-scoring"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_05584c04-8e66-4574-b663-ec0a4345a48c",
+      "text": "O token 1234 desbloqueia o Workbench em desenvolvimento e teste.",
+      "completed": true
+    },
+    {
+      "id": "ac_576d69ce-b78f-43f6-ac97-0f61dc31c8fd",
+      "text": "O token 1234 é rejeitado quando NODE_ENV=production.",
+      "completed": true
+    },
+    {
+      "id": "ac_44a4a346-520b-4a25-b719-2e819e58310c",
+      "text": "O score de maturidade permanece inalterado.",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/auth/local-access.ts",
+      "label": "Política de acesso local"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/auth/local-access.test.ts",
+      "label": "Testes da política"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/app/unlock/page.tsx",
+      "label": "Tela de desbloqueio"
+    }
+  ],
+  "createdAt": "2026-07-29T14:27:48.987Z",
+  "updatedAt": "2026-07-29T14:28:18.387Z",
+  "revision": "28bfb3dc78a61c5f"
+}

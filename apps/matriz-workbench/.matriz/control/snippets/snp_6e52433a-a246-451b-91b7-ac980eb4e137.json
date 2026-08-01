@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_6e52433a-a246-451b-91b7-ac980eb4e137",
+  "projectId": "matriz-workbench",
+  "command": "/contexto-curto",
+  "title": "Contexto curto",
+  "content": "Leia o resumo do projeto, a tarefa vinculada e apenas os documentos referenciados.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:02:05.685Z",
+  "revision": "c12d32c1425345e5"
+}

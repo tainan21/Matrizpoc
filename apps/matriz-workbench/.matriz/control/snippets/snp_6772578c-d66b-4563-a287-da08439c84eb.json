@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_6772578c-d66b-4563-a287-da08439c84eb",
+  "projectId": "matriz-workbench",
+  "command": "/verificacao",
+  "title": "Verificação",
+  "content": "Execute os gates do app e registre o resultado, arquivos alterados e riscos.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:02:05.740Z",
+  "revision": "edcc73069545bf92"
+}

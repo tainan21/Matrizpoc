@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-workbench",
+  "displayName": "Matriz Workbench",
+  "description": "Coworking local-first entre pessoas, Codex e agentes.",
+  "tags": ["tooling", "mcp", "local-first"],
+  "createdAt": "2026-07-28T12:00:00.000Z",
+  "updatedAt": "2026-07-28T12:00:00.000Z",
+  "revision": "bootstrap-v1"
+}

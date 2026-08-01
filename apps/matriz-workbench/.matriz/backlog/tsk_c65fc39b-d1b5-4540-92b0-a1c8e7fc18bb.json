@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_c65fc39b-d1b5-4540-92b0-a1c8e7fc18bb",
+  "projectId": "matriz-workbench",
+  "title": "Habilitar publicação @matriz no GitHub Packages",
+  "description": "Transferir ou criar o repositório MatrizUILib sob a organização GitHub matriz, configurar repository e publishConfig dos packages, habilitar MATRIZ_PACKAGES_RELEASE_ENABLED e publicar uma versão de teste antes da adoção física no Workbench.",
+  "status": "blocked",
+  "priority": "high",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "matriz-lib-ui",
+    "release",
+    "github-packages"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_167ac56c-e638-425c-a4b0-9287002f45bc",
+      "text": "O repositório proprietário está sob a organização GitHub matriz.",
+      "completed": false
+    },
+    {
+      "id": "ac_d8c68861-6e91-428d-add3-9d147157eba8",
+      "text": "Todos os packages declaram repository e publishConfig compatíveis com @matriz.",
+      "completed": false
+    },
+    {
+      "id": "ac_16b82486-4b17-4daa-b57a-0da95fc56a2d",
+      "text": "A workflow de release publica uma versão de teste usando GITHUB_TOKEN.",
+      "completed": false
+    },
+    {
+      "id": "ac_0e0813eb-0e48-4450-91db-345fd8157d91",
+      "text": "Um consumidor externo instala a versão publicada e passa typecheck.",
+      "completed": false
+    },
+    {
+      "id": "ac_6adb4512-8530-4e2d-91ef-95e68ddcebc9",
+      "text": "A política de adoção do Workbench é revisada humanamente.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-31T20:17:45.573Z",
+  "updatedAt": "2026-07-31T20:22:22.840Z",
+  "revision": "843f52ade6dd3acd"
+}

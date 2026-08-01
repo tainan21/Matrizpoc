@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-workbench",
+  "weights": {
+    "app": 0.45,
+    "docs": 0.3,
+    "features-domains": 0.25
+  },
+  "updatedAt": "2026-07-30T19:02:05.646Z",
+  "revision": "2cbb6b810255990c"
+}

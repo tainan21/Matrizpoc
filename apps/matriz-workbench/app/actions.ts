@@ -1,0 +1,475 @@
+"use server"
+
+import { cookies } from "next/headers"
+import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
+import { randomUUID } from "node:crypto"
+import {
+  attachmentReferenceSchema,
+  backlogWorkScopeSchema,
+  backlogStatusSchema,
+  prioritySchema,
+  type RoadmapPhase,
+  type WorkbenchDocument,
+} from "../src/domain/schemas"
+import { WorkspaceRepository } from "../src/integration/filesystem/workspace-repository"
+import { createMaturityGoalCatalog } from "../src/application/maturity-goal-catalog"
+import { auditWorkbenchMaturity } from "../src/application/maturity-evidence-audit"
+import {
+  createScorecard,
+  definitionsForProject,
+} from "../src/application/scorecard-catalog"
+import { enqueueOptionalNotifications } from "../src/application/collaboration/notification-service"
+import {
+  SESSION_COOKIE,
+  isUnlocked,
+  sessionDigest,
+  tokenMatches,
+} from "../src/auth/session"
+import { getLocalRateLimiter } from "../src/auth/local-rate-limiter"
+import { projectBlueprintInputSchema } from "../src/domain/project-blueprints"
+import { createProjectBlueprintWorkflow } from "../src/application/project-blueprints"
+import { ProjectBlueprintRepository } from "../src/integration/filesystem/project-blueprint-repository"
+import { snippetSchema } from "../src/domain/control"
+import { buildScoreSummary } from "../src/application/control"
+
+function required(formData: FormData, key: string): string {
+  const value = formData.get(key)
+  if (typeof value !== "string" || !value.trim()) throw new Error(`Campo obrigatório: ${key}`)
+  return value.trim()
+}
+
+function lines(value: FormDataEntryValue | null): string[] {
+  return typeof value === "string"
+    ? value
+        .split("\n")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : []
+}
+
+async function requireWorkbenchSession(): Promise<void> {
+  if (!(await isUnlocked())) redirect("/unlock")
+}
+
+export async function unlockAction(formData: FormData) {
+  const limiter = getLocalRateLimiter()
+  const decision = limiter.consume("unlock", { limit: 8, windowMs: 5 * 60_000 })
+  if (!decision.allowed) redirect("/unlock?error=rate-limited")
+  const token = required(formData, "token")
+  if (!tokenMatches(token)) redirect("/unlock?error=invalid")
+  limiter.reset("unlock")
+  ;(await cookies()).set(SESSION_COOKIE, sessionDigest(), {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.WORKBENCH_COOKIE_SECURE === "true",
+    path: "/",
+  })
+  redirect("/")
+}
+
+export async function lockAction() {
+  await requireWorkbenchSession()
+  ;(await cookies()).delete(SESSION_COOKIE)
+  redirect("/unlock")
+}
+
+export async function initializeProjectAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  await repository.initializeProject(projectId)
+  revalidatePath("/", "layout")
+  redirect(`/projects/${projectId}`)
+}
+
+export async function createProjectBlueprintAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const blueprints = await ProjectBlueprintRepository.create(
+    repository.repositoryRoot,
+  )
+  const commaSeparated = (key: string) =>
+    String(formData.get(key) ?? "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean)
+  const input = projectBlueprintInputSchema.parse({
+    mode: formData.get("mode") ?? "create",
+    name: required(formData, "name"),
+    projectKind: required(formData, "projectKind"),
+    target: required(formData, "target"),
+    platforms: commaSeparated("platforms"),
+    ownedDomains: commaSeparated("ownedDomains"),
+    consumedCapabilities: commaSeparated("consumedCapabilities"),
+    sharedCandidates: commaSeparated("sharedCandidates"),
+    templateId: required(formData, "templateId"),
+    validationCommands: lines(formData.get("validationCommands")),
+  })
+  const result = await createProjectBlueprintWorkflow(
+    repository,
+    blueprints,
+    input,
+  )
+  revalidatePath("/", "layout")
+  redirect(`/projects/matriz-infra-hub/backlog/${result.backlog.id}`)
+}
+
+export async function createBacklogItemAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  const siteId = String(formData.get("siteId") ?? "").trim()
+  const item = await repository.createBacklogItem(projectId, {
+    title: required(formData, "title"),
+    description: String(formData.get("description") ?? "").trim(),
+    priority: prioritySchema.parse(formData.get("priority") ?? "medium"),
+    workScope: backlogWorkScopeSchema.parse(
+      siteId ? { kind: "site", id: siteId } : { kind: "project" },
+    ),
+    tags: String(formData.get("tags") ?? "")
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+    acceptanceCriteria: lines(formData.get("acceptanceCriteria")),
+  })
+  revalidatePath(`/projects/${projectId}`, "layout")
+  redirect(`/projects/${projectId}/backlog/${item.id}`)
+}
+
+export async function updateBacklogItemAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const itemId = required(formData, "itemId")
+  const repository = await WorkspaceRepository.create()
+  const status = backlogStatusSchema.parse(formData.get("status"))
+  const updated = await repository.updateBacklogItem(
+    projectId,
+    itemId,
+    {
+      title: required(formData, "title"),
+      description: String(formData.get("description") ?? "").trim(),
+      status,
+      priority: prioritySchema.parse(formData.get("priority")),
+      tags: String(formData.get("tags") ?? "")
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      dependencyIds: String(formData.get("dependencyIds") ?? "")
+        .split(/[\n,]/)
+        .map((id) => id.trim())
+        .filter(Boolean),
+    },
+    required(formData, "revision"),
+  )
+  if (updated.status === "done") {
+    await enqueueOptionalNotifications(repository.repositoryRoot, {
+      projectId,
+      event: "completed",
+      idempotencyKey: `backlog:${updated.id}:completed:${updated.revision}`,
+      title: "Tarefa concluída",
+      body: updated.title,
+      workbenchPath: `/projects/${projectId}/backlog/${updated.id}`,
+      backlogItemId: updated.id,
+    })
+  }
+  revalidatePath(`/projects/${projectId}`, "layout")
+}
+
+export async function addBacklogReferenceAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const itemId = required(formData, "itemId")
+  const kind = required(formData, "referenceKind")
+  const value = required(formData, "referenceValue")
+  const label = String(formData.get("label") ?? "").trim() || undefined
+  const reference = attachmentReferenceSchema.parse(
+    kind === "repository_file"
+      ? { kind, path: value, label }
+      : kind === "external_url"
+        ? { kind, url: value, label }
+        : { kind: "workbench_document", documentId: value, label },
+  )
+  const repository = await WorkspaceRepository.create()
+  const item = await repository.getBacklogItem(projectId, itemId)
+  await repository.updateBacklogItem(
+    projectId,
+    itemId,
+    { references: [...item.references, reference] },
+    required(formData, "revision"),
+  )
+  revalidatePath(`/projects/${projectId}/backlog/${itemId}`)
+}
+
+export async function toggleCriterionAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const itemId = required(formData, "itemId")
+  const criterionId = required(formData, "criterionId")
+  const repository = await WorkspaceRepository.create()
+  const item = await repository.getBacklogItem(projectId, itemId)
+  await repository.updateBacklogItem(
+    projectId,
+    itemId,
+    {
+      acceptanceCriteria: item.acceptanceCriteria.map((criterion) =>
+        criterion.id === criterionId
+          ? { ...criterion, completed: !criterion.completed }
+          : criterion,
+      ),
+    },
+    required(formData, "revision"),
+  )
+  revalidatePath(`/projects/${projectId}/backlog/${itemId}`)
+}
+
+export async function archiveBacklogItemAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const itemId = required(formData, "itemId")
+  const repository = await WorkspaceRepository.create()
+  await repository.updateBacklogItem(
+    projectId,
+    itemId,
+    { status: "archived" },
+    required(formData, "revision"),
+  )
+  revalidatePath(`/projects/${projectId}`, "layout")
+  redirect(`/projects/${projectId}/backlog`)
+}
+
+export async function addRoadmapPhaseAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  const phase: RoadmapPhase = {
+    id: `phase_${randomUUID()}`,
+    title: required(formData, "title"),
+    outcome: String(formData.get("outcome") ?? "").trim(),
+    status: roadmap.phases.length === 0 ? "active" : "planned",
+    initiatives: [],
+  }
+  await repository.updateRoadmap(projectId, [...roadmap.phases, phase], required(formData, "revision"))
+  revalidatePath(`/projects/${projectId}/roadmap`)
+}
+
+export async function addRoadmapInitiativeAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const phaseId = required(formData, "phaseId")
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  const phases = roadmap.phases.map((phase) =>
+    phase.id === phaseId
+      ? {
+          ...phase,
+          initiatives: [
+            ...phase.initiatives,
+            {
+              id: `ini_${randomUUID()}`,
+              title: required(formData, "title"),
+              outcome: String(formData.get("outcome") ?? "").trim(),
+              status: "planned" as const,
+              backlogIds: lines(formData.get("backlogIds")),
+            },
+          ],
+        }
+      : phase,
+  )
+  if (!phases.some((phase) => phase.id === phaseId)) throw new Error("Fase não encontrada.")
+  await repository.updateRoadmap(projectId, phases, required(formData, "revision"))
+  revalidatePath(`/projects/${projectId}/roadmap`)
+}
+
+export async function advanceRoadmapInitiativeAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const phaseId = required(formData, "phaseId")
+  const initiativeId = required(formData, "initiativeId")
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  const nextStatus = {
+    planned: "active",
+    active: "completed",
+    paused: "active",
+    completed: "completed",
+  } as const
+  const phases = roadmap.phases.map((phase) => {
+    if (phase.id !== phaseId) return phase
+    const initiatives = phase.initiatives.map((initiative) =>
+      initiative.id === initiativeId
+        ? { ...initiative, status: nextStatus[initiative.status] }
+        : initiative,
+    )
+    if (!initiatives.some((initiative) => initiative.id === initiativeId)) {
+      throw new Error("Iniciativa não encontrada.")
+    }
+    return {
+      ...phase,
+      initiatives,
+      status: initiatives.every((initiative) => initiative.status === "completed")
+        ? "completed" as const
+        : "active" as const,
+    }
+  })
+  if (!phases.some((phase) => phase.id === phaseId)) throw new Error("Fase não encontrada.")
+  await repository.updateRoadmap(projectId, phases, required(formData, "revision"))
+  revalidatePath(`/projects/${projectId}/roadmap`)
+}
+
+export async function initializeRoadmapScorecardAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  if (roadmap.goals.length) throw new Error("O score 0–100 já foi inicializado.")
+  await repository.updateRoadmapGoals(
+    projectId,
+    createMaturityGoalCatalog(),
+    required(formData, "revision"),
+  )
+  revalidatePath(`/projects/${projectId}/roadmap`)
+}
+
+export async function toggleRoadmapGoalAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const goalId = required(formData, "goalId")
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  if (!roadmap.goals.some((goal) => goal.id === goalId)) throw new Error("Meta não encontrada.")
+  await repository.updateRoadmapGoals(
+    projectId,
+    roadmap.goals.map((goal) =>
+      goal.id === goalId ? { ...goal, score: goal.score === 1 ? 0 : 1 } : goal,
+    ),
+    required(formData, "revision"),
+  )
+  revalidatePath(`/projects/${projectId}/roadmap`)
+}
+
+export async function reconcileRoadmapScoreAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  if (projectId !== "matriz-workbench") {
+    throw new Error("A auditoria automática disponível é específica do Matriz Workbench.")
+  }
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  const audit = await auditWorkbenchMaturity(repository.repositoryRoot, roadmap.goals)
+  await repository.updateRoadmapGoals(
+    projectId,
+    audit.goals,
+    required(formData, "revision"),
+    "system",
+  )
+  revalidatePath(`/projects/${projectId}`, "layout")
+}
+
+export async function initializeRoadmapScorecardsAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  const definitions = definitionsForProject(projectId)
+  if (!definitions.length) throw new Error("Não há trilhas especializadas para este projeto.")
+  const existingSlugs = new Set(roadmap.scorecards.map((scorecard) => scorecard.slug))
+  const additions = definitions
+    .filter((definition) => !existingSlugs.has(definition.slug))
+    .map(createScorecard)
+  if (!additions.length) throw new Error("As trilhas especializadas já foram inicializadas.")
+  await repository.updateRoadmapScorecards(
+    projectId,
+    [...roadmap.scorecards, ...additions],
+    required(formData, "revision"),
+  )
+  revalidatePath(`/projects/${projectId}/roadmap`)
+}
+
+export async function toggleRoadmapScorecardGoalAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const scorecardId = required(formData, "scorecardId")
+  const goalId = required(formData, "goalId")
+  const repository = await WorkspaceRepository.create()
+  const roadmap = await repository.getRoadmap(projectId)
+  let found = false
+  const scorecards = roadmap.scorecards.map((scorecard) => {
+    if (scorecard.id !== scorecardId) return scorecard
+    if (!scorecard.goals.some((goal) => goal.id === goalId)) return scorecard
+    found = true
+    return {
+      ...scorecard,
+      goals: scorecard.goals.map((goal) =>
+        goal.id === goalId ? { ...goal, score: goal.score === 1 ? 0 as const : 1 as const } : goal,
+      ),
+    }
+  })
+  if (!found) throw new Error("Meta da trilha não encontrada.")
+  await repository.updateRoadmapScorecards(
+    projectId,
+    scorecards,
+    required(formData, "revision"),
+  )
+  revalidatePath(`/projects/${projectId}/roadmap`)
+}
+
+export async function createAgentRequestAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  const request = await repository.createAgentRequest(
+    projectId,
+    required(formData, "backlogItemId"),
+    String(formData.get("instructions") ?? "").trim(),
+  )
+  revalidatePath(`/projects/${projectId}`, "layout")
+  redirect(`/projects/${projectId}/agents#${request.id}`)
+}
+
+export async function writeDocumentAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const kind = required(formData, "kind") as WorkbenchDocument["kind"]
+  const slug = required(formData, "slug")
+  const repository = await WorkspaceRepository.create()
+  await repository.writeDocument(projectId, {
+    kind,
+    slug,
+    title: required(formData, "title"),
+    content: String(formData.get("content") ?? ""),
+    tags: String(formData.get("tags") ?? "")
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean),
+  }, String(formData.get("revision") ?? "") || undefined)
+  revalidatePath(`/projects/${projectId}`, "layout")
+  redirect(`/projects/${projectId}/docs/${kind}/${slug}`)
+}
+
+export async function reviewControlEvidenceAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const evidenceId = required(formData, "evidenceId")
+  const decision = formData.get("decision") === "rejected" ? "rejected" as const : "approved" as const
+  const repository = await WorkspaceRepository.create()
+  await repository.reviewControlEvidence(projectId, evidenceId, decision, required(formData, "revision"))
+  const [roadmap, policy, evidence] = await Promise.all([repository.getRoadmap(projectId), repository.getControlPolicy(projectId), repository.listControlEvidence(projectId)])
+  await repository.writeControlScoreSummary(projectId, buildScoreSummary(roadmap, policy, evidence))
+  revalidatePath("/control")
+}
+
+export async function createControlSnippetAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  const input = snippetSchema.pick({ command: true, title: true, content: true, tags: true }).parse({
+    command: required(formData, "command"),
+    title: required(formData, "title"),
+    content: required(formData, "content"),
+    tags: String(formData.get("tags") ?? "").split(",").map((tag) => tag.trim()).filter(Boolean),
+  })
+  await repository.createSnippet(projectId, input)
+  revalidatePath("/control")
+}

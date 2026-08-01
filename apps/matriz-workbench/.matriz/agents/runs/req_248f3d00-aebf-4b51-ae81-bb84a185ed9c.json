@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-workbench",
+  "requestId": "req_248f3d00-aebf-4b51-ae81-bb84a185ed9c",
+  "backlogItemId": "tsk_8baf9bf0-d7b8-4485-85f9-8dd0ffb6857f",
+  "status": "completed",
+  "threadId": "019faa8f-419f-7780-8ea5-76d7f34900ed",
+  "turnId": "019faa8f-5322-7992-9da1-b1a1c490be43",
+  "latestMessage": "Verificação somente leitura concluída.\n\n- Tarefa: `tsk_8baf9bf0-d7b8-4485-85f9-8dd0ffb6857f`\n- Solicitação: `req_248f3d00-aebf-4b51-ae81-bb84a185ed9c`\n- Campo consultado: `package.json → name`\n- Resultado: `@matriz/app-matriz-workbench`\n- Arquivos alterados: nenhum\n- `.matriz/**`: não acessado nem editado",
+  "plan": [],
+  "commands": [
+    {
+      "id": "call_5VBYtrlUtFgEXyDUKUC5FSAp",
+      "command": "\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command \"(Get-Content -Raw -LiteralPath 'package.json' | ConvertFrom-Json).name\"",
+      "cwd": "C:\\Apps\\matriz-infra-hub\\apps\\matriz-workbench",
+      "status": "completed",
+      "exitCode": 0,
+      "output": "@matriz/app-matriz-workbench\r\n"
+    }
+  ],
+  "changedFiles": [],
+  "checks": [
+    "\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command \"(Get-Content -Raw -LiteralPath 'package.json' | ConvertFrom-Json).name\""
+  ],
+  "approvals": [],
+  "diff": "",
+  "startedAt": "2026-07-28T21:09:01.642Z",
+  "updatedAt": "2026-07-28T21:09:01.649Z",
+  "completedAt": "2026-07-28T21:09:34.282Z",
+  "revision": "0e41269f16327b5f"
+}

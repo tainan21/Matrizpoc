@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "req_e25c4ed8-43ba-4420-82a0-d4d0c43051ce",
+  "projectId": "matriz-workbench",
+  "backlogItemId": "tsk_7de36e9e-ac10-44cd-8d22-56d469bd61e7",
+  "title": "Validar a prova de coworking ponta a ponta",
+  "instructions": "Validar o fluxo MCP local e devolver evidências dos arquivos e comandos executados.",
+  "status": "completed",
+  "claimedBy": "codex",
+  "resultSummary": "Fluxo de coworking provado de ponta a ponta: solicitação criada na UI, contexto lido via MCP, claim realizado, invariantes endurecidos e evidências renderizadas na interface.",
+  "changedFiles": [
+    "apps/matriz-workbench/src/domain/agent-request-policy.ts",
+    "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts",
+    "apps/matriz-workbench/src/mcp/server.ts",
+    "apps/matriz-workbench/app/(workspace)/projects/[projectId]/agents/page.tsx",
+    "apps/matriz-workbench/src/application/context-bundle.test.ts",
+    "apps/matriz-workbench/docs/WINDOWS.md"
+  ],
+  "checks": [
+    "Workbench tests: 11 passed",
+    "Workbench typecheck: passed",
+    "Workbench lint: passed",
+    "Workbench Next.js build: passed",
+    "Global smoke and boundaries: 118 passed"
+  ],
+  "createdAt": "2026-07-28T20:19:26.836Z",
+  "updatedAt": "2026-07-28T20:20:52.027Z",
+  "revision": "99b25aa240588612"
+}

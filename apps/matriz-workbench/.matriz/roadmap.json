@@ -1,0 +1,3962 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-workbench",
+  "phases": [
+    {
+      "id": "phase_4dbb62c8-46b8-42a5-b0f5-c6501ec72f9d",
+      "title": "Fundação local-first",
+      "outcome": "Projetos descobertos automaticamente e trabalho persistido com segurança no Git.",
+      "status": "completed",
+      "initiatives": [
+        {
+          "id": "ini_e3cf99b2-51a5-4618-93cf-f05f47cced7f",
+          "title": "Discovery e protocolo de arquivos",
+          "outcome": "Todos os apps aparecem sem registro manual.",
+          "status": "completed",
+          "backlogIds": []
+        },
+        {
+          "id": "ini_e1d9d896-b98f-41f5-a0b2-3a06ca7a72cc",
+          "title": "Interface operacional",
+          "outcome": "Roadmap, backlog, docs e agentes funcionam sem editar JSON.",
+          "status": "completed",
+          "backlogIds": [
+            "tsk_7de36e9e-ac10-44cd-8d22-56d469bd61e7"
+          ]
+        },
+        {
+          "id": "ini_3578e4a8-b071-4d2f-bfcb-4cfe89ed28da",
+          "title": "Acesso rápido para testes locais",
+          "outcome": "Token 1234 disponível somente fora de produção, com cobertura automatizada e sem alterar o score 0–100.",
+          "status": "completed",
+          "backlogIds": [
+            "tsk_812aa610-beac-4077-a553-9fa29e4716e8"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_772ab956-998c-49de-a9ef-6063e6dc5346",
+      "title": "Coworking via MCP",
+      "outcome": "Codex consome e conclui uma solicitação com contexto compacto e evidências.",
+      "status": "completed",
+      "initiatives": [
+        {
+          "id": "ini_dfc70388-24bf-4727-887d-b883e1a8ed5c",
+          "title": "Prova ponta a ponta",
+          "outcome": "UI → MCP → agente → resultado visível.",
+          "status": "completed",
+          "backlogIds": [
+            "tsk_7de36e9e-ac10-44cd-8d22-56d469bd61e7"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_af68d467-c0ce-4493-82c3-f2a1bba53c3c",
+      "title": "Codex integrado",
+      "outcome": "Threads, streaming, aprovações e diffs acompanhados no Workbench.",
+      "status": "completed",
+      "initiatives": []
+    },
+    {
+      "id": "phase_1a9a74a8-96f8-4c69-a874-004e6a80dbb1",
+      "title": "Colaboração remota",
+      "outcome": "Cloud e plugins opcionais sem abandonar o formato Git portátil.",
+      "status": "active",
+      "initiatives": []
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal_30726583-6773-4f61-a4b3-eef3340aaaa8",
+      "ordinal": 1,
+      "title": "Definir a dor central e a intenção",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "vision",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/README.md"
+      ]
+    },
+    {
+      "id": "goal_7f9925bb-07ee-4ddb-b6b2-49076c59602a",
+      "ordinal": 2,
+      "title": "Materializar a base operacional",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "vision",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/package.json",
+        "apps/matriz-workbench/app/(workspace)/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_a3aa4f9b-4f59-449f-9259-741dc25f2a4a",
+      "ordinal": 3,
+      "title": "Adotar o score 0–100 como linguagem comum",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "vision",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/SCORE-0-100.md",
+        "apps/matriz-workbench/src/ui/components/roadmap-scorecard.tsx"
+      ]
+    },
+    {
+      "id": "goal_7c30601b-6c01-4ad9-a952-06e55259724b",
+      "ordinal": 4,
+      "title": "Definir público e decisões prioritárias",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "vision",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/collaboration-brief.ts"
+      ]
+    },
+    {
+      "id": "goal_573b5453-320d-4aba-b869-818927c442eb",
+      "ordinal": 5,
+      "title": "Registrar princípios de produto",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "vision",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/collaboration-brief.ts"
+      ]
+    },
+    {
+      "id": "goal_ec250d01-ad78-48d3-9c16-5dc2029200ac",
+      "ordinal": 6,
+      "title": "Delimitar o que não será construído",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "vision",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/README.md"
+      ]
+    },
+    {
+      "id": "goal_c57f177d-ca60-4e2d-a7ab-bbc3cbd87c10",
+      "ordinal": 7,
+      "title": "Definir outcomes mensuráveis",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_2816b6e1-8653-4603-af4e-da0f5daedd2f",
+      "ordinal": 8,
+      "title": "Mapear riscos de produto",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "vision",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/SECURITY-AUDIT-PHASE-7.md"
+      ]
+    },
+    {
+      "id": "goal_74796afb-b610-415f-8f7f-d96e8c70dd2f",
+      "ordinal": 9,
+      "title": "Validar o fluxo principal com uso real",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_60faf2e0-ffb9-4027-b82b-c7b8ab9d33ce",
+      "ordinal": 10,
+      "title": "Revisar visão e escopo",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_41f4e9fd-cd3f-451a-bf6d-9a1a34912f02",
+      "ordinal": 11,
+      "title": "Fechar modelo de projetos",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/project-inventory.ts"
+      ]
+    },
+    {
+      "id": "goal_92a57c6e-2052-4abe-b007-34b94dd064e5",
+      "ordinal": 12,
+      "title": "Fechar modelo de roadmap",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/domain/schemas.ts",
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/roadmap/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_a2040374-8c5e-4848-aff6-357527dcd6ce",
+      "ordinal": 13,
+      "title": "Fechar modelo de backlog",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/backlog/page.tsx",
+        "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts"
+      ]
+    },
+    {
+      "id": "goal_7a4badd7-3a57-4a3a-a968-f23fe0f7f418",
+      "ordinal": 14,
+      "title": "Fechar modelo de documentação",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/docs/page.tsx",
+        "apps/matriz-workbench/src/ui/components/markdown-editor.tsx"
+      ]
+    },
+    {
+      "id": "goal_9a5e0bc0-1c59-4eff-8cae-248dba0a47a8",
+      "ordinal": 15,
+      "title": "Fechar modelo de decisões",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/decisions/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_22b11df7-21a5-4c4a-baf9-e8665488b7bb",
+      "ordinal": 16,
+      "title": "Fechar modelo de solicitações ao Codex",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/agents/page.tsx",
+        "apps/matriz-workbench/src/application/codex-run-manager.ts"
+      ]
+    },
+    {
+      "id": "goal_88316b22-feab-4648-bbb3-1aea3985eaa6",
+      "ordinal": 17,
+      "title": "Definir estados vazios e recuperação",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/error.tsx",
+        "apps/matriz-workbench/app/not-found.tsx",
+        "apps/matriz-workbench/docs/RECOVERY.md"
+      ]
+    },
+    {
+      "id": "goal_65295c73-2c79-4731-b41a-14d6862b3f5d",
+      "ordinal": 18,
+      "title": "Definir busca e filtros",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/backlog/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_ee293d35-2264-4803-809e-86c20e85a065",
+      "ordinal": 19,
+      "title": "Definir referências entre artefatos",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "product",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/domain/schemas.ts",
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/backlog/[itemId]/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_9c0ed14d-f9ee-4020-a5a9-927a8119aa3e",
+      "ordinal": 20,
+      "title": "Validar rotina semanal de uso",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_0832c293-d5ef-4384-b6eb-a4aef15c1553",
+      "ordinal": 21,
+      "title": "Documentar boundaries do Workbench",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/AGENTS.md",
+        "apps/matriz-workbench/docs/AGENT-START-HERE.md"
+      ]
+    },
+    {
+      "id": "goal_33d70ebd-9aaa-4351-b5e9-d2ed5b874158",
+      "ordinal": 22,
+      "title": "Manter domínio específico dentro do app",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/domain/schemas.ts"
+      ]
+    },
+    {
+      "id": "goal_60cb1b45-ee9b-4836-886f-aeb54538a539",
+      "ordinal": 23,
+      "title": "Definir critérios para extração em packages",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "docs/architectural-laws.md",
+        "apps/matriz-workbench/docs/SCORE-0-100.md"
+      ]
+    },
+    {
+      "id": "goal_d4e4cdaf-0876-4597-8890-da9dedbf3e02",
+      "ordinal": 24,
+      "title": "Mapear packages existentes e responsabilidades",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "docs/package-categories.md",
+        "docs/monorepo-structure.md"
+      ]
+    },
+    {
+      "id": "goal_1ede041b-1be6-4e76-9b88-cb2d31123366",
+      "ordinal": 25,
+      "title": "Eliminar imports cruzados entre apps",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "tooling/scripts/verify-app-boundaries.ts"
+      ]
+    },
+    {
+      "id": "goal_a20ec6a1-a9c8-4f2f-9c70-3d3d92a55f45",
+      "ordinal": 26,
+      "title": "Estabilizar contratos públicos",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/public-contract.ts",
+        "apps/matriz-workbench/src/manifest/manifest.ts"
+      ]
+    },
+    {
+      "id": "goal_71ec53e4-c8f2-45c1-ae51-6a67e64eb256",
+      "ordinal": 27,
+      "title": "Fechar protocolo file-backed",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/FILE-PROTOCOL.md",
+        "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts"
+      ]
+    },
+    {
+      "id": "goal_471264f5-706b-4c43-92a7-95836c67c5a0",
+      "ordinal": 28,
+      "title": "Definir adapter futuro de persistência",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_a472e94e-ada5-498c-962f-2df8187c2685",
+      "ordinal": 29,
+      "title": "Validar conflitos e escrita atômica",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/integration/filesystem/workspace-repository.test.ts"
+      ]
+    },
+    {
+      "id": "goal_6d1ca9b2-064e-485c-99ae-0ef6fc9df1f4",
+      "ordinal": 30,
+      "title": "Executar revisão arquitetural",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "architecture",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/MATURITY-AUDIT-2026-07-29.md"
+      ]
+    },
+    {
+      "id": "goal_088bc8d0-0f85-4b0b-b08f-ab83f7ea6bea",
+      "ordinal": 31,
+      "title": "Fechar tese visual do Workbench",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css"
+      ]
+    },
+    {
+      "id": "goal_ee505e1b-ad43-498a-853b-21cb7c5cb1d0",
+      "ordinal": 32,
+      "title": "Consolidar tokens semânticos",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css"
+      ]
+    },
+    {
+      "id": "goal_f3c74a3f-3701-409b-bdb6-91c508c93499",
+      "ordinal": 33,
+      "title": "Fechar escala tipográfica",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css"
+      ]
+    },
+    {
+      "id": "goal_8095d5da-0403-4208-9f4c-99e3012b2a0b",
+      "ordinal": 34,
+      "title": "Fechar escala de espaçamento",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css"
+      ]
+    },
+    {
+      "id": "goal_b20b8350-5687-4e36-98b8-a185e994d770",
+      "ordinal": 35,
+      "title": "Fechar cores e contraste",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css"
+      ]
+    },
+    {
+      "id": "goal_3b8c6de1-c1ee-4b0c-b6a0-33e35c68916b",
+      "ordinal": 36,
+      "title": "Definir componentes operacionais",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/ui/components/app-shell.tsx",
+        "apps/matriz-workbench/src/ui/components/project-header.tsx"
+      ]
+    },
+    {
+      "id": "goal_0bc4700a-7bc8-4659-a10c-d96ecb896a16",
+      "ordinal": 37,
+      "title": "Definir estados e variantes",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css",
+        "apps/matriz-workbench/src/ui/components/codex-run-panel.tsx"
+      ]
+    },
+    {
+      "id": "goal_04a80bd4-3f86-4814-9ecc-0b62fc40148a",
+      "ordinal": 38,
+      "title": "Definir iconografia",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/icon.svg"
+      ]
+    },
+    {
+      "id": "goal_9918803a-bdce-4ab2-a4e3-5073fc6a6b44",
+      "ordinal": 39,
+      "title": "Documentar critérios de compartilhamento no design package",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "design",
+      "score": 1,
+      "evidence": [
+        "docs/theming-governance.md",
+        "apps/matriz-workbench/docs/SCORE-0-100.md"
+      ]
+    },
+    {
+      "id": "goal_1cbf15e2-4fb4-40cb-9065-cac5fa5613e9",
+      "ordinal": 40,
+      "title": "Auditar consistência visual",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_39411d15-f0ee-40a6-870d-e3f62fd8249a",
+      "ordinal": 41,
+      "title": "Fechar navegação por teclado",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/ui/components/command-menu.tsx",
+        "apps/matriz-workbench/docs/USABILITY-ACCESSIBILITY-BASELINE-2026-07-29.md"
+      ]
+    },
+    {
+      "id": "goal_da246b0c-b2f4-4757-abea-cb2851e33891",
+      "ordinal": 42,
+      "title": "Adicionar feedback de ações",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/ui/components/copy-prompt-button.tsx"
+      ]
+    },
+    {
+      "id": "goal_686d61b6-daf9-455b-bfb7-e0353a256dca",
+      "ordinal": 43,
+      "title": "Adicionar toast acessível",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/ui/components/copy-prompt-button.tsx",
+        "apps/matriz-workbench/app/globals.css"
+      ]
+    },
+    {
+      "id": "goal_6c61e8fc-6d8b-4df8-bcab-1232f1b37035",
+      "ordinal": 44,
+      "title": "Adicionar estados de carregamento",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/loading.tsx"
+      ]
+    },
+    {
+      "id": "goal_ef916e91-1a52-4bc5-b51b-542bd8afa1e8",
+      "ordinal": 45,
+      "title": "Adicionar transições de progresso",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css",
+        "apps/matriz-workbench/src/ui/components/roadmap-scorecard.tsx"
+      ]
+    },
+    {
+      "id": "goal_ea3dde25-b638-4ae2-8780-5ac3354a8a78",
+      "ordinal": 46,
+      "title": "Adicionar estados de erro acionáveis",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/error.tsx",
+        "apps/matriz-workbench/docs/RECOVERY.md"
+      ]
+    },
+    {
+      "id": "goal_1618324c-76ad-4de2-93d3-50b29b6b744b",
+      "ordinal": 47,
+      "title": "Revisar experiência mobile",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css"
+      ]
+    },
+    {
+      "id": "goal_7ac1a9cc-0a18-4a75-aeb0-c22ebbebd300",
+      "ordinal": 48,
+      "title": "Revisar densidade e legibilidade",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_f387540c-e017-4597-894f-397952285187",
+      "ordinal": 49,
+      "title": "Validar acessibilidade AA",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/globals.css",
+        "apps/matriz-workbench/docs/USABILITY-ACCESSIBILITY-BASELINE-2026-07-29.md"
+      ]
+    },
+    {
+      "id": "goal_f651104e-0532-4367-991f-e16374cda7b6",
+      "ordinal": 50,
+      "title": "Executar teste de uso completo",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "experience",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/USABILITY-ACCESSIBILITY-BASELINE-2026-07-29.md"
+      ]
+    },
+    {
+      "id": "goal_363c1eb0-c7ba-4f6e-9764-ce52f6da2da8",
+      "ordinal": 51,
+      "title": "Cobrir schemas com testes",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "quality",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/domain/schemas.test.ts"
+      ]
+    },
+    {
+      "id": "goal_76b10e92-939b-4453-b49d-399338dd7433",
+      "ordinal": 52,
+      "title": "Cobrir repository com testes",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "quality",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/integration/filesystem/workspace-repository.test.ts"
+      ]
+    },
+    {
+      "id": "goal_30f61cc6-a5d2-4e71-9a58-003bbab8d741",
+      "ordinal": 53,
+      "title": "Cobrir MCP com testes de contrato",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "quality",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/cli/verify-mcp.ts"
+      ]
+    },
+    {
+      "id": "goal_1851efbf-54ca-45d2-94b5-d09d8bdfa41e",
+      "ordinal": 54,
+      "title": "Automatizar E2E crítico",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_db2e833a-d57f-4aaf-a76c-5d60dca2bc90",
+      "ordinal": 55,
+      "title": "Definir gates por app",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "quality",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/package.json"
+      ]
+    },
+    {
+      "id": "goal_a25e5c9a-a5c6-491f-91ea-11d0a166ebcd",
+      "ordinal": 56,
+      "title": "Definir clean clone test",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "quality",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/RECOVERY.md"
+      ]
+    },
+    {
+      "id": "goal_47a70ad6-3365-41f2-840d-74a0522c82c5",
+      "ordinal": 57,
+      "title": "Documentar setup Windows",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "quality",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/WINDOWS.md"
+      ]
+    },
+    {
+      "id": "goal_6c700ff7-73f7-4496-8adb-8a8456a5f754",
+      "ordinal": 58,
+      "title": "Padronizar logs e erros",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "quality",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/domain/errors.ts",
+        "apps/matriz-workbench/src/auth/api-error-status.ts"
+      ]
+    },
+    {
+      "id": "goal_a9ea82cd-c33b-4879-867d-69f386ee4ed4",
+      "ordinal": 59,
+      "title": "Medir cobertura de fluxos críticos",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_4c4d2b45-4334-44c4-9c38-a1ceaa53c064",
+      "ordinal": 60,
+      "title": "Fechar checklist de release",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_ddcdd489-b9fd-400c-a7f8-8a2f2851b88c",
+      "ordinal": 61,
+      "title": "Validar traversal e caminhos absolutos",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/domain/schemas.test.ts",
+        "apps/matriz-workbench/src/integration/codex/codex-run-store.test.ts"
+      ]
+    },
+    {
+      "id": "goal_ca473349-f4e7-434b-87f0-811f7a8bf70b",
+      "ordinal": 62,
+      "title": "Validar proteção contra symlinks",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/FILE-PROTOCOL.md",
+        "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts"
+      ]
+    },
+    {
+      "id": "goal_90920a19-b76d-4648-8a4d-a53c30305382",
+      "ordinal": 63,
+      "title": "Validar limites de arquivos",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts",
+        "apps/matriz-workbench/src/integration/codex/codex-run-store.ts"
+      ]
+    },
+    {
+      "id": "goal_a24a0cd4-f41b-4be2-8a38-1109dcb1b9d7",
+      "ordinal": 64,
+      "title": "Validar token e cookie local",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/auth/session.ts",
+        "apps/matriz-workbench/app/unlock/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_fe34e7b6-c061-49cd-9d99-180e8f8b2e2c",
+      "ordinal": 65,
+      "title": "Mapear ameaças do MCP",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/MCP.md",
+        "apps/matriz-workbench/docs/SECURITY-AUDIT-PHASE-7.md"
+      ]
+    },
+    {
+      "id": "goal_822d5d94-aca3-46eb-a981-4b1b811ced96",
+      "ordinal": 66,
+      "title": "Exigir aprovação em mutações",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/mcp/server.ts",
+        "apps/matriz-workbench/src/application/codex-run-manager.ts"
+      ]
+    },
+    {
+      "id": "goal_2cfe6688-e7c9-4548-8d60-e9b68652201e",
+      "ordinal": 67,
+      "title": "Redigir política de secrets",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/RECOVERY.md",
+        "apps/matriz-workbench/docs/COLLABORATION-ADAPTERS.md"
+      ]
+    },
+    {
+      "id": "goal_3fa80d5e-89f4-4879-aa31-8de4592c97de",
+      "ordinal": 68,
+      "title": "Redigir política de dados sensíveis",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/SECURITY-AUDIT-PHASE-7.md"
+      ]
+    },
+    {
+      "id": "goal_40c53ea2-157f-43a9-b84e-76c8dd0dbdc3",
+      "ordinal": 69,
+      "title": "Adicionar auditoria de dependências",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_a7ebc557-e110-46c7-86ba-2c495fac9a5c",
+      "ordinal": 70,
+      "title": "Executar revisão de segurança",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "security",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/SECURITY-AUDIT-PHASE-7.md"
+      ]
+    },
+    {
+      "id": "goal_5dcc8230-b4a4-4f84-b342-dece0810eb09",
+      "ordinal": 71,
+      "title": "Medir tempo de discovery",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "performance",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/operational-health.ts",
+        "apps/matriz-workbench/src/application/operational-health.test.ts"
+      ]
+    },
+    {
+      "id": "goal_d99fb634-f59c-41ca-a7e9-e272c4b3a59a",
+      "ordinal": 72,
+      "title": "Evitar leituras repetidas",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_154c4d2b-c073-45ef-8b95-4483519b2534",
+      "ordinal": 73,
+      "title": "Limitar contexto do Codex",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "performance",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/context-bundle.test.ts"
+      ]
+    },
+    {
+      "id": "goal_a45c1509-8b1c-40a6-aaf1-b4f0a9bc5c88",
+      "ordinal": 74,
+      "title": "Medir bundle do cliente",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "performance",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/build-metrics.ts",
+        "apps/matriz-workbench/src/application/build-metrics.test.ts"
+      ]
+    },
+    {
+      "id": "goal_eec6ed40-2ce0-4894-87dd-097ab29eb264",
+      "ordinal": 75,
+      "title": "Reduzir client components",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_d5e1aa1b-fe1b-4bd7-856e-899867a68e65",
+      "ordinal": 76,
+      "title": "Validar listas com muitos itens",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_f73a6fbb-06b2-44d9-a39f-cd870c56b9ec",
+      "ordinal": 77,
+      "title": "Definir estratégia de cache local",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_8cf801e0-17e5-45e8-931a-8337c80444f3",
+      "ordinal": 78,
+      "title": "Adicionar métricas operacionais",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "performance",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/operational-health.ts",
+        "apps/matriz-workbench/src/cli/health.ts"
+      ]
+    },
+    {
+      "id": "goal_7f050cb0-1b6b-4647-bc6d-859c54a93606",
+      "ordinal": 79,
+      "title": "Definir orçamento de performance",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_9b6ddbe1-2dc0-4114-a344-3904ac2641ad",
+      "ordinal": 80,
+      "title": "Executar baseline de performance",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_0053defb-9c0d-4a07-b638-17bd3ec4b565",
+      "ordinal": 81,
+      "title": "Fechar protocolo humano–Codex",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/AGENT-START-HERE.md",
+        "apps/matriz-workbench/src/application/collaboration-brief.ts"
+      ]
+    },
+    {
+      "id": "goal_a34698c3-ea3b-42d0-94b6-ee0c930a1a8f",
+      "ordinal": 82,
+      "title": "Definir prompt de início de rodada",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/collaboration-brief.ts"
+      ]
+    },
+    {
+      "id": "goal_9bcbdf1b-1a63-4345-8cca-c1c320b8bf41",
+      "ordinal": 83,
+      "title": "Definir prompt de conclusão",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/collaboration-brief.ts"
+      ]
+    },
+    {
+      "id": "goal_801e4bd2-e67f-484a-8c61-e66d190e6275",
+      "ordinal": 84,
+      "title": "Definir quando continuar ou abrir novo chat",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/collaboration/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_b53923c6-e6d1-4444-a62f-732730192d7c",
+      "ordinal": 85,
+      "title": "Definir personas especializadas do ChatGPT",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/collaboration-brief.ts"
+      ]
+    },
+    {
+      "id": "goal_38ad5651-c276-4b87-9f26-f7178aee47e2",
+      "ordinal": 86,
+      "title": "Definir plugins opcionais por contexto",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/collaboration/page.tsx",
+        "apps/matriz-workbench/docs/COLLABORATION-ADAPTERS.md"
+      ]
+    },
+    {
+      "id": "goal_75b8f7fc-bb39-4d21-8a3f-a8a1e9d99550",
+      "ordinal": 87,
+      "title": "Associar tarefas a conversas",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/codex-run-manager.ts",
+        "apps/matriz-workbench/src/integration/codex/codex-run-store.ts"
+      ]
+    },
+    {
+      "id": "goal_7046faf3-abf0-406b-8805-74d6e7481797",
+      "ordinal": 88,
+      "title": "Exibir diffs e verificações",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/ui/components/codex-run-panel.tsx",
+        "apps/matriz-workbench/src/ui/components/delivery-evidence.tsx"
+      ]
+    },
+    {
+      "id": "goal_594f3931-e5f4-47ad-833c-b89fc21c8925",
+      "ordinal": 89,
+      "title": "Integrar streaming e aprovações",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "collaboration",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/events/route.ts",
+        "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/approvals/[approvalId]/route.ts"
+      ]
+    },
+    {
+      "id": "goal_9b63e5ea-a572-4c56-8d76-e7fe00ad38cc",
+      "ordinal": 90,
+      "title": "Validar uma semana de coworking real",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_7e33983b-07fc-441d-9b44-ae78eba2a6fd",
+      "ordinal": 91,
+      "title": "Validar descoberta de dezenas de apps",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_069123ca-4a96-4ace-8ddc-19c623204121",
+      "ordinal": 92,
+      "title": "Mapear stacks por projeto",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "scale",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/project-inventory.ts"
+      ]
+    },
+    {
+      "id": "goal_f26b7f23-8ebc-4828-aa4b-d75a084c96eb",
+      "ordinal": 93,
+      "title": "Mapear domínios compartilháveis",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "scale",
+      "score": 1,
+      "evidence": [
+        "docs/app-ownership-map.md",
+        "docs/project-intelligence-contracts.md"
+      ]
+    },
+    {
+      "id": "goal_c27715bf-b8f9-482f-a459-b41db0846682",
+      "ordinal": 94,
+      "title": "Mapear integrações entre projetos",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "scale",
+      "score": 1,
+      "evidence": [
+        "docs/app-communication.md",
+        "docs/cross-repo-integration-model.md"
+      ]
+    },
+    {
+      "id": "goal_afc11c22-2d6c-4f85-af66-df8f6df27e39",
+      "ordinal": 95,
+      "title": "Definir estratégia de templates",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_6a21fc90-34f1-4657-b079-aea169f36784",
+      "ordinal": 96,
+      "title": "Definir feature flags",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_e42ba517-38a8-4c9b-bc12-21d871d5725b",
+      "ordinal": 97,
+      "title": "Preparar adapter cloud opcional",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_1662105b-be01-4315-ae67-07bb07b1cdcf",
+      "ordinal": 98,
+      "title": "Preparar colaboração remota",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "scale",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/docs/ADR-REMOTE-COLLABORATION-BOUNDARY.md",
+        "apps/matriz-workbench/app/(workspace)/projects/[projectId]/collaboration/page.tsx"
+      ]
+    },
+    {
+      "id": "goal_b8745898-46e9-43bc-bffd-610650bab385",
+      "ordinal": 99,
+      "title": "Preparar integração GitHub",
+      "outcome": "Evidência verificada automaticamente no repositório.",
+      "category": "scale",
+      "score": 1,
+      "evidence": [
+        "apps/matriz-workbench/src/application/collaboration/github-issue-draft.ts",
+        "apps/matriz-workbench/docs/COLLABORATION-ADAPTERS.md"
+      ]
+    },
+    {
+      "id": "goal_7d8191ea-b7e9-4a57-ad40-31cedfd10995",
+      "ordinal": 100,
+      "title": "Concluir auditoria 100/100",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    }
+  ],
+  "scorecards": [
+    {
+      "id": "scorecard_765a89f1-4ece-4770-8afb-9429b36e6854",
+      "slug": "app",
+      "title": "Workbench · App",
+      "description": "Produto, interface, design system local, experiência e qualidade operacional do aplicativo.",
+      "scope": "workbench_app",
+      "goals": [
+        {
+          "id": "goal_e683acae-0345-4e8d-978a-686a6fc00a04",
+          "ordinal": 1,
+          "title": "Definir contrato e resultado de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_91c29485-4680-404b-9749-ddf19d9e2188",
+          "ordinal": 2,
+          "title": "Mapear estado atual de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c81dabb9-8672-4db5-a5a3-a28eec622cdd",
+          "ordinal": 3,
+          "title": "Registrar decisões de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6e877067-ebe5-499b-8c98-8dc63e98be9c",
+          "ordinal": 4,
+          "title": "Implementar baseline de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6f49a7cf-3359-4d0e-922e-1e73f3dd1c1c",
+          "ordinal": 5,
+          "title": "Cobrir estados e exceções de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_22851298-c62e-4d7e-98d8-75827dd15c2b",
+          "ordinal": 6,
+          "title": "Validar acessibilidade e segurança de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_58a204a1-d031-474e-8637-0582a53400f0",
+          "ordinal": 7,
+          "title": "Medir qualidade e performance de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0ae76574-46b5-4d72-9596-499b5496668f",
+          "ordinal": 8,
+          "title": "Documentar operação de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_87c58bb3-d81f-466d-ade5-051f7cc75ea4",
+          "ordinal": 9,
+          "title": "Validar em uso real de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c7052943-be0d-4183-bbad-54b3a4a044ea",
+          "ordinal": 10,
+          "title": "Concluir auditoria de visão e escopo do produto",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d14d16b1-854a-4d4d-ac8e-05762874594d",
+          "ordinal": 11,
+          "title": "Definir contrato e resultado de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b24f40a8-df66-4538-9402-6bf80358b1ee",
+          "ordinal": 12,
+          "title": "Mapear estado atual de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1fdc22de-8887-4350-852d-31d58165ddb6",
+          "ordinal": 13,
+          "title": "Registrar decisões de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4fac4054-d65e-4fce-82f2-1a6f7674ed5d",
+          "ordinal": 14,
+          "title": "Implementar baseline de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_db5c3606-e744-4692-aedf-44ddb67b501b",
+          "ordinal": 15,
+          "title": "Cobrir estados e exceções de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_08a05236-ceca-4576-bd12-3a8f8e9ed853",
+          "ordinal": 16,
+          "title": "Validar acessibilidade e segurança de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0f0cfef6-eec1-480d-b3a6-6a4c363a034b",
+          "ordinal": 17,
+          "title": "Medir qualidade e performance de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_afa0dcc8-0bea-4571-9ee7-bcf69ea95dc4",
+          "ordinal": 18,
+          "title": "Documentar operação de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6044861f-eeab-410c-ac58-e201856ba62b",
+          "ordinal": 19,
+          "title": "Validar em uso real de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ed829491-df6b-4fa5-b97d-3e0fb2450bad",
+          "ordinal": 20,
+          "title": "Concluir auditoria de shell, navegação e responsividade",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8cd3c9ea-4f07-4920-93a9-f28b4b42c05f",
+          "ordinal": 21,
+          "title": "Definir contrato e resultado de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_23166e2c-deff-45c8-bd38-5377f5a0cd7b",
+          "ordinal": 22,
+          "title": "Mapear estado atual de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8eb1aac4-eef5-47ad-8eef-601ec58473fb",
+          "ordinal": 23,
+          "title": "Registrar decisões de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_93ef5779-5c21-4863-8226-f211cb05df29",
+          "ordinal": 24,
+          "title": "Implementar baseline de temas light/dark e tokens",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "design",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/app/globals.css",
+            "apps/matriz-workbench/src/ui/components/theme-toggle.tsx",
+            "apps/matriz-workbench/src/ui/theme.ts"
+          ]
+        },
+        {
+          "id": "goal_1f07b355-697a-4bdc-9178-537ef858e77d",
+          "ordinal": 25,
+          "title": "Cobrir estados e exceções de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_edddaa79-808c-4d0d-bcab-b33d1ed82098",
+          "ordinal": 26,
+          "title": "Validar acessibilidade e segurança de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a5901ca0-d2cf-4419-87f9-88dcb9a8b217",
+          "ordinal": 27,
+          "title": "Medir qualidade e performance de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9ffd689d-bba0-48bf-98b2-d2f23f68a90d",
+          "ordinal": 28,
+          "title": "Documentar operação de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_40a876c6-f442-48c4-9c68-3e93b720fa99",
+          "ordinal": 29,
+          "title": "Validar em uso real de temas light/dark e tokens",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "design",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/ui/theme.test.ts",
+            "output/playwright/05-workbench-sites-light.png",
+            "output/playwright/06-workbench-sites-dark.png"
+          ]
+        },
+        {
+          "id": "goal_2ea49e2b-b4f2-4d3c-88df-150876ab7559",
+          "ordinal": 30,
+          "title": "Concluir auditoria de temas light/dark e tokens",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_12113637-8000-4fa8-bea1-d3a6d0ba2088",
+          "ordinal": 31,
+          "title": "Definir contrato e resultado de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3c7c3638-2c5e-4188-b507-dadbcb14eae3",
+          "ordinal": 32,
+          "title": "Mapear estado atual de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9ae6605e-99e3-4a9b-a658-03fc29c62112",
+          "ordinal": 33,
+          "title": "Registrar decisões de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_02713b44-8214-42cc-9865-1e2c47fa0b52",
+          "ordinal": 34,
+          "title": "Implementar baseline de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_773c9c5a-d854-4596-bb92-82575e496596",
+          "ordinal": 35,
+          "title": "Cobrir estados e exceções de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ee49fb32-896b-410b-aeb6-8a0cad8cce31",
+          "ordinal": 36,
+          "title": "Validar acessibilidade e segurança de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_eda43f10-882c-4b07-9222-ea246c286adf",
+          "ordinal": 37,
+          "title": "Medir qualidade e performance de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c58516aa-27c3-4d0c-9960-636357af1498",
+          "ordinal": 38,
+          "title": "Documentar operação de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e9dc4b50-b964-4acb-a876-a24feacfac43",
+          "ordinal": 39,
+          "title": "Validar em uso real de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a8b01186-f640-400c-9ddd-6380f49c950e",
+          "ordinal": 40,
+          "title": "Concluir auditoria de componentes e padrões de interação",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_45136ccf-cda1-415f-88fd-859cd191542b",
+          "ordinal": 41,
+          "title": "Definir contrato e resultado de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_cfa89721-2bf3-4194-92ed-0622804c5032",
+          "ordinal": 42,
+          "title": "Mapear estado atual de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_684787b8-34bf-4f8b-a76f-0af21bfb0859",
+          "ordinal": 43,
+          "title": "Registrar decisões de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f3fe84d1-e195-4778-95f3-81d4ce64ed63",
+          "ordinal": 44,
+          "title": "Implementar baseline de descoberta e visão de projetos",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "product",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/app/(workspace)/projects/page.tsx",
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.ts"
+          ]
+        },
+        {
+          "id": "goal_60fa7f4f-557d-4d76-97bc-304de7adb58c",
+          "ordinal": 45,
+          "title": "Cobrir estados e exceções de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4d2c1d09-eaa8-4de2-be44-feeb35f103cf",
+          "ordinal": 46,
+          "title": "Validar acessibilidade e segurança de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6c520838-d00b-4919-8126-a630306be19f",
+          "ordinal": 47,
+          "title": "Medir qualidade e performance de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c3647687-152c-4a56-9927-dc1b8eab2a67",
+          "ordinal": 48,
+          "title": "Documentar operação de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f194e294-8a23-4d5b-95b9-a100db910118",
+          "ordinal": 49,
+          "title": "Validar em uso real de descoberta e visão de projetos",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "product",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/cli/verify-mcp.ts",
+            "output/playwright/03-workbench-projects-full.png",
+            "output/playwright/08-workbench-projects-mobile-dark.png"
+          ]
+        },
+        {
+          "id": "goal_93eb2155-9d1d-4eb6-aec0-4d5207277dc4",
+          "ordinal": 50,
+          "title": "Concluir auditoria de descoberta e visão de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4ab315b4-6199-499b-a742-fdc5b4f24566",
+          "ordinal": 51,
+          "title": "Definir contrato e resultado de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b226344b-c451-4e24-9b75-73aa1646da68",
+          "ordinal": 52,
+          "title": "Mapear estado atual de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0091e5b9-f17f-4875-9844-e45837acf8d1",
+          "ordinal": 53,
+          "title": "Registrar decisões de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_36b64689-c031-4464-964b-f2a2d468ad16",
+          "ordinal": 54,
+          "title": "Implementar baseline de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_afbccefa-8f74-4b83-87f7-1a8d9d28f4a5",
+          "ordinal": 55,
+          "title": "Cobrir estados e exceções de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ae8643c3-8f10-4ebf-af9a-4de0a85266f2",
+          "ordinal": 56,
+          "title": "Validar acessibilidade e segurança de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_20b8699d-84a0-4f76-8a82-8f754dd8cde1",
+          "ordinal": 57,
+          "title": "Medir qualidade e performance de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0a7d64dc-b99c-4a69-8e41-ef6ac3cca328",
+          "ordinal": 58,
+          "title": "Documentar operação de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9204056f-8064-4b5e-a285-701a8c1de7fe",
+          "ordinal": 59,
+          "title": "Validar em uso real de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_55c4467f-6a13-4112-9d4e-360d9b7a66da",
+          "ordinal": 60,
+          "title": "Concluir auditoria de roadmap e trilhas 0–100",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_7912e0a1-9c70-4632-bc67-65d3b0b0d88c",
+          "ordinal": 61,
+          "title": "Definir contrato e resultado de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_cbd4a3a4-959e-47c6-996e-c0b2a5de3180",
+          "ordinal": 62,
+          "title": "Mapear estado atual de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_87c217b4-3ce5-4eda-884b-5e9bf53d8a45",
+          "ordinal": 63,
+          "title": "Registrar decisões de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e46363b1-e7b7-4b06-8683-714dcf78036d",
+          "ordinal": 64,
+          "title": "Implementar baseline de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6d91852c-3cad-4233-8d7e-06466a2fb36f",
+          "ordinal": 65,
+          "title": "Cobrir estados e exceções de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_71aa4f10-b7f4-4ea6-a20a-9090333d9a0d",
+          "ordinal": 66,
+          "title": "Validar acessibilidade e segurança de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c53ef124-a6ef-4b22-affc-16b96a2bf48e",
+          "ordinal": 67,
+          "title": "Medir qualidade e performance de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_fff80c57-2962-4ea6-b766-1fc4016392ee",
+          "ordinal": 68,
+          "title": "Documentar operação de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_19c4062f-dff0-48c3-b40e-9e6728a7a991",
+          "ordinal": 69,
+          "title": "Validar em uso real de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8a4c85e1-3e90-4c4e-8e35-4170b2fa5e67",
+          "ordinal": 70,
+          "title": "Concluir auditoria de backlog e fluxo de trabalho",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_7a5e354c-8f05-44de-8a8e-2ee6fcde8089",
+          "ordinal": 71,
+          "title": "Definir contrato e resultado de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_32abb1f2-dd00-4e4e-9246-e98a66257360",
+          "ordinal": 72,
+          "title": "Mapear estado atual de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f4fae069-99c5-4b8a-a068-24cec4720744",
+          "ordinal": 73,
+          "title": "Registrar decisões de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d8ecb690-de00-4517-8847-52eda4f24abd",
+          "ordinal": 74,
+          "title": "Implementar baseline de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_46383418-5113-46fe-9fa2-d849fa5363fe",
+          "ordinal": 75,
+          "title": "Cobrir estados e exceções de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8eaa50a6-41ff-4579-9c65-f17325076eeb",
+          "ordinal": 76,
+          "title": "Validar acessibilidade e segurança de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_96917dc7-02b3-4ec9-8a0f-783955a229ee",
+          "ordinal": 77,
+          "title": "Medir qualidade e performance de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_61d122c7-7305-4965-8fb4-f6e15996a476",
+          "ordinal": 78,
+          "title": "Documentar operação de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d413b76e-9388-4885-a5b7-ff244da7fe16",
+          "ordinal": 79,
+          "title": "Validar em uso real de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d1c28041-df56-4920-89a3-d2a980d304a0",
+          "ordinal": 80,
+          "title": "Concluir auditoria de documentos e decisões na interface",
+          "outcome": "",
+          "category": "experience",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2ddf1e9f-31cf-4939-beaf-4842ac5e50f3",
+          "ordinal": 81,
+          "title": "Definir contrato e resultado de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5b81ebe2-65d1-466f-a58c-961ce592d439",
+          "ordinal": 82,
+          "title": "Mapear estado atual de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_23212d95-ce83-4c9a-888d-f1813ba8147f",
+          "ordinal": 83,
+          "title": "Registrar decisões de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2cc3f722-af05-4fe8-83be-bf69b510e407",
+          "ordinal": 84,
+          "title": "Implementar baseline de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d99e7b69-bfc5-4317-b13f-31fc85507058",
+          "ordinal": 85,
+          "title": "Cobrir estados e exceções de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_fcffdfa5-3a3a-43d7-9989-b18ee3418ab1",
+          "ordinal": 86,
+          "title": "Validar acessibilidade e segurança de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_74fae2fb-cd49-40f1-9a8a-0a5da19942d4",
+          "ordinal": 87,
+          "title": "Medir qualidade e performance de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_835e2691-f4aa-446f-8e9c-ed40aed9899d",
+          "ordinal": 88,
+          "title": "Documentar operação de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2ccbbd23-292e-4a07-9376-32f9ef4cf33f",
+          "ordinal": 89,
+          "title": "Validar em uso real de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0e14167a-3a8e-4c3e-9013-d5ae5ec46cfb",
+          "ordinal": 90,
+          "title": "Concluir auditoria de performance, acessibilidade e segurança",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4d93e9ac-e8da-4070-bbf7-1ccb6ae56e64",
+          "ordinal": 91,
+          "title": "Definir contrato e resultado de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8df4892f-d09c-45a6-8a31-33a606d198f9",
+          "ordinal": 92,
+          "title": "Mapear estado atual de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f06a9664-9499-4843-94ee-a7f1c90ab46d",
+          "ordinal": 93,
+          "title": "Registrar decisões de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3f1c1487-2057-4f40-bbf5-40cf27be395b",
+          "ordinal": 94,
+          "title": "Implementar baseline de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_14614f8b-b812-4300-8484-e71af183d183",
+          "ordinal": 95,
+          "title": "Cobrir estados e exceções de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_573f2840-9dc8-46ac-8ce0-1b143dfa1dec",
+          "ordinal": 96,
+          "title": "Validar acessibilidade e segurança de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_bf4ed16c-59a8-429e-aadf-879f472c3d13",
+          "ordinal": 97,
+          "title": "Medir qualidade e performance de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6c74f415-b3be-4e32-90f9-0b57087cb9c7",
+          "ordinal": 98,
+          "title": "Documentar operação de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b2ebc62f-1d9d-4e46-861d-932067ace445",
+          "ordinal": 99,
+          "title": "Validar em uso real de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c2295ee8-d65f-4750-af59-590e3d3d70e1",
+          "ordinal": 100,
+          "title": "Concluir auditoria de release, recuperação e operação local",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": "scorecard_39be350d-908f-43b3-ae88-1ffb2f24e850",
+      "slug": "docs",
+      "title": "Workbench · Docs",
+      "description": "Documentação necessária para instalar, entender, operar, integrar e evoluir o Workbench.",
+      "scope": "workbench_docs",
+      "goals": [
+        {
+          "id": "goal_18d51b43-661d-4b9b-b1db-b2cef849c773",
+          "ordinal": 1,
+          "title": "Inventariar conteúdo de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4de5c4df-05db-47c4-abb1-cd3196bf69cd",
+          "ordinal": 2,
+          "title": "Definir audiência e perguntas de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9508df5d-85d3-4b61-ae8b-60fd34329329",
+          "ordinal": 3,
+          "title": "Criar guia principal de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ccc122cb-024b-415a-9e36-7907360e279f",
+          "ordinal": 4,
+          "title": "Adicionar exemplos executáveis de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_51a53bd2-105f-4093-9505-c9026487cfee",
+          "ordinal": 5,
+          "title": "Adicionar diagramas e referências de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b35cf09d-daa1-4c35-87a1-e793c075e2d4",
+          "ordinal": 6,
+          "title": "Documentar erros e recuperação de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9bf2f909-0c94-4972-b66b-5a81d693ae56",
+          "ordinal": 7,
+          "title": "Revisar consistência e linguagem de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e47bca55-b21b-496c-b4eb-bdd87e683175",
+          "ordinal": 8,
+          "title": "Validar comandos e links de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1615489b-c7f6-4a9b-8b7e-f418f33c4999",
+          "ordinal": 9,
+          "title": "Testar onboarding usando início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b72ad032-d1df-4b10-b3e8-1af5e298b503",
+          "ordinal": 10,
+          "title": "Publicar e manter índice de início rápido e instalação",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_698af4d0-69b5-481b-b5ab-7d4bfd5347a5",
+          "ordinal": 11,
+          "title": "Inventariar conteúdo de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_83170b9d-333a-47c6-8b0b-416f2194bc70",
+          "ordinal": 12,
+          "title": "Definir audiência e perguntas de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2b1431d7-00d6-42bd-838c-e4e0a357cedc",
+          "ordinal": 13,
+          "title": "Criar guia principal de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a0204098-a6ff-4dab-ac9f-7f634fb29609",
+          "ordinal": 14,
+          "title": "Adicionar exemplos executáveis de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3d8fc0f8-3452-4975-ad3f-d40a71471c42",
+          "ordinal": 15,
+          "title": "Adicionar diagramas e referências de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_894adc83-ca35-4c68-8562-5f92f2b4a0c7",
+          "ordinal": 16,
+          "title": "Documentar erros e recuperação de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ced453f2-bab6-4358-87d1-0a16af5807d6",
+          "ordinal": 17,
+          "title": "Revisar consistência e linguagem de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e8be3fd7-6a52-4158-8bd9-e046fff15500",
+          "ordinal": 18,
+          "title": "Validar comandos e links de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_7a8f63fc-b94e-4130-a7d9-aed06ca7c5a0",
+          "ordinal": 19,
+          "title": "Testar onboarding usando arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f9f2116a-1ed9-4d6c-9012-c61155aa69f5",
+          "ordinal": 20,
+          "title": "Publicar e manter índice de arquitetura e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_de90bc37-7260-4306-b722-69ed8d40351b",
+          "ordinal": 21,
+          "title": "Inventariar conteúdo de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_183fd39c-7bbd-4102-9330-75bd722a28b1",
+          "ordinal": 22,
+          "title": "Definir audiência e perguntas de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5788a1a8-620b-42ce-a5b2-e2f15cbff845",
+          "ordinal": 23,
+          "title": "Criar guia principal de protocolo de arquivos e schemas",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "architecture",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/FEDERATED-PORTFOLIO.md",
+            "apps/matriz-workbench/docs/FILE-PROTOCOL.md"
+          ]
+        },
+        {
+          "id": "goal_3b591a93-f140-408a-adea-43a3397ff56d",
+          "ordinal": 24,
+          "title": "Adicionar exemplos executáveis de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5fdee8be-c8ce-4cf8-a288-31dd6bd93fa4",
+          "ordinal": 25,
+          "title": "Adicionar diagramas e referências de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c2a5334d-4501-4716-b9d0-e940a7a73dc3",
+          "ordinal": 26,
+          "title": "Documentar erros e recuperação de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_21a36bad-026f-401a-a4e7-c371ce5268a7",
+          "ordinal": 27,
+          "title": "Revisar consistência e linguagem de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9fcd9ca3-3d85-44cf-8149-2b347e871e42",
+          "ordinal": 28,
+          "title": "Validar comandos e links de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_da6a8171-c62c-426e-9a02-1575d4361d2a",
+          "ordinal": 29,
+          "title": "Testar onboarding usando protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e9d71140-6f83-4a6d-94a0-123b9de400d2",
+          "ordinal": 30,
+          "title": "Publicar e manter índice de protocolo de arquivos e schemas",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f985b012-9d23-4f6a-9c7c-ddc3d8cfdb17",
+          "ordinal": 31,
+          "title": "Inventariar conteúdo de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4e5dcc70-a17f-4293-a6eb-2987adef312c",
+          "ordinal": 32,
+          "title": "Definir audiência e perguntas de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2a603cbd-1e7c-4577-afac-e4690c4e1188",
+          "ordinal": 33,
+          "title": "Criar guia principal de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_bc7f8455-4661-41d1-b45d-9c831f4b4f4f",
+          "ordinal": 34,
+          "title": "Adicionar exemplos executáveis de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e2e15a4e-eb60-45ff-8aaf-b952d2f43beb",
+          "ordinal": 35,
+          "title": "Adicionar diagramas e referências de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a64d7bb7-bb45-436c-894f-92658ca9071c",
+          "ordinal": 36,
+          "title": "Documentar erros e recuperação de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_325ca6f6-aaec-48b8-910c-b2e8331d5067",
+          "ordinal": 37,
+          "title": "Revisar consistência e linguagem de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5f37acdc-f4ef-4cb0-a4b5-132c9a25b3c9",
+          "ordinal": 38,
+          "title": "Validar comandos e links de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_08ad680c-e425-49bc-b018-e227fcb470ba",
+          "ordinal": 39,
+          "title": "Testar onboarding usando scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e83109b9-c011-4830-9b78-1f9cd7eb4fab",
+          "ordinal": 40,
+          "title": "Publicar e manter índice de scripts e comandos",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9d493eb1-be05-4f2b-ae5b-83d3ab982a70",
+          "ordinal": 41,
+          "title": "Inventariar conteúdo de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c903fa68-8963-46e0-b05e-d2701520bd37",
+          "ordinal": 42,
+          "title": "Definir audiência e perguntas de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_cb678a60-d870-4a19-a016-160e012f4025",
+          "ordinal": 43,
+          "title": "Criar guia principal de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6482c94d-543a-442a-bc94-593f8fd6709d",
+          "ordinal": 44,
+          "title": "Adicionar exemplos executáveis de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2d977d3e-b8df-4acd-8578-81e66c9bf258",
+          "ordinal": 45,
+          "title": "Adicionar diagramas e referências de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6371dca8-cb0b-420a-b709-2725b79ee2f4",
+          "ordinal": 46,
+          "title": "Documentar erros e recuperação de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_555bb84d-5c22-4f00-a7c3-67c1fcfadba1",
+          "ordinal": 47,
+          "title": "Revisar consistência e linguagem de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_075febb7-b68d-43bf-b22f-d9906e8f6e25",
+          "ordinal": 48,
+          "title": "Validar comandos e links de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_91819fd4-4b25-492c-a8b7-1b105bdcd208",
+          "ordinal": 49,
+          "title": "Testar onboarding usando rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f464c034-a88d-49bf-a703-4a32750b8fe4",
+          "ordinal": 50,
+          "title": "Publicar e manter índice de rotas e ações da interface",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1ae6e3db-72e0-4ca9-b5bb-131e386572e3",
+          "ordinal": 51,
+          "title": "Inventariar conteúdo de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_03a73d96-1e59-480d-828a-bc073bede62f",
+          "ordinal": 52,
+          "title": "Definir audiência e perguntas de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6c3a766a-ba43-4dcc-bd54-966dbf17d3be",
+          "ordinal": 53,
+          "title": "Criar guia principal de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c45ddad1-9d9d-4c97-85ba-df8344aa77fd",
+          "ordinal": 54,
+          "title": "Adicionar exemplos executáveis de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c237c197-1ca8-4ed7-b7df-8a5c98cb3c09",
+          "ordinal": 55,
+          "title": "Adicionar diagramas e referências de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1076e109-8c86-4bd1-a0b5-2856a3e9b5a3",
+          "ordinal": 56,
+          "title": "Documentar erros e recuperação de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c1a46b39-810b-4c17-9de0-f4f9ebe9509d",
+          "ordinal": 57,
+          "title": "Revisar consistência e linguagem de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0ac084ff-e366-4aed-8c36-18923e455261",
+          "ordinal": 58,
+          "title": "Validar comandos e links de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e3cb6e60-ffe2-48b1-81cf-e837f9e0ac02",
+          "ordinal": 59,
+          "title": "Testar onboarding usando API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f66a6076-c02d-47c0-af83-eb65235934dc",
+          "ordinal": 60,
+          "title": "Publicar e manter índice de API local e streaming Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_18249367-8b06-4fdb-bb43-e0c58f2301a2",
+          "ordinal": 61,
+          "title": "Inventariar conteúdo de MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_7e8e2603-a4d1-447c-beb0-8ac1097da365",
+          "ordinal": 62,
+          "title": "Definir audiência e perguntas de MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1980054d-0dfb-484a-8959-f11e3936e918",
+          "ordinal": 63,
+          "title": "Criar guia principal de MCP, resources e tools",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/MCP.md"
+          ]
+        },
+        {
+          "id": "goal_60584ec7-9234-4567-afb4-e7757160863b",
+          "ordinal": 64,
+          "title": "Adicionar exemplos executáveis de MCP, resources e tools",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/MCP.md",
+            "apps/matriz-workbench/src/cli/verify-mcp.ts"
+          ]
+        },
+        {
+          "id": "goal_60891249-81ac-4731-82a0-e91f5195f455",
+          "ordinal": 65,
+          "title": "Adicionar diagramas e referências de MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6592d315-f000-4e9a-9e1d-669ea68e5b87",
+          "ordinal": 66,
+          "title": "Documentar erros e recuperação de MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3c07f074-7d6d-4d81-bc66-dec6cd1b712d",
+          "ordinal": 67,
+          "title": "Revisar consistência e linguagem de MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_77201c28-617b-4044-ab5a-8c03e2217345",
+          "ordinal": 68,
+          "title": "Validar comandos e links de MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_cdab816d-1f07-4352-9cde-300fc07d6ffb",
+          "ordinal": 69,
+          "title": "Testar onboarding usando MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_74ca2279-d280-4efc-bd34-7347c881b432",
+          "ordinal": 70,
+          "title": "Publicar e manter índice de MCP, resources e tools",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8749b0f1-9871-420c-9a4c-282a48db291a",
+          "ordinal": 71,
+          "title": "Inventariar conteúdo de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1a9791c6-a893-4903-9c08-8a6fdbf27f5e",
+          "ordinal": 72,
+          "title": "Definir audiência e perguntas de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_80d4b0d2-4ff6-4b69-af86-ac42080d56d0",
+          "ordinal": 73,
+          "title": "Criar guia principal de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2d3760d1-9f2b-4515-b20f-dbb7d1949de1",
+          "ordinal": 74,
+          "title": "Adicionar exemplos executáveis de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0f577e50-c85d-4f2e-9d9f-3689cbc02a3f",
+          "ordinal": 75,
+          "title": "Adicionar diagramas e referências de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_fcabc059-eda1-44bb-bf2a-2aa3d7e6f829",
+          "ordinal": 76,
+          "title": "Documentar erros e recuperação de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_cf6edbd4-3e02-4ea9-afa8-32243eb4e75d",
+          "ordinal": 77,
+          "title": "Revisar consistência e linguagem de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_18d4f637-ea4a-4e83-96b8-3ff81e4c0e99",
+          "ordinal": 78,
+          "title": "Validar comandos e links de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_112a523f-c33a-4740-ae80-cbc902a91229",
+          "ordinal": 79,
+          "title": "Testar onboarding usando score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3d7f3b3a-b1e0-4dea-b945-c58d3495ef74",
+          "ordinal": 80,
+          "title": "Publicar e manter índice de score, roadmap e backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a9871633-6f87-47fe-9e1b-ab9b643fdc6e",
+          "ordinal": 81,
+          "title": "Inventariar conteúdo de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_fa8325db-b9ba-4c61-a62f-962084a5615f",
+          "ordinal": 82,
+          "title": "Definir audiência e perguntas de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_27d2d2b7-23c0-465d-9465-46331b4f1071",
+          "ordinal": 83,
+          "title": "Criar guia principal de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b081454c-3cf1-49c9-b905-4c40d2ff6fd6",
+          "ordinal": 84,
+          "title": "Adicionar exemplos executáveis de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_94635d99-57d8-4464-bc70-b75895e3cb03",
+          "ordinal": 85,
+          "title": "Adicionar diagramas e referências de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f1354ad3-2856-4f5e-9fcb-2c79cf4159e2",
+          "ordinal": 86,
+          "title": "Documentar erros e recuperação de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0767ad23-05c0-4f27-9e2e-f705db38c8e4",
+          "ordinal": 87,
+          "title": "Revisar consistência e linguagem de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_effc054f-10ac-4829-bfe3-82fc3cbcab17",
+          "ordinal": 88,
+          "title": "Validar comandos e links de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e5436e2b-d8d3-4f73-a97e-b5ecb1a367f3",
+          "ordinal": 89,
+          "title": "Testar onboarding usando segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_eb1b1a46-4f55-4303-a00c-0a93101cf5c3",
+          "ordinal": 90,
+          "title": "Publicar e manter índice de segurança, recuperação e troubleshooting",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_821ca944-5066-4ed2-b262-c8173429bedf",
+          "ordinal": 91,
+          "title": "Inventariar conteúdo de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2c9e1fa9-ce9a-4168-bcde-674b87aa8027",
+          "ordinal": 92,
+          "title": "Definir audiência e perguntas de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c51fdead-fccf-42e8-9bea-89e28c4a07f1",
+          "ordinal": 93,
+          "title": "Criar guia principal de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0f830813-8a77-496b-8240-104c76f36783",
+          "ordinal": 94,
+          "title": "Adicionar exemplos executáveis de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_05278d80-bb4d-4312-be4c-1779e9ced396",
+          "ordinal": 95,
+          "title": "Adicionar diagramas e referências de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_de53fac9-0020-4b58-9abe-27ae77fcc00f",
+          "ordinal": 96,
+          "title": "Documentar erros e recuperação de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b68fa41d-a337-48fa-b7b5-53a7b0b92b14",
+          "ordinal": 97,
+          "title": "Revisar consistência e linguagem de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_67618d71-1654-45c8-87c2-190ba0df51a4",
+          "ordinal": 98,
+          "title": "Validar comandos e links de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_212a941f-0690-4be9-bfad-743cdf7ac198",
+          "ordinal": 99,
+          "title": "Testar onboarding usando onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_cddb183a-ef50-4adc-8375-6e03e4c2007c",
+          "ordinal": 100,
+          "title": "Publicar e manter índice de onboarding humano–Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        }
+      ]
+    },
+    {
+      "id": "scorecard_7d4d5053-26e4-49cf-8b26-2194f408b5e2",
+      "slug": "features-domains",
+      "title": "Workbench · Features & domains",
+      "description": "Blocos avançados e reutilizáveis, mantidos no app até provarem estabilidade e dois consumidores reais.",
+      "scope": "workbench_features",
+      "goals": [
+        {
+          "id": "goal_7ec6b2d8-ca66-462b-9270-a44e5e4117ed",
+          "ordinal": 1,
+          "title": "Definir domínio e linguagem de inteligência de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0e7b9f08-a105-4506-920a-fb9db917ae21",
+          "ordinal": 2,
+          "title": "Mapear casos de uso de inteligência de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d7ad00f8-d9be-4530-94e4-38b5b05fa0ae",
+          "ordinal": 3,
+          "title": "Estabelecer contratos de inteligência de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_86170dca-3d2a-40ec-8383-08f9f12d0b47",
+          "ordinal": 4,
+          "title": "Implementar leitura de inteligência de projetos",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "product",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.ts"
+          ]
+        },
+        {
+          "id": "goal_99652b92-249d-4acb-8eda-0b70701153ef",
+          "ordinal": 5,
+          "title": "Implementar mutações seguras de inteligência de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_fa45eb5b-a6fb-47e9-b6a0-ba73f8217fbd",
+          "ordinal": 6,
+          "title": "Integrar contexto Codex de inteligência de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_abdef88c-5101-4de5-a569-be580df43421",
+          "ordinal": 7,
+          "title": "Adicionar segurança e limites de inteligência de projetos",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "product",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.test.ts"
+          ]
+        },
+        {
+          "id": "goal_47f70d98-a857-47a1-9b67-5083016ea12e",
+          "ordinal": 8,
+          "title": "Cobrir testes e observabilidade de inteligência de projetos",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "product",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.test.ts"
+          ]
+        },
+        {
+          "id": "goal_20b261d2-e701-4d24-a147-2ef9300304f7",
+          "ordinal": 9,
+          "title": "Validar uso real de inteligência de projetos",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "product",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/cli/verify-mcp.ts",
+            "output/playwright/04-matriz-lib-ui-knowledge-full.png"
+          ]
+        },
+        {
+          "id": "goal_6d58c037-49f8-4deb-918c-6e366b1f8455",
+          "ordinal": 10,
+          "title": "Documentar evolução e reuso de inteligência de projetos",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_aa56bfed-a5d1-4f55-ba3b-bb4dee4c7e42",
+          "ordinal": 11,
+          "title": "Definir domínio e linguagem de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4c877269-4098-4c14-8b2d-ce2edf8b34d0",
+          "ordinal": 12,
+          "title": "Mapear casos de uso de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4f2e455d-e073-430c-9c0f-4c6525eebef6",
+          "ordinal": 13,
+          "title": "Estabelecer contratos de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e20d2987-533b-4491-a207-748f27b30b66",
+          "ordinal": 14,
+          "title": "Implementar leitura de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_354c6f6a-f276-4234-88f3-84c173488362",
+          "ordinal": 15,
+          "title": "Implementar mutações seguras de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b7f217d7-615c-4f5c-abc7-f263642d9e62",
+          "ordinal": 16,
+          "title": "Integrar contexto Codex de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5e2346ee-8725-47e6-98a7-c74e0e36a9a6",
+          "ordinal": 17,
+          "title": "Adicionar segurança e limites de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6d638545-c226-420a-942c-e3827b528088",
+          "ordinal": 18,
+          "title": "Cobrir testes e observabilidade de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_44faa5a6-7930-4e27-8474-97a7dff1d219",
+          "ordinal": 19,
+          "title": "Validar uso real de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_26ec1392-4855-4c7e-be77-e73ed0574958",
+          "ordinal": 20,
+          "title": "Documentar evolução e reuso de inteligência de backlog",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4d534aa7-a14a-448b-9d16-48a1eec64a05",
+          "ordinal": 21,
+          "title": "Definir domínio e linguagem de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_75544040-a1e2-4b58-a6db-58e8d0735c6c",
+          "ordinal": 22,
+          "title": "Mapear casos de uso de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f8f40248-b7b9-44af-b9a3-a58a9c9c19a9",
+          "ordinal": 23,
+          "title": "Estabelecer contratos de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_246df03f-df2a-4b1e-9e62-335e91a06678",
+          "ordinal": 24,
+          "title": "Implementar leitura de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_538fecd6-ba15-4cd3-99e8-37cabce4fe7f",
+          "ordinal": 25,
+          "title": "Implementar mutações seguras de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1584d18e-66d3-4feb-b8e6-9de381b678be",
+          "ordinal": 26,
+          "title": "Integrar contexto Codex de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d2e22e47-4719-4d49-b5ef-c1753db3e8cd",
+          "ordinal": 27,
+          "title": "Adicionar segurança e limites de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_61e178bc-cbaa-4684-8734-67cfa4232758",
+          "ordinal": 28,
+          "title": "Cobrir testes e observabilidade de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d1f4b33c-2bb7-441f-b55f-6ecf74ebebd5",
+          "ordinal": 29,
+          "title": "Validar uso real de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5dab2a10-65a9-4e4a-883b-046096496a8b",
+          "ordinal": 30,
+          "title": "Documentar evolução e reuso de context bundles e orçamento de tokens",
+          "outcome": "",
+          "category": "performance",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d06c9751-cdcb-450f-8c65-985382ffa073",
+          "ordinal": 31,
+          "title": "Definir domínio e linguagem de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a650cc32-d0a1-49cd-b9fb-8eef3409f795",
+          "ordinal": 32,
+          "title": "Mapear casos de uso de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4fa09b21-dbb9-4c37-b2c0-5afa72f9b76d",
+          "ordinal": 33,
+          "title": "Estabelecer contratos de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8f9fb4c1-71a0-431b-adae-492f696ea450",
+          "ordinal": 34,
+          "title": "Implementar leitura de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_7da4e36d-a0ac-47c5-8bf1-c0fd4ec72c12",
+          "ordinal": 35,
+          "title": "Implementar mutações seguras de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_60f54a4c-9138-46b6-9789-e91a87947544",
+          "ordinal": 36,
+          "title": "Integrar contexto Codex de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3abaa313-7969-43f7-8211-dfb9255a1f76",
+          "ordinal": 37,
+          "title": "Adicionar segurança e limites de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a2925711-125c-4fe2-99a3-7ef7adaa5e31",
+          "ordinal": 38,
+          "title": "Cobrir testes e observabilidade de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1f792532-330a-4b88-b718-580394865c69",
+          "ordinal": 39,
+          "title": "Validar uso real de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9d17c3de-e46a-4cde-90b1-a55c54d7f640",
+          "ordinal": 40,
+          "title": "Documentar evolução e reuso de execuções, threads e aprovações Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_216ac1da-a049-406d-8817-02063055c215",
+          "ordinal": 41,
+          "title": "Definir domínio e linguagem de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9c1f7a20-14b0-4d2f-9a93-28970683e520",
+          "ordinal": 42,
+          "title": "Mapear casos de uso de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6cd37d10-9ec8-4836-a8c0-8f91cf5cf6bc",
+          "ordinal": 43,
+          "title": "Estabelecer contratos de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f0997594-ddf1-46c5-a42b-c60720b60f7c",
+          "ordinal": 44,
+          "title": "Implementar leitura de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9e2edd90-1203-491a-8c01-f32f86eb73ff",
+          "ordinal": 45,
+          "title": "Implementar mutações seguras de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d0579b06-fb45-4667-be77-baad6d5f9f5b",
+          "ordinal": 46,
+          "title": "Integrar contexto Codex de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e1c9333d-1267-4c66-9402-64746df50bb1",
+          "ordinal": 47,
+          "title": "Adicionar segurança e limites de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0defd5ec-9f7f-4b1a-88c7-d66e90be6671",
+          "ordinal": 48,
+          "title": "Cobrir testes e observabilidade de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a166d310-c5d4-4eeb-93b7-390139466779",
+          "ordinal": 49,
+          "title": "Validar uso real de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a297d870-6676-42a4-b54f-add96e17c6ad",
+          "ordinal": 50,
+          "title": "Documentar evolução e reuso de evidências, diffs e verificações",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4ce1297b-f147-449a-934e-d664817680d4",
+          "ordinal": 51,
+          "title": "Definir domínio e linguagem de documentação e conhecimento conectado",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0a60c3ae-2183-4228-af59-c8462708d606",
+          "ordinal": 52,
+          "title": "Mapear casos de uso de documentação e conhecimento conectado",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2d02e0dd-1512-414c-8273-c5c0d35662df",
+          "ordinal": 53,
+          "title": "Estabelecer contratos de documentação e conhecimento conectado",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md",
+            "apps/matriz-workbench/src/domain/federated-sources.ts",
+            "apps/matriz-workbench/src/domain/library-adoption.ts"
+          ]
+        },
+        {
+          "id": "goal_b9364e23-6707-49a8-920d-2b067c1a27fb",
+          "ordinal": 54,
+          "title": "Implementar leitura de documentação e conhecimento conectado",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/application/library-adoption-readiness.ts",
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.ts",
+            "apps/matriz-workbench/src/integration/filesystem/library-adoption-policy-repository.ts"
+          ]
+        },
+        {
+          "id": "goal_9a65fa36-b1eb-4503-ae07-6cb61f1c3b98",
+          "ordinal": 55,
+          "title": "Implementar mutações seguras de documentação e conhecimento conectado",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d9685019-3f39-4d3b-b437-d7f3718cf65a",
+          "ordinal": 56,
+          "title": "Integrar contexto Codex de documentação e conhecimento conectado",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/application/context-bundle.ts"
+          ]
+        },
+        {
+          "id": "goal_93fe9e60-6352-4759-8314-734b3bf11f6c",
+          "ordinal": 57,
+          "title": "Adicionar segurança e limites de documentação e conhecimento conectado",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/application/context-bundle.test.ts",
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.test.ts"
+          ]
+        },
+        {
+          "id": "goal_3443a03a-6d5e-4a5d-9b1f-ff134d86a0d1",
+          "ordinal": 58,
+          "title": "Cobrir testes e observabilidade de documentação e conhecimento conectado",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/application/context-bundle.test.ts",
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.test.ts"
+          ]
+        },
+        {
+          "id": "goal_07d75ded-0584-452a-b58e-81801cb7ffc6",
+          "ordinal": 59,
+          "title": "Validar uso real de documentação e conhecimento conectado",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/MCP.md",
+            "apps/matriz-workbench/src/cli/verify-mcp.ts"
+          ]
+        },
+        {
+          "id": "goal_40a1c21e-1fad-451c-becd-d1e5bc613f0b",
+          "ordinal": 60,
+          "title": "Documentar evolução e reuso de documentação e conhecimento conectado",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "collaboration",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md"
+          ]
+        },
+        {
+          "id": "goal_35d06f52-804b-4a9c-a5de-56a3e0d3f6a1",
+          "ordinal": 61,
+          "title": "Definir domínio e linguagem de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e4b683eb-c2e7-4cb8-92f6-f0b03279c3ff",
+          "ordinal": 62,
+          "title": "Mapear casos de uso de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6e288eb4-1c6d-456a-a93a-c5bd13edda5d",
+          "ordinal": 63,
+          "title": "Estabelecer contratos de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ce16cae1-49c3-4c8c-8104-0fb6e0d2bc2f",
+          "ordinal": 64,
+          "title": "Implementar leitura de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_501d54fd-f549-4151-9c4b-ac3090b7d109",
+          "ordinal": 65,
+          "title": "Implementar mutações seguras de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5b08eaf5-35d0-4dcd-9d46-bbed16207cd1",
+          "ordinal": 66,
+          "title": "Integrar contexto Codex de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_08e0eb23-f0f6-4250-b558-2537b654907d",
+          "ordinal": 67,
+          "title": "Adicionar segurança e limites de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e20b7fa7-cca6-40ea-b63d-71939ad460bb",
+          "ordinal": 68,
+          "title": "Cobrir testes e observabilidade de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_aef1e201-68cd-4b8d-b99b-3c5a079510f0",
+          "ordinal": 69,
+          "title": "Validar uso real de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5dec0b27-8a87-44fc-99d3-689d0b456f72",
+          "ordinal": 70,
+          "title": "Documentar evolução e reuso de adapters GitHub, Vercel e notificações",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6ce86df4-80ce-4453-8788-b6be6a88354b",
+          "ordinal": 71,
+          "title": "Definir domínio e linguagem de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a2ff298b-bd1a-4b87-99d6-fc0b326848d9",
+          "ordinal": 72,
+          "title": "Mapear casos de uso de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_34753926-5815-4429-8885-7b17b67a75e7",
+          "ordinal": 73,
+          "title": "Estabelecer contratos de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_69b80c14-2472-4461-b014-391a7eeb58fe",
+          "ordinal": 74,
+          "title": "Implementar leitura de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c9f7557b-698c-4373-93a4-94f2e69c43d8",
+          "ordinal": 75,
+          "title": "Implementar mutações seguras de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_de9d1d17-7f9f-4760-ba96-7be38524b295",
+          "ordinal": 76,
+          "title": "Integrar contexto Codex de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6a095733-8b90-4100-ac22-63cdddb8005c",
+          "ordinal": 77,
+          "title": "Adicionar segurança e limites de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_815f1d0c-3c2a-44ee-b221-075bd92b8a36",
+          "ordinal": 78,
+          "title": "Cobrir testes e observabilidade de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8708a3c1-1bce-403f-9901-0ef497e8cbae",
+          "ordinal": 79,
+          "title": "Validar uso real de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6ec35189-2c9a-4306-8678-f33a6e750ba5",
+          "ordinal": 80,
+          "title": "Documentar evolução e reuso de automação local segura",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0c3c8ded-eaea-431f-8810-7d75aa71d67b",
+          "ordinal": 81,
+          "title": "Definir domínio e linguagem de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_cd70f13e-4927-4830-a3da-bad10992a8ca",
+          "ordinal": 82,
+          "title": "Mapear casos de uso de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6838ecbd-9fb7-49fc-bc58-90c35254b46d",
+          "ordinal": 83,
+          "title": "Estabelecer contratos de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a003b872-01f0-4a06-b5d6-47e8be47eabd",
+          "ordinal": 84,
+          "title": "Implementar leitura de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_020fb4eb-d8cf-416f-8ca2-3e45b056dc15",
+          "ordinal": 85,
+          "title": "Implementar mutações seguras de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_047197e9-3111-4cf1-b81f-f0d355df3cff",
+          "ordinal": 86,
+          "title": "Integrar contexto Codex de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_370ac81e-2610-48ca-b321-3b8f349d0647",
+          "ordinal": 87,
+          "title": "Adicionar segurança e limites de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_87f5d493-c1cb-49ad-b3cb-64b50774220d",
+          "ordinal": 88,
+          "title": "Cobrir testes e observabilidade de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_37e86504-fb32-47c5-bf54-54a743241674",
+          "ordinal": 89,
+          "title": "Validar uso real de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4f0f2c32-2a73-43e5-a885-723b8b954279",
+          "ordinal": 90,
+          "title": "Documentar evolução e reuso de portabilidade file-backed e cloud adapter",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9eae9fee-bb7d-4bf5-bf5c-28981b45f7a7",
+          "ordinal": 91,
+          "title": "Definir domínio e linguagem de templates, plugins e extensibilidade",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_42d90419-8e84-4dba-9553-3970c21f1843",
+          "ordinal": 92,
+          "title": "Mapear casos de uso de templates, plugins e extensibilidade",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b5cf64a8-d7c9-4716-9ff2-75ea8b222bd2",
+          "ordinal": 93,
+          "title": "Estabelecer contratos de templates, plugins e extensibilidade",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "scale",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/domain/project-blueprints.ts"
+          ]
+        },
+        {
+          "id": "goal_8c335b68-a2ca-46af-a4b6-2a8fbce326fe",
+          "ordinal": 94,
+          "title": "Implementar leitura de templates, plugins e extensibilidade",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_53f1160d-2710-4bc3-bc50-35f01e3df0a9",
+          "ordinal": 95,
+          "title": "Implementar mutações seguras de templates, plugins e extensibilidade",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "scale",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/application/project-blueprints.ts"
+          ]
+        },
+        {
+          "id": "goal_da497f38-27e6-4612-b92b-47ed92e1c7d3",
+          "ordinal": 96,
+          "title": "Integrar contexto Codex de templates, plugins e extensibilidade",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d7af813e-c487-4b8c-8915-2f1983bb9480",
+          "ordinal": 97,
+          "title": "Adicionar segurança e limites de templates, plugins e extensibilidade",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "scale",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/integration/filesystem/project-blueprint-repository.ts"
+          ]
+        },
+        {
+          "id": "goal_e78ccdf4-f047-4b1d-b05d-237005593c6d",
+          "ordinal": 98,
+          "title": "Cobrir testes e observabilidade de templates, plugins e extensibilidade",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "scale",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/src/application/project-blueprints.test.ts"
+          ]
+        },
+        {
+          "id": "goal_d8757f4f-2112-4b65-a634-f266a2269f9a",
+          "ordinal": 99,
+          "title": "Validar uso real de templates, plugins e extensibilidade",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_abe12349-b768-420f-84e6-7008791aad2a",
+          "ordinal": 100,
+          "title": "Documentar evolução e reuso de templates, plugins e extensibilidade",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-07-31T01:08:09.489Z",
+  "revision": "546ab95162fa1728"
+}

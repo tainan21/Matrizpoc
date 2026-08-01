@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_a326175b-ffd4-4f4d-988e-7457cda11834",
+  "projectId": "matriz-workbench",
+  "command": "/criterios",
+  "title": "Critérios de aceite",
+  "content": "Liste critérios de aceite observáveis e como cada um será verificado.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:02:05.701Z",
+  "revision": "fdcc9f789c9b6e4b"
+}

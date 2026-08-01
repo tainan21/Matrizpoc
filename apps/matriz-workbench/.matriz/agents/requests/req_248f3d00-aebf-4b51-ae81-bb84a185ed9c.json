@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "req_248f3d00-aebf-4b51-ae81-bb84a185ed9c",
+  "projectId": "matriz-workbench",
+  "backlogItemId": "tsk_8baf9bf0-d7b8-4485-85f9-8dd0ffb6857f",
+  "title": "Provar integração local com Codex App Server",
+  "instructions": "Não modifique arquivos. Execute somente uma verificação de leitura equivalente a consultar o campo name do package.json.",
+  "status": "completed",
+  "claimedBy": "codex-app-server",
+  "resultSummary": "Verificação somente leitura concluída.\n\n- Tarefa: `tsk_8baf9bf0-d7b8-4485-85f9-8dd0ffb6857f`\n- Solicitação: `req_248f3d00-aebf-4b51-ae81-bb84a185ed9c`\n- Campo consultado: `package.json → name`\n- Resultado: `@matriz/app-matriz-workbench`\n- Arquivos alterados: nenhum\n- `.matriz/**`: não acessado nem editado",
+  "changedFiles": [],
+  "checks": [
+    "\"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe\" -Command \"(Get-Content -Raw -LiteralPath 'package.json' | ConvertFrom-Json).name\""
+  ],
+  "createdAt": "2026-07-28T21:09:01.561Z",
+  "updatedAt": "2026-07-28T21:09:34.305Z",
+  "revision": "041795c4894a43b2"
+}
