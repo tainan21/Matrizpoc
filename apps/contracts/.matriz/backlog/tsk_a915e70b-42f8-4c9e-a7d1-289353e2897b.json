@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_a915e70b-42f8-4c9e-a7d1-289353e2897b",
+  "projectId": "contracts",
+  "title": "teste",
+  "description": "teste",
+  "status": "idea",
+  "priority": "critical",
+  "tags": [
+    "teste"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_8d4df81c-0753-479d-848b-592acb06fc60",
+      "text": "teste",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-29T23:44:21.754Z",
+  "updatedAt": "2026-07-29T23:44:21.754Z",
+  "revision": "f3a56b6f275c7264"
+}

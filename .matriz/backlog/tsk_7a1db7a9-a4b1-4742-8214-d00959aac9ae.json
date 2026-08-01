@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_7a1db7a9-a4b1-4742-8214-d00959aac9ae",
+  "projectId": "matriz-infra-hub",
+  "title": "Definir estratégia PWA por tipo de app",
+  "description": "Registrar critérios objetivos para decidir quando um app Matriz deve oferecer instalação PWA, offline, atualização controlada e notificações.",
+  "status": "idea",
+  "priority": "medium",
+  "tags": [
+    "docs",
+    "pwa",
+    "architecture"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_c01bf934-439c-412a-9097-fb2bdb4a4872",
+      "text": "Casos favoráveis e desfavoráveis documentados",
+      "completed": false
+    },
+    {
+      "id": "ac_986b477f-91f3-446e-b50b-fd4758f18875",
+      "text": "Estratégia de cache e atualização descrita",
+      "completed": false
+    },
+    {
+      "id": "ac_5a35da9f-2257-4ef0-8621-b25381c9a319",
+      "text": "Responsabilidades de segurança e observabilidade registradas",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-30T16:43:42.104Z",
+  "updatedAt": "2026-07-30T16:43:42.104Z",
+  "revision": "da2dcca803bfe355"
+}

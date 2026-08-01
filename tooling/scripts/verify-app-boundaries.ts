@@ -19,7 +19,15 @@
 import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join, relative, resolve } from "node:path"
 
-const APPS = ["matriz-hub", "spot", "seumei", "contracts", "willdash"] as const
+const APPS = [
+  "matriz-hub",
+  "matriz-workbench",
+  "sites",
+  "spot",
+  "seumei",
+  "contracts",
+  "willdash",
+] as const
 type AppId = (typeof APPS)[number]
 
 interface Violation {
@@ -31,7 +39,13 @@ interface Violation {
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
-    if (entry === "node_modules" || entry === ".next" || entry === ".turbo") continue
+    if (
+      entry === "node_modules"
+      || entry === ".next"
+      || entry === ".turbo"
+      || entry === ".runtime"
+      || entry === ".matriz"
+    ) continue
     const p = join(dir, entry)
     const st = statSync(p)
     if (st.isDirectory()) walk(p, out)

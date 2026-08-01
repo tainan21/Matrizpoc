@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_f771eb34-fae3-41b0-9231-21836ceb5833",
+  "projectId": "seumei",
+  "command": "/handoff",
+  "title": "Handoff",
+  "content": "Resuma o que mudou, o que permanece pendente e o próximo passo seguro.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:09.527Z",
+  "revision": "318481bd77df0fe0"
+}

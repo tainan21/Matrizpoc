@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_e3a6a580-f1ce-4865-946c-cc0c358f789e",
+  "projectId": "matriz-workbench",
+  "kind": "feature",
+  "title": "Implementar roadmap temporal operacional",
+  "description": "Segundo corte vertical: timeline trimestral baseada em fases e iniciativas reais, com inspector, datas opcionais e vínculos V1/V2.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "domain": "Plataforma / Roadmap",
+  "responsible": "Codex",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "roadmap",
+    "timeline",
+    "colaboração"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_dfd6c516-aa2c-4082-9287-559dc56d790e",
+      "text": "Roadmap V1 continua legível sem migração silenciosa",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-08-01T18:46:17.451Z",
+  "updatedAt": "2026-08-01T18:46:17.451Z",
+  "revision": "ef5cde96f303a2ec"
+}

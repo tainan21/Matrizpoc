@@ -1,0 +1,138 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - link "Pular para o conteúdo" [ref=f1e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f1e4]:
+      - generic [ref=f1e5]:
+        - generic [ref=f1e6]: M
+        - generic [ref=f1e7]:
+          - strong [ref=f1e8]: Workbench
+          - generic [ref=f1e9]: matriz local
+      - navigation "Navegação principal" [ref=f1e10]:
+        - link "Foco" [ref=f1e11] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f1e12]: ⌁
+        - link "Controle" [ref=f1e14] [cursor=pointer]:
+          - /url: /control
+          - generic [ref=f1e15]: ◈
+        - link "Projetos" [ref=f1e17] [cursor=pointer]:
+          - /url: /projects
+          - generic [ref=f1e18]: ⌘
+        - link "Conhecimento" [ref=f1e20] [cursor=pointer]:
+          - /url: /knowledge
+          - generic [ref=f1e21]: ◇
+        - link "Sites" [ref=f1e23] [cursor=pointer]:
+          - /url: /sites
+          - generic [ref=f1e24]: ▦
+      - generic [ref=f1e26]:
+        - text: Apps detectados
+        - generic [ref=f1e27]: "8"
+      - navigation "Projetos" [ref=f1e28]:
+        - link "contracts" [ref=f1e29] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Infra Hub" [ref=f1e32] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Sites" [ref=f1e35] [cursor=pointer]:
+          - /url: /projects/sites
+        - link "Matriz Workbench" [ref=f1e38] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=f1e41] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=f1e44] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=f1e47] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=f1e50] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=f1e53]:
+        - link "Configurações" [ref=f1e54] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=f1e55]: ⚙
+        - button "Bloquear" [ref=f1e58] [cursor=pointer]:
+          - generic [ref=f1e59]: ↗
+    - generic [ref=f1e61]:
+      - banner [ref=f1e62]:
+        - generic [ref=f1e64]: Repositório local
+        - generic [ref=f1e65]: .matriz · apps/*/.matriz
+        - button "Ativar tema claro" [ref=f1e66] [cursor=pointer]:
+          - generic [ref=f1e67]: ☀
+          - generic [ref=f1e68]: Tema dark
+        - button "Ctrl K" [ref=f1e69] [cursor=pointer]
+      - main [ref=f1e263]:
+        - generic [ref=f1e264]:
+          - generic [ref=f1e265]:
+            - generic [ref=f1e266]: Projeto
+            - combobox "Projeto" [ref=f1e267]:
+              - option "contracts"
+              - option "Matriz Infra Hub"
+              - option "Matriz Sites"
+              - option "Matriz Workbench"
+              - option "matriz-hub"
+              - option "seumei"
+              - option "spot" [selected]
+          - generic [ref=f1e268]:
+            - generic [ref=f1e269]: Domínio
+            - combobox "Domínio" [ref=f1e270]:
+              - option "Todos os domínios" [selected]
+          - generic [ref=f1e271]:
+            - generic [ref=f1e272]: ⌕
+            - searchbox "Buscar work items" [ref=f1e273]
+            - generic [ref=f1e274]: ⌘K
+          - navigation "Visões do projeto" [ref=f1e275]:
+            - generic [ref=f1e276]: Board
+            - link "Roadmap" [ref=f1e277] [cursor=pointer]:
+              - /url: /projects/spot/roadmap
+            - link "Histórico" [ref=f1e278] [cursor=pointer]:
+              - /url: /projects/spot/activity
+          - button "＋ Novo item" [ref=f1e279] [cursor=pointer]:
+            - generic [ref=f1e280]: ＋
+            - text: Novo item
+        - generic [ref=f1e281]:
+          - generic [ref=f1e282]:
+            - generic [ref=f1e283]: Matriz Workbench / spot
+            - heading "spot · Quadro operacional" [level=1] [ref=f1e284]
+          - generic [ref=f1e285]: 0 de 0 itens
+        - region "Quadro de work items" [ref=f1e288]:
+          - generic [ref=f1e289]:
+            - generic [ref=f1e290]:
+              - heading "Descoberta" [level=2] [ref=f1e293]
+              - generic [ref=f1e294]: "0"
+            - generic [ref=f1e296]:
+              - generic [ref=f1e297]: Sem itens
+              - generic [ref=f1e298]: Arraste um item elegível ou crie trabalho.
+          - generic [ref=f1e299]:
+            - generic [ref=f1e300]:
+              - heading "Refinado" [level=2] [ref=f1e303]
+              - generic [ref=f1e304]: "0"
+            - generic [ref=f1e306]:
+              - generic [ref=f1e307]: Sem itens
+              - generic [ref=f1e308]: Arraste um item elegível ou crie trabalho.
+          - generic [ref=f1e309]:
+            - generic [ref=f1e310]:
+              - heading "Pronto" [level=2] [ref=f1e313]
+              - generic [ref=f1e314]: "0"
+            - generic [ref=f1e316]:
+              - generic [ref=f1e317]: Sem itens
+              - generic [ref=f1e318]: Arraste um item elegível ou crie trabalho.
+          - generic [ref=f1e319]:
+            - generic [ref=f1e320]:
+              - heading "Em execução" [level=2] [ref=f1e323]
+              - generic [ref=f1e324]: "0"
+            - generic [ref=f1e326]:
+              - generic [ref=f1e327]: Sem itens
+              - generic [ref=f1e328]: Arraste um item elegível ou crie trabalho.
+          - generic [ref=f1e329]:
+            - generic [ref=f1e330]:
+              - heading "Validação" [level=2] [ref=f1e333]
+              - generic [ref=f1e334]: "0"
+            - generic [ref=f1e336]:
+              - generic [ref=f1e337]: Sem itens
+              - generic [ref=f1e338]: Arraste um item elegível ou crie trabalho.
+          - generic [ref=f1e339]:
+            - generic [ref=f1e340]:
+              - heading "Concluído" [level=2] [ref=f1e343]
+              - generic [ref=f1e344]: "0"
+            - generic [ref=f1e346]:
+              - generic [ref=f1e347]: Sem itens
+              - generic [ref=f1e348]: Arraste um item elegível ou crie trabalho.
+  - alert [ref=f1e259]

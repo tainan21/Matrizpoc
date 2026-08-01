@@ -5,7 +5,8 @@ schemas before use and send the current `revision` for updates.
 
 - JSON writes use a temporary sibling file followed by atomic rename.
 - JSONL activity is append-only.
-- IDs use UUIDs prefixed by `tsk_`, `req_`, `doc_`, `goal_` or `evt_`.
+- IDs use UUIDs with an artifact prefix, including `tsk_`, `wi_`, `phase_`,
+  `ini_`, `req_`, `doc_`, `goal_` and `evt_`.
 - `roadmap.json` may keep one legacy set of up to 100 goals and up to 12
   specialized scorecards. Each scorecard contains exactly 100 uniquely
   numbered binary goals.
@@ -47,3 +48,21 @@ visible conflict; it is never resolved with last-write-wins.
 The product flow is `discovery`, `refined`, `ready`, `in_progress`,
 `validation`, `completed`, plus `archived`. Interactive moves follow adjacent
 states. Archiving is an explicit inspector operation, not a board column.
+
+## Temporal roadmap
+
+`roadmap.json` keeps phases and initiatives as the strategic source of truth.
+Initiatives may add `startDate`, `targetDate`, `domain` and `responsible`
+without rewriting older records during reads. Dates use calendar form
+`YYYY-MM-DD`; when both dates exist, the target cannot precede the start.
+
+Initiative `backlogIds` accept both legacy `tsk_<uuid>` and V2 `wi_<uuid>`
+identifiers. A missing referenced item remains visible as a broken reference;
+it is not silently removed. Timeline progress is derived only from linked work
+items and never inferred from elapsed time.
+
+All roadmap mutations take the project roadmap lock under
+`.runtime/workbench/locks`, re-read the revision under that lock and replace the
+JSON atomically. A stale revision is returned as a conflict. Completing every
+initiative does not complete its phase automatically: phase completion remains
+a human decision about the stated outcome.

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_bd319825-5c0e-4227-8868-3bc7103f424f",
+  "projectId": "matriz-infra-hub",
+  "title": "Definir fronteira compartilhável com React Native",
+  "description": "Mapear quais contratos, tokens e regras podem ser compartilhados com futuros apps React Native sem reutilizar componentes DOM ou acoplar os runtimes.",
+  "status": "idea",
+  "priority": "medium",
+  "tags": [
+    "docs",
+    "react-native",
+    "packages"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_2e19d85a-8625-4e38-9d70-5cb2d53d1a51",
+      "text": "Superfícies portáveis e não portáveis listadas",
+      "completed": false
+    },
+    {
+      "id": "ac_a2d62850-c310-460f-a5d9-31f3562c52cf",
+      "text": "Critérios de package compartilhado aplicados",
+      "completed": false
+    },
+    {
+      "id": "ac_deccf7ae-b4bb-4dee-bc95-c22171086632",
+      "text": "Primeiro experimento recomendado e limitado",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-30T16:43:42.126Z",
+  "updatedAt": "2026-07-30T16:43:42.126Z",
+  "revision": "5701cc4407f99668"
+}

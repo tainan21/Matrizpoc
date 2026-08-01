@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "projectId": "spot",
+  "weights": {
+    "app": 0.45,
+    "docs": 0.3,
+    "features-domains": 0.25
+  },
+  "updatedAt": "2026-07-30T19:05:29.078Z",
+  "revision": "997cac9d36fb8c90"
+}

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_ab01e5a5-86da-4959-afcb-0997cccc3448",
+  "projectId": "sites",
+  "command": "/criterios",
+  "title": "Critérios de aceite",
+  "content": "Liste critérios de aceite observáveis e como cada um será verificado.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:05:56.158Z",
+  "revision": "2c6fe565bb23f351"
+}

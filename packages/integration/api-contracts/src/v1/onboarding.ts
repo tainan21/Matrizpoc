@@ -69,6 +69,8 @@ export type WilldashOnboardingPayload = z.infer<typeof willdashOnboardingPayload
 /** Map app -> payload schema para extensoes especificas. */
 export const appOnboardingPayloadSchemas = {
   "matriz-hub": z.object({}),
+  "matriz-workbench": z.object({}),
+  sites: z.object({}),
   spot: spotOnboardingPayloadSchema,
   seumei: seumeiOnboardingPayloadSchema,
   contracts: contractsOnboardingPayloadSchema,

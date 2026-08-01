@@ -1,0 +1,104 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - link "Pular para o conteúdo" [ref=f2e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f2e4]:
+      - generic [ref=f2e5]:
+        - generic [ref=f2e6]: M
+        - generic [ref=f2e7]:
+          - strong [ref=f2e8]: Workbench
+          - generic [ref=f2e9]: matriz local
+      - navigation "Navegação principal" [ref=f2e10]:
+        - link "⌁ Foco" [ref=f2e11] [cursor=pointer]:
+          - /url: /
+          - text: ⌁
+          - generic [ref=f2e12]: Foco
+        - link "⌘ Projetos" [ref=f2e13] [cursor=pointer]:
+          - /url: /projects
+          - text: ⌘
+          - generic [ref=f2e14]: Projetos
+      - generic [ref=f2e15]:
+        - text: Apps detectados
+        - generic [ref=f2e16]: "7"
+      - navigation "Projetos" [ref=f2e17]:
+        - link "contracts" [ref=f2e18] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Monorepo — V1.1" [ref=f2e21] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Workbench" [ref=f2e24] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=f2e27] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=f2e30] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=f2e33] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=f2e36] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=f2e39]:
+        - link "⚙ Configurações" [ref=f2e40] [cursor=pointer]:
+          - /url: /settings
+          - text: ⚙
+          - generic [ref=f2e41]: Configurações
+        - button "↗ Bloquear" [ref=f2e43] [cursor=pointer]:
+          - text: ↗
+          - generic [ref=f2e44]: Bloquear
+    - generic [ref=f2e45]:
+      - banner [ref=f2e46]:
+        - generic [ref=f2e48]: Repositório local
+        - generic [ref=f2e49]: .matriz · apps/*/.matriz
+        - button "Ctrl K" [ref=f2e50] [cursor=pointer]
+      - main [ref=f2e53]:
+        - generic [ref=f2e54]:
+          - generic [ref=f2e55]:
+            - paragraph [ref=f2e56]: raiz do repositório
+            - heading "Matriz Monorepo — V1.1" [level=1] [ref=f2e57]
+            - paragraph [ref=f2e58]: Fases orientadas a outcomes, não a listas de features.
+          - generic [ref=f2e59]: workspace ativo
+        - navigation "Áreas do projeto" [ref=f2e61]:
+          - link "Visão geral" [ref=f2e62] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub
+          - link "Roadmap" [ref=f2e63] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/roadmap
+          - link "Colaborar" [ref=f2e64] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/collaboration
+          - link "Backlog" [ref=f2e65] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/backlog
+          - link "Docs" [ref=f2e66] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/docs
+          - link "Decisões" [ref=f2e67] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/decisions
+          - link "Agentes" [ref=f2e68] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/agents
+          - link "Atividade" [ref=f2e69] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/activity
+        - region [ref=f2e70]:
+          - generic [ref=f2e71]:
+            - generic [ref=f2e72]:
+              - text: Trilhas especializadas
+              - heading "Progresso por responsabilidade" [level=2] [ref=f2e73]
+            - button "Verificar trilhas" [ref=f2e75] [cursor=pointer]
+          - group [ref=f2e76]:
+            - generic "Matriz Infra Hub · Docs Conhecimento canônico para instalar, compreender, operar e ampliar o ecossistema Matriz. 4/100" [ref=f2e77] [cursor=pointer]:
+              - generic [ref=f2e78]:
+                - strong [ref=f2e79]: Matriz Infra Hub · Docs
+                - generic [ref=f2e80]: Conhecimento canônico para instalar, compreender, operar e ampliar o ecossistema Matriz.
+              - generic [ref=f2e81]: 4/100
+        - generic [ref=f2e83]:
+          - text: "01"
+          - strong [ref=f2e84]: Defina a direção
+          - paragraph [ref=f2e85]: Comece pela transformação desejada, não pela solução.
+        - group [ref=f2e86]:
+          - generic "Adicionar fase −" [ref=f2e87] [cursor=pointer]
+          - generic [ref=f2e88]:
+            - generic [ref=f2e89]:
+              - text: Título
+              - textbox "Título" [ref=f2e90]:
+                - /placeholder: "Ex.: Fundamentos operacionais"
+            - generic [ref=f2e91]:
+              - text: Outcome
+              - textbox "Outcome" [ref=f2e92]:
+                - /placeholder: Qual mudança observável encerra esta fase?
+            - button "Adicionar fase" [ref=f2e94] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=f2e100] [cursor=pointer]
+  - alert [ref=f2e104]

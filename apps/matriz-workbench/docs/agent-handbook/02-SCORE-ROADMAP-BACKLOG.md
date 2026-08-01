@@ -72,6 +72,15 @@ Estados: `planned`, `active`, `paused`, `completed`.
 Não marque uma fase como concluída apenas porque arquivos foram criados. O
 outcome da fase precisa ser observável.
 
+O período de uma iniciativa é opcional. Sem datas, ela permanece visível em
+"Sem período" e não recebe uma posição inventada na timeline. Com datas, a
+visão trimestral usa `startDate` e `targetDate` reais. O progresso exibido vem
+dos work items `tsk_` ou `wi_` vinculados; tempo decorrido não é progresso.
+
+Concluir todas as iniciativas não conclui automaticamente a fase. A pessoa
+responsável precisa verificar o outcome e decidir explicitamente o estado da
+fase. A timeline não altera score 0–100.
+
 ## Backlog
 
 O backlog responde:

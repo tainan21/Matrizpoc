@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_3b25cab0-8ada-4885-a11a-8d5265d1895a",
+  "projectId": "contracts",
+  "command": "/contexto-curto",
+  "title": "Contexto curto",
+  "content": "Leia o resumo do projeto, a tarefa vinculada e apenas os documentos referenciados.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:05:47.591Z",
+  "revision": "c5c320f702367d38"
+}

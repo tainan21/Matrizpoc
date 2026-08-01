@@ -1,0 +1,942 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-infra-hub",
+  "phases": [],
+  "goals": [],
+  "scorecards": [
+    {
+      "id": "scorecard_b434a643-5573-4eab-93b4-b90ffa6b3161",
+      "slug": "docs",
+      "title": "Matriz Infra Hub · Docs",
+      "description": "Conhecimento canônico para instalar, compreender, operar e ampliar o ecossistema Matriz.",
+      "scope": "ecosystem_docs",
+      "goals": [
+        {
+          "id": "goal_d2e5a313-a893-4804-80d1-e820566e7b56",
+          "ordinal": 1,
+          "title": "Definir visão de visão, princípios e linguagem do ecossistema",
+          "outcome": "Documento canônico criado e versionado.",
+          "category": "vision",
+          "score": 1,
+          "evidence": [
+            "docs/MATRIZ-TECHNICAL-GUIDE.md"
+          ]
+        },
+        {
+          "id": "goal_f423660c-a0cc-4ffb-8b01-8a84252a2a68",
+          "ordinal": 2,
+          "title": "Mapear arquitetura de visão, princípios e linguagem do ecossistema",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_788d5a73-b96c-425e-81bc-10734d286d85",
+          "ordinal": 3,
+          "title": "Registrar decisões de visão, princípios e linguagem do ecossistema",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ba37c22e-eb02-4d69-bc11-f14e47350056",
+          "ordinal": 4,
+          "title": "Criar guia operacional de visão, princípios e linguagem do ecossistema",
+          "outcome": "Documento canônico criado e versionado.",
+          "category": "vision",
+          "score": 1,
+          "evidence": [
+            "docs/MATRIZ-TECHNICAL-GUIDE.md"
+          ]
+        },
+        {
+          "id": "goal_15b71c01-e44b-4984-b057-b86abdbcd22f",
+          "ordinal": 5,
+          "title": "Adicionar diagramas e fluxos de visão, princípios e linguagem do ecossistema",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_aa12d6b0-17b4-4bb4-b56c-439d646d8b0f",
+          "ordinal": 6,
+          "title": "Registrar comandos e exemplos de visão, princípios e linguagem do ecossistema",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_986f7026-e21f-4cf1-9798-a1916805e896",
+          "ordinal": 7,
+          "title": "Explicar extensão e reuso de visão, princípios e linguagem do ecossistema",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6d0f91f0-4611-4e35-b8cf-d7c6187a35fc",
+          "ordinal": 8,
+          "title": "Cobrir segurança e limites de visão, princípios e linguagem do ecossistema",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_30c2f765-3fc0-4415-a2e9-faadd416e0e2",
+          "ordinal": 9,
+          "title": "Validar onboarding de visão, princípios e linguagem do ecossistema",
+          "outcome": "",
+          "category": "vision",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e5b34039-0fb5-42db-b785-e8243e1e720b",
+          "ordinal": 10,
+          "title": "Publicar índice canônico de visão, princípios e linguagem do ecossistema",
+          "outcome": "Documento canônico criado e versionado.",
+          "category": "vision",
+          "score": 1,
+          "evidence": [
+            "docs/README.md"
+          ]
+        },
+        {
+          "id": "goal_18b9b2d0-dc2e-4019-a0d1-34c9d7a1aac9",
+          "ordinal": 11,
+          "title": "Definir visão de monorepo, multirrepositório e ownership",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "architecture",
+          "score": 1,
+          "evidence": [
+            "docs/monorepo-structure.md",
+            "apps/matriz-workbench/docs/FEDERATED-PORTFOLIO.md"
+          ]
+        },
+        {
+          "id": "goal_dd329c16-507d-498b-8f32-673e2e6afcd2",
+          "ordinal": 12,
+          "title": "Mapear arquitetura de monorepo, multirrepositório e ownership",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "architecture",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/FEDERATED-PORTFOLIO.md",
+            "apps/matriz-workbench/docs/PROJECT-BLUEPRINTS.md"
+          ]
+        },
+        {
+          "id": "goal_068bb011-af29-43c0-8049-d5b66807fbb0",
+          "ordinal": 13,
+          "title": "Registrar decisões de monorepo, multirrepositório e ownership",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "architecture",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/ADR-FEDERATED-PORTFOLIO.md"
+          ]
+        },
+        {
+          "id": "goal_13ebda0d-570b-4fd9-af04-5d4233fb0aea",
+          "ordinal": 14,
+          "title": "Criar guia operacional de monorepo, multirrepositório e ownership",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d7588e76-6903-49f7-a0d2-8052d539a744",
+          "ordinal": 15,
+          "title": "Adicionar diagramas e fluxos de monorepo, multirrepositório e ownership",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_abde05c9-bc15-4dbd-a4c2-d9863b9873ab",
+          "ordinal": 16,
+          "title": "Registrar comandos e exemplos de monorepo, multirrepositório e ownership",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_650f3665-a6b8-4660-bcd6-20e3b10963fa",
+          "ordinal": 17,
+          "title": "Explicar extensão e reuso de monorepo, multirrepositório e ownership",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "architecture",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/PROJECT-BLUEPRINTS.md",
+            "apps/matriz-workbench/docs/SITES-INTEGRATION.md"
+          ]
+        },
+        {
+          "id": "goal_d91b8100-bfcb-4a7a-b752-8939af2dbbcb",
+          "ordinal": 18,
+          "title": "Cobrir segurança e limites de monorepo, multirrepositório e ownership",
+          "outcome": "Resultado verificado por implementação, teste ou comportamento observável.",
+          "category": "architecture",
+          "score": 1,
+          "evidence": [
+            "apps/matriz-workbench/docs/FEDERATED-PORTFOLIO.md",
+            "apps/matriz-workbench/src/integration/filesystem/federated-source-repository.test.ts"
+          ]
+        },
+        {
+          "id": "goal_5e0565c1-1daa-48b0-81f7-d1948dd184af",
+          "ordinal": 19,
+          "title": "Validar onboarding de monorepo, multirrepositório e ownership",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_86735412-d51d-4657-bdbf-0f96f717b85f",
+          "ordinal": 20,
+          "title": "Publicar índice canônico de monorepo, multirrepositório e ownership",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_29bb789b-9f2b-4c77-8021-68151c80282d",
+          "ordinal": 21,
+          "title": "Definir visão de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ac0a563d-b732-4de1-bcfb-0f160e50a1a2",
+          "ordinal": 22,
+          "title": "Mapear arquitetura de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1bc78f57-b786-4595-9e75-27ac1c111ded",
+          "ordinal": 23,
+          "title": "Registrar decisões de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_7513aa3b-f30b-4bd3-9f5a-159869c6f47d",
+          "ordinal": 24,
+          "title": "Criar guia operacional de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_df34f9ce-e8cc-4c80-8308-3f538c96bac3",
+          "ordinal": 25,
+          "title": "Adicionar diagramas e fluxos de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4e38bca3-9a8d-4f50-a529-425ead60c24b",
+          "ordinal": 26,
+          "title": "Registrar comandos e exemplos de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1ff68718-cdf6-4d3f-bec5-73b9a2d785a8",
+          "ordinal": 27,
+          "title": "Explicar extensão e reuso de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9a413cf1-4563-4b09-8832-a2d439fd7c35",
+          "ordinal": 28,
+          "title": "Cobrir segurança e limites de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_47b91b94-417b-45cf-8638-e74111ac1dd9",
+          "ordinal": 29,
+          "title": "Validar onboarding de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_736d4683-c5e8-4cc4-9614-1017cf996038",
+          "ordinal": 30,
+          "title": "Publicar índice canônico de domains, DDD, SOLID e boundaries",
+          "outcome": "",
+          "category": "architecture",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a18b2026-5c20-4763-99f4-1e49879b8931",
+          "ordinal": 31,
+          "title": "Definir visão de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_d4413363-33d3-40da-95c2-64050a935b09",
+          "ordinal": 32,
+          "title": "Mapear arquitetura de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3839085a-9352-4238-8ae9-6075c4261049",
+          "ordinal": 33,
+          "title": "Registrar decisões de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3f9358e5-fa35-4a92-a5db-4606bb04d767",
+          "ordinal": 34,
+          "title": "Criar guia operacional de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_79127f99-2933-43ba-b991-f446ebb4aba7",
+          "ordinal": 35,
+          "title": "Adicionar diagramas e fluxos de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f1b7f4f5-3a95-41ba-b5c2-e2e339117f2e",
+          "ordinal": 36,
+          "title": "Registrar comandos e exemplos de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3f6fd09d-95fd-4637-9b81-0a48beb91c2b",
+          "ordinal": 37,
+          "title": "Explicar extensão e reuso de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_25e5f372-e9b7-4088-ac60-0d607f63a65d",
+          "ordinal": 38,
+          "title": "Cobrir segurança e limites de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_02ff016f-5e1f-4ce7-af81-29a8170e79b9",
+          "ordinal": 39,
+          "title": "Validar onboarding de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6d678877-2361-4902-a47e-0588f7bd126d",
+          "ordinal": 40,
+          "title": "Publicar índice canônico de packages, reuso e critérios de extração",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_ef05a68c-4af8-43aa-a7f5-14a79dce5ccb",
+          "ordinal": 41,
+          "title": "Definir visão de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_87c46a59-0c4c-4f0c-978b-459efe4cf1e4",
+          "ordinal": 42,
+          "title": "Mapear arquitetura de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8a165f9f-4f5c-4771-b176-212ed6a96ab5",
+          "ordinal": 43,
+          "title": "Registrar decisões de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_eef4291a-91bf-4ab2-9b22-b56da393ea7d",
+          "ordinal": 44,
+          "title": "Criar guia operacional de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f9522625-0555-4126-8dfc-88bdae36d8cc",
+          "ordinal": 45,
+          "title": "Adicionar diagramas e fluxos de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e97d19b8-3fb9-4f3d-badc-3a27726e49a1",
+          "ordinal": 46,
+          "title": "Registrar comandos e exemplos de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2d1a5c3c-43ee-4921-ae39-25108da3e63a",
+          "ordinal": 47,
+          "title": "Explicar extensão e reuso de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_22eeb8f4-609b-4fb1-8571-029e2409a599",
+          "ordinal": 48,
+          "title": "Cobrir segurança e limites de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9c23fae2-85eb-4722-b767-89f07febfc95",
+          "ordinal": 49,
+          "title": "Validar onboarding de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8781c06d-9474-4e68-86c3-a012e8e6849b",
+          "ordinal": 50,
+          "title": "Publicar índice canônico de Next.js, React, React Native, PWA e evolução Tauri",
+          "outcome": "",
+          "category": "product",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_eba2c5d0-978e-4585-9cd1-500485f5930e",
+          "ordinal": 51,
+          "title": "Definir visão de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5e12af2b-1c12-4238-b0bc-ebe2d6da6064",
+          "ordinal": 52,
+          "title": "Mapear arquitetura de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_05c835b4-6cd6-4586-ad83-1b57193866ea",
+          "ordinal": 53,
+          "title": "Registrar decisões de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2559f53b-c48f-4cf7-92f5-ad07b6e38bbc",
+          "ordinal": 54,
+          "title": "Criar guia operacional de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_869adb99-99c4-496e-9919-2e35a6d15f48",
+          "ordinal": 55,
+          "title": "Adicionar diagramas e fluxos de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c99e0120-5747-4a17-9d47-4653fecbe2d4",
+          "ordinal": 56,
+          "title": "Registrar comandos e exemplos de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f4afc5a6-9a8d-4007-b1e5-fa76808daf32",
+          "ordinal": 57,
+          "title": "Explicar extensão e reuso de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5caaff33-ea4c-4322-b425-ef07e8834472",
+          "ordinal": 58,
+          "title": "Cobrir segurança e limites de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e32c6e0f-8b73-4372-86bc-8c1f6dea70a3",
+          "ordinal": 59,
+          "title": "Validar onboarding de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_8fa75504-319e-454e-89b8-2a4d42e79f7c",
+          "ordinal": 60,
+          "title": "Publicar índice canônico de design system, temas e experiência multiplataforma",
+          "outcome": "",
+          "category": "design",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_660cce86-cfcc-453e-b71b-5eed5fde8644",
+          "ordinal": 61,
+          "title": "Definir visão de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f024754c-e923-4d5b-9c20-61b1965dd683",
+          "ordinal": 62,
+          "title": "Mapear arquitetura de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f240c1d2-34d9-4d50-b60f-527d4579ef75",
+          "ordinal": 63,
+          "title": "Registrar decisões de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_e66a6d6b-0784-4646-8592-295521e39d42",
+          "ordinal": 64,
+          "title": "Criar guia operacional de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a6e6f507-4453-497b-ad9b-036eba24f717",
+          "ordinal": 65,
+          "title": "Adicionar diagramas e fluxos de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4deecf39-919b-437a-b1f1-c45d4024a625",
+          "ordinal": 66,
+          "title": "Registrar comandos e exemplos de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_403c10fd-bee6-44b5-bd72-d2c826352e92",
+          "ordinal": 67,
+          "title": "Explicar extensão e reuso de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_40753eb9-e85a-4b95-b75d-5d35c480d7fa",
+          "ordinal": 68,
+          "title": "Cobrir segurança e limites de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_0aee8355-45d1-4034-a598-fa1e519f4f48",
+          "ordinal": 69,
+          "title": "Validar onboarding de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f459963a-7771-4881-9396-37eb9f37865a",
+          "ordinal": 70,
+          "title": "Publicar índice canônico de dados, multi-tenant, autenticação e segurança",
+          "outcome": "",
+          "category": "security",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_28550a03-c96c-4e0e-876d-a8695f8d34b8",
+          "ordinal": 71,
+          "title": "Definir visão de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_163be04a-a748-44ac-bbd2-39a477b4bfec",
+          "ordinal": 72,
+          "title": "Mapear arquitetura de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_84109d8e-ac8a-458d-98c9-6bbc8ce7864e",
+          "ordinal": 73,
+          "title": "Registrar decisões de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_a26389c9-86b6-47df-83e8-51d5ab2502e2",
+          "ordinal": 74,
+          "title": "Criar guia operacional de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_5e1e23b0-baad-48b2-8635-fc2af5a48096",
+          "ordinal": 75,
+          "title": "Adicionar diagramas e fluxos de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_bc73d34e-9b28-4d4a-84f0-25e04c151e14",
+          "ordinal": 76,
+          "title": "Registrar comandos e exemplos de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_c033f093-059c-4d69-81b8-0f43fc052791",
+          "ordinal": 77,
+          "title": "Explicar extensão e reuso de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_253b4494-65c5-4f76-9d99-28778258ed81",
+          "ordinal": 78,
+          "title": "Cobrir segurança e limites de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_b027827e-c619-421e-81ae-ad54c185c961",
+          "ordinal": 79,
+          "title": "Validar onboarding de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_3f7af367-1db1-48a0-b17d-001428a93d78",
+          "ordinal": 80,
+          "title": "Publicar índice canônico de APIs, eventos, MCP e coworking com Codex",
+          "outcome": "",
+          "category": "collaboration",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_992ab7df-3045-436c-9503-f6c1e4c14fdb",
+          "ordinal": 81,
+          "title": "Definir visão de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_20c378e6-b392-4fe6-9ed4-989812c4d09f",
+          "ordinal": 82,
+          "title": "Mapear arquitetura de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_4a5ab94d-641c-421b-af1a-cd0b315b5cba",
+          "ordinal": 83,
+          "title": "Registrar decisões de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_856b8c83-64d2-43dc-a6e2-dec656ab81a0",
+          "ordinal": 84,
+          "title": "Criar guia operacional de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1ce20896-69e5-446f-b616-770756831f79",
+          "ordinal": 85,
+          "title": "Adicionar diagramas e fluxos de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_078d7a17-ced7-4e5b-bbd1-48cdfce023cc",
+          "ordinal": 86,
+          "title": "Registrar comandos e exemplos de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_68f86229-5c7c-49ff-b7c0-452a35bf6ed6",
+          "ordinal": 87,
+          "title": "Explicar extensão e reuso de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_6c6fc168-61a3-4ce9-8c56-8becffb19987",
+          "ordinal": 88,
+          "title": "Cobrir segurança e limites de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_23656b7c-580b-413c-af4d-1693fa850fad",
+          "ordinal": 89,
+          "title": "Validar onboarding de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_aaec56d6-960a-4428-884f-802809651967",
+          "ordinal": 90,
+          "title": "Publicar índice canônico de instalação, scripts, CI/CD e observabilidade",
+          "outcome": "",
+          "category": "quality",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_2b6ef94d-021d-4cd0-9ba0-52df8b300593",
+          "ordinal": 91,
+          "title": "Definir visão de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_20748753-01d6-4e9c-a054-aa21ebdfc986",
+          "ordinal": 92,
+          "title": "Mapear arquitetura de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_f21771d5-daad-4084-909f-ae8425f7afa1",
+          "ordinal": 93,
+          "title": "Registrar decisões de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_9c2cbd8d-ebc2-4e5a-b2d3-ffe5370d2426",
+          "ordinal": 94,
+          "title": "Criar guia operacional de criação, migração e integração de novos projetos",
+          "outcome": "Documento canônico criado e versionado.",
+          "category": "scale",
+          "score": 1,
+          "evidence": [
+            "docs/NEW-PROJECT-GUIDE.md",
+            "docs/COWORKING-API-MCP.md"
+          ]
+        },
+        {
+          "id": "goal_5dda7717-8fff-4a6c-8e4e-b57d0b102d05",
+          "ordinal": 95,
+          "title": "Adicionar diagramas e fluxos de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_bde2b34f-c010-4c6a-ae27-85e415501ae6",
+          "ordinal": 96,
+          "title": "Registrar comandos e exemplos de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_597e7447-a0d1-4a67-9b45-c73ab2fbe189",
+          "ordinal": 97,
+          "title": "Explicar extensão e reuso de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_1b446d48-4ecc-4a5d-8675-f72b7b4d57b1",
+          "ordinal": 98,
+          "title": "Cobrir segurança e limites de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_307cc9c1-2c4c-4af9-b7b6-18de8f8af81c",
+          "ordinal": 99,
+          "title": "Validar onboarding de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        },
+        {
+          "id": "goal_33b7f8d2-c46e-435b-9384-e112c701cfed",
+          "ordinal": 100,
+          "title": "Publicar índice canônico de criação, migração e integração de novos projetos",
+          "outcome": "",
+          "category": "scale",
+          "score": 0,
+          "evidence": []
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-07-30T21:10:34.913Z",
+  "revision": "1eadb574da3d0620"
+}

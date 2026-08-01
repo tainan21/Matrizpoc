@@ -15,6 +15,10 @@ import {
   makeProjectRepo,
   makePublicMetricsRepo,
 } from "@matriz/platform-db/hub/repositories"
+import {
+  listDocsMcpResources,
+  readDocsMcpResource,
+} from "../domains/docs/mcp/resources"
 
 export type McpResourceDescriptor = {
   uri: string
@@ -36,12 +40,14 @@ export type McpResourceContent = {
 export async function listResources(): Promise<McpResourceDescriptor[]> {
   const projects = makeProjectRepo(getHubDb())
   const rows = await projects.listAll()
-  return rows.map((row) => ({
+  const projectResources = rows.map((row) => ({
     uri: `matriz://projects/${row.projectId}`,
     name: row.projectId,
     description: `Institutional profile of ${row.projectId} (manifest + health + metrics).`,
     mimeType: "application/json",
   }))
+  const docsResources = await listDocsMcpResources()
+  return [...projectResources, ...docsResources]
 }
 
 /**
@@ -52,6 +58,9 @@ export async function listResources(): Promise<McpResourceDescriptor[]> {
 export async function readResource(
   uri: string,
 ): Promise<McpResourceContent | null> {
+  const docsContent = await readDocsMcpResource(uri)
+  if (docsContent) return docsContent
+
   const match = /^matriz:\/\/projects\/([^/]+)$/.exec(uri)
   if (!match) return null
 

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "projectId": "sites",
+  "weights": {
+    "app": 0.45,
+    "docs": 0.3,
+    "features-domains": 0.25
+  },
+  "updatedAt": "2026-07-30T19:05:29.223Z",
+  "revision": "246a885cb03ba6cb"
+}

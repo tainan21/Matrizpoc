@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_cc25d1cd-c56a-4c4b-bf9e-e8cddd18c867",
+  "projectId": "matriz-infra-hub",
+  "command": "/contexto-curto",
+  "title": "Contexto curto",
+  "content": "Leia o resumo do projeto, a tarefa vinculada e apenas os documentos referenciados.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:05:45.061Z",
+  "revision": "c386bd9f09d96d47"
+}

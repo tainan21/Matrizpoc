@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_1948ddcc-36d6-41bc-98c8-31feeba38731",
+  "projectId": "seumei",
+  "command": "/contexto-curto",
+  "title": "Contexto curto",
+  "content": "Leia o resumo do projeto, a tarefa vinculada e apenas os documentos referenciados.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:05:45.333Z",
+  "revision": "e8aa80073d99e594"
+}

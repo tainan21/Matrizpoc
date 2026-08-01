@@ -25,6 +25,7 @@
     "test:smoke": "vitest run --config vitest.config.ts",
     "test:smoke:watch": "vitest --config vitest.config.ts",
     "demo:flows": "tsx scripts/demo-flows.ts",
+    "demo:docs": "tsx scripts/seed-matrizdocs-demo.ts",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\" --ignore-path .gitignore"
   },
   "devDependencies": {

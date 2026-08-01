@@ -319,6 +319,35 @@ export class WorkspaceRepository {
     }
   }
 
+  private async withRoadmapLock<T>(projectId: string, operation: () => Promise<T>): Promise<T> {
+    if (!APP_ID.test(projectId)) {
+      throw new WorkspaceError("Identificador de projeto inválido.", "INVALID_PATH")
+    }
+    const folder = path.join(this.repositoryRoot, ".runtime", "workbench", "locks")
+    await mkdir(folder, { recursive: true })
+    const target = path.join(folder, `${projectId}--roadmap.lock`)
+    let handle: Awaited<ReturnType<typeof open>> | undefined
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      try {
+        handle = await open(target, "wx", 0o600)
+        break
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
+        await new Promise((resolve) => setTimeout(resolve, 25))
+      }
+    }
+    if (!handle) {
+      throw new WorkspaceError("O roadmap está sendo atualizado por outra operação.", "CONFLICT")
+    }
+    try {
+      await handle.writeFile(`${process.pid}\n`, "utf8")
+      return await operation()
+    } finally {
+      await handle.close()
+      await unlink(target).catch(() => undefined)
+    }
+  }
+
   private async discoverRepositoryProject(): Promise<DiscoveredProject | null> {
     const packagePath = path.join(this.repositoryRoot, "package.json")
     if (!(await exists(packagePath))) return null
@@ -701,20 +730,23 @@ export class WorkspaceRepository {
     phases: Roadmap["phases"],
     expectedRevision: string,
     actor: ActivityEvent["actor"] = "human",
-  ) {
-    const current = await this.getRoadmap(projectId)
-    if (current.revision !== expectedRevision) throw new RevisionConflictError()
-    const base = { ...current, phases, updatedAt: now(), revision: "" }
-    const next = roadmapSchema.parse({ ...base, revision: revisionFor(base) })
-    await this.atomicWrite(projectId, ["roadmap.json"], next)
-    await this.appendActivity(projectId, {
-      actor,
-      action: "roadmap.updated",
-      summary: "Roadmap atualizado.",
-      entityType: "roadmap",
-      entityId: projectId,
+    activity?: { action: string; summary: string; entityId?: string },
+  ): Promise<Roadmap> {
+    return this.withRoadmapLock(projectId, async () => {
+      const current = await this.getRoadmap(projectId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      const base = { ...current, phases, updatedAt: now(), revision: "" }
+      const next = roadmapSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(projectId, ["roadmap.json"], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: activity?.action ?? "roadmap.updated",
+        summary: activity?.summary ?? "Roadmap atualizado.",
+        entityType: "roadmap",
+        entityId: activity?.entityId ?? projectId,
+      })
+      return next
     })
-    return next
   }
 
   async updateRoadmapGoals(
@@ -723,19 +755,21 @@ export class WorkspaceRepository {
     expectedRevision: string,
     actor: ActivityEvent["actor"] = "human",
   ): Promise<Roadmap> {
-    const current = await this.getRoadmap(projectId)
-    if (current.revision !== expectedRevision) throw new RevisionConflictError()
-    const base = { ...current, goals, updatedAt: now(), revision: "" }
-    const next = roadmapSchema.parse({ ...base, revision: revisionFor(base) })
-    await this.atomicWrite(projectId, ["roadmap.json"], next)
-    await this.appendActivity(projectId, {
-      actor,
-      action: "roadmap.scorecard_updated",
-      summary: `Score 0–100 atualizado: ${goals.filter((goal) => goal.score === 1).length}/100.`,
-      entityType: "roadmap",
-      entityId: projectId,
+    return this.withRoadmapLock(projectId, async () => {
+      const current = await this.getRoadmap(projectId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      const base = { ...current, goals, updatedAt: now(), revision: "" }
+      const next = roadmapSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(projectId, ["roadmap.json"], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "roadmap.scorecard_updated",
+        summary: `Score 0–100 atualizado: ${goals.filter((goal) => goal.score === 1).length}/100.`,
+        entityType: "roadmap",
+        entityId: projectId,
+      })
+      return next
     })
-    return next
   }
 
   async updateRoadmapScorecards(
@@ -744,19 +778,21 @@ export class WorkspaceRepository {
     expectedRevision: string,
     actor: ActivityEvent["actor"] = "human",
   ): Promise<Roadmap> {
-    const current = await this.getRoadmap(projectId)
-    if (current.revision !== expectedRevision) throw new RevisionConflictError()
-    const base = { ...current, scorecards, updatedAt: now(), revision: "" }
-    const next = roadmapSchema.parse({ ...base, revision: revisionFor(base) })
-    await this.atomicWrite(projectId, ["roadmap.json"], next)
-    await this.appendActivity(projectId, {
-      actor,
-      action: "roadmap.scorecards_updated",
-      summary: `${scorecards.length} trilha(s) 0–100 atualizada(s).`,
-      entityType: "roadmap",
-      entityId: projectId,
+    return this.withRoadmapLock(projectId, async () => {
+      const current = await this.getRoadmap(projectId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      const base = { ...current, scorecards, updatedAt: now(), revision: "" }
+      const next = roadmapSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(projectId, ["roadmap.json"], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "roadmap.scorecards_updated",
+        summary: `${scorecards.length} trilha(s) 0–100 atualizada(s).`,
+        entityType: "roadmap",
+        entityId: projectId,
+      })
+      return next
     })
-    return next
   }
 
   async getContextPolicy(projectId: string): Promise<ContextPolicy> {

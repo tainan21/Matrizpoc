@@ -1,0 +1,29 @@
+{
+  "name": "@matriz/app-sites",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3006",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 3006",
+    "lint": "eslint app src public-contract.ts --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "dependencies": {
+    "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-registry-core": "workspace:*",
+    "@matriz/platform-config": "workspace:*",
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.5",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "typescript": "5.6.3",
+    "vitest": "2.1.2"
+  }
+}

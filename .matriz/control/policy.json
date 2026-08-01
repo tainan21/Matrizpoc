@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-infra-hub",
+  "weights": {
+    "app": 0.45,
+    "docs": 0.3,
+    "features-domains": 0.25
+  },
+  "updatedAt": "2026-07-30T19:05:28.946Z",
+  "revision": "c5f668828e620a8e"
+}

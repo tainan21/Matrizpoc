@@ -1,0 +1,51 @@
+<h2>Como deve funcionar o centro do Workbench?</h2>
+<p class="subtitle">Compare três maneiras de organizar trilhas 0–100, evidências, aprovações e ações.</p>
+
+<div class="section">
+  <div class="label">Fluxo comum</div>
+  <div class="mockup">
+    <div class="mockup-header">Projeto selecionado · Matriz Workbench</div>
+    <div class="mockup-body" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+      <div class="placeholder"><strong>Trilhas</strong><br>App · Docs · Features</div>
+      <div class="placeholder"><strong>Evidências</strong><br>Propostas · Checks · Fontes</div>
+      <div class="placeholder"><strong>Controle</strong><br>Aprovações · Logs · Entidades</div>
+    </div>
+  </div>
+</div>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mock-nav">Workbench&nbsp;&nbsp; Trilhas&nbsp;&nbsp; Backlog&nbsp;&nbsp; Controle</div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <div class="mock-sidebar" style="width:30%;">App<br><b>42/100</b><br><br>Docs<br><b>18/100</b><br><br>Features<br><b>07/100</b></div>
+        <div class="mock-content" style="flex:1;"><b>Próxima decisão</b><br><br>3 evidências aguardam aprovação<br><br><button class="mock-button">Revisar agora</button></div>
+      </div>
+    </div>
+    <div class="card-body"><h3>A · Trilhas como centro</h3><p>Foco principal nos três 0–100. Controle aparece como inspector contextual.</p></div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mock-nav">Workbench&nbsp;&nbsp; Foco&nbsp;&nbsp; Controle&nbsp;&nbsp; Projetos</div>
+      <div class="mock-content" style="margin-top:8px;"><b>Foco de hoje</b><br><br><div class="placeholder">Aprovar evidência · Docs 19</div><br><div class="placeholder">Tarefa bloqueada · Seumei</div><br><button class="mock-button">Abrir fila</button></div>
+    </div>
+    <div class="card-body"><h3>B · Foco operacional</h3><p>Uma fila inteligente prioriza decisões; scorecards e logs ficam em áreas dedicadas.</p></div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mock-nav">Matriz&nbsp;&nbsp; Projetos&nbsp;&nbsp; Score&nbsp;&nbsp; Controle</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+        <div class="mock-content"><b>Agregado</b><br><span style="font-size:26px;">28/100</span><br><small>média ponderada</small></div>
+        <div class="mock-content"><b>Atividade</b><br>Codex propôs 2<br>MCP confirmou 1<br>Humano aprovou 4</div>
+      </div>
+    </div>
+    <div class="card-body"><h3>C · Painel executivo</h3><p>Score agregado e proveniência no topo; trilhas, backlog e controle são drill-downs.</p></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Critério</div>
+  <p>Escolha pelo que deve ocupar o primeiro olhar durante o trabalho diário entre você e o Codex.</p>
+</div>

@@ -81,6 +81,154 @@ export interface MatrizEventPayloads {
     goalId?: string
     kind: string
   }
+  "docs.document.created": {
+    documentId: string
+    tenantId: string
+    title: string
+    type: string
+    actorId: string
+    actorType: string
+  }
+  "docs.document.imported": {
+    documentId: string
+    tenantId: string
+    sourceKind: string
+    actorId: string
+    actorType: string
+  }
+  "docs.document.converted": {
+    documentId: string
+    tenantId: string
+    runId: string
+    blockCount: number
+  }
+  "docs.document.version.created": {
+    documentId: string
+    versionId: string
+    tenantId: string
+    versionNumber: number
+  }
+  "docs.document.version.published": {
+    documentId: string
+    versionId: string
+    tenantId: string
+    versionNumber: number
+  }
+  "docs.document.deprecated": {
+    documentId: string
+    tenantId: string
+    reason?: string
+  }
+  "docs.block.created": {
+    documentId: string
+    blockId: string
+    tenantId: string
+    blockType: string
+  }
+  "docs.entity.created": {
+    nodeId: string
+    tenantId: string
+    name: string
+    type: string
+  }
+  "docs.entity.detected": {
+    nodeId: string
+    documentId: string
+    blockId?: string
+    tenantId: string
+    confidence?: number
+  }
+  "docs.relation.suggested": {
+    edgeId: string
+    tenantId: string
+    sourceNodeId: string
+    targetNodeId: string
+    relationType: string
+  }
+  "docs.relation.approved": {
+    edgeId: string
+    tenantId: string
+    approvedByActorId: string
+  }
+  "docs.relation.rejected": {
+    edgeId: string
+    tenantId: string
+    reviewedByActorId: string
+  }
+  "docs.suggestion.created": {
+    suggestionId: string
+    tenantId: string
+    type: string
+    targetType: string
+    targetId: string
+  }
+  "docs.suggestion.accepted": {
+    suggestionId: string
+    tenantId: string
+    reviewedByActorId: string
+  }
+  "docs.suggestion.rejected": {
+    suggestionId: string
+    tenantId: string
+    reviewedByActorId: string
+    reason?: string
+  }
+  "docs.context.created": {
+    contextPackageId: string
+    tenantId: string
+    slug: string
+  }
+  "docs.context.updated": {
+    contextPackageId: string
+    tenantId: string
+    reason?: string
+  }
+  "docs.context.published": {
+    contextPackageId: string
+    tenantId: string
+    version: number
+    mcpUri?: string
+  }
+  "docs.mcp.read": {
+    uri: string
+    tenantId: string
+    actorId: string
+    actorType: string
+    targetType: string
+    targetId: string
+  }
+  "docs.mcp.refreshed": {
+    uri: string
+    tenantId: string
+    resourceType: string
+  }
+  "docs.taskCandidate.created": {
+    candidateId: string
+    documentId: string
+    tenantId: string
+    title: string
+  }
+  "docs.governanceCandidate.created": {
+    candidateId: string
+    documentId: string
+    tenantId: string
+    reason: string
+    sensitivity: string
+  }
+  "docs.export.generated": {
+    exportArtifactId: string
+    tenantId: string
+    exportType: string
+    targetType: string
+    targetId: string
+  }
+  "docs.timeline.created": {
+    timelineEventId: string
+    tenantId: string
+    targetType: string
+    targetId: string
+    name: string
+  }
 }
 
 // ---------- event bus ----------

@@ -157,6 +157,47 @@ describe("WorkspaceRepository", () => {
     })
   })
 
+  it("serializes roadmap writes and persists temporal links to V2 work items", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const roadmap = await repository.getRoadmap("sample")
+    const phases = [
+      {
+        id: "phase_00000000-0000-4000-8000-000000000000",
+        title: "Planejamento",
+        outcome: "Roadmap temporal operável.",
+        status: "active" as const,
+        initiatives: [
+          {
+            id: "ini_00000000-0000-4000-8000-000000000001",
+            title: "Timeline trimestral",
+            outcome: "Períodos e contexto visíveis.",
+            status: "active" as const,
+            startDate: "2026-08-01",
+            targetDate: "2026-09-30",
+            backlogIds: ["wi_00000000-0000-4000-8000-000000000002"],
+          },
+        ],
+      },
+    ]
+    const saved = await repository.updateRoadmap("sample", phases, roadmap.revision)
+    expect(saved.phases[0].initiatives[0]).toMatchObject({
+      startDate: "2026-08-01",
+      targetDate: "2026-09-30",
+      backlogIds: ["wi_00000000-0000-4000-8000-000000000002"],
+    })
+
+    const results = await Promise.allSettled([
+      repository.updateRoadmap("sample", [{ ...phases[0], title: "Primeiro escritor" }], saved.revision),
+      repository.updateRoadmap("sample", [{ ...phases[0], title: "Segundo escritor" }], saved.revision),
+    ])
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1)
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1)
+    expect(results.find((result) => result.status === "rejected")).toMatchObject({
+      reason: { code: "CONFLICT" },
+    })
+  })
+
   it("allows human-only completion with evidence and keeps governance explicit", async () => {
     const { repository } = await fixture()
     await repository.initializeProject("sample")

@@ -4,6 +4,7 @@ import {
   attachmentReferenceSchema,
   backlogItemSchema,
   backlogStatusSchema,
+  roadmapInitiativeSchema,
   roadmapSchema,
   workItemV2Schema,
 } from "./schemas"
@@ -52,6 +53,32 @@ describe("Workbench schemas", () => {
         goals: [{ ...first, ordinal: 1 }, { ...second, ordinal: 1 }],
         updatedAt: new Date().toISOString(),
         revision: "revision-1",
+      }).success,
+    ).toBe(false)
+  })
+
+  it("accepts temporal roadmap initiatives linked to V1 and V2 work items", () => {
+    const initiative = {
+      id: "ini_00000000-0000-4000-8000-000000000000",
+      title: "Planejamento colaborativo",
+      outcome: "Times operam o roadmap com contexto revisável.",
+      status: "active" as const,
+      domain: "Plataforma / Roadmap",
+      responsible: "Produto",
+      startDate: "2026-08-01",
+      targetDate: "2026-09-30",
+      backlogIds: [
+        "tsk_00000000-0000-4000-8000-000000000001",
+        "wi_00000000-0000-4000-8000-000000000002",
+      ],
+    }
+
+    expect(roadmapInitiativeSchema.parse(initiative)).toEqual(initiative)
+    expect(
+      roadmapInitiativeSchema.safeParse({
+        ...initiative,
+        startDate: "2026-10-01",
+        targetDate: "2026-09-30",
       }).success,
     ).toBe(false)
   })

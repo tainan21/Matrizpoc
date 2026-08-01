@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-infra-hub",
+  "aggregate": 0,
+  "tracks": [
+    {
+      "slug": "app",
+      "title": "App",
+      "score": 0,
+      "approved": 0,
+      "pending": 100,
+      "total": 100
+    },
+    {
+      "slug": "docs",
+      "title": "Docs",
+      "score": 0,
+      "approved": 0,
+      "pending": 100,
+      "total": 100
+    },
+    {
+      "slug": "features-domains",
+      "title": "Features/Domains",
+      "score": 0,
+      "approved": 0,
+      "pending": 100,
+      "total": 100
+    }
+  ],
+  "updatedAt": "2026-07-30T19:05:34.135Z",
+  "revision": "d9bbb8b3e530dfa8"
+}

@@ -64,7 +64,21 @@
       "title": "Colaboração remota",
       "outcome": "Cloud e plugins opcionais sem abandonar o formato Git portátil.",
       "status": "active",
-      "initiatives": []
+      "initiatives": [
+        {
+          "id": "ini_d1f87fb9-cd8b-4785-9930-4bd9721bff85",
+          "title": "Roadmap temporal operacional",
+          "outcome": "Planejamento trimestral operável com vínculos revisáveis ao backlog.",
+          "status": "active",
+          "domain": "Plataforma / Roadmap",
+          "responsible": "Produto + Codex",
+          "startDate": "2026-08-01",
+          "targetDate": "2026-09-30",
+          "backlogIds": [
+            "wi_e3a6a580-f1ce-4865-946c-cc0c358f789e"
+          ]
+        }
+      ]
     }
   ],
   "goals": [
@@ -3957,6 +3971,6 @@
       ]
     }
   ],
-  "updatedAt": "2026-07-31T01:08:09.489Z",
-  "revision": "546ab95162fa1728"
+  "updatedAt": "2026-08-01T18:51:53.074Z",
+  "revision": "cd58beb64e2b63a1"
 }

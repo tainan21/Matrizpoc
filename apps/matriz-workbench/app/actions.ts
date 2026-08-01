@@ -12,7 +12,9 @@ import {
   humanReviewStatusSchema,
   prioritySchema,
   productStatusSchema,
+  roadmapStatusSchema,
   validationStatusSchema,
+  workItemIdSchema,
   workItemKindSchema,
   type RoadmapPhase,
   type WorkbenchDocument,
@@ -58,6 +60,41 @@ export type WorkItemMutationResult =
   | { status: "success"; itemId: string; revision: string; message: string }
   | { status: "conflict"; itemId: string; latestRevision: string; message: string }
   | { status: "error"; message: string }
+
+export type RoadmapMutationResult =
+  | { status: "success"; entityId: string; revision: string; message: string }
+  | { status: "conflict"; entityId: string; latestRevision: string; message: string }
+  | { status: "error"; message: string }
+
+async function roadmapFailure(
+  repository: WorkspaceRepository,
+  projectId: string,
+  entityId: string,
+  error: unknown,
+): Promise<RoadmapMutationResult> {
+  if (error instanceof RevisionConflictError) {
+    const latest = await repository.getRoadmap(projectId).catch(() => undefined)
+    return {
+      status: "conflict",
+      entityId,
+      latestRevision: latest?.revision ?? "unknown",
+      message: "O roadmap foi alterado em outra aba. Recarregue os dados antes de salvar novamente.",
+    }
+  }
+  return {
+    status: "error",
+    message: error instanceof WorkspaceError || error instanceof Error
+      ? error.message
+      : "Não foi possível atualizar o roadmap.",
+  }
+}
+
+function roadmapBacklogIds(value: FormDataEntryValue | null): string[] {
+  const ids = typeof value === "string"
+    ? value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean)
+    : []
+  return Array.from(new Set(ids.map((item) => workItemIdSchema.parse(item))))
+}
 
 async function workItemFailure(
   repository: WorkspaceRepository,
@@ -412,48 +449,123 @@ export async function archiveBacklogItemAction(formData: FormData) {
   redirect(`/projects/${projectId}/backlog`)
 }
 
-export async function addRoadmapPhaseAction(formData: FormData) {
+export async function addRoadmapPhaseAction(formData: FormData): Promise<RoadmapMutationResult> {
   await requireWorkbenchSession()
   const projectId = required(formData, "projectId")
   const repository = await WorkspaceRepository.create()
-  const roadmap = await repository.getRoadmap(projectId)
-  const phase: RoadmapPhase = {
-    id: `phase_${randomUUID()}`,
-    title: required(formData, "title"),
-    outcome: String(formData.get("outcome") ?? "").trim(),
-    status: roadmap.phases.length === 0 ? "active" : "planned",
-    initiatives: [],
+  const phaseId = `phase_${randomUUID()}`
+  try {
+    const roadmap = await repository.getRoadmap(projectId)
+    const phase: RoadmapPhase = {
+      id: phaseId,
+      title: required(formData, "title"),
+      outcome: String(formData.get("outcome") ?? "").trim(),
+      status: roadmap.phases.length === 0 ? "active" : "planned",
+      initiatives: [],
+    }
+    const next = await repository.updateRoadmap(
+      projectId,
+      [...roadmap.phases, phase],
+      required(formData, "revision"),
+      "human",
+      { action: "roadmap.phase_created", summary: `Fase criada: ${phase.title}`, entityId: phase.id },
+    )
+    revalidatePath(`/projects/${projectId}/roadmap`)
+    return { status: "success", entityId: phase.id, revision: next.revision, message: "Fase criada." }
+  } catch (error) {
+    return roadmapFailure(repository, projectId, phaseId, error)
   }
-  await repository.updateRoadmap(projectId, [...roadmap.phases, phase], required(formData, "revision"))
-  revalidatePath(`/projects/${projectId}/roadmap`)
 }
 
-export async function addRoadmapInitiativeAction(formData: FormData) {
+export async function addRoadmapInitiativeAction(formData: FormData): Promise<RoadmapMutationResult> {
   await requireWorkbenchSession()
   const projectId = required(formData, "projectId")
   const phaseId = required(formData, "phaseId")
   const repository = await WorkspaceRepository.create()
-  const roadmap = await repository.getRoadmap(projectId)
-  const phases = roadmap.phases.map((phase) =>
-    phase.id === phaseId
-      ? {
-          ...phase,
-          initiatives: [
-            ...phase.initiatives,
-            {
-              id: `ini_${randomUUID()}`,
-              title: required(formData, "title"),
-              outcome: String(formData.get("outcome") ?? "").trim(),
-              status: "planned" as const,
-              backlogIds: lines(formData.get("backlogIds")),
-            },
-          ],
-        }
-      : phase,
-  )
-  if (!phases.some((phase) => phase.id === phaseId)) throw new Error("Fase não encontrada.")
-  await repository.updateRoadmap(projectId, phases, required(formData, "revision"))
-  revalidatePath(`/projects/${projectId}/roadmap`)
+  const initiativeId = `ini_${randomUUID()}`
+  try {
+    const roadmap = await repository.getRoadmap(projectId)
+    const title = required(formData, "title")
+    const phases = roadmap.phases.map((phase) =>
+      phase.id === phaseId
+        ? {
+            ...phase,
+            initiatives: [
+              ...phase.initiatives,
+              {
+                id: initiativeId,
+                title,
+                outcome: String(formData.get("outcome") ?? "").trim(),
+                status: "planned" as const,
+                domain: String(formData.get("domain") ?? "").trim() || undefined,
+                responsible: String(formData.get("responsible") ?? "").trim() || undefined,
+                startDate: String(formData.get("startDate") ?? "").trim() || undefined,
+                targetDate: String(formData.get("targetDate") ?? "").trim() || undefined,
+                backlogIds: roadmapBacklogIds(formData.get("backlogIds")),
+              },
+            ],
+          }
+        : phase,
+    )
+    if (!phases.some((phase) => phase.id === phaseId)) throw new Error("Fase não encontrada.")
+    const next = await repository.updateRoadmap(
+      projectId,
+      phases,
+      required(formData, "revision"),
+      "human",
+      { action: "roadmap.initiative_created", summary: `Iniciativa criada: ${title}`, entityId: initiativeId },
+    )
+    revalidatePath(`/projects/${projectId}/roadmap`)
+    return { status: "success", entityId: initiativeId, revision: next.revision, message: "Iniciativa criada." }
+  } catch (error) {
+    return roadmapFailure(repository, projectId, initiativeId, error)
+  }
+}
+
+export async function saveRoadmapInitiativeAction(formData: FormData): Promise<RoadmapMutationResult> {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const phaseId = required(formData, "phaseId")
+  const initiativeId = required(formData, "initiativeId")
+  const repository = await WorkspaceRepository.create()
+  try {
+    const roadmap = await repository.getRoadmap(projectId)
+    let found = false
+    const title = required(formData, "title")
+    const phases = roadmap.phases.map((phase) => {
+      if (phase.id !== phaseId) return phase
+      return {
+        ...phase,
+        initiatives: phase.initiatives.map((initiative) => {
+          if (initiative.id !== initiativeId) return initiative
+          found = true
+          return {
+            ...initiative,
+            title,
+            outcome: String(formData.get("outcome") ?? "").trim(),
+            status: roadmapStatusSchema.parse(formData.get("status")),
+            domain: String(formData.get("domain") ?? "").trim() || undefined,
+            responsible: String(formData.get("responsible") ?? "").trim() || undefined,
+            startDate: String(formData.get("startDate") ?? "").trim() || undefined,
+            targetDate: String(formData.get("targetDate") ?? "").trim() || undefined,
+            backlogIds: roadmapBacklogIds(formData.get("backlogIds")),
+          }
+        }),
+      }
+    })
+    if (!found) throw new Error("Iniciativa não encontrada.")
+    const next = await repository.updateRoadmap(
+      projectId,
+      phases,
+      required(formData, "revision"),
+      "human",
+      { action: "roadmap.initiative_updated", summary: `Iniciativa atualizada: ${title}`, entityId: initiativeId },
+    )
+    revalidatePath(`/projects/${projectId}/roadmap`)
+    return { status: "success", entityId: initiativeId, revision: next.revision, message: "Iniciativa salva." }
+  } catch (error) {
+    return roadmapFailure(repository, projectId, initiativeId, error)
+  }
 }
 
 export async function advanceRoadmapInitiativeAction(formData: FormData) {
@@ -479,16 +591,16 @@ export async function advanceRoadmapInitiativeAction(formData: FormData) {
     if (!initiatives.some((initiative) => initiative.id === initiativeId)) {
       throw new Error("Iniciativa não encontrada.")
     }
-    return {
-      ...phase,
-      initiatives,
-      status: initiatives.every((initiative) => initiative.status === "completed")
-        ? "completed" as const
-        : "active" as const,
-    }
+    return { ...phase, initiatives }
   })
   if (!phases.some((phase) => phase.id === phaseId)) throw new Error("Fase não encontrada.")
-  await repository.updateRoadmap(projectId, phases, required(formData, "revision"))
+  await repository.updateRoadmap(
+    projectId,
+    phases,
+    required(formData, "revision"),
+    "human",
+    { action: "roadmap.initiative_status_changed", summary: "Estado da iniciativa atualizado.", entityId: initiativeId },
+  )
   revalidatePath(`/projects/${projectId}/roadmap`)
 }
 

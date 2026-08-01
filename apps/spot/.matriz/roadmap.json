@@ -1,0 +1,909 @@
+{
+  "schemaVersion": 1,
+  "projectId": "spot",
+  "phases": [],
+  "goals": [
+    {
+      "id": "goal_f2a8626d-3a3c-4ab5-ba3e-c1a69c65bb1a",
+      "ordinal": 1,
+      "title": "Definir a dor central e a intenção",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_6e835278-ed04-4ae3-bee0-683e698ac477",
+      "ordinal": 2,
+      "title": "Materializar a base operacional",
+      "outcome": "",
+      "category": "vision",
+      "score": 1,
+      "evidence": []
+    },
+    {
+      "id": "goal_4f805609-6c18-4ed2-b75c-fb1710905ec8",
+      "ordinal": 3,
+      "title": "Adotar o score 0–100 como linguagem comum",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_ec38c971-0ff8-4b2f-9448-1db073b84e31",
+      "ordinal": 4,
+      "title": "Definir público e decisões prioritárias",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_54752d69-7bb1-48c0-bd45-5ff297195f92",
+      "ordinal": 5,
+      "title": "Registrar princípios de produto",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_bcd9082a-bbdb-40bf-b739-c0a3f6497116",
+      "ordinal": 6,
+      "title": "Delimitar o que não será construído",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_c129ae81-ed6e-4a81-9fa3-2d130924af79",
+      "ordinal": 7,
+      "title": "Definir outcomes mensuráveis",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_8a8fd0c5-66e5-4413-b2d7-13662f2429b4",
+      "ordinal": 8,
+      "title": "Mapear riscos de produto",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_3d6fc34e-8cff-4551-9903-b4e2ad5f37e8",
+      "ordinal": 9,
+      "title": "Validar o fluxo principal com uso real",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_baec0a9c-bbcc-4da2-88bd-70eccaacf127",
+      "ordinal": 10,
+      "title": "Revisar visão e escopo",
+      "outcome": "",
+      "category": "vision",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_79be0d43-4bbe-41db-96c8-b8d007b62124",
+      "ordinal": 11,
+      "title": "Fechar modelo de projetos",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_33e0b065-213d-45ee-aa49-c16e272f7630",
+      "ordinal": 12,
+      "title": "Fechar modelo de roadmap",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_2e64ea4d-2778-48c8-b596-8882cbdbc982",
+      "ordinal": 13,
+      "title": "Fechar modelo de backlog",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_ba22863b-c270-4df2-9ee5-db755a7eb8e2",
+      "ordinal": 14,
+      "title": "Fechar modelo de documentação",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_2cec4029-1215-4cff-ba03-45cd72ae5dc1",
+      "ordinal": 15,
+      "title": "Fechar modelo de decisões",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_edf3f5cb-cca8-443b-bf82-16c1d98b2ff2",
+      "ordinal": 16,
+      "title": "Fechar modelo de solicitações ao Codex",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_f9fca6b2-9885-4f30-9b09-2faf7af0ea9c",
+      "ordinal": 17,
+      "title": "Definir estados vazios e recuperação",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_a5aba384-cc7f-45d9-b0ad-86d0c0180d3b",
+      "ordinal": 18,
+      "title": "Definir busca e filtros",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_44c2adde-003e-4086-9fe6-dd3fa651d3a5",
+      "ordinal": 19,
+      "title": "Definir referências entre artefatos",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_32402760-aba9-4a54-afa3-26f6b7c73dfe",
+      "ordinal": 20,
+      "title": "Validar rotina semanal de uso",
+      "outcome": "",
+      "category": "product",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_3742b8fa-c7cc-4858-8109-0d467bcf826f",
+      "ordinal": 21,
+      "title": "Documentar boundaries do Workbench",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_26b34ba0-41b4-42ff-bb9c-95a259fbf608",
+      "ordinal": 22,
+      "title": "Manter domínio específico dentro do app",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_d470f6a9-11e7-49e1-8915-6d3bbe9801d6",
+      "ordinal": 23,
+      "title": "Definir critérios para extração em packages",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_21e17800-fe96-470d-b52b-1c95a4c4c6a6",
+      "ordinal": 24,
+      "title": "Mapear packages existentes e responsabilidades",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_84eaaa64-5fbe-4642-befd-82b507bfd0df",
+      "ordinal": 25,
+      "title": "Eliminar imports cruzados entre apps",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_f7ff6060-135b-42a2-be40-fcdb6aa2a633",
+      "ordinal": 26,
+      "title": "Estabilizar contratos públicos",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_cf092e59-c2de-483d-858b-8a0336f9d196",
+      "ordinal": 27,
+      "title": "Fechar protocolo file-backed",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_59b22de8-447c-4c4d-8cb9-0841add22178",
+      "ordinal": 28,
+      "title": "Definir adapter futuro de persistência",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_f3bd531b-7fe5-4c22-b008-617cb1338b2d",
+      "ordinal": 29,
+      "title": "Validar conflitos e escrita atômica",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_e61939cd-5f0d-4e3c-a56f-644cae9968a9",
+      "ordinal": 30,
+      "title": "Executar revisão arquitetural",
+      "outcome": "",
+      "category": "architecture",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_62f61747-37a3-42d1-a9fd-f81af20a3c33",
+      "ordinal": 31,
+      "title": "Fechar tese visual do Workbench",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_bc486a1d-5cef-4e2a-a02f-9cc798a95e2e",
+      "ordinal": 32,
+      "title": "Consolidar tokens semânticos",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_38d9c9c1-385b-4409-ab50-ec53dafa598e",
+      "ordinal": 33,
+      "title": "Fechar escala tipográfica",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_ba9b218e-10f9-46ee-bc15-490802983f68",
+      "ordinal": 34,
+      "title": "Fechar escala de espaçamento",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_6ec2afeb-bc36-4a6b-ad99-ab734358eb0b",
+      "ordinal": 35,
+      "title": "Fechar cores e contraste",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_92331594-a459-4aa3-b08e-b65f4fb46498",
+      "ordinal": 36,
+      "title": "Definir componentes operacionais",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_f259012d-1476-476d-97cf-65e6b06c72f9",
+      "ordinal": 37,
+      "title": "Definir estados e variantes",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_9c49cc14-61b1-42b1-87e3-570b2f1094f5",
+      "ordinal": 38,
+      "title": "Definir iconografia",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_53ff955b-7714-465a-9ea4-72537213e035",
+      "ordinal": 39,
+      "title": "Documentar critérios de compartilhamento no design package",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_4a9bcf3a-9f0e-45c8-b720-910059f3ab5f",
+      "ordinal": 40,
+      "title": "Auditar consistência visual",
+      "outcome": "",
+      "category": "design",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_c77e7f97-0ac5-42aa-b3d8-782af32e4f2b",
+      "ordinal": 41,
+      "title": "Fechar navegação por teclado",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_1cbf0fc7-60e4-4d33-b639-b209fff4f04f",
+      "ordinal": 42,
+      "title": "Adicionar feedback de ações",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_8777541e-f792-4542-b604-c27e21c6b9aa",
+      "ordinal": 43,
+      "title": "Adicionar toast acessível",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_1caa60c6-7b90-472a-a42a-a80e1e93873c",
+      "ordinal": 44,
+      "title": "Adicionar estados de carregamento",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_83dc4256-c89b-4178-b140-1261fd39916d",
+      "ordinal": 45,
+      "title": "Adicionar transições de progresso",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_3e655071-66aa-4ce9-8db9-d9b7f49ee12a",
+      "ordinal": 46,
+      "title": "Adicionar estados de erro acionáveis",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_b565ff98-c808-4eff-aaf9-f85242844c40",
+      "ordinal": 47,
+      "title": "Revisar experiência mobile",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_d4a697a6-eae8-49d6-a725-d2b2ab578b81",
+      "ordinal": 48,
+      "title": "Revisar densidade e legibilidade",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_f1987104-7e09-4644-acbe-5705c169021a",
+      "ordinal": 49,
+      "title": "Validar acessibilidade AA",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_95a1ceef-fcd6-4271-8c58-6c9bec62f32f",
+      "ordinal": 50,
+      "title": "Executar teste de uso completo",
+      "outcome": "",
+      "category": "experience",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_fda6a720-1707-4870-9cb3-1482de9f26ef",
+      "ordinal": 51,
+      "title": "Cobrir schemas com testes",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_3f3624e3-ee4e-4013-b010-76068a30e273",
+      "ordinal": 52,
+      "title": "Cobrir repository com testes",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_55a104a8-a16d-4bb5-8367-d9642e9ab21a",
+      "ordinal": 53,
+      "title": "Cobrir MCP com testes de contrato",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_a9f8ba66-c788-4981-955e-d0e06f4c5e4d",
+      "ordinal": 54,
+      "title": "Automatizar E2E crítico",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_4e4165e8-c3ba-422d-9629-d682739c4fcd",
+      "ordinal": 55,
+      "title": "Definir gates por app",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_5712dc13-e183-44be-ab2c-0b5d648e8ef5",
+      "ordinal": 56,
+      "title": "Definir clean clone test",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_f519426c-017c-4f46-8fe5-6165524684c7",
+      "ordinal": 57,
+      "title": "Documentar setup Windows",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_e1438658-4afe-48b8-abb4-e096af51a37f",
+      "ordinal": 58,
+      "title": "Padronizar logs e erros",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_247e5f22-0a9d-4c8e-bb68-38582b2c2c0c",
+      "ordinal": 59,
+      "title": "Medir cobertura de fluxos críticos",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_03832ddd-5d27-4ec0-99e8-84e28eef364a",
+      "ordinal": 60,
+      "title": "Fechar checklist de release",
+      "outcome": "",
+      "category": "quality",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_db1fbc65-c323-49be-bdfc-ec1b2d7cfb7c",
+      "ordinal": 61,
+      "title": "Validar traversal e caminhos absolutos",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_75c95a92-c010-42b8-bc17-9019b8fddb62",
+      "ordinal": 62,
+      "title": "Validar proteção contra symlinks",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_3f112d47-0687-48a4-9b32-9af7edff1c85",
+      "ordinal": 63,
+      "title": "Validar limites de arquivos",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_05518b0b-dfc1-4bd0-86d9-a3d917689408",
+      "ordinal": 64,
+      "title": "Validar token e cookie local",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_2b989b53-ae3c-41a8-b3e6-928e31187e7f",
+      "ordinal": 65,
+      "title": "Mapear ameaças do MCP",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_bbab24f3-a11b-411b-9b1c-dcc75f3da970",
+      "ordinal": 66,
+      "title": "Exigir aprovação em mutações",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_1e68ac38-3d61-4c73-a6af-f7d628e0dd03",
+      "ordinal": 67,
+      "title": "Redigir política de secrets",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_874fa150-6f82-4f3f-a525-4cfe37d4d496",
+      "ordinal": 68,
+      "title": "Redigir política de dados sensíveis",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_fbb64276-bbc3-4edb-9734-12b5bf4af301",
+      "ordinal": 69,
+      "title": "Adicionar auditoria de dependências",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_4b27e76f-b28b-47e2-bc37-fbff2077c7a5",
+      "ordinal": 70,
+      "title": "Executar revisão de segurança",
+      "outcome": "",
+      "category": "security",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_24455198-a7f7-4338-9bf8-1ae730cad249",
+      "ordinal": 71,
+      "title": "Medir tempo de discovery",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_4c9f28f4-f0fc-45e5-ab2a-2d8cfb8dcc0f",
+      "ordinal": 72,
+      "title": "Evitar leituras repetidas",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_d7ed611e-0138-4a38-a562-00ecd470f9b3",
+      "ordinal": 73,
+      "title": "Limitar contexto do Codex",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_3f818b91-66ce-4d1e-abe7-ca64583e35ab",
+      "ordinal": 74,
+      "title": "Medir bundle do cliente",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_96804855-74f0-4cfe-b1cc-e87712a5cafd",
+      "ordinal": 75,
+      "title": "Reduzir client components",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_7b199aed-5464-4715-9d7b-3e00183b1b8f",
+      "ordinal": 76,
+      "title": "Validar listas com muitos itens",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_6170a2a5-4af5-42f1-8c3e-ebb3a939ae8d",
+      "ordinal": 77,
+      "title": "Definir estratégia de cache local",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_69ec2514-5fbf-49dc-ac89-578cede896d3",
+      "ordinal": 78,
+      "title": "Adicionar métricas operacionais",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_91c69aaa-dc55-44d6-aba8-9462a34dc0e1",
+      "ordinal": 79,
+      "title": "Definir orçamento de performance",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_e4c26f35-5458-4524-b012-6ce367647f60",
+      "ordinal": 80,
+      "title": "Executar baseline de performance",
+      "outcome": "",
+      "category": "performance",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_22a379b0-5dc4-4a0f-a28c-1ab358d60f9e",
+      "ordinal": 81,
+      "title": "Fechar protocolo humano–Codex",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_2f1f504d-cd1f-44bc-ab2b-246f56db229b",
+      "ordinal": 82,
+      "title": "Definir prompt de início de rodada",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_068ce465-21e8-4953-b972-9b3b02d9321b",
+      "ordinal": 83,
+      "title": "Definir prompt de conclusão",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_43a4b4c3-3f0f-4f70-b94f-2e51ab77eaea",
+      "ordinal": 84,
+      "title": "Definir quando continuar ou abrir novo chat",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_174cc7d8-0a15-4dbc-866f-041e9d237223",
+      "ordinal": 85,
+      "title": "Definir personas especializadas do ChatGPT",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_0c1581e2-7685-43db-b51d-d24cd72d4e16",
+      "ordinal": 86,
+      "title": "Definir plugins opcionais por contexto",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_d9386790-cf93-4af0-8cd6-37a34aef9adc",
+      "ordinal": 87,
+      "title": "Associar tarefas a conversas",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_030d4d3b-fb44-4c3d-bf13-b954e8236711",
+      "ordinal": 88,
+      "title": "Exibir diffs e verificações",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_a42a98ff-53eb-4b2d-a78a-fedafbbdb9aa",
+      "ordinal": 89,
+      "title": "Integrar streaming e aprovações",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_46110adf-fef3-46c3-8356-a81fa5ae9709",
+      "ordinal": 90,
+      "title": "Validar uma semana de coworking real",
+      "outcome": "",
+      "category": "collaboration",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_eb2be2f7-02e0-4ed2-bc3e-d534cb7fdf28",
+      "ordinal": 91,
+      "title": "Validar descoberta de dezenas de apps",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_6302a195-6930-4f5e-9037-86a2ed3aefac",
+      "ordinal": 92,
+      "title": "Mapear stacks por projeto",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_d4ace965-3e05-4452-8331-9b50ebf1821e",
+      "ordinal": 93,
+      "title": "Mapear domínios compartilháveis",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_49506ba8-0031-40e4-baac-fe5339c62e6f",
+      "ordinal": 94,
+      "title": "Mapear integrações entre projetos",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_9a7e30c5-1d58-4c22-9d74-3364b8123674",
+      "ordinal": 95,
+      "title": "Definir estratégia de templates",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_79cd483e-a802-4d20-9f9b-d79661dbc856",
+      "ordinal": 96,
+      "title": "Definir feature flags",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_6d227147-ef8c-4bdc-b535-2937f01d1dae",
+      "ordinal": 97,
+      "title": "Preparar adapter cloud opcional",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_4418820e-1587-4b5c-a722-d472506b9f1e",
+      "ordinal": 98,
+      "title": "Preparar colaboração remota",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_d40ab00b-f766-4002-9188-5d54a232c9db",
+      "ordinal": 99,
+      "title": "Preparar integração GitHub",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    },
+    {
+      "id": "goal_c21d26e5-a0d4-471c-97ae-8028e1b02aaf",
+      "ordinal": 100,
+      "title": "Concluir auditoria 100/100",
+      "outcome": "",
+      "category": "scale",
+      "score": 0,
+      "evidence": []
+    }
+  ],
+  "updatedAt": "2026-07-29T23:45:21.846Z",
+  "revision": "c8b7a3666ba7462c"
+}

@@ -1,0 +1,49 @@
+<h2>Interface operacional · leitura em segundos</h2>
+<p class="subtitle">Rail colorido, ações com ícone, scorecards em grade e um centro que prioriza decisões.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Matriz Workbench <span style="float:right;color:#2d9a69;">● sincronizado agora</span></div>
+  <div style="display:grid;grid-template-columns:190px 1fr 245px;min-height:475px;">
+    <div class="mock-sidebar" style="background:#171a25;color:#f4f6ff;">
+      <div style="font-size:11px;color:#9da6c1;text-transform:uppercase;letter-spacing:.08em;">Projetos</div>
+      <div style="margin-top:12px;padding:8px;background:#29304a;border-radius:6px;">🟣 <b>Workbench</b><br><small style="color:#aeb7d2;">28/100 · 3 pendências</small></div>
+      <div style="padding:8px;">🟢 Seumei<br><small style="color:#aeb7d2;">saudável · 2 tarefas</small></div>
+      <div style="padding:8px;">🟠 Spot<br><small style="color:#aeb7d2;">atenção · 1 bloqueio</small></div>
+      <div style="padding:8px;">🔴 Contracts<br><small style="color:#aeb7d2;">risco · docs ausentes</small></div>
+      <hr style="border-color:#353c53;">
+      <div style="font-size:11px;color:#9da6c1;text-transform:uppercase;letter-spacing:.08em;">Áreas</div>
+      <div style="padding:8px;">⌂ Foco</div><div style="padding:8px;">▦ Backlog</div><div style="padding:8px;">◈ Score</div><div style="padding:8px;">◉ Controle</div>
+    </div>
+
+    <div class="mock-content" style="background:#f7f8fb;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+        <div><div class="label">Foco de hoje</div><h3 style="margin:3px 0;">3 decisões para destravar</h3></div>
+        <button class="mock-button">＋ Nova ação</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0;">
+        <div class="placeholder" style="border-left:4px solid #2d9a69;"><small>PRONTO</small><br><b>Docs 19</b><br><button class="mock-button">✓ Aprovar</button></div>
+        <div class="placeholder" style="border-left:4px solid #e39a38;"><small>ATENÇÃO</small><br><b>Spot · 1 bloqueio</b><br><button class="mock-button">↗ Investigar</button></div>
+        <div class="placeholder" style="border-left:4px solid #d64a57;"><small>RISCO</small><br><b>Contracts · sem guia</b><br><button class="mock-button">＋ Criar tarefa</button></div>
+      </div>
+      <div class="placeholder" style="min-height:145px;"><div class="label">Linha de atividade</div><p style="margin:8px 0;">◉ Humano aprovou evidência · agora</p><p style="margin:8px 0;">◌ Codex propôs Docs 19 · há 4 min</p><p style="margin:8px 0;">◌ MCP observou alteração · há 11 min</p></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;"><button class="mock-button">☰ Ver histórico</button><button class="mock-button">⌘ Abrir Codex</button></div>
+    </div>
+
+    <div class="mock-sidebar" style="background:#fff;">
+      <div style="display:flex;justify-content:space-between;align-items:center;"><div class="label">Scorecards</div><button class="mock-button">≡</button></div>
+      <div style="margin-top:10px;padding:9px;border:1px solid #dfe2eb;border-radius:6px;"><span style="color:#2d9a69;">●</span> <b>App</b><span style="float:right;">42</span><br><small>████████░░</small></div>
+      <div style="margin-top:8px;padding:9px;border:1px solid #dfe2eb;border-radius:6px;"><span style="color:#e39a38;">●</span> <b>Docs</b><span style="float:right;">18</span><br><small>████░░░░░░</small></div>
+      <div style="margin-top:8px;padding:9px;border:1px solid #dfe2eb;border-radius:6px;"><span style="color:#d64a57;">●</span> <b>Features</b><span style="float:right;">07</span><br><small>██░░░░░░░░</small></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid #dfe2eb;"><div class="label">Controle</div><p style="font-size:12px;">⏳ 3 aprovações<br>⚡ 2 propostas IA<br>♧ 4 entidades ativas<br>✓ 0 conflitos</p><button class="mock-button">Abrir controle</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">Interação selecionável</div>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="instant-selection" onclick="toggleSelect(this)"><div class="letter">✓</div><div class="content"><h3>Selecionar = aplicar</h3><p>A escolha grava imediatamente, mostra toast e atualiza a lista; não há salvar/remover separado.</p></div></div>
+    <div class="option" data-choice="history-drawer" onclick="toggleSelect(this)"><div class="letter">◫</div><div class="content"><h3>Histórico expansível</h3><p>Abaixo da fila ficam decisões aprovadas, chats, projetos e execuções Codex com “ver mais”.</p></div></div>
+    <div class="option" data-choice="hover-inspector" onclick="toggleSelect(this)"><div class="letter">⌁</div><div class="content"><h3>Hover = contexto</h3><p>Projetos, áreas e cards exibem tooltip mínimo; clique abre o detalhe completo.</p></div></div>
+  </div>
+</div>

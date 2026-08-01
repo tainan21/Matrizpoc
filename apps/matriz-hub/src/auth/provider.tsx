@@ -54,9 +54,7 @@ function HubSessionBar() {
       }}
     >
       <span>
-        <strong style={{ color: "var(--surface-fg)" }}>
-          {session.identity.user.name}
-        </strong>
+        <strong style={{ color: "var(--surface-fg)" }}>{session.identity.user.name}</strong>
         {" · "}
         {session.identity.user.email}
       </span>
@@ -83,6 +81,7 @@ function HubAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLoginRoute = (pathname ?? "").startsWith("/login")
   const isPublicRoute = (pathname ?? "").startsWith("/public")
+  const isAuditRoute = (pathname ?? "").startsWith("/audit")
   if (isLoginRoute) {
     return <LoginLayoutFrame>{children}</LoginLayoutFrame>
   }
@@ -94,7 +93,7 @@ function HubAuthShell({ children }: { children: React.ReactNode }) {
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>
       <HubSessionBar />
-      <HubShell>{children}</HubShell>
+      {isAuditRoute ? children : <HubShell>{children}</HubShell>}
     </AuthGate>
   )
 }

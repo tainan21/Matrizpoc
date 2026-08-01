@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 const isoDate = z.string().datetime()
+const calendarDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 const revision = z.string().min(8)
 const id = (prefix: string) => z.string().regex(new RegExp(`^${prefix}_[0-9a-f-]{36}$`))
 
@@ -112,13 +113,27 @@ export const projectWorkspaceSchema = z.object({
   revision,
 })
 
-export const roadmapInitiativeSchema = z.object({
-  id: id("ini"),
-  title: z.string().trim().min(1).max(160),
-  outcome: z.string().trim().max(500).default(""),
-  status: roadmapStatusSchema,
-  backlogIds: z.array(id("tsk")).default([]),
-})
+export const roadmapInitiativeSchema = z
+  .object({
+    id: id("ini"),
+    title: z.string().trim().min(1).max(160),
+    outcome: z.string().trim().max(500).default(""),
+    status: roadmapStatusSchema,
+    domain: z.string().trim().min(1).max(120).optional(),
+    responsible: z.string().trim().min(1).max(120).optional(),
+    startDate: calendarDate.optional(),
+    targetDate: calendarDate.optional(),
+    backlogIds: z.array(workItemIdSchema).max(100).default([]),
+  })
+  .superRefine((initiative, context) => {
+    if (initiative.startDate && initiative.targetDate && initiative.startDate > initiative.targetDate) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "A data alvo deve ser igual ou posterior ao início.",
+        path: ["targetDate"],
+      })
+    }
+  })
 
 export const roadmapPhaseSchema = z.object({
   id: id("phase"),
@@ -313,6 +328,7 @@ export type ProjectWorkspace = z.infer<typeof projectWorkspaceSchema>
 export type Roadmap = z.infer<typeof roadmapSchema>
 export type RoadmapPhase = z.infer<typeof roadmapPhaseSchema>
 export type RoadmapInitiative = z.infer<typeof roadmapInitiativeSchema>
+export type RoadmapStatus = z.infer<typeof roadmapStatusSchema>
 export type RoadmapGoal = z.infer<typeof roadmapGoalSchema>
 export type RoadmapGoalCategory = z.infer<typeof roadmapGoalCategorySchema>
 export type RoadmapScorecard = z.infer<typeof roadmapScorecardSchema>

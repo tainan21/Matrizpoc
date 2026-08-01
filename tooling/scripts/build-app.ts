@@ -13,7 +13,7 @@
 import { spawnSync } from "node:child_process"
 import { resolve } from "node:path"
 
-const KNOWN_APPS = ["matriz-hub", "spot", "seumei", "contracts", "willdash"] as const
+const KNOWN_APPS = ["matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"] as const
 type AppId = (typeof KNOWN_APPS)[number]
 
 function fail(msg: string): never {

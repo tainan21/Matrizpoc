@@ -1,0 +1,18 @@
+- generic [ref=f2e1]:
+  - main [ref=f2e2]:
+    - region [ref=f2e3]:
+      - generic [ref=f2e4]: M
+      - paragraph [ref=f2e5]: Matriz local workspace
+      - heading "Desbloquear Workbench" [level=1] [ref=f2e6]
+      - paragraph [ref=f2e7]:
+        - text: Use o valor de
+        - code [ref=f2e8]: WORKBENCH_LOCAL_TOKEN
+        - text: . O token vira uma sessão HTTP-only e não é armazenado no navegador.
+      - generic [ref=f2e9]:
+        - textbox [ref=f2e10]: local
+        - generic [ref=f2e11]:
+          - text: Token local
+          - textbox "Token local" [active] [ref=f2e12]
+        - button "Entrar no workspace" [ref=f2e13] [cursor=pointer]
+      - paragraph [ref=f2e14]: Restrito a 127.0.0.1 · sem banco · sem cloud
+  - alert [ref=f2e15]

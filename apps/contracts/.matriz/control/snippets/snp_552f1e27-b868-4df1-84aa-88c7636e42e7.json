@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_552f1e27-b868-4df1-84aa-88c7636e42e7",
+  "projectId": "contracts",
+  "command": "/verificacao",
+  "title": "Verificação",
+  "content": "Execute os gates do app e registre o resultado, arquivos alterados e riscos.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:03.778Z",
+  "revision": "695c3f0672139804"
+}
