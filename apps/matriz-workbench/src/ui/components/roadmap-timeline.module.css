@@ -73,7 +73,7 @@
 .quarters em { position: absolute; right: 6px; bottom: 4px; padding: 1px 4px; border-radius: 3px; color: #d8ccff; background: #4c1d95; font-size: 8px; font-style: normal; }
 .currentQuarter { background: rgba(124, 58, 237, .06); }
 
-.phaseRow { min-width: 980px; display: grid; grid-template-columns: 220px minmax(760px, 1fr); border-bottom: 1px solid var(--roadmap-border); background: var(--roadmap-surface); }
+.phaseRow { min-width: 980px; display: grid; grid-template-columns: 220px minmax(760px, 1fr); border-bottom: 1px solid var(--roadmap-border); background: var(--roadmap-surface); content-visibility: auto; contain-intrinsic-size: 120px; }
 .phaseRow > header { grid-row: 1 / span 2; padding: 14px 15px; border-right: 1px solid var(--roadmap-border); }
 .phaseRow > header > div { display: flex; align-items: center; gap: 7px; }
 .phaseRow h2 { margin: 0; font-size: 12px; }

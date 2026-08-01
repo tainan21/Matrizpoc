@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type { CSSProperties } from "react"
-import { useEffect, useMemo, useState, useTransition } from "react"
+import { useMemo, useState, useTransition } from "react"
 import {
   addRoadmapInitiativeAction,
   addRoadmapPhaseAction,
@@ -40,33 +40,31 @@ export function RoadmapTimeline({
   selected?: RoadmapInspectorViewModel
 }) {
   const router = useRouter()
-  const [timeline, setTimeline] = useState(initialTimeline)
   const [query, setQuery] = useState("")
   const [status, setStatus] = useState("")
   const [composer, setComposer] = useState<"initiative" | "phase">()
   const [notice, setNotice] = useState<RoadmapMutationResult>()
   const [pending, startTransition] = useTransition()
 
-  useEffect(() => setTimeline(initialTimeline), [initialTimeline])
-
   const filtered = useMemo(() => {
     const term = query.trim().toLocaleLowerCase("pt-BR")
+    const phases = initialTimeline.phases.map((phase) => {
+      const initiatives = phase.initiatives.filter((initiative) => {
+        if (status && initiative.status !== status) return false
+        return !term || `${initiative.title} ${initiative.outcome} ${initiative.domain} ${initiative.responsible}`.toLocaleLowerCase("pt-BR").includes(term)
+      })
+      return {
+        ...phase,
+        initiatives,
+        scheduled: initiatives.filter((initiative) => initiative.startDate && initiative.targetDate),
+        unscheduled: initiatives.filter((initiative) => !initiative.startDate || !initiative.targetDate),
+      }
+    })
     return {
-      ...timeline,
-      phases: timeline.phases.map((phase) => {
-        const initiatives = phase.initiatives.filter((initiative) => {
-          if (status && initiative.status !== status) return false
-          return !term || `${initiative.title} ${initiative.outcome} ${initiative.domain} ${initiative.responsible}`.toLocaleLowerCase("pt-BR").includes(term)
-        })
-        return {
-          ...phase,
-          initiatives,
-          scheduled: initiatives.filter((initiative) => initiative.startDate && initiative.targetDate),
-          unscheduled: initiatives.filter((initiative) => !initiative.startDate || !initiative.targetDate),
-        }
-      }),
+      ...initialTimeline,
+      phases: term || status ? phases.filter((phase) => phase.initiatives.length) : phases,
     }
-  }, [query, status, timeline])
+  }, [initialTimeline, query, status])
 
   function navigateToInitiative(initiativeId?: string) {
     const params = new URLSearchParams(typeof window === "undefined" ? "" : window.location.search)
@@ -99,12 +97,12 @@ export function RoadmapTimeline({
         <div className={styles.search}><span aria-hidden="true">⌕</span><input aria-label="Buscar iniciativas" onChange={(event) => setQuery(event.target.value)} placeholder="Buscar iniciativa, outcome ou responsável…" type="search" value={query} /></div>
         <nav aria-label="Visões do projeto"><Link href={`/projects/${projectId}/backlog`}>Board</Link><span aria-current="page">Roadmap</span><Link href={`/projects/${projectId}/activity`}>Histórico</Link></nav>
         <button className={styles.phaseButton} onClick={() => setComposer("phase")} type="button">Nova fase</button>
-        <button className={styles.newButton} disabled={!timeline.phases.length} onClick={() => setComposer("initiative")} type="button">＋ Nova iniciativa</button>
+        <button className={styles.newButton} disabled={!initialTimeline.phases.length} onClick={() => setComposer("initiative")} type="button">＋ Nova iniciativa</button>
       </header>
 
       <div className={styles.heading}>
         <div><span>Matriz Workbench / {projectId}</span><h1>{projectName} · Roadmap estratégico</h1><p>Iniciativas por fase e período, vinculadas ao trabalho verificável.</p></div>
-        <div className={styles.summary}><strong>{visibleCount}</strong><span>iniciativas</span><strong>{timeline.scheduledCount}</strong><span>planejadas no tempo</span></div>
+        <div className={styles.summary}><strong>{visibleCount}</strong><span>iniciativas</span><strong>{initialTimeline.scheduledCount}</strong><span>planejadas no tempo</span></div>
       </div>
 
       {notice ? <div className={`${styles.noticeBar} ${styles[notice.status]}`} role={notice.status === "success" ? "status" : "alert"}><span>{notice.message}</span>{notice.status === "conflict" ? <button onClick={() => router.refresh()} type="button">Recarregar</button> : null}</div> : null}
@@ -142,7 +140,7 @@ export function RoadmapTimeline({
             </section>
           ))}
 
-          {!timeline.phases.length ? <div className={styles.emptyState}><span>01</span><h2>Defina a direção antes do calendário</h2><p>Crie uma fase com um outcome observável. Iniciativas e períodos entram depois.</p><button onClick={() => setComposer("phase")} type="button">Criar primeira fase</button></div> : visibleCount === 0 ? <div className={styles.emptyState}><h2>Nenhuma iniciativa corresponde aos filtros</h2><p>Limpe a busca ou selecione outro estado.</p><button onClick={() => { setQuery(""); setStatus("") }} type="button">Limpar filtros</button></div> : null}
+          {!initialTimeline.phases.length ? <div className={styles.emptyState}><span>01</span><h2>Defina a direção antes do calendário</h2><p>Crie uma fase com um outcome observável. Iniciativas e períodos entram depois.</p><button onClick={() => setComposer("phase")} type="button">Criar primeira fase</button></div> : visibleCount === 0 ? <div className={styles.emptyState}><h2>Nenhuma iniciativa corresponde aos filtros</h2><p>Limpe a busca ou selecione outro estado.</p><button onClick={() => { setQuery(""); setStatus("") }} type="button">Limpar filtros</button></div> : null}
         </section>
         {selected ? <RoadmapInspector item={selected} key={selected.roadmapRevision} onClose={() => navigateToInitiative()} projectId={projectId} /> : null}
       </div>
@@ -152,8 +150,8 @@ export function RoadmapTimeline({
           <section aria-labelledby="roadmap-composer-title" aria-modal="true" className={styles.composer} role="dialog">
             <header><div><span>Planejamento permanente</span><h2 id="roadmap-composer-title">{composer === "phase" ? "Nova fase" : "Nova iniciativa"}</h2></div><button aria-label="Fechar" onClick={() => setComposer(undefined)} type="button">×</button></header>
             <form action={(formData) => mutate(composer === "phase" ? addRoadmapPhaseAction : addRoadmapInitiativeAction, formData)}>
-              <input name="projectId" type="hidden" value={projectId} /><input name="revision" type="hidden" value={timeline.revision} />
-              {composer === "initiative" ? <label>Fase<select autoFocus name="phaseId">{timeline.phases.map((phase) => <option key={phase.id} value={phase.id}>{phase.title}</option>)}</select></label> : null}
+              <input name="projectId" type="hidden" value={projectId} /><input name="revision" type="hidden" value={initialTimeline.revision} />
+              {composer === "initiative" ? <label>Fase<select autoFocus name="phaseId">{initialTimeline.phases.map((phase) => <option key={phase.id} value={phase.id}>{phase.title}</option>)}</select></label> : null}
               <label>Título<input autoFocus={composer === "phase"} maxLength={composer === "phase" ? 120 : 160} name="title" required /></label>
               <label>Outcome<textarea maxLength={500} name="outcome" rows={4} /></label>
               {composer === "initiative" ? <><div className={styles.fieldGrid}><label>Domínio<input name="domain" /></label><label>Responsável<input name="responsible" /></label></div><div className={styles.fieldGrid}><label>Início<input name="startDate" type="date" /></label><label>Data alvo<input name="targetDate" type="date" /></label></div><label>Work items <small>IDs `tsk_` ou `wi_`, um por linha</small><textarea name="backlogIds" rows={3} /></label></> : null}

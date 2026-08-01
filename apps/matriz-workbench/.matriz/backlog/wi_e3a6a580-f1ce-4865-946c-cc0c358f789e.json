@@ -4,14 +4,14 @@
   "projectId": "matriz-workbench",
   "kind": "feature",
   "title": "Implementar roadmap temporal operacional",
-  "description": "Segundo corte vertical: timeline trimestral baseada em fases e iniciativas reais, com inspector, datas opcionais e vínculos V1/V2.",
-  "productStatus": "discovery",
+  "description": "Segundo corte vertical entregue: timeline trimestral por fases com datas opcionais, inspector editável, busca, filtro, progresso derivado de work items reais e conflito otimista explícito. Testes, typecheck, lint, build, health e MCP aprovados; navegador validado em 1536x1024, 1672x937, 1280x800, 768x1024 e 390x844.",
+  "productStatus": "validation",
   "validationStatus": "pending",
-  "humanReviewStatus": "not_required",
-  "documentationStatus": "not_required",
+  "humanReviewStatus": "pending",
+  "documentationStatus": "current",
   "priority": "high",
   "domain": "Plataforma / Roadmap",
-  "responsible": "Codex",
+  "responsible": "Produto + Codex",
   "workScope": {
     "kind": "project"
   },
@@ -24,12 +24,53 @@
     {
       "id": "ac_dfd6c516-aa2c-4082-9287-559dc56d790e",
       "text": "Roadmap V1 continua legível sem migração silenciosa",
-      "completed": false
+      "completed": true
+    },
+    {
+      "id": "ac_7dcc7e51-719c-46c2-aacd-028f9f604e52",
+      "text": "Iniciativas aceitam datas válidas e vínculos tsk/wi",
+      "completed": true
+    },
+    {
+      "id": "ac_b009a613-381f-491c-abe2-46c1e538d584",
+      "text": "Timeline e inspector usam dados reais persistidos",
+      "completed": true
+    },
+    {
+      "id": "ac_c65c01bc-d223-48a0-bc97-d5deac4b3668",
+      "text": "Conflito de revisão é explícito e recuperável",
+      "completed": true
+    },
+    {
+      "id": "ac_6d91b596-fbf2-49be-b442-fed3c73007da",
+      "text": "Validação visual, responsiva e por teclado foi executada",
+      "completed": true
     }
   ],
   "dependencyIds": [],
-  "references": [],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/roadmap-timeline.tsx",
+      "label": "Timeline operacional"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/presenters/roadmap-timeline-presenter.ts",
+      "label": "View model do roadmap"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts",
+      "label": "Persistência e revisão otimista"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/docs/FILE-PROTOCOL.md",
+      "label": "Protocolo de arquivos atualizado"
+    }
+  ],
   "createdAt": "2026-08-01T18:46:17.451Z",
-  "updatedAt": "2026-08-01T18:46:17.451Z",
-  "revision": "ef5cde96f303a2ec"
+  "updatedAt": "2026-08-01T19:05:55.855Z",
+  "revision": "ec6cf0fe53aee979"
 }

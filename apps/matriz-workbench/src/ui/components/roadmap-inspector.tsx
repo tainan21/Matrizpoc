@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { saveRoadmapInitiativeAction, type RoadmapMutationResult } from "../../../app/actions"
 import { ROADMAP_STATUS_LABELS, type RoadmapInspectorViewModel } from "../presenters/roadmap-timeline-presenter"
 import styles from "./roadmap-timeline.module.css"
@@ -17,8 +17,18 @@ export function RoadmapInspector({
   onClose: () => void
 }) {
   const router = useRouter()
+  const closeButton = useRef<HTMLButtonElement>(null)
   const [notice, setNotice] = useState<RoadmapMutationResult>()
   const [pending, startTransition] = useTransition()
+
+  useEffect(() => {
+    closeButton.current?.focus()
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose()
+    }
+    window.addEventListener("keydown", closeOnEscape)
+    return () => window.removeEventListener("keydown", closeOnEscape)
+  }, [onClose])
 
   function save(formData: FormData) {
     setNotice(undefined)
@@ -36,7 +46,7 @@ export function RoadmapInspector({
           <span>{item.phaseTitle} / Roadmap</span>
           <h2>{item.title}</h2>
         </div>
-        <button aria-label="Fechar inspector" onClick={onClose} type="button">×</button>
+        <button aria-label="Fechar inspector" onClick={onClose} ref={closeButton} type="button">×</button>
       </header>
 
       <div className={styles.inspectorStatus}>
