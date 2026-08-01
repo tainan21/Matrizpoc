@@ -105,6 +105,11 @@ editados. Bloqueio é uma condição do item, não uma coluna permanente.
 Estado de produto, execução, validação, revisão humana e documentação são
 independentes. Somente uma pessoa pode aprovar os estados de governança.
 
+O mapa de dependências projeta somente `dependencyIds` persistidos. Uma relação
+é resolvida quando o item pré-requisito está `completed`; referências ausentes e
+ciclos permanecem visíveis para correção humana. O mapa não infere vínculos,
+cria bloqueios nem movimenta itens automaticamente.
+
 ## Escolha do artefato
 
 | Situação | Registrar em |

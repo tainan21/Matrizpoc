@@ -133,6 +133,7 @@ export function WorkItemBoard({
         <nav className={styles.viewTabs} aria-label="Visões do projeto">
           <span aria-current="page">Board</span>
           <Link href={`/projects/${projectId}/roadmap`}>Roadmap</Link>
+          <Link href={`/projects/${projectId}/dependencies`}>Dependências</Link>
           <Link href={`/projects/${projectId}/activity`}>Histórico</Link>
         </nav>
         <button className={styles.newButton} onClick={() => setComposerOpen(true)} type="button"><span>＋</span>Novo item</button>

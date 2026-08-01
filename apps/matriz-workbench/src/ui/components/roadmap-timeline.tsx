@@ -95,7 +95,7 @@ export function RoadmapTimeline({
         <label>Projeto<select onChange={(event) => router.push(`/projects/${event.target.value}/roadmap`)} value={projectId}>{projects.filter((project) => project.initialized).map((project) => <option key={project.id} value={project.id}>{project.displayName}</option>)}</select></label>
         <label>Estado<select onChange={(event) => setStatus(event.target.value)} value={status}><option value="">Todos os estados</option>{Object.entries(ROADMAP_STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <div className={styles.search}><span aria-hidden="true">⌕</span><input aria-label="Buscar iniciativas" onChange={(event) => setQuery(event.target.value)} placeholder="Buscar iniciativa, outcome ou responsável…" type="search" value={query} /></div>
-        <nav aria-label="Visões do projeto"><Link href={`/projects/${projectId}/backlog`}>Board</Link><span aria-current="page">Roadmap</span><Link href={`/projects/${projectId}/activity`}>Histórico</Link></nav>
+        <nav aria-label="Visões do projeto"><Link href={`/projects/${projectId}/backlog`}>Board</Link><span aria-current="page">Roadmap</span><Link href={`/projects/${projectId}/dependencies`}>Dependências</Link><Link href={`/projects/${projectId}/activity`}>Histórico</Link></nav>
         <button className={styles.phaseButton} onClick={() => setComposer("phase")} type="button">Nova fase</button>
         <button className={styles.newButton} disabled={!initialTimeline.phases.length} onClick={() => setComposer("initiative")} type="button">＋ Nova iniciativa</button>
       </header>

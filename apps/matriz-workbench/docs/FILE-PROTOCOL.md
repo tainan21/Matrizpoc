@@ -66,3 +66,17 @@ All roadmap mutations take the project roadmap lock under
 JSON atomically. A stale revision is returned as a conflict. Completing every
 initiative does not complete its phase automatically: phase completion remains
 a human decision about the stated outcome.
+
+## Dependency map
+
+The dependency view is a projection of each work item's persisted
+`dependencyIds`; it does not infer relationships from text, roadmap position or
+agent activity. An edge points from the prerequisite to the dependent item and
+is resolved only when the prerequisite product state is `completed`.
+
+Missing identifiers remain visible as broken references. Cycles are detected
+and surfaced without rewriting either item. Archived standalone items are
+excluded, but an archived prerequisite remains visible while an active item
+references it. The view never changes product status, creates blockers or
+removes a dependency automatically; edits continue through the revisioned work
+item inspector.

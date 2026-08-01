@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import {
   addWorkItemReferenceAction,
   saveWorkItemAction,
@@ -46,9 +46,19 @@ export function WorkItemInspector({
   onClose: () => void
 }) {
   const router = useRouter()
+  const closeButton = useRef<HTMLButtonElement>(null)
   const [tab, setTab] = useState<Tab>("overview")
   const [result, setResult] = useState<WorkItemMutationResult>()
   const [pending, startTransition] = useTransition()
+
+  useEffect(() => {
+    closeButton.current?.focus()
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose()
+    }
+    window.addEventListener("keydown", closeOnEscape)
+    return () => window.removeEventListener("keydown", closeOnEscape)
+  }, [onClose])
 
   function submit(action: (formData: FormData) => Promise<WorkItemMutationResult>, formData: FormData) {
     setResult(undefined)
@@ -70,7 +80,7 @@ export function WorkItemInspector({
             <span className={`${styles.priorityChip} ${styles[item.priority]}`}>{item.priorityLabel}</span>
           </div>
         </div>
-        <button className={styles.iconButton} aria-label="Fechar inspector" onClick={onClose} type="button">×</button>
+        <button className={styles.iconButton} aria-label="Fechar inspector" onClick={onClose} ref={closeButton} type="button">×</button>
       </header>
 
       <nav className={styles.inspectorTabs} aria-label="Seções do work item" role="tablist">
