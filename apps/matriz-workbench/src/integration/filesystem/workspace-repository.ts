@@ -8,6 +8,7 @@ import {
   realpath,
   rename,
   stat,
+  unlink,
 } from "node:fs/promises"
 import path from "node:path"
 import {
@@ -17,6 +18,8 @@ import {
   contextPolicySchema,
   projectWorkspaceSchema,
   roadmapSchema,
+  persistedWorkItemSchema,
+  workItemV2Schema,
   workbenchDocumentSchema,
   type ActivityEvent,
   type AgentRequest,
@@ -24,8 +27,15 @@ import {
   type ContextPolicy,
   type ProjectWorkspace,
   type Roadmap,
+  type WorkItem,
   type WorkbenchDocument,
 } from "../../domain/schemas"
+import {
+  assertWorkItemCompletion,
+  assertWorkItemTransition,
+  normalizeLegacyWorkItem,
+  toLegacyBacklogItem,
+} from "../../domain/work-item"
 import {
   controlApprovalSchema,
   controlEntitySchema,
@@ -91,6 +101,7 @@ export interface ActivityQuery {
   until?: string
   actor?: ActivityEvent["actor"]
   entityType?: ActivityEvent["entityType"]
+  entityId?: string
   text?: string
   limit?: number
 }
@@ -273,6 +284,39 @@ export class WorkspaceRepository {
       await handle.close()
     }
     await rename(temp, target)
+  }
+
+  private async withWorkItemLock<T>(
+    projectId: string,
+    itemId: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    if (!APP_ID.test(projectId) || !/^(?:tsk|wi)_[0-9a-f-]{36}$/.test(itemId)) {
+      throw new WorkspaceError("Identificador de work item inválido.", "INVALID_PATH")
+    }
+    const folder = path.join(this.repositoryRoot, ".runtime", "workbench", "locks")
+    await mkdir(folder, { recursive: true })
+    const target = path.join(folder, `${projectId}--${itemId}.lock`)
+    let handle: Awaited<ReturnType<typeof open>> | undefined
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      try {
+        handle = await open(target, "wx", 0o600)
+        break
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
+        await new Promise((resolve) => setTimeout(resolve, 25))
+      }
+    }
+    if (!handle) {
+      throw new WorkspaceError("O work item está sendo atualizado por outra operação.", "CONFLICT")
+    }
+    try {
+      await handle.writeFile(`${process.pid}\n`, "utf8")
+      return await operation()
+    } finally {
+      await handle.close()
+      await unlink(target).catch(() => undefined)
+    }
   }
 
   private async discoverRepositoryProject(): Promise<DiscoveredProject | null> {
@@ -720,19 +764,219 @@ export class WorkspaceRepository {
   }
 
   async listBacklog(projectId: string): Promise<BacklogItem[]> {
+    return (await this.listWorkItems(projectId)).map(toLegacyBacklogItem)
+  }
+
+  async getBacklogItem(projectId: string, itemId: string): Promise<BacklogItem> {
+    return toLegacyBacklogItem(await this.getWorkItem(projectId, itemId))
+  }
+
+  async listWorkItems(projectId: string): Promise<WorkItem[]> {
     const folder = await this.safeMatrixPath(projectId, ["backlog"])
-    const files = (await readdir(folder)).filter((name) => /^tsk_[0-9a-f-]{36}\.json$/.test(name))
+    const files = (await readdir(folder)).filter((name) => /^(?:tsk|wi)_[0-9a-f-]{36}\.json$/.test(name))
     const items = await Promise.all(
-      files.map((name) => this.readJson(projectId, ["backlog", name], backlogItemSchema)),
+      files.map(async (name) => {
+        const value = await this.readJson(projectId, ["backlog", name], persistedWorkItemSchema)
+        return value.schemaVersion === 1 ? normalizeLegacyWorkItem(value) : value
+      }),
     )
     return items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
   }
 
-  async getBacklogItem(projectId: string, itemId: string): Promise<BacklogItem> {
-    if (!/^tsk_[0-9a-f-]{36}$/.test(itemId)) {
-      throw new WorkspaceError("ID de tarefa inválido.", "INVALID_PATH")
+  async getWorkItem(projectId: string, itemId: string): Promise<WorkItem> {
+    if (!/^(?:tsk|wi)_[0-9a-f-]{36}$/.test(itemId)) {
+      throw new WorkspaceError("ID de work item inválido.", "INVALID_PATH")
     }
-    return this.readJson(projectId, ["backlog", `${itemId}.json`], backlogItemSchema)
+    const value = await this.readJson(
+      projectId,
+      ["backlog", `${itemId}.json`],
+      persistedWorkItemSchema,
+    )
+    return value.schemaVersion === 1 ? normalizeLegacyWorkItem(value) : value
+  }
+
+  async createWorkItem(
+    projectId: string,
+    input: Pick<
+      WorkItem,
+      | "kind"
+      | "title"
+      | "description"
+      | "priority"
+      | "productStatus"
+      | "validationStatus"
+      | "humanReviewStatus"
+      | "documentationStatus"
+    > & {
+      domain?: string
+      responsible?: string
+      tags?: string[]
+      acceptanceCriteria?: string[]
+      workScope?: WorkItem["workScope"]
+    },
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<WorkItem> {
+    if (actor !== "human") {
+      throw new WorkspaceError("Somente uma pessoa pode criar work items pelo quadro.", "INVALID_DATA")
+    }
+    await this.getWorkspace(projectId)
+    const timestamp = now()
+    const base = {
+      schemaVersion: 2 as const,
+      id: newId("wi"),
+      projectId,
+      kind: input.kind,
+      title: input.title,
+      description: input.description,
+      productStatus: input.productStatus,
+      validationStatus: input.validationStatus,
+      humanReviewStatus: input.humanReviewStatus,
+      documentationStatus: input.documentationStatus,
+      priority: input.priority,
+      domain: input.domain,
+      responsible: input.responsible,
+      workScope: input.workScope ?? { kind: "project" as const },
+      tags: input.tags ?? [],
+      acceptanceCriteria: (input.acceptanceCriteria ?? []).map((text) => ({
+        id: newId("ac"),
+        text,
+        completed: false,
+      })),
+      dependencyIds: [],
+      references: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }
+    const item = workItemV2Schema.parse({ ...base, revision: revisionFor(base) })
+    await this.atomicWrite(projectId, ["backlog", `${item.id}.json`], item)
+    await this.appendActivity(projectId, {
+      actor,
+      action: "work_item.created",
+      summary: `${item.kind} criado: ${item.title}`,
+      entityType: "backlog",
+      entityId: item.id,
+      metadata: { productStatus: item.productStatus, revision: item.revision },
+    })
+    return item
+  }
+
+  async updateWorkItem(
+    projectId: string,
+    itemId: string,
+    patch: Partial<
+      Pick<
+        WorkItem,
+        | "kind"
+        | "title"
+        | "description"
+        | "productStatus"
+        | "validationStatus"
+        | "humanReviewStatus"
+        | "documentationStatus"
+        | "priority"
+        | "domain"
+        | "responsible"
+        | "workScope"
+        | "tags"
+        | "acceptanceCriteria"
+        | "dependencyIds"
+        | "references"
+        | "blocker"
+      >
+    >,
+    expectedRevision: string,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<WorkItem> {
+    return this.withWorkItemLock(projectId, itemId, async () => {
+      const current = await this.getWorkItem(projectId, itemId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      if (
+        actor !== "human" &&
+        (patch.validationStatus !== undefined ||
+          patch.humanReviewStatus !== undefined ||
+          patch.documentationStatus !== undefined ||
+          patch.productStatus !== undefined)
+      ) {
+        throw new WorkspaceError("Agentes não podem alterar governança ou estado de produto.", "INVALID_DATA")
+      }
+      if (patch.productStatus && patch.productStatus !== current.productStatus) {
+        assertWorkItemTransition(current, patch.productStatus)
+      }
+      if (patch.references) {
+        for (const reference of patch.references) {
+          if (reference.kind === "repository_file") {
+            const segments = reference.path.split(/[\\/]/)
+            const basename = segments.at(-1)?.toLowerCase() ?? ""
+            if (
+              path.isAbsolute(reference.path) ||
+              segments.includes("..") ||
+              segments.some((segment) => REPOSITORY_REFERENCE_EXCLUDED_SEGMENTS.has(segment)) ||
+              basename === ".env" ||
+              basename.startsWith(".env.") ||
+              basename.endsWith(".log")
+            ) {
+              throw new WorkspaceError("Referência de arquivo fora do repositório.", "INVALID_PATH")
+            }
+            const target = await realpath(path.resolve(this.repositoryRoot, reference.path)).catch(() => {
+              throw new WorkspaceError("Arquivo referenciado não existe.", "NOT_FOUND")
+            })
+            if (!isInside(this.repositoryRoot, target)) {
+              throw new WorkspaceError("Referência de arquivo fora do repositório.", "INVALID_PATH")
+            }
+          }
+          if (reference.kind === "workbench_document") {
+            const documents = await this.listDocuments(projectId)
+            if (!documents.some((document) => document.id === reference.documentId)) {
+              throw new WorkspaceError("Documento referenciado não existe.", "NOT_FOUND")
+            }
+          }
+        }
+      }
+      const base = {
+        ...current,
+        ...patch,
+        schemaVersion: 2 as const,
+        id: current.id,
+        projectId,
+        updatedAt: now(),
+        revision: "",
+      }
+      const next = workItemV2Schema.parse({ ...base, revision: revisionFor(base) })
+      if (next.productStatus === "completed" && current.productStatus !== "completed") {
+        const requests = (await this.listAgentRequests(projectId)).filter(
+          (request) => request.backlogItemId === itemId,
+        )
+        const hasAgentExecution = requests.some((request) => request.status === "completed")
+        const hasExecutionEvidence = requests.some(
+          (request) =>
+            request.status === "completed" &&
+            request.checks.length > 0 &&
+            (request.changedFiles.length > 0 || Boolean(request.resultSummary)),
+        )
+        assertWorkItemCompletion(next, {
+          hasAgentExecution,
+          hasEvidence: next.references.length > 0 || hasExecutionEvidence,
+        })
+      }
+      await this.atomicWrite(projectId, ["backlog", `${itemId}.json`], next)
+      const statusChanged = current.productStatus !== next.productStatus
+      await this.appendActivity(projectId, {
+        actor,
+        action: statusChanged ? "work_item.status_changed" : "work_item.updated",
+        summary: statusChanged
+          ? `${next.title}: ${current.productStatus} → ${next.productStatus}`
+          : `Work item atualizado: ${next.title}`,
+        entityType: "backlog",
+        entityId: itemId,
+        metadata: {
+          previousRevision: current.revision,
+          revision: next.revision,
+          from: current.productStatus,
+          to: next.productStatus,
+        },
+      })
+      return next
+    })
   }
 
   async createBacklogItem(
@@ -1089,6 +1333,7 @@ export class WorkspaceRepository {
         if (query.until && value.occurredAt >= query.until) continue
         if (query.actor && value.actor !== query.actor) continue
         if (query.entityType && value.entityType !== query.entityType) continue
+        if (query.entityId && value.entityId !== query.entityId) continue
         if (text) {
           const searchable = [
             value.summary,

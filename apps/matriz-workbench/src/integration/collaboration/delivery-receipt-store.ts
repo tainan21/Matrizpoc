@@ -8,7 +8,7 @@ import {
 import { RevisionConflictError, WorkspaceError } from "../../domain/errors"
 
 const PROJECT_ID = /^[a-z0-9][a-z0-9-]*$/
-const TASK_ID = /^tsk_[0-9a-f-]{36}$/
+const TASK_ID = /^(?:tsk|wi)_[0-9a-f-]{36}$/
 const MAX_RECEIPT_BYTES = 16_000
 
 function isInside(parent: string, child: string): boolean {

@@ -13,6 +13,37 @@ export const backlogStatusSchema = z.enum([
   "done",
   "archived",
 ])
+export const workItemIdSchema = z.string().regex(/^(?:tsk|wi)_[0-9a-f-]{36}$/)
+export const workItemKindSchema = z.enum(["outcome", "feature", "task", "bug"])
+export const productStatusSchema = z.enum([
+  "discovery",
+  "refined",
+  "ready",
+  "in_progress",
+  "validation",
+  "completed",
+  "archived",
+])
+export const validationStatusSchema = z.enum([
+  "not_required",
+  "pending",
+  "running",
+  "passed",
+  "failed",
+  "waived",
+])
+export const humanReviewStatusSchema = z.enum([
+  "not_required",
+  "pending",
+  "approved",
+  "changes_requested",
+])
+export const documentationStatusSchema = z.enum([
+  "not_required",
+  "pending",
+  "current",
+  "stale",
+])
 export const roadmapStatusSchema = z.enum(["planned", "active", "paused", "completed"])
 export const roadmapGoalCategorySchema = z.enum([
   "vision",
@@ -191,11 +222,44 @@ export const backlogItemSchema = z.object({
   revision,
 })
 
+export const workItemBlockerSchema = z.object({
+  summary: z.string().trim().min(1).max(500),
+  status: z.enum(["open", "resolved"]),
+  updatedAt: isoDate,
+})
+
+export const workItemV2Schema = z.object({
+  schemaVersion: z.literal(2),
+  id: workItemIdSchema,
+  projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
+  kind: workItemKindSchema,
+  title: z.string().trim().min(1).max(180),
+  description: z.string().trim().max(8000).default(""),
+  productStatus: productStatusSchema,
+  validationStatus: validationStatusSchema,
+  humanReviewStatus: humanReviewStatusSchema,
+  documentationStatus: documentationStatusSchema,
+  priority: prioritySchema,
+  domain: z.string().trim().min(1).max(100).optional(),
+  responsible: z.string().trim().min(1).max(100).optional(),
+  workScope: backlogWorkScopeSchema,
+  tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
+  acceptanceCriteria: z.array(acceptanceCriterionSchema).max(30).default([]),
+  dependencyIds: z.array(workItemIdSchema).max(30).default([]),
+  references: z.array(attachmentReferenceSchema).max(30).default([]),
+  blocker: workItemBlockerSchema.optional(),
+  createdAt: isoDate,
+  updatedAt: isoDate,
+  revision,
+})
+
+export const persistedWorkItemSchema = z.union([backlogItemSchema, workItemV2Schema])
+
 export const agentRequestSchema = z.object({
   schemaVersion: z.literal(1),
   id: id("req"),
   projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
-  backlogItemId: id("tsk"),
+  backlogItemId: workItemIdSchema,
   title: z.string().trim().min(1).max(180),
   instructions: z.string().trim().max(8000).default(""),
   status: agentRequestStatusSchema,
@@ -254,6 +318,13 @@ export type RoadmapGoalCategory = z.infer<typeof roadmapGoalCategorySchema>
 export type RoadmapScorecard = z.infer<typeof roadmapScorecardSchema>
 export type RoadmapScorecardScope = z.infer<typeof roadmapScorecardScopeSchema>
 export type BacklogItem = z.infer<typeof backlogItemSchema>
+export type WorkItem = z.infer<typeof workItemV2Schema>
+export type PersistedWorkItem = z.infer<typeof persistedWorkItemSchema>
+export type WorkItemKind = z.infer<typeof workItemKindSchema>
+export type ProductStatus = z.infer<typeof productStatusSchema>
+export type ValidationStatus = z.infer<typeof validationStatusSchema>
+export type HumanReviewStatus = z.infer<typeof humanReviewStatusSchema>
+export type DocumentationStatus = z.infer<typeof documentationStatusSchema>
 export type AcceptanceCriterion = z.infer<typeof acceptanceCriterionSchema>
 export type AttachmentReference = z.infer<typeof attachmentReferenceSchema>
 export type AgentRequest = z.infer<typeof agentRequestSchema>

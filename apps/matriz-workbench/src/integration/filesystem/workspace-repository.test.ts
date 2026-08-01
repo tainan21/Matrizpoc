@@ -101,6 +101,107 @@ describe("WorkspaceRepository", () => {
     ).rejects.toBeInstanceOf(RevisionConflictError)
   })
 
+  it("reads V1 without rewriting it and creates V2 work items", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    const legacy = await repository.createBacklogItem("sample", {
+      title: "Legacy task",
+      description: "",
+      priority: "medium",
+      tags: [],
+    })
+    const legacyPath = path.join(root, "apps", "sample", ".matriz", "backlog", `${legacy.id}.json`)
+    const before = await readFile(legacyPath, "utf8")
+    const normalized = await repository.listWorkItems("sample")
+    expect(normalized[0]).toMatchObject({ id: legacy.id, schemaVersion: 2, productStatus: "discovery" })
+    expect(await readFile(legacyPath, "utf8")).toBe(before)
+
+    const created = await repository.createWorkItem("sample", {
+      kind: "feature",
+      title: "Operational board",
+      description: "",
+      productStatus: "discovery",
+      validationStatus: "pending",
+      humanReviewStatus: "not_required",
+      documentationStatus: "pending",
+      priority: "high",
+    })
+    expect(created.id).toMatch(/^wi_/)
+    expect((await WorkspaceRepository.create(root)).getWorkItem("sample", created.id)).resolves.toMatchObject({
+      schemaVersion: 2,
+      kind: "feature",
+    })
+  })
+
+  it("serializes concurrent work item writes and reports the stale revision", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const item = await repository.createWorkItem("sample", {
+      kind: "task",
+      title: "Concurrent item",
+      description: "",
+      productStatus: "discovery",
+      validationStatus: "not_required",
+      humanReviewStatus: "not_required",
+      documentationStatus: "not_required",
+      priority: "medium",
+    })
+    const results = await Promise.allSettled([
+      repository.updateWorkItem("sample", item.id, { title: "First writer" }, item.revision),
+      repository.updateWorkItem("sample", item.id, { title: "Second writer" }, item.revision),
+    ])
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1)
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1)
+    expect(results.find((result) => result.status === "rejected")).toMatchObject({
+      reason: { code: "CONFLICT" },
+    })
+  })
+
+  it("allows human-only completion with evidence and keeps governance explicit", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const item = await repository.createWorkItem("sample", {
+      kind: "task",
+      title: "Human-only task",
+      description: "",
+      productStatus: "validation",
+      validationStatus: "not_required",
+      humanReviewStatus: "not_required",
+      documentationStatus: "not_required",
+      priority: "medium",
+      acceptanceCriteria: ["Resultado revisado"],
+    })
+    const prepared = await repository.updateWorkItem("sample", item.id, {
+      acceptanceCriteria: item.acceptanceCriteria.map((criterion) => ({ ...criterion, completed: true })),
+      references: [{ kind: "external_url", url: "https://example.com/evidence" }],
+    }, item.revision)
+    const completed = await repository.updateWorkItem(
+      "sample",
+      item.id,
+      { productStatus: "completed" },
+      prepared.revision,
+    )
+    expect(completed.productStatus).toBe("completed")
+  })
+
+  it("filters work item history by entity id", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const first = await repository.createWorkItem("sample", {
+      kind: "task", title: "First", description: "", productStatus: "discovery",
+      validationStatus: "not_required", humanReviewStatus: "not_required",
+      documentationStatus: "not_required", priority: "low",
+    })
+    await repository.createWorkItem("sample", {
+      kind: "task", title: "Second", description: "", productStatus: "discovery",
+      validationStatus: "not_required", humanReviewStatus: "not_required",
+      documentationStatus: "not_required", priority: "low",
+    })
+    const events = await repository.queryActivity("sample", { entityId: first.id })
+    expect(events).toHaveLength(1)
+    expect(events[0].entityId).toBe(first.id)
+  })
+
   it("persists control evidence atomically and rejects stale review", async () => {
     const { repository } = await fixture()
     await repository.initializeProject("sample")

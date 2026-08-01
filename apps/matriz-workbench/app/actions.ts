@@ -8,10 +8,16 @@ import {
   attachmentReferenceSchema,
   backlogWorkScopeSchema,
   backlogStatusSchema,
+  documentationStatusSchema,
+  humanReviewStatusSchema,
   prioritySchema,
+  productStatusSchema,
+  validationStatusSchema,
+  workItemKindSchema,
   type RoadmapPhase,
   type WorkbenchDocument,
 } from "../src/domain/schemas"
+import { RevisionConflictError, WorkspaceError } from "../src/domain/errors"
 import { WorkspaceRepository } from "../src/integration/filesystem/workspace-repository"
 import { createMaturityGoalCatalog } from "../src/application/maturity-goal-catalog"
 import { auditWorkbenchMaturity } from "../src/application/maturity-evidence-audit"
@@ -46,6 +52,34 @@ function lines(value: FormDataEntryValue | null): string[] {
         .map((item) => item.trim())
         .filter(Boolean)
     : []
+}
+
+export type WorkItemMutationResult =
+  | { status: "success"; itemId: string; revision: string; message: string }
+  | { status: "conflict"; itemId: string; latestRevision: string; message: string }
+  | { status: "error"; message: string }
+
+async function workItemFailure(
+  repository: WorkspaceRepository,
+  projectId: string,
+  itemId: string,
+  error: unknown,
+): Promise<WorkItemMutationResult> {
+  if (error instanceof RevisionConflictError) {
+    const latest = await repository.getWorkItem(projectId, itemId).catch(() => undefined)
+    return {
+      status: "conflict",
+      itemId,
+      latestRevision: latest?.revision ?? "unknown",
+      message: error.message,
+    }
+  }
+  return {
+    status: "error",
+    message: error instanceof WorkspaceError || error instanceof Error
+      ? error.message
+      : "Não foi possível atualizar o work item.",
+  }
 }
 
 async function requireWorkbenchSession(): Promise<void> {
@@ -113,6 +147,146 @@ export async function createProjectBlueprintAction(formData: FormData) {
   )
   revalidatePath("/", "layout")
   redirect(`/projects/matriz-infra-hub/backlog/${result.backlog.id}`)
+}
+
+export async function createWorkItemAction(formData: FormData): Promise<WorkItemMutationResult> {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  try {
+    const kind = workItemKindSchema.parse(formData.get("kind") ?? "task")
+    const item = await repository.createWorkItem(projectId, {
+      kind,
+      title: required(formData, "title"),
+      description: String(formData.get("description") ?? "").trim(),
+      productStatus: "discovery",
+      validationStatus: kind === "task" ? "not_required" : "pending",
+      humanReviewStatus: "not_required",
+      documentationStatus: kind === "outcome" ? "pending" : "not_required",
+      priority: prioritySchema.parse(formData.get("priority") ?? "medium"),
+      domain: String(formData.get("domain") ?? "").trim() || undefined,
+      responsible: String(formData.get("responsible") ?? "").trim() || undefined,
+      tags: String(formData.get("tags") ?? "")
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      acceptanceCriteria: lines(formData.get("acceptanceCriteria")),
+    })
+    revalidatePath(`/projects/${projectId}`, "layout")
+    return { status: "success", itemId: item.id, revision: item.revision, message: "Work item criado." }
+  } catch (error) {
+    return { status: "error", message: error instanceof Error ? error.message : "Não foi possível criar o work item." }
+  }
+}
+
+export async function saveWorkItemAction(formData: FormData): Promise<WorkItemMutationResult> {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const itemId = required(formData, "itemId")
+  const repository = await WorkspaceRepository.create()
+  try {
+    const current = await repository.getWorkItem(projectId, itemId)
+    const blockerSummary = String(formData.get("blockerSummary") ?? "").trim()
+    const criterionTexts = lines(formData.get("acceptanceCriteria"))
+    const item = await repository.updateWorkItem(
+      projectId,
+      itemId,
+      {
+        kind: workItemKindSchema.parse(formData.get("kind")),
+        title: required(formData, "title"),
+        description: String(formData.get("description") ?? "").trim(),
+        productStatus: productStatusSchema.parse(formData.get("productStatus")),
+        validationStatus: validationStatusSchema.parse(formData.get("validationStatus")),
+        humanReviewStatus: humanReviewStatusSchema.parse(formData.get("humanReviewStatus")),
+        documentationStatus: documentationStatusSchema.parse(formData.get("documentationStatus")),
+        priority: prioritySchema.parse(formData.get("priority")),
+        domain: String(formData.get("domain") ?? "").trim() || undefined,
+        responsible: String(formData.get("responsible") ?? "").trim() || undefined,
+        tags: String(formData.get("tags") ?? "")
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+        dependencyIds: String(formData.get("dependencyIds") ?? "")
+          .split(/[\n,]/)
+          .map((value) => value.trim())
+          .filter(Boolean),
+        acceptanceCriteria: criterionTexts.map((text, index) => {
+          const currentCriterion = current.acceptanceCriteria[index]
+          return {
+            id: currentCriterion?.id ?? `ac_${crypto.randomUUID()}`,
+            text,
+            completed: currentCriterion
+              ? formData.get(`criterion:${currentCriterion.id}`) === "on"
+              : false,
+          }
+        }),
+        blocker: blockerSummary
+          ? {
+              summary: blockerSummary,
+              status: formData.get("blockerStatus") === "resolved" ? "resolved" : "open",
+              updatedAt: new Date().toISOString(),
+            }
+          : undefined,
+      },
+      required(formData, "revision"),
+    )
+    revalidatePath(`/projects/${projectId}`, "layout")
+    return { status: "success", itemId: item.id, revision: item.revision, message: "Alterações salvas." }
+  } catch (error) {
+    return workItemFailure(repository, projectId, itemId, error)
+  }
+}
+
+export async function moveWorkItemAction(
+  projectId: string,
+  itemId: string,
+  targetStatus: string,
+  revision: string,
+): Promise<WorkItemMutationResult> {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  try {
+    const item = await repository.updateWorkItem(
+      projectId,
+      itemId,
+      { productStatus: productStatusSchema.parse(targetStatus) },
+      revision,
+    )
+    revalidatePath(`/projects/${projectId}`, "layout")
+    return { status: "success", itemId: item.id, revision: item.revision, message: "Estado atualizado." }
+  } catch (error) {
+    return workItemFailure(repository, projectId, itemId, error)
+  }
+}
+
+export async function addWorkItemReferenceAction(formData: FormData): Promise<WorkItemMutationResult> {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const itemId = required(formData, "itemId")
+  const repository = await WorkspaceRepository.create()
+  try {
+    const kind = required(formData, "referenceKind")
+    const value = required(formData, "referenceValue")
+    const label = String(formData.get("referenceLabel") ?? "").trim() || undefined
+    const reference = attachmentReferenceSchema.parse(
+      kind === "repository_file"
+        ? { kind, path: value, label }
+        : kind === "external_url"
+          ? { kind, url: value, label }
+          : { kind: "workbench_document", documentId: value, label },
+    )
+    const current = await repository.getWorkItem(projectId, itemId)
+    const item = await repository.updateWorkItem(
+      projectId,
+      itemId,
+      { references: [...current.references, reference] },
+      required(formData, "revision"),
+    )
+    revalidatePath(`/projects/${projectId}`, "layout")
+    return { status: "success", itemId: item.id, revision: item.revision, message: "Evidência vinculada." }
+  } catch (error) {
+    return workItemFailure(repository, projectId, itemId, error)
+  }
 }
 
 export async function createBacklogItemAction(formData: FormData) {

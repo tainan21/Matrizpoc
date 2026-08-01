@@ -79,6 +79,28 @@ function maxConcurrentCodexRuns(): number {
   return Number.isInteger(configured) && configured >= 1 && configured <= 4 ? configured : 2
 }
 
+export async function completeCodexRequestRecord(
+  repository: WorkspaceRepository,
+  projectId: string,
+  requestId: string,
+  result: { resultSummary: string; changedFiles: string[]; checks: string[] },
+) {
+  const request = await repository.getAgentRequest(projectId, requestId)
+  if (request.status === "completed" || request.status === "cancelled") return request
+  return repository.updateAgentRequest(
+    projectId,
+    requestId,
+    {
+      status: "completed",
+      resultSummary: result.resultSummary,
+      changedFiles: result.changedFiles,
+      checks: result.checks,
+    },
+    request.revision,
+    "codex",
+  )
+}
+
 export class CodexRunManager {
   private readonly sessions = new Map<string, Session>()
   private readonly pendingStarts = new Set<string>()
@@ -515,30 +537,16 @@ export class CodexRunManager {
 
   private async completeRequest(session: Session): Promise<void> {
     const repository = await WorkspaceRepository.create(session.repositoryRoot)
-    const request = await repository.getAgentRequest(session.projectId, session.requestId)
-    if (request.status === "completed" || request.status === "cancelled") return
-    const completedRequest = await repository.updateAgentRequest(
+    const completedRequest = await completeCodexRequestRecord(
+      repository,
       session.projectId,
       session.requestId,
       {
-        status: "completed",
         resultSummary: session.record.latestMessage || "Execução concluída pelo Codex.",
         changedFiles: session.record.changedFiles,
         checks: session.record.checks,
       },
-      request.revision,
-      "codex",
     )
-    const task = await repository.getBacklogItem(session.projectId, request.backlogItemId)
-    if (task.status !== "done" && task.status !== "archived") {
-      await repository.updateBacklogItem(
-        session.projectId,
-        task.id,
-        { status: "review" },
-        task.revision,
-        "codex",
-      )
-    }
     await enqueueOptionalNotifications(session.repositoryRoot, {
       projectId: session.projectId,
       event: "review_ready",

@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_7e2328e3-f9c3-4c24-ad33-96aa20c996ec",
+  "projectId": "matriz-workbench",
+  "kind": "feature",
+  "title": "Implementar quadro operacional e inspector",
+  "description": "Primeiro corte vertical persistente para operar work items com estados independentes de produto, execução, validação, revisão e documentação.\r\n\r\nChecks executados em 01/08/2026: pnpm test (144/144); typecheck; lint; build; health; verify:mcp.\r\nValidação visual: 1536×1024, 1672×937, 1280×800, 768×1024 e 390×844.\r\nRevisão humana aprovada pelo responsável em 01/08/2026; validação do produto promovida com base nos checks e evidências registrados.",
+  "productStatus": "completed",
+  "validationStatus": "passed",
+  "humanReviewStatus": "approved",
+  "documentationStatus": "current",
+  "priority": "high",
+  "domain": "Plataforma / Roadmap",
+  "responsible": "Codex",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "roadmap",
+    "colaboração",
+    "workbench"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_ff19f236-7484-4232-84de-0805646d12bc",
+      "text": "Quadro usa dados reais e persiste após recarga",
+      "completed": true
+    },
+    {
+      "id": "ac_ada7d105-d29f-475f-bd61-3ada9f4b1853",
+      "text": "Estado de produto permanece separado da execução",
+      "completed": true
+    },
+    {
+      "id": "ac_78b1253a-e45d-4a3f-822a-0cf15b912284",
+      "text": "Inspector apresenta contexto, evidências e histórico",
+      "completed": true
+    },
+    {
+      "id": "ac_b4c7e7f5-fb1e-4e44-9c8d-aec409d7a569",
+      "text": "DnD e alternativa acessível alteram estados adjacentes",
+      "completed": true
+    },
+    {
+      "id": "ac_dbbb1223-e4bb-464b-a5ff-5340caa5ca89",
+      "text": "Testes e validação visual foram executados",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/work-item-board.tsx",
+      "label": "Quadro operacional"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts",
+      "label": "Persistência V2 e concorrência"
+    }
+  ],
+  "createdAt": "2026-08-01T03:27:18.437Z",
+  "updatedAt": "2026-08-01T13:16:48.986Z",
+  "revision": "fdbd7ddfbac1a35d"
+}

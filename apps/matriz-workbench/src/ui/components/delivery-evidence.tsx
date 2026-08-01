@@ -4,12 +4,14 @@ import type { DeliveryEvidenceViewModel } from "../presenters/delivery-evidence-
 export function DeliveryEvidence({
   evidence,
   projectId,
+  variant = "default",
 }: {
   evidence: DeliveryEvidenceViewModel
   projectId: string
+  variant?: "default" | "compact"
 }) {
   return (
-    <section className="delivery-evidence">
+    <section className={`delivery-evidence ${variant === "compact" ? "delivery-evidence-compact" : ""}`}>
       <div className="section-heading">
         <div>
           <span className="eyebrow">Cadeia auditável</span>

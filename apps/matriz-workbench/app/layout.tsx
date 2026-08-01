@@ -17,7 +17,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#f7f7f8",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#070b13" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f7f8" },
+  ],
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
@@ -26,7 +29,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html
       lang="pt-BR"
       className={`${sans.variable} ${mono.variable}`}
-      data-theme={theme}
+      data-theme={theme ?? "dark"}
       suppressHydrationWarning
     >
       <body><WorkbenchBootstrap>{children}</WorkbenchBootstrap></body>

@@ -1,11 +1,12 @@
 import { z } from "zod"
+import { workItemIdSchema } from "./schemas"
 
 const isoDate = z.string().datetime()
 
 export const deliveryReceiptSchema = z.object({
   schemaVersion: z.literal(1),
   projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
-  backlogItemId: z.string().regex(/^tsk_[0-9a-f-]{36}$/),
+  backlogItemId: workItemIdSchema,
   provider: z.literal("github"),
   kind: z.literal("issue"),
   idempotencyKey: z.string().trim().min(1).max(300),
@@ -21,7 +22,7 @@ export type DeliveryReceipt = z.infer<typeof deliveryReceiptSchema>
 export const pullRequestReceiptSchema = z.object({
   schemaVersion: z.literal(1),
   projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
-  backlogItemId: z.string().regex(/^tsk_[0-9a-f-]{36}$/),
+  backlogItemId: workItemIdSchema,
   agentRequestId: z.string().regex(/^req_[0-9a-f-]{36}$/),
   provider: z.literal("github"),
   kind: z.literal("pull_request"),
@@ -40,7 +41,7 @@ export const pullRequestReceiptSchema = z.object({
 export const previewReceiptSchema = z.object({
   schemaVersion: z.literal(1),
   projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
-  backlogItemId: z.string().regex(/^tsk_[0-9a-f-]{36}$/),
+  backlogItemId: workItemIdSchema,
   agentRequestId: z.string().regex(/^req_[0-9a-f-]{36}$/),
   provider: z.literal("vercel"),
   kind: z.literal("preview"),

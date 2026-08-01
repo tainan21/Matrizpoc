@@ -5,6 +5,7 @@ import {
   backlogItemSchema,
   backlogStatusSchema,
   roadmapSchema,
+  workItemV2Schema,
 } from "./schemas"
 
 describe("Workbench schemas", () => {
@@ -88,5 +89,34 @@ describe("Workbench schemas", () => {
         workScope: { kind: "site", id: "../outside" },
       }).success,
     ).toBe(false)
+  })
+
+  it("accepts the independent governance states of a V2 work item", () => {
+    const timestamp = new Date().toISOString()
+    const item = workItemV2Schema.parse({
+      schemaVersion: 2,
+      id: "wi_00000000-0000-4000-8000-000000000000",
+      projectId: "matriz-workbench",
+      kind: "feature",
+      title: "Operational board",
+      description: "",
+      productStatus: "validation",
+      validationStatus: "pending",
+      humanReviewStatus: "pending",
+      documentationStatus: "current",
+      priority: "high",
+      workScope: { kind: "project" },
+      tags: [],
+      acceptanceCriteria: [],
+      dependencyIds: [],
+      references: [],
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      revision: "revision-1",
+    })
+
+    expect(item.productStatus).toBe("validation")
+    expect(item.validationStatus).toBe("pending")
+    expect(item.humanReviewStatus).toBe("pending")
   })
 })

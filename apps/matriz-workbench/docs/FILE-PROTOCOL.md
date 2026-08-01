@@ -27,3 +27,23 @@ schemas before use and send the current `revision` for updates.
 
 See `FEDERATED-PORTFOLIO.md`, `PROJECT-BLUEPRINTS.md` and
 `SITES-INTEGRATION.md` for the operational flows.
+
+## Work items v2
+
+The backlog folder accepts V1 `tsk_*.json` records and V2 work items. Reading a
+V1 record creates an in-memory projection only; the file is not rewritten.
+Creating a work item uses `wi_<uuid>`. Editing a V1 item preserves its `tsk_`
+identifier and writes schema version 2 to the same path.
+
+V2 separates `productStatus`, `validationStatus`, `humanReviewStatus` and
+`documentationStatus`. Agent request and run status remain separate files.
+Completing an agent request never completes or validates the product state.
+
+Board writes take a short per-item lock under the Git-ignored
+`.runtime/workbench/locks` folder, re-read the persisted revision while holding
+the lock, then use the existing atomic JSON replacement. A stale revision is a
+visible conflict; it is never resolved with last-write-wins.
+
+The product flow is `discovery`, `refined`, `ready`, `in_progress`,
+`validation`, `completed`, plus `archived`. Interactive moves follow adjacent
+states. Archiving is an explicit inspector operation, not a board column.

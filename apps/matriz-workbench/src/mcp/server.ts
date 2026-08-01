@@ -799,10 +799,6 @@ server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
       case "workbench_complete_agent_request": {
         const parsed = projectIdInput.extend({ requestId: z.string(), revision: z.string(), resultSummary: z.string().trim().min(1), changedFiles: z.array(z.string()).max(100), checks: z.array(z.string().trim().min(1)).min(1).max(100) }).parse(input)
         const result = await repository.updateAgentRequest(parsed.projectId, parsed.requestId, { status: "completed", resultSummary: parsed.resultSummary, changedFiles: parsed.changedFiles, checks: parsed.checks }, parsed.revision, "codex")
-        const task = await repository.getBacklogItem(parsed.projectId, result.backlogItemId)
-        if (task.status !== "done" && task.status !== "archived") {
-          await repository.updateBacklogItem(parsed.projectId, task.id, { status: "review" }, task.revision, "codex")
-        }
         return json(result)
       }
       case "workbench_write_document": {

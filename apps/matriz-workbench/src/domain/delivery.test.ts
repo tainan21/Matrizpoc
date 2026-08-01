@@ -16,7 +16,7 @@ const shared = {
 
 describe("delivery artifact contracts", () => {
   it("requires immutable commit evidence for a pull request", () => {
-    const result = pullRequestReceiptSchema.safeParse({
+    const receipt = {
       ...shared,
       provider: "github",
       kind: "pull_request",
@@ -28,8 +28,12 @@ describe("delivery artifact contracts", () => {
       headCommit: "a".repeat(40),
       checks: ["pnpm test"],
       publishedAt: "2026-07-28T20:00:00.000Z",
-    })
-    expect(result.success).toBe(true)
+    }
+    expect(pullRequestReceiptSchema.safeParse(receipt).success).toBe(true)
+    expect(pullRequestReceiptSchema.safeParse({
+      ...receipt,
+      backlogItemId: "wi_11111111-1111-4111-8111-111111111111",
+    }).success).toBe(true)
   })
 
   it("rejects a preview without a commit or terminally known state", () => {

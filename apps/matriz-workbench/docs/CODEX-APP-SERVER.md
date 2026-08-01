@@ -54,11 +54,17 @@ environment.
 6. Coarse run state is persisted in
    `apps/<app>/.matriz/agents/runs/<request-id>.json`.
 7. A successful turn requires at least one command with exit code zero.
-8. The request is completed and its backlog item moves to `review`.
+8. The request is completed and becomes available for human review. The linked
+   work item's product state is not changed automatically.
 9. A failed turn becomes `blocked`; a user interruption becomes `cancelled`.
 
 Run files are snapshots, not a second source of task truth. Backlog and agent
 request files remain canonical.
+
+An execution may provide checks, changed files, a diff and a result summary.
+Those artifacts support review but do not mean that validation, documentation
+or product completion was approved. Only a human can update those governance
+states in the operational board.
 
 ## HTTP surface
 

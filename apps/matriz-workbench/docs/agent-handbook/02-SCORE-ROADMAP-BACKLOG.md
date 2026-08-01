@@ -85,8 +85,16 @@ O backlog responde:
 Estados: `idea`, `ready`, `in_progress`, `blocked`, `review`, `done`,
 `archived`.
 
-`done` exige critérios concluídos e evidência de verificação. Uma execução do
-Codex normalmente move a tarefa para `review`, preservando a decisão humana.
+`done` exige critérios concluídos e evidência de verificação. No quadro V2, uma
+execução Codex concluída disponibiliza evidências, mas não altera o estado de
+produto nem concede validação.
+
+O quadro operacional usa `discovery`, `refined`, `ready`, `in_progress`,
+`validation` e `completed`. Registros V1 continuam legíveis e só migram quando
+editados. Bloqueio é uma condição do item, não uma coluna permanente.
+
+Estado de produto, execução, validação, revisão humana e documentação são
+independentes. Somente uma pessoa pode aprovar os estados de governança.
 
 ## Escolha do artefato
 
