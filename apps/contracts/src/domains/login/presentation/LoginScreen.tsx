@@ -101,9 +101,9 @@ export function ContractsLoginScreen() {
           role="alert"
           style={{
             padding: "0.75rem",
-            borderLeft: "3px solid #991b1b",
-            background: "#fef2f2",
-            color: "#991b1b",
+            borderLeft: "3px solid var(--danger)",
+            background: "var(--danger-soft)",
+            color: "var(--danger)",
             fontFamily: "ui-sans-serif, -apple-system, sans-serif",
             fontSize: "0.8125rem",
           }}

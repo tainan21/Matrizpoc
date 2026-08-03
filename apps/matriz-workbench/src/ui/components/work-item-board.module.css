@@ -1,23 +1,22 @@
 .workspace {
-  --board-bg: #070b13;
-  --board-surface: #0b111b;
-  --board-surface-2: #101824;
-  --board-surface-3: #151f2d;
-  --board-border: #202a3a;
-  --board-border-strong: #303b50;
-  --board-text: #f4f6fb;
-  --board-muted: #a4adbd;
-  --board-subtle: #778195;
-  --board-accent: #8b5cf6;
-  --board-accent-strong: #7c3aed;
-  --board-accent-soft: #2a174f;
-  --board-success: #22c55e;
-  --board-warning: #f59e0b;
-  --board-danger: #ef4444;
+  --board-bg: var(--wb-canvas);
+  --board-surface: var(--wb-surface-1);
+  --board-surface-2: var(--wb-surface-2);
+  --board-surface-3: var(--wb-surface-3);
+  --board-border: var(--wb-border);
+  --board-border-strong: var(--wb-border-strong);
+  --board-text: var(--wb-text);
+  --board-muted: var(--wb-text-secondary);
+  --board-subtle: var(--wb-text-subtle);
+  --board-accent: var(--wb-accent);
+  --board-accent-strong: var(--wb-accent);
+  --board-accent-soft: var(--wb-accent-soft);
+  --board-success: var(--wb-success);
+  --board-warning: var(--wb-warning);
+  --board-danger: var(--wb-danger);
   min-height: calc(100vh - var(--topbar));
   color: var(--board-text);
   background: var(--board-bg);
-  color-scheme: dark;
   overflow: hidden;
 }
 
@@ -55,7 +54,7 @@
 .viewTabs a, .viewTabs span { display: flex; align-items: center; padding: 0 12px; color: var(--board-muted); font-size: 11px; text-decoration: none; }
 .viewTabs span { color: #fff; background: var(--board-accent-soft); box-shadow: inset 0 -2px var(--board-accent); }
 .newButton, .primaryButton, .secondaryButton { min-height: 32px; border-radius: 5px; padding: 0 13px; border: 1px solid var(--board-border-strong); cursor: pointer; font-weight: 650; }
-.newButton, .primaryButton { color: #fff; border-color: var(--board-accent-strong); background: linear-gradient(180deg, #8b5cf6, #6d28d9); }
+.newButton, .primaryButton { color: #fff; border-color: var(--board-accent-strong); background: linear-gradient(180deg, color-mix(in srgb, var(--board-accent) 88%, white), color-mix(in srgb, var(--board-accent) 80%, black)); }
 .newButton { align-self: end; display: flex; align-items: center; gap: 6px; }
 .secondaryButton { color: var(--board-text); background: var(--board-surface-2); }
 .newButton:disabled, .primaryButton:disabled, .secondaryButton:disabled { cursor: not-allowed; opacity: .55; }
@@ -91,6 +90,8 @@
 .card h3 { margin: 7px 0 4px; font-size: 11px; line-height: 1.35; }
 .card p { margin: 0 0 8px; color: var(--board-muted); font-size: 9px; }
 .chipRow { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.detailLink { margin-left: auto; color: var(--board-accent); font-size: 11px; text-decoration: none; }
+.detailLink:hover { text-decoration: underline; }
 .kindChip, .priorityChip { display: inline-flex; align-items: center; min-height: 18px; padding: 0 6px; border-radius: 4px; font-size: 8px; }
 .kindChip { color: #d8b4fe; background: #2e1b4c; }.priorityChip { color: #cbd5e1; background: #253044; }.priorityChip.critical { color: #fecaca; background: #4a1e25; }.priorityChip.high { color: #fda4af; background: #481d2a; }.priorityChip.low { color: #86efac; background: #173524; }
 .executionBand { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding: 6px; border-radius: 4px; background: #161d2c; color: var(--board-muted); font-size: 8px; }

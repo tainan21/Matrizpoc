@@ -58,6 +58,13 @@ import {
   assertAgentRequestCompletion,
   assertAgentRequestTransition,
 } from "../../domain/agent-request-policy"
+import { buildAgentExecutionReview } from "../../domain/agent-execution-review"
+import {
+  inboxItemSchema,
+  sprintSchema,
+  type InboxItem,
+  type Sprint,
+} from "../../domain/adaptive-work"
 
 const MAX_JSON_BYTES = 256_000
 const MAX_DOCUMENT_BYTES = 100_000
@@ -348,6 +355,33 @@ export class WorkspaceRepository {
     }
   }
 
+  private async withCoordinatorLock<T>(key: string, operation: () => Promise<T>): Promise<T> {
+    if (!/^[a-z0-9_-]+$/.test(key)) {
+      throw new WorkspaceError("Identificador de coordenação inválido.", "INVALID_PATH")
+    }
+    const folder = path.join(this.repositoryRoot, ".runtime", "workbench", "locks")
+    await mkdir(folder, { recursive: true })
+    const target = path.join(folder, `coordinator--${key}.lock`)
+    let handle: Awaited<ReturnType<typeof open>> | undefined
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      try {
+        handle = await open(target, "wx", 0o600)
+        break
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
+        await new Promise((resolve) => setTimeout(resolve, 25))
+      }
+    }
+    if (!handle) throw new WorkspaceError("O planejamento está sendo atualizado em outra operação.", "CONFLICT")
+    try {
+      await handle.writeFile(`${process.pid}\n`, "utf8")
+      return await operation()
+    } finally {
+      await handle.close()
+      await unlink(target).catch(() => undefined)
+    }
+  }
+
   private async discoverRepositoryProject(): Promise<DiscoveredProject | null> {
     const packagePath = path.join(this.repositoryRoot, "package.json")
     if (!(await exists(packagePath))) return null
@@ -557,6 +591,10 @@ export class WorkspaceRepository {
     ]) {
       await this.ensureMatrixDirectory(projectId, folder)
     }
+    if (projectId === REPOSITORY_PROJECT_ID) {
+      await this.ensureMatrixDirectory(projectId, ["inbox"])
+      await this.ensureMatrixDirectory(projectId, ["sprints"])
+    }
     await this.atomicWrite(projectId, ["project.json"], workspace)
     await this.atomicWrite(projectId, ["roadmap.json"], roadmap)
     await this.atomicWrite(projectId, ["context.json"], context)
@@ -749,6 +787,30 @@ export class WorkspaceRepository {
     })
   }
 
+  async updateRoadmapMarkers(
+    projectId: string,
+    markers: Roadmap["markers"],
+    expectedRevision: string,
+    actor: ActivityEvent["actor"] = "human",
+    activity?: { action: string; summary: string; entityId?: string },
+  ): Promise<Roadmap> {
+    return this.withRoadmapLock(projectId, async () => {
+      const current = await this.getRoadmap(projectId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      const base = { ...current, markers, updatedAt: now(), revision: "" }
+      const next = roadmapSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(projectId, ["roadmap.json"], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: activity?.action ?? "roadmap.marker_updated",
+        summary: activity?.summary ?? "Marcador do roadmap atualizado.",
+        entityType: "roadmap",
+        entityId: activity?.entityId ?? projectId,
+      })
+      return next
+    })
+  }
+
   async updateRoadmapGoals(
     projectId: string,
     goals: Roadmap["goals"],
@@ -795,6 +857,338 @@ export class WorkspaceRepository {
     })
   }
 
+  async listInboxItems(): Promise<InboxItem[]> {
+    const folder = await this.safeMatrixPath(REPOSITORY_PROJECT_ID, ["inbox"])
+    const files = await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return []
+      throw error
+    })
+    const items = await Promise.all(
+      files
+        .filter((name) => /^in_[0-9a-f-]{36}\.json$/.test(name))
+        .map((name) => this.readJson(REPOSITORY_PROJECT_ID, ["inbox", name], inboxItemSchema)),
+    )
+    return items.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  }
+
+  async getInboxItem(itemId: string): Promise<InboxItem> {
+    if (!/^in_[0-9a-f-]{36}$/.test(itemId)) {
+      throw new WorkspaceError("ID de entrada inválido.", "INVALID_PATH")
+    }
+    return this.readJson(REPOSITORY_PROJECT_ID, ["inbox", `${itemId}.json`], inboxItemSchema)
+  }
+
+  async createInboxItem(
+    input: Pick<InboxItem, "title" | "detail" | "origin"> &
+      Partial<Pick<InboxItem, "originKey" | "reason" | "confidence" | "references" | "suggestedProjectId" | "suggestedKind" | "suggestedDomain" | "suggestedPriority" | "suggestedRelations" | "groupKey" | "duplicateOf">>,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<InboxItem> {
+    if (actor !== "human" && actor !== "codex") {
+      throw new WorkspaceError("Apenas pessoas e Codex podem propor entradas.", "INVALID_DATA")
+    }
+    if (actor === "codex" && input.origin !== "codex_suggestion") {
+      throw new WorkspaceError("Propostas do Codex precisam declarar sua origem.", "INVALID_DATA")
+    }
+    return this.withCoordinatorLock("inbox-create", async () => {
+      if (input.duplicateOf) await this.getInboxItem(input.duplicateOf)
+      if (input.originKey) {
+        const duplicate = (await this.listInboxItems()).find(
+          (item) => item.origin === input.origin && item.originKey === input.originKey,
+        )
+        if (duplicate) return duplicate
+      }
+      const timestamp = now()
+      const base = {
+        schemaVersion: 1 as const,
+        id: newId("in"),
+        title: input.title,
+        detail: input.detail,
+        origin: input.origin,
+        originKey: input.originKey,
+        reason: input.reason ?? "",
+        confidence: input.confidence,
+        references: input.references ?? [],
+        suggestedProjectId: input.suggestedProjectId,
+        suggestedKind: input.suggestedKind,
+        suggestedDomain: input.suggestedDomain,
+        suggestedPriority: input.suggestedPriority,
+        suggestedRelations: input.suggestedRelations ?? [],
+        groupKey: input.groupKey,
+        duplicateOf: input.duplicateOf,
+        status: "untriaged" as const,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }
+      const item = inboxItemSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(REPOSITORY_PROJECT_ID, ["inbox", `${item.id}.json`], item)
+      await this.appendActivity(REPOSITORY_PROJECT_ID, {
+        actor,
+        action: "inbox.proposed",
+        summary: `Entrada recebida: ${item.title}`,
+        entityType: "inbox",
+        entityId: item.id,
+        metadata: { origin: item.origin, status: item.status },
+      })
+      return item
+    })
+  }
+
+  async updateInboxItem(
+    itemId: string,
+    patch: Partial<Pick<InboxItem, "title" | "detail" | "reason" | "confidence" | "references" | "suggestedProjectId" | "suggestedKind" | "suggestedDomain" | "suggestedPriority" | "suggestedRelations" | "groupKey" | "duplicateOf" | "status">>,
+    expectedRevision: string,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<InboxItem> {
+    if (actor !== "human") throw new WorkspaceError("A curadoria da Inbox exige decisão humana.", "INVALID_DATA")
+    return this.withCoordinatorLock(itemId, async () => {
+      const current = await this.getInboxItem(itemId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      if (current.decision) throw new WorkspaceError("Uma entrada decidida não pode ser reclassificada.", "INVALID_DATA")
+      if (patch.duplicateOf === itemId) throw new WorkspaceError("Uma entrada não pode ser duplicada de si mesma.", "INVALID_DATA")
+      if (patch.duplicateOf) await this.getInboxItem(patch.duplicateOf)
+      if (patch.status && !["untriaged", "triaged"].includes(patch.status)) {
+        throw new WorkspaceError("Aceite ou descarte a entrada pela ação de decisão.", "INVALID_DATA")
+      }
+      const base = { ...current, ...patch, decision: undefined, updatedAt: now(), revision: "" }
+      const next = inboxItemSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(REPOSITORY_PROJECT_ID, ["inbox", `${itemId}.json`], next)
+      await this.appendActivity(REPOSITORY_PROJECT_ID, {
+        actor,
+        action: "inbox.triaged",
+        summary: `Entrada refinada: ${next.title}`,
+        entityType: "inbox",
+        entityId: itemId,
+      })
+      return next
+    })
+  }
+
+  async acceptInboxItem(
+    itemId: string,
+    input: { projectId: string; kind: WorkItem["kind"]; parentId?: string; priority?: WorkItem["priority"] },
+    expectedRevision: string,
+  ): Promise<{ inboxItem: InboxItem; workItem: WorkItem }> {
+    return this.withCoordinatorLock(itemId, async () => {
+      const current = await this.getInboxItem(itemId)
+      if (current.revision !== expectedRevision && current.decision?.kind !== "accepted") {
+        throw new RevisionConflictError()
+      }
+      if (current.decision?.kind === "discarded") {
+        throw new WorkspaceError("Uma entrada descartada não pode ser aceita.", "INVALID_DATA")
+      }
+      if (current.decision?.kind === "accepted") {
+        return { inboxItem: current, workItem: await this.getWorkItem(current.decision.projectId, current.decision.workItemId) }
+      }
+      const initializedProjects = (await this.discoverProjects()).filter((project) => project.initialized && !project.corrupted)
+      let existing: WorkItem | undefined
+      for (const project of initializedProjects) {
+        existing = (await this.listWorkItems(project.id)).find(
+          (item) => item.originRef?.kind === "inbox" && item.originRef.id === itemId,
+        )
+        if (existing) break
+      }
+      const workItem = existing ?? await this.createWorkItem(input.projectId, {
+        kind: input.kind,
+        title: current.title,
+        description: current.detail,
+        productStatus: "discovery",
+        validationStatus: input.kind === "task" ? "not_required" : "pending",
+        humanReviewStatus: "not_required",
+        documentationStatus: input.kind === "outcome" ? "pending" : "not_required",
+        priority: input.priority ?? current.suggestedPriority ?? "medium",
+        domain: current.suggestedDomain,
+        parentId: input.parentId,
+        originRef: { kind: "inbox", id: current.id },
+      })
+      const timestamp = now()
+      const base = {
+        ...current,
+        status: "accepted" as const,
+        decision: { kind: "accepted" as const, projectId: workItem.projectId, workItemId: workItem.id, actor: "human" as const, decidedAt: timestamp },
+        updatedAt: timestamp,
+        revision: "",
+      }
+      const inboxItem = inboxItemSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(REPOSITORY_PROJECT_ID, ["inbox", `${itemId}.json`], inboxItem)
+      await this.appendActivity(REPOSITORY_PROJECT_ID, {
+        actor: "human",
+        action: "inbox.accepted",
+        summary: `Entrada convertida em ${workItem.kind}: ${workItem.title}`,
+        entityType: "inbox",
+        entityId: itemId,
+        metadata: { projectId: workItem.projectId, workItemId: workItem.id },
+      })
+      return { inboxItem, workItem }
+    })
+  }
+
+  async discardInboxItem(itemId: string, reason: string, expectedRevision: string): Promise<InboxItem> {
+    return this.withCoordinatorLock(itemId, async () => {
+      const current = await this.getInboxItem(itemId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      if (current.decision) throw new WorkspaceError("A entrada já possui uma decisão.", "INVALID_DATA")
+      const timestamp = now()
+      const base = {
+        ...current,
+        status: "discarded" as const,
+        decision: { kind: "discarded" as const, reason, actor: "human" as const, decidedAt: timestamp },
+        updatedAt: timestamp,
+        revision: "",
+      }
+      const next = inboxItemSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(REPOSITORY_PROJECT_ID, ["inbox", `${itemId}.json`], next)
+      await this.appendActivity(REPOSITORY_PROJECT_ID, {
+        actor: "human",
+        action: "inbox.discarded",
+        summary: `Entrada descartada: ${next.title}`,
+        entityType: "inbox",
+        entityId: itemId,
+        metadata: { reason },
+      })
+      return next
+    })
+  }
+
+  async listSprints(): Promise<Sprint[]> {
+    const folder = await this.safeMatrixPath(REPOSITORY_PROJECT_ID, ["sprints"])
+    const files = await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return []
+      throw error
+    })
+    const sprints = await Promise.all(
+      files
+        .filter((name) => /^spr_[0-9a-f-]{36}\.json$/.test(name))
+        .map((name) => this.readJson(REPOSITORY_PROJECT_ID, ["sprints", name], sprintSchema)),
+    )
+    return sprints.sort((a, b) => b.startDate.localeCompare(a.startDate))
+  }
+
+  async getSprint(sprintId: string): Promise<Sprint> {
+    if (!/^spr_[0-9a-f-]{36}$/.test(sprintId)) throw new WorkspaceError("ID de sprint inválido.", "INVALID_PATH")
+    return this.readJson(REPOSITORY_PROJECT_ID, ["sprints", `${sprintId}.json`], sprintSchema)
+  }
+
+  private async validateSprint(sprint: Sprint): Promise<void> {
+    if (sprint.status === "active") {
+      const anotherActive = (await this.listSprints()).find((item) => item.status === "active" && item.id !== sprint.id)
+      if (anotherActive) throw new WorkspaceError(`A sprint ${anotherActive.name} já está ativa.`, "INVALID_DATA")
+    }
+    const commitments = new Map(sprint.outcomes.map((outcome) => [outcome.id, outcome]))
+    const seenWork = new Set<string>()
+    let activeWork = 0
+    for (const reference of sprint.work) {
+      const key = `${reference.projectId}:${reference.workItemId}`
+      if (seenWork.has(key)) throw new WorkspaceError("O mesmo trabalho não pode aparecer duas vezes na sprint.", "INVALID_DATA")
+      seenWork.add(key)
+      if (!commitments.has(reference.outcomeCommitmentId)) throw new WorkspaceError("O trabalho precisa apontar para um outcome comprometido.", "INVALID_DATA")
+      const item = await this.getWorkItem(reference.projectId, reference.workItemId)
+      if (["in_progress", "validation"].includes(item.productStatus)) activeWork += 1
+    }
+    if (activeWork > sprint.wipLimit && !sprint.wipOverrideReason) {
+      throw new WorkspaceError("Exceder o limite de WIP exige justificativa humana.", "INVALID_DATA")
+    }
+    const initiativeBacklog = new Set<string>()
+    for (const outcome of sprint.outcomes) {
+      if (outcome.ref.kind === "work_item_outcome") {
+        const item = await this.getWorkItem(outcome.ref.projectId, outcome.ref.workItemId)
+        if (item.kind !== "outcome") throw new WorkspaceError("O compromisso precisa referenciar um WorkItem Outcome.", "INVALID_DATA")
+      } else {
+        const roadmap = await this.getRoadmap(outcome.ref.projectId)
+        const initiativeId = outcome.ref.initiativeId
+        const initiative = roadmap.phases.flatMap((phase) => phase.initiatives).find((candidate) => candidate.id === initiativeId)
+        if (!initiative || !initiative.outcome.trim()) throw new WorkspaceError("A iniciativa comprometida precisa existir e declarar um outcome.", "INVALID_DATA")
+        for (const backlogId of initiative.backlogIds) initiativeBacklog.add(`${outcome.ref.projectId}:${backlogId}`)
+      }
+    }
+    const dependencyKeys = new Set<string>()
+    for (const dependency of sprint.crossProjectDependencies) {
+      if (dependency.fromProjectId === dependency.toProjectId) {
+        throw new WorkspaceError("Dependências dentro do mesmo projeto pertencem ao work item, não à sprint.", "INVALID_DATA")
+      }
+      const key = `${dependency.fromProjectId}:${dependency.fromWorkItemId}:${dependency.toProjectId}:${dependency.toWorkItemId}`
+      if (dependencyKeys.has(key)) throw new WorkspaceError("A dependência transversal já está registrada.", "INVALID_DATA")
+      const fromKey = `${dependency.fromProjectId}:${dependency.fromWorkItemId}`
+      const toKey = `${dependency.toProjectId}:${dependency.toWorkItemId}`
+      if (!seenWork.has(fromKey) || !seenWork.has(toKey)) {
+        throw new WorkspaceError("Dependências transversais precisam conectar trabalhos comprometidos na sprint.", "INVALID_DATA")
+      }
+      dependencyKeys.add(key)
+      await Promise.all([
+        this.getWorkItem(dependency.fromProjectId, dependency.fromWorkItemId),
+        this.getWorkItem(dependency.toProjectId, dependency.toWorkItemId),
+      ])
+    }
+    for (const outcome of sprint.outcomes) {
+      if (outcome.ref.kind === "work_item_outcome" && initiativeBacklog.has(`${outcome.ref.projectId}:${outcome.ref.workItemId}`)) {
+        throw new WorkspaceError("Não comprometa simultaneamente uma iniciativa e o Outcome já vinculado a ela.", "INVALID_DATA")
+      }
+    }
+  }
+
+  async createSprint(
+    input: Pick<Sprint, "name" | "intent" | "startDate" | "endDate"> & Partial<Pick<Sprint, "status" | "wipLimit" | "confidence" | "confidenceRationale" | "risks" | "outcomes" | "work" | "crossProjectDependencies">>,
+  ): Promise<Sprint> {
+    return this.withCoordinatorLock("sprint-create", async () => {
+      const timestamp = now()
+      const base = {
+        schemaVersion: 1 as const,
+        id: newId("spr"),
+        name: input.name,
+        intent: input.intent,
+        startDate: input.startDate,
+        endDate: input.endDate,
+        status: input.status ?? "planning" as const,
+        wipLimit: input.wipLimit ?? 4,
+        confidence: input.confidence,
+        confidenceRationale: input.confidenceRationale ?? "",
+        risks: input.risks ?? [],
+        outcomes: input.outcomes ?? [],
+        work: input.work ?? [],
+        crossProjectDependencies: input.crossProjectDependencies ?? [],
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }
+      const sprint = sprintSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.validateSprint(sprint)
+      await this.atomicWrite(REPOSITORY_PROJECT_ID, ["sprints", `${sprint.id}.json`], sprint)
+      await this.appendActivity(REPOSITORY_PROJECT_ID, {
+        actor: "human", action: "sprint.created", summary: `Sprint criada: ${sprint.name}`, entityType: "sprint", entityId: sprint.id,
+      })
+      return sprint
+    })
+  }
+
+  async updateSprint(
+    sprintId: string,
+    patch: Partial<Pick<Sprint, "name" | "intent" | "startDate" | "endDate" | "status" | "wipLimit" | "wipOverrideReason" | "confidence" | "confidenceRationale" | "risks" | "outcomes" | "work" | "crossProjectDependencies" | "closure">>,
+    expectedRevision: string,
+  ): Promise<Sprint> {
+    return this.withCoordinatorLock(sprintId, async () => {
+      const current = await this.getSprint(sprintId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      if (patch.status && patch.status !== current.status) {
+        const allowed: Record<Sprint["status"], Sprint["status"][]> = {
+          planning: ["active", "cancelled"],
+          active: ["validation", "cancelled"],
+          validation: ["active", "completed", "cancelled"],
+          completed: [],
+          cancelled: [],
+        }
+        if (!allowed[current.status].includes(patch.status)) {
+          throw new WorkspaceError(`A sprint não pode mudar de ${current.status} para ${patch.status}.`, "INVALID_DATA")
+        }
+      }
+      const base = { ...current, ...patch, id: current.id, updatedAt: now(), revision: "" }
+      const next = sprintSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.validateSprint(next)
+      await this.atomicWrite(REPOSITORY_PROJECT_ID, ["sprints", `${sprintId}.json`], next)
+      await this.appendActivity(REPOSITORY_PROJECT_ID, {
+        actor: "human", action: next.status === "completed" ? "sprint.completed" : "sprint.updated", summary: `Sprint atualizada: ${next.name}`, entityType: "sprint", entityId: sprintId, metadata: { status: next.status },
+      })
+      return next
+    })
+  }
+
   async getContextPolicy(projectId: string): Promise<ContextPolicy> {
     return this.readJson(projectId, ["context.json"], contextPolicySchema)
   }
@@ -831,6 +1225,50 @@ export class WorkspaceRepository {
     return value.schemaVersion === 1 ? normalizeLegacyWorkItem(value) : value
   }
 
+  private async validateWorkItemParent(
+    projectId: string,
+    itemId: string,
+    kind: WorkItem["kind"],
+    parentId?: string,
+  ): Promise<void> {
+    if (!parentId) return
+    if (parentId === itemId) throw new WorkspaceError("Um work item não pode ser pai de si mesmo.", "INVALID_DATA")
+    const parent = await this.getWorkItem(projectId, parentId)
+    const allowed = (parent.kind === "outcome" && kind !== "outcome") || (parent.kind === "task" && kind === "task")
+    if (!allowed) {
+      throw new WorkspaceError("Outcome aceita Feature, Bug ou Task; apenas Task pode conter outra Task.", "INVALID_DATA")
+    }
+    if (parent.productStatus === "archived") throw new WorkspaceError("Um item arquivado não pode receber trabalho filho.", "INVALID_DATA")
+    const visited = new Set([itemId])
+    let cursor: WorkItem | undefined = parent
+    while (cursor) {
+      if (visited.has(cursor.id)) throw new WorkspaceError("A relação parental criaria um ciclo.", "INVALID_DATA")
+      visited.add(cursor.id)
+      cursor = cursor.parentId ? await this.getWorkItem(projectId, cursor.parentId) : undefined
+    }
+  }
+
+  private async assertSprintWipForTransition(projectId: string, itemId: string, target: WorkItem["productStatus"]): Promise<void> {
+    if (!["in_progress", "validation"].includes(target)) return
+    const sprints = await this.listSprints().catch(() => [])
+    const sprint = sprints.find((candidate) =>
+      candidate.status === "active" && candidate.work.some((reference) => reference.projectId === projectId && reference.workItemId === itemId),
+    )
+    if (!sprint || sprint.wipOverrideReason) return
+    let activeCount = 0
+    for (const reference of sprint.work) {
+      if (reference.projectId === projectId && reference.workItemId === itemId) {
+        activeCount += 1
+        continue
+      }
+      const item = await this.getWorkItem(reference.projectId, reference.workItemId)
+      if (["in_progress", "validation"].includes(item.productStatus)) activeCount += 1
+    }
+    if (activeCount > sprint.wipLimit) {
+      throw new WorkspaceError(`A sprint ${sprint.name} atingiu o limite de WIP. Registre um override humano antes de iniciar mais trabalho.`, "INVALID_DATA")
+    }
+  }
+
   async createWorkItem(
     projectId: string,
     input: Pick<
@@ -849,6 +1287,8 @@ export class WorkspaceRepository {
       tags?: string[]
       acceptanceCriteria?: string[]
       workScope?: WorkItem["workScope"]
+      parentId?: WorkItem["parentId"]
+      originRef?: WorkItem["originRef"]
     },
     actor: ActivityEvent["actor"] = "human",
   ): Promise<WorkItem> {
@@ -857,9 +1297,11 @@ export class WorkspaceRepository {
     }
     await this.getWorkspace(projectId)
     const timestamp = now()
+    const itemId = newId("wi")
+    await this.validateWorkItemParent(projectId, itemId, input.kind, input.parentId)
     const base = {
       schemaVersion: 2 as const,
-      id: newId("wi"),
+      id: itemId,
       projectId,
       kind: input.kind,
       title: input.title,
@@ -871,6 +1313,8 @@ export class WorkspaceRepository {
       priority: input.priority,
       domain: input.domain,
       responsible: input.responsible,
+      parentId: input.parentId,
+      originRef: input.originRef,
       workScope: input.workScope ?? { kind: "project" as const },
       tags: input.tags ?? [],
       acceptanceCriteria: (input.acceptanceCriteria ?? []).map((text) => ({
@@ -912,6 +1356,7 @@ export class WorkspaceRepository {
         | "priority"
         | "domain"
         | "responsible"
+        | "archive"
         | "workScope"
         | "tags"
         | "acceptanceCriteria"
@@ -919,7 +1364,7 @@ export class WorkspaceRepository {
         | "references"
         | "blocker"
       >
-    >,
+    > & { parentId?: string | null },
     expectedRevision: string,
     actor: ActivityEvent["actor"] = "human",
   ): Promise<WorkItem> {
@@ -937,6 +1382,13 @@ export class WorkspaceRepository {
       }
       if (patch.productStatus && patch.productStatus !== current.productStatus) {
         assertWorkItemTransition(current, patch.productStatus)
+        await this.assertSprintWipForTransition(projectId, itemId, patch.productStatus)
+      }
+      const nextKind = patch.kind ?? current.kind
+      const nextParentId = patch.parentId === undefined ? current.parentId : patch.parentId ?? undefined
+      await this.validateWorkItemParent(projectId, itemId, nextKind, nextParentId)
+      if (patch.productStatus === "archived" && !(patch.archive ?? current.archive)) {
+        throw new WorkspaceError("Arquivar trabalho exige motivo, ator e data.", "INVALID_DATA")
       }
       if (patch.references) {
         for (const reference of patch.references) {
@@ -971,6 +1423,7 @@ export class WorkspaceRepository {
       const base = {
         ...current,
         ...patch,
+        parentId: nextParentId,
         schemaVersion: 2 as const,
         id: current.id,
         projectId,
@@ -1218,6 +1671,45 @@ export class WorkspaceRepository {
       entityId: requestId,
     })
     return next
+  }
+
+  async reviewAgentRequest(
+    projectId: string,
+    requestId: string,
+    input: {
+      status: "approved" | "changes_requested"
+      reviewedBy: string
+      note?: string
+      runRevision?: string
+    },
+    expectedRevision: string,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<AgentRequest> {
+    return this.withCoordinatorLock(`agent-review-${requestId}`, async () => {
+      const current = await this.getAgentRequest(projectId, requestId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      const review = buildAgentExecutionReview(current, input, actor)
+      const base = { ...current, review, updatedAt: now(), revision: "" }
+      const next = agentRequestSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(projectId, ["agents", "requests", `${requestId}.json`], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: review.status === "approved"
+          ? "agent_request.review_approved"
+          : "agent_request.changes_requested",
+        summary: review.status === "approved"
+          ? `Execução aprovada por ${review.reviewedBy}: ${next.title}`
+          : `Alterações solicitadas por ${review.reviewedBy}: ${next.title}`,
+        entityType: "agent_request",
+        entityId: requestId,
+        metadata: {
+          backlogItemId: next.backlogItemId,
+          requestRevision: current.revision,
+          runRevision: review.runRevision ?? null,
+        },
+      })
+      return next
+    })
   }
 
   async listDocuments(projectId: string): Promise<WorkbenchDocument[]> {

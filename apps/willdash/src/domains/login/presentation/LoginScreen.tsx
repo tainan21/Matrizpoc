@@ -100,8 +100,8 @@ export function WilldashLoginScreen() {
           role="alert"
           style={{
             padding: "0.5rem 0.75rem",
-            border: "1px solid #991b1b",
-            color: "#991b1b",
+            border: "1px solid var(--danger)",
+            color: "var(--danger)",
             fontSize: "0.75rem",
           }}
         >

@@ -4,7 +4,8 @@ import { cookies } from "next/headers"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { WorkbenchBootstrap } from "../src/bootstrap/provider"
-import { normalizeTheme, THEME_COOKIE } from "../src/ui/theme"
+import { normalizeAppearance, THEME_COOKIE, THEME_SYSTEM_COOKIE } from "../src/ui/theme"
+import { getAppearanceVariables } from "../src/ui/theme-presets"
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" })
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
@@ -24,12 +25,18 @@ export const viewport: Viewport = {
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const theme = normalizeTheme((await cookies()).get(THEME_COOKIE)?.value)
+  const cookieStore = await cookies()
+  const appearance = normalizeAppearance(
+    cookieStore.get(THEME_COOKIE)?.value,
+    cookieStore.get(THEME_SYSTEM_COOKIE)?.value,
+  )
   return (
     <html
       lang="pt-BR"
       className={`${sans.variable} ${mono.variable}`}
-      data-theme={theme ?? "dark"}
+      data-theme={appearance.mode}
+      data-system={appearance.system}
+      style={getAppearanceVariables(appearance.mode, appearance.system)}
       suppressHydrationWarning
     >
       <body><WorkbenchBootstrap>{children}</WorkbenchBootstrap></body>

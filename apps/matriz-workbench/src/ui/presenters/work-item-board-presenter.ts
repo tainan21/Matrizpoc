@@ -35,6 +35,9 @@ export interface WorkItemBoardViewModel {
 
 export interface WorkItemInspectorViewModel extends WorkItemCardViewModel {
   description: string
+  parentId?: string
+  originLabel?: string
+  archiveReason?: string
   validationStatus: WorkItem["validationStatus"]
   humanReviewStatus: WorkItem["humanReviewStatus"]
   documentationStatus: WorkItem["documentationStatus"]
@@ -153,6 +156,9 @@ export function toWorkItemInspectorViewModel(
   return {
     ...toWorkItemCardViewModel(item, requests),
     description: item.description,
+    parentId: item.parentId,
+    originLabel: item.originRef ? `${item.originRef.kind} · ${item.originRef.id}` : undefined,
+    archiveReason: item.archive?.reason,
     validationStatus: item.validationStatus,
     humanReviewStatus:
       requests.some((request) => request.backlogItemId === item.id) && item.humanReviewStatus === "not_required"

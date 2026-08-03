@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { roadmapSchema, workItemV2Schema } from "../../domain/schemas"
-import { toRoadmapInspectorViewModel, toRoadmapTimelineViewModel } from "./roadmap-timeline-presenter"
+import { toRoadmapInspectorViewModel, toRoadmapMarkerInspectorViewModel, toRoadmapTimelineViewModel } from "./roadmap-timeline-presenter"
 
 describe("roadmap timeline presenter", () => {
   it("maps dated and undated initiatives without inventing dates", () => {
@@ -102,5 +102,20 @@ describe("roadmap timeline presenter", () => {
     }])
     expect(inspector?.history).toHaveLength(1)
     expect(inspector?.roadmapRevision).toBe("revision-1")
+  })
+
+  it("positions markers by real date and exposes broken work item links", () => {
+    const phaseId = "phase_11111111-1111-4111-8111-111111111111"
+    const markerId = "marker_22222222-2222-4222-8222-222222222222"
+    const roadmap = roadmapSchema.parse({
+      schemaVersion: 1, projectId: "sample", goals: [], scorecards: [], updatedAt: "2026-08-01T00:00:00.000Z", revision: "revision-1",
+      phases: [{ id: phaseId, title: "Entrega", outcome: "", status: "active", initiatives: [] }],
+      markers: [{ id: markerId, phaseId, kind: "decision_gate", status: "pending_review", title: "Gate 1", description: "Revisar decisão", targetDate: "2026-09-15", backlogIds: ["wi_33333333-3333-4333-8333-333333333333"], references: [] }],
+    })
+    const timeline = toRoadmapTimelineViewModel(roadmap, [], "2026-08-01")
+    expect(timeline.totalMarkers).toBe(1)
+    expect(timeline.phases[0].markers[0]).toMatchObject({ kindLabel: "Gate de decisão", missingBacklogIds: ["wi_33333333-3333-4333-8333-333333333333"] })
+    expect(timeline.phases[0].markers[0].left).toBeGreaterThan(0)
+    expect(toRoadmapMarkerInspectorViewModel(timeline, markerId, [])?.roadmapRevision).toBe("revision-1")
   })
 })

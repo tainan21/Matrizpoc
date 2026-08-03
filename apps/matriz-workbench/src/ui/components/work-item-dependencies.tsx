@@ -193,7 +193,7 @@ export function WorkItemDependencies({
             ) : null}
           </div>
         </section>
-        {selected ? <WorkItemInspector item={selected} key={selected.revision} onClose={() => navigateToItem()} projectId={projectId} /> : null}
+        {selected ? <WorkItemInspector item={selected} key={selected.revision} onClose={() => navigateToItem()} parentOptions={dependencyMap.nodes.flatMap((node) => node.id !== selected.id && (node.kind === "outcome" || node.kind === "task") ? [{ id: node.id, kind: node.kind, title: node.title }] : [])} projectId={projectId} /> : null}
       </div>
 
       <footer className={styles.legend}>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { appThemes, themeToCssVars } from "@matriz/design-system"
+import { ThemeController } from "@matriz/design-ui"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
 import { ContractsAuthAdoption } from "../src/auth/provider"
 import "./globals.css"
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
 export default function ContractsRootLayout({ children }: { children: ReactNode }) {
   const tokens = themeToCssVars(appThemes.contracts)
   return (
-    <html lang="pt-BR" style={tokens}>
+    <html lang="pt-BR" data-theme="light" style={tokens}>
       <body
         style={{
           margin: 0,
@@ -22,6 +23,7 @@ export default function ContractsRootLayout({ children }: { children: ReactNode 
           minHeight: "100vh",
         }}
       >
+        <ThemeController appId="contracts" />
         <BootstrapGuard />
         <ContractsAuthAdoption>{children}</ContractsAuthAdoption>
       </body>

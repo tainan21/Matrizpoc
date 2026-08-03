@@ -66,6 +66,13 @@ Those artifacts support review but do not mean that validation, documentation
 or product completion was approved. Only a human can update those governance
 states in the operational board.
 
+The request detail and the linked work-item detail expose an explicit human
+review. Approving or requesting changes records a decision on the
+`AgentRequest` and the exact persisted run revision. This review does not move
+the request out of `completed`, does not update the linked work item and does
+not approve product validation. If the run snapshot later changes, the review
+is shown as stale and must be repeated.
+
 ## HTTP surface
 
 - `GET /api/codex/runtime`

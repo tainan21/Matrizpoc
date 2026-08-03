@@ -16,6 +16,7 @@ function roadmap(goal: {
     schemaVersion: 1,
     projectId: "matriz-workbench",
     phases: [],
+    markers: [],
     goals: [],
     scorecards: [
       {

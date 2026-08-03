@@ -15,7 +15,7 @@ function roadmap(): Roadmap {
     scope: slug === "app" ? "workbench_app" as const : slug === "docs" ? "workbench_docs" as const : "workbench_features" as const,
     goals: Array.from({ length: 100 }, (_, index) => goal(`goal-${index + 1}`, score, evidence)),
   })
-  return { schemaVersion: 1, projectId: "matriz-workbench", phases: [], goals: [], scorecards: [make("app", "App", 1, ["build passou"]), make("docs", "Docs", 0), make("features-domains", "Features", 0)], updatedAt: new Date().toISOString(), revision: "1234567890abcdef" }
+  return { schemaVersion: 1, projectId: "matriz-workbench", phases: [], markers: [], goals: [], scorecards: [make("app", "App", 1, ["build passou"]), make("docs", "Docs", 0), make("features-domains", "Features", 0)], updatedAt: new Date().toISOString(), revision: "1234567890abcdef" }
 }
 
 describe("control score", () => {

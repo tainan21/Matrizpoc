@@ -1,0 +1,311 @@
+[  862250ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  862353ms] [LOG] [HMR] connected @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  883862ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  885424ms] [LOG] [Fast Refresh] done in 1676ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  885897ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  885911ms] [LOG] [Fast Refresh] done in 123ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  953571ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  953809ms] [LOG] [Fast Refresh] done in 333ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  954003ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  954192ms] [LOG] [Fast Refresh] done in 290ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  954322ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  954571ms] [LOG] [Fast Refresh] done in 348ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  954734ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  954835ms] [LOG] [Fast Refresh] done in 201ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  955107ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  955268ms] [LOG] [Fast Refresh] done in 262ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  955642ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  955660ms] [LOG] [Fast Refresh] done in 123ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  955857ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  956103ms] [LOG] [Fast Refresh] done in 352ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  956341ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  956410ms] [LOG] [Fast Refresh] done in 170ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  956906ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  956923ms] [LOG] [Fast Refresh] done in 118ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  958342ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  958375ms] [LOG] [Fast Refresh] done in 136ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  980342ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[  980573ms] [LOG] [Fast Refresh] done in 334ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1034480ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1034767ms] [LOG] [Fast Refresh] done in 397ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1036355ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1037147ms] [LOG] [Fast Refresh] done in 892ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1067128ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1067177ms] [LOG] [Fast Refresh] done in 155ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1105008ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1105038ms] [LOG] [Fast Refresh] done in 135ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1214524ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1218827ms] [LOG] [Fast Refresh] done in 4398ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1218989ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1219988ms] [LOG] [Fast Refresh] done in 1100ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1220115ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1220263ms] [LOG] [Fast Refresh] done in 248ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1221254ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1221321ms] [LOG] [Fast Refresh] done in 168ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1221621ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1221942ms] [LOG] [Fast Refresh] done in 421ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1224244ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1224255ms] [LOG] [Fast Refresh] done in 115ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1224357ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1224369ms] [LOG] [Fast Refresh] done in 114ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1226690ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1226783ms] [LOG] [Fast Refresh] done in 198ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1227878ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1228129ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://127.0.0.1:3005/unlock?_rsc=1bzb5:0
+[ 1228129ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://127.0.0.1:3005/unlock?_rsc=1bzb5:0
+[ 1230170ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/unlock?_rsc=1bzb5:0
+[ 1230173ms] [ERROR] Failed to fetch RSC payload for http://127.0.0.1:3005/unlock. Falling back to browser navigation. TypeError: Failed to fetch
+    at createFetch (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:8084:21)
+    at fetchServerResponse (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:7928:27)
+    at fetchMissingDynamicData (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:9341:75)
+    at spawnDynamicRequests (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:9149:35)
+    at navigateToKnownRoute (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:10033:54)
+    at refreshDynamicData (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:10653:49)
+    at hmrRefreshReducer (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:10802:51)
+    at clientReducer (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:11398:65)
+    at Object.action (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:11631:55)
+    at runAction (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:11536:38)
+    at dispatchAction (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:11599:9)
+    at Object.dispatch (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:11629:40)
+    at http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:963:29
+    at startTransition (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_compiled_react-dom_0a3yzr5._.js:5469:31)
+    at nextDispatch (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:962:13)
+    at dispatchAppRouterAction (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:922:5)
+    at http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:11800:61
+    at startTransition (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_compiled_0tbh~ly._.js:1279:31)
+    at Object.hmrRefresh (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:11799:40)
+    at http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13967:64
+    at startTransition (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_compiled_0tbh~ly._.js:1279:31)
+    at processMessage (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13966:44)
+    at WebSocket.handleMessage (http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13335:52) @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:3272
+[ 1230184ms] [ERROR] WebSocket is already in CLOSING or CLOSED state. @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2790
+[ 1235994ms] [LOG] [HMR] connected @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1238210ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1238319ms] [LOG] [HMR] connected @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1247821ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1248135ms] [LOG] [Fast Refresh] done in 407ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1248299ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1248577ms] [LOG] [Fast Refresh] done in 380ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1500970ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1501213ms] [LOG] [Fast Refresh] done in 355ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1513715ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1513804ms] [LOG] [Fast Refresh] done in 203ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1515755ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1515802ms] [LOG] [Fast Refresh] done in 150ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1539848ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1540214ms] [LOG] [Fast Refresh] done in 468ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1540461ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1540813ms] [LOG] [Fast Refresh] done in 458ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1540996ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1541028ms] [LOG] [Fast Refresh] done in 134ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1543444ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1544305ms] [LOG] [Fast Refresh] done in 962ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1544537ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1544940ms] [LOG] [Fast Refresh] done in 509ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1545224ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1545285ms] [LOG] [Fast Refresh] done in 164ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1545969ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1546082ms] [LOG] [Fast Refresh] done in 213ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1546777ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1546806ms] [LOG] [Fast Refresh] done in 129ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1547168ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1547207ms] [LOG] [Fast Refresh] done in 146ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1550438ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1550466ms] [LOG] [Fast Refresh] done in 129ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1602571ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1602795ms] [LOG] [Fast Refresh] done in 327ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1603022ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1603312ms] [LOG] [Fast Refresh] done in 393ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1603591ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1603630ms] [LOG] [Fast Refresh] done in 140ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1615877ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1629809ms] [LOG] [Fast Refresh] done in 14004ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1630920ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1631416ms] [LOG] [Fast Refresh] done in 599ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1631518ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1632453ms] [LOG] [Fast Refresh] done in 1036ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1632707ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1632861ms] [LOG] [Fast Refresh] done in 255ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1634261ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1634300ms] [LOG] [Fast Refresh] done in 139ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1636289ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1636378ms] [LOG] [Fast Refresh] done in 190ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1637108ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1637120ms] [LOG] [Fast Refresh] done in 116ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1638648ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1638683ms] [LOG] [Fast Refresh] done in 139ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1639087ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1639092ms] [LOG] [Fast Refresh] done in 105ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1639407ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1639437ms] [LOG] [Fast Refresh] done in 131ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1640566ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1640574ms] [LOG] [Fast Refresh] done in 114ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1645216ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1645250ms] [LOG] [Fast Refresh] done in 144ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1667166ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1703777ms] [LOG] [Fast Refresh] done in 36701ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1704225ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1705922ms] [LOG] [Fast Refresh] done in 1804ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1708564ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1708916ms] [LOG] [Fast Refresh] done in 455ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1710895ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1711012ms] [LOG] [Fast Refresh] done in 221ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1714182ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1714205ms] [LOG] [Fast Refresh] done in 126ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1714952ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1715008ms] [LOG] [Fast Refresh] done in 158ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1715445ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1715657ms] [LOG] [Fast Refresh] done in 313ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1716466ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1717265ms] [LOG] [Fast Refresh] done in 899ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1718863ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1720442ms] [LOG] [Fast Refresh] done in 1664ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1720757ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1721353ms] [LOG] [Fast Refresh] done in 699ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1722320ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1722372ms] [LOG] [Fast Refresh] done in 155ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1723191ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1723208ms] [LOG] [Fast Refresh] done in 120ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1723590ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1723713ms] [LOG] [Fast Refresh] done in 225ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1725866ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1725874ms] [LOG] [Fast Refresh] done in 108ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1726476ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1726509ms] [LOG] [Fast Refresh] done in 135ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1727937ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1729398ms] [LOG] [Fast Refresh] done in 1316ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1730527ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1730914ms] [LOG] [Fast Refresh] done in 491ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1731020ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1731060ms] [LOG] [Fast Refresh] done in 145ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1733242ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1733467ms] [LOG] [Fast Refresh] done in 330ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1735811ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1735829ms] [LOG] [Fast Refresh] done in 120ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1737054ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1737072ms] [LOG] [Fast Refresh] done in 120ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1737478ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1737492ms] [LOG] [Fast Refresh] done in 124ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1740981ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1744250ms] [LOG] [Fast Refresh] done in 3365ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1744699ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1745097ms] [LOG] [Fast Refresh] done in 503ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1746269ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1747704ms] [LOG] [Fast Refresh] done in 1537ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1750677ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1753374ms] [LOG] [Fast Refresh] done in 2790ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1753857ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1769940ms] [LOG] [Fast Refresh] done in 16188ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1818457ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1818471ms] [LOG] [Fast Refresh] done in 127ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1821293ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1821399ms] [LOG] [Fast Refresh] done in 207ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1822952ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1823659ms] [LOG] [Fast Refresh] done in 812ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1824249ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1824425ms] [LOG] [Fast Refresh] done in 278ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1826049ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1826254ms] [LOG] [Fast Refresh] done in 311ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1827678ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1827813ms] [LOG] [Fast Refresh] done in 237ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1828487ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1828684ms] [LOG] [Fast Refresh] done in 301ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1831410ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1831640ms] [LOG] [Fast Refresh] done in 334ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1832974ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1833125ms] [LOG] [Fast Refresh] done in 253ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1833988ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1834170ms] [LOG] [Fast Refresh] done in 284ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1834902ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1835015ms] [LOG] [Fast Refresh] done in 216ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1836173ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1836209ms] [LOG] [Fast Refresh] done in 140ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1838457ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1838525ms] [LOG] [Fast Refresh] done in 173ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1841749ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1841755ms] [LOG] [Fast Refresh] done in 112ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1844727ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1844733ms] [LOG] [Fast Refresh] done in 109ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1846012ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1846072ms] [LOG] [Fast Refresh] done in 161ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1846415ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1846493ms] [LOG] [Fast Refresh] done in 179ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1846978ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1847079ms] [LOG] [Fast Refresh] done in 202ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1850963ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1850988ms] [LOG] [Fast Refresh] done in 129ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1857514ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1857535ms] [LOG] [Fast Refresh] done in 131ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1863398ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=fDj6Zf5OVkoervg1WPT_b' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1866442ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=fDj6Zf5OVkoervg1WPT_b' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1869493ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=fDj6Zf5OVkoervg1WPT_b' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1872997ms] [LOG] [HMR] connected @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1875199ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1875354ms] [LOG] [HMR] connected @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1875616ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1875783ms] [LOG] [Fast Refresh] done in 277ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1889637ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1894829ms] [LOG] [Fast Refresh] done in 5295ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1896373ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1896903ms] [LOG] [Fast Refresh] done in 635ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1897152ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1897761ms] [LOG] [Fast Refresh] done in 710ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1897992ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1898433ms] [LOG] [Fast Refresh] done in 545ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1898666ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1898887ms] [LOG] [Fast Refresh] done in 322ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1899117ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1899142ms] [LOG] [Fast Refresh] done in 127ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1899353ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1899716ms] [LOG] [Fast Refresh] done in 463ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1899903ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1900264ms] [LOG] [Fast Refresh] done in 463ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1901061ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1901194ms] [LOG] [Fast Refresh] done in 235ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1902054ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1902353ms] [LOG] [Fast Refresh] done in 400ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1902880ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1903508ms] [LOG] [Fast Refresh] done in 729ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1903769ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1904106ms] [LOG] [Fast Refresh] done in 438ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 1925061ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1928107ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1931159ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1934207ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1937264ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1944320ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1951371ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1958419ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1965470ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1972533ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1979593ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 1986642ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=N0kSq45kFtp-JXHexOAPV' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2029372ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2029464ms] [LOG] [HMR] connected @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2041843ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2041974ms] [LOG] [Fast Refresh] done in 163ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2042088ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2042120ms] [LOG] [Fast Refresh] done in 143ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2100183ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2102861ms] [LOG] [Fast Refresh] done in 2776ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2103062ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2103222ms] [LOG] [Fast Refresh] done in 265ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2148084ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2148377ms] [LOG] [Fast Refresh] done in 392ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2148527ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2148644ms] [LOG] [Fast Refresh] done in 222ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2297131ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2297135ms] [LOG] [Fast Refresh] done in 109ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2416378ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2416379ms] [LOG] [Fast Refresh] done in 116ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2419827ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2419858ms] [LOG] [Fast Refresh] done in 144ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
+[ 2439546ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2442595ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2445649ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2448705ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2451762ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2458824ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2465887ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2472940ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299
+[ 2480004ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3005/_next/webpack-hmr?id=ajVTRYbdT-4M0NTBbK_-8' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_client_0crsigt._.js:13299

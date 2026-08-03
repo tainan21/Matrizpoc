@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import {
   addWorkItemReferenceAction,
+  createAgentRequestAction,
   saveWorkItemAction,
   type WorkItemMutationResult,
 } from "../../../app/actions"
@@ -40,10 +41,12 @@ export function WorkItemInspector({
   projectId,
   item,
   onClose,
+  parentOptions = [],
 }: {
   projectId: string
   item: WorkItemInspectorViewModel
   onClose: () => void
+  parentOptions?: Array<{ id: string; kind: "outcome" | "task"; title: string }>
 }) {
   const router = useRouter()
   const closeButton = useRef<HTMLButtonElement>(null)
@@ -55,6 +58,11 @@ export function WorkItemInspector({
     closeButton.current?.focus()
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose()
+      const target = event.target as HTMLElement | null
+      if (target?.matches("input, textarea, select, [contenteditable='true']")) return
+      if (event.key.toLowerCase() === "r") setTab("context")
+      if (event.key.toLowerCase() === "e") setTab("execution")
+      if (event.key.toLowerCase() === "v") setTab("evidence")
     }
     window.addEventListener("keydown", closeOnEscape)
     return () => window.removeEventListener("keydown", closeOnEscape)
@@ -78,6 +86,7 @@ export function WorkItemInspector({
           <div className={styles.chipRow}>
             <span className={styles.kindChip}>{item.kindLabel}</span>
             <span className={`${styles.priorityChip} ${styles[item.priority]}`}>{item.priorityLabel}</span>
+            <Link className={styles.detailLink} href={`/projects/${projectId}/backlog/${item.id}`}>Abrir detalhe completo</Link>
           </div>
         </div>
         <button className={styles.iconButton} aria-label="Fechar inspector" onClick={onClose} ref={closeButton} type="button">×</button>
@@ -113,6 +122,11 @@ export function WorkItemInspector({
               <label>Prioridade<select name="priority" defaultValue={item.priority}><option value="critical">Crítica</option><option value="high">Alta</option><option value="medium">Média</option><option value="low">Baixa</option></select></label>
             </div>
             <label>Estado do produto<select name="productStatus" defaultValue={item.productStatus}>{Object.entries(PRODUCT_STATUS_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+            <label>
+              Motivo do arquivamento
+              <span className={styles.fieldHint}>obrigatório somente ao escolher Arquivado</span>
+              <input defaultValue={item.archiveReason ?? ""} name="archiveReason" />
+            </label>
             <div className={styles.fieldGrid}>
               <label>Domínio<input name="domain" defaultValue={item.domain === "Sem domínio" ? "" : item.domain} /></label>
               <label>Responsável<input name="responsible" defaultValue={item.responsible === "Não atribuído" ? "" : item.responsible} /></label>
@@ -148,6 +162,8 @@ export function WorkItemInspector({
             <label>Descrição<textarea defaultValue={item.description} name="description" rows={8} /></label>
             <label>Tags<input defaultValue={item.tags.join(", ")} name="tags" /></label>
             <label>Dependências<textarea defaultValue={item.dependencyIds.join("\n")} name="dependencyIds" rows={3} /></label>
+            <label>Outcome ou Task pai<select defaultValue={item.parentId ?? ""} name="parentId"><option value="">Sem pai</option>{parentOptions.map((option) => <option key={option.id} value={option.id}>{option.kind === "outcome" ? "Outcome" : "Task"} · {option.title}</option>)}</select></label>
+            {item.originLabel ? <p className={styles.fieldHint}>Origem permanente: {item.originLabel}</p> : null}
             <label>Bloqueio<textarea defaultValue={item.blocker ?? ""} name="blockerSummary" rows={3} /></label>
             <label>Status do bloqueio<select defaultValue={item.blocker ? "open" : "resolved"} name="blockerStatus"><option value="open">Aberto</option><option value="resolved">Resolvido</option></select></label>
           </section>
@@ -161,9 +177,11 @@ export function WorkItemInspector({
           {tab !== "overview" ? <input name="validationStatus" type="hidden" value={item.validationStatus} /> : null}
           {tab !== "overview" ? <input name="humanReviewStatus" type="hidden" value={item.humanReviewStatus} /> : null}
           {tab !== "overview" ? <input name="documentationStatus" type="hidden" value={item.documentationStatus} /> : null}
+          {tab !== "overview" ? <input name="archiveReason" type="hidden" value={item.archiveReason ?? ""} /> : null}
           {tab !== "context" ? <input name="description" type="hidden" value={item.description} /> : null}
           {tab !== "context" ? <input name="tags" type="hidden" value={item.tags.join(", ")} /> : null}
           {tab !== "context" ? <input name="dependencyIds" type="hidden" value={item.dependencyIds.join("\n")} /> : null}
+          {tab !== "context" ? <input name="parentId" type="hidden" value={item.parentId ?? ""} /> : null}
           {tab !== "context" ? <input name="blockerSummary" type="hidden" value={item.blocker ?? ""} /> : null}
           {tab !== "context" ? <input name="blockerStatus" type="hidden" value={item.blocker ? "open" : "resolved"} /> : null}
           {tab !== "criteria" ? item.acceptanceCriteria.filter((criterion) => criterion.completed).map((criterion) => <input key={criterion.id} name={`criterion:${criterion.id}`} type="hidden" value="on" />) : null}
@@ -190,6 +208,16 @@ export function WorkItemInspector({
             </article>
           ))}
           {!item.evidence.runs.length ? <p className={styles.emptyText}>Nenhuma execução vinculada. O estado do produto permanece independente.</p> : null}
+          <form action={createAgentRequestAction} className={styles.referenceForm}>
+            <input name="projectId" type="hidden" value={projectId} />
+            <input name="backlogItemId" type="hidden" value={item.id} />
+            <label>
+              Instruções adicionais
+              <span className={styles.fieldHint}>tipo, contexto, parent, sprint e critérios são herdados automaticamente</span>
+              <textarea name="instructions" placeholder="Opcional: limite, arquivo ou cuidado específico" rows={4} />
+            </label>
+            <button className={styles.primaryButton} type="submit">Criar solicitação Codex</button>
+          </form>
         </section>
       ) : null}
 

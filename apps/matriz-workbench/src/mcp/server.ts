@@ -307,8 +307,29 @@ const tools = [
     },
   },
   {
+    name: "workbench_propose_inbox_item",
+    description: "ESCRITA CURÁVEL — propõe uma entrada na Inbox; não cria trabalho permanente.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        title: { type: "string" },
+        detail: { type: "string" },
+        reason: { type: "string" },
+        confidence: { type: "number", minimum: 0, maximum: 1 },
+        projectId: { type: "string" },
+        kind: { type: "string", enum: ["outcome", "feature", "task", "bug"] },
+        domain: { type: "string" },
+        priority: { type: "string", enum: ["critical", "high", "medium", "low"] },
+        originKey: { type: "string" },
+      },
+      required: ["title", "reason"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
     name: "workbench_create_backlog_item",
-    description: "ESCRITA — cria uma tarefa e registra activity. Exige aprovação humana.",
+    description: "COMPATIBILIDADE — cria uma proposta curável na Inbox; não cria mais tarefa permanente.",
     inputSchema: {
       type: "object",
       properties: {
@@ -500,6 +521,8 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
         mimeType: "application/json",
       },
       { uri: "matriz://projects", name: "Projetos Matriz", mimeType: "application/json" },
+      { uri: "matriz://work/inbox", name: "Inbox de trabalho", mimeType: "application/json" },
+      { uri: "matriz://work/sprints", name: "Sprints", mimeType: "application/json" },
       ...projects
         .filter((project) => project.initialized)
         .flatMap((project) => [
@@ -532,6 +555,10 @@ server.setRequestHandler(ReadResourceRequestSchema, async ({ params }) => {
   let value: unknown
   if (uri.hostname === "workbench" && parts.join("/") === "agent-guide") {
     value = getAgentOperatingGuide()
+  } else if (uri.hostname === "work" && parts.join("/") === "inbox") {
+    value = await repository.listInboxItems()
+  } else if (uri.hostname === "work" && parts.join("/") === "sprints") {
+    value = await repository.listSprints()
   } else if (uri.hostname === "projects" && parts.length === 0) {
     value = (await repository.discoverProjects()).map(({ id, displayName, initialized, corrupted }) => ({
       id, displayName, initialized, corrupted,
@@ -735,7 +762,40 @@ server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
       }
       case "workbench_create_backlog_item": {
         const parsed = projectIdInput.extend({ title: z.string(), description: z.string().default(""), priority: prioritySchema, workScope: backlogWorkScopeSchema.optional(), tags: z.array(z.string()).default([]), acceptanceCriteria: z.array(z.string()).default([]) }).parse(input)
-        return json(await repository.createBacklogItem(parsed.projectId, parsed, "codex"))
+        return json(await repository.createInboxItem({
+          title: parsed.title,
+          detail: parsed.description,
+          origin: "codex_suggestion",
+          reason: "Proposta recebida pela tool legada workbench_create_backlog_item.",
+          suggestedProjectId: parsed.projectId,
+          suggestedKind: "task",
+          suggestedPriority: parsed.priority,
+        }, "codex"))
+      }
+      case "workbench_propose_inbox_item": {
+        const parsed = z.object({
+          title: z.string().trim().min(1).max(180),
+          detail: z.string().max(8000).default(""),
+          reason: z.string().trim().min(1).max(1000),
+          confidence: z.number().min(0).max(1).optional(),
+          projectId: z.string().optional(),
+          kind: z.enum(["outcome", "feature", "task", "bug"]).optional(),
+          domain: z.string().optional(),
+          priority: prioritySchema.optional(),
+          originKey: z.string().optional(),
+        }).parse(input)
+        return json(await repository.createInboxItem({
+          title: parsed.title,
+          detail: parsed.detail,
+          origin: "codex_suggestion",
+          originKey: parsed.originKey,
+          reason: parsed.reason,
+          confidence: parsed.confidence,
+          suggestedProjectId: parsed.projectId,
+          suggestedKind: parsed.kind,
+          suggestedDomain: parsed.domain,
+          suggestedPriority: parsed.priority,
+        }, "codex"))
       }
       case "workbench_propose_site_metadata_update": {
         if (!sites) throw new Error("App Sites não está disponível.")
@@ -751,36 +811,19 @@ server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
           ),
         }).parse(input)
         await sites.getSite(parsed.siteId)
-        const created = await repository.createBacklogItem("sites", {
+        const proposal = await repository.createInboxItem({
           title: `Revisar metadata: ${parsed.siteId}`,
-          description: `${parsed.summary}\n\nProposta:\n${JSON.stringify(parsed.changes, null, 2)}`,
-          priority: "medium",
-          workScope: { kind: "site", id: parsed.siteId },
-          tags: ["metadata", "seo"],
-          acceptanceCriteria: [
-            "A mudança foi revisada no diff",
-            "Metadata e assets foram validados",
-          ],
+          detail: `${parsed.summary}\n\nProposta:\n${JSON.stringify(parsed.changes, null, 2)}`,
+          origin: "codex_suggestion",
+          originKey: `site-metadata:${parsed.siteId}:${JSON.stringify(parsed.changes)}`,
+          reason: "Metadata do site requer revisão humana antes de se tornar trabalho.",
+          suggestedProjectId: "sites",
+          suggestedKind: "task",
+          suggestedPriority: "medium",
+          suggestedDomain: "metadata",
+          references: [{ kind: "repository_file", value: `apps/sites/sites/${parsed.siteId}/site.json`, label: `Configuração ${parsed.siteId}` }],
         }, "codex")
-        const task = await repository.updateBacklogItem(
-          "sites",
-          created.id,
-          {
-            references: [{
-              kind: "repository_file",
-              path: `apps/sites/sites/${parsed.siteId}/site.json`,
-              label: `Configuração ${parsed.siteId}`,
-            }],
-          },
-          created.revision,
-          "codex",
-        )
-        const request = await repository.createAgentRequest(
-          "sites",
-          task.id,
-          "Revise a proposta, apresente o diff e solicite aprovação antes de alterar site.json.",
-        )
-        return json({ task, request })
+        return json({ proposal, requiresHumanAcceptance: true })
       }
       case "workbench_update_backlog_item": {
         const parsed = projectIdInput.extend({ itemId: z.string(), revision: z.string(), title: z.string().optional(), description: z.string().optional(), status: backlogStatusSchema.optional(), priority: prioritySchema.optional(), tags: z.array(z.string()).optional() }).parse(input)
@@ -788,7 +831,7 @@ server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
         return json(await repository.updateBacklogItem(projectId, itemId, patch, revision, "codex"))
       }
       case "workbench_append_activity": {
-        const parsed = projectIdInput.extend({ actor: z.enum(["human", "codex", "agent", "system"]), action: z.string(), summary: z.string(), entityType: z.enum(["project", "roadmap", "backlog", "document", "agent_request"]), entityId: z.string() }).parse(input)
+        const parsed = projectIdInput.extend({ actor: z.enum(["human", "codex", "agent", "system"]), action: z.string(), summary: z.string(), entityType: z.enum(["project", "roadmap", "backlog", "document", "agent_request", "inbox", "sprint"]), entityId: z.string() }).parse(input)
         const { projectId, ...event } = parsed
         return json(await repository.appendActivity(projectId, event))
       }

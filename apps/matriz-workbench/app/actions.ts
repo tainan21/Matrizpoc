@@ -13,12 +13,18 @@ import {
   prioritySchema,
   productStatusSchema,
   roadmapStatusSchema,
+  roadmapGateStatusSchema,
+  roadmapMarkerKindSchema,
+  roadmapMarkerSchema,
+  roadmapOutcomeMarkerStatusSchema,
   validationStatusSchema,
   workItemIdSchema,
   workItemKindSchema,
   type RoadmapPhase,
+  type AttachmentReference,
   type WorkbenchDocument,
 } from "../src/domain/schemas"
+import { assertRoadmapMarkerStatusChange, markerHasReviewableEvidence } from "../src/domain/roadmap-marker"
 import { RevisionConflictError, WorkspaceError } from "../src/domain/errors"
 import { WorkspaceRepository } from "../src/integration/filesystem/workspace-repository"
 import { createMaturityGoalCatalog } from "../src/application/maturity-goal-catalog"
@@ -40,6 +46,12 @@ import { createProjectBlueprintWorkflow } from "../src/application/project-bluep
 import { ProjectBlueprintRepository } from "../src/integration/filesystem/project-blueprint-repository"
 import { snippetSchema } from "../src/domain/control"
 import { buildScoreSummary } from "../src/application/control"
+import {
+  inboxOriginSchema,
+  sprintExecutionModeSchema,
+  sprintOutcomeResultSchema,
+  sprintStatusSchema,
+} from "../src/domain/adaptive-work"
 
 function required(formData: FormData, key: string): string {
   const value = formData.get(key)
@@ -64,6 +76,11 @@ export type WorkItemMutationResult =
 export type RoadmapMutationResult =
   | { status: "success"; entityId: string; revision: string; message: string }
   | { status: "conflict"; entityId: string; latestRevision: string; message: string }
+  | { status: "error"; message: string }
+
+export type AgentExecutionReviewResult =
+  | { status: "success"; requestId: string; revision: string; message: string }
+  | { status: "conflict"; requestId: string; latestRevision: string; message: string }
   | { status: "error"; message: string }
 
 async function roadmapFailure(
@@ -94,6 +111,18 @@ function roadmapBacklogIds(value: FormDataEntryValue | null): string[] {
     ? value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean)
     : []
   return Array.from(new Set(ids.map((item) => workItemIdSchema.parse(item))))
+}
+
+function optionalAttachmentReference(formData: FormData): AttachmentReference | undefined {
+  const kind = String(formData.get("referenceKind") ?? "").trim()
+  const value = String(formData.get("referenceValue") ?? "").trim()
+  if (!kind || !value) return undefined
+  const label = String(formData.get("referenceLabel") ?? "").trim() || undefined
+  return attachmentReferenceSchema.parse(
+    kind === "repository_file" ? { kind, path: value, label }
+      : kind === "external_url" ? { kind, url: value, label }
+        : { kind, documentId: value, label },
+  )
 }
 
 async function workItemFailure(
@@ -224,6 +253,8 @@ export async function saveWorkItemAction(formData: FormData): Promise<WorkItemMu
   try {
     const current = await repository.getWorkItem(projectId, itemId)
     const blockerSummary = String(formData.get("blockerSummary") ?? "").trim()
+    const productStatus = productStatusSchema.parse(formData.get("productStatus"))
+    const archiveReason = String(formData.get("archiveReason") ?? "").trim()
     const criterionTexts = lines(formData.get("acceptanceCriteria"))
     const item = await repository.updateWorkItem(
       projectId,
@@ -232,13 +263,21 @@ export async function saveWorkItemAction(formData: FormData): Promise<WorkItemMu
         kind: workItemKindSchema.parse(formData.get("kind")),
         title: required(formData, "title"),
         description: String(formData.get("description") ?? "").trim(),
-        productStatus: productStatusSchema.parse(formData.get("productStatus")),
+        productStatus,
         validationStatus: validationStatusSchema.parse(formData.get("validationStatus")),
         humanReviewStatus: humanReviewStatusSchema.parse(formData.get("humanReviewStatus")),
         documentationStatus: documentationStatusSchema.parse(formData.get("documentationStatus")),
         priority: prioritySchema.parse(formData.get("priority")),
         domain: String(formData.get("domain") ?? "").trim() || undefined,
         responsible: String(formData.get("responsible") ?? "").trim() || undefined,
+        parentId: String(formData.get("parentId") ?? "").trim() || null,
+        archive: productStatus === "archived"
+          ? {
+              reason: archiveReason,
+              actor: "human",
+              archivedAt: new Date().toISOString(),
+            }
+          : current.archive,
         tags: String(formData.get("tags") ?? "")
           .split(",")
           .map((tag) => tag.trim())
@@ -568,6 +607,86 @@ export async function saveRoadmapInitiativeAction(formData: FormData): Promise<R
   }
 }
 
+export async function addRoadmapMarkerAction(formData: FormData): Promise<RoadmapMutationResult> {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const phaseId = required(formData, "phaseId")
+  const repository = await WorkspaceRepository.create()
+  const markerId = `marker_${randomUUID()}`
+  try {
+    const roadmap = await repository.getRoadmap(projectId)
+    const phase = roadmap.phases.find((item) => item.id === phaseId)
+    if (!phase) throw new Error("Fase não encontrada.")
+    const initiativeId = String(formData.get("initiativeId") ?? "").trim() || undefined
+    if (initiativeId && !phase.initiatives.some((item) => item.id === initiativeId)) throw new Error("A iniciativa não pertence à fase selecionada.")
+    const kind = roadmapMarkerKindSchema.parse(formData.get("kind"))
+    const reference = optionalAttachmentReference(formData)
+    const marker = roadmapMarkerSchema.parse({
+      id: markerId, phaseId, initiativeId, kind, status: "planned",
+      title: required(formData, "title"), description: String(formData.get("description") ?? "").trim(),
+      targetDate: required(formData, "targetDate"), responsible: String(formData.get("responsible") ?? "").trim() || undefined,
+      backlogIds: roadmapBacklogIds(formData.get("backlogIds")), references: reference ? [reference] : [],
+    })
+    const next = await repository.updateRoadmapMarkers(projectId, [...roadmap.markers, marker], required(formData, "revision"), "human", {
+      action: "roadmap.marker_created", summary: `Marcador criado: ${marker.title}`, entityId: marker.id,
+    })
+    revalidatePath(`/projects/${projectId}/roadmap`)
+    return { status: "success", entityId: marker.id, revision: next.revision, message: "Marcador criado." }
+  } catch (error) {
+    return roadmapFailure(repository, projectId, markerId, error)
+  }
+}
+
+export async function saveRoadmapMarkerAction(formData: FormData): Promise<RoadmapMutationResult> {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const markerId = required(formData, "markerId")
+  const repository = await WorkspaceRepository.create()
+  try {
+    const [roadmap, workItems] = await Promise.all([repository.getRoadmap(projectId), repository.listWorkItems(projectId)])
+    const current = roadmap.markers.find((marker) => marker.id === markerId)
+    if (!current) throw new Error("Marcador não encontrado.")
+    const phaseId = required(formData, "phaseId")
+    const phase = roadmap.phases.find((item) => item.id === phaseId)
+    if (!phase) throw new Error("Fase não encontrada.")
+    const initiativeId = String(formData.get("initiativeId") ?? "").trim() || undefined
+    if (initiativeId && !phase.initiatives.some((item) => item.id === initiativeId)) throw new Error("A iniciativa não pertence à fase selecionada.")
+    const reference = optionalAttachmentReference(formData)
+    const references = reference ? [...current.references, reference] : current.references
+    const nextStatus = (current.kind === "validation_gate" || current.kind === "decision_gate")
+      ? roadmapGateStatusSchema.parse(formData.get("status"))
+      : roadmapOutcomeMarkerStatusSchema.parse(formData.get("status"))
+    const reviewedBy = String(formData.get("reviewedBy") ?? "").trim() || undefined
+    const waiverReason = String(formData.get("waiverReason") ?? "").trim() || undefined
+    const candidate = roadmapMarkerSchema.parse({
+      ...current, phaseId, initiativeId, status: nextStatus,
+      title: required(formData, "title"), description: String(formData.get("description") ?? "").trim(),
+      targetDate: required(formData, "targetDate"), responsible: String(formData.get("responsible") ?? "").trim() || undefined,
+      backlogIds: roadmapBacklogIds(formData.get("backlogIds")), references,
+      reviewedBy, waiverReason, reviewNote: String(formData.get("reviewNote") ?? "").trim() || undefined,
+      reviewedAt: ["passed", "failed", "waived"].includes(nextStatus) ? new Date().toISOString() : undefined,
+    })
+    if (candidate.status !== current.status) {
+      assertRoadmapMarkerStatusChange(current, candidate.status, {
+        actor: "human", evidenceAvailable: markerHasReviewableEvidence(candidate, workItems), reviewedBy, waiverReason,
+      })
+    }
+    const isGate = candidate.kind === "validation_gate" || candidate.kind === "decision_gate"
+    const action = reference ? "roadmap.marker_evidence_linked"
+      : candidate.status !== current.status && isGate && candidate.status === "pending_review" ? "roadmap.gate_submitted"
+        : candidate.status !== current.status && isGate && candidate.status === "waived" ? "roadmap.gate_waived"
+          : candidate.status !== current.status && isGate ? "roadmap.gate_reviewed"
+            : candidate.status !== current.status ? "roadmap.marker_status_changed" : "roadmap.marker_updated"
+    const next = await repository.updateRoadmapMarkers(projectId, roadmap.markers.map((marker) => marker.id === markerId ? candidate : marker), required(formData, "revision"), "human", {
+      action, summary: `Marcador atualizado: ${candidate.title} (${candidate.status}).`, entityId: markerId,
+    })
+    revalidatePath(`/projects/${projectId}/roadmap`)
+    return { status: "success", entityId: markerId, revision: next.revision, message: reference ? "Evidência vinculada." : "Marcador salvo." }
+  } catch (error) {
+    return roadmapFailure(repository, projectId, markerId, error)
+  }
+}
+
 export async function advanceRoadmapInitiativeAction(formData: FormData) {
   await requireWorkbenchSession()
   const projectId = required(formData, "projectId")
@@ -712,6 +831,338 @@ export async function createAgentRequestAction(formData: FormData) {
   )
   revalidatePath(`/projects/${projectId}`, "layout")
   redirect(`/projects/${projectId}/agents#${request.id}`)
+}
+
+export async function reviewAgentExecutionAction(
+  formData: FormData,
+): Promise<AgentExecutionReviewResult> {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const requestId = required(formData, "requestId")
+  const revision = required(formData, "revision")
+  const statusValue = required(formData, "reviewStatus")
+  const status = statusValue === "approved" || statusValue === "changes_requested"
+    ? statusValue
+    : undefined
+  if (!status) return { status: "error", message: "Decisão de revisão inválida." }
+  const repository = await WorkspaceRepository.create()
+  try {
+    const request = await repository.reviewAgentRequest(projectId, requestId, {
+      status,
+      reviewedBy: required(formData, "reviewedBy"),
+      note: String(formData.get("reviewNote") ?? ""),
+      runRevision: String(formData.get("runRevision") ?? "").trim() || undefined,
+    }, revision, "human")
+    revalidatePath(`/projects/${projectId}/agents/${requestId}`)
+    revalidatePath(`/projects/${projectId}/backlog/${request.backlogItemId}`)
+    revalidatePath(`/projects/${projectId}/backlog`)
+    return {
+      status: "success",
+      requestId,
+      revision: request.revision,
+      message: status === "approved"
+        ? "Execução aprovada. O estado do produto não foi alterado."
+        : "Alterações solicitadas. O estado do produto não foi alterado.",
+    }
+  } catch (error) {
+    if (error instanceof RevisionConflictError) {
+      const latest = await repository.getAgentRequest(projectId, requestId).catch(() => undefined)
+      return {
+        status: "conflict",
+        requestId,
+        latestRevision: latest?.revision ?? "unknown",
+        message: error.message,
+      }
+    }
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Não foi possível revisar a execução.",
+    }
+  }
+}
+
+export async function captureInboxItemAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const item = await repository.createInboxItem({
+    title: required(formData, "title"),
+    detail: String(formData.get("detail") ?? "").trim(),
+    origin: inboxOriginSchema.parse(formData.get("origin") ?? "human"),
+    suggestedProjectId: String(formData.get("suggestedProjectId") ?? "").trim() || undefined,
+    suggestedKind: formData.get("suggestedKind") ? workItemKindSchema.parse(formData.get("suggestedKind")) : undefined,
+  })
+  revalidatePath("/work", "layout")
+  redirect(`/work/inbox?item=${item.id}`)
+}
+
+export async function triageInboxItemAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const itemId = required(formData, "itemId")
+  await repository.updateInboxItem(itemId, {
+    title: required(formData, "title"),
+    detail: String(formData.get("detail") ?? "").trim(),
+    reason: String(formData.get("reason") ?? "").trim(),
+    suggestedProjectId: String(formData.get("suggestedProjectId") ?? "").trim() || undefined,
+    suggestedKind: formData.get("suggestedKind") ? workItemKindSchema.parse(formData.get("suggestedKind")) : undefined,
+    suggestedDomain: String(formData.get("suggestedDomain") ?? "").trim() || undefined,
+    suggestedPriority: prioritySchema.parse(formData.get("suggestedPriority") ?? "medium"),
+    groupKey: String(formData.get("groupKey") ?? "").trim() || undefined,
+    duplicateOf: String(formData.get("duplicateOf") ?? "").trim() || undefined,
+    status: "triaged",
+  }, required(formData, "revision"))
+  revalidatePath("/work/inbox")
+  redirect(`/work/inbox?item=${itemId}`)
+}
+
+export async function acceptInboxItemAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const itemId = required(formData, "itemId")
+  const result = await repository.acceptInboxItem(itemId, {
+    projectId: required(formData, "projectId"),
+    kind: workItemKindSchema.parse(formData.get("kind") ?? "task"),
+    parentId: String(formData.get("parentId") ?? "").trim() || undefined,
+    priority: prioritySchema.parse(formData.get("priority") ?? "medium"),
+  }, required(formData, "revision"))
+  revalidatePath("/work", "layout")
+  revalidatePath(`/projects/${result.workItem.projectId}`, "layout")
+  redirect(`/projects/${result.workItem.projectId}/backlog/${result.workItem.id}`)
+}
+
+export async function discardInboxItemAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  await repository.discardInboxItem(
+    required(formData, "itemId"),
+    required(formData, "discardReason"),
+    required(formData, "revision"),
+  )
+  revalidatePath("/work/inbox")
+  redirect("/work/inbox")
+}
+
+export async function createSprintAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const sprint = await repository.createSprint({
+    name: required(formData, "name"),
+    intent: required(formData, "intent"),
+    startDate: required(formData, "startDate"),
+    endDate: required(formData, "endDate"),
+    wipLimit: Number(formData.get("wipLimit") ?? 4),
+    confidence: formData.get("confidence") ? Number(formData.get("confidence")) : undefined,
+    confidenceRationale: String(formData.get("confidenceRationale") ?? "").trim(),
+    risks: lines(formData.get("risks")),
+  })
+  revalidatePath("/work/sprints")
+  redirect(`/work/sprints/${sprint.id}`)
+}
+
+export async function bulkWorkItemsAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const references = formData.getAll("workRef").flatMap((value) => {
+    if (typeof value !== "string") return []
+    const [projectId, itemId, revision] = value.split(":")
+    return projectId && itemId && revision ? [{ projectId, itemId, revision }] : []
+  })
+  if (!references.length) redirect("/work/backlog?bulk=empty")
+  const operation = required(formData, "operation")
+  const supportedOperations = new Set(["priority", "domain", "archive", "promote"])
+  if (!supportedOperations.has(operation)) throw new WorkspaceError("Ação em massa não suportada.", "INVALID_DATA")
+
+  const currentItems = await Promise.all(
+    references.map((reference) => repository.getWorkItem(reference.projectId, reference.itemId)),
+  )
+  if (currentItems.some((item, index) => item.revision !== references[index]?.revision)) {
+    throw new RevisionConflictError()
+  }
+
+  const bulkPriority = operation === "priority" ? prioritySchema.parse(formData.get("bulkPriority")) : undefined
+  const bulkDomain = operation === "domain" ? required(formData, "bulkDomain") : undefined
+  const bulkArchiveReason = operation === "archive" ? required(formData, "bulkArchiveReason") : undefined
+  if (operation === "promote") {
+    const [sprintId, outcomeCommitmentId] = required(formData, "sprintCommitment").split(":")
+    if (!sprintId || !outcomeCommitmentId) throw new WorkspaceError("Escolha um outcome de sprint.", "INVALID_DATA")
+    const sprint = await repository.getSprint(sprintId)
+    const currentKeys = new Set(sprint.work.map((item) => `${item.projectId}:${item.workItemId}`))
+    const additions = references
+      .filter((reference) => !currentKeys.has(`${reference.projectId}:${reference.itemId}`))
+      .map((reference) => ({ projectId: reference.projectId, workItemId: reference.itemId, outcomeCommitmentId, executionMode: "human" as const, addedAt: new Date().toISOString() }))
+    await repository.updateSprint(sprintId, { work: [...sprint.work, ...additions] }, sprint.revision)
+  } else {
+    for (const reference of references) {
+      if (operation === "priority") {
+        await repository.updateWorkItem(reference.projectId, reference.itemId, { priority: bulkPriority }, reference.revision)
+      } else if (operation === "domain") {
+        await repository.updateWorkItem(reference.projectId, reference.itemId, { domain: bulkDomain }, reference.revision)
+      } else if (operation === "archive") {
+        await repository.updateWorkItem(reference.projectId, reference.itemId, { productStatus: "archived", archive: { reason: bulkArchiveReason ?? "", actor: "human", archivedAt: new Date().toISOString() } }, reference.revision)
+      }
+    }
+  }
+  revalidatePath("/work", "layout")
+  redirect(`/work/backlog?bulk=${operation}`)
+}
+
+export async function saveSprintAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const sprintId = required(formData, "sprintId")
+  await repository.updateSprint(sprintId, {
+    name: required(formData, "name"),
+    intent: required(formData, "intent"),
+    startDate: required(formData, "startDate"),
+    endDate: required(formData, "endDate"),
+    status: sprintStatusSchema.parse(formData.get("status")),
+    wipLimit: Number(formData.get("wipLimit") ?? 4),
+    wipOverrideReason: String(formData.get("wipOverrideReason") ?? "").trim() || undefined,
+    confidence: formData.get("confidence") ? Number(formData.get("confidence")) : undefined,
+    confidenceRationale: String(formData.get("confidenceRationale") ?? "").trim(),
+    risks: lines(formData.get("risks")),
+  }, required(formData, "revision"))
+  revalidatePath(`/work/sprints/${sprintId}`)
+  redirect(`/work/sprints/${sprintId}`)
+}
+
+export async function addSprintOutcomeAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const sprintId = required(formData, "sprintId")
+  const encodedRef = String(formData.get("outcomeRef") ?? "").trim()
+  const [encodedKind, encodedProjectId, encodedReferenceId] = encodedRef.split(":")
+  const projectId = encodedProjectId || required(formData, "projectId")
+  const referenceKind = (encodedKind || formData.get("referenceKind")) === "roadmap_initiative" ? "roadmap_initiative" as const : "work_item_outcome" as const
+  const referenceId = encodedReferenceId || required(formData, "referenceId")
+  const sprint = await repository.getSprint(sprintId)
+  let title: string
+  const ref = referenceKind === "work_item_outcome"
+    ? { kind: referenceKind, projectId, workItemId: referenceId }
+    : { kind: referenceKind, projectId, initiativeId: referenceId }
+  if (referenceKind === "work_item_outcome") {
+    title = (await repository.getWorkItem(projectId, referenceId)).title
+  } else {
+    const roadmap = await repository.getRoadmap(projectId)
+    const initiative = roadmap.phases.flatMap((phase) => phase.initiatives).find((item) => item.id === referenceId)
+    if (!initiative) throw new WorkspaceError("Iniciativa não encontrada.", "NOT_FOUND")
+    title = initiative.title
+  }
+  await repository.updateSprint(sprintId, {
+    outcomes: [...sprint.outcomes, {
+      id: `commit_${randomUUID()}`,
+      ref,
+      title,
+      resultSummary: "",
+      evidenceRefs: [],
+    }],
+  }, required(formData, "revision"))
+  revalidatePath(`/work/sprints/${sprintId}`)
+  redirect(`/work/sprints/${sprintId}`)
+}
+
+export async function addSprintWorkAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const sprintId = required(formData, "sprintId")
+  const sprint = await repository.getSprint(sprintId)
+  const encodedWorkRef = String(formData.get("workRef") ?? "").trim()
+  const [encodedProjectId, encodedWorkItemId] = encodedWorkRef.split(":")
+  const projectId = encodedProjectId || required(formData, "projectId")
+  const workItemId = encodedWorkItemId || required(formData, "workItemId")
+  if (!projectId || !workItemId) throw new WorkspaceError("Escolha um work item.", "INVALID_DATA")
+  await repository.updateSprint(sprintId, {
+    work: [...sprint.work, {
+      projectId,
+      workItemId,
+      outcomeCommitmentId: required(formData, "outcomeCommitmentId"),
+      executionMode: sprintExecutionModeSchema.parse(formData.get("executionMode") ?? "human"),
+      addedAt: new Date().toISOString(),
+    }],
+  }, required(formData, "revision"))
+  revalidatePath(`/work/sprints/${sprintId}`)
+  redirect(`/work/sprints/${sprintId}`)
+}
+
+export async function addSprintDependencyAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const sprintId = required(formData, "sprintId")
+  const sprint = await repository.getSprint(sprintId)
+  const [fromProjectId, fromWorkItemId] = required(formData, "fromRef").split(":")
+  const [toProjectId, toWorkItemId] = required(formData, "toRef").split(":")
+  if (!fromProjectId || !fromWorkItemId || !toProjectId || !toWorkItemId) throw new WorkspaceError("Escolha os dois work items da dependência.", "INVALID_DATA")
+  await repository.updateSprint(sprintId, {
+    crossProjectDependencies: [...sprint.crossProjectDependencies, {
+      fromProjectId,
+      fromWorkItemId,
+      toProjectId,
+      toWorkItemId,
+      summary: required(formData, "summary"),
+    }],
+  }, required(formData, "revision"))
+  revalidatePath(`/work/sprints/${sprintId}`)
+  redirect(`/work/sprints/${sprintId}`)
+}
+
+export async function decideSprintOutcomeAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const sprintId = required(formData, "sprintId")
+  const commitmentId = required(formData, "commitmentId")
+  const sprint = await repository.getSprint(sprintId)
+  await repository.updateSprint(sprintId, {
+    outcomes: sprint.outcomes.map((outcome) => outcome.id === commitmentId ? {
+      ...outcome,
+      result: sprintOutcomeResultSchema.parse(formData.get("result")),
+      resultSummary: required(formData, "resultSummary"),
+      evidenceRefs: lines(formData.get("evidenceRefs")),
+    } : outcome),
+  }, required(formData, "revision"))
+  revalidatePath(`/work/sprints/${sprintId}`)
+  redirect(`/work/sprints/${sprintId}`)
+}
+
+export async function closeSprintAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const repository = await WorkspaceRepository.create()
+  const sprintId = required(formData, "sprintId")
+  const sprint = await repository.getSprint(sprintId)
+  const expectedRevision = required(formData, "revision")
+  if (sprint.revision !== expectedRevision) throw new RevisionConflictError()
+  if (sprint.outcomes.some((outcome) => !outcome.result)) {
+    throw new WorkspaceError("Todos os outcomes precisam de uma decisão antes do encerramento.", "INVALID_DATA")
+  }
+  const summary = required(formData, "summary")
+  const slug = `sprint-${sprint.name.toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70)}`
+  const currentDocument = await repository.readDocument("matriz-infra-hub", "product", slug).catch(() => undefined)
+  const document = await repository.writeDocument("matriz-infra-hub", {
+    kind: "product",
+    slug,
+    title: `Memória · ${sprint.name}`,
+    content: `# ${sprint.name}\n\n${summary}\n\n## Outcomes\n\n${sprint.outcomes.map((outcome) => `- **${outcome.title}** — ${outcome.result ?? "sem decisão"}: ${outcome.resultSummary}`).join("\n")}`,
+    tags: ["sprint", "memory"],
+  }, currentDocument?.revision)
+  await repository.updateSprint(sprintId, {
+    status: "completed",
+    closure: {
+      summary,
+      memoryDocumentRef: `product/${document.slug}`,
+      nextSprintId: String(formData.get("nextSprintId") ?? "").trim() || undefined,
+      closedBy: "human",
+      closedAt: new Date().toISOString(),
+    },
+  }, expectedRevision)
+  await repository.appendActivity("matriz-infra-hub", {
+    actor: "human",
+    action: "memory.recorded",
+    summary: `Memória final registrada para ${sprint.name}.`,
+    entityType: "sprint",
+    entityId: sprintId,
+    metadata: { documentId: document.id },
+  })
+  revalidatePath("/work/sprints", "layout")
+  redirect(`/work/sprints/${sprintId}`)
 }
 
 export async function writeDocumentAction(formData: FormData) {

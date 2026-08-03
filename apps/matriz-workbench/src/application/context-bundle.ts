@@ -1,6 +1,6 @@
 import { readFile, realpath, stat } from "node:fs/promises"
 import path from "node:path"
-import type { AgentRequest, BacklogItem, WorkbenchDocument } from "../domain/schemas"
+import type { AgentRequest, WorkItem, WorkbenchDocument } from "../domain/schemas"
 import { WorkspaceRepository } from "../integration/filesystem/workspace-repository"
 import { AGENT_OPERATING_SUMMARY } from "./agent-operating-summary"
 import { redactSensitiveText } from "../domain/redaction"
@@ -57,12 +57,12 @@ export async function buildContextBundle(
     policy.absoluteBudgetChars,
   )
   const project = await repository.getProject(projectId)
-  let task: BacklogItem | undefined
+  let task: WorkItem | undefined
   let request: AgentRequest | undefined
-  if (options.backlogItemId) task = await repository.getBacklogItem(projectId, options.backlogItemId)
+  if (options.backlogItemId) task = await repository.getWorkItem(projectId, options.backlogItemId)
   if (options.agentRequestId) {
     request = await repository.getAgentRequest(projectId, options.agentRequestId)
-    task ??= await repository.getBacklogItem(projectId, request.backlogItemId)
+    task ??= await repository.getWorkItem(projectId, request.backlogItemId)
   }
 
   const blocks: string[] = [
@@ -80,13 +80,25 @@ export async function buildContextBundle(
   }
 
   if (task) {
+    const [parent, sprints] = await Promise.all([
+      task.parentId ? repository.getWorkItem(projectId, task.parentId).catch(() => undefined) : undefined,
+      repository.listSprints().catch(() => []),
+    ])
+    const sprint = sprints.find((candidate) => candidate.work.some((item) => item.projectId === projectId && item.workItemId === task?.id))
     blocks.push(
       section(
-        "Tarefa",
+        "Work item",
         [
-          `${task.id} · ${task.status} · prioridade ${task.priority}`,
+          `${task.id} · ${task.kind} · produto ${task.productStatus} · prioridade ${task.priority}`,
           task.title,
           task.description,
+          `Governança: validação ${task.validationStatus} · revisão humana ${task.humanReviewStatus} · documentação ${task.documentationStatus}`,
+          task.domain ? `Domínio: ${task.domain}` : "",
+          task.responsible ? `Responsável: ${task.responsible}` : "",
+          parent ? `Pai: ${parent.id} · ${parent.kind} · ${parent.title}` : "",
+          sprint ? `Sprint: ${sprint.id} · ${sprint.name} · ${sprint.status}\nIntent: ${sprint.intent}` : "",
+          task.originRef ? `Origem: ${task.originRef.kind} · ${task.originRef.id}` : "",
+          task.blocker?.status === "open" ? `Bloqueio: ${task.blocker.summary}` : "",
           task.acceptanceCriteria.length
             ? `Critérios:\n${task.acceptanceCriteria.map((item) => `- [${item.completed ? "x" : " "}] ${item.text}`).join("\n")}`
             : "",

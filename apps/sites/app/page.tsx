@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { ThemeToggle } from "@matriz/design-ui"
 import { FileSiteCatalog } from "../src/integration/file-site-catalog"
 
 export const dynamic = "force-dynamic"
@@ -10,6 +11,10 @@ export default async function SitesCatalogPage() {
 
   return (
     <main className="catalog-shell">
+      <div className="catalog-toolbar">
+        <span>Matriz Design System · Sites</span>
+        <ThemeToggle appId="sites" />
+      </div>
       <header className="catalog-header">
         <div>
           <p className="eyebrow">Matriz · site collection</p>

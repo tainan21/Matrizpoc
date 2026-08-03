@@ -2,6 +2,7 @@ import type {
   ActivityEvent,
   Roadmap,
   RoadmapInitiative,
+  RoadmapMarker,
   RoadmapStatus,
   WorkItem,
 } from "../../domain/schemas"
@@ -11,6 +12,10 @@ export const ROADMAP_STATUS_LABELS: Record<RoadmapStatus, string> = {
   active: "Em andamento",
   paused: "Pausado",
   completed: "Concluído",
+}
+
+export const ROADMAP_MARKER_KIND_LABELS: Record<RoadmapMarker["kind"], string> = {
+  milestone: "Marco", validation_gate: "Gate de validação", decision_gate: "Gate de decisão", release: "Release",
 }
 
 export interface RoadmapQuarterViewModel {
@@ -60,12 +65,39 @@ export interface RoadmapPhaseViewModel {
   initiatives: RoadmapInitiativeViewModel[]
   scheduled: RoadmapInitiativeViewModel[]
   unscheduled: RoadmapInitiativeViewModel[]
+  markers: RoadmapMarkerViewModel[]
+}
+
+export interface RoadmapMarkerViewModel {
+  id: string
+  phaseId: string
+  initiativeId?: string
+  initiativeTitle?: string
+  kind: RoadmapMarker["kind"]
+  kindLabel: string
+  title: string
+  description: string
+  status: RoadmapMarker["status"]
+  statusLabel: string
+  targetDate: string
+  targetDateLabel: string
+  responsible: string
+  left: number
+  linkedItems: RoadmapLinkedItemViewModel[]
+  missingBacklogIds: string[]
+  references: RoadmapMarker["references"]
+  evidenceCount: number
+  reviewedBy?: string
+  reviewedAt?: string
+  reviewNote?: string
+  waiverReason?: string
 }
 
 export interface RoadmapTimelineViewModel {
   revision: string
   totalInitiatives: number
   scheduledCount: number
+  totalMarkers: number
   domains: string[]
   quarters: RoadmapQuarterViewModel[]
   phases: RoadmapPhaseViewModel[]
@@ -83,6 +115,12 @@ export interface RoadmapInspectorViewModel extends RoadmapInitiativeViewModel {
     summary: string
     occurredAt: string
   }>
+}
+
+export interface RoadmapMarkerInspectorViewModel extends RoadmapMarkerViewModel {
+  roadmapRevision: string
+  phaseTitle: string
+  history: RoadmapInspectorViewModel["history"]
 }
 
 function parseDate(value: string): number {
@@ -131,7 +169,7 @@ export function toRoadmapTimelineViewModel(
   today = new Date().toISOString().slice(0, 10),
 ): RoadmapTimelineViewModel {
   const initiatives = roadmap.phases.flatMap((phase) => phase.initiatives)
-  const dates = initiatives.flatMap((initiative) => [initiative.startDate, initiative.targetDate]).filter(Boolean) as string[]
+  const dates = [...initiatives.flatMap((initiative) => [initiative.startDate, initiative.targetDate]), ...roadmap.markers.map((marker) => marker.targetDate)].filter(Boolean) as string[]
   const firstDate = dates.length ? dates.reduce((first, value) => value < first ? value : first) : today
   const lastDate = dates.length ? dates.reduce((last, value) => value > last ? value : last) : today
   const rangeStartDate = quarterStart(firstDate)
@@ -193,6 +231,23 @@ export function toRoadmapTimelineViewModel(
       }
     })
     const completed = mapped.filter((initiative) => initiative.status === "completed").length
+    const markers = roadmap.markers.filter((marker) => marker.phaseId === phase.id).map((marker): RoadmapMarkerViewModel => {
+      const linkedItems = marker.backlogIds.map((id) => itemById.get(id)).filter(Boolean).map((item) => toLinkedItem(item!))
+      const isGate = marker.kind === "validation_gate" || marker.kind === "decision_gate"
+      const statusLabels: Record<string, string> = { planned: "Planejado", pending_review: "Aguardando revisão", passed: "Aprovado", failed: "Reprovado", waived: "Dispensado", achieved: "Atingido", missed: "Não atingido", cancelled: "Cancelado" }
+      return {
+        id: marker.id, phaseId: marker.phaseId, initiativeId: marker.initiativeId,
+        initiativeTitle: phase.initiatives.find((initiative) => initiative.id === marker.initiativeId)?.title,
+        kind: marker.kind, kindLabel: ROADMAP_MARKER_KIND_LABELS[marker.kind], title: marker.title, description: marker.description,
+        status: marker.status, statusLabel: statusLabels[marker.status] ?? marker.status, targetDate: marker.targetDate,
+        targetDateLabel: formatDate(marker.targetDate), responsible: marker.responsible ?? "Não atribuído",
+        left: Math.max(0, Math.min(((parseDate(marker.targetDate) - startTime) / span) * 100, 100)), linkedItems,
+        missingBacklogIds: marker.backlogIds.filter((id) => !itemById.has(id)), references: marker.references,
+        evidenceCount: marker.references.length + linkedItems.reduce((total, item) => total + (item.completed ? item.evidenceCount : 0), 0),
+        reviewedBy: isGate ? marker.reviewedBy : undefined, reviewedAt: isGate ? marker.reviewedAt : undefined,
+        reviewNote: isGate ? marker.reviewNote : undefined, waiverReason: isGate ? marker.waiverReason : undefined,
+      }
+    })
     return {
       id: phase.id,
       title: phase.title,
@@ -203,6 +258,7 @@ export function toRoadmapTimelineViewModel(
       initiatives: mapped,
       scheduled: mapped.filter((initiative) => initiative.startDate && initiative.targetDate),
       unscheduled: mapped.filter((initiative) => !initiative.startDate || !initiative.targetDate),
+      markers,
     }
   })
   const todayTime = parseDate(today)
@@ -211,12 +267,29 @@ export function toRoadmapTimelineViewModel(
     revision: roadmap.revision,
     totalInitiatives: initiatives.length,
     scheduledCount: initiatives.filter((initiative) => initiative.startDate || initiative.targetDate).length,
+    totalMarkers: roadmap.markers.length,
     domains: Array.from(new Set(phases.flatMap((phase) => phase.initiatives.map((initiative) => initiative.domain)))).sort((a, b) => a.localeCompare(b, "pt-BR")),
     quarters,
     phases,
     rangeStart,
     rangeEnd,
     todayPosition: todayTime >= startTime && todayTime < endTime ? ((todayTime - startTime) / span) * 100 : undefined,
+  }
+}
+
+export function toRoadmapMarkerInspectorViewModel(
+  timeline: RoadmapTimelineViewModel,
+  markerId: string,
+  history: ActivityEvent[],
+): RoadmapMarkerInspectorViewModel | undefined {
+  const phase = timeline.phases.find((item) => item.markers.some((marker) => marker.id === markerId))
+  const marker = phase?.markers.find((item) => item.id === markerId)
+  if (!phase || !marker) return undefined
+  return {
+    ...marker,
+    phaseTitle: phase.title,
+    roadmapRevision: timeline.revision,
+    history: history.map((event) => ({ id: event.id, actor: event.actor, action: event.action, summary: event.summary, occurredAt: event.occurredAt })),
   }
 }
 

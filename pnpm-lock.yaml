@@ -367,6 +367,12 @@ importers:
 
   apps/sites:
     dependencies:
+      '@matriz/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design/system
+      '@matriz/design-ui':
+        specifier: workspace:*
+        version: link:../../packages/design/ui
       '@matriz/integration-api-contracts':
         specifier: workspace:*
         version: link:../../packages/integration/api-contracts
@@ -619,6 +625,12 @@ importers:
 
   packages/design/ui:
     dependencies:
+      '@matriz/design-system':
+        specifier: workspace:^
+        version: link:../system
+      '@matriz/foundation-constants':
+        specifier: workspace:^
+        version: link:../../foundation/constants
       '@matriz/foundation-utils':
         specifier: workspace:^
         version: link:../../foundation/utils

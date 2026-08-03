@@ -3,6 +3,7 @@ import { WorkspaceRepository } from "../../../../../src/integration/filesystem/w
 import { RoadmapTimeline } from "../../../../../src/ui/components/roadmap-timeline"
 import {
   toRoadmapInspectorViewModel,
+  toRoadmapMarkerInspectorViewModel,
   toRoadmapTimelineViewModel,
 } from "../../../../../src/ui/presenters/roadmap-timeline-presenter"
 import { toProjectNavViewModel } from "../../../../../src/ui/presenters/workspace-presenters"
@@ -12,7 +13,7 @@ export default async function RoadmapPage({
   searchParams,
 }: {
   params: Promise<{ projectId: string }>
-  searchParams: Promise<{ initiative?: string }>
+  searchParams: Promise<{ initiative?: string; marker?: string }>
 }) {
   const { projectId } = await params
   const filters = await searchParams
@@ -26,11 +27,15 @@ export default async function RoadmapPage({
     repository.discoverProjects(),
   ])
   const timeline = toRoadmapTimelineViewModel(roadmap, workItems)
-  const history = filters.initiative
-    ? await repository.queryActivity(projectId, { entityId: filters.initiative, limit: 100 })
+  const selectedEntityId = filters.marker ?? filters.initiative
+  const history = selectedEntityId
+    ? await repository.queryActivity(projectId, { entityId: selectedEntityId, limit: 100 })
     : []
   const selected = filters.initiative
     ? toRoadmapInspectorViewModel(timeline, filters.initiative, history)
+    : undefined
+  const selectedMarker = filters.marker
+    ? toRoadmapMarkerInspectorViewModel(timeline, filters.marker, history)
     : undefined
 
   return (
@@ -40,6 +45,7 @@ export default async function RoadmapPage({
       projectName={project.workspace.displayName}
       projects={projects.map(toProjectNavViewModel)}
       selected={selected}
+      selectedMarker={selectedMarker}
     />
   )
 }

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_3d52ed3e-9653-44ca-bd3c-686b3fefe577",
+  "projectId": "matriz-workbench",
+  "kind": "feature",
+  "title": "Implementar detalhe completo e revisão explícita de execuções",
+  "description": "Detalhe completo do work item com relações, critérios, execuções, evidências e histórico. Revisão humana explícita de execução Codex persistida com revisão otimista, sem alterar automaticamente produto, validação, documentação ou score. Validação técnica: 179 testes, typecheck, lint, build, health e MCP aprovados; validação visual de produção bloqueada pela política do navegador integrado.",
+  "productStatus": "validation",
+  "validationStatus": "pending",
+  "humanReviewStatus": "pending",
+  "documentationStatus": "current",
+  "priority": "high",
+  "domain": "Plataforma / Workbench",
+  "responsible": "Produto + Codex",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "work-item",
+    "execução-codex",
+    "revisão-humana"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_740b3920-7b0b-4842-914e-7b8ebc49c519",
+      "text": "Detalhe completo usa view model e dados reais do workspace",
+      "completed": true
+    },
+    {
+      "id": "ac_6affd301-42e9-468f-9f10-38378f1aa8df",
+      "text": "Revisão de execução exige ator humano e revisão otimista",
+      "completed": true
+    },
+    {
+      "id": "ac_293d2547-ac10-4f9b-a9f3-e157e7d4c5d7",
+      "text": "Execução revisada não altera estado do produto ou score",
+      "completed": true
+    },
+    {
+      "id": "ac_2505b18e-83df-42d9-8b68-cb2e496ccd1c",
+      "text": "Estados de sucesso, erro, conflito e desatualização são explícitos",
+      "completed": true
+    },
+    {
+      "id": "ac_832d9e60-b169-4600-b22c-22427c34a7f4",
+      "text": "Documentação e suíte de qualidade permanecem consistentes",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/work-item-detail.tsx",
+      "label": "Detalhe completo do work item"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/execution-review-panel.tsx",
+      "label": "Revisão humana da execução"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/domain/agent-execution-review.ts",
+      "label": "Regras de revisão da execução"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts",
+      "label": "Persistência, lock e conflito"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/docs/FILE-PROTOCOL.md",
+      "label": "Protocolo documentado"
+    }
+  ],
+  "createdAt": "2026-08-03T15:44:57.978Z",
+  "updatedAt": "2026-08-03T15:44:57.993Z",
+  "revision": "fa167ece4ac80e13"
+}

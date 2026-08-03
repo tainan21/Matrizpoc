@@ -16,6 +16,9 @@ for repositories.
 - **Responsibility:** discover repository apps and manage their roadmap,
   backlog, documentation, decisions, agent requests and activity as Git-backed
   files.
+- **Coordinator artifacts:** the repository-root `.matriz/inbox/**` and
+  `.matriz/sprints/**` back the global `/work/inbox`, `/work/backlog` and
+  `/work/sprints` surfaces. They reference project work without copying it.
 - **Exposes:** `public-contract.ts` → `{ manifest }` only; MCP named resources
   and workflow tools over STDIO.
 - **Does not expose:** filesystem primitives, source editing, shell execution or

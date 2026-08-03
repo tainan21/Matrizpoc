@@ -243,6 +243,115 @@ describe("WorkspaceRepository", () => {
     expect(events[0].entityId).toBe(first.id)
   })
 
+  it("accepts an Inbox entry idempotently and preserves its origin", async () => {
+    const { root, repository } = await fixture()
+    await writeFile(path.join(root, "package.json"), JSON.stringify({ name: "matriz" }))
+    await writeFile(path.join(root, "README.md"), "# Matriz Infra Hub\n")
+    await repository.initializeProject("matriz-infra-hub")
+    await repository.initializeProject("sample")
+    const inbox = await repository.createInboxItem({
+      title: "Criar captura progressiva",
+      detail: "Começar com uma frase.",
+      origin: "human",
+      suggestedProjectId: "sample",
+      suggestedKind: "feature",
+    })
+    const first = await repository.acceptInboxItem(inbox.id, { projectId: "sample", kind: "feature" }, inbox.revision)
+    const second = await repository.acceptInboxItem(inbox.id, { projectId: "sample", kind: "feature" }, inbox.revision)
+    expect(second.workItem.id).toBe(first.workItem.id)
+    expect(first.workItem.originRef).toEqual({ kind: "inbox", id: inbox.id })
+    expect(await repository.listWorkItems("sample")).toHaveLength(1)
+  })
+
+  it("enforces parent semantics, archival reasons and a single active sprint", async () => {
+    const { root, repository } = await fixture()
+    await writeFile(path.join(root, "package.json"), JSON.stringify({ name: "matriz" }))
+    await writeFile(path.join(root, "README.md"), "# Matriz Infra Hub\n")
+    await repository.initializeProject("matriz-infra-hub")
+    await repository.initializeProject("sample")
+    const outcome = await repository.createWorkItem("sample", {
+      kind: "outcome", title: "Operação contínua validada", description: "", productStatus: "discovery",
+      validationStatus: "pending", humanReviewStatus: "not_required", documentationStatus: "pending", priority: "high",
+    })
+    const deliverable = await repository.createWorkItem("sample", {
+      kind: "feature", title: "Inbox operacional", description: "", productStatus: "discovery",
+      validationStatus: "pending", humanReviewStatus: "not_required", documentationStatus: "not_required", priority: "high",
+      parentId: outcome.id,
+    })
+    expect(deliverable.parentId).toBe(outcome.id)
+    await expect(repository.updateWorkItem("sample", deliverable.id, { productStatus: "archived" }, deliverable.revision)).rejects.toMatchObject({ code: "INVALID_DATA" })
+
+    const sprint = await repository.createSprint({
+      name: "Sprint adaptativa 1", intent: "Provar Inbox até validação.", startDate: "2026-08-03", endDate: "2026-08-14", status: "active",
+      outcomes: [{ id: "commit_00000000-0000-4000-8000-000000000001", ref: { kind: "work_item_outcome", projectId: "sample", workItemId: outcome.id }, title: outcome.title, resultSummary: "", evidenceRefs: [] }],
+      work: [{ projectId: "sample", workItemId: deliverable.id, outcomeCommitmentId: "commit_00000000-0000-4000-8000-000000000001", executionMode: "paired", addedAt: "2026-08-03T12:00:00.000Z" }],
+    })
+    expect(sprint.status).toBe("active")
+    await expect(repository.createSprint({
+      name: "Sprint concorrente", intent: "Não deve ativar.", startDate: "2026-08-03", endDate: "2026-08-14", status: "active",
+    })).rejects.toMatchObject({ code: "INVALID_DATA" })
+  })
+
+  it("blocks new active work when the sprint WIP limit is reached", async () => {
+    const { root, repository } = await fixture()
+    await writeFile(path.join(root, "package.json"), JSON.stringify({ name: "matriz" }))
+    await writeFile(path.join(root, "README.md"), "# Matriz Infra Hub\n")
+    await repository.initializeProject("matriz-infra-hub")
+    await repository.initializeProject("sample")
+    const outcome = await repository.createWorkItem("sample", {
+      kind: "outcome", title: "Fluxo validado", description: "", productStatus: "discovery",
+      validationStatus: "pending", humanReviewStatus: "not_required", documentationStatus: "pending", priority: "high",
+    })
+    const active = await repository.createWorkItem("sample", {
+      kind: "task", title: "Trabalho ativo", description: "", productStatus: "in_progress",
+      validationStatus: "not_required", humanReviewStatus: "not_required", documentationStatus: "not_required", priority: "medium", parentId: outcome.id,
+    })
+    const waiting = await repository.createWorkItem("sample", {
+      kind: "task", title: "Trabalho aguardando", description: "", productStatus: "ready",
+      validationStatus: "not_required", humanReviewStatus: "not_required", documentationStatus: "not_required", priority: "medium", parentId: outcome.id,
+    })
+    const commitmentId = "commit_00000000-0000-4000-8000-000000000099"
+    await repository.createSprint({
+      name: "Sprint WIP", intent: "Manter foco explícito.", startDate: "2026-08-03", endDate: "2026-08-14", status: "active", wipLimit: 1,
+      outcomes: [{ id: commitmentId, ref: { kind: "work_item_outcome", projectId: "sample", workItemId: outcome.id }, title: outcome.title, resultSummary: "", evidenceRefs: [] }],
+      work: [active, waiting].map((item) => ({ projectId: "sample", workItemId: item.id, outcomeCommitmentId: commitmentId, executionMode: "human" as const, addedAt: "2026-08-03T12:00:00.000Z" })),
+    })
+    await expect(repository.updateWorkItem("sample", waiting.id, { productStatus: "in_progress" }, waiting.revision)).rejects.toMatchObject({ code: "INVALID_DATA" })
+  })
+
+  it("accepts only cross-project dependencies between sprint work references", async () => {
+    const { root, repository } = await fixture()
+    await writeFile(path.join(root, "package.json"), JSON.stringify({ name: "matriz" }))
+    await writeFile(path.join(root, "README.md"), "# Matriz Infra Hub\n")
+    await mkdir(path.join(root, "apps", "another"), { recursive: true })
+    await writeFile(path.join(root, "apps", "another", "package.json"), JSON.stringify({ name: "@matriz/app-another" }))
+    await repository.initializeProject("matriz-infra-hub")
+    await repository.initializeProject("sample")
+    await repository.initializeProject("another")
+    const outcome = await repository.createWorkItem("sample", {
+      kind: "outcome", title: "Integração validada", description: "", productStatus: "discovery",
+      validationStatus: "pending", humanReviewStatus: "not_required", documentationStatus: "pending", priority: "high",
+    })
+    const source = await repository.createWorkItem("sample", {
+      kind: "task", title: "Publicar contrato", description: "", productStatus: "ready",
+      validationStatus: "not_required", humanReviewStatus: "not_required", documentationStatus: "not_required", priority: "medium", parentId: outcome.id,
+    })
+    const target = await repository.createWorkItem("another", {
+      kind: "task", title: "Consumir contrato", description: "", productStatus: "ready",
+      validationStatus: "not_required", humanReviewStatus: "not_required", documentationStatus: "not_required", priority: "medium",
+    })
+    const commitmentId = "commit_00000000-0000-4000-8000-000000000123"
+    const sprint = await repository.createSprint({
+      name: "Sprint transversal", intent: "Validar dependências explícitas.", startDate: "2026-08-03", endDate: "2026-08-14",
+      outcomes: [{ id: commitmentId, ref: { kind: "work_item_outcome", projectId: "sample", workItemId: outcome.id }, title: outcome.title, resultSummary: "", evidenceRefs: [] }],
+      work: [source, target].map((item, index) => ({ projectId: index === 0 ? "sample" : "another", workItemId: item.id, outcomeCommitmentId: commitmentId, executionMode: "human" as const, addedAt: "2026-08-03T12:00:00.000Z" })),
+    })
+    const dependency = { fromProjectId: "sample", fromWorkItemId: source.id, toProjectId: "another", toWorkItemId: target.id, summary: "Contrato precisa estar publicado antes do consumo." }
+    await expect(repository.updateSprint(sprint.id, { crossProjectDependencies: [dependency] }, sprint.revision)).resolves.toMatchObject({ crossProjectDependencies: [dependency] })
+    const updated = await repository.getSprint(sprint.id)
+    await expect(repository.updateSprint(updated.id, { work: updated.work.slice(0, 1), crossProjectDependencies: [dependency] }, updated.revision)).rejects.toMatchObject({ code: "INVALID_DATA" })
+  })
+
   it("persists control evidence atomically and rejects stale review", async () => {
     const { repository } = await fixture()
     await repository.initializeProject("sample")
@@ -411,6 +520,66 @@ describe("WorkspaceRepository", () => {
     expect(done.status).toBe("done")
   })
 
+  it("reviews a completed execution without moving the product and rejects stale review writes", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const task = await repository.createWorkItem("sample", {
+      kind: "feature",
+      title: "Review execution independently",
+      description: "",
+      productStatus: "validation",
+      validationStatus: "pending",
+      humanReviewStatus: "pending",
+      documentationStatus: "current",
+      priority: "high",
+    })
+    const queued = await repository.createAgentRequest("sample", task.id, "Implement and verify.")
+    const claimed = await repository.updateAgentRequest(
+      "sample",
+      queued.id,
+      { status: "claimed", claimedBy: "codex" },
+      queued.revision,
+    )
+    const completed = await repository.updateAgentRequest(
+      "sample",
+      queued.id,
+      {
+        status: "completed",
+        resultSummary: "Implementation verified.",
+        changedFiles: ["apps/sample/package.json"],
+        checks: ["pnpm test"],
+      },
+      claimed.revision,
+    )
+
+    await expect(repository.reviewAgentRequest(
+      "sample",
+      completed.id,
+      { status: "approved", reviewedBy: "Agent" },
+      completed.revision,
+      "codex",
+    )).rejects.toMatchObject({ code: "INVALID_DATA" })
+
+    const results = await Promise.allSettled([
+      repository.reviewAgentRequest("sample", completed.id, {
+        status: "approved",
+        reviewedBy: "Zara",
+        note: "Diff e checks revisados.",
+        runRevision: "run-revision-1",
+      }, completed.revision),
+      repository.reviewAgentRequest("sample", completed.id, {
+        status: "changes_requested",
+        reviewedBy: "Zara",
+        note: "Revisar a documentação.",
+        runRevision: "run-revision-1",
+      }, completed.revision),
+    ])
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1)
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1)
+    expect((await repository.getWorkItem("sample", task.id)).productStatus).toBe("validation")
+    expect((await repository.getAgentRequest("sample", completed.id)).status).toBe("completed")
+  })
+
   it("rejects completion evidence that points outside the repository", async () => {
     const { repository } = await fixture()
     await repository.initializeProject("sample")
@@ -473,5 +642,25 @@ describe("WorkspaceRepository", () => {
         ),
       ).rejects.toMatchObject({ code: "INVALID_PATH" })
     }
+  })
+
+  it("serializes marker updates and filters marker history", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const roadmap = await repository.getRoadmap("sample")
+    const phase = { id: "phase_11111111-1111-4111-8111-111111111111", title: "Entrega", outcome: "", status: "active" as const, initiatives: [] }
+    const withPhase = await repository.updateRoadmap("sample", [phase], roadmap.revision)
+    const marker = {
+      id: "marker_22222222-2222-4222-8222-222222222222", phaseId: phase.id, kind: "milestone" as const, status: "planned" as const,
+      title: "M1", description: "", targetDate: "2026-08-20", backlogIds: [], references: [],
+    }
+    const saved = await repository.updateRoadmapMarkers("sample", [marker], withPhase.revision, "human", { action: "roadmap.marker_created", summary: "Marco criado", entityId: marker.id })
+    const results = await Promise.allSettled([
+      repository.updateRoadmapMarkers("sample", [{ ...marker, title: "Primeiro" }], saved.revision),
+      repository.updateRoadmapMarkers("sample", [{ ...marker, title: "Segundo" }], saved.revision),
+    ])
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1)
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1)
+    expect(await repository.queryActivity("sample", { entityId: marker.id, limit: 20 })).toEqual(expect.arrayContaining([expect.objectContaining({ action: "roadmap.marker_created" })]))
   })
 })

@@ -1,6 +1,7 @@
 import { WorkspaceRepository } from "../../../src/integration/filesystem/workspace-repository"
 import { getCodexRunManager } from "../../../src/application/codex-run-manager"
 import { buildOperationalHealth } from "../../../src/application/operational-health"
+import { ThemeSystemPicker } from "../../../src/ui/components/theme-system-picker"
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -13,6 +14,7 @@ export default async function SettingsPage() {
   return (
     <main className="workspace-page">
       <header className="page-header"><div><p className="eyebrow">Ambiente local</p><h1>Configurações</h1><p>Estado operacional e limites deliberados da V1.</p></div></header>
+      <ThemeSystemPicker variant="gallery" />
       <section className="health-dashboard" aria-labelledby="health-title">
         <div className="section-heading">
           <div>

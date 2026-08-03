@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { ThemeToggle } from "@matriz/design-ui"
 import { notFound } from "next/navigation"
 import { buildSiteMetadata } from "../../../../src/application/site-metadata"
 import { FileSiteCatalog } from "../../../../src/integration/file-site-catalog"
@@ -42,6 +43,7 @@ export default async function SitePreviewPage(props: PageProps) {
               {item}
             </Link>
           ))}
+          <ThemeToggle appId="sites" />
         </div>
       </nav>
       {fallback ? (

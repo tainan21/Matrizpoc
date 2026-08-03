@@ -16,7 +16,10 @@ export function GET() {
       startedAt: progress?.startedAt ?? null,
       completedAt: progress?.completedAt ?? null,
       apps: MATRIZ_APP_IDS.map((appId) => {
-        const hasAppPayload = progress?.perApp?.[appId] != null
+        const hasAppPayload = Object.prototype.hasOwnProperty.call(
+          progress?.perApp ?? {},
+          appId,
+        )
         return {
           appId,
           started: hasAppPayload,

@@ -143,6 +143,50 @@ export const roadmapPhaseSchema = z.object({
   initiatives: z.array(roadmapInitiativeSchema).default([]),
 })
 
+export const roadmapMarkerKindSchema = z.enum([
+  "milestone",
+  "validation_gate",
+  "decision_gate",
+  "release",
+])
+export const roadmapOutcomeMarkerStatusSchema = z.enum(["planned", "achieved", "missed", "cancelled"])
+export const roadmapGateStatusSchema = z.enum(["planned", "pending_review", "passed", "failed", "waived"])
+
+const roadmapMarkerBase = {
+  id: id("marker"),
+  phaseId: id("phase"),
+  initiativeId: id("ini").optional(),
+  title: z.string().trim().min(1).max(160),
+  description: z.string().trim().max(1000).default(""),
+  targetDate: calendarDate,
+  backlogIds: z.array(workItemIdSchema).max(50).default([]),
+  references: z.array(attachmentReferenceSchema).max(20).default([]),
+  responsible: z.string().trim().min(1).max(120).optional(),
+}
+
+export const roadmapMarkerSchema = z.discriminatedUnion("kind", [
+  z.object({ ...roadmapMarkerBase, kind: z.literal("milestone"), status: roadmapOutcomeMarkerStatusSchema }),
+  z.object({ ...roadmapMarkerBase, kind: z.literal("release"), status: roadmapOutcomeMarkerStatusSchema }),
+  z.object({
+    ...roadmapMarkerBase,
+    kind: z.literal("validation_gate"),
+    status: roadmapGateStatusSchema,
+    reviewedBy: z.string().trim().min(1).max(120).optional(),
+    reviewedAt: isoDate.optional(),
+    reviewNote: z.string().trim().max(1000).optional(),
+    waiverReason: z.string().trim().max(1000).optional(),
+  }),
+  z.object({
+    ...roadmapMarkerBase,
+    kind: z.literal("decision_gate"),
+    status: roadmapGateStatusSchema,
+    reviewedBy: z.string().trim().min(1).max(120).optional(),
+    reviewedAt: isoDate.optional(),
+    reviewNote: z.string().trim().max(1000).optional(),
+    waiverReason: z.string().trim().max(1000).optional(),
+  }),
+])
+
 export const roadmapGoalSchema = z.object({
   id: id("goal"),
   ordinal: z.number().int().min(1).max(100),
@@ -189,12 +233,24 @@ export const roadmapSchema = z
     schemaVersion: z.literal(1),
     projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
     phases: z.array(roadmapPhaseSchema).default([]),
+    markers: z.array(roadmapMarkerSchema).max(100).default([]),
     goals: z.array(roadmapGoalSchema).max(100).default([]),
     scorecards: z.array(roadmapScorecardSchema).max(12).default([]),
     updatedAt: isoDate,
     revision,
   })
   .superRefine((roadmap, context) => {
+    const phaseById = new Map(roadmap.phases.map((phase) => [phase.id, phase]))
+    const markerIds = new Set<string>()
+    for (const [index, marker] of roadmap.markers.entries()) {
+      const phase = phaseById.get(marker.phaseId)
+      if (markerIds.has(marker.id)) context.addIssue({ code: z.ZodIssueCode.custom, message: "O marcador está duplicado.", path: ["markers", index, "id"] })
+      markerIds.add(marker.id)
+      if (!phase) context.addIssue({ code: z.ZodIssueCode.custom, message: "A fase do marcador não existe.", path: ["markers", index, "phaseId"] })
+      if (marker.initiativeId && !phase?.initiatives.some((initiative) => initiative.id === marker.initiativeId)) {
+        context.addIssue({ code: z.ZodIssueCode.custom, message: "A iniciativa do marcador não pertence à fase.", path: ["markers", index, "initiativeId"] })
+      }
+    }
     const ordinals = new Set<number>()
     for (const goal of roadmap.goals) {
       if (ordinals.has(goal.ordinal)) {
@@ -243,6 +299,17 @@ export const workItemBlockerSchema = z.object({
   updatedAt: isoDate,
 })
 
+export const workItemOriginRefSchema = z.object({
+  kind: z.literal("inbox"),
+  id: id("in"),
+})
+
+export const workItemArchiveSchema = z.object({
+  reason: z.string().trim().min(1).max(500),
+  actor: actorSchema,
+  archivedAt: isoDate,
+})
+
 export const workItemV2Schema = z.object({
   schemaVersion: z.literal(2),
   id: workItemIdSchema,
@@ -257,6 +324,9 @@ export const workItemV2Schema = z.object({
   priority: prioritySchema,
   domain: z.string().trim().min(1).max(100).optional(),
   responsible: z.string().trim().min(1).max(100).optional(),
+  parentId: workItemIdSchema.optional(),
+  originRef: workItemOriginRefSchema.optional(),
+  archive: workItemArchiveSchema.optional(),
   workScope: backlogWorkScopeSchema,
   tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
   acceptanceCriteria: z.array(acceptanceCriterionSchema).max(30).default([]),
@@ -270,6 +340,14 @@ export const workItemV2Schema = z.object({
 
 export const persistedWorkItemSchema = z.union([backlogItemSchema, workItemV2Schema])
 
+export const agentExecutionReviewSchema = z.object({
+  status: z.enum(["approved", "changes_requested"]),
+  reviewedBy: z.string().trim().min(1).max(100),
+  reviewedAt: isoDate,
+  note: z.string().trim().max(4000).default(""),
+  runRevision: revision.optional(),
+})
+
 export const agentRequestSchema = z.object({
   schemaVersion: z.literal(1),
   id: id("req"),
@@ -282,6 +360,7 @@ export const agentRequestSchema = z.object({
   resultSummary: z.string().trim().max(8000).optional(),
   changedFiles: z.array(z.string().trim().min(1).max(500)).max(100).default([]),
   checks: z.array(z.string().trim().min(1).max(500)).max(100).default([]),
+  review: agentExecutionReviewSchema.optional(),
   createdAt: isoDate,
   updatedAt: isoDate,
   revision,
@@ -294,7 +373,15 @@ export const activityEventSchema = z.object({
   actor: actorSchema,
   action: z.string().trim().min(1).max(120),
   summary: z.string().trim().min(1).max(1000),
-  entityType: z.enum(["project", "roadmap", "backlog", "document", "agent_request"]),
+  entityType: z.enum([
+    "project",
+    "roadmap",
+    "backlog",
+    "document",
+    "agent_request",
+    "inbox",
+    "sprint",
+  ]),
   entityId: z.string().trim().min(1).max(100),
   metadata: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])).default({}),
   occurredAt: isoDate,
@@ -328,6 +415,10 @@ export type ProjectWorkspace = z.infer<typeof projectWorkspaceSchema>
 export type Roadmap = z.infer<typeof roadmapSchema>
 export type RoadmapPhase = z.infer<typeof roadmapPhaseSchema>
 export type RoadmapInitiative = z.infer<typeof roadmapInitiativeSchema>
+export type RoadmapMarker = z.infer<typeof roadmapMarkerSchema>
+export type RoadmapMarkerKind = z.infer<typeof roadmapMarkerKindSchema>
+export type RoadmapOutcomeMarkerStatus = z.infer<typeof roadmapOutcomeMarkerStatusSchema>
+export type RoadmapGateStatus = z.infer<typeof roadmapGateStatusSchema>
 export type RoadmapStatus = z.infer<typeof roadmapStatusSchema>
 export type RoadmapGoal = z.infer<typeof roadmapGoalSchema>
 export type RoadmapGoalCategory = z.infer<typeof roadmapGoalCategorySchema>
@@ -344,6 +435,7 @@ export type DocumentationStatus = z.infer<typeof documentationStatusSchema>
 export type AcceptanceCriterion = z.infer<typeof acceptanceCriterionSchema>
 export type AttachmentReference = z.infer<typeof attachmentReferenceSchema>
 export type AgentRequest = z.infer<typeof agentRequestSchema>
+export type AgentExecutionReview = z.infer<typeof agentExecutionReviewSchema>
 export type ActivityEvent = z.infer<typeof activityEventSchema>
 export type ContextPolicy = z.infer<typeof contextPolicySchema>
 export type WorkbenchDocument = z.infer<typeof workbenchDocumentSchema>

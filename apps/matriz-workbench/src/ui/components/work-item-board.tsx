@@ -225,21 +225,18 @@ export function WorkItemBoard({
             </section>
           ))}
         </section>
-        {selected ? <WorkItemInspector key={selected.revision} item={selected} onClose={() => navigateToItem()} projectId={projectId} /> : null}
+        {selected ? <WorkItemInspector key={selected.revision} item={selected} onClose={() => navigateToItem()} parentOptions={initialBoard.columns.flatMap((column) => column.items).flatMap((item) => item.id !== selected.id && (item.kind === "outcome" || item.kind === "task") ? [{ id: item.id, kind: item.kind, title: item.title }] : [])} projectId={projectId} /> : null}
       </div>
 
       {composerOpen ? (
         <div className={styles.composerBackdrop} onKeyDown={(event) => { if (event.key === "Escape") setComposerOpen(false) }} onMouseDown={(event) => { if (event.target === event.currentTarget) setComposerOpen(false) }}>
           <section aria-labelledby="new-work-item-title" aria-modal="true" className={styles.composer} role="dialog">
-            <header><div><span className={styles.eyebrow}>Novo registro permanente</span><h2 id="new-work-item-title">Criar work item</h2></div><button aria-label="Fechar" onClick={() => setComposerOpen(false)} type="button">×</button></header>
+            <header><div><span className={styles.eyebrow}>Captura direta no projeto</span><h2 id="new-work-item-title">Criar work item</h2></div><button aria-label="Fechar" onClick={() => setComposerOpen(false)} type="button">×</button></header>
             <form action={create}>
               <input name="projectId" type="hidden" value={projectId} />
               <label>Título<input autoFocus name="title" required /></label>
               <div className={styles.fieldGrid}><label>Tipo<select defaultValue="feature" name="kind"><option value="outcome">Outcome</option><option value="feature">Feature</option><option value="task">Task</option><option value="bug">Bug</option></select></label><label>Prioridade<select defaultValue="medium" name="priority"><option value="critical">Crítica</option><option value="high">Alta</option><option value="medium">Média</option><option value="low">Baixa</option></select></label></div>
-              <div className={styles.fieldGrid}><label>Domínio<input name="domain" /></label><label>Responsável<input name="responsible" /></label></div>
-              <label>Descrição<textarea name="description" rows={5} /></label>
-              <label>Critérios de aceite <small>um por linha</small><textarea name="acceptanceCriteria" rows={4} /></label>
-              <label>Tags<input name="tags" placeholder="roadmap, colaboração" /></label>
+              <p className={styles.emptyText}>Contexto, critérios, relações, responsável e evidências serão revelados no inspector conforme o trabalho avançar.</p>
               <footer><button className={styles.secondaryButton} onClick={() => setComposerOpen(false)} type="button">Cancelar</button><button className={styles.primaryButton} disabled={pending} type="submit">{pending ? "Criando…" : "Criar item"}</button></footer>
             </form>
           </section>

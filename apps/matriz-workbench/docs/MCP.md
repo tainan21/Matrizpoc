@@ -12,6 +12,8 @@ can request human approval. There is no generic filesystem or delete tool.
 Compact read tools:
 
 - projects, inventories, backlog, documents and agent requests;
+- the coordinator Inbox and sprints through `matriz://work/inbox` and
+  `matriz://work/sprints`;
 - registered external sources and their document summaries;
 - one explicitly selected repository document;
 - one package contract from a registered source, limited to name, version,
@@ -20,10 +22,15 @@ Compact read tools:
 
 Approved workflow writes:
 
-- backlog and agent-request lifecycle;
+- Inbox proposals and agent-request lifecycle;
 - Workbench documents and activity;
 - project blueprints, which create a preview and Codex request only;
-- site metadata proposals, which create site-scoped work only.
+- site metadata proposals, which remain in the Inbox until human acceptance.
+
+`workbench_propose_inbox_item` is the canonical Codex entry point. It records
+origin, reason, confidence and proposed classification without creating
+permanent work. The legacy `workbench_create_backlog_item` name is retained for
+compatibility but now produces the same curable Inbox proposal.
 
 Blueprint and site proposal tools never write source code. The agent changes
 the repository through normal Codex permissions, with reviewable diffs.
@@ -103,4 +110,6 @@ contratual, não a execução dos checks.
 4. Run scoped checks.
 5. Complete it with summary, changed files and exact commands.
 
-The Workbench moves the linked backlog item to `review`, not directly to `done`.
+Completion of an agent request records execution facts only. Product state,
+human review, validation and sprint outcome decisions remain separate and are
+changed by a person in the Workbench.

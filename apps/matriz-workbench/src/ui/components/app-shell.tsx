@@ -4,6 +4,7 @@ import type { ProjectNavViewModel } from "../presenters/workspace-presenters"
 import { lockAction } from "../../../app/actions"
 import { CommandMenu } from "./command-menu"
 import { ThemeToggle } from "./theme-toggle"
+import { ThemeSystemPicker } from "./theme-system-picker"
 
 export function AppShell({
   projects,
@@ -26,6 +27,7 @@ export function AppShell({
         <nav className="primary-nav" aria-label="Navegação principal">
           <Link href="/"><span className="rail-icon" aria-hidden="true">⌁</span><span>Foco</span></Link>
           <Link href="/control"><span className="rail-icon" aria-hidden="true">◈</span><span>Controle</span></Link>
+          <Link href="/work/inbox"><span className="rail-icon" aria-hidden="true">◎</span><span>Trabalho</span></Link>
           <Link href="/projects"><span className="rail-icon" aria-hidden="true">⌘</span><span>Projetos</span></Link>
           <Link href="/knowledge"><span className="rail-icon" aria-hidden="true">◇</span><span>Conhecimento</span></Link>
           <Link href="/sites"><span className="rail-icon" aria-hidden="true">▦</span><span>Sites</span></Link>
@@ -50,6 +52,7 @@ export function AppShell({
           <span className="live-dot" aria-hidden="true" />
           <span>Repositório local</span>
           <span className="topbar-path">.matriz · apps/*/.matriz</span>
+          <ThemeSystemPicker />
           <ThemeToggle />
           <CommandMenu projects={projects} />
         </header>

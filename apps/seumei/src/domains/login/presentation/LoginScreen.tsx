@@ -126,8 +126,8 @@ export function SeumeiLoginScreen() {
           style={{
             padding: "0.75rem",
             borderRadius: "0.375rem",
-            background: "#fef2f2",
-            color: "#991b1b",
+            background: "var(--danger-soft)",
+            color: "var(--danger)",
             fontSize: "0.8125rem",
           }}
         >

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import "./globals.css"
 import { themeToCssVars, appThemes } from "@matriz/design-system"
+import { ThemeController } from "@matriz/design-ui"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
 import { SeumeiAuthAdoption } from "../src/auth/provider"
 
@@ -17,11 +18,12 @@ export default function SeumeiRootLayout({ children }: { children: ReactNode }) 
     .join("\n")
 
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" data-theme="light">
       <head>
         <style>{`:root { ${styleVars} }`}</style>
       </head>
       <body style={{ margin: 0, background: "var(--color-background)", color: "var(--color-foreground)" }}>
+        <ThemeController appId="seumei" />
         <BootstrapGuard>
           <SeumeiAuthAdoption>{children}</SeumeiAuthAdoption>
         </BootstrapGuard>

@@ -81,6 +81,24 @@
       ]
     }
   ],
+  "markers": [
+    {
+      "id": "marker_0a59d492-6077-4b79-9bd7-34f7184b0a33",
+      "phaseId": "phase_1a9a74a8-96f8-4c69-a874-004e6a80dbb1",
+      "initiativeId": "ini_d1f87fb9-cd8b-4785-9930-4bd9721bff85",
+      "title": "Gate de validação — multitemas e marcos",
+      "description": "Revisão humana da fundação multitema e dos marcadores persistidos no roadmap.",
+      "targetDate": "2026-08-10",
+      "backlogIds": [
+        "wi_e3a6a580-f1ce-4865-946c-cc0c358f789e",
+        "wi_bce28f01-62f0-486b-8280-a2444275d853"
+      ],
+      "references": [],
+      "responsible": "Produto + revisão humana",
+      "kind": "validation_gate",
+      "status": "pending_review"
+    }
+  ],
   "goals": [
     {
       "id": "goal_30726583-6773-4f61-a4b3-eef3340aaaa8",
@@ -3971,6 +3989,6 @@
       ]
     }
   ],
-  "updatedAt": "2026-08-01T18:51:53.074Z",
-  "revision": "cd58beb64e2b63a1"
+  "updatedAt": "2026-08-03T14:59:13.026Z",
+  "revision": "dc670cd4b02e8923"
 }

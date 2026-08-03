@@ -1,10 +1,14 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "tsk_c65fc39b-d1b5-4540-92b0-a1c8e7fc18bb",
   "projectId": "matriz-workbench",
+  "kind": "task",
   "title": "Habilitar publicação @matriz no GitHub Packages",
   "description": "Transferir ou criar o repositório MatrizUILib sob a organização GitHub matriz, configurar repository e publishConfig dos packages, habilitar MATRIZ_PACKAGES_RELEASE_ENABLED e publicar uma versão de teste antes da adoção física no Workbench.",
-  "status": "blocked",
+  "productStatus": "ready",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
   "priority": "high",
   "workScope": {
     "kind": "project"
@@ -18,7 +22,7 @@
     {
       "id": "ac_167ac56c-e638-425c-a4b0-9287002f45bc",
       "text": "O repositório proprietário está sob a organização GitHub matriz.",
-      "completed": false
+      "completed": true
     },
     {
       "id": "ac_d8c68861-6e91-428d-add3-9d147157eba8",
@@ -43,7 +47,12 @@
   ],
   "dependencyIds": [],
   "references": [],
+  "blocker": {
+    "summary": "Bloqueio legado sem descrição estruturada.",
+    "status": "open",
+    "updatedAt": "2026-08-01T19:15:09.235Z"
+  },
   "createdAt": "2026-07-31T20:17:45.573Z",
-  "updatedAt": "2026-07-31T20:22:22.840Z",
-  "revision": "843f52ade6dd3acd"
+  "updatedAt": "2026-08-01T19:15:09.248Z",
+  "revision": "80ab0a6f278aa470"
 }

@@ -1,11 +1,14 @@
 import type { Metadata, Viewport } from "next"
 import type { ReactNode } from "react"
 import { Geist, Geist_Mono } from "next/font/google"
+import { darkAppThemes, themeToCssVars } from "@matriz/design-system"
+import { ThemeController } from "@matriz/design-ui"
 import { SitesBootstrap } from "../src/bootstrap/provider"
 import "./globals.css"
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" })
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
+const sitesVars = themeToCssVars(darkAppThemes.sites)
 
 export const metadata: Metadata = {
   title: { default: "Matriz Sites", template: "%s · Matriz Sites" },
@@ -20,8 +23,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${sans.variable} ${mono.variable}`}>
-      <body><SitesBootstrap>{children}</SitesBootstrap></body>
+    <html lang="pt-BR" className={`${sans.variable} ${mono.variable}`} data-theme="dark" style={sitesVars}>
+      <body><ThemeController appId="sites" /><SitesBootstrap>{children}</SitesBootstrap></body>
     </html>
   )
 }

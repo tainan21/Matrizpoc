@@ -81,6 +81,15 @@ Concluir todas as iniciativas não conclui automaticamente a fase. A pessoa
 responsável precisa verificar o outcome e decidir explicitamente o estado da
 fase. A timeline não altera score 0–100.
 
+Marcos, gates e marcadores de release são pontos datados dentro da fase, não
+novos estados da iniciativa. Um marco ou release só fica `achieved` com
+evidência revisável. Gates de validação e decisão só ficam `passed` por ação
+humana identificada e com evidência; `waived` exige justificativa humana.
+
+Uma execução Codex pode produzir uma referência candidata. Ela não aprova o
+gate, não conclui o marco, não move a iniciativa ou a fase e não altera o score.
+Mesmo todos os gates aprovados não concluem automaticamente uma iniciativa.
+
 ## Backlog
 
 O backlog responde:
@@ -104,6 +113,11 @@ editados. Bloqueio é uma condição do item, não uma coluna permanente.
 
 Estado de produto, execução, validação, revisão humana e documentação são
 independentes. Somente uma pessoa pode aprovar os estados de governança.
+
+A revisão de uma execução também é explícita e independente. Ela registra se o
+resultado específico foi aprovado ou se exige alterações, com pessoa, nota e
+revision do run. Aprovar a execução não aprova automaticamente a revisão do
+produto, a validação, a documentação ou o score.
 
 O mapa de dependências projeta somente `dependencyIds` persistidos. Uma relação
 é resolvida quando o item pré-requisito está `completed`; referências ausentes e

@@ -7,6 +7,7 @@ export type DependencyEdgeHealth = "resolved" | "waiting" | "missing" | "cycle"
 export interface WorkItemDependencyNodeViewModel {
   id: string
   title: string
+  kind?: WorkItem["kind"]
   kindLabel: string
   productStatus?: ProductStatus
   statusLabel: string
@@ -206,6 +207,7 @@ export function toWorkItemDependencyMapViewModel(items: WorkItem[]): WorkItemDep
     return {
       id: item.id,
       title: item.title,
+      kind: item.kind,
       kindLabel: KIND_LABELS[item.kind],
       productStatus: item.productStatus,
       statusLabel: PRODUCT_STATUS_LABELS[item.productStatus],

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { createMaturityGoalCatalog } from "../application/maturity-goal-catalog"
 import {
   attachmentReferenceSchema,
+  agentRequestSchema,
   backlogItemSchema,
   backlogStatusSchema,
   roadmapInitiativeSchema,
@@ -10,6 +11,24 @@ import {
 } from "./schemas"
 
 describe("Workbench schemas", () => {
+  it("keeps legacy agent requests readable without an execution review", () => {
+    const parsed = agentRequestSchema.parse({
+      schemaVersion: 1,
+      id: "req_00000000-0000-4000-8000-000000000001",
+      projectId: "sample",
+      backlogItemId: "tsk_00000000-0000-4000-8000-000000000001",
+      title: "Legacy request",
+      instructions: "",
+      status: "queued",
+      changedFiles: [],
+      checks: [],
+      createdAt: "2026-08-03T10:00:00.000Z",
+      updatedAt: "2026-08-03T10:00:00.000Z",
+      revision: "revision-1",
+    })
+    expect(parsed.review).toBeUndefined()
+  })
+
   it("rejects unsupported backlog state", () => {
     expect(backlogStatusSchema.safeParse("deleted").success).toBe(false)
   })
@@ -81,6 +100,24 @@ describe("Workbench schemas", () => {
         targetDate: "2026-09-30",
       }).success,
     ).toBe(false)
+  })
+
+  it("reads legacy roadmaps with an empty marker collection", () => {
+    const parsed = roadmapSchema.parse({
+      schemaVersion: 1, projectId: "sample", phases: [], goals: [], scorecards: [],
+      updatedAt: "2026-08-01T00:00:00.000Z", revision: "revision1",
+    })
+    expect(parsed.markers).toEqual([])
+  })
+
+  it("rejects a marker whose initiative is outside its phase", () => {
+    const phaseId = "phase_11111111-1111-4111-8111-111111111111"
+    const parsed = roadmapSchema.safeParse({
+      schemaVersion: 1, projectId: "sample", goals: [], scorecards: [], updatedAt: "2026-08-01T00:00:00.000Z", revision: "revision1",
+      phases: [{ id: phaseId, title: "Fase", outcome: "", status: "active", initiatives: [] }],
+      markers: [{ id: "marker_22222222-2222-4222-8222-222222222222", phaseId, initiativeId: "ini_33333333-3333-4333-8333-333333333333", kind: "milestone", status: "planned", title: "M1", description: "", targetDate: "2026-08-10", backlogIds: [], references: [] }],
+    })
+    expect(parsed.success).toBe(false)
   })
 
   it("defaults old backlog records to project scope and accepts site scope", () => {

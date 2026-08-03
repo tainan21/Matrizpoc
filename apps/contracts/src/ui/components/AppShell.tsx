@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Container, Stack, Heading, Text } from "@matriz/design-ui"
+import { Container, Stack, Heading, Text, ThemeToggle } from "@matriz/design-ui"
 
 interface AppShellProps {
   title: string
@@ -19,6 +19,9 @@ export function ContractsAppShell({ title, description, children }: AppShellProp
     <Container>
       <Stack gap={6}>
         <header>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <ThemeToggle appId="contracts" />
+          </div>
           <Stack gap={2}>
             <Text size="sm" tone="muted">
               Matriz / Contracts

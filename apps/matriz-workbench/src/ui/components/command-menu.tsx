@@ -23,6 +23,9 @@ export function CommandMenu({ projects }: { projects: ProjectNavViewModel[] }) {
     () => [
       { href: "/", label: "Foco atual", context: "Visão operacional" },
       { href: "/control", label: "Controle", context: "Score, evidências e aprovações" },
+      { href: "/work/inbox", label: "Inbox de trabalho", context: "Captura e curadoria" },
+      { href: "/work/backlog", label: "Backlog estruturado", context: "Trabalho multi-projeto" },
+      { href: "/work/sprints", label: "Sprints", context: "Compromisso, review e validação" },
       { href: "/projects", label: "Projetos", context: "Apps detectados" },
       { href: "/projects/new", label: "Novo projeto", context: "Project Blueprint" },
       { href: "/knowledge", label: "Conhecimento", context: "Repositórios federados" },
@@ -61,7 +64,7 @@ export function CommandMenu({ projects }: { projects: ProjectNavViewModel[] }) {
         return
       }
       if (sequenceRef.current[0] === "g") {
-        const routes: Record<string, string> = { f: "/", c: "/control", b: "/projects", s: "/projects/matriz-workbench/roadmap" }
+        const routes: Record<string, string> = { f: "/", c: "/control", b: "/work/backlog", i: "/work/inbox", s: "/work/sprints" }
         const destination = routes[event.key.toLowerCase()]
         sequenceRef.current = []
         if (destination) { event.preventDefault(); router.push(destination) }
