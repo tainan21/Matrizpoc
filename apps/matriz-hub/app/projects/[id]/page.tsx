@@ -112,6 +112,17 @@ export default async function ProjectDetailPage({ params }: Props) {
             </CardDescription>
           </CardHeader>
           <Stack gap={2}>
+            {vm.healthObservation ? (
+              <div className="flex flex-wrap gap-1.5">
+                <Badge tone={vm.healthObservation.nature === "observed" ? "success" : "warning"}>
+                  {vm.healthObservation.natureLabel}
+                </Badge>
+                <Badge tone="neutral">{vm.healthObservation.freshnessLabel}</Badge>
+                <Badge tone="neutral">{vm.healthObservation.confidenceLabel}</Badge>
+              </div>
+            ) : (
+              <Badge tone="warning">Proveniencia desconhecida</Badge>
+            )}
             <div className="flex items-center gap-3">
               <div className="flex-1">
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
@@ -144,6 +155,16 @@ export default async function ProjectDetailPage({ params }: Props) {
                 </li>
               ))}
             </ul>
+            {vm.healthObservation ? (
+              <Text size="xs" tone="muted">
+                {`Fonte: ${vm.healthObservation.sourceId} · coletado em ${new Date(vm.healthObservation.collectedAt).toLocaleString("pt-BR")}`}
+              </Text>
+            ) : null}
+            {vm.healthObservation?.lastError ? (
+              <Text size="xs" tone="muted">
+                {`Ultimo erro: ${vm.healthObservation.lastError.message}`}
+              </Text>
+            ) : null}
           </Stack>
         </Card>
       </div>

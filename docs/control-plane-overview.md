@@ -7,6 +7,15 @@
 
 ## O que é o control plane institucional
 
+### Regra de honestidade operacional
+
+Status operacional carrega origem, natureza, instante de coleta, frescor e
+confianca. Dados decorativos ou institucionais sem check executado sao
+`declared` ou `simulated` e aparecem como `unknown`; nao produzem badge de
+health saudavel. Ambientes observados usam `ProjectEnvironment` e
+`ObservationMeta`. Falha de coleta preserva o erro sem transformar ausencia de
+integracao em indisponibilidade do projeto.
+
 A Matrizpoc V1.1 provou **disciplina arquitetural técnica**: manifests,
 DTOs, registry, eventos, external-links, boundaries, auth compartilhada.
 

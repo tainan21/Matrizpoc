@@ -136,6 +136,16 @@ describe("smoke: ingestion — LocalContractImportAdapter", () => {
     expect(p.ingestMode).toBe("local_contract_import")
     expect(p.capabilities.produces.length).toBeGreaterThan(0)
     expect(p.capabilities.exposes.length).toBe(m.routes.length)
+    expect(p.health).toMatchObject({
+      status: "unknown",
+      readinessScore: 0,
+      observation: {
+        sourceId: "test.local",
+        nature: "declared",
+        freshness: "unknown",
+        confidence: "unverified",
+      },
+    })
   })
 })
 

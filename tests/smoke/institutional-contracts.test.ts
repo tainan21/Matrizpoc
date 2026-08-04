@@ -9,6 +9,8 @@ import {
   isIngestModeAllowed,
   projectBrandIdentitySchema,
   projectHealthSnapshotSchema,
+  projectEnvironmentSchema,
+  observationMetaSchema,
   projectIntegrationCapabilitiesSchema,
   projectManifestSchema,
   projectMcpCapabilitiesSchema,
@@ -125,6 +127,77 @@ describe("smoke: institutional contracts — ProjectHealthSnapshot", () => {
   it("rejects readiness out of range", () => {
     const r = projectHealthSnapshotSchema.safeParse({ ...baseHealth, readinessScore: 150 })
     expect(r.success).toBe(false)
+  })
+})
+
+describe("smoke: institutional contracts — observation provenance", () => {
+  it("accepts a stale declared observation with an explicit collection error", () => {
+    const result = observationMetaSchema.safeParse({
+      sourceId: "local:matriz-monorepo",
+      nature: "declared",
+      collectedAt: "2026-04-22T10:00:00.000Z",
+      freshness: "stale",
+      confidence: "unverified",
+      lastError: {
+        code: "health_not_observed",
+        message: "No runtime check is configured.",
+        occurredAt: "2026-04-22T10:00:00.000Z",
+      },
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects an observed value without observedAt", () => {
+    const result = observationMetaSchema.safeParse({
+      sourceId: "health:https",
+      nature: "observed",
+      collectedAt: "2026-04-22T10:00:00.000Z",
+      freshness: "fresh",
+      confidence: "verified",
+    })
+
+    expect(result.success).toBe(false)
+  })
+})
+
+describe("smoke: institutional contracts — project environments", () => {
+  it("accepts an observed local environment", () => {
+    const result = projectEnvironmentSchema.safeParse({
+      id: "local",
+      kind: "local",
+      label: "Local",
+      url: "http://127.0.0.1:3001",
+      status: "available",
+      observation: {
+        sourceId: "local:http",
+        nature: "observed",
+        observedAt: "2026-08-04T12:00:00.000Z",
+        collectedAt: "2026-08-04T12:00:00.000Z",
+        freshness: "fresh",
+        confidence: "verified",
+      },
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects an available environment without an observed status", () => {
+    const result = projectEnvironmentSchema.safeParse({
+      id: "production",
+      kind: "production",
+      label: "Production",
+      status: "available",
+      observation: {
+        sourceId: "manifest",
+        nature: "declared",
+        collectedAt: "2026-08-04T12:00:00.000Z",
+        freshness: "unknown",
+        confidence: "unverified",
+      },
+    })
+
+    expect(result.success).toBe(false)
   })
 })
 

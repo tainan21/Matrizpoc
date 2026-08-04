@@ -24,6 +24,7 @@ export const manifest: AppManifestDTO = {
     { label: "Onboarding status", path: "/onboarding-status", order: 5 },
     { label: "Feature flags", path: "/feature-flags", order: 6 },
     { label: "Telemetria", path: "/telemetry", order: 7 },
+    { label: "Engineering", path: "/engineering", order: 9 },
     { label: "Projects", path: "/projects", order: 10 },
     { label: "Health", path: "/health", order: 11 },
     { label: "Ecosystem", path: "/ecosystem", order: 12 },

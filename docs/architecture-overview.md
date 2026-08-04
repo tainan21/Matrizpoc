@@ -5,12 +5,12 @@
 
 ## Objetivo
 
-Monorepo TypeScript com **5 apps Next.js 16** independentes, que se
+Monorepo TypeScript com **7 apps Next.js 16** independentes, que se
 comunicam **exclusivamente** via `packages/integration/*` e os
 `public-contract.ts` de cada app. Nenhum app conhece a estrutura interna
 de outro (L3/L4).
 
-## Apps (5)
+## Apps (7)
 
 | App | Dominio | Papel no ecossistema |
 |-----|---------|----------------------|
@@ -19,6 +19,8 @@ de outro (L3/L4).
 | `seumei` | Estabelecimentos, ofertas, donos | Produz `seumei.establishment.selected` e `contract.created`. |
 | `contracts` | Contratos | Consome `contract.created` de spot/seumei. Produz `contract.linked`. |
 | `willdash` | Metas, atividades, recompensas | Produz `willdash.goal.opened` e `willdash.activity.logged`. Consome `contract.created` e `onboarding.completed` para agregacao. |
+| `matriz-workbench` | Tooling local-first | Backlog, roadmap, agentes, evidencias e MCP operacional. |
+| `sites` | Colecao de sites | Catalogo e runtime de sites no ecossistema. |
 
 Cada app tem: `src/manifest/manifest.ts` (L2), `src/bootstrap/index.ts`
 (L11), `public-contract.ts` (L2/L3), `docs/README.md` (este nivel).
