@@ -60,11 +60,21 @@ import {
 } from "../../domain/agent-request-policy"
 import { buildAgentExecutionReview } from "../../domain/agent-execution-review"
 import {
+  buildExecutionClaim,
+  findOwnershipConflicts,
+  renewExecutionLease,
+  type ExecutionClaim,
+} from "../../domain/engineering-operation"
+import {
   inboxItemSchema,
   sprintSchema,
   type InboxItem,
   type Sprint,
 } from "../../domain/adaptive-work"
+import {
+  reconciliationRecordSchema,
+  type ReconciliationRecord,
+} from "../../domain/reconciliation"
 
 const MAX_JSON_BYTES = 256_000
 const MAX_DOCUMENT_BYTES = 100_000
@@ -587,6 +597,7 @@ export class WorkspaceRepository {
       ["docs", "technical"],
       ["docs", "decisions"],
       ["agents", "requests"],
+      ["agents", "reconciliation"],
       ["activity"],
     ]) {
       await this.ensureMatrixDirectory(projectId, folder)
@@ -1646,7 +1657,7 @@ export class WorkspaceRepository {
     patch: Partial<
       Pick<
         AgentRequest,
-        "status" | "claimedBy" | "resultSummary" | "changedFiles" | "checks"
+        "status" | "claimedBy" | "resultSummary" | "changedFiles" | "checks" | "executionClaim"
       >
     >,
     expectedRevision: string,
@@ -1671,6 +1682,191 @@ export class WorkspaceRepository {
       entityId: requestId,
     })
     return next
+  }
+
+  async getReconciliationSnapshot(
+    projectId: string,
+    requestId: string,
+  ): Promise<ReconciliationRecord | undefined> {
+    if (!/^req_[0-9a-f-]{36}$/.test(requestId)) {
+      throw new WorkspaceError("ID de solicitação inválido.", "INVALID_PATH")
+    }
+    try {
+      return await this.readJson(
+        projectId,
+        ["agents", "reconciliation", `${requestId}.json`],
+        reconciliationRecordSchema,
+      )
+    } catch (error) {
+      if (error instanceof WorkspaceError && error.code === "NOT_FOUND") return undefined
+      throw error
+    }
+  }
+
+  async writeReconciliationSnapshot(
+    projectId: string,
+    input: Omit<ReconciliationRecord, "schemaVersion" | "revision"> & {
+      schemaVersion?: 1
+      revision?: string
+    },
+    expectedRevision?: string,
+  ): Promise<ReconciliationRecord> {
+    if (input.projectId !== projectId) {
+      throw new WorkspaceError("O snapshot pertence a outro projeto.", "INVALID_DATA")
+    }
+    return this.withCoordinatorLock(`reconciliation-${input.requestId}`, async () => {
+      const current = await this.getReconciliationSnapshot(projectId, input.requestId)
+      if (current && expectedRevision !== current.revision) throw new RevisionConflictError()
+      if (!current && expectedRevision) throw new RevisionConflictError()
+      await this.ensureMatrixDirectory(projectId, ["agents", "reconciliation"])
+      const base = {
+        ...input,
+        schemaVersion: 1 as const,
+        revision: "",
+      }
+      const next = reconciliationRecordSchema.parse({
+        ...base,
+        revision: revisionFor(base),
+      })
+      await this.atomicWrite(
+        projectId,
+        ["agents", "reconciliation", `${input.requestId}.json`],
+        next,
+      )
+      await this.appendActivity(projectId, {
+        actor: "system",
+        action: "agent_request.reconciled",
+        summary: `Reconciliação ${next.status}: ${next.findings.length} finding(s).`,
+        entityType: "agent_request",
+        entityId: input.requestId,
+        metadata: {
+          requestRevision: next.requestRevision,
+          runRevision: next.runRevision ?? null,
+        },
+      })
+      return next
+    })
+  }
+
+  async claimAgentRequest(
+    projectId: string,
+    requestId: string,
+    input: Omit<
+      Parameters<typeof buildExecutionClaim>[0],
+      "requestId"
+    >,
+    expectedRevision: string,
+    observedAt = new Date().toISOString(),
+  ): Promise<AgentRequest> {
+    return this.withCoordinatorLock("engineering-operation-claims", async () => {
+      const current = await this.getAgentRequest(projectId, requestId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      if (
+        current.executionClaim &&
+        !["completed", "cancelled"].includes(current.status) &&
+        Date.parse(current.executionClaim.lease.expiresAt) > Date.parse(observedAt)
+      ) {
+        throw new WorkspaceError("A solicitação já possui uma ownership lease ativa.", "CONFLICT")
+      }
+      const claim = buildExecutionClaim({ ...input, requestId })
+      const claims = (await this.listActiveExecutionClaims()).map((entry) => entry.claim)
+      const conflicts = findOwnershipConflicts(claim, claims, observedAt)
+      if (conflicts.length) {
+        const first = conflicts[0]
+        throw new WorkspaceError(
+          `Ownership em conflito com ${first.requestId}: ${first.value}.`,
+          "CONFLICT",
+        )
+      }
+      return this.updateAgentRequest(
+        projectId,
+        requestId,
+        {
+          status: "claimed",
+          claimedBy: claim.claimedBy,
+          executionClaim: claim,
+        },
+        expectedRevision,
+        "codex",
+      )
+    })
+  }
+
+  async listActiveExecutionClaims(): Promise<Array<{
+    projectId: string
+    requestId: string
+    status: AgentRequest["status"]
+    claim: ExecutionClaim
+  }>> {
+    const claims: Array<{
+      projectId: string
+      requestId: string
+      status: AgentRequest["status"]
+      claim: ExecutionClaim
+    }> = []
+    for (const project of await this.discoverProjects()) {
+      if (!project.initialized || project.corrupted) continue
+      const requests = await this.listAgentRequests(project.id).catch(() => [])
+      for (const request of requests) {
+        if (request.executionClaim && !["completed", "cancelled"].includes(request.status)) {
+          claims.push({
+            projectId: project.id,
+            requestId: request.id,
+            status: request.status,
+            claim: request.executionClaim,
+          })
+        }
+      }
+    }
+    return claims
+  }
+
+  async renewAgentRequestClaim(
+    projectId: string,
+    requestId: string,
+    expectedRevision: string,
+    expectedGeneration: number,
+    renewedAt: string,
+    expiresAt: string,
+    checkpointSummary: string,
+    actor: ActivityEvent["actor"] = "codex",
+  ): Promise<AgentRequest> {
+    return this.withCoordinatorLock("engineering-operation-claims", async () => {
+      const current = await this.getAgentRequest(projectId, requestId)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      if (!current.executionClaim) {
+        throw new WorkspaceError("A solicitação não possui ownership ativa.", "INVALID_DATA")
+      }
+      if (!["claimed", "in_progress", "blocked"].includes(current.status)) {
+        throw new WorkspaceError("A lease só pode ser renovada durante execução ativa.", "CONFLICT")
+      }
+      if (!checkpointSummary.trim()) {
+        throw new WorkspaceError("O checkpoint exige um resumo material.", "INVALID_DATA")
+      }
+      const executionClaim = renewExecutionLease(
+        current.executionClaim,
+        expectedGeneration,
+        renewedAt,
+        expiresAt,
+      )
+      const base = {
+        ...current,
+        executionClaim,
+        updatedAt: now(),
+        revision: "",
+      }
+      const next = agentRequestSchema.parse({ ...base, revision: revisionFor(base) })
+      await this.atomicWrite(projectId, ["agents", "requests", `${requestId}.json`], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "agent_request.checkpoint",
+        summary: checkpointSummary,
+        entityType: "agent_request",
+        entityId: requestId,
+        metadata: { leaseGeneration: executionClaim.lease.generation },
+      })
+      return next
+    })
   }
 
   async reviewAgentRequest(

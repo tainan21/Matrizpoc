@@ -6,6 +6,7 @@ import { WorkspaceRepository } from "../../../../../../src/integration/filesyste
 import { CodexRunPanel } from "../../../../../../src/ui/components/codex-run-panel"
 import { DeliveryArtifactsPanel } from "../../../../../../src/ui/components/delivery-artifacts-panel"
 import { ExecutionReviewPanel } from "../../../../../../src/ui/components/execution-review-panel"
+import { EngineeringOperationsPanel } from "../../../../../../src/ui/components/engineering-operations-panel"
 import { ProjectHeader } from "../../../../../../src/ui/components/project-header"
 import {
   toCodexRuntimeViewModel,
@@ -16,6 +17,7 @@ import {
   toPullRequestReceiptViewModel,
 } from "../../../../../../src/ui/presenters/delivery-artifact-presenter"
 import { toExecutionReviewViewModel } from "../../../../../../src/ui/presenters/work-item-detail-presenter"
+import { toEngineeringOperationViewModel } from "../../../../../../src/ui/presenters/engineering-operation-presenter"
 
 export const dynamic = "force-dynamic"
 
@@ -33,11 +35,12 @@ export default async function AgentRequestPage({
   const workItem = await repository.getWorkItem(projectId, request.backlogItemId).catch(() => undefined)
   const manager = getCodexRunManager()
   const artifactStore = new DeliveryArtifactStore(repository.repositoryRoot)
-  const [run, runtime, pullRequest, preview] = await Promise.all([
+  const [run, runtime, pullRequest, preview, reconciliation] = await Promise.all([
     manager.getSnapshot(projectId, requestId),
     manager.runtimeInfo(),
     artifactStore.readPullRequest(projectId, requestId),
     artifactStore.readPreview(projectId, requestId),
+    repository.getReconciliationSnapshot(projectId, requestId),
   ])
 
   return (
@@ -64,6 +67,9 @@ export default async function AgentRequestPage({
         requestStatus={request.status}
         runtime={toCodexRuntimeViewModel(runtime)}
         initialRun={toCodexRunViewModel(run)}
+      />
+      <EngineeringOperationsPanel
+        operation={toEngineeringOperationViewModel(request, run, reconciliation)}
       />
       <DeliveryArtifactsPanel
         projectId={projectId}
