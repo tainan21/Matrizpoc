@@ -18,7 +18,6 @@ import { TenantProvider } from "@matriz/access-tenants/client"
 import { Button } from "@matriz/design-ui"
 import { spotAuthConfig } from "./config"
 import { AppShell } from "../ui/components/AppShell"
-import { LoginLayoutFrame } from "../domains/login/presentation/LoginLayoutFrame"
 
 function RedirectToLogin(): null {
   const router = useRouter()
@@ -57,7 +56,7 @@ function SpotAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLoginRoute = (pathname ?? "").startsWith("/login")
   if (isLoginRoute) {
-    return <LoginLayoutFrame>{children}</LoginLayoutFrame>
+    return <>{children}</>
   }
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>

@@ -4,6 +4,7 @@ import { appThemes, themeToCssVars } from "@matriz/design-system"
 import { ThemeController } from "@matriz/design-ui"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
 import { ContractsAuthAdoption } from "../src/auth/provider"
+import { EcosystemAccess } from "@matriz/flows-ecosystem"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function ContractsRootLayout({ children }: { children: ReactNode 
         }}
       >
         <ThemeController appId="contracts" />
+        <EcosystemAccess appId="contracts" />
         <BootstrapGuard />
         <ContractsAuthAdoption>{children}</ContractsAuthAdoption>
       </body>

@@ -6,7 +6,6 @@ import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { TenantProvider } from "@matriz/access-tenants/client"
 import { seumeiAuthConfig } from "./config"
 import { AppShell } from "../ui/components/AppShell"
-import { LoginLayoutFrame } from "../domains/login/presentation/LoginLayoutFrame"
 
 function RedirectToLogin(): null {
   const router = useRouter()
@@ -80,7 +79,7 @@ function SeumeiAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLoginRoute = (pathname ?? "").startsWith("/login")
   if (isLoginRoute) {
-    return <LoginLayoutFrame>{children}</LoginLayoutFrame>
+    return <>{children}</>
   }
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>

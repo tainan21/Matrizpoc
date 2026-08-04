@@ -44,6 +44,8 @@ export default defineConfig({
       "@matriz/integration-ingestion": resolve(__dirname, "./packages/integration/ingestion/src/index.ts"),
       "@matriz/platform-config": resolve(__dirname, "./packages/platform/config/src/index.ts"),
       "@matriz/flows-onboarding": resolve(__dirname, "./packages/flows/onboarding/src/index.ts"),
+      "@matriz/flows-auth": resolve(__dirname, "./packages/flows/auth/src/login-machine.ts"),
+      "@matriz/flows-ecosystem": resolve(__dirname, "./packages/flows/ecosystem/src/index.tsx"),
       "@apps/matriz-hub/public-contract": resolve(__dirname, "./apps/matriz-hub/public-contract.ts"),
       "@apps/matriz-workbench/public-contract": resolve(__dirname, "./apps/matriz-workbench/public-contract.ts"),
       "@apps/sites/public-contract": resolve(__dirname, "./apps/sites/public-contract.ts"),

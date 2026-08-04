@@ -7,6 +7,7 @@
 import * as React from "react"
 import type { AuthError, AuthSession, AuthStatus } from "../types"
 import type { SignInStrategy } from "../strategies/strategy.types"
+import type { MockAuthBroker } from "../mock/mock-auth-broker"
 
 export interface AuthContextValue {
   readonly status: AuthStatus
@@ -14,8 +15,10 @@ export interface AuthContextValue {
   readonly error: AuthError | null
   readonly strategies: readonly SignInStrategy[]
   readonly defaultStrategyId: string
+  readonly broker?: MockAuthBroker
   start<TIn, TOut>(strategyId: string, input: TIn): Promise<TOut | null>
   verify(strategyId: string, input: unknown): Promise<AuthSession | null>
+  acceptSession(session: AuthSession): void
   signOut(): void
   refresh(): void
   setActiveTenant(tenantId: string): void

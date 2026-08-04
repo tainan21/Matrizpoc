@@ -18,6 +18,7 @@ export function buildContentSecurityPolicy(
   ]
   const connectSources = [
     "'self'",
+    "http://localhost:3000",
     ...(options.development ? ["ws:", "wss:"] : []),
   ]
 

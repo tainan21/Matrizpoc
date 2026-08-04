@@ -4,6 +4,7 @@ import { themeToCssVars, appThemes } from "@matriz/design-system"
 import { ThemeController } from "@matriz/design-ui"
 import { bootstrapMatrizHub } from "../src/bootstrap"
 import { HubAuthAdoption } from "../src/auth/provider"
+import { EcosystemAccess } from "@matriz/flows-ecosystem"
 import "./globals.css"
 
 bootstrapMatrizHub()
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         }}
       >
         <ThemeController appId="matriz-hub" />
+        <EcosystemAccess appId="matriz-hub" />
         <HubAuthAdoption>{children}</HubAuthAdoption>
       </body>
     </html>

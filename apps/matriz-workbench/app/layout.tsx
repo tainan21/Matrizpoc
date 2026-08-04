@@ -6,6 +6,7 @@ import "./globals.css"
 import { WorkbenchBootstrap } from "../src/bootstrap/provider"
 import { normalizeAppearance, THEME_COOKIE, THEME_SYSTEM_COOKIE } from "../src/ui/theme"
 import { getAppearanceVariables } from "../src/ui/theme-presets"
+import { EcosystemAccess } from "@matriz/flows-ecosystem"
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" })
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" })
@@ -39,7 +40,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       style={getAppearanceVariables(appearance.mode, appearance.system)}
       suppressHydrationWarning
     >
-      <body><WorkbenchBootstrap>{children}</WorkbenchBootstrap></body>
+      <body><EcosystemAccess appId="matriz-workbench" ownThemeControl /><WorkbenchBootstrap>{children}</WorkbenchBootstrap></body>
     </html>
   )
 }

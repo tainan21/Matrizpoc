@@ -13,6 +13,7 @@
   "dependencies": {
     "@matriz/design-system": "workspace:*",
     "@matriz/design-ui": "workspace:*",
+    "@matriz/flows-ecosystem": "workspace:^",
     "@matriz/integration-api-contracts": "workspace:*",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",

@@ -14,6 +14,7 @@ export interface MatrizAuthLayoutProps {
   panelEyebrow?: string
   panelTitle: string
   footer: string
+  storySupplement?: ReactNode
   children: ReactNode
 }
 
@@ -30,6 +31,7 @@ export function MatrizAuthLayout({
   panelTitle,
   footer,
   children,
+  storySupplement,
 }: MatrizAuthLayoutProps) {
   const variant = appId === "matriz-hub" ? "hub" : appId
 
@@ -68,6 +70,7 @@ export function MatrizAuthLayout({
             <span>Tipografia</span><span>Cor semântica</span><span>Ritmo 4px</span>
           </div>
         </div>
+        {storySupplement}
       </aside>
 
       <main className="matriz-auth-access">

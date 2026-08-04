@@ -1,5 +1,18 @@
 # Matriz Decision Log
 
+## 2026-08-04 — Broker mockado e fluxo visual de login compartilhado
+
+- **Decisão:** centralizar desafios e sessão mockados no Matriz Hub para Hub,
+  Spot, Seumei, Contracts e WillDash; compartilhar a composição visual por
+  `@matriz/flows-auth` e manter skins declarativas em cada app.
+- **Motivo:** provar SSO local e reduzir duplicação sem apagar a identidade dos
+  produtos nem mover domínio forte para packages.
+- **Impacto:** `localhost:3000` é necessário para autenticar na POC. Workbench
+  preserva o token local e Sites permanece público. Reiniciar o Hub encerra a
+  sessão em memória.
+- **Revisar quando:** autenticação real, multiusuário, persistência remota ou
+  implantação em domínios diferentes entrarem no escopo.
+
 Decisões curtas que alteram os limites do monorepo. ADRs detalhados permanecem
 próximos do app responsável.
 

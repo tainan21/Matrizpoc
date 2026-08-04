@@ -17,12 +17,13 @@
     "mcp": "tsx src/mcp/server.ts"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.17.5",
     "@matriz/design-system": "workspace:*",
+    "@matriz/flows-ecosystem": "workspace:^",
     "@matriz/foundation-types": "workspace:*",
     "@matriz/integration-api-contracts": "workspace:*",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.17.5",
     "next": "16.2.4",
     "react": "19.2.5",
     "react-dom": "19.2.5",

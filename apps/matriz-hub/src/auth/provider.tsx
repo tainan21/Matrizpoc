@@ -10,7 +10,6 @@ import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { TenantProvider } from "@matriz/access-tenants/client"
 import { hubAuthConfig } from "./config"
 import { HubShell } from "../ui/components/HubShell"
-import { LoginLayoutFrame } from "../domains/login/presentation/LoginLayoutFrame"
 
 function RedirectToLogin(): null {
   const router = useRouter()
@@ -83,7 +82,7 @@ function HubAuthShell({ children }: { children: React.ReactNode }) {
   const isPublicRoute = (pathname ?? "").startsWith("/public")
   const isAuditRoute = (pathname ?? "").startsWith("/audit")
   if (isLoginRoute) {
-    return <LoginLayoutFrame>{children}</LoginLayoutFrame>
+    return <>{children}</>
   }
   if (isPublicRoute) {
     // V1.2: superficie publica institucional nao requer autenticacao

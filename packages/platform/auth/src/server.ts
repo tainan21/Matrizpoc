@@ -70,3 +70,17 @@ export {
 } from "./v1/mappers/session-snapshot.mapper"
 
 export { requireSession } from "./v1/guards/requireSession"
+
+export type {
+  AuthMethodId,
+  ChallengeMethod,
+  MockGoogleAccount,
+  AuthChallenge,
+  RecentAppAccess,
+  SharedAuthSession,
+  MockAuthClock,
+  MockAuthState,
+} from "./v1/mock/mock-auth"
+export { MOCK_GOOGLE_ACCOUNTS, createMockAuthState } from "./v1/mock/mock-auth"
+export type { MockAuthBroker } from "./v1/mock/mock-auth-broker"
+export { createHttpMockAuthBroker } from "./v1/mock/mock-auth-broker"

@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { darkAppThemes, themeToCssVars } from "@matriz/design-system"
 import { ThemeController } from "@matriz/design-ui"
 import { SitesBootstrap } from "../src/bootstrap/provider"
+import { EcosystemAccess } from "@matriz/flows-ecosystem"
 import "./globals.css"
 
 const sans = Geist({ subsets: ["latin"], variable: "--font-sans" })
@@ -24,7 +25,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR" className={`${sans.variable} ${mono.variable}`} data-theme="dark" style={sitesVars}>
-      <body><ThemeController appId="sites" /><SitesBootstrap>{children}</SitesBootstrap></body>
+      <body><ThemeController appId="sites" /><EcosystemAccess appId="sites" /><SitesBootstrap>{children}</SitesBootstrap></body>
     </html>
   )
 }

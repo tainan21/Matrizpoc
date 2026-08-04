@@ -75,6 +75,12 @@ importers:
       '@matriz/design-ui':
         specifier: workspace:*
         version: link:../../packages/design/ui
+      '@matriz/flows-auth':
+        specifier: workspace:^
+        version: link:../../packages/flows/auth
+      '@matriz/flows-ecosystem':
+        specifier: workspace:^
+        version: link:../../packages/flows/ecosystem
       '@matriz/flows-onboarding':
         specifier: workspace:*
         version: link:../../packages/flows/onboarding
@@ -160,6 +166,12 @@ importers:
       '@matriz/design-ui':
         specifier: workspace:*
         version: link:../../packages/design/ui
+      '@matriz/flows-auth':
+        specifier: workspace:^
+        version: link:../../packages/flows/auth
+      '@matriz/flows-ecosystem':
+        specifier: workspace:^
+        version: link:../../packages/flows/ecosystem
       '@matriz/flows-onboarding':
         specifier: workspace:*
         version: link:../../packages/flows/onboarding
@@ -236,6 +248,9 @@ importers:
       '@matriz/design-system':
         specifier: workspace:*
         version: link:../../packages/design/system
+      '@matriz/flows-ecosystem':
+        specifier: workspace:^
+        version: link:../../packages/flows/ecosystem
       '@matriz/foundation-types':
         specifier: workspace:*
         version: link:../../packages/foundation/types
@@ -294,6 +309,12 @@ importers:
       '@matriz/design-ui':
         specifier: workspace:*
         version: link:../../packages/design/ui
+      '@matriz/flows-auth':
+        specifier: workspace:^
+        version: link:../../packages/flows/auth
+      '@matriz/flows-ecosystem':
+        specifier: workspace:^
+        version: link:../../packages/flows/ecosystem
       '@matriz/flows-onboarding':
         specifier: workspace:*
         version: link:../../packages/flows/onboarding
@@ -373,6 +394,9 @@ importers:
       '@matriz/design-ui':
         specifier: workspace:*
         version: link:../../packages/design/ui
+      '@matriz/flows-ecosystem':
+        specifier: workspace:^
+        version: link:../../packages/flows/ecosystem
       '@matriz/integration-api-contracts':
         specifier: workspace:*
         version: link:../../packages/integration/api-contracts
@@ -422,6 +446,12 @@ importers:
       '@matriz/design-ui':
         specifier: workspace:*
         version: link:../../packages/design/ui
+      '@matriz/flows-auth':
+        specifier: workspace:^
+        version: link:../../packages/flows/auth
+      '@matriz/flows-ecosystem':
+        specifier: workspace:^
+        version: link:../../packages/flows/ecosystem
       '@matriz/flows-onboarding':
         specifier: workspace:*
         version: link:../../packages/flows/onboarding
@@ -504,6 +534,12 @@ importers:
       '@matriz/design-ui':
         specifier: workspace:*
         version: link:../../packages/design/ui
+      '@matriz/flows-auth':
+        specifier: workspace:^
+        version: link:../../packages/flows/auth
+      '@matriz/flows-ecosystem':
+        specifier: workspace:^
+        version: link:../../packages/flows/ecosystem
       '@matriz/flows-onboarding':
         specifier: workspace:*
         version: link:../../packages/flows/onboarding
@@ -653,6 +689,53 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
+  packages/flows/auth:
+    dependencies:
+      '@matriz/design-ui':
+        specifier: workspace:^
+        version: link:../../design/ui
+      '@matriz/foundation-constants':
+        specifier: workspace:^
+        version: link:../../foundation/constants
+      '@matriz/platform-auth':
+        specifier: workspace:^
+        version: link:../../platform/auth
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
+  packages/flows/ecosystem:
+    dependencies:
+      '@matriz/design-ui':
+        specifier: workspace:^
+        version: link:../../design/ui
+      '@matriz/foundation-constants':
+        specifier: workspace:^
+        version: link:../../foundation/constants
+      '@matriz/platform-config':
+        specifier: workspace:^
+        version: link:../../platform/config
+      '@matriz/platform-storage':
+        specifier: workspace:^
+        version: link:../../platform/storage
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
       typescript:
         specifier: 5.6.3
         version: 5.6.3

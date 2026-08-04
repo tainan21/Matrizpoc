@@ -5,6 +5,7 @@ import { ThemeController } from "@matriz/design-ui"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
 import { SpotAuthAdoption } from "../src/auth/provider"
 import { bootstrapSpot } from "../src/bootstrap"
+import { EcosystemAccess } from "@matriz/flows-ecosystem"
 import "./globals.css"
 
 // Bootstrap tambem no server para apps que fazem render RSC.
@@ -26,6 +27,7 @@ export default function SpotRootLayout({ children }: { children: ReactNode }) {
     <html lang="pt-BR" data-theme="light" style={spotVars as Record<string, string>}>
       <body className="bg-surface text-surface-fg antialiased">
         <ThemeController appId="spot" />
+        <EcosystemAccess appId="spot" />
         <BootstrapGuard>
           <SpotAuthAdoption>{children}</SpotAuthAdoption>
         </BootstrapGuard>
