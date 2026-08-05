@@ -1,4 +1,0 @@
-
-> @matriz/app-contracts@0.0.0 lint /vercel/share/v0-project/apps/contracts
-> eslint . --max-warnings 0
-

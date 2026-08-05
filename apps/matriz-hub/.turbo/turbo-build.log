@@ -1,81 +1,0 @@
-[?9001h[?1004h[?25l[2J[m[2;1H> @matriz/app-matriz-hub@0.0.0 build C:\Apps\matriz-infra-hub\apps\matriz-hub
-> next build[6;1H]0;C:\WINDOWS\system32\cmd.exe[?25h[?25l[38;2;173;127;168m[1m▲ Next.js 16.2.4[m (Turbopack)[8;1H[?25h[37m[1m [m Creating an optimized production build ...
-[32m[1m✓[m Compiled successfully in 9.7s
-[37m[1m [m Running TypeScript  [36m.[?25l[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[K[59C[37m[1m [m Running TypeScript  [36m.[m[K[59C[37m[1m [m Running TypeScript  [36m..[m[K[59C[37m[1m [m Running TypeScript  [36m...[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[37m[1m [m Running TypeScript  [36m...[K[34C[m[37m[1m [m Running TypeScript  [36m.[K[36C[m[37m[1m [m Running TypeScript  [36m..[K[35C[m[32m[1m✓[m Finished TypeScript in 12.7s[K
-[?25h[37m[1m [m Collecting page data using 11 workers  [36m.[?25l[m[37m[1m [m Collecting page data using 11 workers  [36m..[K[16C[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m.[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m..[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m.[m[37m[1m [m Collecting page data using 11 workers  [36m..[K[16C[m[37m[1m [m Collecting page data using 11 workers  [36m...[K[15C[m[37m[1m [m Collecting page data using 11 workers  [36m.[K[17C[m[37m[1m [m Collecting page data using 11 workers  [36m..[K[16C[m[37m[1m [m Collecting page data using 11 workers  [36m...[K[15C[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m.[m[37m[1m [m Collecting page data using 11 workers  [36m..[K[16C[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m...[m[K[59C[37m[1m [m Collecting page data using 11 workers  [36m.[m[K[59C[?25h[32m[1m✓[m Collecting page data using 11 workers in 5.5s    
-[37m[1m [m Generating static pages using 11 workers (0/12)  [36m[    ][?25l[m[K[59C[11;1H[K[59C[37m[1m [m Generating static pages using 11 workers (0/12)  [36m[=   ][m[K[59C[10;1H[K[59C[37m[1m [m Generating static pages using 11 workers (1/12)  [36m[==  ][m[K[59C[9;1H[K[59C[37m[1m [m Generating static pages using 11 workers (1/12)  [36m[=== ][m[K[59C[8;1H[K[59C[37m[1m [m Generating static pages using 11 workers (1/12)  [36m[ ===][m[37m[1m[7;1H [m Generating static pages using 11 workers (1/12)  [36m[  ==]  [m
-[K[59C[37m[1m[6;1H [m Generating static pages using 11 workers (8/12)  [36m[   =]  [m
-[K[59C[32m[1m[5;1H✓[m Generating static pages using 11 workers (12/12) in 1522ms[K
-[?25h[37m[1m [m Finalizing page optimization  [36m.[?25l[m[32m[1m✓[m Finalizing page optimization in 18ms[K[9;1H[?25h[4mRoute (app)[24m
-┌ ○ /
-├ ○ /_not-found
-├ ƒ /api/docs/context-packages
-├ ƒ /api/docs/context-packages/[id]/publish
-├ ƒ /api/docs/conversions
-├ ƒ /api/docs/documents
-├ ƒ /api/docs/documents/[docId]
-├ ƒ /api/docs/documents/[docId]/versions
-├ ƒ /api/docs/entities
-├ ƒ /api/docs/exports
-├ ƒ /api/docs/governance
-├ ƒ /api/docs/imports
-├ ƒ /api/docs/mcp
-├ ƒ /api/docs/relations
-├ ƒ /api/docs/runs
-├ ƒ /api/docs/suggestions
-├ ƒ /api/docs/suggestions/[id]/accept
-├ ƒ /api/docs/suggestions/[id]/reject
-├ ƒ /api/docs/tasks
-├ ƒ /api/docs/timeline
-├ ƒ /api/events
-├ ƒ /api/external-links
-├ ƒ /api/feature-flags
-├ ƒ /api/institutional/refresh
-├ ƒ /api/mcp
-├ ƒ /api/onboarding-status
-├ ƒ /api/registry
-├ ƒ /api/telemetry
-├ ○ /audit
-├ ○ /catalog
-├ ƒ /docs
-├ ƒ /docs/[docId]
-├ ƒ /docs/[docId]/edit
-├ ƒ /docs/[docId]/graph
-├ ƒ /docs/[docId]/timeline
-├ ƒ /docs/[docId]/versions
-├ ƒ /docs/approvals
-├ ƒ /docs/context
-├ ƒ /docs/context/[contextId]
-├ ƒ /docs/converter
-├ ƒ /docs/entities
-├ ƒ /docs/entities/[entityId]
-├ ƒ /docs/exports
-├ ƒ /docs/governance
-├ ƒ /docs/graph
-├ ƒ /docs/import
-├ ƒ /docs/mcp
-├ ƒ /docs/new
-├ ƒ /docs/review-desk
-├ ƒ /docs/runs
-├ ƒ /docs/settings
-├ ƒ /docs/suggestions
-├ ƒ /docs/tasks
-├ ƒ /docs/timeline
-├ ƒ /ecosystem
-├ ○ /events
-├ ○ /external-links
-├ ○ /feature-flags
-├ ƒ /health
-├ ƒ /intelligence
-├ ○ /login
-├ ○ /onboarding-status
-├ ƒ /projects
-├ ƒ /projects/[id]
-├ ƒ /public
-├ ○ /registry
-└ ƒ /telemetry
-
-
-○  (Static)   prerendered as static content
-ƒ  (Dynamic)  server-rendered on demand
-

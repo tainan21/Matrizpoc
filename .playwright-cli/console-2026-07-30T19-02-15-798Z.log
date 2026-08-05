@@ -1,5 +1,0 @@
-[     568ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://127.0.0.1:3005/projects/matriz-workbench/roadmap:0
-[     912ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
-[    1075ms] [LOG] [HMR] connected @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
-[    1252ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431
-[    1253ms] [LOG] [Fast Refresh] done in 130ms @ http://127.0.0.1:3005/_next/static/chunks/1108_next_dist_06gkuqa._.js:2431

@@ -23,6 +23,11 @@ node_modules
 .vercel
 .playwright-cli/
 .pnpm-store/
+.codex/
+.superpowers/
+output/
+*.log
+*.pid
 
 # Interrupted atomic Workbench writes
 apps/*/.matriz/**/*.tmp

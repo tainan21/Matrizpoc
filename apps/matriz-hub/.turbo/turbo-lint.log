@@ -1,4 +1,0 @@
-
-> @matriz/app-matriz-hub@0.0.0 lint /vercel/share/v0-project/apps/matriz-hub
-> eslint . --max-warnings 0
-
