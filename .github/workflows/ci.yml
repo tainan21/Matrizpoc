@@ -19,6 +19,8 @@ jobs:
           cache: "pnpm"
       - name: Install
         run: pnpm install --frozen-lockfile
+      - name: Generate Prisma clients
+        run: pnpm prisma:generate
       - name: Typecheck
         run: pnpm -r typecheck
       - name: Lint
