@@ -62,7 +62,12 @@ export const backlogBatchReceiptSchema = z.object({
   scoreBaselineFingerprint: z.string().regex(/^[0-9a-f]{64}$/).optional(),
   entries: z.record(z.discriminatedUnion("state", [
     z.object({ state: z.literal("creating") }).strict(),
-    z.object({ state: z.literal("created"), workItemId: z.string().regex(/^wi_[0-9a-f-]{36}$/), completed: z.boolean() }).strict(),
+    z.object({
+      state: z.literal("created"),
+      workItemId: z.string().regex(/^wi_[0-9a-f-]{36}$/),
+      completed: z.boolean(),
+      acceptanceCriterionIds: z.array(z.string().regex(/^ac_[0-9a-f-]{36}$/)).max(30).optional(),
+    }).strict(),
   ])),
 }).strict()
 
@@ -307,6 +312,7 @@ async function importLockedBacklogBatch(
   const persistReceipt = () => repository.writeImportReceipt(plan.projectId, plan.batchId, receipt)
 
   let repairedReceipt = false
+  const legacyCriterionIds = new Map<string, string[]>()
   for (const item of plan.items) {
     const saved = receipt.entries[item.key]
     if (saved?.state !== "created") continue
@@ -318,10 +324,24 @@ async function importLockedBacklogBatch(
     const final = hasImportedFinalShape(current, item, plan.projectId, parentId, dependencyIds)
     const valid = saved.completed ? final : final || hasImportedCreationShape(current, item, plan.projectId, parentId)
     if (!valid) throw new WorkspaceError("Batch receipt points to divergent work.", "CONFLICT")
+    const acceptanceCriterionIds = current.acceptanceCriteria.map((criterion) => criterion.id)
+    if (saved.acceptanceCriterionIds &&
+      JSON.stringify(saved.acceptanceCriterionIds) !== JSON.stringify(acceptanceCriterionIds)) {
+      throw new WorkspaceError("Batch receipt points to divergent acceptance criteria.", "CONFLICT")
+    }
+    if (final && !saved.acceptanceCriterionIds) {
+      legacyCriterionIds.set(item.key, acceptanceCriterionIds)
+    }
     if (!saved.completed && final) {
       receipt.entries[item.key] = { ...saved, completed: true }
       repairedReceipt = true
     }
+  }
+  for (const [key, acceptanceCriterionIds] of legacyCriterionIds) {
+    const entry = receipt.entries[key]
+    if (entry?.state !== "created") continue
+    receipt.entries[key] = { ...entry, acceptanceCriterionIds }
+    repairedReceipt = true
   }
   if (repairedReceipt) await persistReceipt()
 
@@ -374,7 +394,11 @@ async function importLockedBacklogBatch(
       const parentId = item.parentKey ? itemIds.get(item.parentKey) : undefined
       const dependencyIds = item.dependencies.map((key) => itemIds.get(key)!)
       if (hasImportedFinalShape(current, item, plan.projectId, parentId, dependencyIds)) {
-        receipt.entries[item.key] = { ...saved, completed: true }
+        receipt.entries[item.key] = {
+          ...saved,
+          completed: true,
+          acceptanceCriterionIds: current.acceptanceCriteria.map((criterion) => criterion.id),
+        }
         await persistReceipt()
         continue
       }
@@ -382,7 +406,11 @@ async function importLockedBacklogBatch(
         dependencyIds,
         references: item.references as AttachmentReference[],
       }, current.revision)
-      receipt.entries[item.key] = { ...saved, completed: true }
+      receipt.entries[item.key] = {
+        ...saved,
+        completed: true,
+        acceptanceCriterionIds: current.acceptanceCriteria.map((criterion) => criterion.id),
+      }
       await persistReceipt()
     } catch {
       report.failedKeys.push(item.key)

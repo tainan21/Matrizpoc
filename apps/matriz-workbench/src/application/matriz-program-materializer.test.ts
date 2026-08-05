@@ -371,6 +371,33 @@ describe("materializeMatrizProgram", () => {
     expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
   }, 20_000)
 
+  it("rejects an adulterated acceptance criterion ID without writes or activity", async () => {
+    const { root, repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const receipt = JSON.parse(
+      await readFile(path.join(root, ".matriz", "imports", `${plan.batchId}.json`), "utf8"),
+    ) as {
+      entries: Record<string, { workItemId: string; acceptanceCriterionIds: string[] }>
+    }
+    const firstEntry = receipt.entries["matriz-program-v1-01"]
+    const itemPath = path.join(root, ".matriz", "backlog", `${firstEntry.workItemId}.json`)
+    const item = JSON.parse(await readFile(itemPath, "utf8")) as {
+      acceptanceCriteria: Array<{ id: string; text: string; completed: boolean }>
+    }
+    expect(firstEntry.acceptanceCriterionIds).toEqual([item.acceptanceCriteria[0].id])
+    item.acceptanceCriteria[0].id = "ac_ffffffff-ffff-4fff-8fff-ffffffffffff"
+    await writeFile(itemPath, JSON.stringify(item))
+    const beforeReplay = await matrixSnapshot(root)
+    const activityBefore = await repository.listActivity(plan.projectId, undefined, 500)
+
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+    await expect(materializeMatrizProgram(repository, plan, "apply")).rejects.toThrow()
+    await expect(materializeMatrizProgram(repository, plan, "resume")).rejects.toThrow()
+    expect(await matrixSnapshot(root)).toEqual(beforeReplay)
+    expect(await repository.listActivity(plan.projectId, undefined, 500)).toEqual(activityBefore)
+  }, 30_000)
+
   it("reports invalid when the preserved scorecard diverges from the program baseline", async () => {
     const { repository } = await fixture()
     const plan = await readPlan()

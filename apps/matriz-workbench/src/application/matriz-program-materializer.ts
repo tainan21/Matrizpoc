@@ -120,6 +120,12 @@ function importedItemsByReceipt(
       valid = false
       continue
     }
+    const acceptanceCriterionIds = item.acceptanceCriteria.map((criterion) => criterion.id)
+    if (!entry.acceptanceCriterionIds ||
+      JSON.stringify(entry.acceptanceCriterionIds) !== JSON.stringify(acceptanceCriterionIds)) {
+      valid = false
+      continue
+    }
     byKey.set(candidate.key, item)
   }
   return { byKey, valid: valid && byKey.size === plan.items.length && receivedIds.size === plan.items.length }

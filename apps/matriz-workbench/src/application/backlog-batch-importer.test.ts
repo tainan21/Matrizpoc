@@ -247,6 +247,45 @@ describe("importBacklogBatch", () => {
     expect(await repository.listWorkItems("sample")).toHaveLength(50)
   })
 
+  it("migrates criterion identities into a legacy receipt only after immutable validation", async () => {
+    const { root, repository } = await fixture()
+    const batch = plan()
+    await importBacklogBatch(repository, batch, "apply")
+    const receiptPath = path.join(root, "apps", "sample", ".matriz", "imports", "wave-1-foundation.json")
+    const legacyReceipt = JSON.parse(await readFile(receiptPath, "utf8")) as {
+      entries: Record<string, { workItemId: string; acceptanceCriterionIds?: string[] }>
+    }
+    for (const entry of Object.values(legacyReceipt.entries)) delete entry.acceptanceCriterionIds
+    await writeFile(receiptPath, JSON.stringify(legacyReceipt))
+    const workBefore = await repository.listWorkItems("sample")
+    const roadmapBefore = await repository.getRoadmap("sample")
+    const activityBefore = await repository.listActivity("sample", undefined, 500)
+
+    const migrated = await importBacklogBatch(repository, batch, "resume")
+    const migratedReceipt = JSON.parse(await readFile(receiptPath, "utf8")) as {
+      entries: Record<string, { workItemId: string; acceptanceCriterionIds?: string[] }>
+    }
+    const workById = new Map(workBefore.map((item) => [item.id, item]))
+    for (const candidate of batch.items) {
+      const entry = migratedReceipt.entries[candidate.key]
+      expect(entry.acceptanceCriterionIds).toEqual(
+        workById.get(entry.workItemId)?.acceptanceCriteria.map((criterion) => criterion.id),
+      )
+    }
+    expect(migrated).toMatchObject({ createdKeys: [], reusedKeys: expect.any(Array) })
+    expect(migrated.reusedKeys).toHaveLength(50)
+    expect(await repository.listWorkItems("sample")).toEqual(workBefore)
+    expect(await repository.getRoadmap("sample")).toEqual(roadmapBefore)
+    expect(await repository.listActivity("sample", undefined, 500)).toEqual(activityBefore)
+
+    const afterMigration = await tree(root)
+    const receiptAfterMigration = await readFile(receiptPath, "utf8")
+    await importBacklogBatch(repository, batch, "resume")
+    expect(await tree(root)).toEqual(afterMigration)
+    expect(await readFile(receiptPath, "utf8")).toBe(receiptAfterMigration)
+    expect(await repository.listActivity("sample", undefined, 500)).toEqual(activityBefore)
+  }, 30_000)
+
   it("resumes after a partial create failure without duplicating completed work", async () => {
     const { repository } = await fixture()
     const originalCreate = repository.createWorkItem.bind(repository)
