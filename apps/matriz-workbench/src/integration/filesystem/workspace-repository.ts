@@ -355,7 +355,7 @@ export class WorkspaceRepository {
     }
   }
 
-  private async withCoordinatorLock<T>(key: string, operation: () => Promise<T>): Promise<T> {
+  private async withCoordinatorLock<T>(key: string, operation: () => Promise<T>, maxAttempts = 40): Promise<T> {
     if (!/^[a-z0-9_-]+$/.test(key)) {
       throw new WorkspaceError("Identificador de coordenação inválido.", "INVALID_PATH")
     }
@@ -363,7 +363,7 @@ export class WorkspaceRepository {
     await mkdir(folder, { recursive: true })
     const target = path.join(folder, `coordinator--${key}.lock`)
     let handle: Awaited<ReturnType<typeof open>> | undefined
-    for (let attempt = 0; attempt < 40; attempt += 1) {
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       try {
         handle = await open(target, "wx", 0o600)
         break
@@ -1191,6 +1191,76 @@ export class WorkspaceRepository {
 
   async getContextPolicy(projectId: string): Promise<ContextPolicy> {
     return this.readJson(projectId, ["context.json"], contextPolicySchema)
+  }
+
+  async readImportReceipt<T>(
+    projectId: string,
+    batchId: string,
+    parser: { parse(value: unknown): T },
+  ): Promise<T | undefined> {
+    if (!/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
+      throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
+    }
+    try {
+      return await this.readJson(projectId, ["imports", `${batchId}.json`], parser)
+    } catch (error) {
+      if (error instanceof WorkspaceError && error.code === "NOT_FOUND") return undefined
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined
+      throw error
+    }
+  }
+
+  async writeImportReceipt(projectId: string, batchId: string, receipt: unknown): Promise<void> {
+    if (!/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
+      throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
+    }
+    await this.atomicWrite(projectId, ["imports", `${batchId}.json`], receipt)
+  }
+
+  async withBacklogBatchLock<T>(
+    projectId: string,
+    batchId: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    if (!APP_ID.test(projectId) || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
+      throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
+    }
+    return this.withCoordinatorLock(`batch-${projectId}-${batchId}`, operation, 1200)
+  }
+
+  async validateWorkItemReferences(
+    projectId: string,
+    references: WorkItem["references"],
+  ): Promise<void> {
+    await this.getWorkspace(projectId)
+    for (const reference of references) {
+      if (reference.kind === "repository_file") {
+        const segments = reference.path.split(/[\\/]/)
+        const basename = segments.at(-1)?.toLowerCase() ?? ""
+        if (
+          path.isAbsolute(reference.path) ||
+          segments.includes("..") ||
+          segments.some((segment) => REPOSITORY_REFERENCE_EXCLUDED_SEGMENTS.has(segment)) ||
+          basename === ".env" ||
+          basename.startsWith(".env.") ||
+          basename.endsWith(".log")
+        ) {
+          throw new WorkspaceError("Refer\u00eancia de arquivo fora do reposit\u00f3rio.", "INVALID_PATH")
+        }
+        const target = await realpath(path.resolve(this.repositoryRoot, reference.path)).catch(() => {
+          throw new WorkspaceError("Arquivo referenciado n\u00e3o existe.", "NOT_FOUND")
+        })
+        if (!isInside(this.repositoryRoot, target)) {
+          throw new WorkspaceError("Refer\u00eancia de arquivo fora do reposit\u00f3rio.", "INVALID_PATH")
+        }
+      }
+      if (reference.kind === "workbench_document") {
+        const documents = await this.listDocuments(projectId)
+        if (!documents.some((document) => document.id === reference.documentId)) {
+          throw new WorkspaceError("Documento referenciado n\u00e3o existe.", "NOT_FOUND")
+        }
+      }
+    }
   }
 
   async listBacklog(projectId: string): Promise<BacklogItem[]> {
