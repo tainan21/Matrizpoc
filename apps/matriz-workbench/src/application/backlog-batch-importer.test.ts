@@ -3,6 +3,7 @@ import os from "node:os"
 import path from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
 import {
+  backlogBatchPlanSchema,
   importBacklogBatch,
   type BacklogBatchPlan,
 } from "./backlog-batch-importer"
@@ -81,6 +82,31 @@ async function maximumConcurrentBatchOwners(
 }
 
 describe("importBacklogBatch", () => {
+  it("parses the canonical raw JSON strictly and requires all contract arrays", () => {
+    const canonical = JSON.stringify(plan())
+    expect(backlogBatchPlanSchema.parse(JSON.parse(canonical))).toEqual(plan())
+
+    const withUnknownPlanField = JSON.parse(canonical) as Record<string, unknown>
+    withUnknownPlanField.productStatus = "discovery"
+    expect(backlogBatchPlanSchema.safeParse(withUnknownPlanField).success).toBe(false)
+
+    const withUnknownItemField = JSON.parse(canonical) as { items: Array<Record<string, unknown>> }
+    withUnknownItemField.items[0].productStatus = "discovery"
+    expect(backlogBatchPlanSchema.safeParse(withUnknownItemField).success).toBe(false)
+
+    const withUnknownReferenceField = JSON.parse(canonical) as {
+      items: Array<{ references: Array<Record<string, unknown>> }>
+    }
+    withUnknownReferenceField.items[0].references[0].paht = "README.md"
+    expect(backlogBatchPlanSchema.safeParse(withUnknownReferenceField).success).toBe(false)
+
+    for (const field of ["dependencies", "tags", "acceptanceCriteria", "references"] as const) {
+      const withoutRequiredArray = JSON.parse(canonical) as { items: Array<Record<string, unknown>> }
+      delete withoutRequiredArray.items[0][field]
+      expect(backlogBatchPlanSchema.safeParse(withoutRequiredArray).success, field).toBe(false)
+    }
+  })
+
   it.runIf(process.platform === "win32")("serializes repositories whose physical root differs only by casing", async () => {
     const { root, repository } = await fixture()
     const alias = await WorkspaceRepository.create(root.toUpperCase())

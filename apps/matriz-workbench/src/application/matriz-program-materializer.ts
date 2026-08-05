@@ -3,7 +3,10 @@ import { WorkspaceError } from "../domain/errors"
 import type { Roadmap, WorkItem } from "../domain/schemas"
 import type { WorkspaceRepository } from "../integration/filesystem/workspace-repository"
 import {
+  backlogBatchPlanFingerprint,
+  backlogBatchReceiptSchema,
   importBacklogBatch,
+  type BacklogBatchReceipt,
   type BacklogBatchMode,
   type BacklogBatchPlan,
   type BacklogBatchReport,
@@ -75,7 +78,7 @@ function programInitiativeId(plan: BacklogBatchPlan, wave: number): string {
   return `ini_${stableUuid(`${plan.batchId}:initiative:${wave}`)}`
 }
 
-async function importedItemsByKey(
+async function importedItemsByTitle(
   repository: WorkspaceRepository,
   plan: BacklogBatchPlan,
 ): Promise<{ allItems: WorkItem[]; byKey: Map<string, WorkItem> }> {
@@ -94,6 +97,32 @@ async function importedItemsByKey(
     byKey.set(candidate.key, matches[0])
   }
   return { allItems, byKey }
+}
+
+function importedItemsByReceipt(
+  allItems: WorkItem[],
+  plan: BacklogBatchPlan,
+  receipt: BacklogBatchReceipt | undefined,
+): { byKey: Map<string, WorkItem>; valid: boolean } {
+  const allById = new Map(allItems.map((item) => [item.id, item]))
+  const byKey = new Map<string, WorkItem>()
+  const receivedIds = new Set<string>()
+  let valid = Boolean(receipt)
+  for (const candidate of plan.items) {
+    const entry = receipt?.entries[candidate.key]
+    if (!entry || entry.state !== "created" || !entry.completed || receivedIds.has(entry.workItemId)) {
+      valid = false
+      continue
+    }
+    receivedIds.add(entry.workItemId)
+    const item = allById.get(entry.workItemId)
+    if (!item) {
+      valid = false
+      continue
+    }
+    byKey.set(candidate.key, item)
+  }
+  return { byKey, valid: valid && byKey.size === plan.items.length && receivedIds.size === plan.items.length }
 }
 
 function desiredProgramPhases(plan: BacklogBatchPlan, byKey: Map<string, WorkItem>): Roadmap["phases"] {
@@ -155,6 +184,10 @@ function scoreMeaning(roadmap: Roadmap): string {
   return JSON.stringify({ goals: roadmap.goals, scorecards: roadmap.scorecards })
 }
 
+function scoreFingerprint(roadmap: Roadmap): string {
+  return createHash("sha256").update(scoreMeaning(roadmap)).digest("hex")
+}
+
 export async function materializeMatrizProgram(
   repository: WorkspaceRepository,
   plan: BacklogBatchPlan,
@@ -163,6 +196,11 @@ export async function materializeMatrizProgram(
   const roadmapBefore = await repository.getRoadmap(plan.projectId)
   assertNoRoadmapTitleCollision(roadmapBefore, plan)
   const scoreBefore = scoreMeaning(roadmapBefore)
+  const baselineScoreFingerprint = scoreFingerprint(roadmapBefore)
+  const receiptBefore = await repository.readImportReceipt(plan.projectId, plan.batchId, backlogBatchReceiptSchema)
+  if (receiptBefore?.scoreBaselineFingerprint && receiptBefore.scoreBaselineFingerprint !== baselineScoreFingerprint) {
+    throw new WorkspaceError("O score divergiu do baseline canônico do programa.", "CONFLICT")
+  }
   const backlog = await importBacklogBatch(repository, plan, mode)
   const baseRoadmapReport = {
     changed: false,
@@ -179,7 +217,7 @@ export async function materializeMatrizProgram(
     if (matchingItems.length !== plan.items.length) {
       return { mode, backlog, roadmap: baseRoadmapReport }
     }
-    const { byKey } = await importedItemsByKey(repository, plan)
+    const { byKey } = await importedItemsByTitle(repository, plan)
     const desired = desiredProgramPhases(plan, byKey)
     const next = reconciledPhases(roadmapBefore, plan, desired)
     return {
@@ -193,7 +231,21 @@ export async function materializeMatrizProgram(
     return { mode, backlog, roadmap: baseRoadmapReport }
   }
 
-  const { byKey } = await importedItemsByKey(repository, plan)
+  const importedReceipt = await repository.readImportReceipt(plan.projectId, plan.batchId, backlogBatchReceiptSchema)
+  if (!importedReceipt) {
+    throw new WorkspaceError("O importador não persistiu o receipt canônico do programa.", "CONFLICT")
+  }
+  if (!importedReceipt.scoreBaselineFingerprint) {
+    importedReceipt.scoreBaselineFingerprint = baselineScoreFingerprint
+    await repository.writeImportReceipt(plan.projectId, plan.batchId, importedReceipt)
+  }
+
+  const allItems = await repository.listWorkItems(plan.projectId)
+  const resolved = importedItemsByReceipt(allItems, plan, importedReceipt)
+  if (!resolved.valid) {
+    throw new WorkspaceError("O receipt do programa não resolve os 50 WorkItems canônicos.", "CONFLICT")
+  }
+  const { byKey } = resolved
   const desired = desiredProgramPhases(plan, byKey)
   const currentRoadmap = await repository.getRoadmap(plan.projectId)
   if (scoreMeaning(currentRoadmap) !== scoreBefore) {
@@ -230,18 +282,33 @@ async function inspectMatrizProgram(
   plan: BacklogBatchPlan,
   allowImporterProgress: boolean,
 ): Promise<MatrizProgramVerificationReport> {
-  const { allItems, byKey } = await importedItemsByKey(repository, plan)
+  const receipt = await repository.readImportReceipt(plan.projectId, plan.batchId, backlogBatchReceiptSchema)
+    .catch((error: unknown) => {
+      if (error instanceof WorkspaceError && error.code === "INVALID_DATA") return undefined
+      throw error
+    })
+  const receiptKeys = Object.keys(receipt?.entries ?? {}).sort()
+  const planKeys = plan.items.map((item) => item.key).sort()
+  const receiptKeysValid = receiptKeys.length === 50 &&
+    receiptKeys.every((key, index) => key === planKeys[index])
+  const allItems = await repository.listWorkItems(plan.projectId)
+  const resolved = importedItemsByReceipt(allItems, plan, receipt)
+  const { byKey } = resolved
   const roadmap = await repository.getRoadmap(plan.projectId)
-  const desiredPhases = desiredProgramPhases(plan, byKey)
+  const desiredPhases = resolved.valid ? desiredProgramPhases(plan, byKey) : []
   const normalizedTitles = allItems.map((item) => normalizedTitle(item.title))
   const titleCollisions = normalizedTitles.length - new Set(normalizedTitles).size
   const completedKeys: string[] = []
   const discoveryKeys: string[] = []
   let itemShapesValid = true
   for (const candidate of plan.items) {
-    const item = byKey.get(candidate.key)!
+    const item = byKey.get(candidate.key)
+    if (!item) {
+      itemShapesValid = false
+      continue
+    }
     const expectedParentId = candidate.parentKey ? byKey.get(candidate.parentKey)?.id : undefined
-    const expectedDependencyIds = candidate.dependencies.map((key) => byKey.get(key)!.id)
+    const expectedDependencyIds = candidate.dependencies.map((key) => byKey.get(key)?.id)
     const isImporter = candidate.key === IMPORTER_KEY
     const isCompletedImporter = candidate.key === IMPORTER_KEY && item.productStatus === "completed"
     const defaultValidation = candidate.kind === "task" ? "not_required" : "pending"
@@ -258,10 +325,15 @@ async function inspectMatrizProgram(
     if (item.productStatus === "discovery") discoveryKeys.push(candidate.key)
     itemShapesValid = itemShapesValid &&
       item.kind === candidate.kind &&
+      item.projectId === plan.projectId &&
       normalizedTitle(item.title) === normalizedTitle(candidate.title) &&
       item.description === candidate.description &&
       item.priority === candidate.priority &&
+      item.domain === candidate.domain &&
+      item.responsible === candidate.responsible &&
       item.parentId === expectedParentId &&
+      JSON.stringify(item.originRef) === JSON.stringify(candidate.originRef) &&
+      JSON.stringify(item.workScope) === JSON.stringify({ kind: "project" }) &&
       JSON.stringify(item.dependencyIds) === JSON.stringify(expectedDependencyIds) &&
       JSON.stringify(item.tags) === JSON.stringify(candidate.tags) &&
       JSON.stringify(item.references) === JSON.stringify(candidate.references) &&
@@ -273,7 +345,12 @@ async function inspectMatrizProgram(
   }
   const initiatives = roadmap.phases.flatMap((phase) => phase.initiatives)
   const referencesPerInitiative = initiatives.map((initiative) => initiative.backlogIds.length)
-  const generatedIdsByKey = Object.fromEntries(plan.items.map((item) => [item.key, byKey.get(item.key)!.id]))
+  const generatedIdsByKey = Object.fromEntries(
+    plan.items.flatMap((item) => {
+      const resolvedItem = byKey.get(item.key)
+      return resolvedItem ? [[item.key, resolvedItem.id]] : []
+    }),
+  )
   const statusShapeValid = completedKeys.length === 0 ||
     (completedKeys.length === 1 && completedKeys[0] === IMPORTER_KEY)
   const roadmapValid = JSON.stringify(roadmap.phases) === JSON.stringify(desiredPhases)
@@ -304,7 +381,13 @@ async function inspectMatrizProgram(
     discoveryKeys,
     generatedIdsByKey,
   }
-  report.valid = itemShapesValid && statusShapeValid && roadmapValid &&
+  report.valid = receipt?.batchId === plan.batchId &&
+    receipt.projectId === plan.projectId &&
+    receipt.planFingerprint === backlogBatchPlanFingerprint(plan) &&
+    receipt.scoreBaselineFingerprint === scoreFingerprint(roadmap) &&
+    receiptKeysValid &&
+    resolved.valid &&
+    itemShapesValid && statusShapeValid && roadmapValid &&
     report.workItems.total === 55 &&
     report.workItems.legacyV1 === 5 &&
     report.workItems.generatedV2 === 50 &&
@@ -331,7 +414,14 @@ export async function completeMatrizProgramImporterItem(
   if (!verification.valid || verification.completedKeys.some((key) => key !== IMPORTER_KEY)) {
     throw new WorkspaceError("O programa precisa estar materializado e idempotente antes da conclusão do importador.", "INVALID_DATA")
   }
-  let item = (await importedItemsByKey(repository, plan)).byKey.get(IMPORTER_KEY)!
+  const allItems = await repository.listWorkItems(plan.projectId)
+  const receipt = await repository.readImportReceipt(plan.projectId, plan.batchId, backlogBatchReceiptSchema)
+  const resolved = importedItemsByReceipt(allItems, plan, receipt)
+  const itemFromReceipt = resolved.byKey.get(IMPORTER_KEY)
+  if (!resolved.valid || !itemFromReceipt) {
+    throw new WorkspaceError("O receipt do programa não resolve o item do importador.", "CONFLICT")
+  }
+  let item = itemFromReceipt
   if (item.productStatus === "completed") return { key: IMPORTER_KEY, changed: false, item }
   const currentIndex = PRODUCT_FLOW.indexOf(item.productStatus as typeof PRODUCT_FLOW[number])
   if (currentIndex < 0) throw new WorkspaceError("O item do importador está fora do fluxo concluível.", "CONFLICT")

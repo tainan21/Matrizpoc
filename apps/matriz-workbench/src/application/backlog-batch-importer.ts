@@ -4,6 +4,24 @@ import type { AttachmentReference, WorkItem, WorkItemKind } from "../domain/sche
 import { WorkspaceError } from "../domain/errors"
 import type { WorkspaceRepository } from "../integration/filesystem/workspace-repository"
 
+const repositoryFileReferenceSchema = z.object({
+  kind: z.literal("repository_file"),
+  path: z.string().trim().min(1).max(500),
+  label: z.string().trim().min(1).max(120).optional(),
+}).strict()
+
+const externalUrlReferenceSchema = z.object({
+  kind: z.literal("external_url"),
+  url: z.string().url().refine((value) => ["http:", "https:"].includes(new URL(value).protocol)),
+  label: z.string().trim().min(1).max(120).optional(),
+}).strict()
+
+const workbenchDocumentReferenceSchema = z.object({
+  kind: z.literal("workbench_document"),
+  documentId: z.string().regex(/^doc_[0-9a-f-]{36}$/),
+  label: z.string().trim().min(1).max(120).optional(),
+}).strict()
+
 const itemSchema = z.object({
   key: z.string().trim().min(1).max(120).regex(/^[a-z0-9][a-z0-9-]*$/),
   kind: z.enum(["outcome", "feature", "task", "bug"]),
@@ -13,17 +31,17 @@ const itemSchema = z.object({
   domain: z.string().trim().min(1).max(100).optional(),
   responsible: z.string().trim().min(1).max(100).optional(),
   parentKey: z.string().trim().min(1).max(120).optional(),
-  dependencies: z.array(z.string().trim().min(1).max(120)).max(30).default([]),
-  tags: z.array(z.string().trim().min(1).max(40)).max(20).default([]),
-  acceptanceCriteria: z.array(z.string().trim().min(1).max(500)).max(30).default([]),
+  dependencies: z.array(z.string().trim().min(1).max(120)).max(30),
+  tags: z.array(z.string().trim().min(1).max(40)).max(20),
+  acceptanceCriteria: z.array(z.string().trim().min(1).max(500)).max(30),
   references: z.array(z.discriminatedUnion("kind", [
-    z.object({ kind: z.literal("repository_file"), path: z.string().trim().min(1).max(500), label: z.string().trim().min(1).max(120).optional() }),
-    z.object({ kind: z.literal("external_url"), url: z.string().url().refine((value) => ["http:", "https:"].includes(new URL(value).protocol)), label: z.string().trim().min(1).max(120).optional() }),
-    z.object({ kind: z.literal("workbench_document"), documentId: z.string().regex(/^doc_[0-9a-f-]{36}$/), label: z.string().trim().min(1).max(120).optional() }),
-  ])).max(30).default([]),
-  originRef: z.object({ kind: z.literal("inbox"), id: z.string().regex(/^in_[0-9a-f-]{36}$/) }).optional(),
+    repositoryFileReferenceSchema,
+    externalUrlReferenceSchema,
+    workbenchDocumentReferenceSchema,
+  ])).max(30),
+  originRef: z.object({ kind: z.literal("inbox"), id: z.string().regex(/^in_[0-9a-f-]{36}$/) }).strict().optional(),
   originKey: z.string().trim().min(1).max(300).optional(),
-})
+}).strict()
 
 export const backlogBatchPlanSchema = z.object({
   schemaVersion: z.literal(1),
@@ -31,23 +49,24 @@ export const backlogBatchPlanSchema = z.object({
   projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
   expectedCount: z.literal(50),
   items: z.array(itemSchema).length(50),
-})
+}).strict()
 
 export type BacklogBatchPlan = z.infer<typeof backlogBatchPlanSchema>
 export type BacklogBatchMode = "dry-run" | "apply" | "resume"
 
-const receiptSchema = z.object({
+export const backlogBatchReceiptSchema = z.object({
   schemaVersion: z.literal(1),
   batchId: z.string(),
   projectId: z.string(),
   planFingerprint: z.string().length(64),
+  scoreBaselineFingerprint: z.string().regex(/^[0-9a-f]{64}$/).optional(),
   entries: z.record(z.discriminatedUnion("state", [
-    z.object({ state: z.literal("creating") }),
-    z.object({ state: z.literal("created"), workItemId: z.string().regex(/^wi_[0-9a-f-]{36}$/), completed: z.boolean() }),
+    z.object({ state: z.literal("creating") }).strict(),
+    z.object({ state: z.literal("created"), workItemId: z.string().regex(/^wi_[0-9a-f-]{36}$/), completed: z.boolean() }).strict(),
   ])),
-})
+}).strict()
 
-type BatchReceipt = z.infer<typeof receiptSchema>
+export type BacklogBatchReceipt = z.infer<typeof backlogBatchReceiptSchema>
 
 export interface BacklogBatchReport {
   mode: BacklogBatchMode
@@ -100,7 +119,7 @@ function orderedByParent(plan: BacklogBatchPlan): BacklogBatchPlan["items"] {
 async function preflight(
   repository: WorkspaceRepository,
   plan: BacklogBatchPlan,
-  receipt: BatchReceipt | undefined,
+  receipt: BacklogBatchReceipt | undefined,
 ): Promise<void> {
   const keys = new Set<string>()
   const byKey = new Map(plan.items.map((item) => [item.key, item]))
@@ -178,34 +197,57 @@ function defaultsFor(kind: WorkItemKind) {
   }
 }
 
-function fingerprint(plan: BacklogBatchPlan) {
+export function backlogBatchPlanFingerprint(plan: BacklogBatchPlan) {
   return createHash("sha256").update(JSON.stringify(plan)).digest("hex")
 }
 
-function hasImportedCreationShape(item: WorkItem, candidate: BacklogBatchPlan["items"][number], parentId?: string, allowEnriched = false) {
-  const defaults = defaultsFor(candidate.kind)
+function hasImportedImmutableShape(
+  item: WorkItem,
+  candidate: BacklogBatchPlan["items"][number],
+  projectId: string,
+  parentId?: string,
+) {
   return item.schemaVersion === 2 &&
+    item.projectId === projectId &&
     item.kind === candidate.kind &&
     normalizedTitle(item.title) === normalizedTitle(candidate.title) &&
     item.description === candidate.description &&
     item.priority === candidate.priority &&
     item.domain === candidate.domain &&
     item.responsible === candidate.responsible &&
+    item.parentId === parentId &&
+    JSON.stringify(item.originRef) === JSON.stringify(candidate.originRef) &&
+    JSON.stringify(item.workScope) === JSON.stringify({ kind: "project" }) &&
+    JSON.stringify(item.tags) === JSON.stringify(candidate.tags) &&
+    item.acceptanceCriteria.length === candidate.acceptanceCriteria.length &&
+    item.acceptanceCriteria.every((criterion, index) => criterion.text === candidate.acceptanceCriteria[index])
+}
+
+function hasImportedCreationShape(
+  item: WorkItem,
+  candidate: BacklogBatchPlan["items"][number],
+  projectId: string,
+  parentId?: string,
+) {
+  const defaults = defaultsFor(candidate.kind)
+  return item.schemaVersion === 2 &&
+    hasImportedImmutableShape(item, candidate, projectId, parentId) &&
     item.productStatus === defaults.productStatus &&
     item.validationStatus === defaults.validationStatus &&
     item.humanReviewStatus === defaults.humanReviewStatus &&
     item.documentationStatus === defaults.documentationStatus &&
-    item.parentId === parentId &&
-    item.originRef?.id === candidate.originRef?.id &&
-    item.workScope.kind === "project" &&
-    item.tags.length === candidate.tags.length && item.tags.every((tag, index) => tag === candidate.tags[index]) &&
-    item.acceptanceCriteria.length === candidate.acceptanceCriteria.length &&
     item.acceptanceCriteria.every((criterion, index) => criterion.text === candidate.acceptanceCriteria[index] && !criterion.completed) &&
-    (allowEnriched || (item.references.length === 0 && item.dependencyIds.length === 0))
+    item.references.length === 0 && item.dependencyIds.length === 0
 }
 
-function hasImportedFinalShape(item: WorkItem, candidate: BacklogBatchPlan["items"][number], parentId: string | undefined, dependencyIds: string[]) {
-  return hasImportedCreationShape(item, candidate, parentId, true) &&
+function hasImportedFinalShape(
+  item: WorkItem,
+  candidate: BacklogBatchPlan["items"][number],
+  projectId: string,
+  parentId: string | undefined,
+  dependencyIds: string[],
+) {
+  return hasImportedImmutableShape(item, candidate, projectId, parentId) &&
     item.dependencyIds.length === dependencyIds.length && item.dependencyIds.every((id, index) => id === dependencyIds[index]) &&
     JSON.stringify(item.references) === JSON.stringify(candidate.references)
 }
@@ -225,8 +267,8 @@ async function importLockedBacklogBatch(
   plan: BacklogBatchPlan,
   mode: BacklogBatchMode,
 ): Promise<BacklogBatchReport> {
-  const existingReceipt = await repository.readImportReceipt(plan.projectId, plan.batchId, receiptSchema)
-  const planFingerprint = fingerprint(plan)
+  const existingReceipt = await repository.readImportReceipt(plan.projectId, plan.batchId, backlogBatchReceiptSchema)
+  const planFingerprint = backlogBatchPlanFingerprint(plan)
   if (existingReceipt && existingReceipt.planFingerprint !== planFingerprint) {
     throw new WorkspaceError("Batch ID already belongs to a different plan.", "CONFLICT")
   }
@@ -239,7 +281,12 @@ async function importLockedBacklogBatch(
     let recovered = false
     for (const item of plan.items) {
       if (receipt.entries[item.key]?.state !== "creating") continue
-      const matches = existing.filter((work) => hasImportedCreationShape(work, item, item.parentKey ? recoveredIds.get(item.parentKey) : undefined))
+      const matches = existing.filter((work) => hasImportedCreationShape(
+        work,
+        item,
+        plan.projectId,
+        item.parentKey ? recoveredIds.get(item.parentKey) : undefined,
+      ))
       if (matches.length > 1) throw new WorkspaceError("Pending batch item cannot be recovered unambiguously.", "CONFLICT")
       if (matches.length === 1) {
         receipt.entries[item.key] = { state: "created", workItemId: matches[0].id, completed: false }
@@ -268,8 +315,8 @@ async function importLockedBacklogBatch(
     })
     const parentId = item.parentKey ? itemIds.get(item.parentKey) : undefined
     const dependencyIds = item.dependencies.map((key) => itemIds.get(key)!)
-    const final = hasImportedFinalShape(current, item, parentId, dependencyIds)
-    const valid = saved.completed ? final : final || hasImportedCreationShape(current, item, parentId)
+    const final = hasImportedFinalShape(current, item, plan.projectId, parentId, dependencyIds)
+    const valid = saved.completed ? final : final || hasImportedCreationShape(current, item, plan.projectId, parentId)
     if (!valid) throw new WorkspaceError("Batch receipt points to divergent work.", "CONFLICT")
     if (!saved.completed && final) {
       receipt.entries[item.key] = { ...saved, completed: true }
@@ -326,7 +373,7 @@ async function importLockedBacklogBatch(
       const current = await repository.getWorkItem(plan.projectId, saved.workItemId)
       const parentId = item.parentKey ? itemIds.get(item.parentKey) : undefined
       const dependencyIds = item.dependencies.map((key) => itemIds.get(key)!)
-      if (hasImportedFinalShape(current, item, parentId, dependencyIds)) {
+      if (hasImportedFinalShape(current, item, plan.projectId, parentId, dependencyIds)) {
         receipt.entries[item.key] = { ...saved, completed: true }
         await persistReceipt()
         continue

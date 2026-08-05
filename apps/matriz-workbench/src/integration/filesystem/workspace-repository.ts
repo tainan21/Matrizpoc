@@ -1735,7 +1735,11 @@ export class WorkspaceRepository {
       throw error
     })
     if (!folder) return []
-    const files = (await readdir(folder)).filter((name) => /^req_[0-9a-f-]{36}\.json$/.test(name))
+    const entries = await readdir(folder).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return []
+      throw error
+    })
+    const files = entries.filter((name) => /^req_[0-9a-f-]{36}\.json$/.test(name))
     const requests = await Promise.all(
       files.map((name) =>
         this.readJson(projectId, ["agents", "requests", name], agentRequestSchema),

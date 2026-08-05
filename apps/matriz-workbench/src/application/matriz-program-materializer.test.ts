@@ -290,6 +290,103 @@ describe("materializeMatrizProgram", () => {
     expect(await matrixSnapshot(root)).toEqual(before)
   }, 20_000)
 
+  it("reports the materialized program invalid when its canonical receipt is missing", async () => {
+    const { root, repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    await rm(path.join(root, ".matriz", "imports", `${plan.batchId}.json`))
+
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+  }, 60_000)
+
+  it("reports the materialized program invalid when the receipt plan fingerprint is adulterated", async () => {
+    const { root, repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const receiptPath = path.join(root, ".matriz", "imports", `${plan.batchId}.json`)
+    const receipt = JSON.parse(await readFile(receiptPath, "utf8")) as { planFingerprint: string }
+    receipt.planFingerprint = "0".repeat(64)
+    await writeFile(receiptPath, JSON.stringify(receipt))
+
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+  }, 20_000)
+
+  it("requires the receipt to belong to the canonical batch and project", async () => {
+    const { root, repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const receiptPath = path.join(root, ".matriz", "imports", `${plan.batchId}.json`)
+    const receipt = JSON.parse(await readFile(receiptPath, "utf8")) as { batchId: string; projectId: string }
+
+    await writeFile(receiptPath, JSON.stringify({ ...receipt, batchId: "another-batch" }))
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+    await writeFile(receiptPath, JSON.stringify({ ...receipt, projectId: "another-project" }))
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+  }, 20_000)
+
+  it("returns invalid for a structurally adulterated receipt", async () => {
+    const { root, repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const receiptPath = path.join(root, ".matriz", "imports", `${plan.batchId}.json`)
+    const receipt = JSON.parse(await readFile(receiptPath, "utf8")) as Record<string, unknown>
+
+    await writeFile(receiptPath, JSON.stringify({ ...receipt, schemaVersion: 2 }))
+    await expect(verifyMatrizProgram(repository, plan)).resolves.toMatchObject({ valid: false })
+    await writeFile(receiptPath, JSON.stringify({ ...receipt, unexpected: true }))
+    await expect(verifyMatrizProgram(repository, plan)).resolves.toMatchObject({ valid: false })
+  }, 20_000)
+
+  it("requires exactly the 50 canonical logical keys in the receipt", async () => {
+    const { root, repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const receiptPath = path.join(root, ".matriz", "imports", `${plan.batchId}.json`)
+    const receipt = JSON.parse(await readFile(receiptPath, "utf8")) as {
+      entries: Record<string, unknown>
+    }
+    const removed = receipt.entries["matriz-program-v1-50"]
+    delete receipt.entries["matriz-program-v1-50"]
+    await writeFile(receiptPath, JSON.stringify(receipt))
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+
+    receipt.entries["unexpected-logical-key"] = removed
+    await writeFile(receiptPath, JSON.stringify(receipt))
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+  }, 20_000)
+
+  it("resolves every logical key by its receipt WorkItem ID", async () => {
+    const { root, repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const receiptPath = path.join(root, ".matriz", "imports", `${plan.batchId}.json`)
+    const receipt = JSON.parse(await readFile(receiptPath, "utf8")) as {
+      entries: Record<string, { workItemId: string }>
+    }
+    const firstId = receipt.entries["matriz-program-v1-01"].workItemId
+    receipt.entries["matriz-program-v1-01"].workItemId = receipt.entries["matriz-program-v1-02"].workItemId
+    receipt.entries["matriz-program-v1-02"].workItemId = firstId
+    await writeFile(receiptPath, JSON.stringify(receipt))
+
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+  }, 20_000)
+
+  it("reports invalid when the preserved scorecard diverges from the program baseline", async () => {
+    const { repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const roadmap = await repository.getRoadmap(plan.projectId)
+    const scorecards = roadmap.scorecards.map((scorecard, scorecardIndex) => ({
+      ...scorecard,
+      goals: scorecard.goals.map((goal, goalIndex) => scorecardIndex === 0 && goalIndex === 0
+        ? { ...goal, score: 0 as const }
+        : goal),
+    }))
+    await repository.updateRoadmapScorecards(plan.projectId, scorecards, roadmap.revision)
+
+    expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
+  }, 20_000)
+
   it("creates 50 V2 plus five phases once, preserves V1 and score, and completes only logical item 2 after idempotency", async () => {
     const { root, repository, legacyIds, legacyBytes } = await fixture()
     const plan = await readPlan()
@@ -371,6 +468,19 @@ describe("materializeMatrizProgram", () => {
       discoveryKeys: expect.any(Array),
     })
     expect(verification.discoveryKeys).toHaveLength(49)
+
+    const afterCompletion = await matrixSnapshot(root)
+    const activityBeforePostCompletionReplay = await repository.listActivity("matriz-infra-hub", undefined, 500)
+    const appliedAfterCompletion = await materializeMatrizProgram(repository, plan, "apply")
+    const resumedAfterCompletion = await materializeMatrizProgram(repository, plan, "resume")
+    expect(appliedAfterCompletion.backlog).toMatchObject({ createdKeys: [], reusedKeys: expect.any(Array) })
+    expect(appliedAfterCompletion.backlog.reusedKeys).toHaveLength(50)
+    expect(appliedAfterCompletion.roadmap.changed).toBe(false)
+    expect(resumedAfterCompletion.backlog).toMatchObject({ createdKeys: [], reusedKeys: expect.any(Array) })
+    expect(resumedAfterCompletion.backlog.reusedKeys).toHaveLength(50)
+    expect(resumedAfterCompletion.roadmap.changed).toBe(false)
+    expect(await repository.listActivity("matriz-infra-hub", undefined, 500)).toEqual(activityBeforePostCompletionReplay)
+    expect(await matrixSnapshot(root)).toEqual(afterCompletion)
 
     const third = itemsAfterApply.find((item) => item.title === titles[2])!
     await repository.updateWorkItem("matriz-infra-hub", third.id, { productStatus: "refined" }, third.revision)

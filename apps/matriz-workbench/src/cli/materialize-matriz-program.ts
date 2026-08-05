@@ -21,12 +21,16 @@ export function parseMatrizProgramCliMode(args: string[]): MatrizProgramCliMode 
   return mode as MatrizProgramCliMode
 }
 
+export function parseMatrizProgramPlanSource(source: string) {
+  return backlogBatchPlanSchema.parse(JSON.parse(source) as unknown)
+}
+
 async function loadPlan() {
   const source = await readFile(
     new URL("../application/plans/matriz-program-2026-08-05-v1.json", import.meta.url),
     "utf8",
   )
-  return backlogBatchPlanSchema.parse(JSON.parse(source) as unknown)
+  return parseMatrizProgramPlanSource(source)
 }
 
 async function main() {
