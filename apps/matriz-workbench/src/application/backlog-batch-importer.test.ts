@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
+import { mkdtemp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
@@ -20,6 +20,18 @@ async function fixture() {
   const repository = await WorkspaceRepository.create(root)
   await repository.initializeProject("sample")
   return { root, repository }
+}
+
+async function tree(root: string): Promise<string[]> {
+  const walk = async (folder: string): Promise<string[]> => {
+    const entries = await readdir(folder, { withFileTypes: true })
+    return (await Promise.all(entries.map(async (entry) => {
+      const target = path.join(folder, entry.name)
+      if (entry.isDirectory()) return walk(target)
+      return [`${path.relative(root, target)}:${(await stat(target)).size}`]
+    }))).flat()
+  }
+  return (await walk(root)).sort()
 }
 
 afterEach(async () => {
@@ -52,6 +64,7 @@ function plan(overrides: Partial<BacklogBatchPlan> = {}): BacklogBatchPlan {
 describe("importBacklogBatch", () => {
   it("reports a valid 50-item dry-run without changing any workspace artifact", async () => {
     const { root, repository } = await fixture()
+    const beforeTree = await tree(root)
     const before = await readFile(path.join(root, "apps", "sample", ".matriz", "roadmap.json"), "utf8")
 
     const report = await importBacklogBatch(repository, plan(), "dry-run")
@@ -59,6 +72,7 @@ describe("importBacklogBatch", () => {
     expect(report).toMatchObject({ mode: "dry-run", valid: true, createdKeys: [], reusedKeys: [] })
     expect(await repository.listWorkItems("sample")).toEqual([])
     expect(await readFile(path.join(root, "apps", "sample", ".matriz", "roadmap.json"), "utf8")).toBe(before)
+    expect(await tree(root)).toEqual(beforeTree)
     await expect(readFile(path.join(root, "apps", "sample", ".matriz", "imports", "wave-1-foundation.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" })
   })
 
@@ -185,5 +199,107 @@ describe("importBacklogBatch", () => {
     await Promise.all([importBacklogBatch(repository, plan(), "apply"), importBacklogBatch(repository, plan(), "resume")])
 
     expect(await repository.listWorkItems("sample")).toHaveLength(50)
+  })
+
+  it("serializes different batches for one project", async () => {
+    const { repository } = await fixture()
+    const second = plan({ batchId: "wave-1-foundation-b" })
+
+    await Promise.allSettled([importBacklogBatch(repository, plan(), "apply"), importBacklogBatch(repository, second, "apply")])
+
+    expect(await repository.listWorkItems("sample")).toHaveLength(50)
+  })
+
+  it("reports keys not attempted after a create failure as skipped", async () => {
+    const { repository } = await fixture()
+    const originalCreate = repository.createWorkItem.bind(repository)
+    let attempts = 0
+    repository.createWorkItem = async (...args) => {
+      attempts += 1
+      if (attempts === 3) throw new Error("simulated create failure")
+      return originalCreate(...args)
+    }
+
+    const report = await importBacklogBatch(repository, plan(), "apply")
+
+    expect(report).toMatchObject({ failedKeys: ["item-03"], skippedKeys: plan().items.slice(3).map((item) => item.key) })
+  })
+
+  it("recovers a persisted update without a second activity event", async () => {
+    const { repository } = await fixture()
+    const originalWrite = repository.writeImportReceipt.bind(repository)
+    let writes = 0
+    repository.writeImportReceipt = async (...args) => {
+      writes += 1
+      if (writes === 101) throw new Error("simulated receipt failure after update")
+      await originalWrite(...args)
+    }
+    await importBacklogBatch(repository, plan(), "apply")
+    repository.writeImportReceipt = originalWrite
+    const first = (await repository.listWorkItems("sample")).find((item) => item.title === "Batch item 1")!
+    const before = await repository.queryActivity("sample", { entityType: "backlog", entityId: first.id, limit: 500 })
+
+    await importBacklogBatch(repository, plan(), "resume")
+
+    expect(await repository.queryActivity("sample", { entityType: "backlog", entityId: first.id, limit: 500 })).toEqual(before)
+  })
+
+  it("rejects a receipt that points to a divergent work item", async () => {
+    const { root, repository } = await fixture()
+    await importBacklogBatch(repository, plan(), "apply")
+    const receiptPath = path.join(root, "apps", "sample", ".matriz", "imports", "wave-1-foundation.json")
+    const receipt = JSON.parse(await readFile(receiptPath, "utf8")) as { entries: Record<string, { workItemId: string }> }
+    receipt.entries["item-01"].workItemId = receipt.entries["item-02"].workItemId
+    await writeFile(receiptPath, JSON.stringify(receipt))
+
+    await expect(importBacklogBatch(repository, plan(), "resume")).rejects.toThrow()
+  })
+
+  it("does not adopt a pending item whose parent differs", async () => {
+    const { repository } = await fixture()
+    const originalCreate = repository.createWorkItem.bind(repository)
+    let attempts = 0
+    repository.createWorkItem = async (...args) => {
+      attempts += 1
+      if (attempts === 2) throw new Error("leave item-02 pending")
+      return originalCreate(...args)
+    }
+    await importBacklogBatch(repository, plan(), "apply")
+    repository.createWorkItem = originalCreate
+    const unrelated = await repository.createWorkItem("sample", { kind: "outcome", title: "Unrelated", description: "", priority: "medium", productStatus: "discovery", validationStatus: "pending", humanReviewStatus: "not_required", documentationStatus: "pending" })
+    await repository.createWorkItem("sample", { kind: "task", title: "Batch item 2", description: "Safe batch-import fixture.", priority: "medium", parentId: unrelated.id, tags: ["batch"], acceptanceCriteria: ["Has a verifiable result"], productStatus: "discovery", validationStatus: "not_required", humanReviewStatus: "not_required", documentationStatus: "not_required" })
+
+    await expect(importBacklogBatch(repository, plan(), "resume")).rejects.toThrow()
+  })
+
+  it("rejects an Inbox origin already converted in another project", async () => {
+    const { root, repository } = await fixture()
+    await mkdir(path.join(root, "apps", "another"), { recursive: true })
+    await writeFile(path.join(root, "apps", "another", "package.json"), JSON.stringify({ name: "@matriz/app-another" }))
+    await repository.initializeProject("another")
+    await repository.createWorkItem("another", { kind: "task", title: "Elsewhere", description: "", priority: "medium", originRef: { kind: "inbox", id: "in_00000000-0000-4000-8000-000000000000" }, productStatus: "discovery", validationStatus: "not_required", humanReviewStatus: "not_required", documentationStatus: "not_required" })
+    const value = plan({ items: plan().items.map((item, index) => index === 0 ? { ...item, originRef: { kind: "inbox" as const, id: "in_00000000-0000-4000-8000-000000000000" } } : item) })
+
+    await expect(importBacklogBatch(repository, value, "apply")).rejects.toThrow()
+  })
+
+  it("reclaims an expired project batch lock", async () => {
+    const { root, repository } = await fixture()
+    const locks = path.join(root, ".runtime", "workbench", "locks")
+    await mkdir(locks, { recursive: true })
+    await writeFile(path.join(locks, "coordinator--batch-project-sample.lock"), JSON.stringify({ pid: 1, expiresAt: Date.now() - 1 }))
+
+    await expect(repository.withBacklogBatchLock("sample", "batch-a", async () => "recovered", 2)).resolves.toBe("recovered")
+  })
+
+  it("does not remove a live project batch lock", async () => {
+    const { root, repository } = await fixture()
+    const locks = path.join(root, ".runtime", "workbench", "locks")
+    const target = path.join(locks, "coordinator--batch-project-sample.lock")
+    await mkdir(locks, { recursive: true })
+    await writeFile(target, JSON.stringify({ pid: process.pid, expiresAt: Date.now() + 60_000 }))
+
+    await expect(repository.withBacklogBatchLock("sample", "batch-a", async () => "stolen", 1)).rejects.toMatchObject({ code: "CONFLICT" })
+    await expect(readFile(target, "utf8")).resolves.toContain("expiresAt")
   })
 })

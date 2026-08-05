@@ -369,12 +369,17 @@ export class WorkspaceRepository {
         break
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
+        const lease = await readFile(target, "utf8").then((value) => JSON.parse(value) as { expiresAt?: number }).catch(() => undefined)
+        if (lease?.expiresAt && lease.expiresAt < Date.now()) {
+          await unlink(target).catch(() => undefined)
+          continue
+        }
         await new Promise((resolve) => setTimeout(resolve, 25))
       }
     }
     if (!handle) throw new WorkspaceError("O planejamento está sendo atualizado em outra operação.", "CONFLICT")
     try {
-      await handle.writeFile(`${process.pid}\n`, "utf8")
+      await handle.writeFile(JSON.stringify({ pid: process.pid, expiresAt: Date.now() + 60_000 }), "utf8")
       return await operation()
     } finally {
       await handle.close()
@@ -1221,11 +1226,12 @@ export class WorkspaceRepository {
     projectId: string,
     batchId: string,
     operation: () => Promise<T>,
+    maxAttempts = 1200,
   ): Promise<T> {
     if (!APP_ID.test(projectId) || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
       throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
     }
-    return this.withCoordinatorLock(`batch-${projectId}-${batchId}`, operation, 1200)
+    return this.withCoordinatorLock(`batch-project-${projectId}`, operation, maxAttempts)
   }
 
   async validateWorkItemReferences(

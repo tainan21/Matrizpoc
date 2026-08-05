@@ -157,6 +157,16 @@ async function preflight(
       throw new WorkspaceError("Batch origin key collides with an unresolved Inbox entry.", "CONFLICT")
     }
   }
+  const originIds = new Set(plan.items.flatMap((item) => item.originRef ? [item.originRef.id] : []))
+  if (originIds.size) {
+    for (const project of await repository.discoverProjects()) {
+      if (!project.initialized || project.id === plan.projectId) continue
+      const work = await repository.listWorkItems(project.id)
+      if (work.some((item) => item.originRef && originIds.has(item.originRef.id))) {
+        throw new WorkspaceError("Batch origin collides with work in another project.", "CONFLICT")
+      }
+    }
+  }
 }
 
 function defaultsFor(kind: WorkItemKind) {
@@ -172,7 +182,7 @@ function fingerprint(plan: BacklogBatchPlan) {
   return createHash("sha256").update(JSON.stringify(plan)).digest("hex")
 }
 
-function hasImportedCreationShape(item: WorkItem, candidate: BacklogBatchPlan["items"][number]) {
+function hasImportedCreationShape(item: WorkItem, candidate: BacklogBatchPlan["items"][number], parentId?: string, allowEnriched = false) {
   const defaults = defaultsFor(candidate.kind)
   return item.schemaVersion === 2 &&
     item.kind === candidate.kind &&
@@ -185,10 +195,19 @@ function hasImportedCreationShape(item: WorkItem, candidate: BacklogBatchPlan["i
     item.validationStatus === defaults.validationStatus &&
     item.humanReviewStatus === defaults.humanReviewStatus &&
     item.documentationStatus === defaults.documentationStatus &&
+    item.parentId === parentId &&
+    item.originRef?.id === candidate.originRef?.id &&
+    item.workScope.kind === "project" &&
     item.tags.length === candidate.tags.length && item.tags.every((tag, index) => tag === candidate.tags[index]) &&
     item.acceptanceCriteria.length === candidate.acceptanceCriteria.length &&
     item.acceptanceCriteria.every((criterion, index) => criterion.text === candidate.acceptanceCriteria[index] && !criterion.completed) &&
-    item.references.length === 0 && item.dependencyIds.length === 0
+    (allowEnriched || (item.references.length === 0 && item.dependencyIds.length === 0))
+}
+
+function hasImportedFinalShape(item: WorkItem, candidate: BacklogBatchPlan["items"][number], parentId: string | undefined, dependencyIds: string[]) {
+  return hasImportedCreationShape(item, candidate, parentId, true) &&
+    item.dependencyIds.length === dependencyIds.length && item.dependencyIds.every((id, index) => id === dependencyIds[index]) &&
+    JSON.stringify(item.references) === JSON.stringify(candidate.references)
 }
 
 export async function importBacklogBatch(
@@ -197,6 +216,7 @@ export async function importBacklogBatch(
   mode: BacklogBatchMode,
 ): Promise<BacklogBatchReport> {
   const plan = backlogBatchPlanSchema.parse(input)
+  if (mode === "dry-run") return importLockedBacklogBatch(repository, plan, mode)
   return repository.withBacklogBatchLock(plan.projectId, plan.batchId, () => importLockedBacklogBatch(repository, plan, mode))
 }
 
@@ -215,10 +235,11 @@ async function importLockedBacklogBatch(
   }
   if (mode !== "dry-run") {
     const existing = await repository.listWorkItems(plan.projectId)
+    const recoveredIds = new Map(Object.entries(receipt.entries).flatMap(([key, entry]) => entry.state === "created" ? [[key, entry.workItemId] as const] : []))
     let recovered = false
     for (const item of plan.items) {
       if (receipt.entries[item.key]?.state !== "creating") continue
-      const matches = existing.filter((work) => hasImportedCreationShape(work, item))
+      const matches = existing.filter((work) => hasImportedCreationShape(work, item, item.parentKey ? recoveredIds.get(item.parentKey) : undefined))
       if (matches.length > 1) throw new WorkspaceError("Pending batch item cannot be recovered unambiguously.", "CONFLICT")
       if (matches.length === 1) {
         receipt.entries[item.key] = { state: "created", workItemId: matches[0].id, completed: false }
@@ -238,7 +259,27 @@ async function importLockedBacklogBatch(
     .flatMap(([key, entry]) => entry.state === "created" ? [[key, entry.workItemId] as const] : []))
   const persistReceipt = () => repository.writeImportReceipt(plan.projectId, plan.batchId, receipt)
 
-  for (const item of orderedByParent(plan)) {
+  let repairedReceipt = false
+  for (const item of plan.items) {
+    const saved = receipt.entries[item.key]
+    if (saved?.state !== "created") continue
+    const current = await repository.getWorkItem(plan.projectId, saved.workItemId).catch(() => {
+      throw new WorkspaceError("Batch receipt points to missing work.", "CONFLICT")
+    })
+    const parentId = item.parentKey ? itemIds.get(item.parentKey) : undefined
+    const dependencyIds = item.dependencies.map((key) => itemIds.get(key)!)
+    const final = hasImportedFinalShape(current, item, parentId, dependencyIds)
+    const valid = saved.completed ? final : final || hasImportedCreationShape(current, item, parentId)
+    if (!valid) throw new WorkspaceError("Batch receipt points to divergent work.", "CONFLICT")
+    if (!saved.completed && final) {
+      receipt.entries[item.key] = { ...saved, completed: true }
+      repairedReceipt = true
+    }
+  }
+  if (repairedReceipt) await persistReceipt()
+
+  const creationOrder = orderedByParent(plan)
+  for (const [index, item] of creationOrder.entries()) {
     const saved = receipt.entries[item.key]
     if (saved?.state === "created") {
       report.reusedKeys.push(item.key)
@@ -269,6 +310,7 @@ async function importLockedBacklogBatch(
       report.createdKeys.push(item.key)
     } catch {
       report.failedKeys.push(item.key)
+      report.skippedKeys.push(...creationOrder.slice(index + 1).map((candidate) => candidate.key))
       return report
     }
   }
@@ -282,8 +324,15 @@ async function importLockedBacklogBatch(
     if (saved.completed) continue
     try {
       const current = await repository.getWorkItem(plan.projectId, saved.workItemId)
+      const parentId = item.parentKey ? itemIds.get(item.parentKey) : undefined
+      const dependencyIds = item.dependencies.map((key) => itemIds.get(key)!)
+      if (hasImportedFinalShape(current, item, parentId, dependencyIds)) {
+        receipt.entries[item.key] = { ...saved, completed: true }
+        await persistReceipt()
+        continue
+      }
       await repository.updateWorkItem(plan.projectId, saved.workItemId, {
-        dependencyIds: item.dependencies.map((key) => itemIds.get(key)!),
+        dependencyIds,
         references: item.references as AttachmentReference[],
       }, current.revision)
       receipt.entries[item.key] = { ...saved, completed: true }
