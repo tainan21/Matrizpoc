@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_ec60d182-d540-4a8a-a442-1882f5fe634a",
+  "projectId": "matriz-infra-hub",
+  "kind": "bug",
+  "title": "Corrigir writes e consultas tenant-unsafe",
+  "description": "Fechar acessos a dados que não respeitam o tenant autorizado.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:1",
+    "multi-tenant"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_2c6aef52-34a2-43b7-af78-2eafe4915550",
+      "text": "Tenant do AuthorizationContext e testes negativos A/B incluindo sugestões e ExternalLinks.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_50e69a55-1e8b-45bd-8698-451bbd13e488"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/architectural-laws.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:25.954Z",
+  "updatedAt": "2026-08-05T18:33:29.007Z",
+  "revision": "9d204b381a826af3"
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "projectId": "matriz-infra-hub",
+  "kind": "outcome",
+  "title": "Outcome: operar dados e identidade multi-tenant reais",
+  "description": "Outcome da Onda 2 para operar dados e identidade multi-tenant reais.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "pending",
+  "priority": "critical",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "identity"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_33f6f09b-0d5c-4757-926d-6d98378ee0b8",
+      "text": "Banco recriável, RLS ativo e login real no Hub e Seumei.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.040Z",
+  "updatedAt": "2026-08-05T18:33:29.098Z",
+  "revision": "ef1ef43e136f2028"
+}

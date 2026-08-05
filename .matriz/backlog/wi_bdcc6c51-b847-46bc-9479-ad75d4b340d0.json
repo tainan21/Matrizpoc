@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_bdcc6c51-b847-46bc-9479-ad75d4b340d0",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Ligar gateways reais de Spot e Seumei",
+  "description": "Conectar Spot e Seumei a Contracts por gateways reais.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:3",
+    "gateways"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_7ed49b2d-94b6-4a6f-a46f-eca3504775b8",
+      "text": "Sem sucesso fabricado; timeout, retry seguro, indisponibilidade e pending.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_74538550-2257-4469-ac3a-b9a6a9f6bd6f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.161Z",
+  "updatedAt": "2026-08-05T18:33:29.812Z",
+  "revision": "e54fe33360166635"
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_57078d61-ee20-410c-a6c3-9ab3594c66f6",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Criar o serviço Matriz Identity",
+  "description": "Criar o provedor de identidade oficial do ecossistema Matriz.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "oidc"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_881b06f2-165f-4da8-b0f5-782db33d1e39",
+      "text": "Node+oidc-provider 9.11.0, PKCE, JWKS/discovery, tokens curtos, rotation, revogação, Neon.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_7b0e32d0-c79a-458d-a55b-ac4c3023b094",
+    "wi_1ee463aa-ce97-4f46-88fe-5589c5b71344",
+    "wi_db450605-ecfa-4749-9f56-efc2069cd21a"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.941Z",
+  "updatedAt": "2026-08-05T18:33:29.556Z",
+  "revision": "92aaba63c97d3bd6"
+}

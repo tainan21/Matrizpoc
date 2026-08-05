@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_7b0b3be8-b86c-44cc-b2b9-85abab101965",
+  "projectId": "matriz-infra-hub",
+  "kind": "task",
+  "title": "Materializar o programa de 50 itens no Workbench",
+  "description": "Materializar o backlog e o roadmap canônicos do programa Matriz.",
+  "productStatus": "discovery",
+  "validationStatus": "not_required",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:1",
+    "roadmap"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_5ba97cd8-a1ea-4a72-887e-61eaf39a6fd1",
+      "text": "Cinco fases/iniciativas, 50 V2, cinco V1 preservados, 55 totais e zero duplicação semântica.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_8aa14180-b813-467c-80e8-fb1d5d68ac75"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/architectural-laws.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:25.529Z",
+  "updatedAt": "2026-08-05T18:33:28.659Z",
+  "revision": "ebb16382cbcd5538"
+}

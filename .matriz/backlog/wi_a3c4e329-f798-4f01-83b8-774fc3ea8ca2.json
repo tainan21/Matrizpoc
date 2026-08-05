@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_a3c4e329-f798-4f01-83b8-774fc3ea8ca2",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Transformar eventos em metas no WillDash",
+  "description": "Construir projeções reprocessáveis de eventos no WillDash.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "medium",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "willdash"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_a1b2f3a3-4c8d-40ff-aa48-2441ae82628a",
+      "text": "Rebuildable projections, progress/reward rules, dedupe and reprocessing.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_a524f28a-251d-48a3-913f-f2966677934b",
+    "wi_65236fc2-f7ee-4f27-af9e-90d9b637e42f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.390Z",
+  "updatedAt": "2026-08-05T18:33:31.325Z",
+  "revision": "e3c795a76de1d084"
+}

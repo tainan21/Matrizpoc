@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_63c366c9-dc56-476b-b5a8-d444e49c22dd",
+  "projectId": "matriz-infra-hub",
+  "kind": "bug",
+  "title": "Completar geração e ownership dos Prisma clients",
+  "description": "Corrigir lacunas na geração e no ownership dos clients Prisma.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "prisma"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_f500254f-4862-4584-96f7-c74cf65f9504",
+      "text": "Seis clients, lazy server-safe, Spot/WillDash incluídos.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_fd808651-c1ff-4965-ab56-6424c7bc3f5d"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.674Z",
+  "updatedAt": "2026-08-05T18:33:29.338Z",
+  "revision": "154f2edbe1778d4b"
+}

@@ -1,7 +1,139 @@
 {
   "schemaVersion": 1,
   "projectId": "matriz-infra-hub",
-  "phases": [],
+  "phases": [
+    {
+      "id": "phase_9c01d2c7-507a-5931-af24-99b43b6718be",
+      "title": "Onda 1 — Contenção e governança",
+      "outcome": "Itens 2–10 concluídos, vulnerabilidades críticas contidas e baseline arquitetural atualizada.",
+      "status": "planned",
+      "initiatives": [
+        {
+          "id": "ini_9908b76d-acf0-5715-a86f-dea80897f591",
+          "title": "Programa Matriz — Onda 1",
+          "outcome": "Itens 2–10 concluídos, vulnerabilidades críticas contidas e baseline arquitetural atualizada.",
+          "status": "planned",
+          "backlogIds": [
+            "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+            "wi_8aa14180-b813-467c-80e8-fb1d5d68ac75",
+            "wi_7b0b3be8-b86c-44cc-b2b9-85abab101965",
+            "wi_99490eb7-0446-4e4e-8620-4d99499830f8",
+            "wi_d1ff677b-1f32-4e5b-9778-4cd14317daf5",
+            "wi_9ed3c652-0ac2-4e03-8d42-2e5070b7d3f7",
+            "wi_50e69a55-1e8b-45bd-8698-451bbd13e488",
+            "wi_1f396d29-2e4a-4901-8abb-078f0d799f2e",
+            "wi_ec60d182-d540-4a8a-a442-1882f5fe634a",
+            "wi_dee3f049-e4f6-44a7-8a1a-5d1854a8329f"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_017e362f-c5ad-59d5-a071-f37ff31d8601",
+      "title": "Onda 2 — Banco central e identidade",
+      "outcome": "Banco recriável, RLS ativo e login real no Hub e Seumei.",
+      "status": "planned",
+      "initiatives": [
+        {
+          "id": "ini_5c6241de-81c3-5e71-a160-2f8f15ebad07",
+          "title": "Programa Matriz — Onda 2",
+          "outcome": "Banco recriável, RLS ativo e login real no Hub e Seumei.",
+          "status": "planned",
+          "backlogIds": [
+            "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+            "wi_94bd4c86-705a-4924-bf95-02e8571f684f",
+            "wi_fd808651-c1ff-4965-ab56-6424c7bc3f5d",
+            "wi_63c366c9-dc56-476b-b5a8-d444e49c22dd",
+            "wi_7b0e32d0-c79a-458d-a55b-ac4c3023b094",
+            "wi_f8da65b4-fd34-49d5-9669-6d242be80a11",
+            "wi_1ee463aa-ce97-4f46-88fe-5589c5b71344",
+            "wi_db450605-ecfa-4749-9f56-efc2069cd21a",
+            "wi_57078d61-ee20-410c-a6c3-9ab3594c66f6",
+            "wi_7881dbac-e3a6-498a-ac19-2b4fa728ca73"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_95a62ef9-cf42-5d40-aa37-0bd26aea862a",
+      "title": "Onda 3 — Integração distribuída",
+      "outcome": "Spot→Contracts e Seumei→Contracts entre processos, persistentes e restart/retry safe.",
+      "status": "planned",
+      "initiatives": [
+        {
+          "id": "ini_eccd8fc1-f9cf-548f-a8a7-69b189aaa781",
+          "title": "Programa Matriz — Onda 3",
+          "outcome": "Spot→Contracts e Seumei→Contracts entre processos, persistentes e restart/retry safe.",
+          "status": "planned",
+          "backlogIds": [
+            "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+            "wi_74538550-2257-4469-ac3a-b9a6a9f6bd6f",
+            "wi_bdcc6c51-b847-46bc-9479-ad75d4b340d0",
+            "wi_caf2c291-68d7-451b-b83f-3bb7bcad8167",
+            "wi_bfeb5ff2-23c8-433b-af68-c9bcc8f4f777",
+            "wi_f9cc69af-cea1-4fa8-8619-abf4a6ddfd2e",
+            "wi_a524f28a-251d-48a3-913f-f2966677934b",
+            "wi_6018a415-4c5f-4849-bb64-d8f9b4fa5190",
+            "wi_65236fc2-f7ee-4f27-af9e-90d9b637e42f",
+            "wi_bbb0da6a-214f-47bc-a088-bf313519fe7e"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_0e7a6979-817e-53a2-af49-d750cf2a7822",
+      "title": "Onda 4 — Seumei offline desktop e PWA",
+      "outcome": "Desktop/PWA offline, sync, conflitos e restore.",
+      "status": "planned",
+      "initiatives": [
+        {
+          "id": "ini_cff948f0-61a8-59c1-ab00-a88e526e0245",
+          "title": "Programa Matriz — Onda 4",
+          "outcome": "Desktop/PWA offline, sync, conflitos e restore.",
+          "status": "planned",
+          "backlogIds": [
+            "wi_de0b6c27-2251-4cc3-be5c-96a4d9e84a67",
+            "wi_511950d2-1264-4b26-846d-45bcab1a6a08",
+            "wi_abaecd72-77c7-480d-a70a-c10abffa704b",
+            "wi_50c509cc-c134-4bf4-a4b9-a8b08832b42c",
+            "wi_acdb3d25-2a21-42f6-88cc-cca1f4b6d39d",
+            "wi_18b67ab5-ac28-4c25-9974-d7d8adc22662",
+            "wi_e8250d0c-fc0e-44d7-8e5a-fd4cce02436b",
+            "wi_e541142a-c1f9-440b-aa1f-cc942a803203",
+            "wi_522da46c-382f-439b-afea-6b30538c7400",
+            "wi_e7838924-c1eb-4f21-9962-703ef84a8bda"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "phase_b4242f46-5584-51c4-a4c2-6a7f62b72ea7",
+      "title": "Onda 5 — Produtos e hardening institucional",
+      "outcome": "All apps useful flow, local tests, telemetry and release gate.",
+      "status": "planned",
+      "initiatives": [
+        {
+          "id": "ini_7ea8d7e5-67cb-5c49-a5f1-219a9fb549e9",
+          "title": "Programa Matriz — Onda 5",
+          "outcome": "All apps useful flow, local tests, telemetry and release gate.",
+          "status": "planned",
+          "backlogIds": [
+            "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+            "wi_1fcf6045-decf-40c9-94be-226f93b8d35e",
+            "wi_751c3867-878a-43fe-8023-fd502ad58315",
+            "wi_8978eae3-1a40-4630-8306-77825d726fa3",
+            "wi_a140ae04-2e1f-4bf9-8a99-6c030003200a",
+            "wi_a3c4e329-f798-4f01-83b8-774fc3ea8ca2",
+            "wi_8efea2e8-06be-4053-b0d2-d5c056cd338e",
+            "wi_cf07452b-6a31-4e94-b713-a917cc47f2ce",
+            "wi_957aebae-26c0-4da1-8055-8271d9e0884a",
+            "wi_3f848da3-e35c-41a5-b800-b995afb51b03"
+          ]
+        }
+      ]
+    }
+  ],
+  "markers": [],
   "goals": [],
   "scorecards": [
     {
@@ -937,6 +1069,6 @@
       ]
     }
   ],
-  "updatedAt": "2026-07-30T21:10:34.913Z",
-  "revision": "1eadb574da3d0620"
+  "updatedAt": "2026-08-05T18:33:31.693Z",
+  "revision": "08589168582ef8ed"
 }

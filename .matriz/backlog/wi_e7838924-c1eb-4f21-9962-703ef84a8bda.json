@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_e7838924-c1eb-4f21-9962-703ef84a8bda",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Validar backup, restauração e piloto offline",
+  "description": "Validar recuperação e operação real dos clientes offline.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_de0b6c27-2251-4cc3-be5c-96a4d9e84a67",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:4",
+    "recovery"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_4cd46a49-4388-44f5-b4f3-fba12bf0cd8f",
+      "text": "Corruption/crash/upgrade/skew/revocation/large queue/restore and real pilots.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_522da46c-382f-439b-afea-6b30538c7400"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "apps/seumei/README.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.150Z",
+  "updatedAt": "2026-08-05T18:33:30.848Z",
+  "revision": "43ba2c165a95d578"
+}

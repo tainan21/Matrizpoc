@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_1fcf6045-decf-40c9-94be-226f93b8d35e",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Completar Spot e edição Local Show-day",
+  "description": "Completar o fluxo principal do Spot e a edição local de show-day.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "spot"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_020d7449-a878-4d2f-8408-9158737dc223",
+      "text": "Draft→published→confirmed→performed/cancelled, bookings, contract state and limited offline edit.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_bbb0da6a-214f-47bc-a088-bf313519fe7e",
+    "wi_511950d2-1264-4b26-846d-45bcab1a6a08",
+    "wi_e7838924-c1eb-4f21-9962-703ef84a8bda"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.251Z",
+  "updatedAt": "2026-08-05T18:33:30.966Z",
+  "revision": "95e3e88a54c35c2e"
+}

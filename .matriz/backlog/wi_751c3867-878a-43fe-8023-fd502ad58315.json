@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_751c3867-878a-43fe-8023-fd502ad58315",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Evoluir operação online do Seumei",
+  "description": "Evoluir o escopo operacional online do Seumei sem expandir domínio indevidamente.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "seumei"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_8d1d6b60-88bb-4c45-b50e-3533172b94d2",
+      "text": "Owners/members/units/hours/service areas/app permissions; no stock/finance.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_bbb0da6a-214f-47bc-a088-bf313519fe7e",
+    "wi_abaecd72-77c7-480d-a70a-c10abffa704b",
+    "wi_e7838924-c1eb-4f21-9962-703ef84a8bda"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.297Z",
+  "updatedAt": "2026-08-05T18:33:31.068Z",
+  "revision": "3331d04da16625dd"
+}

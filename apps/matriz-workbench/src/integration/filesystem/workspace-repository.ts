@@ -1730,7 +1730,11 @@ export class WorkspaceRepository {
   }
 
   async listAgentRequests(projectId: string): Promise<AgentRequest[]> {
-    const folder = await this.safeMatrixPath(projectId, ["agents", "requests"])
+    const folder = await this.safeMatrixPath(projectId, ["agents", "requests"]).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined
+      throw error
+    })
+    if (!folder) return []
     const files = (await readdir(folder)).filter((name) => /^req_[0-9a-f-]{36}\.json$/.test(name))
     const requests = await Promise.all(
       files.map((name) =>

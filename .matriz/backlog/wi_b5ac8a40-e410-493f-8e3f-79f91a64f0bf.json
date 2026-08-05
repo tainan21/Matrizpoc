@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "projectId": "matriz-infra-hub",
+  "kind": "outcome",
+  "title": "Outcome: estabilizar a fundação Matriz",
+  "description": "Outcome da Onda 1 para conter riscos e estabilizar a fundação do ecossistema.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "pending",
+  "priority": "critical",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:1",
+    "governance"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_bf2ed4f4-02e0-43ab-8a81-b43ff91e4868",
+      "text": "Itens 2–10 concluídos, vulnerabilidades críticas contidas e baseline arquitetural atualizada.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/architectural-laws.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:25.397Z",
+  "updatedAt": "2026-08-05T18:33:28.571Z",
+  "revision": "44c9abe605bf71cd"
+}
