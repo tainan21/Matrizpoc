@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises"
+import { mkdtemp, mkdir, open, readFile, readdir, rm, stat, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
@@ -62,6 +62,28 @@ function plan(overrides: Partial<BacklogBatchPlan> = {}): BacklogBatchPlan {
 }
 
 describe("importBacklogBatch", () => {
+  it("releases its own project lock after the callback", async () => {
+    const { root, repository } = await fixture()
+    const target = path.join(root, ".runtime", "workbench", "locks", "coordinator--batch-project-sample.lock")
+    await repository.withBacklogBatchLock("sample", "batch-a", async () => undefined, 2)
+    await expect(readFile(target, "utf8")).rejects.toMatchObject({ code: "ENOENT" })
+    await expect(repository.withBacklogBatchLock("sample", "batch-b", async () => "second", 2)).resolves.toBe("second")
+  })
+
+  it("retries a transient Windows receipt replacement without truncating the batch", async () => {
+    const { root, repository } = await fixture()
+    const target = path.join(root, "apps", "sample", ".matriz", "imports", "batch-a.json")
+    await repository.writeImportReceipt("sample", "batch-a", { revision: 1 })
+    const reader = await open(target, "r")
+    const replacement = repository.writeImportReceipt("sample", "batch-a", { revision: 2 })
+      .then(() => ({ ok: true as const }), (error: unknown) => ({ ok: false as const, error }))
+
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    await reader.close()
+
+    expect(await replacement).toEqual({ ok: true })
+    expect(JSON.parse(await readFile(target, "utf8"))).toEqual({ revision: 2 })
+  })
   it("reports a valid 50-item dry-run without changing any workspace artifact", async () => {
     const { root, repository } = await fixture()
     const beforeTree = await tree(root)
@@ -225,6 +247,21 @@ describe("importBacklogBatch", () => {
     expect(report).toMatchObject({ failedKeys: ["item-03"], skippedKeys: plan().items.slice(3).map((item) => item.key) })
   })
 
+  it("reports enrichment keys not attempted after an update failure as skipped", async () => {
+    const { repository } = await fixture()
+    const originalUpdate = repository.updateWorkItem.bind(repository)
+    let attempts = 0
+    repository.updateWorkItem = async (...args) => {
+      attempts += 1
+      if (attempts === 3) throw new Error("simulated enrichment failure")
+      return originalUpdate(...args)
+    }
+    const report = await importBacklogBatch(repository, plan(), "apply")
+
+    expect(report).toMatchObject({ failedKeys: ["item-03"], skippedKeys: plan().items.slice(3).map((item) => item.key) })
+    expect(new Set([...report.failedKeys, ...report.skippedKeys, ...report.createdKeys, ...report.reusedKeys]).size).toBe(50)
+  })
+
   it("recovers a persisted update without a second activity event", async () => {
     const { repository } = await fixture()
     const originalWrite = repository.writeImportReceipt.bind(repository)
@@ -283,23 +320,29 @@ describe("importBacklogBatch", () => {
     await expect(importBacklogBatch(repository, value, "apply")).rejects.toThrow()
   })
 
-  it("reclaims an expired project batch lock", async () => {
+  it("does not block on an abandoned partial legacy batch lock", async () => {
     const { root, repository } = await fixture()
     const locks = path.join(root, ".runtime", "workbench", "locks")
     await mkdir(locks, { recursive: true })
-    await writeFile(path.join(locks, "coordinator--batch-project-sample.lock"), JSON.stringify({ pid: 1, expiresAt: Date.now() - 1 }))
+    await writeFile(path.join(locks, "coordinator--batch-project-sample.lock"), "")
 
     await expect(repository.withBacklogBatchLock("sample", "batch-a", async () => "recovered", 2)).resolves.toBe("recovered")
   })
 
-  it("does not remove a live project batch lock", async () => {
-    const { root, repository } = await fixture()
-    const locks = path.join(root, ".runtime", "workbench", "locks")
-    const target = path.join(locks, "coordinator--batch-project-sample.lock")
-    await mkdir(locks, { recursive: true })
-    await writeFile(target, JSON.stringify({ pid: process.pid, expiresAt: Date.now() + 60_000 }))
+  it("does not steal a live project batch lock", async () => {
+    const { repository } = await fixture()
+    let release!: () => void
+    let entered!: () => void
+    const active = new Promise<void>((resolve) => { entered = resolve })
+    const blocked = new Promise<void>((resolve) => { release = resolve })
+    const owner = repository.withBacklogBatchLock("sample", "batch-a", async () => {
+      entered()
+      await blocked
+    }, 2)
+    await active
 
     await expect(repository.withBacklogBatchLock("sample", "batch-a", async () => "stolen", 1)).rejects.toMatchObject({ code: "CONFLICT" })
-    await expect(readFile(target, "utf8")).resolves.toContain("expiresAt")
+    release()
+    await owner
   })
 })

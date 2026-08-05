@@ -315,7 +315,7 @@ async function importLockedBacklogBatch(
     }
   }
 
-  for (const item of plan.items) {
+  for (const [index, item] of plan.items.entries()) {
     const saved = receipt.entries[item.key]
     if (!saved || saved.state !== "created") {
       report.failedKeys.push(item.key)
@@ -339,6 +339,7 @@ async function importLockedBacklogBatch(
       await persistReceipt()
     } catch {
       report.failedKeys.push(item.key)
+      report.skippedKeys.push(...plan.items.slice(index + 1).map((candidate) => candidate.key))
       return report
     }
   }

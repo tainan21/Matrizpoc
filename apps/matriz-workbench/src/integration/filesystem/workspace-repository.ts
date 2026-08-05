@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto"
+import { createServer, type Server } from "node:net"
 import {
   appendFile,
   mkdir,
@@ -84,6 +85,50 @@ const REPOSITORY_REFERENCE_EXCLUDED_SEGMENTS = new Set([
 ])
 const documentFolder = (kind: WorkbenchDocument["kind"]) =>
   kind === "decision" ? "decisions" : kind
+
+async function replaceFile(temp: string, target: string): Promise<void> {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      await rename(temp, target)
+      return
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code
+      if (!(["EACCES", "EBUSY", "EPERM"].includes(code ?? "")) || attempt === 7) throw error
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+  }
+}
+
+function batchLockEndpoint(repositoryRoot: string, key: string): string | number {
+  const digest = createHash("sha256").update(`${repositoryRoot}\0${key}`).digest("hex")
+  if (process.platform === "win32") return `\\\\.\\pipe\\matriz-workbench-batch-${digest}`
+  if (process.platform === "linux") return `\0matriz-workbench-batch-${digest}`
+  return 20_000 + (Number.parseInt(digest.slice(0, 8), 16) % 10_000)
+}
+
+async function tryAcquireBatchLock(endpoint: string | number): Promise<Server | undefined> {
+  return new Promise((resolve, reject) => {
+    const server = createServer((socket) => socket.destroy())
+    server.once("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "EADDRINUSE") resolve(undefined)
+      else reject(error)
+    })
+    const acquired = () => {
+      resolve(server)
+    }
+    if (typeof endpoint === "number") {
+      server.listen({ host: "127.0.0.1", port: endpoint, exclusive: true }, acquired)
+    } else {
+      server.listen(endpoint, acquired)
+    }
+  })
+}
+
+async function releaseBatchLock(server: Server): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve())
+  })
+}
 
 export interface DiscoveredProject {
   id: string
@@ -290,7 +335,12 @@ export class WorkspaceRepository {
     } finally {
       await handle.close()
     }
-    await rename(temp, target)
+    try {
+      await replaceFile(temp, target)
+    } catch (error) {
+      await unlink(temp).catch(() => undefined)
+      throw error
+    }
   }
 
   private async withWorkItemLock<T>(
@@ -1231,7 +1281,19 @@ export class WorkspaceRepository {
     if (!APP_ID.test(projectId) || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
       throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
     }
-    return this.withCoordinatorLock(`batch-project-${projectId}`, operation, maxAttempts)
+    const endpoint = batchLockEndpoint(this.repositoryRoot, `batch-project-${projectId}`)
+    let server: Server | undefined
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      server = await tryAcquireBatchLock(endpoint)
+      if (server) break
+      await new Promise((resolve) => setTimeout(resolve, 25))
+    }
+    if (!server) throw new WorkspaceError("O planejamento está sendo atualizado em outra operação.", "CONFLICT")
+    try {
+      return await operation()
+    } finally {
+      await releaseBatchLock(server)
+    }
   }
 
   async validateWorkItemReferences(
