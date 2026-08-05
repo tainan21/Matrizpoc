@@ -39,11 +39,13 @@ export function ThemeSystemPicker({ variant = "compact" }: { variant?: "compact"
   }
 
   if (variant === "compact") {
+    const preset = getThemePreset(system)
+    const modeLabel = mode === "dark" ? "escuro" : "claro"
     return (
       <label className={styles.compact} title={mode === "light" ? "Sistema salvo para o modo escuro" : "Sistema visual ativo"}>
-        <span className="sr-only">Sistema visual</span>
-        <i aria-hidden="true" style={{ background: getThemePreset(system).tokens.accent }} />
-        <select aria-label="Sistema visual do modo escuro" onChange={(event) => choose(event.target.value as WorkbenchDesignSystemId)} value={system}>
+        <i aria-hidden="true" style={{ background: preset.tokens.accent }} />
+        <strong aria-hidden="true">{preset.shortLabel}</strong>
+        <select aria-label={`Aparência: ${modeLabel}, ${preset.label}`} onChange={(event) => choose(event.target.value as WorkbenchDesignSystemId)} value={system}>
           {WORKBENCH_THEME_PRESETS.map((preset) => <option key={preset.id} value={preset.id}>{preset.label}</option>)}
         </select>
       </label>

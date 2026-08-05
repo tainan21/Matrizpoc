@@ -1,9 +1,14 @@
 import Link from "next/link"
 import { WorkspaceRepository } from "../../src/integration/filesystem/workspace-repository"
+import {
+  toFocusAgentRequestViewModel,
+  toFocusWorkItemViewModel,
+} from "../../src/ui/presenters/focus-presenter"
+import { toProjectNavViewModel } from "../../src/ui/presenters/workspace-presenters"
 
 export default async function FocusPage() {
   const repository = await WorkspaceRepository.create()
-  const projects = await repository.discoverProjects()
+  const projects = (await repository.discoverProjects()).map(toProjectNavViewModel)
   const initialized = projects.filter((project) => project.initialized && !project.corrupted)
   const snapshots = await Promise.all(
     initialized.map(async (project) => {
@@ -17,44 +22,53 @@ export default async function FocusPage() {
   const active = snapshots.flatMap(({ project, backlog }) =>
     backlog
       .filter((item) => ["ready", "in_progress", "review"].includes(item.status))
-      .map((item) => ({ project, item })),
+      .map((item) => toFocusWorkItemViewModel({ item, project })),
   )
   const blocked = snapshots.flatMap(({ project, backlog }) =>
-    backlog.filter((item) => item.status === "blocked").map((item) => ({ project, item })),
+    backlog
+      .filter((item) => item.status === "blocked")
+      .map((item) => toFocusWorkItemViewModel({ item, project })),
   )
   const requests = snapshots.flatMap(({ project, requests: rows }) =>
     rows
       .filter((request) => ["queued", "claimed", "in_progress"].includes(request.status))
-      .map((request) => ({ project, request })),
+      .map((request) => toFocusAgentRequestViewModel({ project, request })),
   )
 
   return (
     <main className="workspace-page">
       <header className="page-header focus-header">
         <div>
-          <p className="eyebrow">Hoje · coworking local</p>
-          <h1>Foco atual</h1>
-          <p>O que está em movimento, o que bloqueia e o que aguarda um agente.</p>
+          <p className="eyebrow">Hoje</p>
+          <h1>Foco</h1>
+          <p>Ativos, bloqueios e agentes em um só lugar.</p>
         </div>
-        <Link className="button primary" href="/projects">Abrir projetos</Link>
+        <Link className="button primary" href="/projects">Projetos</Link>
       </header>
       <div className="workspace-with-inspector">
         <div className="main-column">
           <section className="metric-strip" aria-label="Resumo">
-            <div><strong>{active.length}</strong><span>em andamento</span></div>
+            <div><strong>{active.length}</strong><span>ativos</span></div>
             <div><strong>{blocked.length}</strong><span>bloqueios</span></div>
-            <div><strong>{requests.length}</strong><span>na fila de agentes</span></div>
-            <div><strong>{projects.length}</strong><span>apps detectados</span></div>
+            <div><strong>{requests.length}</strong><span>agentes</span></div>
+            <div><strong>{projects.length}</strong><span>apps</span></div>
           </section>
           <section className="data-section">
-            <div className="section-heading"><h2>Trabalho ativo</h2><span>{active.length} itens</span></div>
+            <div className="section-heading"><h2>Em andamento</h2><span>{active.length} itens</span></div>
             {active.length ? (
               <div className="rows">
-                {active.slice(0, 8).map(({ project, item }) => (
-                  <Link className="work-row" href={`/projects/${project.id}/backlog/${item.id}`} key={item.id}>
-                    <span className={`priority-bar ${item.priority}`} />
-                    <span className="row-main"><strong>{item.title}</strong><small>{project.displayName} · {item.id}</small></span>
-                    <span className={`status-chip ${item.status}`}>{item.status.replace("_", " ")}</span>
+                {active.slice(0, 8).map((item) => (
+                  <Link className="work-row" href={item.href} key={item.id}>
+                    <span aria-hidden="true" className={`priority-bar ${item.priority}`} />
+                    <span className="sr-only">Prioridade {item.priorityLabel}</span>
+                    <span className="row-main">
+                      <strong>{item.title}</strong>
+                      <small>
+                        {item.projectLabel} · <span aria-hidden="true">{item.shortReference}</span>
+                        <span className="sr-only">Referência completa {item.fullReference}</span>
+                      </small>
+                    </span>
+                    <span className={`status-chip ${item.status}`}>{item.statusLabel}</span>
                   </Link>
                 ))}
               </div>
@@ -62,26 +76,33 @@ export default async function FocusPage() {
           </section>
           <section className="data-section">
             <div className="section-heading"><h2>Bloqueios</h2><span>{blocked.length} itens</span></div>
-            {blocked.length ? blocked.map(({ project, item }) => (
-              <Link className="work-row" href={`/projects/${project.id}/backlog/${item.id}`} key={item.id}>
-                <span className="danger">!</span>
-                <span className="row-main"><strong>{item.title}</strong><small>{project.displayName}</small></span>
-                <span className="status-chip blocked">bloqueada</span>
+            {blocked.length ? blocked.map((item) => (
+              <Link className="work-row" href={item.href} key={item.id}>
+                <span aria-hidden="true" className={`priority-bar ${item.priority}`} />
+                <span className="sr-only">Prioridade {item.priorityLabel}</span>
+                <span className="row-main">
+                  <strong>{item.title}</strong>
+                  <small>
+                    {item.projectLabel} · <span aria-hidden="true">{item.shortReference}</span>
+                    <span className="sr-only">Referência completa {item.fullReference}</span>
+                  </small>
+                </span>
+                <span className={`status-chip ${item.status}`}>{item.statusLabel}</span>
               </Link>
             )) : <Empty title="Sem bloqueios" text="O fluxo está livre para avançar." />}
           </section>
         </div>
         <aside className="inspector">
-          <div className="inspector-heading"><span>Fila de agentes</span><strong>{requests.length}</strong></div>
-          {requests.length ? requests.slice(0, 8).map(({ project, request }) => (
-            <Link className="agent-line" href={`/projects/${project.id}/agents#${request.id}`} key={request.id}>
+          <div className="inspector-heading"><span>Agentes</span><strong>{requests.length}</strong></div>
+          {requests.length ? requests.slice(0, 8).map((request) => (
+            <Link className="agent-line" href={request.href} key={request.id}>
               <span className="agent-avatar">AI</span>
-              <span><strong>{request.title}</strong><small>{request.status} · {project.displayName}</small></span>
+              <span><strong>{request.title}</strong><small>{request.statusLabel} · {request.projectLabel}</small></span>
             </Link>
           )) : <p className="muted compact">Nenhuma solicitação aguardando agente.</p>}
           <div className="inspector-note">
             <span className="live-dot" /> MCP local
-            <p>Contexto compacto, leitura seletiva e aprovação humana para qualquer escrita.</p>
+            <p>Escritas exigem aprovação humana.</p>
           </div>
         </aside>
       </div>

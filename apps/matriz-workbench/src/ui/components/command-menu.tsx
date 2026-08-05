@@ -12,6 +12,13 @@ interface CommandDestination {
   context: string
 }
 
+export function isEditableShortcutTarget(target: EventTarget | null): boolean {
+  if (!target || typeof target !== "object") return false
+  const element = target as { tagName?: unknown; isContentEditable?: boolean }
+  const tagName = typeof element.tagName === "string" ? element.tagName.toLowerCase() : ""
+  return ["input", "textarea", "select"].includes(tagName) || element.isContentEditable === true
+}
+
 export function CommandMenu({ projects }: { projects: ProjectNavViewModel[] }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -56,6 +63,10 @@ export function CommandMenu({ projects }: { projects: ProjectNavViewModel[] }) {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
         event.preventDefault()
         setOpen((current) => !current)
+        return
+      }
+      if (isEditableShortcutTarget(event.target)) {
+        sequenceRef.current = []
         return
       }
       if (event.key.toLowerCase() === "g") {

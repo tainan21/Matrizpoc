@@ -39,6 +39,7 @@ export interface WorkbenchThemeTokens {
 
 export interface WorkbenchThemePreset {
   id: WorkbenchDesignSystemId
+  shortLabel: string
   label: string
   description: string
   tokens: WorkbenchThemeTokens
@@ -80,7 +81,12 @@ export const LIGHT_THEME_TOKENS: WorkbenchThemeTokens = {
   radiusSmall: "5px", radiusMedium: "8px", borderWidth: "1px", shadowSmall: "0 1px 3px #18181d16", shadowMedium: "0 18px 48px #18181d24", density: "1",
 }
 
-export const WORKBENCH_THEME_PRESETS: readonly WorkbenchThemePreset[] = [
+const WORKBENCH_THEME_SHORT_LABELS: Record<WorkbenchDesignSystemId, string> = {
+  default: "DF", "neo-brutal": "NB", "midnight-graphite": "MG", "pearl-light": "PL", aurora: "AU",
+  zen: "ZN", pulse: "PU", terra: "TR", dracula: "DR", glass: "GL",
+}
+
+const WORKBENCH_THEME_PRESET_DEFINITIONS: readonly Omit<WorkbenchThemePreset, "shortLabel">[] = [
   { id: "default", label: "Default", description: "Violeta equilibrado e neutros frios.", tokens: darkTokens({ canvas: "#0d0e14", surface1: "#14151d", surface2: "#1a1b25", surface3: "#222431", overlay: "#11121aee", text: "#f3f3f7", textSecondary: "#c0c2ce", textSubtle: "#8e91a2", border: "#2b2d39", borderStrong: "#414453", accent: "#8b7cf6", accentHover: "#a99cff", accentSoft: "#292548", focus: "#b1a7ff", chart1: "#8b7cf6", chart2: "#45b9ad", chart3: "#e3a24a", chart4: "#dc6f9f", chart5: "#669be8" }) },
   { id: "neo-brutal", label: "Neo Brutal", description: "Contraste alto, bordas firmes e sombra seca.", tokens: darkTokens({ canvas: "#08090b", surface1: "#111216", surface2: "#17191e", surface3: "#20232a", overlay: "#0b0c0ff5", text: "#ffffff", textSecondary: "#d7dae0", textSubtle: "#a3a7b0", border: "#656b76", borderStrong: "#f3f4f6", accent: "#b99cff", accentHover: "#d1bdff", accentSoft: "#3a285e", focus: "#f9df50", chart1: "#b99cff", chart2: "#44e4c3", chart3: "#f9df50", chart4: "#ff6b9e", chart5: "#70a5ff", radiusSmall: "1px", radiusMedium: "2px", borderWidth: "2px", shadowSmall: "4px 4px 0 #000", shadowMedium: "8px 8px 0 #000", density: ".96" }) },
   { id: "midnight-graphite", label: "Midnight Graphite", description: "Grafite, violeta frio e ciano técnico.", tokens: darkTokens({ canvas: "#070b13", surface1: "#0b111b", surface2: "#101824", surface3: "#151f2d", overlay: "#090e17ee", text: "#f4f6fb", textSecondary: "#aeb7c7", textSubtle: "#778195", border: "#202a3a", borderStrong: "#303b50", accent: "#8b5cf6", accentHover: "#a78bfa", accentSoft: "#2a174f", focus: "#b59aff", chart1: "#8b5cf6", chart2: "#22d3ee", chart3: "#34d399", chart4: "#f59e0b", chart5: "#f472b6" }) },
@@ -93,6 +99,11 @@ export const WORKBENCH_THEME_PRESETS: readonly WorkbenchThemePreset[] = [
   { id: "glass", label: "Glass", description: "Transparência moderada reservada a overlays.", tokens: darkTokens({ canvas: "#07101b", surface1: "#0d1724e8", surface2: "#142131dc", surface3: "#1c2b3ddd", overlay: "#101b2ac9", text: "#f2f7ff", textSecondary: "#bcc9d8", textSubtle: "#8192a6", border: "#ffffff18", borderStrong: "#a9c9e23d", accent: "#8b7cff", accentHover: "#aca2ff", accentSoft: "#6d5be62e", focus: "#9de8ff", chart1: "#8b7cff", chart2: "#3bd9d0", chart3: "#74a9ff", chart4: "#f1a665", chart5: "#e479c7", radiusSmall: "8px", radiusMedium: "12px", shadowSmall: "0 8px 24px #0005", shadowMedium: "0 24px 70px #0008" }) },
 ] as const
 
+export const WORKBENCH_THEME_PRESETS: readonly WorkbenchThemePreset[] = WORKBENCH_THEME_PRESET_DEFINITIONS.map((preset) => ({
+  ...preset,
+  shortLabel: WORKBENCH_THEME_SHORT_LABELS[preset.id],
+}))
+
 export function getThemePreset(id: WorkbenchDesignSystemId): WorkbenchThemePreset {
   return WORKBENCH_THEME_PRESETS.find((preset) => preset.id === id) ?? WORKBENCH_THEME_PRESETS[2]
 }
@@ -101,7 +112,7 @@ export function getAppearanceTokens(mode: WorkbenchColorMode, system: WorkbenchD
   return mode === "light" ? LIGHT_THEME_TOKENS : getThemePreset(system).tokens
 }
 
-export function getAppearanceVariables(mode: WorkbenchColorMode, system: WorkbenchDesignSystemId): Record<`--wb-${string}`, string> {
+export function getAppearanceVariables(mode: WorkbenchColorMode, system: WorkbenchDesignSystemId): Record<`--${string}`, string> {
   const tokens = getAppearanceTokens(mode, system)
   return {
     "--wb-canvas": tokens.canvas, "--wb-surface-1": tokens.surface1, "--wb-surface-2": tokens.surface2, "--wb-surface-3": tokens.surface3,
@@ -113,6 +124,8 @@ export function getAppearanceVariables(mode: WorkbenchColorMode, system: Workben
     "--wb-chart-3": tokens.chart3, "--wb-chart-4": tokens.chart4, "--wb-chart-5": tokens.chart5, "--wb-radius-sm": tokens.radiusSmall,
     "--wb-radius-md": tokens.radiusMedium, "--wb-border-width": tokens.borderWidth, "--wb-shadow-sm": tokens.shadowSmall,
     "--wb-shadow-md": tokens.shadowMedium, "--wb-density": tokens.density,
+    "--surface-fg": tokens.text, "--color-foreground": tokens.text, "--color-surface": tokens.surface1,
+    "--color-background": tokens.canvas, "--color-border": tokens.border, "--accent-fg": tokens.accentText,
   }
 }
 

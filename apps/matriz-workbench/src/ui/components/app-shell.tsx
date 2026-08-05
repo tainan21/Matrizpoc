@@ -1,63 +1,64 @@
-import Link from "next/link"
 import type { ReactNode } from "react"
 import type { ProjectNavViewModel } from "../presenters/workspace-presenters"
+import type { RailPreference, TopbarPreference } from "../shell-preferences"
 import { lockAction } from "../../../app/actions"
 import { CommandMenu } from "./command-menu"
+import { ShellChrome, type ShellNavigationItem } from "./shell-chrome"
 import { ThemeToggle } from "./theme-toggle"
 import { ThemeSystemPicker } from "./theme-system-picker"
 
+const primaryNavigation = [
+  { href: "/", icon: "⌁", label: "Foco" },
+  { href: "/control", icon: "◈", label: "Controle" },
+  { activePrefixes: ["/work"], href: "/work/inbox", icon: "◎", label: "Trabalho" },
+  { href: "/projects", icon: "⌘", label: "Projetos" },
+  { href: "/knowledge", icon: "◇", label: "Conhecimento" },
+  { href: "/sites", icon: "▦", label: "Sites" },
+] satisfies readonly ShellNavigationItem[]
+
+const secondaryNavigation = [
+  { href: "/settings", icon: "⚙", label: "Configurações" },
+] satisfies readonly ShellNavigationItem[]
+
 export function AppShell({
   projects,
+  initialRailPreference,
+  initialTopbarPreference,
   children,
 }: {
   projects: ProjectNavViewModel[]
+  initialRailPreference: RailPreference
+  initialTopbarPreference: TopbarPreference
   children: ReactNode
 }) {
+  const projectNavigation = projects.map((project) => ({
+    href: `/projects/${project.id}`,
+    icon: "",
+    indicator: project.initialized ? "ready" as const : "idle" as const,
+    label: project.displayName,
+    warning: project.corrupted ? "Projeto com dados inválidos" : undefined,
+  }))
+
   return (
-    <div className="app-shell">
-      <a className="skip-link" href="#workspace-content">Pular para o conteúdo</a>
-      <aside className="project-rail">
-        <div className="rail-brand">
-          <span className="brand-mark small">M</span>
-          <span>
-            <strong>Workbench</strong>
-            <small>matriz local</small>
-          </span>
-        </div>
-        <nav className="primary-nav" aria-label="Navegação principal">
-          <Link href="/"><span className="rail-icon" aria-hidden="true">⌁</span><span>Foco</span></Link>
-          <Link href="/control"><span className="rail-icon" aria-hidden="true">◈</span><span>Controle</span></Link>
-          <Link href="/work/inbox"><span className="rail-icon" aria-hidden="true">◎</span><span>Trabalho</span></Link>
-          <Link href="/projects"><span className="rail-icon" aria-hidden="true">⌘</span><span>Projetos</span></Link>
-          <Link href="/knowledge"><span className="rail-icon" aria-hidden="true">◇</span><span>Conhecimento</span></Link>
-          <Link href="/sites"><span className="rail-icon" aria-hidden="true">▦</span><span>Sites</span></Link>
-        </nav>
-        <div className="rail-section-title">Apps detectados <span>{projects.length}</span></div>
-        <nav className="project-nav" aria-label="Projetos">
-          {projects.map((project) => (
-            <Link href={`/projects/${project.id}`} key={project.id} title={project.displayName}>
-              <span className={`project-dot ${project.initialized ? "ready" : ""}`} />
-              <span className="truncate">{project.displayName}</span>
-              {project.corrupted ? <span className="danger">!</span> : null}
-            </Link>
-          ))}
-        </nav>
-        <div className="rail-footer">
-          <Link href="/settings"><span className="rail-icon" aria-hidden="true">⚙</span><span>Configurações</span></Link>
-          <form action={lockAction}><button type="submit"><span className="rail-icon" aria-hidden="true">↗</span><span>Bloquear</span></button></form>
-        </div>
-      </aside>
-      <div className="workspace-frame">
-        <header className="topbar">
+    <ShellChrome
+      initialRailPreference={initialRailPreference}
+      initialTopbarPreference={initialTopbarPreference}
+      lockAction={lockAction}
+      primaryNavigation={primaryNavigation}
+      projectNavigation={projectNavigation}
+      secondaryNavigation={secondaryNavigation}
+      topbar={
+        <>
           <span className="live-dot" aria-hidden="true" />
           <span>Repositório local</span>
           <span className="topbar-path">.matriz · apps/*/.matriz</span>
           <ThemeSystemPicker />
           <ThemeToggle />
           <CommandMenu projects={projects} />
-        </header>
-        <div id="workspace-content" tabIndex={-1}>{children}</div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      {children}
+    </ShellChrome>
   )
 }

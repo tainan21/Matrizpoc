@@ -15,12 +15,23 @@ export interface EcosystemBarProps {
   readonly cacheControl?: React.ReactNode
 }
 
+export const ECOSYSTEM_PANEL_STYLE = {
+  width: 280,
+  marginBottom: 8,
+  padding: 12,
+  border: "1px solid var(--color-border, var(--border, #d4d4d8))",
+  borderRadius: 12,
+  background: "var(--color-surface, var(--surface, #fff))",
+  color: "var(--color-foreground, var(--surface-fg, var(--text, #111827)))",
+  boxShadow: "0 18px 48px rgba(0,0,0,.18)",
+} as const
+
 export function EcosystemBar({ currentAppId, apps, themeControl, cacheControl }: EcosystemBarProps) {
   const [open, setOpen] = useState(false)
   return (
     <div className="matriz-ecosystem-root" style={{ position: "fixed", right: 16, bottom: 16, zIndex: 9999, fontFamily: "var(--font-sans, system-ui), sans-serif" }}>
       {open ? (
-        <div role="dialog" aria-label="Alternar plataforma" style={{ width: 280, marginBottom: 8, padding: 12, border: "1px solid var(--color-border, var(--border, #d4d4d8))", borderRadius: 12, background: "var(--color-surface, var(--surface, #fff))", color: "var(--color-foreground, var(--surface-fg, #111))", boxShadow: "0 18px 48px rgba(0,0,0,.18)" }}>
+        <div role="dialog" aria-label="Alternar plataforma" style={ECOSYSTEM_PANEL_STYLE}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <strong style={{ fontSize: 13 }}>Ecossistema Matriz</strong>
             {themeControl}

@@ -62,6 +62,10 @@ The latest verified implementation snapshot is
 `docs/IMPLEMENTATION-FEDERATED-PORTFOLIO-2026-07-30.md`.
 The Matriz Lib UI package boundary is documented in
 `docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md`.
+The Workbench visual reform, its executable plan and the reusable agent prompt
+are documented in `docs/design/WORKBENCH-VISUAL-REFORM-2026-08-04.md`,
+`docs/plans/2026-08-04-workbench-visual-reform-implementation.md` and
+`docs/design/AGENT-PROMPT-WORKBENCH-VISUAL-REFORM.md`.
 The evidence-based planning method is documented in `docs/SCORE-0-100.md`.
 Agents must also read `docs/agent-handbook/README.md`, which explains the
 product language, operating protocol, coworking model, freedom and security
