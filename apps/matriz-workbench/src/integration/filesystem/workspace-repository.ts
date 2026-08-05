@@ -218,13 +218,18 @@ export class WorkspaceRepository {
   private constructor(
     readonly repositoryRoot: string,
     readonly appsRoot: string,
+    private readonly coordinationRootKey: string,
   ) {}
 
   static async create(repositoryRoot?: string): Promise<WorkspaceRepository> {
     const root = repositoryRoot ? path.resolve(repositoryRoot) : await findRepositoryRoot()
     const appsRoot = path.join(root, "apps")
     const appsReal = await realpath(appsRoot)
-    return new WorkspaceRepository(root, appsReal)
+    const physicalRoot = await realpath(root)
+    const coordinationRootKey = process.platform === "win32"
+      ? physicalRoot.toLocaleLowerCase("en-US")
+      : physicalRoot
+    return new WorkspaceRepository(root, appsReal, coordinationRootKey)
   }
 
   private async projectRoot(projectId: string): Promise<string> {
@@ -1281,7 +1286,7 @@ export class WorkspaceRepository {
     if (!APP_ID.test(projectId) || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
       throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
     }
-    const endpoint = batchLockEndpoint(this.repositoryRoot, `batch-project-${projectId}`)
+    const endpoint = batchLockEndpoint(this.coordinationRootKey, `batch-project-${projectId}`)
     let server: Server | undefined
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       server = await tryAcquireBatchLock(endpoint)

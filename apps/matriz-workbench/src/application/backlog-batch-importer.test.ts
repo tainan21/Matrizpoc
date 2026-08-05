@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, open, readFile, readdir, rm, stat, writeFile } from "node:fs/promises"
+import { mkdtemp, mkdir, open, readFile, readdir, rm, stat, symlink, unlink, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
@@ -61,7 +61,53 @@ function plan(overrides: Partial<BacklogBatchPlan> = {}): BacklogBatchPlan {
   }
 }
 
+async function maximumConcurrentBatchOwners(
+  first: WorkspaceRepository,
+  second: WorkspaceRepository,
+): Promise<number> {
+  let active = 0
+  let maximum = 0
+  const enter = async () => {
+    active += 1
+    maximum = Math.max(maximum, active)
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    active -= 1
+  }
+  await Promise.all([
+    first.withBacklogBatchLock("sample", "batch-a", enter, 20),
+    second.withBacklogBatchLock("sample", "batch-b", enter, 20),
+  ])
+  return maximum
+}
+
 describe("importBacklogBatch", () => {
+  it.runIf(process.platform === "win32")("serializes repositories whose physical root differs only by casing", async () => {
+    const { root, repository } = await fixture()
+    const alias = await WorkspaceRepository.create(root.toUpperCase())
+
+    expect(await maximumConcurrentBatchOwners(repository, alias)).toBe(1)
+  })
+
+  it("serializes repositories whose physical root is reached through a filesystem alias", async ({ skip }) => {
+    const { root, repository } = await fixture()
+    const aliasPath = `${root}-alias`
+    try {
+      await symlink(root, aliasPath, process.platform === "win32" ? "junction" : "dir")
+    } catch (error) {
+      if (["EACCES", "ENOTSUP", "EPERM"].includes((error as NodeJS.ErrnoException).code ?? "")) {
+        skip()
+        return
+      }
+      throw error
+    }
+    try {
+      const alias = await WorkspaceRepository.create(aliasPath)
+      expect(await maximumConcurrentBatchOwners(repository, alias)).toBe(1)
+    } finally {
+      await unlink(aliasPath).catch(() => undefined)
+    }
+  })
+
   it("releases its own project lock after the callback", async () => {
     const { root, repository } = await fixture()
     const target = path.join(root, ".runtime", "workbench", "locks", "coordinator--batch-project-sample.lock")
