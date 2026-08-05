@@ -29,11 +29,11 @@ on:
 jobs:
   split:
     runs-on: ubuntu-latest
+    env:
+      SPLIT_REPO_PAT: ${{ secrets.SPLIT_REPO_PAT }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -44,9 +44,9 @@ jobs:
       - name: Export ${{ inputs.app }}
         run: pnpm tsx tooling/scripts/export-app.ts ${{ inputs.app }} ./dist/split/${{ inputs.app }}
       - name: Push export to ${{ inputs.destination }}
-        if: ${{ secrets.SPLIT_REPO_PAT != '' }}
+        if: ${{ env.SPLIT_REPO_PAT != '' }}
         env:
-          PAT: ${{ secrets.SPLIT_REPO_PAT }}
+          PAT: ${{ env.SPLIT_REPO_PAT }}
         run: |
           cd dist/split/${{ inputs.app }}
           git init -b ${{ inputs.branch }}
@@ -57,7 +57,7 @@ jobs:
           git remote add origin "https://x-access-token:${PAT}@github.com/${{ inputs.destination }}.git"
           git push -f origin ${{ inputs.branch }}
       - name: Upload artifact (fallback when PAT missing)
-        if: ${{ secrets.SPLIT_REPO_PAT == '' }}
+        if: ${{ env.SPLIT_REPO_PAT == '' }}
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.app }}-split

@@ -61,6 +61,7 @@ function checkApp(root: string, app: AppId): Violation[] {
   const otherApps = APPS.filter((a) => a !== app)
 
   for (const file of files) {
+    const normalizedFile = file.replaceAll("\\", "/")
     const content = readFileSync(file, "utf8")
     const lines = content.split("\n")
     lines.forEach((line, idx) => {
@@ -77,12 +78,12 @@ function checkApp(root: string, app: AppId): Violation[] {
         }
       }
       // Rule L12: auth layer must not pull domain internals
-      if (file.includes(`/src/auth/`) && /from ["'][^"']*\/domain\//.test(line)) {
+      if (normalizedFile.includes(`/src/auth/`) && /from ["'][^"']*\/domain\//.test(line)) {
         const m = line.match(/from ["'][^"']*\/domain\/[^"']*["']/)
         if (m) violations.push({ file: relative(root, file), line: idx + 1, rule: "L12", match: m[0] })
       }
       // Rule L6: presentation must not import raw domain models
-      if (/\/presentation\//.test(file) && /from ["'][^"']*\/domain\/(?!index)/.test(line)) {
+      if (/\/presentation\//.test(normalizedFile) && /from ["'][^"']*\/domain\/(?!index)/.test(line)) {
         const m = line.match(/from ["'][^"']*\/domain\/[^"']*["']/)
         if (m && !m[0].includes("/domain/index")) {
           violations.push({ file: relative(root, file), line: idx + 1, rule: "L6", match: m[0] })

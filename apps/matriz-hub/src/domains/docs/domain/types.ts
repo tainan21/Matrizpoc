@@ -1,13 +1,10 @@
 import type {
   ContextPackageDTO,
   DocActorType,
-  DocBlockType,
   DocDocumentStatus,
   DocDocumentType,
   DocSensitivity,
   DocVisibility,
-  DocumentBlockDTO,
-  DocumentDetailDTO,
   DocumentSummaryDTO,
   KnowledgeRelationType,
   SuggestionDTO,
@@ -104,10 +101,4 @@ export interface DocsDashboardVM {
   suggestions: SuggestionDTO[]
   contexts: ContextPackageDTO[]
   timeline: TimelineEventDTO[]
-}
-
-export interface DocsDocumentVM {
-  detail: DocumentDetailDTO
-  blocksByKind: Record<DocBlockType, DocumentBlockDTO[]>
-  canExportPublic: boolean
 }

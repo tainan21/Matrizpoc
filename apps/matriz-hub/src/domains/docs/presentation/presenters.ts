@@ -1,8 +1,14 @@
 import type {
   DocBlockType,
+  DocumentBlockDTO,
   DocumentDetailDTO,
 } from "@matriz/integration-api-contracts/v1/docs"
-import type { DocsDocumentVM } from "../domain/types"
+
+export interface DocsDocumentVM {
+  detail: DocumentDetailDTO
+  blocksByKind: Record<DocBlockType, DocumentBlockDTO[]>
+  canExportPublic: boolean
+}
 
 export function toDocsDocumentVM(detail: DocumentDetailDTO): DocsDocumentVM {
   const blocksByKind = detail.blocks.reduce(
