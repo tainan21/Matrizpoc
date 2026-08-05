@@ -1,0 +1,187 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - link "Pular para o conteúdo" [ref=f5e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f5e4]:
+      - generic [ref=f5e5]:
+        - generic [ref=f5e6]: M
+        - generic [ref=f5e7]:
+          - strong [ref=f5e8]: Workbench
+          - generic [ref=f5e9]: matriz local
+      - navigation "Navegação principal" [ref=f5e10]:
+        - link "⌁ Foco" [ref=f5e11] [cursor=pointer]:
+          - /url: /
+          - text: ⌁
+          - generic [ref=f5e12]: Foco
+        - link "◈ Controle" [ref=f5e13] [cursor=pointer]:
+          - /url: /control
+          - text: ◈
+          - generic [ref=f5e14]: Controle
+        - link "⌘ Projetos" [ref=f5e15] [cursor=pointer]:
+          - /url: /projects
+          - text: ⌘
+          - generic [ref=f5e16]: Projetos
+        - link "◇ Conhecimento" [ref=f5e17] [cursor=pointer]:
+          - /url: /knowledge
+          - text: ◇
+          - generic [ref=f5e18]: Conhecimento
+        - link "▦ Sites" [ref=f5e19] [cursor=pointer]:
+          - /url: /sites
+          - text: ▦
+          - generic [ref=f5e20]: Sites
+      - generic [ref=f5e21]:
+        - text: Apps detectados
+        - generic [ref=f5e22]: "8"
+      - navigation "Projetos" [ref=f5e23]:
+        - link "contracts" [ref=f5e24] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Infra Hub" [ref=f5e27] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Sites" [ref=f5e30] [cursor=pointer]:
+          - /url: /projects/sites
+        - link "Matriz Workbench" [ref=f5e33] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=f5e36] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=f5e39] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=f5e42] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=f5e45] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=f5e48]:
+        - link "⚙ Configurações" [ref=f5e49] [cursor=pointer]:
+          - /url: /settings
+          - text: ⚙
+          - generic [ref=f5e50]: Configurações
+        - button "↗ Bloquear" [ref=f5e52] [cursor=pointer]:
+          - text: ↗
+          - generic [ref=f5e53]: Bloquear
+    - generic [ref=f5e54]:
+      - banner [ref=f5e55]:
+        - generic [ref=f5e57]: Repositório local
+        - generic [ref=f5e58]: .matriz · apps/*/.matriz
+        - button "Ativar tema escuro" [ref=f5e59] [cursor=pointer]:
+          - generic [ref=f5e60]: ◐
+          - generic [ref=f5e61]: Tema light
+        - button "Ctrl K" [ref=f5e62] [cursor=pointer]
+      - main [ref=f5e259]:
+        - generic [ref=f5e260]:
+          - generic [ref=f5e261]:
+            - paragraph [ref=f5e262]: apps/matriz-workbench
+            - heading "Matriz Workbench" [level=1] [ref=f5e263]
+            - paragraph [ref=f5e264]: Coworking local-first entre pessoas, Codex e agentes.
+          - generic [ref=f5e265]: workspace ativo
+        - navigation "Áreas do projeto" [ref=f5e267]:
+          - link "Visão geral" [ref=f5e268] [cursor=pointer]:
+            - /url: /projects/matriz-workbench
+          - link "Roadmap" [ref=f5e269] [cursor=pointer]:
+            - /url: /projects/matriz-workbench/roadmap
+          - link "Colaborar" [ref=f5e270] [cursor=pointer]:
+            - /url: /projects/matriz-workbench/collaboration
+          - link "Backlog" [ref=f5e271] [cursor=pointer]:
+            - /url: /projects/matriz-workbench/backlog
+          - link "Docs" [ref=f5e272] [cursor=pointer]:
+            - /url: /projects/matriz-workbench/docs
+          - link "Decisões" [ref=f5e273] [cursor=pointer]:
+            - /url: /projects/matriz-workbench/decisions
+          - link "Agentes" [ref=f5e274] [cursor=pointer]:
+            - /url: /projects/matriz-workbench/agents
+          - link "Atividade" [ref=f5e275] [cursor=pointer]:
+            - /url: /projects/matriz-workbench/activity
+        - generic [ref=f5e276]:
+          - generic [ref=f5e277]:
+            - generic [ref=f5e278]:
+              - generic [ref=f5e279]:
+                - strong [ref=f5e280]: "3"
+                - generic [ref=f5e281]: ativas
+              - generic [ref=f5e282]:
+                - strong [ref=f5e283]: "0"
+                - generic [ref=f5e284]: bloqueadas
+              - generic [ref=f5e285]:
+                - strong [ref=f5e286]: "0"
+                - generic [ref=f5e287]: na fila
+              - generic [ref=f5e288]:
+                - strong [ref=f5e289]: "78"
+                - generic [ref=f5e290]: pontos de 100
+            - generic [ref=f5e291]:
+              - generic [ref=f5e292]:
+                - heading "Próximo trabalho" [level=2] [ref=f5e293]
+                - link "Ver backlog →" [ref=f5e294] [cursor=pointer]:
+                  - /url: /projects/matriz-workbench/backlog
+              - link "Disponibilizar token 1234 para testes locais tsk_812aa610-beac-4077-a553-9fa29e4716e8 review" [ref=f5e295] [cursor=pointer]:
+                - /url: /projects/matriz-workbench/backlog/tsk_812aa610-beac-4077-a553-9fa29e4716e8
+                - generic [ref=f5e297]:
+                  - strong [ref=f5e298]: Disponibilizar token 1234 para testes locais
+                  - generic [ref=f5e299]: tsk_812aa610-beac-4077-a553-9fa29e4716e8
+                - generic [ref=f5e300]: review
+              - link "Provar integração local com Codex App Server tsk_8baf9bf0-d7b8-4485-85f9-8dd0ffb6857f review" [ref=f5e301] [cursor=pointer]:
+                - /url: /projects/matriz-workbench/backlog/tsk_8baf9bf0-d7b8-4485-85f9-8dd0ffb6857f
+                - generic [ref=f5e303]:
+                  - strong [ref=f5e304]: Provar integração local com Codex App Server
+                  - generic [ref=f5e305]: tsk_8baf9bf0-d7b8-4485-85f9-8dd0ffb6857f
+                - generic [ref=f5e306]: review
+              - link "Validar a prova de coworking ponta a ponta tsk_7de36e9e-ac10-44cd-8d22-56d469bd61e7 review" [ref=f5e307] [cursor=pointer]:
+                - /url: /projects/matriz-workbench/backlog/tsk_7de36e9e-ac10-44cd-8d22-56d469bd61e7
+                - generic [ref=f5e309]:
+                  - strong [ref=f5e310]: Validar a prova de coworking ponta a ponta
+                  - generic [ref=f5e311]: tsk_7de36e9e-ac10-44cd-8d22-56d469bd61e7
+                - generic [ref=f5e312]: review
+          - complementary [ref=f5e313]:
+            - generic [ref=f5e314]:
+              - generic [ref=f5e315]: Estrutura
+              - code [ref=f5e316]: apps/matriz-workbench
+            - generic [ref=f5e317]:
+              - generic [ref=f5e318]:
+                - term [ref=f5e319]: Package
+                - definition [ref=f5e320]: "@matriz/app-matriz-workbench"
+              - generic [ref=f5e321]:
+                - term [ref=f5e322]: Stack
+                - definition [ref=f5e323]: Next.js, React, TypeScript, Zod
+              - generic [ref=f5e324]:
+                - term [ref=f5e325]: Scripts
+                - definition [ref=f5e326]: build, dev, health, lint, mcp, start, sync, sync:federated-evidence, sync:planning, test, typecheck, verify:mcp
+              - generic [ref=f5e327]:
+                - term [ref=f5e328]: Pastas
+                - definition [ref=f5e329]: app, docs, src
+              - generic [ref=f5e330]:
+                - term [ref=f5e331]: Contexto
+                - definition [ref=f5e332]: AGENTS.md presente
+              - generic [ref=f5e333]:
+                - term [ref=f5e334]: Git
+                - definition [ref=f5e335]: codex/workbench-federated-portfolio · tainan21/Matrizpoc
+              - generic [ref=f5e336]:
+                - term [ref=f5e337]: Vercel
+                - definition [ref=f5e338]: não mapeado
+            - separator [ref=f5e339]
+            - generic [ref=f5e340]:
+              - generic [ref=f5e341]: Atividade recente
+              - link "tudo" [ref=f5e342] [cursor=pointer]:
+                - /url: /projects/matriz-workbench/activity
+            - generic [ref=f5e343]:
+              - generic [ref=f5e346]:
+                - strong [ref=f5e347]: 3 trilha(s) 0–100 atualizada(s).
+                - generic [ref=f5e348]: codex · 30/07/2026, 15:57:44
+              - generic [ref=f5e351]:
+                - strong [ref=f5e352]: 3 trilha(s) 0–100 atualizada(s).
+                - generic [ref=f5e353]: system · 30/07/2026, 13:43:42
+              - generic [ref=f5e356]:
+                - strong [ref=f5e357]: Inventário sincronizado e score revalidado em 78/100.
+                - generic [ref=f5e358]: system · 29/07/2026, 13:02:23
+              - generic [ref=f5e361]:
+                - strong [ref=f5e362]: Roadmap atualizado.
+                - generic [ref=f5e363]: system · 29/07/2026, 13:02:23
+              - generic [ref=f5e366]:
+                - strong [ref=f5e367]: "Score 0–100 atualizado: 78/100."
+                - generic [ref=f5e368]: system · 29/07/2026, 13:02:23
+              - generic [ref=f5e371]:
+                - strong [ref=f5e372]: Roadmap atualizado.
+                - generic [ref=f5e373]: codex · 29/07/2026, 11:28:18
+              - generic [ref=f5e376]:
+                - strong [ref=f5e377]: "Tarefa atualizada: Disponibilizar token 1234 para testes locais → review"
+                - generic [ref=f5e378]: codex · 29/07/2026, 11:28:18
+              - generic [ref=f5e381]:
+                - strong [ref=f5e382]: "Tarefa criada: Disponibilizar token 1234 para testes locais"
+                - generic [ref=f5e383]: codex · 29/07/2026, 11:27:48
+  - button "Open Next.js Dev Tools" [ref=f5e254] [cursor=pointer]
+  - alert [ref=f5e258]

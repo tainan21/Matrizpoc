@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_87d9898f-9e36-423c-8432-731d8e04d42e",
+  "projectId": "spot",
+  "command": "/handoff",
+  "title": "Handoff",
+  "content": "Resuma o que mudou, o que permanece pendente e o próximo passo seguro.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:09.312Z",
+  "revision": "5862e1469b64d3bc"
+}

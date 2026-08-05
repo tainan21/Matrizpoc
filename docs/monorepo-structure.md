@@ -6,10 +6,12 @@
 Matriz/
 ├─ apps/
 │  ├─ matriz-hub/   (Next.js 15 + public-contract.ts)
+│  ├─ matriz-workbench/ (Next.js local-first + MCP STDIO)
 │  ├─ spot/
 │  ├─ seumei/
 │  ├─ contracts/
-│  └─ willdash/
+│  ├─ willdash/
+│  └─ sites/ (Next.js site collection, port 3006)
 ├─ packages/
 │  ├─ design/ (ui, system)
 │  ├─ platform/ (auth, storage, notifications, telemetry, pdf, config, i18n, env)
@@ -31,3 +33,5 @@ Matriz/
 - Cada app tem `docs/AGENT-START-HERE.md`, `README.md`, `public-contract.ts`,
   `src/manifest/manifest.ts`, `src/bootstrap/index.ts`.
 - Packages usam TS puro (sem build — `exports: src/index.ts` + `transpilePackages`).
+- Repositórios externos permanecem federados e são registrados no Workbench;
+  caminhos locais nunca são versionados.

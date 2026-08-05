@@ -1,0 +1,168 @@
+- generic [active] [ref=f3e1]:
+  - generic [ref=f3e2]:
+    - link "Pular para o conteúdo" [ref=f3e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f3e4]:
+      - generic [ref=f3e5]:
+        - generic [ref=f3e6]: M
+        - generic [ref=f3e7]:
+          - strong [ref=f3e8]: Workbench
+          - generic [ref=f3e9]: matriz local
+      - navigation "Navegação principal" [ref=f3e10]:
+        - link "⌁ Foco" [ref=f3e11] [cursor=pointer]:
+          - /url: /
+          - text: ⌁
+          - generic [ref=f3e12]: Foco
+        - link "⌘ Projetos" [ref=f3e13] [cursor=pointer]:
+          - /url: /projects
+          - text: ⌘
+          - generic [ref=f3e14]: Projetos
+      - generic [ref=f3e15]:
+        - text: Apps detectados
+        - generic [ref=f3e16]: "7"
+      - navigation "Projetos" [ref=f3e17]:
+        - link "contracts" [ref=f3e18] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Monorepo — V1.1" [ref=f3e21] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Workbench" [ref=f3e24] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=f3e27] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=f3e30] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=f3e33] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=f3e36] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=f3e39]:
+        - link "⚙ Configurações" [ref=f3e40] [cursor=pointer]:
+          - /url: /settings
+          - text: ⚙
+          - generic [ref=f3e41]: Configurações
+        - button "↗ Bloquear" [ref=f3e43] [cursor=pointer]:
+          - text: ↗
+          - generic [ref=f3e44]: Bloquear
+    - generic [ref=f3e45]:
+      - banner [ref=f3e46]:
+        - generic [ref=f3e48]: Repositório local
+        - generic [ref=f3e49]: .matriz · apps/*/.matriz
+        - button "Ctrl K" [ref=f3e50] [cursor=pointer]
+      - main [ref=f3e53]:
+        - generic [ref=f3e54]:
+          - generic [ref=f3e55]:
+            - paragraph [ref=f3e56]: raiz do repositório
+            - heading "Matriz Monorepo — V1.1" [level=1] [ref=f3e57]
+            - paragraph [ref=f3e58]: Trabalho executável, critérios claros e dependências visíveis.
+          - generic [ref=f3e59]: workspace ativo
+        - navigation "Áreas do projeto" [ref=f3e61]:
+          - link "Visão geral" [ref=f3e62] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub
+          - link "Roadmap" [ref=f3e63] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/roadmap
+          - link "Colaborar" [ref=f3e64] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/collaboration
+          - link "Backlog" [ref=f3e65] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/backlog
+          - link "Docs" [ref=f3e66] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/docs
+          - link "Decisões" [ref=f3e67] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/decisions
+          - link "Agentes" [ref=f3e68] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/agents
+          - link "Atividade" [ref=f3e69] [cursor=pointer]:
+            - /url: /projects/matriz-infra-hub/activity
+        - generic [ref=f3e70]:
+          - generic [ref=f3e71]:
+            - textbox "Buscar por título, tag ou ID…" [ref=f3e72]
+            - combobox [ref=f3e73]:
+              - option "Todos os estados" [selected]
+              - option "Ideia"
+              - option "Pronta"
+              - option "Em andamento"
+              - option "Bloqueada"
+              - option "Em revisão"
+              - option "Concluída"
+              - option "Arquivada"
+            - button "Filtrar" [ref=f3e74] [cursor=pointer]
+          - generic [ref=f3e75]: 5 de 5 itens
+        - generic [ref=f3e76]:
+          - generic [ref=f3e77]:
+            - generic [ref=f3e78]: Prioridade
+            - generic [ref=f3e79]: Trabalho
+            - generic [ref=f3e80]: Prontidão
+            - generic [ref=f3e81]: Próxima ação
+            - generic [ref=f3e82]: Estado
+          - 'link "Alta Integrar o próximo repositório externo ao inventário tsk_874974f5-5df4-49b4-b98c-b2bcbf6cbee0 #onboarding #multi-repo #integration 90% 1 lacuna(s) Preparar para execução 3 critérios Ideia" [ref=f3e83] [cursor=pointer]':
+            - /url: /projects/matriz-infra-hub/backlog/tsk_874974f5-5df4-49b4-b98c-b2bcbf6cbee0
+            - generic [ref=f3e84]: Alta
+            - generic [ref=f3e85]:
+              - strong [ref=f3e86]: Integrar o próximo repositório externo ao inventário
+              - generic [ref=f3e87]: "tsk_874974f5-5df4-49b4-b98c-b2bcbf6cbee0 #onboarding #multi-repo #integration"
+            - generic [ref=f3e88]:
+              - strong [ref=f3e89]: 90%
+              - generic [ref=f3e90]: 1 lacuna(s)
+            - generic [ref=f3e91]:
+              - strong [ref=f3e92]: Preparar para execução
+              - generic [ref=f3e93]: 3 critérios
+            - generic [ref=f3e94]: Ideia
+          - 'link "Baixa Promover uma API pública versionada do Workbench tsk_d962d7f7-b72a-4a1a-bbbe-fc50022de4c2 #api #contracts #workbench 90% 1 lacuna(s) Preparar para execução 3 critérios Ideia" [ref=f3e95] [cursor=pointer]':
+            - /url: /projects/matriz-infra-hub/backlog/tsk_d962d7f7-b72a-4a1a-bbbe-fc50022de4c2
+            - generic [ref=f3e96]: Baixa
+            - generic [ref=f3e97]:
+              - strong [ref=f3e98]: Promover uma API pública versionada do Workbench
+              - generic [ref=f3e99]: "tsk_d962d7f7-b72a-4a1a-bbbe-fc50022de4c2 #api #contracts #workbench"
+            - generic [ref=f3e100]:
+              - strong [ref=f3e101]: 90%
+              - generic [ref=f3e102]: 1 lacuna(s)
+            - generic [ref=f3e103]:
+              - strong [ref=f3e104]: Preparar para execução
+              - generic [ref=f3e105]: 3 critérios
+            - generic [ref=f3e106]: Ideia
+          - 'link "Média Definir fronteira compartilhável com React Native tsk_bd319825-5c0e-4227-8868-3bc7103f424f #docs #react-native #packages 90% 1 lacuna(s) Preparar para execução 3 critérios Ideia" [ref=f3e107] [cursor=pointer]':
+            - /url: /projects/matriz-infra-hub/backlog/tsk_bd319825-5c0e-4227-8868-3bc7103f424f
+            - generic [ref=f3e108]: Média
+            - generic [ref=f3e109]:
+              - strong [ref=f3e110]: Definir fronteira compartilhável com React Native
+              - generic [ref=f3e111]: "tsk_bd319825-5c0e-4227-8868-3bc7103f424f #docs #react-native #packages"
+            - generic [ref=f3e112]:
+              - strong [ref=f3e113]: 90%
+              - generic [ref=f3e114]: 1 lacuna(s)
+            - generic [ref=f3e115]:
+              - strong [ref=f3e116]: Preparar para execução
+              - generic [ref=f3e117]: 3 critérios
+            - generic [ref=f3e118]: Ideia
+          - 'link "Média Definir estratégia PWA por tipo de app tsk_7a1db7a9-a4b1-4742-8214-d00959aac9ae #docs #pwa #architecture 90% 1 lacuna(s) Preparar para execução 3 critérios Ideia" [ref=f3e119] [cursor=pointer]':
+            - /url: /projects/matriz-infra-hub/backlog/tsk_7a1db7a9-a4b1-4742-8214-d00959aac9ae
+            - generic [ref=f3e120]: Média
+            - generic [ref=f3e121]:
+              - strong [ref=f3e122]: Definir estratégia PWA por tipo de app
+              - generic [ref=f3e123]: "tsk_7a1db7a9-a4b1-4742-8214-d00959aac9ae #docs #pwa #architecture"
+            - generic [ref=f3e124]:
+              - strong [ref=f3e125]: 90%
+              - generic [ref=f3e126]: 1 lacuna(s)
+            - generic [ref=f3e127]:
+              - strong [ref=f3e128]: Preparar para execução
+              - generic [ref=f3e129]: 3 critérios
+            - generic [ref=f3e130]: Ideia
+          - 'link "Alta Validar o guia técnico com um clone limpo tsk_47bd318a-e9c1-4166-b979-38bba79d249c #docs #onboarding #validation 90% 1 lacuna(s) Preparar para execução 3 critérios Ideia" [ref=f3e131] [cursor=pointer]':
+            - /url: /projects/matriz-infra-hub/backlog/tsk_47bd318a-e9c1-4166-b979-38bba79d249c
+            - generic [ref=f3e132]: Alta
+            - generic [ref=f3e133]:
+              - strong [ref=f3e134]: Validar o guia técnico com um clone limpo
+              - generic [ref=f3e135]: "tsk_47bd318a-e9c1-4166-b979-38bba79d249c #docs #onboarding #validation"
+            - generic [ref=f3e136]:
+              - strong [ref=f3e137]: 90%
+              - generic [ref=f3e138]: 1 lacuna(s)
+            - generic [ref=f3e139]:
+              - strong [ref=f3e140]: Preparar para execução
+              - generic [ref=f3e141]: 3 critérios
+            - generic [ref=f3e142]: Ideia
+        - group [ref=f3e143]:
+          - generic "Nova tarefa +" [ref=f3e144] [cursor=pointer]
+          - option "Crítica"
+          - option "Alta"
+          - option "Média" [selected]
+          - option "Baixa"
+  - button "Open Next.js Dev Tools" [ref=f3e150] [cursor=pointer]
+  - alert [ref=f3e154]

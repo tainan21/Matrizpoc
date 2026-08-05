@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_fca01516-7cb0-4e1c-b2d9-0e4b6f3df001",
+  "projectId": "matriz-infra-hub",
+  "command": "/handoff",
+  "title": "Handoff",
+  "content": "Resuma o que mudou, o que permanece pendente e o próximo passo seguro.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:07.340Z",
+  "revision": "fe809cab5d250143"
+}

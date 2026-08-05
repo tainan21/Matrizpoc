@@ -9,6 +9,8 @@
  */
 import { safeJsonParse, safeJsonStringify } from "@matriz/foundation-utils"
 
+export * from "./shared-cache"
+
 export const PLATFORM_STORAGE_VERSION = "0.1.0" as const
 
 // ---------------------------------------------------------------------------

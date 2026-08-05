@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Container, Stack, Heading, Text } from "@matriz/design-ui"
+import { Container, Stack, Heading, Text, ThemeToggle } from "@matriz/design-ui"
 
 interface AppShellProps {
   title: string
@@ -19,6 +19,9 @@ export function WilldashAppShell({ title, description, children }: AppShellProps
     <Container>
       <Stack gap={6}>
         <header>
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <ThemeToggle appId="willdash" />
+          </div>
           <Stack gap={2}>
             <Text size="sm" tone="muted">
               Matriz / Willdash

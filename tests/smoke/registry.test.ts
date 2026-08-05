@@ -9,6 +9,8 @@ import { describe, it, expect, beforeEach } from "vitest"
 import { createRegistry, type Registry } from "@matriz/integration-registry-core"
 import { monorepoConfig } from "@matriz/platform-config"
 import { manifest as hubManifest } from "@apps/matriz-hub/public-contract"
+import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
+import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
@@ -16,6 +18,8 @@ import { manifest as willdashManifest } from "@apps/willdash/public-contract"
 
 const allManifests = [
   hubManifest,
+  workbenchManifest,
+  sitesManifest,
   spotManifest,
   seumeiManifest,
   contractsManifest,
@@ -40,11 +44,11 @@ describe("registry", () => {
     registry = buildRegistry()
   })
 
-  it("registra todos os 5 apps", () => {
+  it("registra todos os 7 apps", () => {
     const ids = registry.listEnabled().map((e) => e.manifest.appId)
-    expect(ids).toHaveLength(5)
+    expect(ids).toHaveLength(7)
     expect(new Set(ids)).toEqual(
-      new Set(["matriz-hub", "spot", "seumei", "contracts", "willdash"]),
+      new Set(["matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"]),
     )
   })
 
@@ -71,16 +75,16 @@ describe("registry", () => {
     expect(ids).toContain("seumei")
   })
 
-  it("findWithOnboardingSupport retorna todos os 5 apps", () => {
+  it("findWithOnboardingSupport retorna todos os 7 apps", () => {
     const supporting = registry.findWithOnboardingSupport()
     expect(supporting.map((e) => e.appId).sort()).toEqual(
-      ["contracts", "matriz-hub", "seumei", "spot", "willdash"],
+      ["contracts", "matriz-hub", "matriz-workbench", "seumei", "sites", "spot", "willdash"],
     )
   })
 
   it("toNavigation produz SharedAppNavigationDTO valido", () => {
     const nav = registry.toNavigation()
-    expect(nav).toHaveLength(5)
+    expect(nav).toHaveLength(7)
     for (const item of nav) {
       expect(item.routes.length).toBeGreaterThan(0)
       expect(item.primaryRoute).toMatch(/^\//)

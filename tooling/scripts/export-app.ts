@@ -18,7 +18,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 
-const APPS = ["matriz-hub", "spot", "seumei", "contracts", "willdash"] as const
+const APPS = ["matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"] as const
 type AppId = (typeof APPS)[number]
 
 const PUBLISHED_VERSION = "1.1.0"

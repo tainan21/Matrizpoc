@@ -15,6 +15,8 @@
  * L11: bootstrap unico.
  */
 import { manifest as hubManifest } from "../manifest/manifest"
+import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
+import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
@@ -41,6 +43,8 @@ let cached: InstitutionalBootstrapReport | undefined
 
 const INTERNAL_MANIFESTS: readonly AppManifestDTO[] = [
   hubManifest,
+  workbenchManifest,
+  sitesManifest,
   spotManifest,
   seumeiManifest,
   contractsManifest,

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_bce28f01-62f0-486b-8280-a2444275d853",
+  "projectId": "matriz-workbench",
+  "kind": "feature",
+  "title": "Implementar multitemas, marcos e gates do roadmap",
+  "description": "Funda??o multitema app-local e marcadores governados no roadmap temporal, sem adotar pacote federado nem automatizar aprova??o.",
+  "productStatus": "validation",
+  "validationStatus": "pending",
+  "humanReviewStatus": "pending",
+  "documentationStatus": "current",
+  "priority": "high",
+  "domain": "Plataforma / Roadmap",
+  "responsible": "Codex + revis?o humana",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "multitema",
+    "roadmap",
+    "gates",
+    "evid?ncia"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_24a62a9e-027b-4505-9f8b-a703e87efa10",
+      "text": "Os dez sistemas visuais s?o distintos, persistidos e aplicados sem flash no HTML inicial.",
+      "completed": true
+    },
+    {
+      "id": "ac_0a72c59b-d5e0-4140-9d39-fa08ba3077eb",
+      "text": "Board, Roadmap e Depend?ncias consomem o mesmo contrato sem?ntico de apar?ncia.",
+      "completed": true
+    },
+    {
+      "id": "ac_347e70e3-0475-4390-8797-62fb1ef307e3",
+      "text": "Marcos e gates s?o persistidos com revis?o otimista, lock e conflito expl?cito.",
+      "completed": true
+    },
+    {
+      "id": "ac_2259efcf-8707-45e3-a60a-121e6b66b185",
+      "text": "Gates n?o podem ser aprovados por agentes nem sem evid?ncia revis?vel.",
+      "completed": true
+    },
+    {
+      "id": "ac_2770eb09-8da1-4573-9747-02edbb38bd28",
+      "text": "Timeline, filtros, composer, inspector e alternativa cronol?gica mobile est?o funcionais.",
+      "completed": true
+    },
+    {
+      "id": "ac_2ee352ff-1911-4293-840c-bbb603f32f77",
+      "text": "Testes, typecheck, lint, build, health e verify:mcp foram executados com sucesso.",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/theme.ts",
+      "label": "Contrato de apar?ncia"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/theme-presets.ts",
+      "label": "Registro dos dez sistemas"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/theme-system-picker.tsx",
+      "label": "Seletor e galeria"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/app/layout.tsx",
+      "label": "Aplica??o SSR dos cookies"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/app/globals.css",
+      "label": "Tokens sem?nticos globais"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/app-shell.tsx",
+      "label": "Integra??o no shell"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/work-item-board.module.css",
+      "label": "Board tematizado"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/work-item-dependencies.module.css",
+      "label": "Depend?ncias tematizadas"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/roadmap-timeline.tsx",
+      "label": "Timeline e composer"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/roadmap-timeline.module.css",
+      "label": "Marcos e responsividade"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/components/roadmap-marker-inspector.tsx",
+      "label": "Inspector de marcadores"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/presenters/roadmap-timeline-presenter.ts",
+      "label": "View model temporal"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/domain/schemas.ts",
+      "label": "Schema aditivo"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/domain/roadmap-marker.ts",
+      "label": "Pol?tica de governan?a"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/integration/filesystem/workspace-repository.ts",
+      "label": "Persist?ncia e locks"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/app/actions.ts",
+      "label": "A??es e conflitos"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/ui/theme.test.ts",
+      "label": "Testes de temas"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/domain/roadmap-marker.test.ts",
+      "label": "Testes de gates"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/src/integration/filesystem/workspace-repository.test.ts",
+      "label": "Testes de concorr?ncia"
+    },
+    {
+      "kind": "repository_file",
+      "path": "apps/matriz-workbench/docs/FILE-PROTOCOL.md",
+      "label": "Protocolo documentado"
+    }
+  ],
+  "createdAt": "2026-08-03T14:58:36.091Z",
+  "updatedAt": "2026-08-03T14:58:36.103Z",
+  "revision": "ed09072abb8c3682"
+}

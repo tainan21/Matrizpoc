@@ -5,6 +5,7 @@
 import type { AppId } from "@matriz/foundation-types"
 import type { SignInStrategy } from "./strategies/strategy.types"
 import type { SessionStorage } from "./storage/session.storage"
+import type { MockAuthBroker } from "./mock/mock-auth-broker"
 
 /**
  * Immutable snapshot persisted by `SessionStorage`. Versioned (`v`) so
@@ -58,4 +59,6 @@ export interface AuthProviderConfig {
    * Session lifetime in ms. Defaults to 24h.
    */
   readonly sessionTtlMs?: number
+  /** Optional central mock broker used for localhost SSO across app ports. */
+  readonly broker?: MockAuthBroker
 }

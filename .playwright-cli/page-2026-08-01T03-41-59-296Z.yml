@@ -1,0 +1,329 @@
+- generic [active] [ref=f8e1]:
+  - generic [ref=f8e2]:
+    - link "Pular para o conteúdo" [ref=f8e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f8e4]:
+      - generic [ref=f8e5]:
+        - generic [ref=f8e6]: M
+        - generic [ref=f8e7]:
+          - strong [ref=f8e8]: Workbench
+          - generic [ref=f8e9]: matriz local
+      - navigation "Navegação principal" [ref=f8e10]:
+        - link "Foco" [ref=f8e11] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f8e12]: ⌁
+        - link "Controle" [ref=f8e14] [cursor=pointer]:
+          - /url: /control
+          - generic [ref=f8e15]: ◈
+        - link "Projetos" [ref=f8e17] [cursor=pointer]:
+          - /url: /projects
+          - generic [ref=f8e18]: ⌘
+        - link "Conhecimento" [ref=f8e20] [cursor=pointer]:
+          - /url: /knowledge
+          - generic [ref=f8e21]: ◇
+        - link "Sites" [ref=f8e23] [cursor=pointer]:
+          - /url: /sites
+          - generic [ref=f8e24]: ▦
+      - generic [ref=f8e26]:
+        - text: Apps detectados
+        - generic [ref=f8e27]: "8"
+      - navigation "Projetos" [ref=f8e28]:
+        - link "contracts" [ref=f8e29] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Infra Hub" [ref=f8e32] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Sites" [ref=f8e35] [cursor=pointer]:
+          - /url: /projects/sites
+        - link "Matriz Workbench" [ref=f8e38] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=f8e41] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=f8e44] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=f8e47] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=f8e50] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=f8e53]:
+        - link "Configurações" [ref=f8e54] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=f8e55]: ⚙
+        - button "Bloquear" [ref=f8e58] [cursor=pointer]:
+          - generic [ref=f8e59]: ↗
+    - generic [ref=f8e61]:
+      - banner [ref=f8e62]:
+        - generic [ref=f8e64]: Repositório local
+        - generic [ref=f8e65]: .matriz · apps/*/.matriz
+        - button "Ativar tema escuro" [ref=f8e66] [cursor=pointer]:
+          - generic [ref=f8e67]: ◐
+          - generic [ref=f8e68]: Tema do sistema
+        - button "Ctrl K" [ref=f8e69] [cursor=pointer]
+      - main [ref=f8e72]:
+        - generic [ref=f8e73]:
+          - generic [ref=f8e74]:
+            - generic [ref=f8e75]: Projeto
+            - combobox "Projeto" [ref=f8e76]:
+              - option "contracts"
+              - option "Matriz Infra Hub"
+              - option "Matriz Sites"
+              - option "Matriz Workbench" [selected]
+              - option "matriz-hub"
+              - option "seumei"
+              - option "spot"
+          - generic [ref=f8e77]:
+            - generic [ref=f8e78]: Domínio
+            - combobox "Domínio" [ref=f8e79]:
+              - option "Todos os domínios" [selected]
+              - option "Plataforma / Roadmap"
+              - option "Sem domínio"
+          - generic [ref=f8e80]:
+            - generic [ref=f8e81]: ⌕
+            - searchbox "Buscar work items" [ref=f8e82]
+            - generic [ref=f8e83]: ⌘K
+          - navigation "Visões do projeto" [ref=f8e84]:
+            - generic [ref=f8e85]: Board
+            - link "Roadmap" [ref=f8e86] [cursor=pointer]:
+              - /url: /projects/matriz-workbench/roadmap
+            - link "Histórico" [ref=f8e87] [cursor=pointer]:
+              - /url: /projects/matriz-workbench/activity
+          - button "＋ Novo item" [ref=f8e88] [cursor=pointer]:
+            - generic [ref=f8e89]: ＋
+            - text: Novo item
+        - generic [ref=f8e90]:
+          - generic [ref=f8e91]:
+            - generic [ref=f8e92]: Matriz Workbench / matriz-workbench
+            - heading "Matriz Workbench · Quadro operacional" [level=1] [ref=f8e93]
+          - generic [ref=f8e94]: 5 de 5 itens
+        - generic [ref=f8e96]:
+          - region "Quadro de work items" [ref=f8e97]:
+            - generic [ref=f8e98]:
+              - generic [ref=f8e99]:
+                - heading "Descoberta" [level=2] [ref=f8e102]
+                - generic [ref=f8e103]: "1"
+              - article [ref=f8e105]:
+                - generic [ref=f8e106]: Plataforma / Roadmap
+                - heading "Implementar quadro operacional e inspector" [level=3] [ref=f8e108]
+                - paragraph [ref=f8e109]: Feature · Codex
+                - generic [ref=f8e110]:
+                  - generic [ref=f8e111]: Feature
+                  - generic [ref=f8e112]: Alta
+                - generic [ref=f8e113]:
+                  - generic "Critérios" [ref=f8e114]: ✓ 0%
+                  - generic "Evidências" [ref=f8e115]: ◇ 1
+                  - combobox "Mover Implementar quadro operacional e inspector" [ref=f8e116]:
+                    - option "Mover…" [selected]
+                    - option "Refinado"
+            - generic [ref=f8e117]:
+              - generic [ref=f8e118]:
+                - heading "Refinado" [level=2] [ref=f8e121]
+                - generic [ref=f8e122]: "0"
+              - generic [ref=f8e124]:
+                - generic [ref=f8e125]: Sem itens
+                - generic [ref=f8e126]: Arraste um item elegível ou crie trabalho.
+            - generic [ref=f8e127]:
+              - generic [ref=f8e128]:
+                - heading "Pronto" [level=2] [ref=f8e131]
+                - generic [ref=f8e132]: "1"
+              - article [ref=f8e134]:
+                - generic [ref=f8e135]:
+                  - generic [ref=f8e136]: Sem domínio
+                  - generic [ref=f8e137]: Bloqueado
+                - heading "Habilitar publicação @matriz no GitHub Packages" [level=3] [ref=f8e138]
+                - paragraph [ref=f8e139]: Task · Não atribuído
+                - generic [ref=f8e140]:
+                  - generic [ref=f8e141]: Task
+                  - generic [ref=f8e142]: Alta
+                - generic [ref=f8e143]:
+                  - generic "Critérios" [ref=f8e144]: ✓ 0%
+                  - generic "Evidências" [ref=f8e145]: ◇ 0
+                  - combobox "Mover Habilitar publicação @matriz no GitHub Packages" [ref=f8e146]:
+                    - option "Mover…" [selected]
+                    - option "Refinado"
+                    - option "Em execução"
+            - generic [ref=f8e147]:
+              - generic [ref=f8e148]:
+                - heading "Em execução" [level=2] [ref=f8e151]
+                - generic [ref=f8e152]: "0"
+              - generic [ref=f8e154]:
+                - generic [ref=f8e155]: Sem itens
+                - generic [ref=f8e156]: Arraste um item elegível ou crie trabalho.
+            - generic [ref=f8e157]:
+              - generic [ref=f8e158]:
+                - heading "Validação" [level=2] [ref=f8e161]
+                - generic [ref=f8e162]: "3"
+              - generic [ref=f8e163]:
+                - article [ref=f8e164]:
+                  - generic [ref=f8e165]: Sem domínio
+                  - heading "Disponibilizar token 1234 para testes locais" [level=3] [ref=f8e167]
+                  - paragraph [ref=f8e168]: Task · Não atribuído
+                  - generic [ref=f8e169]:
+                    - generic [ref=f8e170]: Task
+                    - generic [ref=f8e171]: Média
+                  - generic [ref=f8e172]:
+                    - generic "Critérios" [ref=f8e173]: ✓ 100%
+                    - generic "Evidências" [ref=f8e174]: ◇ 3
+                    - combobox "Mover Disponibilizar token 1234 para testes locais" [ref=f8e175]:
+                      - option "Mover…" [selected]
+                      - option "Em execução"
+                      - option "Concluído"
+                - article [ref=f8e176]:
+                  - generic [ref=f8e177]: Sem domínio
+                  - heading "Provar integração local com Codex App Server" [level=3] [ref=f8e179]
+                  - paragraph [ref=f8e180]: Task · Não atribuído
+                  - generic [ref=f8e181]:
+                    - generic [ref=f8e182]: Task
+                    - generic [ref=f8e183]: Alta
+                  - generic [ref=f8e184]:
+                    - generic [ref=f8e185]: Execução
+                    - strong [ref=f8e186]: completed
+                  - generic [ref=f8e187]:
+                    - generic "Critérios" [ref=f8e188]: ✓ 0%
+                    - generic "Evidências" [ref=f8e189]: ◇ 0
+                    - combobox "Mover Provar integração local com Codex App Server" [ref=f8e190]:
+                      - option "Mover…" [selected]
+                      - option "Em execução"
+                      - option "Concluído"
+                - article [ref=f8e191]:
+                  - generic [ref=f8e192]: Sem domínio
+                  - heading "Validar a prova de coworking ponta a ponta" [level=3] [ref=f8e194]
+                  - paragraph [ref=f8e195]: Task · Não atribuído
+                  - generic [ref=f8e196]:
+                    - generic [ref=f8e197]: Task
+                    - generic [ref=f8e198]: Alta
+                  - generic [ref=f8e199]:
+                    - generic [ref=f8e200]: Execução
+                    - strong [ref=f8e201]: completed
+                  - generic [ref=f8e202]:
+                    - generic "Critérios" [ref=f8e203]: ✓ 100%
+                    - generic "Evidências" [ref=f8e204]: ◇ 1
+                    - combobox "Mover Validar a prova de coworking ponta a ponta" [ref=f8e205]:
+                      - option "Mover…" [selected]
+                      - option "Em execução"
+                      - option "Concluído"
+            - generic [ref=f8e206]:
+              - generic [ref=f8e207]:
+                - heading "Concluído" [level=2] [ref=f8e210]
+                - generic [ref=f8e211]: "0"
+              - generic [ref=f8e213]:
+                - generic [ref=f8e214]: Sem itens
+                - generic [ref=f8e215]: Arraste um item elegível ou crie trabalho.
+          - complementary "Inspector de Implementar quadro operacional e inspector" [ref=f8e216]:
+            - generic [ref=f8e217]:
+              - generic [ref=f8e218]:
+                - generic [ref=f8e219]: Plataforma / Roadmap / Feature
+                - heading "Implementar quadro operacional e inspector" [level=2] [ref=f8e220]
+                - generic [ref=f8e221]:
+                  - generic [ref=f8e222]: Feature
+                  - generic [ref=f8e223]: Alta
+              - button "Fechar inspector" [ref=f8e224] [cursor=pointer]: ×
+            - tablist "Seções do work item" [ref=f8e225]:
+              - tab "Visão geral" [selected] [ref=f8e226] [cursor=pointer]
+              - tab "Critérios" [ref=f8e227] [cursor=pointer]
+              - tab "Contexto" [ref=f8e228] [cursor=pointer]
+              - tab "Execução" [ref=f8e229] [cursor=pointer]
+              - tab "Evidências" [ref=f8e230] [cursor=pointer]
+              - tab "Histórico" [ref=f8e231] [cursor=pointer]
+            - generic [ref=f8e232]:
+              - region [ref=f8e233]:
+                - generic [ref=f8e234]:
+                  - text: Título
+                  - textbox "Título" [ref=f8e235]: Implementar quadro operacional e inspector
+                - generic [ref=f8e236]:
+                  - generic [ref=f8e237]:
+                    - text: Tipo
+                    - combobox "Tipo" [ref=f8e238]:
+                      - option "Outcome"
+                      - option "Feature" [selected]
+                      - option "Task"
+                      - option "Bug"
+                  - generic [ref=f8e239]:
+                    - text: Prioridade
+                    - combobox "Prioridade" [ref=f8e240]:
+                      - option "Crítica"
+                      - option "Alta" [selected]
+                      - option "Média"
+                      - option "Baixa"
+                - generic [ref=f8e241]:
+                  - text: Estado do produto
+                  - combobox "Estado do produto" [ref=f8e242]:
+                    - option "Descoberta" [selected]
+                    - option "Refinado"
+                    - option "Pronto"
+                    - option "Em execução"
+                    - option "Validação"
+                    - option "Concluído"
+                    - option "Arquivado"
+                - generic [ref=f8e243]:
+                  - generic [ref=f8e244]:
+                    - text: Domínio
+                    - textbox "Domínio" [ref=f8e245]: Plataforma / Roadmap
+                  - generic [ref=f8e246]:
+                    - text: Responsável
+                    - textbox "Responsável" [ref=f8e247]: Codex
+                - generic [ref=f8e248]:
+                  - text: Validação
+                  - combobox "Validação" [ref=f8e249]:
+                    - option "Não exigida"
+                    - option "Pendente" [selected]
+                    - option "Em execução"
+                    - option "Aprovada"
+                    - option "Falhou"
+                    - option "Dispensada"
+                - generic [ref=f8e250]:
+                  - text: Revisão humana
+                  - combobox "Revisão humana" [ref=f8e251]:
+                    - option "Não exigida"
+                    - option "Pendente" [selected]
+                    - option "Aprovada"
+                    - option "Alterações solicitadas"
+                - generic [ref=f8e252]:
+                  - text: Documentação
+                  - combobox "Documentação" [ref=f8e253]:
+                    - option "Não exigida"
+                    - option "Pendente"
+                    - option "Atualizada" [selected]
+                    - option "Desatualizada"
+              - generic [ref=f8e254]:
+                - generic [ref=f8e255]:
+                  - strong [ref=f8e256]: Critérios de aceite
+                  - generic [ref=f8e257]: 0%
+                - generic [ref=f8e258]:
+                  - generic [ref=f8e259]:
+                    - checkbox "Quadro usa dados reais e persiste após recarga" [ref=f8e260]
+                    - generic [ref=f8e261]: Quadro usa dados reais e persiste após recarga
+                  - generic [ref=f8e262]:
+                    - checkbox "Estado de produto permanece separado da execução" [ref=f8e263]
+                    - generic [ref=f8e264]: Estado de produto permanece separado da execução
+                  - generic [ref=f8e265]:
+                    - checkbox "Inspector apresenta contexto, evidências e histórico" [ref=f8e266]
+                    - generic [ref=f8e267]: Inspector apresenta contexto, evidências e histórico
+                  - generic [ref=f8e268]:
+                    - checkbox "DnD e alternativa acessível alteram estados adjacentes" [ref=f8e269]
+                    - generic [ref=f8e270]: DnD e alternativa acessível alteram estados adjacentes
+                  - generic [ref=f8e271]:
+                    - checkbox "Testes e validação visual foram executados" [ref=f8e272]
+                    - generic [ref=f8e273]: Testes e validação visual foram executados
+                - generic [ref=f8e274]:
+                  - text: Editar critérios
+                  - generic [ref=f8e275]: um por linha; itens novos iniciam pendentes
+                  - textbox "Editar critérios um por linha; itens novos iniciam pendentes" [ref=f8e276]: Quadro usa dados reais e persiste após recarga Estado de produto permanece separado da execução Inspector apresenta contexto, evidências e histórico DnD e alternativa acessível alteram estados adjacentes Testes e validação visual foram executados
+              - generic [ref=f8e277]:
+                - generic [ref=f8e278]:
+                  - text: Descrição
+                  - textbox "Descrição" [ref=f8e279]: Primeiro corte vertical persistente para operar work items com estados independentes de produto, execução, validação, revisão e documentação.
+                - generic [ref=f8e280]:
+                  - text: Tags
+                  - textbox "Tags" [ref=f8e281]: roadmap, colaboração, workbench
+                - generic [ref=f8e282]:
+                  - text: Dependências
+                  - textbox "Dependências" [ref=f8e283]
+                - generic [ref=f8e284]:
+                  - text: Bloqueio
+                  - textbox "Bloqueio" [ref=f8e285]
+                - generic [ref=f8e286]:
+                  - text: Status do bloqueio
+                  - combobox "Status do bloqueio" [ref=f8e287]:
+                    - option "Aberto"
+                    - option "Resolvido" [selected]
+              - button "Salvar alterações" [ref=f8e289] [cursor=pointer]
+  - alert [ref=f8e290]

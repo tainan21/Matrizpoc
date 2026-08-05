@@ -10,6 +10,7 @@
  */
 import { persistIngestionRun } from "../institutional/persistence"
 import { runInstitutionalIngestion } from "../institutional/bootstrap"
+import { DOCS_MCP_TOOLS, callDocsTool } from "../domains/docs/mcp/tools"
 
 export type McpToolDescriptor = {
   name: string
@@ -41,12 +42,16 @@ export const MCP_TOOLS: readonly McpToolDescriptor[] = [
       additionalProperties: false,
     },
   },
+  ...DOCS_MCP_TOOLS,
 ]
 
 export async function callTool(
   name: string,
   args: Record<string, unknown>,
 ): Promise<McpToolResult> {
+  const docsResult = await callDocsTool(name, args)
+  if (docsResult) return docsResult
+
   switch (name) {
     case "refresh_project_ingestion":
       return await refreshProjectIngestion(args)

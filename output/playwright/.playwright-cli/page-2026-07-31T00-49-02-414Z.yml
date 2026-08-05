@@ -1,0 +1,20 @@
+- generic [ref=e1]:
+  - main [ref=e2]:
+    - region [ref=e3]:
+      - generic [ref=e4]: M
+      - paragraph [ref=e5]: Matriz local workspace
+      - heading "Desbloquear Workbench" [level=1] [ref=e6]
+      - paragraph [ref=e7]:
+        - text: Para teste local, use
+        - code [ref=e8]: "1234"
+        - text: . O acesso de produção continua exigindo
+        - code [ref=e9]: WORKBENCH_LOCAL_TOKEN
+        - text: . O token vira uma sessão HTTP-only e não é armazenado no navegador.
+      - generic [ref=e10]:
+        - textbox [ref=e11]: local
+        - generic [ref=e12]:
+          - text: Token local
+          - textbox "Token local" [active] [ref=e13]
+        - button "Entrar no workspace" [ref=e14] [cursor=pointer]
+      - paragraph [ref=e15]: Restrito a 127.0.0.1 · sem banco · sem cloud
+  - button "Open Next.js Dev Tools" [ref=e21] [cursor=pointer]

@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation"
 import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { TenantProvider } from "@matriz/access-tenants/client"
 import { willdashAuthConfig } from "./config"
-import { LoginLayoutFrame } from "../domains/login/presentation/LoginLayoutFrame"
 
 function RedirectToLogin(): null {
   const router = useRouter()
@@ -82,7 +81,7 @@ function WilldashAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLoginRoute = (pathname ?? "").startsWith("/login")
   if (isLoginRoute) {
-    return <LoginLayoutFrame>{children}</LoginLayoutFrame>
+    return <>{children}</>
   }
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>

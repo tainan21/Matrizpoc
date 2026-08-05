@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_47bd318a-e9c1-4166-b979-38bba79d249c",
+  "projectId": "matriz-infra-hub",
+  "title": "Validar o guia técnico com um clone limpo",
+  "description": "Executar o onboarding descrito em docs/MATRIZ-TECHNICAL-GUIDE.md a partir de um clone limpo e registrar toda divergência entre documentação e comportamento real.",
+  "status": "idea",
+  "priority": "high",
+  "tags": [
+    "docs",
+    "onboarding",
+    "validation"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_40cc414b-0f61-400c-858c-02e554b9a602",
+      "text": "Instalação reproduzida com Node 22 e pnpm 9",
+      "completed": false
+    },
+    {
+      "id": "ac_74270be3-491b-44a7-9730-47e99f02c289",
+      "text": "Todos os comandos inválidos ou ausentes foram corrigidos na documentação",
+      "completed": false
+    },
+    {
+      "id": "ac_a321103b-5179-4465-808b-17dfbe3fe104",
+      "text": "Resultado registrado como evidência na trilha documental",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-30T16:43:42.084Z",
+  "updatedAt": "2026-07-30T16:43:42.084Z",
+  "revision": "911ffd045b765332"
+}

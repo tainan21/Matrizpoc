@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "matriz-lib-ui",
+      "name": "Matriz Lib UI",
+      "kind": "library",
+      "gitRemote": "https://github.com/tainan21/MatrizUILib.git",
+      "documentationIncludes": [
+        "README.md",
+        "AGENTS.md",
+        "docs/**/*.md"
+      ]
+    },
+    {
+      "id": "seumei-reference",
+      "name": "Seumei · referência funcional",
+      "kind": "application",
+      "gitRemote": "https://github.com/tainan21/seumeiworkspace.git",
+      "documentationIncludes": [
+        "README.md",
+        "AGENTS.md",
+        "docs/**/*.md",
+        "doc/**/*.md",
+        "src/domains/**/*.md"
+      ]
+    },
+    {
+      "id": "seumei-archive",
+      "name": "Seumei · arquivo histórico",
+      "kind": "external_repository",
+      "gitRemote": "https://github.com/tainan21/SeumeiNew.git",
+      "documentationIncludes": [
+        "README.md",
+        "docs/**/*.md",
+        "doc/**/*.md"
+      ]
+    },
+    {
+      "id": "laudate-reference",
+      "name": "Laudate · referência",
+      "kind": "application",
+      "gitRemote": "https://github.com/tainan21/laudate.git",
+      "documentationIncludes": [
+        "README.md",
+        "AGENTS.md",
+        "- Configurar dominio.md",
+        "docs/**/*.md"
+      ]
+    }
+  ]
+}

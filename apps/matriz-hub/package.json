@@ -13,6 +13,8 @@
     "@matriz/access-tenants": "workspace:*",
     "@matriz/design-system": "workspace:*",
     "@matriz/design-ui": "workspace:*",
+    "@matriz/flows-ecosystem": "workspace:^",
+    "@matriz/flows-auth": "workspace:^",
     "@matriz/flows-onboarding": "workspace:*",
     "@matriz/foundation-constants": "workspace:*",
     "@matriz/foundation-schemas": "workspace:*",

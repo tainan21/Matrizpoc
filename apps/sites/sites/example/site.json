@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "example",
+  "name": "Site Exemplo",
+  "status": "active",
+  "presetId": "marketing",
+  "defaultLocale": "pt-BR",
+  "locales": [
+    "pt-BR",
+    "en"
+  ],
+  "domains": [],
+  "metadata": {
+    "title": "Um site configurado por dados",
+    "description": "Prova mínima do Matriz Sites com metadata, i18n, assets locais e configuração reutilizável.",
+    "canonicalPath": "/preview/example/pt-BR",
+    "openGraphImage": "/sites/example/og.svg",
+    "icons": [
+      "/sites/example/icon.svg"
+    ]
+  }
+}

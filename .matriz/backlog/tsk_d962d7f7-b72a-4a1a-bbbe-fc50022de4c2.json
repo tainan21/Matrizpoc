@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_d962d7f7-b72a-4a1a-bbbe-fc50022de4c2",
+  "projectId": "matriz-infra-hub",
+  "title": "Promover uma API pública versionada do Workbench",
+  "description": "Definir consumidores, autenticação, DTOs e versionamento antes de expor backlog ou roadmap por HTTP fora da interface local.",
+  "status": "idea",
+  "priority": "low",
+  "tags": [
+    "api",
+    "contracts",
+    "workbench"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_b26a25ce-46ad-40ac-93be-3136a0298969",
+      "text": "Consumidor externo real identificado",
+      "completed": false
+    },
+    {
+      "id": "ac_1bba94ee-e387-4f7d-85af-548bc322f4b7",
+      "text": "DTO v1 documentado",
+      "completed": false
+    },
+    {
+      "id": "ac_895f7722-5723-4a09-850b-929dcdd2e8f1",
+      "text": "Ameaças e autorização revisadas",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-30T16:43:42.151Z",
+  "updatedAt": "2026-07-30T16:43:42.151Z",
+  "revision": "1d39a05165d00eed"
+}

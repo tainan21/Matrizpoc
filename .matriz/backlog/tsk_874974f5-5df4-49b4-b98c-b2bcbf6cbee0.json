@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_874974f5-5df4-49b4-b98c-b2bcbf6cbee0",
+  "projectId": "matriz-infra-hub",
+  "title": "Integrar o próximo repositório externo ao inventário",
+  "description": "Usar o modelo de integração para conectar o próximo projeto externo por contrato, sem imports por caminho e sem copiar seu domínio para o Infra Hub.",
+  "status": "idea",
+  "priority": "high",
+  "tags": [
+    "onboarding",
+    "multi-repo",
+    "integration"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_16b121ff-5716-4ad8-8063-37fa4542707f",
+      "text": "Ownership e bounded context registrados",
+      "completed": false
+    },
+    {
+      "id": "ac_a534dec5-b112-4884-a4a2-2a0154be89d4",
+      "text": "Fronteira de integração escolhida",
+      "completed": false
+    },
+    {
+      "id": "ac_e9d1694f-56b4-48b1-b89b-404bb2cacf9d",
+      "text": "Projeto aparece no fluxo operacional do Workbench",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-30T16:43:42.182Z",
+  "updatedAt": "2026-07-30T16:43:42.182Z",
+  "revision": "433c476dfa4cc397"
+}

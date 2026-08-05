@@ -1,0 +1,85 @@
+name: matriz-workbench
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/matriz-workbench/**"
+      - "packages/design/system/**"
+      - "packages/foundation/types/**"
+      - "packages/integration/api-contracts/**"
+      - "packages/integration/registry-core/**"
+      - "packages/platform/config/**"
+      - "tooling/tsconfig/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "vitest.config.ts"
+  pull_request:
+    branches: [main]
+    paths:
+      - "apps/matriz-workbench/**"
+      - "packages/design/system/**"
+      - "packages/foundation/types/**"
+      - "packages/integration/api-contracts/**"
+      - "packages/integration/registry-core/**"
+      - "packages/platform/config/**"
+      - "tooling/tsconfig/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "turbo.json"
+      - "vitest.config.ts"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: matriz-workbench-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-clean-clone:
+    name: Linux clean-clone gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout clean repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Workbench tests
+        run: pnpm --filter @matriz/app-matriz-workbench test
+
+      - name: Workbench typecheck
+        run: pnpm --filter @matriz/app-matriz-workbench typecheck
+
+      - name: Workbench lint
+        run: pnpm --filter @matriz/app-matriz-workbench lint
+
+      - name: Workbench production build
+        run: pnpm --filter @matriz/app-matriz-workbench build
+
+      - name: Workbench read-only health
+        run: pnpm --filter @matriz/app-matriz-workbench health
+
+      - name: Monorepo contracts and boundaries
+        run: pnpm test:smoke -- --no-file-parallelism
+
+      - name: Confirm verification did not change tracked files
+        run: git diff --exit-code

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_570c6092-03bb-494a-a8c8-7ef9b9a9a521",
+  "projectId": "spot",
+  "command": "/verificacao",
+  "title": "Verificação",
+  "content": "Execute os gates do app e registre o resultado, arquivos alterados e riscos.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:03.810Z",
+  "revision": "0431ecff1e54a458"
+}

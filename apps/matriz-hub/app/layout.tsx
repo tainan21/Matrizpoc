@@ -1,8 +1,10 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import { themeToCssVars, appThemes } from "@matriz/design-system"
+import { ThemeController } from "@matriz/design-ui"
 import { bootstrapMatrizHub } from "../src/bootstrap"
 import { HubAuthAdoption } from "../src/auth/provider"
+import { EcosystemAccess } from "@matriz/flows-ecosystem"
 import "./globals.css"
 
 bootstrapMatrizHub()
@@ -20,7 +22,7 @@ const hubVars = themeToCssVars(appThemes["matriz-hub"])
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" style={hubVars as Record<string, string>}>
+    <html lang="pt-BR" data-theme="light" style={hubVars as Record<string, string>}>
       <body
         style={{
           margin: 0,
@@ -31,6 +33,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           minHeight: "100vh",
         }}
       >
+        <ThemeController appId="matriz-hub" />
+        <EcosystemAccess appId="matriz-hub" />
         <HubAuthAdoption>{children}</HubAuthAdoption>
       </body>
     </html>

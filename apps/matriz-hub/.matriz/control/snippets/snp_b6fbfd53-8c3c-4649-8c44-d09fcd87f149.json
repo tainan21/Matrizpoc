@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_b6fbfd53-8c3c-4649-8c44-d09fcd87f149",
+  "projectId": "matriz-hub",
+  "command": "/contexto-curto",
+  "title": "Contexto curto",
+  "content": "Leia o resumo do projeto, a tarefa vinculada e apenas os documentos referenciados.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:05:47.806Z",
+  "revision": "758b7f4acd1229b0"
+}

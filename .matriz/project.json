@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-infra-hub",
+  "displayName": "Matriz Infra Hub",
+  "description": "Base arquitetural e operacional do ecossistema multiprojeto Matriz.",
+  "tags": ["monorepo", "architecture", "ecosystem"],
+  "createdAt": "2026-07-30T16:43:41.820Z",
+  "updatedAt": "2026-07-30T16:53:00.000Z",
+  "revision": "5525f2f780e46b8f"
+}

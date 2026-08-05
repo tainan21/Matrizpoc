@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_499132b8-c05f-4c46-aa85-b2458ac81afe",
+  "projectId": "sites",
+  "command": "/contexto-curto",
+  "title": "Contexto curto",
+  "content": "Leia o resumo do projeto, a tarefa vinculada e apenas os documentos referenciados.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:05:47.666Z",
+  "revision": "ab612ecccdcbd973"
+}

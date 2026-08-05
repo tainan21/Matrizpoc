@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_bd6afc06-3086-44aa-8674-f766b42a3eca",
+  "projectId": "matriz-infra-hub",
+  "command": "/criterios",
+  "title": "Critérios de aceite",
+  "content": "Liste critérios de aceite observáveis e como cada um será verificado.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:05:59.478Z",
+  "revision": "e716cf09837ab293"
+}

@@ -1,0 +1,19 @@
+[mcp_servers.matriz_workbench]
+command = "pnpm"
+args = ["--silent", "--filter", "@matriz/app-matriz-workbench", "mcp"]
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+enabled_tools = [
+  "workbench_list_projects",
+  "workbench_get_project_context",
+  "workbench_list_backlog",
+  "workbench_get_backlog_item",
+  "workbench_read_document",
+  "workbench_list_agent_requests",
+  "workbench_create_backlog_item",
+  "workbench_update_backlog_item",
+  "workbench_append_activity",
+  "workbench_claim_agent_request",
+  "workbench_complete_agent_request",
+  "workbench_write_document",
+]

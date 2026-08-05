@@ -64,13 +64,35 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
 
   // --- boot: restore from storage ------------------------------------
   React.useEffect(() => {
-    const restored = restoreSession(storage, now())
-    if (restored.ok) {
-      setState({ status: "signed-in", session: restored.value, error: null })
-    } else {
-      setState({ status: "signed-out", session: null, error: null })
+    let active = true
+    async function boot() {
+      if (config.broker) {
+        try {
+          const restored = await config.broker.restoreSession()
+          if (!active) return
+          setState(restored
+            ? { status: "signed-in", session: restored.session, error: null }
+            : { status: "signed-out", session: null, error: null })
+          if (restored) void config.broker.recordAppOpen(config.appId)
+        } catch (cause) {
+          if (!active) return
+          setState({ status: "error", session: null, error: { code: "storage-unavailable", message: "O Hub de autenticacao esta indisponivel na porta 3000.", cause } })
+        }
+        return
+      }
+      const restored = restoreSession(storage, now())
+      setState(restored.ok
+        ? { status: "signed-in", session: restored.value, error: null }
+        : { status: "signed-out", session: null, error: null })
     }
+    void boot()
+    return () => { active = false }
     // run once per storage instance (appId is part of the storage namespace)
+  }, [storage, config.broker, now])
+
+  const acceptSession = React.useCallback((session: AuthSession) => {
+    persistSession(storage, session)
+    setState({ status: "signed-in", session, error: null })
   }, [storage])
 
   // --- strategy lookup -----------------------------------------------
@@ -146,8 +168,9 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
   // --- signOut --------------------------------------------------------
   const signOut = React.useCallback(() => {
     clearSession(storage)
+    void config.broker?.signOut()
     setState({ status: "signed-out", session: null, error: null })
-  }, [storage])
+  }, [storage, config.broker])
 
   // --- refresh --------------------------------------------------------
   const refresh = React.useCallback(() => {
@@ -185,13 +208,15 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
       error: state.error,
       strategies,
       defaultStrategyId,
+      broker: config.broker,
       start,
       verify,
+      acceptSession,
       signOut,
       refresh,
       setActiveTenant,
     }),
-    [state, strategies, defaultStrategyId, start, verify, signOut, refresh, setActiveTenant],
+    [state, strategies, defaultStrategyId, config.broker, start, verify, acceptSession, signOut, refresh, setActiveTenant],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

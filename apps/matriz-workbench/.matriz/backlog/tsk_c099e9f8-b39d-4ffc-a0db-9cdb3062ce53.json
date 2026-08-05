@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_c099e9f8-b39d-4ffc-a0db-9cdb3062ce53",
+  "projectId": "matriz-workbench",
+  "title": "Provar integração local com Codex App Server",
+  "description": "Validação somente leitura. Não altere arquivos. Leia package.json, execute um comando seguro para confirmar o nome do package e informe o resultado.",
+  "status": "archived",
+  "priority": "high",
+  "tags": [
+    "codex",
+    "app-server",
+    "phase-6"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_3c847015-63e5-46e6-8e43-232957e996ae",
+      "text": "Thread e turn são associados à solicitação.",
+      "completed": false
+    },
+    {
+      "id": "ac_fc8e500e-3044-44eb-9abe-51c1e7221f94",
+      "text": "Ao menos uma verificação somente leitura é registrada.",
+      "completed": false
+    },
+    {
+      "id": "ac_246ed795-b7a9-4ef4-bd18-273f3ec75f83",
+      "text": "Nenhum arquivo de código é alterado.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [],
+  "createdAt": "2026-07-28T21:07:47.934Z",
+  "updatedAt": "2026-07-28T21:10:17.026Z",
+  "revision": "e674f47000eb62b3"
+}

@@ -1,0 +1,291 @@
+- generic [active] [ref=f10e1]:
+  - generic [ref=f10e2]:
+    - link "Pular para o conteúdo" [ref=f10e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f10e4]:
+      - generic [ref=f10e5]:
+        - generic [ref=f10e6]: M
+        - generic [ref=f10e7]:
+          - strong [ref=f10e8]: Workbench
+          - generic [ref=f10e9]: matriz local
+      - navigation "Navegação principal" [ref=f10e10]:
+        - link "Foco" [ref=f10e11] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f10e12]: ⌁
+        - link "Controle" [ref=f10e14] [cursor=pointer]:
+          - /url: /control
+          - generic [ref=f10e15]: ◈
+        - link "Projetos" [ref=f10e17] [cursor=pointer]:
+          - /url: /projects
+          - generic [ref=f10e18]: ⌘
+        - link "Conhecimento" [ref=f10e20] [cursor=pointer]:
+          - /url: /knowledge
+          - generic [ref=f10e21]: ◇
+        - link "Sites" [ref=f10e23] [cursor=pointer]:
+          - /url: /sites
+          - generic [ref=f10e24]: ▦
+      - generic [ref=f10e26]:
+        - text: Apps detectados
+        - generic [ref=f10e27]: "8"
+      - navigation "Projetos" [ref=f10e28]:
+        - link "contracts" [ref=f10e29] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Infra Hub" [ref=f10e32] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Sites" [ref=f10e35] [cursor=pointer]:
+          - /url: /projects/sites
+        - link "Matriz Workbench" [ref=f10e38] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=f10e41] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=f10e44] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=f10e47] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=f10e50] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=f10e53]:
+        - link "Configurações" [ref=f10e54] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=f10e55]: ⚙
+        - button "Bloquear" [ref=f10e58] [cursor=pointer]:
+          - generic [ref=f10e59]: ↗
+    - generic [ref=f10e61]:
+      - banner [ref=f10e62]:
+        - generic [ref=f10e64]: Repositório local
+        - generic [ref=f10e65]: .matriz · apps/*/.matriz
+        - button "Ativar tema claro" [ref=f10e66] [cursor=pointer]:
+          - generic [ref=f10e67]: ☀
+          - generic [ref=f10e68]: Tema dark
+        - button "Ctrl K" [ref=f10e69] [cursor=pointer]
+      - main [ref=f10e72]:
+        - generic [ref=f10e73]:
+          - generic [ref=f10e74]:
+            - generic [ref=f10e75]: Projeto
+            - combobox "Projeto" [ref=f10e76]:
+              - option "contracts"
+              - option "Matriz Infra Hub"
+              - option "Matriz Sites"
+              - option "Matriz Workbench" [selected]
+              - option "matriz-hub"
+              - option "seumei"
+              - option "spot"
+          - generic [ref=f10e77]:
+            - generic [ref=f10e78]: Domínio
+            - combobox "Domínio" [ref=f10e79]:
+              - option "Todos os domínios" [selected]
+              - option "Plataforma / Roadmap"
+              - option "Sem domínio"
+          - generic [ref=f10e80]:
+            - generic [ref=f10e81]: ⌕
+            - searchbox "Buscar work items" [ref=f10e82]
+            - generic [ref=f10e83]: ⌘K
+          - navigation "Visões do projeto" [ref=f10e84]:
+            - generic [ref=f10e85]: Board
+            - link "Roadmap" [ref=f10e86] [cursor=pointer]:
+              - /url: /projects/matriz-workbench/roadmap
+            - link "Histórico" [ref=f10e87] [cursor=pointer]:
+              - /url: /projects/matriz-workbench/activity
+          - button "＋ Novo item" [ref=f10e88] [cursor=pointer]:
+            - generic [ref=f10e89]: ＋
+            - text: Novo item
+        - generic [ref=f10e90]:
+          - generic [ref=f10e91]:
+            - generic [ref=f10e92]: Matriz Workbench / matriz-workbench
+            - heading "Matriz Workbench · Quadro operacional" [level=1] [ref=f10e93]
+          - generic [ref=f10e94]: 5 de 5 itens
+        - generic [ref=f10e96]:
+          - region "Quadro de work items" [ref=f10e97]:
+            - generic [ref=f10e98]:
+              - generic [ref=f10e99]:
+                - heading "Descoberta" [level=2] [ref=f10e102]
+                - generic [ref=f10e103]: "0"
+              - generic [ref=f10e105]:
+                - generic [ref=f10e106]: Sem itens
+                - generic [ref=f10e107]: Arraste um item elegível ou crie trabalho.
+            - generic [ref=f10e108]:
+              - generic [ref=f10e109]:
+                - heading "Refinado" [level=2] [ref=f10e112]
+                - generic [ref=f10e113]: "0"
+              - generic [ref=f10e115]:
+                - generic [ref=f10e116]: Sem itens
+                - generic [ref=f10e117]: Arraste um item elegível ou crie trabalho.
+            - generic [ref=f10e118]:
+              - generic [ref=f10e119]:
+                - heading "Pronto" [level=2] [ref=f10e122]
+                - generic [ref=f10e123]: "1"
+              - article [ref=f10e125]:
+                - generic [ref=f10e126]:
+                  - generic [ref=f10e127]: Sem domínio
+                  - generic [ref=f10e128]: Bloqueado
+                - heading "Habilitar publicação @matriz no GitHub Packages" [level=3] [ref=f10e129]
+                - paragraph [ref=f10e130]: Task · Não atribuído
+                - generic [ref=f10e131]:
+                  - generic [ref=f10e132]: Task
+                  - generic [ref=f10e133]: Alta
+                - generic [ref=f10e134]:
+                  - generic "Critérios" [ref=f10e135]: ✓ 0%
+                  - generic "Evidências" [ref=f10e136]: ◇ 0
+                  - combobox "Mover Habilitar publicação @matriz no GitHub Packages" [ref=f10e137]:
+                    - option "Mover…" [selected]
+                    - option "Refinado"
+                    - option "Em execução"
+            - generic [ref=f10e138]:
+              - generic [ref=f10e139]:
+                - heading "Em execução" [level=2] [ref=f10e142]
+                - generic [ref=f10e143]: "0"
+              - generic [ref=f10e145]:
+                - generic [ref=f10e146]: Sem itens
+                - generic [ref=f10e147]: Arraste um item elegível ou crie trabalho.
+            - generic [ref=f10e148]:
+              - generic [ref=f10e149]:
+                - heading "Validação" [level=2] [ref=f10e152]
+                - generic [ref=f10e153]: "4"
+              - generic [ref=f10e154]:
+                - article [ref=f10e155]:
+                  - generic [ref=f10e156]: Plataforma / Roadmap
+                  - heading "Implementar quadro operacional e inspector" [level=3] [ref=f10e158]
+                  - paragraph [ref=f10e159]: Feature · Codex
+                  - generic [ref=f10e160]:
+                    - generic [ref=f10e161]: Feature
+                    - generic [ref=f10e162]: Alta
+                  - generic [ref=f10e163]:
+                    - generic "Critérios" [ref=f10e164]: ✓ 0%
+                    - generic "Evidências" [ref=f10e165]: ◇ 2
+                    - combobox "Mover Implementar quadro operacional e inspector" [ref=f10e166]:
+                      - option "Mover…" [selected]
+                      - option "Em execução"
+                      - option "Concluído"
+                - article [ref=f10e167]:
+                  - generic [ref=f10e168]: Sem domínio
+                  - heading "Disponibilizar token 1234 para testes locais" [level=3] [ref=f10e170]
+                  - paragraph [ref=f10e171]: Task · Não atribuído
+                  - generic [ref=f10e172]:
+                    - generic [ref=f10e173]: Task
+                    - generic [ref=f10e174]: Média
+                  - generic [ref=f10e175]:
+                    - generic "Critérios" [ref=f10e176]: ✓ 100%
+                    - generic "Evidências" [ref=f10e177]: ◇ 3
+                    - combobox "Mover Disponibilizar token 1234 para testes locais" [ref=f10e178]:
+                      - option "Mover…" [selected]
+                      - option "Em execução"
+                      - option "Concluído"
+                - article [ref=f10e179]:
+                  - generic [ref=f10e180]: Sem domínio
+                  - heading "Provar integração local com Codex App Server" [level=3] [ref=f10e182]
+                  - paragraph [ref=f10e183]: Task · Não atribuído
+                  - generic [ref=f10e184]:
+                    - generic [ref=f10e185]: Task
+                    - generic [ref=f10e186]: Alta
+                  - generic [ref=f10e187]:
+                    - generic [ref=f10e188]: Execução
+                    - strong [ref=f10e189]: completed
+                  - generic [ref=f10e190]:
+                    - generic "Critérios" [ref=f10e191]: ✓ 0%
+                    - generic "Evidências" [ref=f10e192]: ◇ 0
+                    - combobox "Mover Provar integração local com Codex App Server" [ref=f10e193]:
+                      - option "Mover…" [selected]
+                      - option "Em execução"
+                      - option "Concluído"
+                - article [ref=f10e194]:
+                  - generic [ref=f10e195]: Sem domínio
+                  - heading "Validar a prova de coworking ponta a ponta" [level=3] [ref=f10e197]
+                  - paragraph [ref=f10e198]: Task · Não atribuído
+                  - generic [ref=f10e199]:
+                    - generic [ref=f10e200]: Task
+                    - generic [ref=f10e201]: Alta
+                  - generic [ref=f10e202]:
+                    - generic [ref=f10e203]: Execução
+                    - strong [ref=f10e204]: completed
+                  - generic [ref=f10e205]:
+                    - generic "Critérios" [ref=f10e206]: ✓ 100%
+                    - generic "Evidências" [ref=f10e207]: ◇ 1
+                    - combobox "Mover Validar a prova de coworking ponta a ponta" [ref=f10e208]:
+                      - option "Mover…" [selected]
+                      - option "Em execução"
+                      - option "Concluído"
+            - generic [ref=f10e209]:
+              - generic [ref=f10e210]:
+                - heading "Concluído" [level=2] [ref=f10e213]
+                - generic [ref=f10e214]: "0"
+              - generic [ref=f10e216]:
+                - generic [ref=f10e217]: Sem itens
+                - generic [ref=f10e218]: Arraste um item elegível ou crie trabalho.
+          - complementary "Inspector de Implementar quadro operacional e inspector" [ref=f10e219]:
+            - generic [ref=f10e220]:
+              - generic [ref=f10e221]:
+                - generic [ref=f10e222]: Plataforma / Roadmap / Feature
+                - heading "Implementar quadro operacional e inspector" [level=2] [ref=f10e223]
+                - generic [ref=f10e224]:
+                  - generic [ref=f10e225]: Feature
+                  - generic [ref=f10e226]: Alta
+              - button "Fechar inspector" [ref=f10e227] [cursor=pointer]: ×
+            - tablist "Seções do work item" [ref=f10e228]:
+              - tab "Visão geral" [selected] [ref=f10e229] [cursor=pointer]
+              - tab "Critérios" [ref=f10e230] [cursor=pointer]
+              - tab "Contexto" [ref=f10e231] [cursor=pointer]
+              - tab "Execução" [ref=f10e232] [cursor=pointer]
+              - tab "Evidências" [ref=f10e233] [cursor=pointer]
+              - tab "Histórico" [ref=f10e234] [cursor=pointer]
+            - generic [ref=f10e235]:
+              - region [ref=f10e236]:
+                - generic [ref=f10e237]:
+                  - text: Título
+                  - textbox "Título" [ref=f10e238]: Implementar quadro operacional e inspector
+                - generic [ref=f10e239]:
+                  - generic [ref=f10e240]:
+                    - text: Tipo
+                    - combobox "Tipo" [ref=f10e241]:
+                      - option "Outcome"
+                      - option "Feature" [selected]
+                      - option "Task"
+                      - option "Bug"
+                  - generic [ref=f10e242]:
+                    - text: Prioridade
+                    - combobox "Prioridade" [ref=f10e243]:
+                      - option "Crítica"
+                      - option "Alta" [selected]
+                      - option "Média"
+                      - option "Baixa"
+                - generic [ref=f10e244]:
+                  - text: Estado do produto
+                  - combobox "Estado do produto" [ref=f10e245]:
+                    - option "Descoberta"
+                    - option "Refinado"
+                    - option "Pronto"
+                    - option "Em execução"
+                    - option "Validação" [selected]
+                    - option "Concluído"
+                    - option "Arquivado"
+                - generic [ref=f10e246]:
+                  - generic [ref=f10e247]:
+                    - text: Domínio
+                    - textbox "Domínio" [ref=f10e248]: Plataforma / Roadmap
+                  - generic [ref=f10e249]:
+                    - text: Responsável
+                    - textbox "Responsável" [ref=f10e250]: Codex
+                - generic [ref=f10e251]:
+                  - text: Validação
+                  - combobox "Validação" [ref=f10e252]:
+                    - option "Não exigida"
+                    - option "Pendente" [selected]
+                    - option "Em execução"
+                    - option "Aprovada"
+                    - option "Falhou"
+                    - option "Dispensada"
+                - generic [ref=f10e253]:
+                  - text: Revisão humana
+                  - combobox "Revisão humana" [ref=f10e254]:
+                    - option "Não exigida"
+                    - option "Pendente" [selected]
+                    - option "Aprovada"
+                    - option "Alterações solicitadas"
+                - generic [ref=f10e255]:
+                  - text: Documentação
+                  - combobox "Documentação" [ref=f10e256]:
+                    - option "Não exigida"
+                    - option "Pendente"
+                    - option "Atualizada" [selected]
+                    - option "Desatualizada"
+              - button "Salvar alterações" [ref=f10e258] [cursor=pointer]
+  - alert [ref=f10e259]

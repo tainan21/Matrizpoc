@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Container, Stack, Badge } from "@matriz/design-ui"
+import { Container, Stack, Badge, ThemeToggle } from "@matriz/design-ui"
 import { manifest } from "../../manifest/manifest"
 
 const NAV_ITEMS = [
@@ -36,6 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               Voltar ao Hub
             </a>
+            <ThemeToggle appId="seumei" />
           </div>
         </Container>
       </header>

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_db60c999-49ea-42b5-a955-ae54a69da3a4",
+  "projectId": "contracts",
+  "command": "/handoff",
+  "title": "Handoff",
+  "content": "Resuma o que mudou, o que permanece pendente e o próximo passo seguro.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:07.325Z",
+  "revision": "19353ecd9cb43bc3"
+}

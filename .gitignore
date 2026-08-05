@@ -16,7 +16,16 @@ next.user-config.*
 node_modules
 .next/
 .turbo/
+.runtime/
 *.tsbuildinfo
 .codex-*.log
 .DS_Store
 .vercel
+.playwright-cli/
+.pnpm-store/
+
+# Interrupted atomic Workbench writes
+apps/*/.matriz/**/*.tmp
+
+# Machine-specific Workbench repository bindings
+.matriz/local/

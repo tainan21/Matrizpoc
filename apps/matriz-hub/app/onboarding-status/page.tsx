@@ -27,7 +27,10 @@ export default function OnboardingStatusPage() {
             </Text>
             <div className="mt-3 flex flex-wrap gap-2">
               {MATRIZ_APP_IDS.map((appId) => {
-                const hasAppPayload = progress?.perApp?.[appId] != null
+                const hasAppPayload = Object.prototype.hasOwnProperty.call(
+                  progress?.perApp ?? {},
+                  appId,
+                )
                 const tone = completed
                   ? "success"
                   : hasAppPayload

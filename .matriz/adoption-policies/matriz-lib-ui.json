@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "sourceId": "matriz-lib-ui",
+  "distribution": {
+    "channel": "github_packages",
+    "registry": "https://npm.pkg.github.com",
+    "coordinatedReleases": true
+  },
+  "packages": [
+    {
+      "name": "@matriz/tokens",
+      "status": "candidate",
+      "allowedSubpaths": [".", "./css"],
+      "requiredChecks": ["build", "typecheck"],
+      "blockers": [
+        "O namespace @matriz ainda não possui um repositório proprietário apto a publicar no GitHub Packages."
+      ],
+      "evidence": [
+        "apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md",
+        "apps/matriz-workbench/docs/MATRIZ-TOKENS-ADOPTION-AUDIT-2026-07-31.md",
+        "apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md"
+      ]
+    },
+    {
+      "name": "@matriz/themes",
+      "status": "blocked",
+      "allowedSubpaths": [".", "./provider"],
+      "requiredChecks": ["build", "typecheck"],
+      "blockers": ["Flash e segundo passe no cliente ainda precisam de validação."],
+      "evidence": [
+        "apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md",
+        "apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md"
+      ]
+    },
+    {
+      "name": "@matriz/primitives",
+      "status": "candidate",
+      "allowedSubpaths": [".", "./button"],
+      "requiredChecks": ["build", "typecheck"],
+      "blockers": ["Acessibilidade e peer dependencies ainda precisam de validação."],
+      "evidence": [
+        "apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md",
+        "apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md"
+      ]
+    },
+    {
+      "name": "@matriz/ui",
+      "status": "candidate",
+      "allowedSubpaths": [".", "./stat-card"],
+      "requiredChecks": ["build", "typecheck"],
+      "blockers": ["A API pública e estável ainda precisa de validação."],
+      "evidence": [
+        "apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md",
+        "apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md"
+      ]
+    },
+    {
+      "name": "@matriz/blocks",
+      "status": "candidate",
+      "allowedSubpaths": ["./page-header"],
+      "requiredChecks": ["build", "typecheck"],
+      "blockers": [
+        "O barrel raiz não deve ser usado; somente imports por subpath são permitidos.",
+        "Os packages auditados não têm arquivos test, spec ou stories."
+      ],
+      "evidence": [
+        "apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md",
+        "apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md"
+      ]
+    },
+    {
+      "name": "@matriz/product-ui",
+      "status": "blocked",
+      "allowedSubpaths": [],
+      "requiredChecks": ["build", "typecheck"],
+      "blockers": [
+        "O barrel exporta Billing, Wallet, Coins, Payment Methods, Orders e Kanban.",
+        "O package é camada de showcase/migração, não fundação compartilhada."
+      ],
+      "evidence": [
+        "apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md",
+        "apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md"
+      ]
+    }
+  ]
+}

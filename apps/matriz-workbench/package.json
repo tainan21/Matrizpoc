@@ -1,0 +1,40 @@
+{
+  "name": "@matriz/app-matriz-workbench",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3005",
+    "build": "next build",
+    "start": "next start -H 127.0.0.1 -p 3005",
+    "lint": "eslint app src proxy.ts public-contract.ts --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --config vitest.config.ts",
+    "health": "tsx src/cli/health.ts",
+    "sync": "tsx src/cli/sync.ts",
+    "sync:planning": "tsx src/cli/sync-planning-model.ts",
+    "sync:federated-evidence": "tsx src/cli/sync-federated-plan-evidence.ts",
+    "verify:mcp": "tsx src/cli/verify-mcp.ts",
+    "mcp": "tsx src/mcp/server.ts"
+  },
+  "dependencies": {
+    "@matriz/design-system": "workspace:*",
+    "@matriz/flows-ecosystem": "workspace:^",
+    "@matriz/foundation-types": "workspace:*",
+    "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-registry-core": "workspace:*",
+    "@matriz/platform-config": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.17.5",
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.7.5",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "tsx": "4.19.1",
+    "typescript": "5.6.3",
+    "vitest": "2.1.2"
+  }
+}

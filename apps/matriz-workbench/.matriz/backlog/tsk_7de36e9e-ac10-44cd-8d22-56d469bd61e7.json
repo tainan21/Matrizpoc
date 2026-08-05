@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_7de36e9e-ac10-44cd-8d22-56d469bd61e7",
+  "projectId": "matriz-workbench",
+  "title": "Validar a prova de coworking ponta a ponta",
+  "description": "Criar uma solicitação pela UI, consumi-la via MCP e devolver resumo, arquivos e checks.",
+  "status": "review",
+  "priority": "high",
+  "tags": [
+    "mcp",
+    "e2e"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_232bf4af-6b03-4ed9-b4a1-1978a3fd4dbf",
+      "text": "Codex lista a solicitação e recebe contexto abaixo de 12 mil caracteres.",
+      "completed": true
+    },
+    {
+      "id": "ac_66013862-fe75-469b-944d-9435c79c0b11",
+      "text": "Conclusão mostra resumo, arquivos afetados e checks na interface.",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    {
+      "kind": "workbench_document",
+      "documentId": "doc_0ea76349-e55e-42f8-98da-1cba79ae4de4",
+      "label": "Decisão local-first"
+    }
+  ],
+  "createdAt": "2026-07-28T12:00:00.000Z",
+  "updatedAt": "2026-07-28T20:23:22.382Z",
+  "revision": "fe0522a94ae11788"
+}

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import Link from "next/link"
-import { Container } from "@matriz/design-ui"
+import { Container, ThemeToggle } from "@matriz/design-ui"
 import { manifest as hubManifest } from "../../manifest/manifest"
 
 const navItems = hubManifest.routes
@@ -60,6 +60,9 @@ export function HubShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
+        <div style={{ marginTop: "auto" }}>
+          <ThemeToggle appId="matriz-hub" />
+        </div>
       </aside>
       <main style={{ flex: 1, padding: "2rem" }}>
         <Container>{children}</Container>

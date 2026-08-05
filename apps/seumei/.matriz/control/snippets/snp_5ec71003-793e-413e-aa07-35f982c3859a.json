@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_5ec71003-793e-413e-aa07-35f982c3859a",
+  "projectId": "seumei",
+  "command": "/verificacao",
+  "title": "Verificação",
+  "content": "Execute os gates do app e registre o resultado, arquivos alterados e riscos.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:03.907Z",
+  "revision": "bdd22a4244078217"
+}

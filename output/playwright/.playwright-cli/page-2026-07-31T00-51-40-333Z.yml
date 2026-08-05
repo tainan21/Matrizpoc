@@ -1,0 +1,296 @@
+- generic [active] [ref=f2e1]:
+  - generic [ref=f2e2]:
+    - link "Pular para o conteúdo" [ref=f2e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f2e4]:
+      - navigation "Navegação principal" [ref=f2e5]:
+        - link [ref=f2e6] [cursor=pointer]:
+          - /url: /
+        - link [ref=f2e7] [cursor=pointer]:
+          - /url: /control
+        - link [ref=f2e8] [cursor=pointer]:
+          - /url: /projects
+        - link [ref=f2e9] [cursor=pointer]:
+          - /url: /knowledge
+        - link [ref=f2e10] [cursor=pointer]:
+          - /url: /sites
+      - generic [ref=f2e11]:
+        - link [ref=f2e12] [cursor=pointer]:
+          - /url: /settings
+        - button [ref=f2e14] [cursor=pointer]
+    - generic [ref=f2e15]:
+      - banner [ref=f2e16]:
+        - generic [ref=f2e18]: Repositório local
+        - button "Ativar tema escuro" [ref=f2e19] [cursor=pointer]:
+          - generic [ref=f2e20]: ◐
+          - generic [ref=f2e21]: Tema do sistema
+        - button "Buscar" [ref=f2e22] [cursor=pointer]
+      - main [ref=f2e25]:
+        - generic [ref=f2e27]:
+          - paragraph [ref=f2e28]: Fonte externa · somente leitura
+          - heading "Matriz Lib UI" [level=1] [ref=f2e29]
+          - paragraph [ref=f2e30]: 21 documentos permitidos no catálogo local.
+        - region "Resumo da fonte" [ref=f2e31]:
+          - generic [ref=f2e32]:
+            - strong [ref=f2e33]: matriz-lib-ui
+            - generic [ref=f2e34]: package raiz
+          - generic [ref=f2e35]:
+            - strong [ref=f2e36]: 0.1.0
+            - generic [ref=f2e37]: versão declarada
+          - generic [ref=f2e38]:
+            - strong [ref=f2e39]: "9"
+            - generic [ref=f2e40]: packages declarados
+          - generic [ref=f2e41]:
+            - strong [ref=f2e42]: "21"
+            - generic [ref=f2e43]: scripts disponíveis
+        - region "Packages da fonte" [ref=f2e44]:
+          - generic [ref=f2e45]:
+            - link "@matriz/blocks" [ref=f2e46] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Fblocks
+            - strong [ref=f2e47]: 0.1.0
+          - generic [ref=f2e48]:
+            - link "@matriz/next" [ref=f2e49] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Fnext
+            - strong [ref=f2e50]: 0.1.0
+          - generic [ref=f2e51]:
+            - link "@matriz/primitives" [ref=f2e52] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Fprimitives
+            - strong [ref=f2e53]: 0.1.0
+          - generic [ref=f2e54]:
+            - link "@matriz/product-ui" [ref=f2e55] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Fproduct-ui
+            - strong [ref=f2e56]: 0.1.0
+          - generic [ref=f2e57]:
+            - link "@matriz/react-utils" [ref=f2e58] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Freact-utils
+            - strong [ref=f2e59]: 0.1.0
+          - generic [ref=f2e60]:
+            - link "@matriz/shells" [ref=f2e61] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Fshells
+            - strong [ref=f2e62]: 0.1.0
+          - generic [ref=f2e63]:
+            - link "@matriz/themes" [ref=f2e64] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Fthemes
+            - strong [ref=f2e65]: 0.1.0
+          - generic [ref=f2e66]:
+            - link "@matriz/tokens" [ref=f2e67] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Ftokens
+            - strong [ref=f2e68]: 0.1.0
+          - generic [ref=f2e69]:
+            - link "@matriz/ui" [ref=f2e70] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?package=%40matriz%2Fui
+            - strong [ref=f2e71]: 0.1.0
+        - region "Contrato do package" [ref=f2e72]:
+          - generic [ref=f2e73]:
+            - generic [ref=f2e74]:
+              - paragraph [ref=f2e75]: Contrato read-only
+              - heading "@matriz/tokens" [level=2] [ref=f2e76]
+            - generic [ref=f2e77]: 0.1.0
+          - generic [ref=f2e78]:
+            - generic [ref=f2e79]:
+              - term [ref=f2e80]: Exports
+              - definition [ref=f2e81]: ., ./css, ./themes/*
+            - generic [ref=f2e82]:
+              - term [ref=f2e83]: Dependências
+              - definition [ref=f2e84]: nenhuma
+            - generic [ref=f2e85]:
+              - term [ref=f2e86]: Peers
+              - definition [ref=f2e87]: nenhum
+            - generic [ref=f2e88]:
+              - term [ref=f2e89]: Checks
+              - definition [ref=f2e90]: build, dev, typecheck
+        - region [ref=f2e91]:
+          - generic [ref=f2e92]:
+            - generic [ref=f2e93]:
+              - paragraph [ref=f2e94]: Gate de adoção
+              - heading "Ainda não adotável" [level=2] [ref=f2e95]
+            - generic [ref=f2e96]: candidato
+          - generic [ref=f2e97]:
+            - generic [ref=f2e98]:
+              - term [ref=f2e99]: Decisão
+              - definition [ref=f2e100]: Adoção bloqueada até cumprir o contrato.
+            - generic [ref=f2e101]:
+              - term [ref=f2e102]: Subpaths permitidos
+              - definition [ref=f2e103]:
+                - list [ref=f2e104]:
+                  - listitem [ref=f2e105]:
+                    - code [ref=f2e106]: .
+                  - listitem [ref=f2e107]:
+                    - code [ref=f2e108]: ./css
+            - generic [ref=f2e109]:
+              - term [ref=f2e110]: Critérios ausentes
+              - definition [ref=f2e111]:
+                - list [ref=f2e112]:
+                  - listitem [ref=f2e113]:
+                    - code [ref=f2e114]: nenhum
+            - generic [ref=f2e115]:
+              - term [ref=f2e116]: Bloqueadores
+              - definition [ref=f2e117]:
+                - list [ref=f2e118]:
+                  - listitem [ref=f2e119]: Nomes, CSS e versionamento ainda precisam de auditoria.
+            - generic [ref=f2e120]:
+              - term [ref=f2e121]: Evidências
+              - definition [ref=f2e122]:
+                - list [ref=f2e123]:
+                  - listitem [ref=f2e124]:
+                    - code [ref=f2e125]: apps/matriz-workbench/docs/ADR-MATRIZ-LIB-UI-BOUNDARY.md
+                  - listitem [ref=f2e126]:
+                    - code [ref=f2e127]: apps/matriz-workbench/docs/MATRIZ-LIB-UI-ADOPTION-AUDIT-2026-07-30.md
+        - generic [ref=f2e128]:
+          - generic [ref=f2e129]:
+            - generic [ref=f2e130]:
+              - heading "Documentos" [level=2] [ref=f2e131]
+              - generic [ref=f2e132]: "21"
+            - link "MD AGENTS.md canonical · AGENTS.md 7 KB" [ref=f2e133] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=AGENTS.md
+              - generic [ref=f2e134]: MD
+              - generic [ref=f2e135]:
+                - strong [ref=f2e136]: AGENTS.md
+                - generic [ref=f2e137]: canonical · AGENTS.md
+              - time [ref=f2e138]: 7 KB
+            - link "MD MatrizLibUi canonical · README.md 6 KB" [ref=f2e139] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=README.md
+              - generic [ref=f2e140]: MD
+              - generic [ref=f2e141]:
+                - strong [ref=f2e142]: MatrizLibUi
+                - generic [ref=f2e143]: canonical · README.md
+              - time [ref=f2e144]: 6 KB
+            - link "MD shared-core-domains-world.md reference · docs/# shared-core-domains-world.md 11 KB" [ref=f2e145] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2F%23%20shared-core-domains-world.md
+              - generic [ref=f2e146]: MD
+              - generic [ref=f2e147]:
+                - strong [ref=f2e148]: shared-core-domains-world.md
+                - generic [ref=f2e149]: reference · docs/# shared-core-domains-world.md
+              - time [ref=f2e150]: 11 KB
+            - link "MD Analise atual, pros, contras e melhorias reference · docs/ANALISE-ATUAL-E-MELHORIAS.md 9 KB" [ref=f2e151] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FANALISE-ATUAL-E-MELHORIAS.md
+              - generic [ref=f2e152]: MD
+              - generic [ref=f2e153]:
+                - strong [ref=f2e154]: Analise atual, pros, contras e melhorias
+                - generic [ref=f2e155]: reference · docs/ANALISE-ATUAL-E-MELHORIAS.md
+              - time [ref=f2e156]: 9 KB
+            - link "MD Matriz UI — Arquitetura Final reference · docs/ARCHITECTURE-SUMMARY.md 11 KB" [ref=f2e157] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FARCHITECTURE-SUMMARY.md
+              - generic [ref=f2e158]: MD
+              - generic [ref=f2e159]:
+                - strong [ref=f2e160]: Matriz UI — Arquitetura Final
+                - generic [ref=f2e161]: reference · docs/ARCHITECTURE-SUMMARY.md
+              - time [ref=f2e162]: 11 KB
+            - link "MD Current State Audit - 2026-04-08 reference · docs/CURRENT-STATE-AUDIT-2026-04-08.md 3 KB" [ref=f2e163] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FCURRENT-STATE-AUDIT-2026-04-08.md
+              - generic [ref=f2e164]: MD
+              - generic [ref=f2e165]:
+                - strong [ref=f2e166]: Current State Audit - 2026-04-08
+                - generic [ref=f2e167]: reference · docs/CURRENT-STATE-AUDIT-2026-04-08.md
+              - time [ref=f2e168]: 3 KB
+            - link "MD Engineering Playbook reference · docs/ENGINEERING-PLAYBOOK.md 8 KB" [ref=f2e169] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FENGINEERING-PLAYBOOK.md
+              - generic [ref=f2e170]: MD
+              - generic [ref=f2e171]:
+                - strong [ref=f2e172]: Engineering Playbook
+                - generic [ref=f2e173]: reference · docs/ENGINEERING-PLAYBOOK.md
+              - time [ref=f2e174]: 8 KB
+            - 'link "MD Matriz UI Library: Potencial, Limites E Boas Práticas Em Next.js reference · docs/LIBRARY-POTENTIAL-AND-NEXT-GUIDE.md 7 KB" [ref=f2e175] [cursor=pointer]':
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FLIBRARY-POTENTIAL-AND-NEXT-GUIDE.md
+              - generic [ref=f2e176]: MD
+              - generic [ref=f2e177]:
+                - strong [ref=f2e178]: "Matriz UI Library: Potencial, Limites E Boas Práticas Em Next.js"
+                - generic [ref=f2e179]: reference · docs/LIBRARY-POTENTIAL-AND-NEXT-GUIDE.md
+              - time [ref=f2e180]: 7 KB
+            - link "MD Auditoria, Consolidacao e Planejamento da Matriz reference · docs/matriz-auditoria-planejamento-2026-04-10.md 24 KB" [ref=f2e181] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2Fmatriz-auditoria-planejamento-2026-04-10.md
+              - generic [ref=f2e182]: MD
+              - generic [ref=f2e183]:
+                - strong [ref=f2e184]: Auditoria, Consolidacao e Planejamento da Matriz
+                - generic [ref=f2e185]: reference · docs/matriz-auditoria-planejamento-2026-04-10.md
+              - time [ref=f2e186]: 24 KB
+            - link "MD Mapa Completo de Telas da Matriz reference · docs/matriz-mapa-de-telas-2026-04-10.md 12 KB" [ref=f2e187] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2Fmatriz-mapa-de-telas-2026-04-10.md
+              - generic [ref=f2e188]: MD
+              - generic [ref=f2e189]:
+                - strong [ref=f2e190]: Mapa Completo de Telas da Matriz
+                - generic [ref=f2e191]: reference · docs/matriz-mapa-de-telas-2026-04-10.md
+              - time [ref=f2e192]: 12 KB
+            - 'link "MD Matriz UI — RFC: Arquitetura de Packages para Monorepo reference · docs/MATRIZ-UI-ARCHITECTURE-RFC.md 21 KB" [ref=f2e193] [cursor=pointer]':
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FMATRIZ-UI-ARCHITECTURE-RFC.md
+              - generic [ref=f2e194]: MD
+              - generic [ref=f2e195]:
+                - strong [ref=f2e196]: "Matriz UI — RFC: Arquitetura de Packages para Monorepo"
+                - generic [ref=f2e197]: reference · docs/MATRIZ-UI-ARCHITECTURE-RFC.md
+              - time [ref=f2e198]: 21 KB
+            - link "MD Reauditoria tecnica da MatrizLibUi - consolidacao como biblioteca reference · docs/MATRIZ-UI-REAUDITORIA-CONSOLIDACAO-2026-04-11.md 25 KB" [ref=f2e199] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FMATRIZ-UI-REAUDITORIA-CONSOLIDACAO-2026-04-11.md
+              - generic [ref=f2e200]: MD
+              - generic [ref=f2e201]:
+                - strong [ref=f2e202]: Reauditoria tecnica da MatrizLibUi - consolidacao como biblioteca
+                - generic [ref=f2e203]: reference · docs/MATRIZ-UI-REAUDITORIA-CONSOLIDACAO-2026-04-11.md
+              - time [ref=f2e204]: 25 KB
+            - link "MD Auditoria da Matriz UI Compartilhada reference · docs/MATRIZ-UI-SHARED-LIB-AUDIT-2026-04-10.md 8 KB" [ref=f2e205] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FMATRIZ-UI-SHARED-LIB-AUDIT-2026-04-10.md
+              - generic [ref=f2e206]: MD
+              - generic [ref=f2e207]:
+                - strong [ref=f2e208]: Auditoria da Matriz UI Compartilhada
+                - generic [ref=f2e209]: reference · docs/MATRIZ-UI-SHARED-LIB-AUDIT-2026-04-10.md
+              - time [ref=f2e210]: 8 KB
+            - link "MD Plano de Acao e Implementacao Gradual da Matriz UI reference · docs/MATRIZ-UI-SHARED-LIB-PLAN-2026-04-10.md 6 KB" [ref=f2e211] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FMATRIZ-UI-SHARED-LIB-PLAN-2026-04-10.md
+              - generic [ref=f2e212]: MD
+              - generic [ref=f2e213]:
+                - strong [ref=f2e214]: Plano de Acao e Implementacao Gradual da Matriz UI
+                - generic [ref=f2e215]: reference · docs/MATRIZ-UI-SHARED-LIB-PLAN-2026-04-10.md
+              - time [ref=f2e216]: 6 KB
+            - link "MD Guia de Migração — Matriz UI Packages reference · docs/MIGRATION-GUIDE.md 10 KB" [ref=f2e217] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FMIGRATION-GUIDE.md
+              - generic [ref=f2e218]: MD
+              - generic [ref=f2e219]:
+                - strong [ref=f2e220]: Guia de Migração — Matriz UI Packages
+                - generic [ref=f2e221]: reference · docs/MIGRATION-GUIDE.md
+              - time [ref=f2e222]: 10 KB
+            - link "MD Auditoria dos packages - Matriz UI reference · docs/PACKAGES-AUDITORIA-2026-04-11.md 17 KB" [ref=f2e223] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FPACKAGES-AUDITORIA-2026-04-11.md
+              - generic [ref=f2e224]: MD
+              - generic [ref=f2e225]:
+                - strong [ref=f2e226]: Auditoria dos packages - Matriz UI
+                - generic [ref=f2e227]: reference · docs/PACKAGES-AUDITORIA-2026-04-11.md
+              - time [ref=f2e228]: 17 KB
+            - link "MD Packages e Design System reference · docs/PACKAGES-E-DESIGN-SYSTEM.md 10 KB" [ref=f2e229] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FPACKAGES-E-DESIGN-SYSTEM.md
+              - generic [ref=f2e230]: MD
+              - generic [ref=f2e231]:
+                - strong [ref=f2e232]: Packages e Design System
+                - generic [ref=f2e233]: reference · docs/PACKAGES-E-DESIGN-SYSTEM.md
+              - time [ref=f2e234]: 10 KB
+            - link "MD Performance And Pipeline reference · docs/PERFORMANCE-AND-PIPELINE.md 4 KB" [ref=f2e235] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FPERFORMANCE-AND-PIPELINE.md
+              - generic [ref=f2e236]: MD
+              - generic [ref=f2e237]:
+                - strong [ref=f2e238]: Performance And Pipeline
+                - generic [ref=f2e239]: reference · docs/PERFORMANCE-AND-PIPELINE.md
+              - time [ref=f2e240]: 4 KB
+            - link "MD Evolucao Do Design System reference · docs/THEME-SYSTEM-EVOLUTION.md 5 KB" [ref=f2e241] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FTHEME-SYSTEM-EVOLUTION.md
+              - generic [ref=f2e242]: MD
+              - generic [ref=f2e243]:
+                - strong [ref=f2e244]: Evolucao Do Design System
+                - generic [ref=f2e245]: reference · docs/THEME-SYSTEM-EVOLUTION.md
+              - time [ref=f2e246]: 5 KB
+            - link "MD Theme Toggle & Design System Selector reference · docs/THEME-TOGGLE-GUIDE.md 5 KB" [ref=f2e247] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2FTHEME-TOGGLE-GUIDE.md
+              - generic [ref=f2e248]: MD
+              - generic [ref=f2e249]:
+                - strong [ref=f2e250]: Theme Toggle & Design System Selector
+                - generic [ref=f2e251]: reference · docs/THEME-TOGGLE-GUIDE.md
+              - time [ref=f2e252]: 5 KB
+            - link "MD world.md — MatrizLibUi reference · docs/world.md 19 KB" [ref=f2e253] [cursor=pointer]:
+              - /url: /knowledge/matriz-lib-ui?document=docs%2Fworld.md
+              - generic [ref=f2e254]: MD
+              - generic [ref=f2e255]:
+                - strong [ref=f2e256]: world.md — MatrizLibUi
+                - generic [ref=f2e257]: reference · docs/world.md
+              - time [ref=f2e258]: 19 KB
+          - article [ref=f2e259]:
+            - generic [ref=f2e260]:
+              - strong [ref=f2e261]: Selecione um documento
+              - generic [ref=f2e262]: O conteúdo completo não é carregado na listagem.
+  - button "Open Next.js Dev Tools" [ref=f2e268] [cursor=pointer]
+  - alert [ref=f2e272]

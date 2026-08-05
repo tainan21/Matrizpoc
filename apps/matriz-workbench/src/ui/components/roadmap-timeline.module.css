@@ -1,0 +1,168 @@
+.workspace {
+  --roadmap-bg: var(--wb-canvas);
+  --roadmap-surface: var(--wb-surface-1);
+  --roadmap-raised: var(--wb-surface-2);
+  --roadmap-border: var(--wb-border);
+  --roadmap-strong: var(--wb-border-strong);
+  --roadmap-text: var(--wb-text);
+  --roadmap-muted: var(--wb-text-secondary);
+  --roadmap-subtle: var(--wb-text-subtle);
+  --roadmap-accent: var(--wb-accent);
+  min-height: calc(100vh - 42px);
+  color: var(--roadmap-text);
+  background: var(--roadmap-bg);
+  font-size: 12px;
+}
+
+.commandBar {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 180px 150px minmax(260px, 1fr) auto auto auto;
+  align-items: end;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--roadmap-border);
+  background: rgba(7, 11, 19, .96);
+}
+
+.commandBar label { display: grid; gap: 4px; color: var(--roadmap-subtle); font-size: 9px; }
+.commandBar select, .commandBar input, .inspector input, .inspector select, .inspector textarea, .composer input, .composer select, .composer textarea {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid var(--roadmap-strong);
+  border-radius: 5px;
+  padding: 6px 9px;
+  color: var(--roadmap-text);
+  background: #0a101a;
+  font: inherit;
+}
+
+.search { height: 32px; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px; border: 1px solid var(--roadmap-strong); border-radius: 5px; padding: 0 9px; background: #0a101a; color: var(--roadmap-subtle); }
+.search input { min-height: 0; padding: 0; border: 0; background: transparent; outline: 0; }
+.commandBar nav { height: 32px; display: flex; align-items: stretch; border: 1px solid var(--roadmap-border); border-radius: 5px; overflow: hidden; }
+.commandBar nav a, .commandBar nav span { display: grid; place-items: center; padding: 0 13px; color: var(--roadmap-muted); text-decoration: none; }
+.commandBar nav span[aria-current="page"] { color: var(--roadmap-text); background: rgba(124, 58, 237, .3); box-shadow: inset 0 -2px var(--roadmap-accent); }
+.phaseButton, .newButton, .primaryButton { min-height: 32px; border: 1px solid var(--roadmap-strong); border-radius: 5px; padding: 0 12px; color: var(--roadmap-text); background: var(--roadmap-raised); font: inherit; cursor: pointer; }
+.newButton, .primaryButton { border-color: var(--roadmap-accent); background: linear-gradient(180deg, color-mix(in srgb, var(--roadmap-accent) 88%, white), color-mix(in srgb, var(--roadmap-accent) 80%, black)); font-weight: 650; }
+.phaseButton:disabled, .newButton:disabled, .primaryButton:disabled { cursor: not-allowed; opacity: .48; }
+
+.heading { min-height: 74px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 11px 16px; border-bottom: 1px solid var(--roadmap-border); background: var(--roadmap-surface); }
+.heading > div:first-child { min-width: 0; }
+.heading span { color: var(--roadmap-subtle); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+.heading h1 { margin: 4px 0 2px; font-size: 15px; letter-spacing: -.02em; }
+.heading p { margin: 0; color: var(--roadmap-muted); }
+.summary { display: grid; grid-template-columns: auto auto; align-items: baseline; gap: 1px 7px; min-width: max-content; }
+.summary strong { color: var(--roadmap-accent); font: 650 15px var(--font-mono); text-align: right; }
+.summary span { text-transform: none; letter-spacing: 0; }
+.headingActions { display: flex; align-items: center; gap: 8px; }
+.markerToggle { min-height: 32px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--roadmap-border); border-radius: var(--wb-radius-sm); padding: 0 9px; color: var(--roadmap-muted); background: var(--roadmap-raised); cursor: pointer; }
+.markerToggle i { width: 22px; height: 12px; position: relative; border-radius: 99px; background: var(--roadmap-strong); }.markerToggle i::after { content: ""; width: 8px; height: 8px; position: absolute; top: 2px; left: 2px; border-radius: 50%; background: var(--roadmap-muted); transition: transform 160ms ease; }
+.markerToggle[aria-pressed="true"] { color: var(--roadmap-text); }.markerToggle[aria-pressed="true"] i { background: var(--roadmap-accent); }.markerToggle[aria-pressed="true"] i::after { background: white; transform: translateX(10px); }
+.markerFilters { min-height: 39px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; padding: 4px 14px; border-bottom: 1px solid var(--roadmap-border); background: var(--roadmap-surface); }
+.markerFilters label { display: flex; align-items: center; gap: 6px; color: var(--roadmap-subtle); font-size: 9px; }.markerFilters select { min-height: 29px; border: 1px solid var(--roadmap-border); border-radius: var(--wb-radius-sm); padding: 0 8px; color: var(--roadmap-text); background: var(--roadmap-raised); font: inherit; }
+
+.noticeBar, .notice { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 14px; border-bottom: 1px solid var(--roadmap-border); background: #0e1725; }
+.noticeBar.success, .notice.success { color: #86efac; }
+.noticeBar.conflict, .notice.conflict { color: #fbbf24; background: #20190b; }
+.noticeBar.error, .notice.error { color: #fca5a5; background: #210f14; }
+.notice button, .noticeBar button { border: 0; padding: 0; color: inherit; background: transparent; font: inherit; text-decoration: underline; cursor: pointer; }
+.srStatus { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+.content { display: grid; grid-template-columns: minmax(0, 1fr); min-height: calc(100vh - 174px); }
+.content.hasInspector { grid-template-columns: minmax(0, 1fr) 328px; }
+.timeline { min-width: 0; overflow: auto; border-right: 1px solid var(--roadmap-border); }
+.axisHeader { min-width: 980px; display: grid; grid-template-columns: 220px minmax(760px, 1fr); position: sticky; top: 0; z-index: 5; border-bottom: 1px solid var(--roadmap-strong); background: #0a101a; }
+.axisHeader > div:first-child { display: flex; align-items: center; padding: 0 15px; border-right: 1px solid var(--roadmap-border); color: var(--roadmap-muted); font-weight: 650; }
+.quarters { display: grid; grid-template-columns: repeat(var(--quarter-count, 4), minmax(190px, 1fr)); }
+.quarters > div { min-height: 46px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 1px solid var(--roadmap-border); color: var(--roadmap-muted); }
+.quarters strong { font-size: 10px; }.quarters small { margin-top: 2px; color: var(--roadmap-subtle); font-size: 9px; text-transform: capitalize; }
+.quarters em { position: absolute; right: 6px; bottom: 4px; padding: 1px 4px; border-radius: 3px; color: #d8ccff; background: #4c1d95; font-size: 8px; font-style: normal; }
+.currentQuarter { background: rgba(124, 58, 237, .06); }
+
+.phaseRow { min-width: 980px; display: grid; grid-template-columns: 220px minmax(760px, 1fr); border-bottom: 1px solid var(--roadmap-border); background: var(--roadmap-surface); content-visibility: auto; contain-intrinsic-size: 120px; }
+.phaseRow > header { grid-row: 1 / span 2; padding: 14px 15px; border-right: 1px solid var(--roadmap-border); }
+.phaseRow > header > div { display: flex; align-items: center; gap: 7px; }
+.phaseRow h2 { margin: 0; font-size: 12px; }
+.phaseRow p { margin: 7px 0 12px; color: var(--roadmap-muted); line-height: 1.45; }
+.phaseRow small { color: var(--roadmap-subtle); font-size: 9px; }
+.statusDot { width: 7px; height: 7px; flex: 0 0 auto; border: 1px solid currentColor; border-radius: 50%; color: #6b7280; background: currentColor; }
+.statusDot.active { color: var(--roadmap-accent); box-shadow: 0 0 8px rgba(139, 92, 246, .6); }
+.statusDot.paused { color: #f59e0b; }.statusDot.completed { color: #22c55e; }.statusDot.planned { color: #64748b; background: transparent; }
+
+.lane { --row-height: 32px; min-height: calc(var(--rows) * var(--row-height) + 22px); position: relative; overflow: hidden; }
+.gridLines { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--quarter-count, 4), 1fr); }
+.gridLines i { border-right: 1px solid var(--roadmap-border); background: linear-gradient(180deg, transparent, rgba(255,255,255,.01)); }
+.todayLine { position: absolute; z-index: 2; top: 0; bottom: 0; width: 1px; background: var(--roadmap-accent); box-shadow: 0 0 8px rgba(139, 92, 246, .5); }
+.todayLine span { position: absolute; top: 3px; left: 4px; color: #c4b5fd; font-size: 8px; font-style: normal; }
+.timelineMarker { --marker-color: var(--wb-chart-3); position: absolute; z-index: 5; left: var(--left); bottom: 2px; width: 18px; height: 18px; border: 0; padding: 0; color: var(--marker-color); background: transparent; cursor: pointer; transform: translateX(-50%); }
+.timelineMarker i, .markerGlyph { width: 9px; height: 9px; display: block; border: 2px solid currentColor; background: var(--roadmap-surface); transform: rotate(45deg); }
+.timelineMarker span { max-width: 104px; position: absolute; left: 13px; bottom: 2px; overflow: hidden; color: var(--roadmap-muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; transform: none; }
+.timelineMarker.validation_gate, .markerGlyph.validation_gate { --marker-color: var(--wb-warning); border-radius: 50%; transform: translateX(-50%); }.timelineMarker.validation_gate i, .markerGlyph.validation_gate { border-radius: 50%; transform: none; }
+.timelineMarker.decision_gate, .markerGlyph.decision_gate { --marker-color: var(--wb-danger); }.timelineMarker.release, .markerGlyph.release { --marker-color: var(--wb-info); }.timelineMarker.milestone, .markerGlyph.milestone { --marker-color: var(--wb-success); }
+.timelineMarker:hover span, .timelineMarker:focus-visible span, .selectedMarker span { color: var(--roadmap-text); }.selectedMarker i { box-shadow: 0 0 0 3px var(--wb-accent-soft), 0 0 0 4px var(--roadmap-accent); }
+.bar { position: absolute; z-index: 3; top: calc(14px + var(--row) * var(--row-height)); left: var(--left); width: var(--width); height: 24px; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; align-items: center; gap: 5px; overflow: hidden; border: 1px solid #4c2d86; border-radius: 4px; padding: 0 7px; color: #ede9fe; background: #302050; text-align: left; cursor: pointer; transition: border-color .14s ease, background .14s ease, transform .14s ease; }
+.bar strong, .bar small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; }.bar small { color: #c4b5fd; }
+.bar:hover, .bar:focus-visible, .selectedBar { z-index: 4; border-color: #a78bfa; background: #4c1d95; transform: translateY(-1px); }
+.bar.planned { border-style: dashed; color: #cbd5e1; background: #172033; }.bar.paused { border-color: #92400e; color: #fde68a; background: #3a250e; }.bar.completed { border-color: #166534; color: #bbf7d0; background: #10341f; }
+.emptyLane { position: absolute; inset: 0; display: grid; place-items: center; color: var(--roadmap-subtle); font-size: 10px; }
+
+.unscheduled { grid-column: 2; display: flex; align-items: center; gap: 7px; min-height: 38px; overflow-x: auto; padding: 6px 9px; border-top: 1px dashed var(--roadmap-border); }
+.unscheduled > span { flex: 0 0 auto; color: var(--roadmap-subtle); font-size: 9px; text-transform: uppercase; }
+.unscheduled button { min-height: 26px; flex: 0 0 auto; display: flex; align-items: center; gap: 6px; max-width: 250px; border: 1px dashed var(--roadmap-strong); border-radius: 4px; padding: 3px 7px; color: var(--roadmap-text); background: #111927; font: inherit; cursor: pointer; }
+.unscheduled button[aria-current="true"] { border-style: solid; border-color: var(--roadmap-accent); background: #271746; }
+.unscheduled button strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; }.unscheduled button small { color: var(--roadmap-subtle); }
+.mobileMarkers, .mobileInitiatives { display: none; }
+
+.emptyState { min-height: 300px; display: grid; place-content: center; justify-items: center; padding: 40px; text-align: center; }
+.emptyState > span { color: var(--roadmap-accent); font: 650 10px var(--font-mono); }.emptyState h2 { margin: 10px 0 6px; font-size: 17px; }.emptyState p { max-width: 440px; margin: 0 0 18px; color: var(--roadmap-muted); line-height: 1.5; }
+.emptyState button { min-height: 34px; border: 1px solid #6d28d9; border-radius: 5px; padding: 0 13px; color: white; background: #6d28d9; cursor: pointer; }
+
+.inspector { min-width: 0; height: calc(100vh - 42px); position: sticky; top: 0; overflow-y: auto; border-left: 1px solid var(--roadmap-strong); background: #0a101a; animation: inspector-in .16s ease-out; }
+.inspectorHeader { min-height: 76px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 13px 14px; border-bottom: 1px solid var(--roadmap-border); }
+.inspectorHeader span { color: var(--roadmap-subtle); font-size: 9px; }.inspectorHeader h2 { margin: 7px 0 0; font-size: 15px; line-height: 1.3; }.inspectorHeader button { width: 32px; height: 32px; border: 0; color: var(--roadmap-muted); background: transparent; font-size: 20px; cursor: pointer; }
+.inspectorStatus { min-height: 40px; display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 7px; padding: 0 14px; border-bottom: 1px solid var(--roadmap-border); }.inspectorStatus > span:last-child { justify-self: end; color: var(--roadmap-muted); font-size: 9px; }
+.markerGlyph { --marker-color: var(--wb-chart-3); color: var(--marker-color); margin-left: 2px; }
+.inspectorTabs { min-height: 36px; display: flex; overflow-x: auto; border-bottom: 1px solid var(--roadmap-border); }.inspectorTabs button { min-width: max-content; flex: 1; border: 0; border-bottom: 2px solid transparent; padding: 0 7px; color: var(--roadmap-subtle); background: transparent; font-size: 9px; cursor: pointer; }.inspectorTabs button[aria-current="page"] { border-bottom-color: var(--roadmap-accent); color: var(--roadmap-text); }
+.inspectorForm { display: grid; gap: 11px; padding: 14px; border-bottom: 1px solid var(--roadmap-border); }
+.inspectorForm label, .composer label { display: grid; gap: 5px; color: var(--roadmap-muted); font-size: 10px; }.inspectorForm label small, .composer label small { color: var(--roadmap-subtle); }.inspector textarea, .composer textarea { resize: vertical; line-height: 1.4; }
+.fieldGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.inspectorSection { padding: 14px; border-bottom: 1px solid var(--roadmap-border); }.inspectorSection > header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }.inspectorSection h3 { margin: 0; font-size: 11px; }.inspectorSection > header span, .inspectorSection p { color: var(--roadmap-subtle); font-size: 9px; }
+.inspectorSection > a, .missingLink { min-height: 43px; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px; border-top: 1px solid var(--roadmap-border); color: inherit; text-decoration: none; }.inspectorSection > a span:last-child, .missingLink { display: flex; flex-direction: column; gap: 3px; }.inspectorSection > a strong, .missingLink strong { font-size: 10px; }.inspectorSection > a small, .missingLink small { color: var(--roadmap-subtle); font-size: 9px; }
+.linkedState { width: 8px; height: 8px; border: 1px solid #64748b; border-radius: 2px; }.linkedState.completed { border-color: #22c55e; background: #22c55e; }
+.missingLink { grid-template-columns: 1fr; padding: 7px 0; color: #fbbf24; }
+.referenceRow { display: flex; flex-direction: column; gap: 3px; padding: 8px 0; border-top: 1px solid var(--roadmap-border); }.referenceRow strong { font-size: 10px; }.referenceRow small { overflow-wrap: anywhere; color: var(--roadmap-subtle); font-size: 9px; }
+.history > div { display: grid; grid-template-columns: 8px 1fr; gap: 8px; padding: 7px 0; border-top: 1px solid var(--roadmap-border); }.history i { width: 6px; height: 6px; margin-top: 3px; border-radius: 50%; background: var(--roadmap-accent); }.history span { display: flex; flex-direction: column; gap: 3px; }.history strong { font-size: 9px; }.history small { color: var(--roadmap-subtle); font-size: 8px; }
+
+.backdrop { position: fixed; z-index: 50; inset: 0; display: grid; place-items: center; padding: 18px; background: rgba(1, 4, 10, .76); backdrop-filter: blur(4px); }
+.composer { width: min(560px, 100%); max-height: calc(100vh - 36px); overflow-y: auto; border: 1px solid var(--roadmap-strong); border-radius: 8px; background: var(--roadmap-surface); box-shadow: 0 24px 80px rgba(0,0,0,.5); animation: composer-in .16s ease-out; }
+.composer > header { display: flex; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--roadmap-border); }.composer > header span { color: var(--roadmap-subtle); font-size: 9px; text-transform: uppercase; }.composer h2 { margin: 4px 0 0; font-size: 16px; }.composer > header button { width: 32px; border: 0; color: var(--roadmap-muted); background: transparent; font-size: 20px; cursor: pointer; }.composer form { display: grid; gap: 12px; padding: 16px; }.composer footer { display: flex; justify-content: flex-end; gap: 8px; padding-top: 4px; }.composer footer button { min-height: 34px; border: 1px solid var(--roadmap-strong); border-radius: 5px; padding: 0 13px; color: var(--roadmap-text); background: var(--roadmap-raised); cursor: pointer; }.composer footer .primaryButton { background: #6d28d9; }
+
+.workspace button:focus-visible, .workspace a:focus-visible, .workspace input:focus-visible, .workspace select:focus-visible, .workspace textarea:focus-visible { outline: 2px solid var(--wb-focus); outline-offset: 2px; }
+@keyframes inspector-in { from { opacity: 0; transform: translateX(10px); } }
+@keyframes composer-in { from { opacity: 0; transform: translateY(8px) scale(.99); } }
+
+@media (max-width: 1180px) {
+  .commandBar { grid-template-columns: 160px 135px minmax(200px, 1fr) auto; }
+  .commandBar nav { grid-column: 1 / 3; grid-row: 2; }.phaseButton, .newButton { align-self: end; }
+  .content.hasInspector { grid-template-columns: minmax(0, 1fr) 304px; }
+}
+
+@media (max-width: 820px) {
+  .commandBar { grid-template-columns: 1fr 1fr; align-items: stretch; }.search, .commandBar nav { grid-column: 1 / -1; }.commandBar nav { grid-row: auto; }.commandBar nav a, .commandBar nav span { min-height: 40px; flex: 1; }.phaseButton, .newButton { min-height: 44px; }
+  .heading { align-items: flex-start; padding: 13px; }.summary { display: none; }.headingActions { margin-left: auto; }
+  .content.hasInspector { grid-template-columns: 1fr; }
+  .inspector { width: 100%; height: min(78vh, 720px); position: fixed; z-index: 30; right: 0; bottom: 0; left: 0; top: auto; border-top: 1px solid var(--roadmap-strong); border-left: 0; border-radius: 10px 10px 0 0; box-shadow: 0 -20px 60px rgba(0,0,0,.5); }
+  .inspectorHeader button, .unscheduled button, .bar { min-height: 44px; }
+  .axisHeader, .lane, .unscheduled { display: none; }.phaseRow { min-width: 0; grid-template-columns: 1fr; }.phaseRow > header { grid-row: auto; border-right: 0; }.timelineMarker { display: none; }
+  .mobileMarkers, .mobileInitiatives { grid-column: 1; display: grid; padding: 6px 9px; border-top: 1px solid var(--roadmap-border); }.mobileMarkers button, .mobileInitiatives button { min-height: 44px; display: grid; grid-template-columns: 14px minmax(0, 1fr) auto; align-items: center; gap: 8px; border: 0; border-bottom: 1px solid var(--roadmap-border); color: var(--roadmap-text); background: transparent; text-align: left; }.mobileMarkers span, .mobileInitiatives span { display: flex; flex-direction: column; gap: 2px; }.mobileMarkers strong, .mobileInitiatives strong { font-size: 10px; }.mobileMarkers em, .mobileInitiatives em { color: var(--roadmap-subtle); font-size: 8px; font-style: normal; }
+}
+
+@media (max-width: 480px) {
+  .commandBar { grid-template-columns: 1fr; }.search, .commandBar nav { grid-column: 1; }.phaseButton, .newButton { width: 100%; }
+  .heading h1 { font-size: 14px; }.heading p { display: none; }.headingActions { align-items: flex-end; flex-direction: column; }.markerFilters { justify-content: stretch; }.markerFilters label { flex: 1; flex-direction: column; align-items: stretch; }
+  .fieldGrid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inspector, .composer, .bar { animation: none; transition: none; }
+}

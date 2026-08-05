@@ -1,0 +1,69 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e2]:
+    - link "Pular para o conteúdo" [ref=f1e3] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=f1e4]:
+      - generic [ref=f1e5]:
+        - generic [ref=f1e6]: M
+        - generic [ref=f1e74]:
+          - strong [ref=f1e75]: Workbench
+          - generic [ref=f1e76]: matriz local
+      - navigation "Navegação principal" [ref=f1e7]:
+        - link "Foco" [ref=f1e77] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f1e78]: ⌁
+        - link "Controle" [ref=f1e80] [cursor=pointer]:
+          - /url: /control
+          - generic [ref=f1e81]: ◈
+        - link "Projetos" [ref=f1e83] [cursor=pointer]:
+          - /url: /projects
+          - generic [ref=f1e84]: ⌘
+        - link "Conhecimento" [ref=f1e86] [cursor=pointer]:
+          - /url: /knowledge
+          - generic [ref=f1e87]: ◇
+        - link "Sites" [ref=f1e89] [cursor=pointer]:
+          - /url: /sites
+          - generic [ref=f1e90]: ▦
+      - generic [ref=f1e92]:
+        - text: Apps detectados
+        - generic [ref=f1e93]: "8"
+      - navigation "Projetos" [ref=f1e13]:
+        - link "contracts" [ref=f1e14] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Infra Hub" [ref=f1e16] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Sites" [ref=f1e18] [cursor=pointer]:
+          - /url: /projects/sites
+        - link "Matriz Workbench" [ref=f1e20] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=f1e22] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=f1e24] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=f1e26] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=f1e28] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=f1e30]:
+        - link "Configurações" [ref=f1e102] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=f1e103]: ⚙
+        - button "Bloquear" [ref=f1e105] [cursor=pointer]:
+          - generic [ref=f1e106]: ↗
+    - generic [ref=f1e34]:
+      - banner [ref=f1e35]:
+        - generic [ref=f1e37]: Repositório local
+        - generic [ref=f1e38]: .matriz · apps/*/.matriz
+        - button "Ativar tema claro" [ref=f1e39] [cursor=pointer]:
+          - generic [ref=f1e40]: ☀
+          - generic [ref=f1e41]: Tema dark
+        - button "Ctrl K" [ref=f1e42] [cursor=pointer]
+      - main [ref=f1e272]:
+        - generic [ref=f1e273]: Falha de leitura
+        - heading "O quadro não pôde ser carregado" [level=1] [ref=f1e274]
+        - paragraph [ref=f1e275]: Os arquivos canônicos não foram alterados. Tente novamente ou verifique a integridade do workspace.
+        - generic [ref=f1e276]:
+          - button "Tentar novamente" [ref=f1e277] [cursor=pointer]
+          - link "Voltar aos projetos" [ref=f1e278] [cursor=pointer]:
+            - /url: /projects
+  - alert [ref=f1e73]

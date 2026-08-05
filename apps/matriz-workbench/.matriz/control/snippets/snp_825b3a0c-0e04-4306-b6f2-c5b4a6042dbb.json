@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_825b3a0c-0e04-4306-b6f2-c5b4a6042dbb",
+  "projectId": "matriz-workbench",
+  "command": "/handoff",
+  "title": "Handoff",
+  "content": "Resuma o que mudou, o que permanece pendente e o próximo passo seguro.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:02:05.735Z",
+  "revision": "013132a35fdaa02b"
+}

@@ -10,7 +10,7 @@ Estas 12 leis foram travadas antes do CP-0 e se aplicam a todo o monorepo.
 
 ## L1. Schema por app é a unidade oficial de isolamento da V1
 
-Os 5 schemas Prisma são:
+Os schemas Prisma atuais são:
 
 - `prisma/schemas/core.prisma`
 - `prisma/schemas/spot.prisma`
@@ -18,7 +18,9 @@ Os 5 schemas Prisma são:
 - `prisma/schemas/contracts.prisma`
 - `prisma/schemas/willdash.prisma`
 
-Não fragmentamos schemas por subdomínio interno nesta V1. A unidade é o app.
+Não fragmentamos schemas por subdomínio interno nesta V1. A unidade é o app
+quando ele usa banco. Apps de tooling explicitamente file-backed, como o
+Matriz Workbench, não criam schema Prisma vazio (ver Decision Log).
 
 ---
 
@@ -116,7 +118,7 @@ Localização: `tests/smoke/` na raiz. Runner: **vitest**.
 Cobertura mínima:
 
 - `manifests.test.ts` — cada manifest real satisfaz `AppManifestDTO`
-- `registry.test.ts` — registry carrega 5 apps, faz lookups
+- `registry.test.ts` — registry carrega 7 apps, faz lookups
 - `dtos.test.ts` — amostras válidas/inválidas dos DTOs principais
 - `external-links.test.ts` — `createLink` + `findLinksFor`
 - `events.test.ts` — emit/on/history/off dos 6 eventos obrigatórios

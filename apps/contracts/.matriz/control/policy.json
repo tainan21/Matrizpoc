@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "projectId": "contracts",
+  "weights": {
+    "app": 0.45,
+    "docs": 0.3,
+    "features-domains": 0.25
+  },
+  "updatedAt": "2026-07-30T19:05:28.337Z",
+  "revision": "2350664907723c1a"
+}

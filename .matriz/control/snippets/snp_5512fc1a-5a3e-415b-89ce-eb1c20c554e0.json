@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "snp_5512fc1a-5a3e-415b-89ce-eb1c20c554e0",
+  "projectId": "matriz-infra-hub",
+  "command": "/verificacao",
+  "title": "Verificação",
+  "content": "Execute os gates do app e registre o resultado, arquivos alterados e riscos.",
+  "tags": [
+    "default"
+  ],
+  "updatedAt": "2026-07-30T19:06:04.187Z",
+  "revision": "48bde53c52a5a082"
+}

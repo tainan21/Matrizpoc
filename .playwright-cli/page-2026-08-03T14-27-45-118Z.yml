@@ -1,0 +1,133 @@
+- generic [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e22] [cursor=pointer]
+  - alert [ref=e16]
+  - generic [ref=e26]:
+    - link "Pular para o conteúdo" [ref=e27] [cursor=pointer]:
+      - /url: "#workspace-content"
+    - complementary [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: M
+        - generic [ref=e31]:
+          - strong [ref=e32]: Workbench
+          - generic [ref=e33]: matriz local
+      - navigation "Navegação principal" [ref=e34]:
+        - link "Foco" [ref=e35] [cursor=pointer]:
+          - /url: /
+          - generic [ref=e36]: ⌁
+        - link "Controle" [ref=e38] [cursor=pointer]:
+          - /url: /control
+          - generic [ref=e39]: ◈
+        - link "Trabalho" [ref=e41] [cursor=pointer]:
+          - /url: /work/inbox
+          - generic [ref=e42]: ◎
+        - link "Projetos" [ref=e44] [cursor=pointer]:
+          - /url: /projects
+          - generic [ref=e45]: ⌘
+        - link "Conhecimento" [ref=e47] [cursor=pointer]:
+          - /url: /knowledge
+          - generic [ref=e48]: ◇
+        - link "Sites" [ref=e50] [cursor=pointer]:
+          - /url: /sites
+          - generic [ref=e51]: ▦
+      - generic [ref=e53]:
+        - text: Apps detectados
+        - generic [ref=e54]: "8"
+      - navigation "Projetos" [ref=e55]:
+        - link "contracts" [ref=e56] [cursor=pointer]:
+          - /url: /projects/contracts
+        - link "Matriz Infra Hub" [ref=e59] [cursor=pointer]:
+          - /url: /projects/matriz-infra-hub
+        - link "Matriz Sites" [ref=e62] [cursor=pointer]:
+          - /url: /projects/sites
+        - link "Matriz Workbench" [ref=e65] [cursor=pointer]:
+          - /url: /projects/matriz-workbench
+        - link "matriz-hub" [ref=e68] [cursor=pointer]:
+          - /url: /projects/matriz-hub
+        - link "seumei" [ref=e71] [cursor=pointer]:
+          - /url: /projects/seumei
+        - link "spot" [ref=e74] [cursor=pointer]:
+          - /url: /projects/spot
+        - link "willdash" [ref=e77] [cursor=pointer]:
+          - /url: /projects/willdash
+      - generic [ref=e80]:
+        - link "Configurações" [ref=e81] [cursor=pointer]:
+          - /url: /settings
+          - generic [ref=e82]: ⚙
+        - button "Bloquear" [ref=e85] [cursor=pointer]:
+          - generic [ref=e86]: ↗
+    - generic [ref=e88]:
+      - banner [ref=e89]:
+        - generic [ref=e91]: Repositório local
+        - generic [ref=e92]: .matriz · apps/*/.matriz
+        - generic "Sistema visual ativo" [ref=e93]:
+          - generic [ref=e94]: Sistema visual
+          - combobox "Sistema visual do modo escuro" [ref=e96]:
+            - option "Default"
+            - option "Neo Brutal"
+            - option "Midnight Graphite" [selected]
+            - option "Pearl Light"
+            - option "Aurora"
+            - option "Zen"
+            - option "Pulse"
+            - option "Terra"
+            - option "Dracula"
+            - option "Glass"
+        - button "Ativar tema claro" [ref=e97] [cursor=pointer]:
+          - generic [ref=e98]: ☀
+          - generic [ref=e99]: Tema dark
+        - button "Ctrl K" [ref=e100] [cursor=pointer]
+      - main [ref=e172]:
+        - navigation "Trabalho" [ref=e173]:
+          - link "Inbox" [ref=e174] [cursor=pointer]:
+            - /url: /work/inbox
+          - link "Backlog" [ref=e175] [cursor=pointer]:
+            - /url: /work/backlog
+          - link "Sprints" [active] [ref=e176] [cursor=pointer]:
+            - /url: /work/sprints
+        - generic [ref=e365]:
+          - paragraph [ref=e366]: Compromisso e validação
+          - heading "Sprints" [level=1] [ref=e367]
+          - paragraph [ref=e368]: Tempo, intenção e decisões de outcome — sem confundir execução concluída com produto validado.
+        - generic [ref=e369]:
+          - generic [ref=e371]:
+            - strong [ref=e372]: Nenhuma sprint planejada.
+            - generic [ref=e373]: Crie o primeiro compromisso com uma intenção verificável.
+          - complementary [ref=e374]:
+            - generic [ref=e375]: Nova sprint
+            - heading "Defina primeiro a intenção" [level=2] [ref=e376]
+            - paragraph [ref=e377]: Outcomes e trabalho entram depois, dentro do contexto da sprint.
+            - generic [ref=e378]:
+              - generic [ref=e379]:
+                - text: Nome
+                - textbox "Nome" [ref=e380]:
+                  - /placeholder: Sprint adaptativa 01
+              - generic [ref=e381]:
+                - text: Sprint Intent
+                - textbox "Sprint Intent" [ref=e382]:
+                  - /placeholder: Que mudança verificável queremos validar?
+              - generic [ref=e383]:
+                - generic [ref=e384]:
+                  - text: Início
+                  - textbox "Início" [ref=e385]
+                - generic [ref=e386]:
+                  - text: Fim
+                  - textbox "Fim" [ref=e387]
+                - generic [ref=e388]:
+                  - text: WIP máximo
+                  - spinbutton "WIP máximo" [ref=e389]: "4"
+                - generic [ref=e390]:
+                  - text: Confiança
+                  - combobox "Confiança" [ref=e391]:
+                    - option "Não informar" [selected]
+                    - option "1 — baixa"
+                    - option "2"
+                    - option "3 — média"
+                    - option "4"
+                    - option "5 — alta"
+              - generic [ref=e392]:
+                - text: Justificativa da confiança
+                - textbox "Justificativa da confiança" [ref=e393]
+              - generic [ref=e394]:
+                - text: Riscos, um por linha
+                - textbox "Riscos, um por linha" [ref=e395]
+              - button "Criar em planejamento" [ref=e396] [cursor=pointer]

@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "projectId": "matriz-hub",
+  "weights": {
+    "app": 0.45,
+    "docs": 0.3,
+    "features-domains": 0.25
+  },
+  "updatedAt": "2026-07-30T19:05:29.379Z",
+  "revision": "5b6ae67e80a2c25b"
+}

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "defaultBudgetChars": 12000,
+  "absoluteBudgetChars": 40000,
+  "includeAgentInstructions": true,
+  "preferredDocs": [],
+  "updatedAt": "2026-07-29T13:10:11.033Z",
+  "revision": "93a89e7794c1f93b"
+}
