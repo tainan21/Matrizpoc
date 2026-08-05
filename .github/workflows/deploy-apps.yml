@@ -24,6 +24,7 @@ on:
   push:
     branches: [main]
     paths:
+      - ".github/workflows/deploy-apps.yml"
       - "apps/**"
       - "packages/**"
       - "pnpm-lock.yaml"
