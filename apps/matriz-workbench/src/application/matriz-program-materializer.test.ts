@@ -414,6 +414,67 @@ describe("materializeMatrizProgram", () => {
     expect((await verifyMatrizProgram(repository, plan)).valid).toBe(false)
   }, 20_000)
 
+  it("RED: requires completed-item evidence and an approved human review", async () => {
+    const { repository } = await fixture()
+    const plan = await readPlan()
+    await materializeMatrizProgram(repository, plan, "apply")
+    const third = (await repository.listWorkItems(plan.projectId)).find((item) => item.title === titles[2])!
+    let completed = await repository.updateWorkItem(plan.projectId, third.id, {
+      acceptanceCriteria: third.acceptanceCriteria.map((criterion) => ({ ...criterion, completed: true })),
+    }, third.revision)
+    for (const productStatus of ["refined", "ready", "in_progress", "validation", "completed"] as const) {
+      completed = await repository.updateWorkItem(plan.projectId, completed.id, { productStatus }, completed.revision)
+    }
+
+    expect(await verifyMatrizProgram(repository, plan)).toMatchObject({
+      valid: false,
+      completedKeys: ["matriz-program-v1-03"],
+    })
+
+    const queued = await repository.createAgentRequest(plan.projectId, completed.id, "Verify canonical materialization.")
+    const claimed = await repository.updateAgentRequest(plan.projectId, queued.id, {
+      status: "claimed",
+      claimedBy: "codex-test",
+    }, queued.revision)
+    const execution = await repository.updateAgentRequest(plan.projectId, claimed.id, {
+      status: "completed",
+      resultSummary: "Canonical materialization verified.",
+      changedFiles: [".matriz/roadmap.json"],
+      checks: ["materialize verify"],
+    }, claimed.revision)
+    await repository.reviewAgentRequest(plan.projectId, execution.id, {
+      status: "approved",
+      reviewedBy: "human-test",
+      note: "Evidence and verification reviewed.",
+    }, execution.revision)
+    completed = await repository.updateWorkItem(plan.projectId, completed.id, {
+      humanReviewStatus: "approved",
+    }, completed.revision)
+
+    expect(await verifyMatrizProgram(repository, plan)).toMatchObject({
+      valid: true,
+      completedKeys: ["matriz-program-v1-03"],
+    })
+
+    completed = await repository.updateWorkItem(plan.projectId, completed.id, {
+      references: [...completed.references, { kind: "external_url", url: "https://example.test/evidence" }],
+    }, completed.revision)
+    expect(await verifyMatrizProgram(repository, plan)).toMatchObject({ valid: false })
+
+    completed = await repository.updateWorkItem(plan.projectId, completed.id, {
+      references: [...completed.references.slice(0, 1), { kind: "repository_file", path: "docs/architectural-laws.md" }],
+    }, completed.revision)
+    expect(await verifyMatrizProgram(repository, plan)).toMatchObject({ valid: false })
+
+    const reviewed = await repository.getAgentRequest(plan.projectId, execution.id)
+    await repository.updateAgentRequest(plan.projectId, reviewed.id, {
+      changedFiles: [...reviewed.changedFiles, "docs/architectural-laws.md"],
+      resultSummary: reviewed.resultSummary,
+      checks: reviewed.checks,
+    }, reviewed.revision)
+    expect(await verifyMatrizProgram(repository, plan)).toMatchObject({ valid: true })
+  }, 20_000)
+
   it("creates 50 V2 plus five phases once, preserves V1 and score, and completes only logical item 2 after idempotency", async () => {
     const { root, repository, legacyIds, legacyBytes } = await fixture()
     const plan = await readPlan()
@@ -473,8 +534,25 @@ describe("materializeMatrizProgram", () => {
     for (const productStatus of ["refined", "ready", "in_progress", "validation"] as const) {
       importer = await repository.updateWorkItem("matriz-infra-hub", importer.id, { productStatus }, importer.revision)
     }
-    await rm(path.join(root, ".matriz", "agents"), { recursive: true, force: true })
-
+    const queuedRequest = await repository.createAgentRequest("matriz-infra-hub", importer.id, "Verify batch importer completion.")
+    const claimedRequest = await repository.updateAgentRequest("matriz-infra-hub", queuedRequest.id, {
+      status: "claimed",
+      claimedBy: "codex-test",
+    }, queuedRequest.revision)
+    const completedRequest = await repository.updateAgentRequest("matriz-infra-hub", claimedRequest.id, {
+      status: "completed",
+      resultSummary: "Batch importer verified.",
+      changedFiles: ["apps/matriz-workbench/src/application/backlog-batch-importer.ts"],
+      checks: ["materializer test"],
+    }, claimedRequest.revision)
+    await repository.reviewAgentRequest("matriz-infra-hub", completedRequest.id, {
+      status: "approved",
+      reviewedBy: "human-test",
+      note: "Completion evidence reviewed.",
+    }, completedRequest.revision)
+    importer = await repository.updateWorkItem("matriz-infra-hub", importer.id, {
+      humanReviewStatus: "approved",
+    }, importer.revision)
     const completed = await completeMatrizProgramImporterItem(repository, plan)
     const activityAfterCompletion = await repository.listActivity("matriz-infra-hub", undefined, 500)
     const completedAgain = await completeMatrizProgramImporterItem(repository, plan)

@@ -5,9 +5,9 @@
   "kind": "bug",
   "title": "Corrigir dependências vulneráveis",
   "description": "Conter dependências conhecidas com vulnerabilidades relevantes.",
-  "productStatus": "discovery",
-  "validationStatus": "pending",
-  "humanReviewStatus": "not_required",
+  "productStatus": "completed",
+  "validationStatus": "passed",
+  "humanReviewStatus": "approved",
   "documentationStatus": "not_required",
   "priority": "critical",
   "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
@@ -23,7 +23,7 @@
     {
       "id": "ac_6db01b06-0ca6-41ca-be90-cf3a315ddade",
       "text": "Next >=16.2.11, MCP SDK, PostCSS e Sharp corrigidos; nenhum high/critical silencioso.",
-      "completed": false
+      "completed": true
     }
   ],
   "dependencyIds": [
@@ -36,6 +36,6 @@
     }
   ],
   "createdAt": "2026-08-05T18:33:25.742Z",
-  "updatedAt": "2026-08-05T18:33:28.774Z",
-  "revision": "2db92d2f509500f9"
+  "updatedAt": "2026-08-12T04:22:03.365Z",
+  "revision": "00eb2e38728e9077"
 }

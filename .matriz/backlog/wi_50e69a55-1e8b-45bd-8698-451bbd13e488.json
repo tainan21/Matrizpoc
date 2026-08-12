@@ -5,9 +5,9 @@
   "kind": "task",
   "title": "Produzir threat model e inventário de endpoints",
   "description": "Mapear superfícies de ataque e limites de confiança do ecossistema.",
-  "productStatus": "discovery",
+  "productStatus": "completed",
   "validationStatus": "not_required",
-  "humanReviewStatus": "not_required",
+  "humanReviewStatus": "approved",
   "documentationStatus": "not_required",
   "priority": "critical",
   "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
@@ -23,7 +23,7 @@
     {
       "id": "ac_c3cc567c-1361-4898-8499-8611d03afe74",
       "text": "Rotas, actions, MCP, dados, trust boundaries, auth, CSRF, SSRF, arquivos, cache e mutações classificados.",
-      "completed": false
+      "completed": true
     }
   ],
   "dependencyIds": [
@@ -36,6 +36,6 @@
     }
   ],
   "createdAt": "2026-08-05T18:33:25.862Z",
-  "updatedAt": "2026-08-05T18:33:28.925Z",
-  "revision": "eb7d139351a5c5b0"
+  "updatedAt": "2026-08-12T04:22:03.504Z",
+  "revision": "f4bb18efc64e12da"
 }

@@ -246,7 +246,10 @@ export async function materializeMatrizProgram(
     await repository.writeImportReceipt(plan.projectId, plan.batchId, importedReceipt)
   }
 
-  const allItems = await repository.listWorkItems(plan.projectId)
+  const [allItems, agentRequests] = await Promise.all([
+    repository.listWorkItems(plan.projectId),
+    repository.listAgentRequests(plan.projectId),
+  ])
   const resolved = importedItemsByReceipt(allItems, plan, importedReceipt)
   if (!resolved.valid) {
     throw new WorkspaceError("O receipt do programa não resolve os 50 WorkItems canônicos.", "CONFLICT")
@@ -286,7 +289,7 @@ export async function materializeMatrizProgram(
 async function inspectMatrizProgram(
   repository: WorkspaceRepository,
   plan: BacklogBatchPlan,
-  allowImporterProgress: boolean,
+  allowImporterProgress = false,
 ): Promise<MatrizProgramVerificationReport> {
   const receipt = await repository.readImportReceipt(plan.projectId, plan.batchId, backlogBatchReceiptSchema)
     .catch((error: unknown) => {
@@ -297,7 +300,10 @@ async function inspectMatrizProgram(
   const planKeys = plan.items.map((item) => item.key).sort()
   const receiptKeysValid = receiptKeys.length === 50 &&
     receiptKeys.every((key, index) => key === planKeys[index])
-  const allItems = await repository.listWorkItems(plan.projectId)
+  const [allItems, agentRequests] = await Promise.all([
+    repository.listWorkItems(plan.projectId),
+    repository.listAgentRequests(plan.projectId),
+  ])
   const resolved = importedItemsByReceipt(allItems, plan, receipt)
   const { byKey } = resolved
   const roadmap = await repository.getRoadmap(plan.projectId)
@@ -315,18 +321,37 @@ async function inspectMatrizProgram(
     }
     const expectedParentId = candidate.parentKey ? byKey.get(candidate.parentKey)?.id : undefined
     const expectedDependencyIds = candidate.dependencies.map((key) => byKey.get(key)?.id)
-    const isImporter = candidate.key === IMPORTER_KEY
-    const isCompletedImporter = candidate.key === IMPORTER_KEY && item.productStatus === "completed"
     const defaultValidation = candidate.kind === "task" ? "not_required" : "pending"
-    const criterionCompleted = item.acceptanceCriteria[0]?.completed ?? false
+    const completionValidationValid = candidate.kind === "task"
+      ? item.validationStatus === "not_required"
+      : ["passed", "waived"].includes(item.validationStatus)
+    const requestsForItem = agentRequests.filter((request) => request.backlogItemId === item.id)
+    const completedRequests = requestsForItem.filter((request) => request.status === "completed")
+    const approvedEvidenceRequests = completedRequests.filter((request) =>
+      request.checks.length > 0 &&
+      (request.changedFiles.length > 0 || Boolean(request.resultSummary?.trim())) &&
+      request.review?.status === "approved",
+    )
+    const completionEvidenceValid = approvedEvidenceRequests.length > 0 && item.humanReviewStatus === "approved"
+    const canonicalReferenceCount = candidate.references.length
+    const extraReferencesValid = item.references.slice(canonicalReferenceCount).every((reference) =>
+      reference.kind === "repository_file" && approvedEvidenceRequests.some((request) =>
+        request.changedFiles.includes(reference.path),
+      ),
+    )
+    const documentationValid = item.documentationStatus !== "stale" &&
+      (candidate.kind !== "outcome" || item.documentationStatus === "current")
+    const criteriaCompleted = item.acceptanceCriteria.every((criterion) => criterion.completed)
     const defaultLifecycle = item.productStatus === "discovery" &&
-      !criterionCompleted && item.validationStatus === defaultValidation
-    const completedLifecycle = isCompletedImporter && criterionCompleted && item.validationStatus === "passed"
-    const resumableLifecycle = allowImporterProgress && isImporter &&
+      !criteriaCompleted && item.validationStatus === defaultValidation &&
+      item.humanReviewStatus === "not_required" &&
+      item.documentationStatus === (candidate.kind === "outcome" ? "pending" : "not_required")
+    const completedLifecycle = item.productStatus === "completed" &&
+      criteriaCompleted && completionValidationValid && completionEvidenceValid && documentationValid
+    const importerProgress = allowImporterProgress && candidate.key === IMPORTER_KEY &&
       PRODUCT_FLOW.includes(item.productStatus as typeof PRODUCT_FLOW[number]) &&
-      (item.productStatus === "discovery"
-        ? defaultLifecycle || (criterionCompleted && item.validationStatus === "passed")
-        : criterionCompleted && item.validationStatus === "passed")
+      item.productStatus !== "discovery" && item.productStatus !== "completed" &&
+      criteriaCompleted && completionValidationValid && documentationValid
     if (item.productStatus === "completed") completedKeys.push(candidate.key)
     if (item.productStatus === "discovery") discoveryKeys.push(candidate.key)
     itemShapesValid = itemShapesValid &&
@@ -342,12 +367,11 @@ async function inspectMatrizProgram(
       JSON.stringify(item.workScope) === JSON.stringify({ kind: "project" }) &&
       JSON.stringify(item.dependencyIds) === JSON.stringify(expectedDependencyIds) &&
       JSON.stringify(item.tags) === JSON.stringify(candidate.tags) &&
-      JSON.stringify(item.references) === JSON.stringify(candidate.references) &&
+      JSON.stringify(item.references.slice(0, canonicalReferenceCount)) === JSON.stringify(candidate.references) &&
+      extraReferencesValid &&
       item.acceptanceCriteria.length === 1 &&
       item.acceptanceCriteria[0].text === candidate.acceptanceCriteria[0] &&
-      (defaultLifecycle || completedLifecycle || resumableLifecycle) &&
-      item.humanReviewStatus === "not_required" &&
-      item.documentationStatus === (candidate.kind === "outcome" ? "pending" : "not_required")
+      (defaultLifecycle || completedLifecycle || importerProgress)
   }
   const initiatives = roadmap.phases.flatMap((phase) => phase.initiatives)
   const referencesPerInitiative = initiatives.map((initiative) => initiative.backlogIds.length)
@@ -357,8 +381,9 @@ async function inspectMatrizProgram(
       return resolvedItem ? [[item.key, resolvedItem.id]] : []
     }),
   )
-  const statusShapeValid = completedKeys.length === 0 ||
-    (completedKeys.length === 1 && completedKeys[0] === IMPORTER_KEY)
+  const statusShapeValid = allowImporterProgress
+    ? completedKeys.length + discoveryKeys.length <= plan.items.length
+    : completedKeys.length + discoveryKeys.length === plan.items.length
   const roadmapValid = JSON.stringify(roadmap.phases) === JSON.stringify(desiredPhases)
   const scorePoints = [
     ...roadmap.goals,
@@ -409,7 +434,7 @@ export async function verifyMatrizProgram(
   repository: WorkspaceRepository,
   plan: BacklogBatchPlan,
 ): Promise<MatrizProgramVerificationReport> {
-  return inspectMatrizProgram(repository, plan, false)
+  return inspectMatrizProgram(repository, plan)
 }
 
 export async function completeMatrizProgramImporterItem(
