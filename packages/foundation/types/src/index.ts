@@ -28,6 +28,7 @@ export type MembershipId = Brand<string, "MembershipId">
 
 /** Canonical list of known app IDs (mirrors foundation-constants). */
 export type AppIdLiteral =
+  | "matriz-identity"
   | "matriz-hub"
   | "matriz-workbench"
   | "sites"
