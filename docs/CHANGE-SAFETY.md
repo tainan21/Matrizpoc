@@ -42,12 +42,10 @@ os seis schemas e gere/inspecione os clients de `core`, `hub`, `spot`, `seumei`,
 worktree deve ser revisado depois; nenhum client gerado pode ficar omitido por
 estar fora do script agregado.
 
-Há uma dívida conhecida até a Task 5: o script atual `pnpm prisma:generate`
-cobre apenas `core`, `hub`, `seumei` e `contracts`. Até que a Task 5 a corrija,
-uma validação que exija geração completa deve invocar também `prisma generate
---schema prisma/schemas/spot.prisma` e `prisma generate --schema
-prisma/schemas/willdash.prisma`, além de conferir o estado limpo ou as saídas
-geradas esperadas.
+O script agregado `pnpm prisma:generate` cobre `core`, `hub`, `spot`, `seumei`,
+`contracts` e `willdash`, usando as fontes em
+`prisma/<schema>/schema.prisma`. Sempre confira o estado do worktree depois da
+geração e investigue qualquer saída inesperada.
 
 ## Ambiente e dados sensíveis
 

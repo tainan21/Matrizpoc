@@ -18,6 +18,20 @@ jobs:
     name: Linux validation matrix
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: prisma
+          POSTGRES_PASSWORD: prisma
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U prisma"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core
       HUB_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=hub
@@ -25,6 +39,8 @@ jobs:
       SEUMEI_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=seumei
       CONTRACTS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=contracts
       WILLDASH_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=willdash
+      MIGRATION_TEST_ZERO_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_zero
+      MIGRATION_TEST_N_MINUS_ONE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_previous
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +58,12 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Audit production dependencies
         run: pnpm audit:prod
+      - name: Create disposable migration databases
+        run: |
+          PGPASSWORD=prisma createdb -h 127.0.0.1 -U prisma matriz_migrations_zero
+          PGPASSWORD=prisma createdb -h 127.0.0.1 -U prisma matriz_migrations_previous
+      - name: Run Prisma migration matrix
+        run: pnpm prisma:migrate:test
       - name: Validate Prisma schemas
         run: pnpm prisma:validate
       - name: Generate all Prisma clients

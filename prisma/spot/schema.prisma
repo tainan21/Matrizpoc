@@ -144,3 +144,10 @@ model SpotPreference {
 
   @@map("spot_preferences")
 }
+model MatrizSchemaRelease {
+  id        String   @id @default(cuid())
+  version   String   @unique
+  appliedAt DateTime @default(now())
+
+  @@map("__matriz_schema_releases")
+}

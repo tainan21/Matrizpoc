@@ -1,0 +1,77 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+import { describe, expect, it } from "vitest"
+
+const root = process.cwd()
+const schemas = ["core", "hub", "spot", "seumei", "contracts", "willdash"] as const
+const databaseUrlNames = {
+  core: "CORE_DATABASE_URL",
+  hub: "HUB_DATABASE_URL",
+  spot: "SPOT_DATABASE_URL",
+  seumei: "SEUMEI_DATABASE_URL",
+  contracts: "CONTRACTS_DATABASE_URL",
+  willdash: "WILLDASH_DATABASE_URL",
+} as const
+
+describe("independent Prisma migration roots", () => {
+  it.each(schemas)("keeps %s schema and versioned migrations together", (schema) => {
+    const schemaPath = join(root, "prisma", schema, "schema.prisma")
+    const baselinePath = join(
+      root,
+      "prisma",
+      schema,
+      "migrations",
+      "202608120001_baseline",
+      "migration.sql",
+    )
+    const upgradePath = join(
+      root,
+      "prisma",
+      schema,
+      "migrations",
+      "202608120002_release_marker",
+      "migration.sql",
+    )
+
+    expect(readFileSync(schemaPath, "utf8")).toContain(`env("${databaseUrlNames[schema]}")`)
+    const baseline = readFileSync(baselinePath, "utf8")
+    const upgrade = readFileSync(upgradePath, "utf8")
+    const schemaDeclaration = baseline.indexOf(`CREATE SCHEMA IF NOT EXISTS \"${schema}\"`)
+    const searchPath = baseline.indexOf(`SET search_path TO \"${schema}\"`)
+    const firstObject = [baseline.indexOf("CREATE TYPE"), baseline.indexOf("CREATE TABLE")]
+      .filter((position) => position >= 0)
+      .sort((left, right) => left - right)[0]
+
+    expect(schemaDeclaration).toBeGreaterThanOrEqual(0)
+    expect(searchPath).toBeGreaterThan(schemaDeclaration)
+    expect(firstObject).toBeGreaterThan(searchPath)
+    expect(upgrade).toContain('CREATE TABLE "__matriz_schema_releases"')
+    expect(upgrade).not.toContain("SELECT 1")
+    expect(readFileSync(schemaPath, "utf8")).toContain('@@map("__matriz_schema_releases")')
+  })
+
+  it("exposes from-zero, N-1, deploy and drift gates", () => {
+    const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as {
+      scripts: Record<string, string>
+    }
+    const workflow = readFileSync(join(root, ".github", "workflows", "ci.yml"), "utf8")
+
+    expect(packageJson.scripts["prisma:migrate:deploy"]).toContain("migration-matrix.ts deploy")
+    expect(packageJson.scripts["prisma:migrate:test"]).toContain("migration-matrix.ts test")
+    expect(packageJson.scripts["prisma:migrate:drift"]).toContain("migration-matrix.ts drift")
+    expect(workflow).toContain("Run Prisma migration matrix")
+    expect(workflow).toContain("pnpm prisma:migrate:test")
+  })
+
+  it("fails closed unless migration-only credentials are supplied", () => {
+    const runner = readFileSync(join(root, "tooling", "scripts", "migration-matrix.ts"), "utf8")
+
+    expect(runner).toContain("_MIGRATION_DATABASE_URL")
+    expect(runner).not.toContain("process.env.DATABASE_URL")
+    expect(runner).toContain("Missing disposable migration test database URLs")
+    expect(runner).toContain("two distinct databases")
+    expect(runner).toContain("assertReleaseTable")
+    expect(runner).toContain("Expected release table to be absent")
+    expect(runner).toContain("Expected release table to exist")
+  })
+})
