@@ -1,26 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
   transpilePackages: [
-    "@matriz/access-tenants",
     "@matriz/design-system",
     "@matriz/design-ui",
-    "@matriz/flows-onboarding",
-    "@matriz/foundation-constants",
-    "@matriz/foundation-schemas",
-    "@matriz/foundation-types",
-    "@matriz/foundation-utils",
+    "@matriz/flows-ecosystem",
     "@matriz/integration-api-contracts",
-    "@matriz/integration-events",
-    "@matriz/integration-external-links",
-    "@matriz/integration-manifests",
     "@matriz/integration-registry-core",
-    "@matriz/platform-auth",
     "@matriz/platform-config",
-    "@matriz/platform-storage",
-    "@matriz/platform-telemetry",
   ],
-  reactStrictMode: true,
-  poweredByHeader: false,
   async headers() {
     return [{
       source: "/:path*",
