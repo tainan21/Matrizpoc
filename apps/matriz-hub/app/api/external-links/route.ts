@@ -5,7 +5,8 @@ import { getHubRequestContext, HubAuthError } from "../../../src/auth/hub-sessio
 export const dynamic = "force-dynamic"
 
 export function GET(request: Request) {
-  try { getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
+  let context
+  try { context = getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
   const store = getGlobalExternalLinkStore()
-  return NextResponse.json({ links: store.list() }, { headers: { "cache-control": "private, no-store" } })
+  return NextResponse.json({ links: store.listByTenant(context.session.activeTenantId) }, { headers: { "cache-control": "private, no-store" } })
 }

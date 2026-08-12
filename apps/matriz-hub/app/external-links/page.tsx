@@ -1,9 +1,11 @@
 import { Stack, Card, Heading, Text, EmptyState, Badge } from "@matriz/design-ui"
 import { getGlobalExternalLinkStore } from "@matriz/integration-external-links"
+import { getHubPageRequestContext } from "../../src/auth/page-context"
 
-export default function ExternalLinksPage() {
+export default async function ExternalLinksPage() {
+  const context = await getHubPageRequestContext()
   const store = getGlobalExternalLinkStore()
-  const links = store.list()
+  const links = store.listByTenant(context.session.activeTenantId)
 
   return (
     <Stack gap={6}>

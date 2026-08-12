@@ -25,12 +25,13 @@ export function OPTIONS(request: Request) {
 }
 
 export async function GET(request: Request) {
-  try { getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
+  let context
+  try { context = getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
   const key = new URL(request.url).searchParams.get("key")?.trim()
   const headers = sharedCacheHeaders(request.headers.get("origin"))
   if (!isSharedCacheOriginAllowed(request.headers.get("origin"))) return NextResponse.json({ error: "origin not allowed" }, { status: 403 })
   if (!key || key.length > 64) return NextResponse.json({ error: "valid key is required" }, { status: 400, headers })
-  const entry = store.get(key)
+  const entry = store.get(tenantCacheKey(context.session.activeTenantId, key))
   if (!entry) return NextResponse.json({ error: "not found" }, { status: 404, headers })
   return NextResponse.json(entry, { headers: { ...headers, "cache-control": "private, no-store" } })
 }
@@ -53,10 +54,14 @@ export async function PUT(request: Request) {
     updatedBy: context.session.identity.user.id,
     updatedAt: new Date().toISOString(),
   }
-  store.set(entry.key, entry)
+  store.set(tenantCacheKey(context.session.activeTenantId, entry.key), entry)
   return NextResponse.json(entry, { headers })
 }
 
 function tryParseJson(text: string): unknown {
   try { return JSON.parse(text) } catch { return null }
+}
+
+function tenantCacheKey(tenantId: string, key: string): string {
+  return `${tenantId}:${key}`
 }

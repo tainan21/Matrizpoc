@@ -1,9 +1,11 @@
 import { Stack, Card, Heading, Text, EmptyState, Badge } from "@matriz/design-ui"
 import { getGlobalEventBus } from "@matriz/integration-events"
+import { getHubPageRequestContext } from "../../src/auth/page-context"
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  const context = await getHubPageRequestContext()
   const bus = getGlobalEventBus()
-  const history = bus.history()
+  const history = bus.history().filter((event) => event.tenantId === context.session.activeTenantId)
 
   return (
     <Stack gap={6}>

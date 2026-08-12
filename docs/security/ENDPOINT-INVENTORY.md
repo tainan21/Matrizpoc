@@ -69,7 +69,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/docs/timeline` | `apps/matriz-hub/app/api/docs/timeline/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:POST:/api/institutional/refresh` | `apps/matriz-hub/app/api/institutional/refresh/route.ts:22` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:27` | `GET` | R | `H-CACHE` |
-| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:38` | `PUT` | M | `H-CACHE` |
+| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:39` | `PUT` | M | `H-CACHE` |
 | `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:20` | `OPTIONS` | R | `H-CACHE` |
 | `HTTP:matriz-hub:GET:/api/ecosystem/health` | `apps/matriz-hub/app/api/ecosystem/health/route.ts:6` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/events` | `apps/matriz-hub/app/api/events/route.ts:7` | `GET` | R | `H-R` |

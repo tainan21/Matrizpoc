@@ -11,6 +11,7 @@ import {
 } from "@matriz/design-ui"
 import { collectAllTelemetry, getAllTelemetryClients } from "@matriz/platform-telemetry"
 import { bootstrapMatrizHub } from "../../src/bootstrap"
+import { getHubPageRequestContext } from "../../src/auth/page-context"
 
 export const dynamic = "force-dynamic"
 
@@ -25,10 +26,11 @@ export default async function TelemetryPage({
   searchParams: Promise<SearchParams>
 }) {
   bootstrapMatrizHub()
+  const context = await getHubPageRequestContext()
   const sp = await searchParams
 
   const clients = getAllTelemetryClients()
-  const all = collectAllTelemetry()
+  const all = collectAllTelemetry().filter((event) => event.tenantId === context.session.activeTenantId)
   const filtered = all.filter((e) => {
     if (sp.app && e.appId !== sp.app) return false
     if (sp.type && !e.type.includes(sp.type)) return false
