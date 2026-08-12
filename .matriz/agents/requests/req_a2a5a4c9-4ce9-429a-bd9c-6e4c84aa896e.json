@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "req_a2a5a4c9-4ce9-429a-bd9c-6e4c84aa896e",
+  "projectId": "matriz-infra-hub",
+  "backlogItemId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "title": "Outcome: estabilizar a fundação Matriz",
+  "instructions": "Consolidar o gate integrado da Onda 1 após keys02–10 concluídas e registrar a evidência global verificável.",
+  "status": "completed",
+  "claimedBy": "codex-wave1",
+  "resultSummary": "Gate integrado da Onda 1 concluído: itens 02–10 completos, riscos críticos contidos e baseline arquitetural e de segurança atualizados.",
+  "changedFiles": [
+    "docs/architectural-laws.md",
+    "docs/security/THREAT-MODEL.md",
+    "docs/security/ENDPOINT-INVENTORY.md",
+    ".superpowers/sdd/2026-08-05-matriz-wave-1/progress.md",
+    ".superpowers/sdd/2026-08-05-matriz-wave-1/task-7-report.md",
+    ".superpowers/sdd/2026-08-05-matriz-wave-1/task-8-report.md"
+  ],
+  "checks": [
+    "keys02–10: completed",
+    "commit 8f00d44 e review independente APPROVE R3",
+    "focused: 34/34; Sites: 5/5; audit: 0",
+    "global lint/typecheck: PASS; smoke: 28 arquivos / 208; boundaries: 7",
+    "builds Hub, Spot, Seumei, Contracts, WillDash e Sites: PASS"
+  ],
+  "review": {
+    "status": "approved",
+    "reviewedBy": "independent-review-r3",
+    "reviewedAt": "2026-08-12T17:39:23.550Z",
+    "note": "APPROVE R3 independente do gate integrado da Onda 1.",
+    "runRevision": "8f00d44a0cf65edecf7b0e75ea38f94bbabe8666"
+  },
+  "createdAt": "2026-08-12T17:39:23.531Z",
+  "updatedAt": "2026-08-12T17:39:23.550Z",
+  "revision": "00fc9ebdfa594e43"
+}

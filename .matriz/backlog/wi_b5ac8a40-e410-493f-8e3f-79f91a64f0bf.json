@@ -5,10 +5,10 @@
   "kind": "outcome",
   "title": "Outcome: estabilizar a fundação Matriz",
   "description": "Outcome da Onda 1 para conter riscos e estabilizar a fundação do ecossistema.",
-  "productStatus": "discovery",
-  "validationStatus": "pending",
-  "humanReviewStatus": "not_required",
-  "documentationStatus": "pending",
+  "productStatus": "completed",
+  "validationStatus": "passed",
+  "humanReviewStatus": "approved",
+  "documentationStatus": "current",
   "priority": "critical",
   "workScope": {
     "kind": "project"
@@ -22,7 +22,7 @@
     {
       "id": "ac_bf2ed4f4-02e0-43ab-8a81-b43ff91e4868",
       "text": "Itens 2–10 concluídos, vulnerabilidades críticas contidas e baseline arquitetural atualizada.",
-      "completed": false
+      "completed": true
     }
   ],
   "dependencyIds": [],
@@ -30,9 +30,29 @@
     {
       "kind": "repository_file",
       "path": "docs/architectural-laws.md"
+    },
+    {
+      "kind": "repository_file",
+      "path": "docs/security/THREAT-MODEL.md"
+    },
+    {
+      "kind": "repository_file",
+      "path": "docs/security/ENDPOINT-INVENTORY.md"
+    },
+    {
+      "kind": "repository_file",
+      "path": ".superpowers/sdd/2026-08-05-matriz-wave-1/progress.md"
+    },
+    {
+      "kind": "repository_file",
+      "path": ".superpowers/sdd/2026-08-05-matriz-wave-1/task-7-report.md"
+    },
+    {
+      "kind": "repository_file",
+      "path": ".superpowers/sdd/2026-08-05-matriz-wave-1/task-8-report.md"
     }
   ],
   "createdAt": "2026-08-05T18:33:25.397Z",
-  "updatedAt": "2026-08-05T18:33:28.571Z",
-  "revision": "44c9abe605bf71cd"
+  "updatedAt": "2026-08-12T17:39:23.594Z",
+  "revision": "f60f6cf9f7a0cbf2"
 }
