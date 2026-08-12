@@ -6,8 +6,10 @@
   "exports": {
     "./core": "./src/core.ts",
     "./hub": "./src/hub.ts",
+    "./spot": "./src/spot.ts",
     "./seumei": "./src/seumei.ts",
     "./contracts": "./src/contracts.ts",
+    "./willdash": "./src/willdash.ts",
     "./core/repositories": "./src/repositories/core/index.ts",
     "./hub/repositories": "./src/repositories/hub/index.ts",
     "./seumei/repositories": "./src/repositories/seumei/index.ts",

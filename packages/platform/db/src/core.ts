@@ -11,29 +11,11 @@
  * boundaries: this is the only file that imports from `.prisma/core`.
  */
 import { PrismaClient } from "../../../../node_modules/.prisma/core/index.js"
-
-type GlobalWithCore = typeof globalThis & {
-  __matrizCoreDb__?: PrismaClient
-}
-
-const globalForCore = globalThis as GlobalWithCore
+import { getOrCreateSchemaClient } from "./client-runtime"
 
 export function getCoreDb(): PrismaClient {
-  if (!globalForCore.__matrizCoreDb__) {
-    globalForCore.__matrizCoreDb__ = new PrismaClient({
-      datasources: {
-        db: {
-          url:
-            process.env.CORE_DATABASE_URL ??
-            process.env.DATABASE_URL ??
-            "postgresql://user:pass@localhost:5432/matriz?schema=core",
-        },
-      },
-      log: process.env.NODE_ENV === "production" ? ["error"] : ["warn", "error"],
-    })
-  }
-  return globalForCore.__matrizCoreDb__
+  return getOrCreateSchemaClient({ Client: PrismaClient, environmentName: "CORE_DATABASE_URL", globalKey: "__matrizCoreDb__" })
 }
 
 export type { PrismaClient as CorePrismaClient } from "../../../../node_modules/.prisma/core/index.js"
-export * from "../../../../node_modules/.prisma/core/index.js"
+export { AuthChallengeKind, AuthProvider } from "../../../../node_modules/.prisma/core/index.js"
