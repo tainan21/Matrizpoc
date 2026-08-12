@@ -104,6 +104,7 @@ model TenantMembership {
   appGrants AppGrant[]
 
   @@unique([tenantId, userId])
+  @@unique([tenantId, id])
   @@index([tenantId, revokedAt])
   @@index([userId, revokedAt])
   @@map("tenant_memberships")
@@ -125,13 +126,13 @@ model AppGrant {
   updatedAt        DateTime @updatedAt
 
   tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  membership TenantMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  membership TenantMembership @relation(fields: [tenantId, membershipId], references: [tenantId, id], onDelete: Cascade)
   grantedBy  User?            @relation("AppGrantGrantedBy", fields: [grantedByUserId], references: [id], onDelete: SetNull)
   revokedBy  User?            @relation("AppGrantRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
 
-  @@unique([membershipId, appId])
+  @@unique([tenantId, membershipId, appId])
   @@index([tenantId, appId, revokedAt])
-  @@index([membershipId, revokedAt])
+  @@index([tenantId, membershipId, revokedAt])
   @@map("app_grants")
 }
 

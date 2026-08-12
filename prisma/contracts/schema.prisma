@@ -40,14 +40,16 @@ model Contract {
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
-  template  ContractTemplate? @relation(fields: [templateId], references: [id])
+  template  ContractTemplate? @relation(fields: [tenantId, templateId], references: [tenantId, id])
   parties   ContractParty[]
   versions  ContractVersion[]
   events    ContractEvent[]
 
   @@unique([tenantId, reference])
+  @@unique([tenantId, id])
   @@index([tenantId, status])
   @@index([tenantId, originApp])
+  @@index([tenantId, templateId])
   @@map("contracts")
 }
 
@@ -76,10 +78,10 @@ model ContractParty {
   signedAt    DateTime?
   createdAt   DateTime          @default(now())
 
-  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contract Contract @relation(fields: [tenantId, contractId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([contractId])
+  @@index([tenantId, contractId])
   @@map("contract_parties")
 }
 
@@ -105,10 +107,10 @@ model ContractVersion {
   createdBy   String?
   createdAt   DateTime @default(now())
 
-  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contract Contract @relation(fields: [tenantId, contractId], references: [tenantId, id], onDelete: Cascade)
 
-  @@unique([contractId, versionNo])
-  @@index([tenantId])
+  @@unique([tenantId, contractId, versionNo])
+  @@index([tenantId, contractId])
   @@map("contract_versions")
 }
 
@@ -124,10 +126,10 @@ model ContractEvent {
   actorId    String?
   occurredAt DateTime @default(now())
 
-  contract Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  contract Contract @relation(fields: [tenantId, contractId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([contractId, occurredAt])
+  @@index([tenantId, contractId, occurredAt])
   @@map("contract_events")
 }
 
@@ -148,6 +150,7 @@ model ContractTemplate {
   contracts Contract[]
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId])
   @@map("contract_templates")
 }

@@ -39,6 +39,7 @@ model Goal {
   activity  ActivityRecord[]
 
   @@index([tenantId])
+  @@unique([tenantId, id])
   @@index([tenantId, status])
   @@map("goals")
 }
@@ -71,10 +72,10 @@ model RewardRule {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 
-  goal Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goal Goal @relation(fields: [tenantId, goalId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([goalId])
+  @@index([tenantId, goalId])
   @@map("reward_rules")
 }
 
@@ -98,11 +99,12 @@ model ActivityRecord {
   note       String?
   occurredAt DateTime @default(now())
 
-  goal Goal? @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  goal Goal? @relation(fields: [tenantId, goalId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId])
   @@index([tenantId, ownerId])
-  @@index([occurredAt])
+  @@index([tenantId, goalId])
+  @@index([tenantId, occurredAt])
   @@map("activity_records")
 }
 

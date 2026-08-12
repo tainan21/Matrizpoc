@@ -39,6 +39,7 @@ model Band {
   gigs     Gig[]
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId])
   @@map("bands")
 }
@@ -58,10 +59,10 @@ model ArtistProfile {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  band Band @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  band Band @relation(fields: [tenantId, bandId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([bandId])
+  @@index([tenantId, bandId])
   @@map("artist_profiles")
 }
 
@@ -86,11 +87,12 @@ model Gig {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  band     Band         @relation(fields: [bandId], references: [id], onDelete: Cascade)
+  band     Band         @relation(fields: [tenantId, bandId], references: [tenantId, id], onDelete: Cascade)
   bookings GigBooking[]
 
   @@index([tenantId])
-  @@index([bandId])
+  @@unique([tenantId, id])
+  @@index([tenantId, bandId])
   @@index([tenantId, status])
   @@map("gigs")
 }
@@ -115,10 +117,10 @@ model GigBooking {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 
-  gig Gig @relation(fields: [gigId], references: [id], onDelete: Cascade)
+  gig Gig @relation(fields: [tenantId, gigId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([gigId])
+  @@index([tenantId, gigId])
   @@map("gig_bookings")
 }
 

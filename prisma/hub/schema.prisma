@@ -157,7 +157,7 @@ model DocDocument {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  currentVersion       DocDocumentVersion?     @relation("DocDocumentCurrentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+  currentVersion       DocDocumentVersion?     @relation("DocDocumentCurrentVersion", fields: [tenantId, currentVersionId], references: [tenantId, id], onDelete: NoAction)
   versions             DocDocumentVersion[]    @relation("DocDocumentVersions")
   blocks               DocBlock[]
   chunks               DocChunk[]
@@ -170,10 +170,12 @@ model DocDocument {
   governanceCandidates DocGovernanceCandidate[]
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId, status])
   @@index([tenantId, type])
   @@index([tenantId, visibility])
   @@index([tenantId, sensitivity])
+  @@index([tenantId, currentVersionId])
   @@index([projectId])
   @@map("doc_documents")
 }
@@ -196,7 +198,7 @@ model DocDocumentVersion {
   metadata         Json?
   createdAt        DateTime  @default(now())
 
-  document            DocDocument          @relation("DocDocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  document            DocDocument          @relation("DocDocumentVersions", fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
   currentForDocuments DocDocument[]        @relation("DocDocumentCurrentVersion")
   blocks              DocBlock[]
   chunks              DocChunk[]
@@ -206,8 +208,9 @@ model DocDocumentVersion {
   exportArtifacts     DocExportArtifact[]
 
   @@unique([tenantId, documentId, versionNumber])
+  @@unique([tenantId, id])
   @@index([tenantId, status])
-  @@index([documentId])
+  @@index([tenantId, documentId])
   @@map("doc_document_versions")
 }
 
@@ -226,9 +229,9 @@ model DocBlock {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  document            DocDocument             @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  version             DocDocumentVersion      @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  parent              DocBlock?               @relation("DocBlockTree", fields: [parentBlockId], references: [id], onDelete: SetNull)
+  document            DocDocument             @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  version             DocDocumentVersion      @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: Cascade)
+  parent              DocBlock?               @relation("DocBlockTree", fields: [tenantId, parentBlockId], references: [tenantId, id], onDelete: NoAction)
   children            DocBlock[]              @relation("DocBlockTree")
   chunks              DocChunk[]
   entityMentions      DocEntityMention[]
@@ -237,6 +240,9 @@ model DocBlock {
   governanceCandidates DocGovernanceCandidate[]
 
   @@index([tenantId, documentId, versionId])
+  @@unique([tenantId, id])
+  @@index([tenantId, versionId])
+  @@index([tenantId, parentBlockId])
   @@index([tenantId, type])
   @@index([tenantId, sensitivity])
   @@map("doc_blocks")
@@ -254,12 +260,13 @@ model DocChunk {
   metadata    Json?
   createdAt   DateTime @default(now())
 
-  document DocDocument        @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  version  DocDocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  block    DocBlock?          @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  document DocDocument        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  version  DocDocumentVersion @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: Cascade)
+  block    DocBlock?          @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId, documentId])
   @@index([tenantId, versionId])
+  @@index([tenantId, blockId])
   @@map("doc_chunks")
 }
 
@@ -278,12 +285,15 @@ model DocSourceArtifact {
   metadata         Json?
   createdAt        DateTime @default(now())
 
-  document DocDocument?        @relation(fields: [documentId], references: [id], onDelete: SetNull)
-  version  DocDocumentVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  document DocDocument?        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: NoAction)
+  version  DocDocumentVersion? @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: NoAction)
   conversionRuns DocConversionRun[]
 
   @@index([tenantId, artifactType])
   @@index([tenantId, sourceKind])
+  @@index([tenantId, documentId])
+  @@index([tenantId, versionId])
+  @@unique([tenantId, id])
   @@map("doc_source_artifacts")
 }
 
@@ -302,12 +312,13 @@ model DocConversionRun {
   result           Json?
   error            Json?
 
-  document       DocDocument        @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  sourceArtifact DocSourceArtifact? @relation(fields: [sourceArtifactId], references: [id], onDelete: SetNull)
+  document       DocDocument        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  sourceArtifact DocSourceArtifact? @relation(fields: [tenantId, sourceArtifactId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId, status])
   @@index([tenantId, runType])
-  @@index([documentId, startedAt])
+  @@index([tenantId, documentId, startedAt])
+  @@index([tenantId, sourceArtifactId])
   @@map("doc_conversion_runs")
 }
 
@@ -329,6 +340,7 @@ model KnowledgeNode {
   entityMentions DocEntityMention[]
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId, type])
   @@map("knowledge_nodes")
 }
@@ -349,13 +361,13 @@ model KnowledgeEdge {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  sourceNode KnowledgeNode @relation("KnowledgeEdgeSource", fields: [sourceNodeId], references: [id], onDelete: Cascade)
-  targetNode KnowledgeNode @relation("KnowledgeEdgeTarget", fields: [targetNodeId], references: [id], onDelete: Cascade)
+  sourceNode KnowledgeNode @relation("KnowledgeEdgeSource", fields: [tenantId, sourceNodeId], references: [tenantId, id], onDelete: Cascade)
+  targetNode KnowledgeNode @relation("KnowledgeEdgeTarget", fields: [tenantId, targetNodeId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId, relationType])
   @@index([tenantId, status])
-  @@index([sourceNodeId])
-  @@index([targetNodeId])
+  @@index([tenantId, sourceNodeId])
+  @@index([tenantId, targetNodeId])
   @@map("knowledge_edges")
 }
 
@@ -372,14 +384,16 @@ model DocEntityMention {
   metadata    Json?
   createdAt   DateTime @default(now())
 
-  document DocDocument        @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  version  DocDocumentVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
-  block    DocBlock           @relation(fields: [blockId], references: [id], onDelete: Cascade)
-  node     KnowledgeNode      @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+  document DocDocument        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  version  DocDocumentVersion @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: Cascade)
+  block    DocBlock           @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: Cascade)
+  node     KnowledgeNode      @relation(fields: [tenantId, nodeId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId, status])
-  @@index([documentId, versionId])
-  @@index([nodeId])
+  @@index([tenantId, documentId, versionId])
+  @@index([tenantId, versionId])
+  @@index([tenantId, blockId])
+  @@index([tenantId, nodeId])
   @@map("doc_entity_mentions")
 }
 
@@ -430,6 +444,7 @@ model DocContextPackage {
   exportArtifacts DocExportArtifact[]
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId, status])
   @@index([tenantId, audience])
   @@map("doc_context_packages")
@@ -448,13 +463,15 @@ model DocContextPackageItem {
   metadata         Json?
   createdAt        DateTime @default(now())
 
-  contextPackage DocContextPackage  @relation(fields: [contextPackageId], references: [id], onDelete: Cascade)
-  document       DocDocument        @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  version        DocDocumentVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
-  block          DocBlock?          @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  contextPackage DocContextPackage  @relation(fields: [tenantId, contextPackageId], references: [tenantId, id], onDelete: Cascade)
+  document       DocDocument        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  version        DocDocumentVersion? @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: NoAction)
+  block          DocBlock?          @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId, contextPackageId])
-  @@index([documentId])
+  @@index([tenantId, documentId])
+  @@index([tenantId, versionId])
+  @@index([tenantId, blockId])
   @@map("doc_context_package_items")
 }
 
@@ -517,12 +534,15 @@ model DocExportArtifact {
   metadata         Json?
   createdAt        DateTime  @default(now())
 
-  document       DocDocument?        @relation(fields: [documentId], references: [id], onDelete: SetNull)
-  contextPackage DocContextPackage?  @relation(fields: [contextPackageId], references: [id], onDelete: SetNull)
-  version        DocDocumentVersion? @relation(fields: [versionId], references: [id], onDelete: SetNull)
+  document       DocDocument?        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: NoAction)
+  contextPackage DocContextPackage?  @relation(fields: [tenantId, contextPackageId], references: [tenantId, id], onDelete: NoAction)
+  version        DocDocumentVersion? @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId, exportType])
   @@index([tenantId, status])
+  @@index([tenantId, documentId])
+  @@index([tenantId, contextPackageId])
+  @@index([tenantId, versionId])
   @@map("doc_export_artifacts")
 }
 
@@ -542,11 +562,12 @@ model DocTaskCandidate {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  document DocDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  block    DocBlock?   @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  document DocDocument @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  block    DocBlock?   @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId, status])
-  @@index([documentId])
+  @@index([tenantId, documentId])
+  @@index([tenantId, blockId])
   @@map("doc_task_candidates")
 }
 
@@ -565,12 +586,13 @@ model DocGovernanceCandidate {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  document DocDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  block    DocBlock?   @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  document DocDocument @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  block    DocBlock?   @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId, status])
   @@index([tenantId, sensitivity])
-  @@index([documentId])
+  @@index([tenantId, documentId])
+  @@index([tenantId, blockId])
   @@map("doc_governance_candidates")
 }
 

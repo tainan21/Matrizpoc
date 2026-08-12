@@ -38,6 +38,7 @@ model Establishment {
   orderDrafts  OrderDraft[]
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, type])
   @@map("establishments")
@@ -63,7 +64,7 @@ enum EstablishmentStatus {
 // ---------------------------------------------------------------------------
 model EstablishmentProfile {
   id              String   @id @default(cuid())
-  establishmentId String   @unique
+  establishmentId String
   tenantId        String
   displayName     String
   description     String?
@@ -73,9 +74,10 @@ model EstablishmentProfile {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  establishment Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+  establishment Establishment @relation(fields: [tenantId, establishmentId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId])
+  @@unique([tenantId, establishmentId])
   @@map("establishment_profiles")
 }
 
@@ -95,10 +97,10 @@ model OrderDraft {
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 
-  establishment Establishment @relation(fields: [establishmentId], references: [id], onDelete: Cascade)
+  establishment Establishment @relation(fields: [tenantId, establishmentId], references: [tenantId, id], onDelete: Cascade)
 
   @@index([tenantId])
-  @@index([establishmentId])
+  @@index([tenantId, establishmentId])
   @@map("order_drafts")
 }
 

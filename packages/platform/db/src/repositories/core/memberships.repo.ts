@@ -84,7 +84,11 @@ export function makeTenantAccessRepo(db: CorePrismaClient) {
 
         const existing = await tx.appGrant.findUnique({
           where: {
-            membershipId_appId: { membershipId: input.membershipId, appId: input.appId },
+            tenantId_membershipId_appId: {
+              tenantId: membership.tenantId,
+              membershipId: input.membershipId,
+              appId: input.appId,
+            },
           },
         })
         const existingRoles = normalized(existing?.appRoles)
