@@ -15,7 +15,7 @@ export function executeTopologySql(
   const environment = options.environment ?? process.env
   const result = (options.spawn ?? spawnSync)(
     (options.platform ?? process.platform) === "win32" ? "pnpm.cmd" : "pnpm",
-    ["exec", "prisma", "db", "execute", "--stdin", "--schema", "prisma/schemas/core.prisma"],
+    ["exec", "prisma", "db", "execute", "--stdin", "--schema", "prisma/core/schema.prisma"],
     {
       cwd: options.cwd ?? process.cwd(),
       env: { ...environment, CORE_DATABASE_URL: options.databaseUrl ?? environment.NEON_PRIMARY_DATABASE_URL },

@@ -3,10 +3,7 @@
  *
  * Prereqs (only needed when running against a real DB):
  *   1. Postgres running and DATABASE_URL configured in .env
- *   2. Schemas applied: `pnpm exec prisma db push --schema prisma/schemas/core.prisma`
- *                       `pnpm exec prisma db push --schema prisma/schemas/hub.prisma`
- *                       `pnpm exec prisma db push --schema prisma/schemas/seumei.prisma`
- *                       `pnpm exec prisma db push --schema prisma/schemas/contracts.prisma`
+ *   2. Schemas applied: `pnpm prisma:migrate:deploy`
  *
  * Run: `pnpm tsx scripts/demo-flows.ts`
  *

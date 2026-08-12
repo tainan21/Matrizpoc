@@ -1,7 +1,7 @@
 /**
  * Hub DB Client — @matriz/platform-db/hub
  *
- * Wraps the Prisma client generated from `prisma/schemas/hub.prisma`.
+ * Wraps the Prisma client generated from `prisma/hub/schema.prisma`.
  * Only the Matriz Hub app should consume this entry point. L3 is enforced
  * by import boundaries: this is the only file that imports from `.prisma/hub`.
  */

@@ -1,7 +1,7 @@
 /**
  * Core DB Client — @matriz/platform-db/core
  *
- * Wraps the Prisma client generated from `prisma/schemas/core.prisma`.
+ * Wraps the Prisma client generated from `prisma/core/schema.prisma`.
  * Exposes the client as a process-wide singleton to avoid connection storms
  * during Next.js hot reload.
  *

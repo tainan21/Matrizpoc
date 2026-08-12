@@ -31,9 +31,10 @@ Existem sete apps no monorepo:
 - `willdash`
 - `sites`
 
-O repositório contém seis fontes Prisma em `prisma/schemas/`: `core.prisma`,
-`hub.prisma`, `spot.prisma`, `seumei.prisma`, `contracts.prisma` e
-`willdash.prisma`. A presença desses arquivos não significa que a topologia
+O repositório contém seis fontes Prisma independentes em
+`prisma/<schema>/schema.prisma`, para `core`, `hub`, `spot`, `seumei`,
+`contracts` e `willdash`, cada qual com migrations versionadas ao lado. A
+presença desses arquivos não significa que a topologia
 central, as migrations independentes, os roles ou o RLS já estejam entregues.
 
 O Matriz Workbench permanece file-backed, com estado canônico em `.matriz/**`

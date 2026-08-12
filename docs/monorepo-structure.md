@@ -22,13 +22,9 @@ Matriz/
 │  ├─ integration/
 │  ├─ flows/
 │  └─ foundation/
-├─ prisma/schemas/
-│  ├─ core.prisma
-│  ├─ hub.prisma
-│  ├─ spot.prisma
-│  ├─ seumei.prisma
-│  ├─ contracts.prisma
-│  └─ willdash.prisma
+├─ prisma/<schema>/
+│  ├─ schema.prisma
+│  └─ migrations/**
 ├─ tests/smoke/
 ├─ tooling/
 ├─ docs/
