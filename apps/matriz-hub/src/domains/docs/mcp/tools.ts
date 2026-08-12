@@ -115,29 +115,29 @@ export const DOCS_MCP_TOOLS = [
 ] as const
 
 export async function callDocsTool(name: string, args: Record<string, unknown>, actor: DocsActorContext): Promise<DocsMcpToolResult | null> {
-  const repo = makeDocsRepository()
+  const repo = () => makeDocsRepository()
   switch (name) {
     case "search_docs": {
       const query = typeof args.query === "string" ? args.query : ""
-      const documents = await repo.listDocuments(actor, { query })
+      const documents = await repo().listDocuments(actor, { query })
       return { content: [{ type: "text", text: JSON.stringify({ documents }, null, 2) }] }
     }
     case "read_doc": {
       const documentId = String(args.documentId ?? "")
-      const payload = await repo.readDocForMcp(actor, documentId)
+      const payload = await repo().readDocForMcp(actor, documentId)
       return { content: [{ type: "text", text: JSON.stringify(payload, null, 2) }], isError: !payload }
     }
     case "list_context_packages": {
-      const contexts = await repo.listContextPackages(actor)
+      const contexts = await repo().listContextPackages(actor)
       return { content: [{ type: "text", text: JSON.stringify({ contexts }, null, 2) }] }
     }
     case "read_context_package": {
       const contextId = String(args.contextId ?? "")
-      const payload = await repo.readContextForMcp(actor, contextId)
+      const payload = await repo().readContextForMcp(actor, contextId)
       return { content: [{ type: "text", text: JSON.stringify(payload, null, 2) }], isError: !payload }
     }
     case "create_doc_suggestion": {
-      const suggestion = await repo.createSuggestion(actor, {
+      const suggestion = await repo().createSuggestion(actor, {
         type: String(args.type ?? "document_patch") as never,
         title: String(args.title ?? "MCP suggestion"),
         description: String(args.description ?? ""),
@@ -149,7 +149,7 @@ export async function callDocsTool(name: string, args: Record<string, unknown>, 
       return { content: [{ type: "text", text: JSON.stringify(suggestion, null, 2) }] }
     }
     case "generate_context_package": {
-      const context = await repo.createContextPackage(actor, {
+      const context = await repo().createContextPackage(actor, {
         title: String(args.title ?? "MCP Context Package"),
         audience: typeof args.audience === "string" ? args.audience : "agent",
         documentIds: Array.isArray(args.documentIds) ? args.documentIds.map(String) : [],
@@ -157,7 +157,7 @@ export async function callDocsTool(name: string, args: Record<string, unknown>, 
       return { content: [{ type: "text", text: JSON.stringify(context, null, 2) }] }
     }
     case "propose_task_from_doc": {
-      const suggestion = await repo.createSuggestion(actor, {
+      const suggestion = await repo().createSuggestion(actor, {
         type: "task",
         title: String(args.title ?? "Task candidate from MCP"),
         description: String(args.description ?? "MCP proposed a task candidate from document context."),
@@ -169,7 +169,7 @@ export async function callDocsTool(name: string, args: Record<string, unknown>, 
       return { content: [{ type: "text", text: JSON.stringify(suggestion, null, 2) }] }
     }
     case "propose_governance_review_from_doc": {
-      const suggestion = await repo.createSuggestion(actor, {
+      const suggestion = await repo().createSuggestion(actor, {
         type: "governance",
         title: "Governance review candidate",
         description: String(args.reason ?? "MCP proposed governance review."),
