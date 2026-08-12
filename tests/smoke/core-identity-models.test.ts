@@ -15,7 +15,7 @@ describe("core identity authority model", () => {
     expect(schema).toContain("model AppGrant")
     expect(schema).not.toMatch(/model Membership\s*\{/)
     expect(schema).toContain("@@unique([tenantId, userId])")
-    expect(schema).toContain("@@unique([membershipId, appId])")
+    expect(schema).toContain("@@unique([tenantId, membershipId, appId])")
   })
 
   it("makes grants explicit, revocable and auditable", () => {
