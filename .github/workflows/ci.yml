@@ -41,6 +41,12 @@ jobs:
       WILLDASH_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=willdash
       MIGRATION_TEST_ZERO_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_zero
       MIGRATION_TEST_N_MINUS_ONE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_previous
+      CORE_MIGRATION_DATABASE_URL: postgresql://matriz_core_migration:ci-core-migration@127.0.0.1:5432/matriz_migrations_zero?schema=core
+      HUB_MIGRATION_DATABASE_URL: postgresql://matriz_hub_migration:ci-hub-migration@127.0.0.1:5432/matriz_migrations_zero?schema=hub
+      SPOT_MIGRATION_DATABASE_URL: postgresql://matriz_spot_migration:ci-spot-migration@127.0.0.1:5432/matriz_migrations_zero?schema=spot
+      SEUMEI_MIGRATION_DATABASE_URL: postgresql://matriz_seumei_migration:ci-seumei-migration@127.0.0.1:5432/matriz_migrations_zero?schema=seumei
+      CONTRACTS_MIGRATION_DATABASE_URL: postgresql://matriz_contracts_migration:ci-contracts-migration@127.0.0.1:5432/matriz_migrations_zero?schema=contracts
+      WILLDASH_MIGRATION_DATABASE_URL: postgresql://matriz_willdash_migration:ci-willdash-migration@127.0.0.1:5432/matriz_migrations_zero?schema=willdash
     steps:
       - uses: actions/checkout@v4
         with:
@@ -62,8 +68,17 @@ jobs:
         run: |
           PGPASSWORD=prisma createdb -h 127.0.0.1 -U prisma matriz_migrations_zero
           PGPASSWORD=prisma createdb -h 127.0.0.1 -U prisma matriz_migrations_previous
+          PGPASSWORD=prisma psql -h 127.0.0.1 -U prisma -d matriz_migrations_zero -f tooling/sql/prepare-ci-runtime-roles.sql
+          PGPASSWORD=prisma psql -h 127.0.0.1 -U prisma -d matriz_migrations_previous -f tooling/sql/prepare-ci-runtime-roles.sql
       - name: Run Prisma migration matrix
         run: pnpm prisma:migrate:test
+      - name: Verify runtime roles and tenant RLS
+        run: |
+          PGPASSWORD=prisma psql -h 127.0.0.1 -U prisma -d matriz_migrations_zero -f tooling/sql/verify-tenant-rls.sql
+          for app in core hub spot seumei contracts willdash; do
+            role="matriz_${app}_runtime"
+            PGPASSWORD="ci-${app}-runtime" psql -h 127.0.0.1 -U "$role" -d matriz_migrations_zero -v expected_role="$role" -f tooling/sql/verify-runtime-login.sql
+          done
       - name: Validate Prisma schemas
         run: pnpm prisma:validate
       - name: Generate all Prisma clients

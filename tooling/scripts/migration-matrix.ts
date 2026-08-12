@@ -42,6 +42,14 @@ function schemaEnvName(schema: SchemaName) {
   return `${schema.toUpperCase()}_DATABASE_URL`
 }
 
+function ciMigrationRoleUrl(raw: string, schema: SchemaName) {
+  const url = new URL(raw)
+  url.username = `matriz_${schema}_migration`
+  url.password = `ci-${schema}-migration`
+  url.searchParams.set("schema", schema)
+  return url.toString()
+}
+
 function migrationUrl(schema: SchemaName) {
   const value = process.env[`${schema.toUpperCase()}_MIGRATION_DATABASE_URL`]
   if (!value) throw new Error(`Missing ${schema.toUpperCase()}_MIGRATION_DATABASE_URL`)
@@ -88,8 +96,8 @@ function testMatrix() {
   }
   assertSeparateTestDatabases(zeroRaw, previousRaw)
 
-  for (const schema of schemas) deploy(schema, withSchema(zeroRaw, schema))
-  for (const schema of schemas) drift(schema, withSchema(zeroRaw, schema))
+  for (const schema of schemas) deploy(schema, ciMigrationRoleUrl(zeroRaw, schema))
+  for (const schema of schemas) drift(schema, ciMigrationRoleUrl(zeroRaw, schema))
 
   const staging = mkdtempSync(join(tmpdir(), "matriz-n-minus-one-"))
   try {
@@ -97,7 +105,7 @@ function testMatrix() {
       const stagedRoot = join(staging, schema)
       cpSync(join("prisma", schema), stagedRoot, { recursive: true })
       rmSync(join(stagedRoot, "migrations", "202608120002_release_marker"), { recursive: true })
-      const url = withSchema(previousRaw, schema)
+      const url = ciMigrationRoleUrl(previousRaw, schema)
       deploy(schema, url, join(stagedRoot, "schema.prisma"))
       assertReleaseTable(schema, url, "absent")
       deploy(schema, url)
