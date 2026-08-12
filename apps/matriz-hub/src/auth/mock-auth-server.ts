@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
 import { createMockAuthState, type AuthResult, type AuthSession } from "@matriz/platform-auth"
 import { getMockAuthCorsHeaders, isAllowedMockAuthOrigin } from "./mock-auth-cors"
+import { HUB_SESSION_COOKIE, hubSessionStore, sessionCookieOptions } from "./hub-session"
 
 const globalState = globalThis as typeof globalThis & { __matrizMockAuth?: ReturnType<typeof createMockAuthState> }
 export const mockAuthState = globalState.__matrizMockAuth ??= createMockAuthState()
-export const MOCK_SESSION_COOKIE = "matriz_mock_session"
+export const MOCK_SESSION_COOKIE = HUB_SESSION_COOKIE
 
 export function preflight(request: Request) {
   const origin = request.headers.get("origin")
@@ -22,7 +23,7 @@ export function resultResponse<T>(request: Request, result: AuthResult<T>, setSe
     return NextResponse.json({ error: result.error }, { status, headers })
   }
   const response = NextResponse.json(result.value, { headers })
-  if (setSession) response.cookies.set(MOCK_SESSION_COOKIE, "active", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 24 * 60 * 60 })
+  if (setSession && isAuthSession(result.value)) response.cookies.set(MOCK_SESSION_COOKIE, hubSessionStore.create(result.value), sessionCookieOptions())
   return response
 }
 
@@ -30,6 +31,13 @@ export function sessionResponse(request: Request, session: AuthSession) {
   return resultResponse(request, { ok: true, value: session }, true)
 }
 
-export function hasSessionCookie(request: Request): boolean {
-  return request.headers.get("cookie")?.split(";").some((part) => part.trim() === `${MOCK_SESSION_COOKIE}=active`) ?? false
+export function authRateLimitedResponse(request: Request) {
+  const origin = request.headers.get("origin")
+  return NextResponse.json({ error: { message: "Too many authentication attempts." } }, { status: 429, headers: { ...getMockAuthCorsHeaders(origin), "cache-control": "no-store" } })
 }
+
+export function mockAuthOriginRejected(request: Request) {
+  return NextResponse.json({ error: { message: "Origem nao permitida." } }, { status: 403, headers: getMockAuthCorsHeaders(request.headers.get("origin")) })
+}
+
+function isAuthSession(value: unknown): value is AuthSession { return typeof value === "object" && value !== null && "identity" in value && "expiresAt" in value }

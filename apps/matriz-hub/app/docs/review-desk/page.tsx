@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, Stack } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { ContextGrid, DocsHeader, DocsNav, DocsUnavailable, SuggestionList } from "../../../src/domains/docs/presentation/components"
 
@@ -7,10 +7,11 @@ export const dynamic = "force-dynamic"
 
 export default async function ReviewDeskPage() {
   try {
+    const actor = await getDocsPageActorContext()
     const repo = makeDocsRepository()
     const [suggestions, contexts] = await Promise.all([
-      repo.listSuggestions(defaultDocsActorContext, "suggested"),
-      repo.listContextPackages(defaultDocsActorContext),
+      repo.listSuggestions(actor, "suggested"),
+      repo.listContextPackages(actor),
     ])
     return (
       <Stack gap={6}>

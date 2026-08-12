@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, Stack } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable, EntityGrid, RelationList } from "../../../../src/domains/docs/presentation/components"
 
@@ -12,7 +12,7 @@ interface Props {
 export default async function DocGraphPage({ params }: Props) {
   try {
     const { docId } = await params
-    const detail = await makeDocsRepository().getDocument(defaultDocsActorContext, docId)
+    const detail = await makeDocsRepository().getDocument(await getDocsPageActorContext(), docId)
     if (!detail) return <DocsUnavailable error={new Error("Documento nao encontrado")} />
     return (
       <Stack gap={6}>

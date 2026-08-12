@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, Stack, Text, Badge } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable } from "../../../src/domains/docs/presentation/components"
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 
 export default async function RunsPage() {
   try {
-    const runs = await makeDocsRepository().listRuns(defaultDocsActorContext)
+    const runs = await makeDocsRepository().listRuns(await getDocsPageActorContext())
     return (
       <Stack gap={6}>
         <DocsHeader title="Runs" description="Conversoes, reindexacoes e execucoes de atores/agentes ficam auditaveis." />

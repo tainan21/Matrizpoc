@@ -14,11 +14,19 @@ import {
   runInstitutionalIngestion,
 } from "../../../../src/bootstrap"
 import { asTenantId } from "@matriz/foundation-types"
+import { allowHubRequest, getHubRequestContext, requireSameOrigin, HubAuthError } from "../../../../src/auth/hub-session"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-export async function POST(): Promise<NextResponse> {
+export async function POST(request: Request): Promise<NextResponse> {
+  try {
+    requireSameOrigin(request)
+    const context = getHubRequestContext(request)
+    if (!allowHubRequest(`institutional:refresh:${context.session.identity.user.id}`, Date.now(), 5)) return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429, headers: { "cache-control": "private, no-store" } })
+  } catch (error) {
+    return NextResponse.json({ error: error instanceof HubAuthError && error.status === 403 ? "Access denied" : "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } })
+  }
   const startedAt = Date.now()
   const report = await runInstitutionalIngestion()
 
@@ -47,5 +55,5 @@ export async function POST(): Promise<NextResponse> {
       failed: a.errors.length,
       durationMs: a.durationMs,
     })),
-  })
+  }, { headers: { "cache-control": "private, no-store" } })
 }

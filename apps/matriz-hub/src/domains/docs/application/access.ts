@@ -1,48 +1,31 @@
-import type { NextRequest } from "next/server"
 import type { DocActorType, DocSensitivity, DocVisibility } from "@matriz/integration-api-contracts/v1/docs"
+import { allowHubRequest, getHubRequestContext, requireSameOrigin, HubRateLimitError } from "../../../auth/hub-session"
 import {
   MATRIZ_DOCS_DEFAULT_TENANT,
   MATRIZ_DOCS_SYSTEM_ACTOR_ID,
   type DocsActorContext,
 } from "../domain/types"
 
-const ACTOR_TYPES: readonly DocActorType[] = [
-  "human_user",
-  "mcp_server",
-  "ai_agent",
-  "worker",
-  "scheduler",
-  "system",
-  "external_source",
-]
-
+/**
+ * Transitional server-rendered demo projection. It is intentionally not used
+ * by API or MCP code; those surfaces must call getDocsActorContextFromRequest.
+ * Item 8's opaque Hub session guard will replace these remaining demo pages.
+ */
 export const defaultDocsActorContext: DocsActorContext = {
   tenantId: MATRIZ_DOCS_DEFAULT_TENANT,
   actorId: MATRIZ_DOCS_SYSTEM_ACTOR_ID,
   actorType: "system",
-  displayName: "MatrizDocs System",
+  displayName: "MatrizDocs demo renderer",
 }
 
-export function getDocsActorContextFromHeaders(
-  headers: Headers,
-): DocsActorContext {
-  const actorTypeHeader = headers.get("x-actor-type")
-  const actorType = ACTOR_TYPES.includes(actorTypeHeader as DocActorType)
-    ? (actorTypeHeader as DocActorType)
-    : "human_user"
-
-  return {
-    tenantId: headers.get("x-tenant-id") ?? MATRIZ_DOCS_DEFAULT_TENANT,
-    actorId: headers.get("x-actor-id") ?? "tai",
-    actorType,
-    displayName: headers.get("x-actor-name") ?? "Tai",
+export function getDocsActorContextFromRequest(request: Request): DocsActorContext {
+  // Deliberately server-only: public x-tenant/x-actor headers cannot grant authority.
+  if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
+    requireSameOrigin(request)
   }
-}
-
-export function getDocsActorContextFromRequest(
-  request: Request | NextRequest,
-): DocsActorContext {
-  return getDocsActorContextFromHeaders(request.headers)
+  const context = getHubRequestContext(request)
+  if (!["GET", "HEAD", "OPTIONS"].includes(request.method) && !allowHubRequest(`docs:mutation:${context.session.identity.user.id}`, Date.now(), 20)) throw new HubRateLimitError()
+  return { tenantId: context.session.activeTenantId, actorId: context.session.identity.user.id, actorType: "human_user", displayName: context.session.identity.user.name }
 }
 
 export function canReadDocsTarget(input: {

@@ -27,7 +27,7 @@ provider receipts are confidential tenant or local operational data.
 
 ```mermaid
 flowchart LR
-  B[Browser] -->|HTTP; mock session or public headers| H[Hub plus MatrizDocs]
+  B[Browser] -->|opaque mock/dev cookie| H[Hub plus MatrizDocs]
   H -->|in-memory or Prisma POC| D[(Hub/Docs data)]
   B -->|loopback session| W[Workbench Next app]
   W -->|local filesystem| F[.matriz and Git files]
@@ -36,10 +36,12 @@ flowchart LR
   H -->|HTTP MCP transport| HM[Hub MCP tools]
 ```
 
-MatrizDocs derives `x-tenant-id`, `x-actor-id`, and actor type from public
-headers at `apps/matriz-hub/src/domains/docs/application/access.ts:26-45`.
-Mock session transport remains at
-`apps/matriz-hub/app/api/auth/mock/session/route.ts:7-24`. Workbench's
+Hub now resolves an opaque, server-stored mock/dev cookie at
+`apps/matriz-hub/src/auth/hub-session.ts`; `x-tenant-id`, `x-actor-id`, actor
+type and name are ignored. Docs HTTP, Docs pages and Hub MCP build their actor
+from that server-side session. This is a containment layer, not Membership,
+AppGrant or RLS. Mock session transport remains at
+`apps/matriz-hub/app/api/auth/mock/session/route.ts`. Workbench's
 loopback HTTP/STDIO premise is documented in its README; source starts STDIO at
 `apps/matriz-workbench/src/mcp/server.ts:1-2` and checks a local session
 digest at `apps/matriz-workbench/src/auth/session.ts:23-28`.
@@ -67,8 +69,8 @@ approved targets, not current controls.
 
 | ID | Severity | Current evidence | Impact/current control | Correct containment path | Residual risk |
 | --- | --- | --- | --- | --- | --- |
-| TM-01 | Critical | `apps/matriz-hub/src/domains/docs/application/access.ts:26-45` accepts public actor/tenant headers. | Tenant impersonation; equality check follows caller-derived context. | **Item 8:** remove Hub bypass. **Item 9:** tenant-safe queries. **Item 17:** Membership/AppGrant/roles/RLS. | Critical. |
-| TM-02 | Critical | Docs mutations, e.g. `apps/matriz-hub/app/api/docs/documents/route.ts:25-41`, use TM-01 actor. | Cross-tenant create/change/publish; error mapper only. | **Item 8:** no bypass; **item 9:** tenant predicates; **item 17:** grants/RLS; add CSRF/origin/audit with the server boundary. | Critical. |
+| TM-01 | High | `apps/matriz-hub/src/auth/hub-session.ts` resolves the opaque cookie and `access.ts` derives the Docs actor server-side. | Public actor/tenant headers no longer authorize. | **Item 8:** contained; **item 9:** tenant-safe queries; **item 17:** Membership/AppGrant/roles/RLS. | High: mock identity and in-memory session store remain. |
+| TM-02 | High | Docs mutations call the server actor guard and reject an explicit cross-origin Origin; `app/api/docs/_helpers.ts` caps ordinary bodies and sanitizes errors. | Header impersonation and browser cross-origin mutation are contained. | **Item 8:** contained; **item 9:** predicates; **item 17:** grants/RLS/audit. | High: no durable authorization store or RLS. |
 | TM-03 | High | `apps/matriz-hub/app/api/auth/mock/*/route.ts`; CORS/session at `.../session/route.ts:7-24`. | Mock cookie/state is not production identity. | **Item 8:** remove/isolate the Hub bypass; **item 17:** bind grants after real identity. | High. |
 | TM-04 | High | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:16-45`. | Cache poison/leak; Origin parser exists but `updatedBy` is caller data. | **Item 9:** tenant-safe cache/query boundary; **item 17:** grants/RLS. | High. |
 | TM-05 | High | Hub MCP POST at `apps/matriz-hub/app/api/mcp/route.ts:32`; mutation tools at `src/mcp/tools.ts:28` and `src/domains/docs/mcp/tools.ts:46-106`. | Tool caller can induce ingestion/document effects; no target grant visible. | **Item 8:** remove Hub/MCP bypasses; **item 9:** tenant predicates; **item 17:** capability/grants/RLS. | Critical for mutation tools. |
@@ -89,10 +91,11 @@ files/path traversal: TM-06; cache: TM-04/10; MCP abuse: TM-05/06; supply
 chain and runtime dependency baseline: TM-12; logging/errors: TM-11; DoS/rate/body:
 TM-07/08/09; distributed events: TM-10; offline: TM-13.
 
-Containment is planned, not implemented. **Item 7** is the evidence inventory
-you are reading. **Item 8** removes Hub/MCP bypasses. **Item 9** fixes
+**Item 8** now supplies an app-local Hub containment boundary: opaque mock/dev
+sessions, server-built Docs/MCP principals, origin checks, bounded MCP/body
+handling, redacted errors and private tenant responses. **Item 7** is the
+evidence inventory you are reading. **Item 9** fixes
 tenant-unsafe queries. **Item 10** maintains the Next/React baseline.
 **Item 17** delivers roles, grants and RLS. Until those item-specific outcomes
 exist, Hub/MatrizDocs remains a POC with critical authorization debt; Workbench
 is a trusted-local tool, not a network security boundary.
-

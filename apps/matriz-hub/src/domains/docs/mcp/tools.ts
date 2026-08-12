@@ -1,4 +1,4 @@
-import { defaultDocsActorContext } from "../application/access"
+import type { DocsActorContext } from "../domain/types"
 import { makeDocsRepository } from "../integration/prisma/docs-repository"
 
 type DocsMcpToolResult = {
@@ -114,9 +114,8 @@ export const DOCS_MCP_TOOLS = [
   },
 ] as const
 
-export async function callDocsTool(name: string, args: Record<string, unknown>): Promise<DocsMcpToolResult | null> {
+export async function callDocsTool(name: string, args: Record<string, unknown>, actor: DocsActorContext): Promise<DocsMcpToolResult | null> {
   const repo = makeDocsRepository()
-  const actor = { ...defaultDocsActorContext, actorType: "mcp_server" as const, actorId: "matriz-mcp" }
   switch (name) {
     case "search_docs": {
       const query = typeof args.query === "string" ? args.query : ""

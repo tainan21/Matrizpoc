@@ -17,17 +17,17 @@ CSRF/origin, cache, validation/limit/error posture, risk, and remediation.
 
 | Profile | Current evidence and approved follow-up |
 | --- | --- |
-| `H-R` | Hub/MatrizDocs read; public headers derive actor/tenant at `apps/matriz-hub/src/domains/docs/application/access.ts:26-45`; no Membership/AppGrant. **Item 9** fixes tenant-unsafe queries; **item 17** establishes roles/grants/RLS. |
-| `H-M` | Hub/MatrizDocs mutation; JSON/form body reaches Prisma/mock/in-memory effects with header-derived authority and no general CSRF/origin gate. **Item 8** removes Hub/MCP bypasses; **item 9** fixes tenant-unsafe queries; **item 17** adds roles/grants/RLS. |
-| `H-MOCK` | Mock-auth browser transport; mock cookie/state and CORS helper, not production identity. Remove this Hub bypass under **item 8**; grants belong to **item 17**. |
-| `H-CACHE` | Shared cache; explicit Origin allowlist/parser at `apps/matriz-hub/app/api/ecosystem/cache/route.ts:16-45`, but `updatedBy` is caller data. **Item 9** supplies tenant-safe access; **item 17** supplies grants/RLS. |
+| `H-R` | Hub/MatrizDocs read; opaque server-owned mock/dev session derives actor/tenant, headers do not grant authority. **Item 9** fixes tenant-unsafe queries; **item 17** establishes roles/grants/RLS. |
+| `H-M` | Hub/MatrizDocs mutation; server actor, explicit cross-origin rejection, bounded ordinary bodies and private/sanitized error response. **Item 9** fixes tenant-unsafe queries; **item 17** adds grants/RLS. |
+| `H-MOCK` | Mock-auth browser transport; opaque HttpOnly server-resolved cookie and localhost credential CORS allowlist, not production identity. **Item 17** replaces it with identity/grants. |
+| `H-CACHE` | Shared cache; Hub session guards reads/writes and binds `updatedBy` to its server session. Cache keys remain non-tenant-prefixed until **items 9/17**. |
 | `WB-R` | Workbench local-loopback read. This inventory is **item 7**; no separate canonical remediation is assigned. |
 | `WB-M` | Workbench local mutation. This inventory is **item 7**; retain local trust review before networking it. |
 | `WB-A` | Server Action guarded by `requireWorkbenchSession` at `apps/matriz-workbench/app/actions.ts:151`. This inventory is **item 7**. |
 | `WB-MCP-R` | Workbench STDIO read tool; no HTTP origin/cookie; local process trust required. This inventory is **item 7**. |
 | `WB-MCP-M` | Workbench STDIO write tool; bounded Zod input/documented approval, but the process caller is authority. This inventory is **item 7**. |
-| `H-MCP-R` | Hub/MatrizDocs MCP read through Hub transport; default/header-derived actor is not target authorization. **Item 8** removes Hub/MCP bypasses, **item 9** fixes predicates, and **item 17** supplies grants/RLS. |
-| `H-MCP-M` | Hub/MatrizDocs MCP mutation; repository/ingestion effect with no target Membership/AppGrant visible. Same **items 8, 9, and 17** path as `H-MCP-R`. |
+| `H-MCP-R` | Hub/MatrizDocs MCP operational reads require a server-built principal; only `initialize`, `ping`, and `tools/list` are public advertisement. **Item 9** fixes predicates and **item 17** supplies grants/RLS. |
+| `H-MCP-M` | Hub/MatrizDocs MCP mutation requires the same server-built principal, capped request/batch and principal rate limit. **Items 9/17** remain for predicates/grants/RLS. |
 
 `Item 7` is this completed inventory/threat-model work, not a remediation.
 `Item 10` is the Next/React dependency baseline and is tracked in the threat
@@ -39,8 +39,8 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
-| `HTTP:matriz-hub:DELETE:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:20` | `DELETE` | M | `H-MOCK` |
-| `HTTP:matriz-hub:GET:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:7` | `GET` | R | `H-MOCK` |
+| `HTTP:matriz-hub:DELETE:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:26` | `DELETE` | M | `H-MOCK` |
+| `HTTP:matriz-hub:GET:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:9` | `GET` | R | `H-MOCK` |
 | `HTTP:matriz-hub:GET:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:POST:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:19` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/context-packages/[id]/publish` | `apps/matriz-hub/app/api/docs/context-packages/[id]/publish/route.ts:13` | `POST` | M | `H-M` |
@@ -67,24 +67,24 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:POST:/api/docs/suggestions/[id]/reject` | `apps/matriz-hub/app/api/docs/suggestions/[id]/reject/route.ts:13` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:GET:/api/docs/tasks` | `apps/matriz-hub/app/api/docs/tasks/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/timeline` | `apps/matriz-hub/app/api/docs/timeline/route.ts:9` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:POST:/api/institutional/refresh` | `apps/matriz-hub/app/api/institutional/refresh/route.ts:21` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:23` | `GET` | R | `H-CACHE` |
-| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:33` | `PUT` | M | `H-CACHE` |
-| `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:16` | `OPTIONS` | R | `H-CACHE` |
+| `HTTP:matriz-hub:POST:/api/institutional/refresh` | `apps/matriz-hub/app/api/institutional/refresh/route.ts:22` | `POST` | M | `H-M` |
+| `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:27` | `GET` | R | `H-CACHE` |
+| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:38` | `PUT` | M | `H-CACHE` |
+| `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:20` | `OPTIONS` | R | `H-CACHE` |
 | `HTTP:matriz-hub:GET:/api/ecosystem/health` | `apps/matriz-hub/app/api/ecosystem/health/route.ts:6` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:GET:/api/events` | `apps/matriz-hub/app/api/events/route.ts:6` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:GET:/api/external-links` | `apps/matriz-hub/app/api/external-links/route.ts:6` | `GET` | R | `H-R` |
+| `HTTP:matriz-hub:GET:/api/events` | `apps/matriz-hub/app/api/events/route.ts:7` | `GET` | R | `H-R` |
+| `HTTP:matriz-hub:GET:/api/external-links` | `apps/matriz-hub/app/api/external-links/route.ts:7` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/feature-flags` | `apps/matriz-hub/app/api/feature-flags/route.ts:7` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:GET:/api/mcp` | `apps/matriz-hub/app/api/mcp/route.ts:14` | `GET` | R | `H-MCP-R` |
-| `HTTP:matriz-hub:POST:/api/mcp` | `apps/matriz-hub/app/api/mcp/route.ts:32` | `POST` | M | `H-MCP-M` |
+| `HTTP:matriz-hub:GET:/api/mcp` | `apps/matriz-hub/app/api/mcp/route.ts:16` | `GET` | R | `H-MCP-R` |
+| `HTTP:matriz-hub:POST:/api/mcp` | `apps/matriz-hub/app/api/mcp/route.ts:34` | `POST` | M | `H-MCP-M` |
 | `HTTP:matriz-hub:GET:/api/onboarding-status` | `apps/matriz-hub/app/api/onboarding-status/route.ts:8` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/registry` | `apps/matriz-hub/app/api/registry/route.ts:6` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:GET:/api/telemetry` | `apps/matriz-hub/app/api/telemetry/route.ts:5` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:POST:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:4` | `POST` | M | `H-MOCK` |
-| `HTTP:matriz-hub:POST:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:4` | `POST` | M | `H-MOCK` |
-| `HTTP:matriz-hub:POST:/api/auth/mock/google` | `apps/matriz-hub/app/api/auth/mock/google/route.ts:4` | `POST` | M | `H-MOCK` |
-| `HTTP:matriz-hub:POST:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:14` | `POST` | M | `H-MOCK` |
-| `HTTP:matriz-hub:POST:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:4` | `POST` | M | `H-MOCK` |
+| `HTTP:matriz-hub:GET:/api/telemetry` | `apps/matriz-hub/app/api/telemetry/route.ts:6` | `GET` | R | `H-R` |
+| `HTTP:matriz-hub:POST:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:7` | `POST` | M | `H-MOCK` |
+| `HTTP:matriz-hub:POST:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:7` | `POST` | M | `H-MOCK` |
+| `HTTP:matriz-hub:POST:/api/auth/mock/google` | `apps/matriz-hub/app/api/auth/mock/google/route.ts:7` | `POST` | M | `H-MOCK` |
+| `HTTP:matriz-hub:POST:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:18` | `POST` | M | `H-MOCK` |
+| `HTTP:matriz-hub:POST:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:7` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-workbench:GET:/api/codex/runtime` | `apps/matriz-workbench/app/api/codex/runtime/route.ts:9` | `GET` | R | `WB-R` |
 | `HTTP:matriz-workbench:GET:/api/codex/projects/[projectId]/requests/[requestId]/events` | `apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/events/route.ts:13` | `GET` | R | `WB-R` |
 | `HTTP:matriz-workbench:POST:/api/codex/projects/[projectId]/requests/[requestId]/approvals/[approvalId]` | `apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/approvals/[approvalId]/route.ts:14` | `POST` | M | `WB-M` |
@@ -95,11 +95,11 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/notifications/config` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/config/route.ts:24` | `POST` | M | `WB-M` |
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/notifications/outbox/[notificationId]` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/outbox/[notificationId]/route.ts:16` | `POST` | M | `WB-M` |
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/vercel/previews/[requestId]` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/vercel/previews/[requestId]/route.ts:22` | `POST` | M | `WB-M` |
-| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:3` | `OPTIONS` | R | `H-MOCK` |
-| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:3` | `OPTIONS` | R | `H-MOCK` |
-| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/google` | `apps/matriz-hub/app/api/auth/mock/google/route.ts:3` | `OPTIONS` | R | `H-MOCK` |
-| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
-| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:3` | `OPTIONS` | R | `H-MOCK` |
+| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
+| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
+| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/google` | `apps/matriz-hub/app/api/auth/mock/google/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
+| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:8` | `OPTIONS` | R | `H-MOCK` |
+| `HTTP:matriz-hub:OPTIONS:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
 
 ## Workbench Server Actions — 41 entries
 
@@ -185,7 +185,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `MCP:matriz-workbench:workbench_mark_control_notification` | `apps/matriz-workbench/src/mcp/server.ts:486` | `workbench_mark_control_notification` | M | `WB-MCP-M` |
 | `MCP:matriz-workbench:workbench_create_snippet` | `apps/matriz-workbench/src/mcp/server.ts:492` | `workbench_create_snippet` | M | `WB-MCP-M` |
 | `MCP:matriz-workbench:workbench_update_snippet` | `apps/matriz-workbench/src/mcp/server.ts:498` | `workbench_update_snippet` | M | `WB-MCP-M` |
-| `MCP:matriz-hub:refresh_project_ingestion` | `apps/matriz-hub/src/mcp/tools.ts:28` | `refresh_project_ingestion` | M | `H-MCP-M` |
+| `MCP:matriz-hub:refresh_project_ingestion` | `apps/matriz-hub/src/mcp/tools.ts:29` | `refresh_project_ingestion` | M | `H-MCP-M` |
 | `MCP:matriz-hub:search_docs` | `apps/matriz-hub/src/domains/docs/mcp/tools.ts:11` | `search_docs` | R | `H-MCP-R` |
 | `MCP:matriz-hub:read_doc` | `apps/matriz-hub/src/domains/docs/mcp/tools.ts:21` | `read_doc` | R | `H-MCP-R` |
 | `MCP:matriz-hub:list_context_packages` | `apps/matriz-hub/src/domains/docs/mcp/tools.ts:31` | `list_context_packages` | R | `H-MCP-R` |
@@ -208,5 +208,3 @@ mock-auth `OPTIONS` aliases that a declaration-only scan missed.
 handlers, exported Server Actions, and declared MCP tools** in tracked app
 source. Their page-level mock/domain operations are intentionally not counted
 as request-facing endpoints.
-
-

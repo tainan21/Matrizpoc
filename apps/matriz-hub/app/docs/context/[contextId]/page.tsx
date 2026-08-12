@@ -1,5 +1,5 @@
 import { Button, Card, CardHeader, CardTitle, Stack, Text, Badge } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable } from "../../../../src/domains/docs/presentation/components"
 import { docsToneForStatus } from "../../../../src/domains/docs/presentation/presenters"
@@ -13,7 +13,7 @@ interface Props {
 export default async function ContextDetailPage({ params }: Props) {
   try {
     const { contextId } = await params
-    const context = await makeDocsRepository().getContextPackage(defaultDocsActorContext, contextId)
+    const context = await makeDocsRepository().getContextPackage(await getDocsPageActorContext(), contextId)
     if (!context) return <DocsUnavailable error={new Error("Context package nao encontrado")} />
     return (
       <Stack gap={6}>

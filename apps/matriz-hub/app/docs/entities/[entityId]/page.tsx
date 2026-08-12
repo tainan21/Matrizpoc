@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, Stack, Text, Badge } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable, DocumentGrid, RelationList, TimelineList } from "../../../../src/domains/docs/presentation/components"
 
@@ -12,7 +12,7 @@ interface Props {
 export default async function EntityDetailPage({ params }: Props) {
   try {
     const { entityId } = await params
-    const detail = await makeDocsRepository().getKnowledgeNode(defaultDocsActorContext, entityId)
+    const detail = await makeDocsRepository().getKnowledgeNode(await getDocsPageActorContext(), entityId)
     if (!detail) return <DocsUnavailable error={new Error("Entidade nao encontrada")} />
     return (
       <Stack gap={6}>
