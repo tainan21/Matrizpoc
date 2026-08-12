@@ -27,6 +27,7 @@
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-auth": "workspace:*",
     "@matriz/platform-config": "workspace:*",
+    "@matriz/platform-db": "workspace:*",
     "@matriz/platform-storage": "workspace:*",
     "@matriz/platform-telemetry": "workspace:*",
     "next": "16.2.12",

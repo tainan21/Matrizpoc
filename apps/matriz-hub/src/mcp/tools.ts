@@ -3,7 +3,7 @@
  *
  * V1.3 exposes ONE real tool:
  *   refresh_project_ingestion — triggers a pipeline run, persists the result
- *   via @matriz/platform-db/hub, and returns a summary.
+ *   via the Hub-owned Prisma repositories, and returns a summary.
  *
  * This proves: Hub acts as a real MCP control plane with actions that mutate
  * institutional state, not just read snapshots.

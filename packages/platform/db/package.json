@@ -11,10 +11,7 @@
     "./contracts": "./src/contracts.ts",
     "./willdash": "./src/willdash.ts",
     "./tenant-context": "./src/tenant-context.ts",
-    "./core/repositories": "./src/repositories/core/index.ts",
-    "./hub/repositories": "./src/repositories/hub/index.ts",
-    "./seumei/repositories": "./src/repositories/seumei/index.ts",
-    "./contracts/repositories": "./src/repositories/contracts/index.ts"
+    "./core/repositories": "./src/repositories/core/index.ts"
   },
   "dependencies": {
     "@prisma/client": "5.20.0"

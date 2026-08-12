@@ -14,7 +14,7 @@ import {
   makeHealthSnapshotRepo,
   makeProjectRepo,
   makePublicMetricsRepo,
-} from "@matriz/platform-db/hub/repositories"
+} from "../integration/prisma/repositories"
 import {
   listDocsMcpResources,
   readDocsMcpResource,

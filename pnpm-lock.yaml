@@ -120,6 +120,9 @@ importers:
       '@matriz/platform-config':
         specifier: workspace:*
         version: link:../../packages/platform/config
+      '@matriz/platform-db':
+        specifier: workspace:*
+        version: link:../../packages/platform/db
       '@matriz/platform-pdf':
         specifier: workspace:*
         version: link:../../packages/platform/pdf
@@ -354,6 +357,9 @@ importers:
       '@matriz/platform-config':
         specifier: workspace:*
         version: link:../../packages/platform/config
+      '@matriz/platform-db':
+        specifier: workspace:*
+        version: link:../../packages/platform/db
       '@matriz/platform-storage':
         specifier: workspace:*
         version: link:../../packages/platform/storage
