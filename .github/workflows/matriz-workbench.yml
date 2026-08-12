@@ -63,6 +63,9 @@ jobs:
       - name: Install frozen dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Workbench Next.js types
+        run: pnpm --filter @matriz/app-matriz-workbench exec next typegen
+
       - name: Workbench tests
         run: pnpm --filter @matriz/app-matriz-workbench test
 
@@ -82,4 +85,4 @@ jobs:
         run: pnpm test:smoke -- --no-file-parallelism
 
       - name: Confirm verification did not change tracked files
-        run: git diff --exit-code
+        run: pnpm check:clean

@@ -8,7 +8,7 @@
     "start": "next start -H 127.0.0.1 -p 3005",
     "lint": "eslint app src proxy.ts public-contract.ts --max-warnings 0",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --config vitest.config.ts",
+    "test": "vitest run --config vitest.config.ts --no-file-parallelism",
     "health": "tsx src/cli/health.ts",
     "sync": "tsx src/cli/sync.ts",
     "sync:planning": "tsx src/cli/sync-planning-model.ts",
