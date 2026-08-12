@@ -31,7 +31,7 @@
     "@matriz/platform-db": "workspace:*",
     "@matriz/platform-storage": "workspace:*",
     "@matriz/platform-telemetry": "workspace:*",
-    "next": "16.2.4",
+    "next": "16.2.12",
     "react": "19.2.5",
     "react-dom": "19.2.5"
   },

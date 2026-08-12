@@ -1,0 +1,10 @@
+{
+  "metadata": {
+    "vulnerabilities": {
+      "critical": 0,
+      "high": 0,
+      "moderate": 2,
+      "low": 1
+    }
+  }
+}
