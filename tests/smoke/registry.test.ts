@@ -9,6 +9,7 @@ import { describe, it, expect, beforeEach } from "vitest"
 import { createRegistry, type Registry } from "@matriz/integration-registry-core"
 import { monorepoConfig } from "@matriz/platform-config"
 import { manifest as hubManifest } from "@apps/matriz-hub/public-contract"
+import { manifest as identityManifest } from "@apps/matriz-identity/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
@@ -17,6 +18,7 @@ import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
 
 const allManifests = [
+  identityManifest,
   hubManifest,
   workbenchManifest,
   sitesManifest,
@@ -44,11 +46,11 @@ describe("registry", () => {
     registry = buildRegistry()
   })
 
-  it("registra todos os 7 apps", () => {
+  it("registra todos os 8 apps", () => {
     const ids = registry.listEnabled().map((e) => e.manifest.appId)
-    expect(ids).toHaveLength(7)
+    expect(ids).toHaveLength(8)
     expect(new Set(ids)).toEqual(
-      new Set(["matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"]),
+      new Set(["matriz-identity", "matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"]),
     )
   })
 
@@ -84,7 +86,7 @@ describe("registry", () => {
 
   it("toNavigation produz SharedAppNavigationDTO valido", () => {
     const nav = registry.toNavigation()
-    expect(nav).toHaveLength(7)
+    expect(nav).toHaveLength(8)
     for (const item of nav) {
       expect(item.routes.length).toBeGreaterThan(0)
       expect(item.primaryRoute).toMatch(/^\//)

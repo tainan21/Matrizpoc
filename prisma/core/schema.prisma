@@ -145,6 +145,7 @@ model OidcClient {
   grantTypes              String[]
   responseTypes           String[]
   tokenEndpointAuthMethod String   @default("none")
+  secretFingerprint       String?
   enabled                 Boolean  @default(true)
   revokedAt               DateTime?
   revokedByUserId         String?
@@ -175,6 +176,26 @@ model IdentityAuditEvent {
   @@index([subjectType, subjectId, occurredAt])
   @@index([actorUserId, occurredAt])
   @@map("identity_audit_events")
+}
+
+// Global, opaque persistence required by oidc-provider. Payloads are never
+// exposed to product apps and expire automatically according to provider TTLs.
+model OidcArtifact {
+  model      String
+  id         String
+  payload    Json
+  grantId    String?
+  userCode   String?
+  uid        String?
+  expiresAt  DateTime
+  consumedAt DateTime?
+
+  @@id([model, id])
+  @@index([grantId])
+  @@index([model, userCode])
+  @@index([model, uid])
+  @@index([expiresAt])
+  @@map("oidc_artifacts")
 }
 
 // ---------------------------------------------------------------------------
@@ -267,6 +288,7 @@ model AuthAccount {
   email           String?
   emailVerifiedAt DateTime?
   metadata        Json?        // provider-specific data (OAuth tokens, etc.)
+  credentialHash  String?      // versioned scrypt credential; never plaintext
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
@@ -370,4 +392,13 @@ model MatrizSchemaRelease {
   appliedAt DateTime @default(now())
 
   @@map("__matriz_schema_releases")
+}
+
+model IdentityRateLimit {
+  keyHash   String   @id
+  count     Int
+  expiresAt DateTime
+
+  @@index([expiresAt])
+  @@map("identity_rate_limits")
 }

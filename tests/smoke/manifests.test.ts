@@ -8,6 +8,7 @@
 import { describe, it, expect } from "vitest"
 import { appManifestSchema } from "@matriz/integration-api-contracts"
 import { manifest as hubManifest } from "@apps/matriz-hub/public-contract"
+import { manifest as identityManifest } from "@apps/matriz-identity/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
@@ -16,6 +17,7 @@ import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
 
 const allManifests = [
+  { appId: "matriz-identity", manifest: identityManifest },
   { appId: "matriz-hub", manifest: hubManifest },
   { appId: "matriz-workbench", manifest: workbenchManifest },
   { appId: "sites", manifest: sitesManifest },
@@ -26,7 +28,7 @@ const allManifests = [
 ] as const
 
 describe("manifests", () => {
-  it("todos os 7 manifests satisfazem AppManifestDTO (Zod)", () => {
+  it("todos os 8 manifests satisfazem AppManifestDTO (Zod)", () => {
     for (const { appId, manifest } of allManifests) {
       const result = appManifestSchema.safeParse(manifest)
       if (!result.success) {
