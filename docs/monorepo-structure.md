@@ -54,8 +54,10 @@ implantados. Essas entregas pertencem à Onda 2.
 | `matriz-identity` | **planejado, ainda ausente** | OIDC e identidade central em `core` |
 
 O schema `core` é a fronteira planejada para identidade e serviços Core
-explicitamente globais, incluindo o serviço tenant-aware de ExternalLinks. Ele
-não autoriza repositories de produto em package central.
+centrais/compartilhados, incluindo o serviço tenant-aware de ExternalLinks.
+Os registros operacionais desse serviço são tenant-owned e não ampliam a
+whitelist global fechada. O Core não autoriza repositories de produto em package
+central.
 
 ## Alvo aprovado de persistência — Onda 2
 

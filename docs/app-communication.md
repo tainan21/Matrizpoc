@@ -19,7 +19,12 @@ memória. Isso não é transporte distribuído, entrega durável, deduplicação
 sucesso persistido. A integração real descrita abaixo pertence principalmente à
 Onda 3.
 
-## Regras invariantes
+Nas superfícies Hub/MatrizDocs, a POC atual ainda aceita tenant e actor por
+headers públicos e não possui `TenantMembership`/`AppGrant` reais para os
+helpers de flags. Essa dívida crítica será tratada pelos itens 7–9 da Onda 1;
+ela não é compatível com a regra de autoridade do alvo.
+
+## Regras do alvo aprovado
 
 - Nunca importar `apps/<outro-app>/src/**` ou `apps/<outro-app>/app/**`.
 - Nunca compartilhar tabela, transaction ou repository de produto entre apps.

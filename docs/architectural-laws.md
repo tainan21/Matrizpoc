@@ -49,8 +49,9 @@ recebe schema vazio apenas para uniformizar o monorepo.
   terão privilégio mínimo.
 - `matriz-identity` será o oitavo serviço/app. Ele ainda não existe. Será dono
   do provedor OIDC e dos dados centrais de identidade em `core`. Serviços Core
-  explicitamente globais, como ExternalLinks, terão owner e contrato públicos
-  próprios; isso não desloca domínio de produto para o Core.
+  centrais/compartilhados, como ExternalLinks, terão owner e contrato públicos
+  próprios. Seus registros operacionais permanecem tenant-owned; isso não os
+  adiciona à whitelist global nem desloca domínio de produto para o Core.
 - `matriz-hub`, `spot`, `seumei`, `contracts` e `willdash` serão donos dos
   schemas homônimos. Nenhum app acessará tabelas internas de outro schema.
 - Integridade multi-tenant nascerá na primeira entrega de banco: chaves e
@@ -137,10 +138,22 @@ outro app. Superfícies permitidas:
 4. eventos contratados em `packages/integration/events`;
 5. ExternalLinks por contrato oficial.
 
+### Estado atual: dívida de autoridade da POC
+
 O estado atual usa transports de POC, inclusive bus em memória e gateways
-simulados. O alvo distribuído usa HTTP autenticado e outbox/inbox durável,
-conforme `docs/app-communication.md`. Em ambos, tenant e identidade são
-resolvidos no servidor; payload ou header público não conferem autoridade.
+simulados. Em superfícies Hub/MatrizDocs, a POC ainda aceita tenant e actor por
+headers públicos. Seus helpers de flags também não têm `TenantMembership` nem
+`AppGrant` reais para autorizar o acesso. Isso é uma dívida crítica da Onda 1,
+endereçada pelos itens 7–9 do programa, e não uma implementação parcial da
+política alvo.
+
+### Regra do alvo aprovado
+
+O alvo distribuído usa HTTP autenticado e outbox/inbox durável, conforme
+`docs/app-communication.md`. O servidor constrói o contexto de autorização,
+nega por padrão e só autoriza após validar membership, app grant e capability.
+Tenant, actor, roles ou capabilities de payload, query string ou header público
+nunca conferem autoridade.
 
 ---
 
@@ -237,12 +250,20 @@ eventos e contratos deve ter um único app responsável.
 
 ## L10. Feature flags são tenant/app-scoped
 
-O estado atual usa flags mock por tenant/app. Nenhuma flag concede permissão:
-autorização continua dependendo de membership, grant e capability verificadas.
+### Estado atual: helpers de demonstração
 
-No alvo, o catálogo institucional pode ser global, mas customizações e flags de
-operação são overlays tenant-scoped. Uma leitura sem tenant explícito no
-`AuthorizationContext` não pode retornar overlay operacional.
+O estado atual usa flags mock por tenant/app. Esses helpers não possuem
+`TenantMembership` ou `AppGrant` reais e não podem ser descritos como controle
+de permissão. A autoridade por headers públicos nas superfícies Hub/MatrizDocs
+é a mesma dívida crítica dos itens 7–9 da Onda 1.
+
+### Regra do alvo aprovado
+
+Nenhuma flag concede permissão: a autorização depende de membership, grant e
+capability verificados no `AuthorizationContext` server-only. O catálogo
+institucional pode ser global, mas customizações e flags de operação são
+overlays tenant-scoped. Uma leitura sem tenant explícito no contexto não pode
+retornar overlay operacional.
 
 ---
 

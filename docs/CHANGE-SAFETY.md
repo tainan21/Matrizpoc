@@ -25,14 +25,29 @@ de menor escopo.
 | App isolado | checks do app afetado (`pnpm --filter <app> lint` e `typecheck`) e teste focado existente |
 | Package compartilhado ou manifest | checks dos consumidores afetados, `pnpm test:smoke` e `pnpm tsx tooling/scripts/verify-app-boundaries.ts` |
 | Contratos ou eventos | `pnpm test:smoke`, boundary check, compatibilidade de produtor/consumidor e plano de versão/depreciação |
-| Prisma schema ou migration | `pnpm prisma:validate`, teste de migration/rollback aplicável, validação de tenant/RLS/roles e smoke dos apps afetados |
-| Root, workspace, lock, tsconfig ou tooling | `pnpm lint`, `pnpm typecheck`, `pnpm test:smoke` e `pnpm tsx tooling/scripts/verify-app-boundaries.ts` |
+| Prisma schema ou migration | `pnpm prisma:validate`, geração e consistência dos seis clients, teste de migration/rollback aplicável, validação de tenant/RLS/roles, smoke dos apps afetados e worktree limpo após a geração |
+| Root, workspace, lock, tsconfig ou tooling | `pnpm lint`, `pnpm typecheck`, `pnpm test:smoke`, `pnpm tsx tooling/scripts/verify-app-boundaries.ts`, e geração/consistência dos seis clients se Prisma ou seus scripts forem afetados |
 | Leis ou outros docs de governança | paths/links citados, coerência entre os documentos canônicos e `git diff --check` |
 
 Execute somente checks existentes e relevantes; não invente testes de prose.
 Depois de qualquer generator, Prisma generate ou ferramenta que escreva no
 worktree, revise `git status --short`. Artefato inesperado deve ser explicado e
 removido de forma segura antes da entrega, sem apagar mudanças alheias.
+
+### Consistência de clients Prisma
+
+Ao tocar um schema Prisma, migration, client ou script raiz relacionado, valide
+os seis schemas e gere/inspecione os clients de `core`, `hub`, `spot`, `seumei`,
+`contracts` e `willdash`. A geração deve corresponder ao schema tocado e o
+worktree deve ser revisado depois; nenhum client gerado pode ficar omitido por
+estar fora do script agregado.
+
+Há uma dívida conhecida até a Task 5: o script atual `pnpm prisma:generate`
+cobre apenas `core`, `hub`, `seumei` e `contracts`. Até que a Task 5 a corrija,
+uma validação que exija geração completa deve invocar também `prisma generate
+--schema prisma/schemas/spot.prisma` e `prisma generate --schema
+prisma/schemas/willdash.prisma`, além de conferir o estado limpo ou as saídas
+geradas esperadas.
 
 ## Ambiente e dados sensíveis
 
