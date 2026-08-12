@@ -38,7 +38,9 @@ model Tenant {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  memberships         Membership[]
+  memberships         TenantMembership[]
+  appGrants           AppGrant[]
+  identityAuditEvents IdentityAuditEvent[]
   appRegistrations    AppRegistration[]
   externalLinks       ExternalLink[]
   onboardingProgress  OnboardingProgress[]
@@ -62,9 +64,15 @@ model User {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  memberships      Membership[]
-  authAccounts     AuthAccount[]
-  appSessions      AppSession[]
+  memberships         TenantMembership[]
+  invitedMemberships  TenantMembership[] @relation("MembershipInvitedBy")
+  revokedMemberships  TenantMembership[] @relation("MembershipRevokedBy")
+  grantedAppGrants    AppGrant[]          @relation("AppGrantGrantedBy")
+  revokedAppGrants    AppGrant[]          @relation("AppGrantRevokedBy")
+  revokedOidcClients  OidcClient[]         @relation("OidcClientRevokedBy")
+  identityAuditEvents IdentityAuditEvent[] @relation("IdentityAuditActor")
+  authAccounts        AuthAccount[]
+  appSessions         AppSession[]
 
   @@map("users")
 }
@@ -74,30 +82,98 @@ model User {
 // several apps within one tenant. This is THE JOIN between global User and
 // scoped tenants.
 // ---------------------------------------------------------------------------
-model Membership {
-  id        String         @id @default(cuid())
-  tenantId  String
-  userId    String
-  appId     String
-  role      MembershipRole @default(MEMBER)
-  invitedAt DateTime?
-  lastActiveAt DateTime?
-  createdAt DateTime       @default(now())
+model TenantMembership {
+  id               String   @id @default(cuid())
+  tenantId         String
+  userId           String
+  tenantRoles      String[]
+  invitedAt        DateTime?
+  invitedByUserId  String?
+  acceptedAt       DateTime?
+  lastActiveAt     DateTime?
+  revokedAt        DateTime?
+  revokedByUserId  String?
+  revocationReason String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant    Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitedBy User?      @relation("MembershipInvitedBy", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  revokedBy User?      @relation("MembershipRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+  appGrants AppGrant[]
 
-  @@unique([tenantId, userId, appId])
-  @@index([tenantId])
-  @@index([userId])
-  @@map("memberships")
+  @@unique([tenantId, userId])
+  @@index([tenantId, revokedAt])
+  @@index([userId, revokedAt])
+  @@map("tenant_memberships")
 }
 
-enum MembershipRole {
-  OWNER
-  ADMIN
-  MEMBER
-  VIEWER
+model AppGrant {
+  id               String   @id @default(cuid())
+  tenantId         String
+  membershipId     String
+  appId            String
+  appRoles         String[]
+  capabilities     String[]
+  grantedAt        DateTime @default(now())
+  grantedByUserId  String?
+  revokedAt        DateTime?
+  revokedByUserId  String?
+  revocationReason String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  membership TenantMembership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  grantedBy  User?            @relation("AppGrantGrantedBy", fields: [grantedByUserId], references: [id], onDelete: SetNull)
+  revokedBy  User?            @relation("AppGrantRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([membershipId, appId])
+  @@index([tenantId, appId, revokedAt])
+  @@index([membershipId, revokedAt])
+  @@map("app_grants")
+}
+
+model OidcClient {
+  id                      String   @id @default(cuid())
+  clientId                String   @unique
+  name                    String
+  redirectUris            String[]
+  postLogoutRedirectUris  String[]
+  grantTypes              String[]
+  responseTypes           String[]
+  tokenEndpointAuthMethod String   @default("none")
+  enabled                 Boolean  @default(true)
+  revokedAt               DateTime?
+  revokedByUserId         String?
+  revocationReason        String?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  revokedBy User? @relation("OidcClientRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([enabled, revokedAt])
+  @@map("oidc_clients")
+}
+
+model IdentityAuditEvent {
+  id          String   @id @default(cuid())
+  tenantId    String?
+  actorUserId String?
+  eventType   String
+  subjectType String
+  subjectId   String
+  metadata    Json?
+  occurredAt  DateTime @default(now())
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  actor  User?   @relation("IdentityAuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, occurredAt])
+  @@index([subjectType, subjectId, occurredAt])
+  @@index([actorUserId, occurredAt])
+  @@map("identity_audit_events")
 }
 
 // ---------------------------------------------------------------------------

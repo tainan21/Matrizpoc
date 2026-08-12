@@ -8,7 +8,7 @@ export { makeUserRepo, normalizeEmail, type UserRepo } from "./users.repo"
 export { makeAuthAccountRepo, type AuthAccountRepo } from "./auth-accounts.repo"
 export { makeAuthChallengeRepo, type AuthChallengeRepo } from "./auth-challenges.repo"
 export { makeAppSessionRepo, hashToken, type AppSessionRepo } from "./app-sessions.repo"
-export { makeMembershipRepo, type MembershipRepo } from "./memberships.repo"
+export { makeTenantAccessRepo, type TenantAccessRepo } from "./memberships.repo"
 export { makeTelemetryRepo, type TelemetryRepo } from "./telemetry.repo"
 export {
   makeExternalLinkRepo,
