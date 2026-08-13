@@ -18,4 +18,3 @@
 - Fallback explícito para arquivo ausente ou inválido.
 - Praticies permanece uma área imersiva existente e não será reescrita neste ciclo.
 - Nenhum dado será adicionado ao roadmap apenas para preencher a interface.
-

@@ -18,4 +18,3 @@ Transformar as 24 rotas existentes de `apps/matriz-hub/app/docs` sem alterar rep
 - `typecheck` e `lint` apenas do Matriz-Hub.
 - QA real nas rotas `/docs`, `/docs/review-desk`, `/docs/graph`, `/docs/context` e em viewport móvel.
 - Confirmar ausência de overflow, foco visível e fallback honesto sem banco.
-
