@@ -68,3 +68,90 @@ export interface HubCommandItem extends HubNavItem {
   readonly searchableText: string
 }
 
+export type HubProjectHealth = "healthy" | "degraded" | "offline" | "unknown"
+
+export interface HubPortfolioItemVM {
+  readonly appId: string
+  readonly name: string
+  readonly description: string
+  readonly status: HubStatus
+  readonly statusLabel: string
+  readonly readinessScore?: number
+  readonly capabilitiesCount: number
+  readonly routesCount: number
+  readonly accentColor?: string
+  readonly href: string
+}
+
+export interface HubHealthSummaryVM {
+  readonly total: number
+  readonly healthy: number
+  readonly degraded: number
+  readonly offline: number
+  readonly unknown: number
+  readonly averageReadiness: number
+  readonly status: HubStatus
+  readonly statusLabel: string
+}
+
+export interface HubAttentionItemVM {
+  readonly id: string
+  readonly label: string
+  readonly description: string
+  readonly status: HubStatus
+  readonly statusLabel: string
+  readonly href: string
+}
+
+export interface HubActivityItemVM {
+  readonly id: string
+  readonly kind: "event" | "telemetry"
+  readonly label: string
+  readonly source: string
+  readonly occurredAt: string
+  readonly status: HubStatus
+}
+
+export interface HubActivityStreamVM {
+  readonly items: readonly HubActivityItemVM[]
+  readonly emptyTitle: string
+  readonly emptyDescription: string
+}
+
+export interface HubFlowNodeVM {
+  readonly id: string
+  readonly label: string
+  readonly relations: number
+  readonly status: HubStatus
+}
+
+export interface HubActionVM {
+  readonly label: string
+  readonly technicalLabel: string
+  readonly description: string
+  readonly consequence: string
+  readonly href: string
+  readonly status: HubStatus
+}
+
+export type HubDataPersistence = "process" | "snapshot" | "session" | "persisted" | "local"
+
+export interface HubDataOriginVM {
+  readonly id: string
+  readonly label: string
+  readonly detail: string
+  readonly persistence: HubDataPersistence
+  readonly updatedAt?: string
+  readonly status: HubStatus
+}
+
+export interface HubOverviewVM {
+  readonly generatedAt: string
+  readonly portfolio: readonly HubPortfolioItemVM[]
+  readonly health: HubHealthSummaryVM
+  readonly attention: readonly HubAttentionItemVM[]
+  readonly activity: HubActivityStreamVM
+  readonly flow: readonly HubFlowNodeVM[]
+  readonly nextAction: HubActionVM
+  readonly origins: readonly HubDataOriginVM[]
+}
