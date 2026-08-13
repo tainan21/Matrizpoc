@@ -32,14 +32,17 @@ export function getStatusPresentation(
 export function StatusMark({
   status,
   className,
+  label,
 }: {
   readonly status: HubStatus
   readonly className?: string
+  readonly label?: string
 }) {
   const presentation = getStatusPresentation(status)
   return (
     <span
-      aria-hidden="true"
+      aria-hidden={label ? undefined : true}
+      aria-label={label}
       className={["hub-status-mark", className].filter(Boolean).join(" ")}
       data-status={status}
     >

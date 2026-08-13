@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   HUB_NAV_GROUPS,
   buildCommandItems,
+  filterCommandItems,
   resolveActiveNavItem,
 } from "./navigation"
 
@@ -42,6 +43,17 @@ describe("Hub operational navigation", () => {
         href: "/telemetry",
         groupLabel: "Operação",
       }),
+    )
+  })
+
+  it("finds commands without requiring accents or exact technical wording", () => {
+    const commands = buildCommandItems(HUB_NAV_GROUPS)
+
+    expect(filterCommandItems(commands, "saude").map((item) => item.href)).toContain(
+      "/health",
+    )
+    expect(filterCommandItems(commands, "observabilidade").map((item) => item.href)).toContain(
+      "/telemetry",
     )
   })
 })

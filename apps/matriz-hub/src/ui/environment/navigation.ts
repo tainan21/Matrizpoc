@@ -202,3 +202,24 @@ export function buildCommandItems(
     })),
   )
 }
+
+function normalizeSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim()
+}
+
+export function filterCommandItems(
+  items: readonly HubCommandItem[],
+  query: string,
+): readonly HubCommandItem[] {
+  const terms = normalizeSearch(query).split(/\s+/).filter(Boolean)
+  if (terms.length === 0) return items
+
+  return items.filter((item) => {
+    const searchableText = normalizeSearch(item.searchableText)
+    return terms.every((term) => searchableText.includes(term))
+  })
+}
