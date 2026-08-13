@@ -18,7 +18,7 @@ export function OperationalNav({
   onToggleCollapsed,
 }: OperationalNavProps) {
   return (
-    <aside className="hub-operational-nav" aria-label="Navegação operacional">
+    <nav className="hub-operational-nav" aria-label="Navegação operacional">
       <div className="hub-operational-nav__scroll">
         {HUB_NAV_GROUPS.map((group) => (
           <section className="hub-nav-group" key={group.id} aria-labelledby={`hub-nav-${group.id}`}>
@@ -69,6 +69,6 @@ export function OperationalNav({
           />
         </button>
       </footer>
-    </aside>
+    </nav>
   )
 }
