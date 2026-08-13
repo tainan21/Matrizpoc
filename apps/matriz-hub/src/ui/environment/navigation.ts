@@ -162,6 +162,27 @@ export const HUB_NAV_GROUPS: readonly HubNavGroup[] = [
         icon: "tool",
         keywords: ["patterns", "automação", "utilitários"],
       },
+      {
+        label: "Roadmap",
+        href: "/roadmap",
+        description: "Planos e backlog declarados nos arquivos locais do Hub",
+        icon: "roadmap",
+        keywords: ["plano", "backlog", "futuro"],
+      },
+      {
+        label: "Agentes",
+        href: "/agents",
+        description: "Atores registrados no histórico local de trabalho",
+        icon: "agent",
+        keywords: ["atores", "automação", "histórico"],
+      },
+      {
+        label: "Entregas",
+        href: "/releases",
+        description: "Implementações e validações registradas",
+        icon: "release",
+        keywords: ["release", "entrega", "versão", "validação"],
+      },
     ],
   },
   {

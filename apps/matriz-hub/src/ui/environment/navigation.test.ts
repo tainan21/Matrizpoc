@@ -25,6 +25,9 @@ describe("Hub operational navigation", () => {
         "/telemetry",
         "/docs",
         "/praticies",
+        "/roadmap",
+        "/agents",
+        "/releases",
       ]),
     )
   })
