@@ -1,18 +1,5 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
-import {
-  Alert,
-  Badge,
-  Button,
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  Heading,
-  Stack,
-  Text,
-} from "@matriz/design-ui"
 import type {
   ContextPackageDTO,
   DocumentBlockDTO,
@@ -22,11 +9,26 @@ import type {
   SuggestionDTO,
   TimelineEventDTO,
 } from "@matriz/integration-api-contracts/v1/docs"
+import { HubIcon } from "../../../ui/environment/icons"
+import { StatusLabel } from "../../../ui/environment/status"
 import {
   docsHumanEventName,
-  docsToneForSensitivity,
-  docsToneForStatus,
+  docsHumanStatus,
+  docsStatusToHubStatus,
 } from "./presenters"
+
+const TOOL_LINKS = [
+  ["/docs/new", "Criar", "Novo documento"],
+  ["/docs/import", "Trazer conteúdo", "Import"],
+  ["/docs/converter", "Estruturar", "Converter"],
+  ["/docs/suggestions", "Sugestões", "Inbox"],
+  ["/docs/entities", "Entidades", "Catálogo"],
+  ["/docs/exports", "Distribuir", "Exports"],
+  ["/docs/tasks", "Gerar trabalho", "Tasks"],
+  ["/docs/governance", "Governança", "Candidates"],
+  ["/docs/runs", "Execuções", "Runs"],
+  ["/docs/settings", "Configurar", "Settings"],
+] as const
 
 export function DocsHeader({
   title,
@@ -38,236 +40,180 @@ export function DocsHeader({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-4 md:flex md:flex-row md:items-start md:justify-between">
-      <div>
-        <div className="mb-2 flex flex-wrap gap-2">
-          <Badge tone="brand">MatrizDocs V1</Badge>
-          <Badge tone="neutral">memoria viva</Badge>
-        </div>
-        <Heading level={1}>{title}</Heading>
-        <Text tone="muted" className="max-w-lg">
-          {description}
-        </Text>
+    <header className="knowledge-heading">
+      <div className="knowledge-heading__copy">
+        <span className="knowledge-eyebrow">CONHECIMENTO / MATRIZDOCS</span>
+        <h1>{title}</h1>
+        <p>{description}</p>
       </div>
-      {action ? <div className="flex flex-wrap gap-2">{action}</div> : null}
-    </div>
+      {action ? <div className="knowledge-heading__actions">{action}</div> : null}
+      <div className="knowledge-heading__seal" aria-label="Memória viva, versão 1">
+        <HubIcon name="layers" size={28} />
+        <span><strong>Memória viva</strong><small>canônico · versionado · auditável</small></span>
+      </div>
+    </header>
   )
 }
 
 export function DocsNav() {
-  const items = [
-    ["/docs", "Biblioteca"],
-    ["/docs/import", "Importar"],
-    ["/docs/suggestions", "Sugestoes"],
-    ["/docs/context", "Contextos"],
-    ["/docs/entities", "Entidades"],
-    ["/docs/timeline", "Timeline"],
-    ["/docs/review-desk", "Review Desk"],
-    ["/docs/mcp", "MCP"],
-  ] as const
-
   return (
-    <div className="flex flex-wrap gap-2">
-      {items.map(([href, label]) => (
-        <Link key={href} href={href} className="no-underline">
-          <Badge tone="neutral">{label}</Badge>
-        </Link>
-      ))}
-    </div>
+    <details className="knowledge-toolbelt">
+      <summary><HubIcon name="tool" size={16} /> Ações e ferramentas <small>mostrar opções contextuais</small></summary>
+      <nav aria-label="Ferramentas do MatrizDocs">
+        {TOOL_LINKS.map(([href, label, technical]) => (
+          <Link href={href} key={href}>
+            <strong>{label}</strong><small>{technical}</small>
+          </Link>
+        ))}
+      </nav>
+    </details>
   )
 }
 
 export function DocsUnavailable({ error }: { error: unknown }) {
   const message = error instanceof Error ? error.message : String(error)
   return (
-    <Stack gap={4}>
-      <DocsNav />
-      <Alert tone="warning" title="MatrizDocs precisa do Hub DB">
-        {`A UI e as APIs estao implementadas, mas esta tela nao conseguiu consultar o Postgres do Hub. Detalhe: ${message}`}
-      </Alert>
-      <Card>
-        <CardHeader>
-          <CardTitle>Checklist de ambiente</CardTitle>
-          <CardDescription>Para rodar a V1 com dados persistidos.</CardDescription>
-        </CardHeader>
-        <ul className="list-disc pl-5 text-sm text-surface-fg">
-          <li>Defina `HUB_DATABASE_URL` apontando para o schema `hub`.</li>
-          <li>Rode `pnpm prisma:generate:hub` apos aplicar o schema.</li>
-          <li>Aplique a migration Prisma antes de usar as rotas mutantes.</li>
-        </ul>
-      </Card>
-    </Stack>
+    <section className="knowledge-unavailable" role="status">
+      <div className="knowledge-unavailable__icon"><HubIcon name="database" size={28} /></div>
+      <div>
+        <span className="knowledge-eyebrow">PERSISTÊNCIA / INDISPONÍVEL</span>
+        <h1>A memória persistida não respondeu</h1>
+        <p>A interface continua disponível, mas nenhum dado foi inventado. Conecte o Postgres do Hub para consultar e alterar documentos reais.</p>
+        <details><summary>Diagnóstico técnico</summary><code>{message}</code></details>
+      </div>
+      <ol>
+        <li><strong>Conectar</strong><span>Defina HUB_DATABASE_URL para o schema hub.</span></li>
+        <li><strong>Preparar</strong><span>Gere o Prisma Client do Hub.</span></li>
+        <li><strong>Persistir</strong><span>Aplique a migration antes de usar ações mutantes.</span></li>
+      </ol>
+    </section>
   )
 }
 
-export function StatsGrid({
-  stats,
-}: {
-  stats: Record<string, number | string>
-}) {
+export function StatsGrid({ stats }: { stats: Record<string, number | string> }) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-      {Object.entries(stats).map(([label, value]) => (
-        <Card key={label}>
-          <div className="text-xs text-muted-fg">{label}</div>
-          <div className="text-3xl font-semibold text-surface-fg">{value}</div>
-        </Card>
+    <dl className="knowledge-metrics">
+      {Object.entries(stats).map(([label, value], index) => (
+        <div key={label} data-emphasis={index === 0 || undefined}>
+          <dt>{label}</dt><dd>{value}</dd><small>{index === 0 ? "acervo atual" : "estado persistido"}</small>
+        </div>
       ))}
+    </dl>
+  )
+}
+
+function EmptyKnowledge({ title, detail }: { title: string; detail: string }) {
+  return (
+    <div className="knowledge-empty">
+      <HubIcon name="layers" size={28} />
+      <strong>{title}</strong>
+      <span>{detail}</span>
     </div>
   )
 }
 
 export function DocumentGrid({ documents }: { documents: DocumentSummaryDTO[] }) {
   if (documents.length === 0) {
-    return (
-      <EmptyState
-        title="Nenhum documento ainda"
-        description="Crie ou importe o primeiro documento para iniciar a memoria viva da Matriz."
-        action={
-          <Link href="/docs/new" className="no-underline">
-            <Button>Criar documento</Button>
-          </Link>
-        }
-      />
-    )
+    return <EmptyKnowledge title="Nenhum documento ainda" detail="Crie ou importe a primeira fonte para iniciar a memória viva." />
   }
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {documents.map((doc) => (
-        <Link key={doc.id} href={`/docs/${doc.id}`} className="no-underline">
-          <Card>
-            <CardHeader>
-              <CardTitle>{doc.title}</CardTitle>
-              <CardDescription>{doc.summary ?? doc.description ?? "Documento canonico MatrizDocs."}</CardDescription>
-            </CardHeader>
-            <Stack gap={3}>
-              <div className="flex flex-wrap gap-2">
-                <Badge tone={docsToneForStatus(doc.status)}>{doc.status}</Badge>
-                <Badge tone="neutral">{doc.type}</Badge>
-                <Badge tone="neutral">{doc.visibility}</Badge>
-                <Badge tone={docsToneForSensitivity(doc.sensitivity)}>{doc.sensitivity}</Badge>
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-center text-xs text-muted-fg">
-                <div>
-                  <div className="text-lg font-semibold text-surface-fg">{doc.counters?.blocks ?? 0}</div>
-                  blocos
-                </div>
-                <div>
-                  <div className="text-lg font-semibold text-surface-fg">{doc.counters?.contextPackages ?? 0}</div>
-                  contextos
-                </div>
-                <div>
-                  <div className="text-lg font-semibold text-surface-fg">v{doc.currentVersionNumber ?? 1}</div>
-                  versao
-                </div>
-              </div>
-            </Stack>
-          </Card>
-        </Link>
-      ))}
+    <div className="knowledge-document-list">
+      {documents.map((doc) => {
+        const humanStatus = docsHumanStatus(doc.status)
+        return (
+          <Link href={`/docs/${doc.id}`} key={doc.id} className="knowledge-document">
+            <span className="knowledge-document__icon"><HubIcon name="docs" size={20} /></span>
+            <span className="knowledge-document__copy">
+              <small>{doc.type} · {doc.visibility}</small>
+              <strong>{doc.title}</strong>
+              <span>{doc.summary ?? doc.description ?? "Documento canônico MatrizDocs."}</span>
+            </span>
+            <span className="knowledge-document__state">
+              <StatusLabel status={docsStatusToHubStatus(doc.status)}>{humanStatus.label}</StatusLabel>
+              <small>{humanStatus.technical}</small>
+            </span>
+            <span className="knowledge-document__facts">
+              <span><strong>{doc.counters?.blocks ?? 0}</strong> blocos</span>
+              <span><strong>{doc.counters?.contextPackages ?? 0}</strong> contextos</span>
+              <span><strong>v{doc.currentVersionNumber ?? 1}</strong> versão</span>
+            </span>
+            <span className="knowledge-document__open" aria-hidden="true">›</span>
+          </Link>
+        )
+      })}
     </div>
   )
 }
 
 export function BlockList({ blocks }: { blocks: DocumentBlockDTO[] }) {
-  if (blocks.length === 0) return <EmptyState title="Sem blocos canonicos" />
+  if (blocks.length === 0) return <EmptyKnowledge title="Sem blocos canônicos" detail="Estruture o conteúdo para criar unidades consultáveis." />
   return (
-    <Stack gap={3}>
+    <ol className="knowledge-blocks">
       {blocks.map((block) => (
-        <Card key={block.id}>
-          <div className="flex flex-wrap gap-2">
-            <Badge tone="brand">{block.type}</Badge>
-            <Badge tone={docsToneForSensitivity(block.sensitivity)}>{block.sensitivity}</Badge>
-            <Badge tone="neutral">#{block.order + 1}</Badge>
-          </div>
-          <Text className="mt-3">{block.plainText || "Bloco vazio"}</Text>
-        </Card>
+        <li key={block.id}>
+          <span className="knowledge-blocks__order">{String(block.order + 1).padStart(2, "0")}</span>
+          <div><small>{block.type} · {block.sensitivity}</small><p>{block.plainText || "Bloco vazio"}</p></div>
+        </li>
       ))}
-    </Stack>
+    </ol>
   )
 }
 
 export function SuggestionList({ suggestions }: { suggestions: SuggestionDTO[] }) {
-  if (suggestions.length === 0) return <EmptyState title="Nenhuma sugestao pendente" />
+  if (suggestions.length === 0) return <EmptyKnowledge title="Nenhuma sugestão pendente" detail="A verdade canônica não exige uma decisão agora." />
   return (
-    <Stack gap={3}>
+    <div className="knowledge-decision-list">
       {suggestions.map((suggestion) => (
-        <Card key={suggestion.id}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <div className="flex flex-wrap gap-2">
-                <Badge tone={docsToneForStatus(suggestion.status)}>{suggestion.status}</Badge>
-                <Badge tone="neutral">{suggestion.type}</Badge>
-                {suggestion.confidence !== null ? (
-                  <Badge tone="brand">{`${Math.round(suggestion.confidence * 100)}%`}</Badge>
-                ) : null}
-              </div>
-              <Heading level={4} className="mt-2">{suggestion.title}</Heading>
-              <Text tone="muted" size="sm">{suggestion.description}</Text>
-              <pre className="mt-3 overflow-x-auto rounded-md bg-muted p-3 text-xs">
-                {JSON.stringify(suggestion.evidence, null, 2)}
-              </pre>
-            </div>
-            {suggestion.status === "suggested" ? (
-              <div className="flex flex-wrap gap-2">
-                <form action={`/api/docs/suggestions/${suggestion.id}/accept`} method="post">
-                  <Button type="submit" size="sm">Aceitar</Button>
-                </form>
-                <form action={`/api/docs/suggestions/${suggestion.id}/reject`} method="post">
-                  <Button type="submit" size="sm" variant="secondary">Rejeitar</Button>
-                </form>
-              </div>
-            ) : null}
+        <article key={suggestion.id}>
+          <div className="knowledge-decision-list__state">
+            <StatusLabel status={docsStatusToHubStatus(suggestion.status)}>{docsHumanStatus(suggestion.status).label}</StatusLabel>
+            <code>{suggestion.type}</code>
           </div>
-        </Card>
+          <div className="knowledge-decision-list__copy">
+            <strong>{suggestion.title}</strong><p>{suggestion.description}</p>
+            <details><summary>Ver evidência {suggestion.confidence !== null ? `· ${Math.round(suggestion.confidence * 100)}% de confiança` : ""}</summary><pre>{JSON.stringify(suggestion.evidence, null, 2)}</pre></details>
+          </div>
+          {suggestion.status === "suggested" ? (
+            <div className="knowledge-decision-list__actions">
+              <form action={`/api/docs/suggestions/${suggestion.id}/accept`} method="post"><button className="knowledge-action" type="submit">Aceitar evidência <small>Accept</small></button></form>
+              <form action={`/api/docs/suggestions/${suggestion.id}/reject`} method="post"><button className="knowledge-action" data-variant="secondary" type="submit">Rejeitar <small>Reject</small></button></form>
+            </div>
+          ) : null}
+        </article>
       ))}
-    </Stack>
+    </div>
   )
 }
 
 export function TimelineList({ timeline }: { timeline: TimelineEventDTO[] }) {
-  if (timeline.length === 0) return <EmptyState title="Timeline vazia" />
+  if (timeline.length === 0) return <EmptyKnowledge title="Histórico vazio" detail="Mudanças auditáveis aparecerão aqui quando acontecerem." />
   return (
-    <Stack gap={3}>
+    <ol className="knowledge-timeline">
       {timeline.map((event) => (
-        <Card key={event.id}>
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <Badge tone="neutral">{event.targetType}</Badge>
-              <Heading level={4} className="mt-2">{docsHumanEventName(event.name)}</Heading>
-              <Text tone="muted" size="sm">
-                {`${new Date(event.occurredAt).toLocaleString("pt-BR")} por ${event.actorType}:${event.actorId}`}
-              </Text>
-            </div>
-            <code className="text-xs text-muted-fg">{event.name}</code>
-          </div>
-          <pre className="mt-3 overflow-x-auto rounded-md bg-muted p-3 text-xs">
-            {JSON.stringify(event.payload, null, 2)}
-          </pre>
-        </Card>
+        <li key={event.id}>
+          <span className="knowledge-timeline__mark" aria-hidden="true" />
+          <time>{new Date(event.occurredAt).toLocaleString("pt-BR")}</time>
+          <div><strong>{docsHumanEventName(event.name)}</strong><span>{event.actorType}:{event.actorId} · {event.targetType}</span></div>
+          <code>{event.name}</code>
+          <details><summary>payload</summary><pre>{JSON.stringify(event.payload, null, 2)}</pre></details>
+        </li>
       ))}
-    </Stack>
+    </ol>
   )
 }
 
 export function ContextGrid({ contexts }: { contexts: ContextPackageDTO[] }) {
-  if (contexts.length === 0) return <EmptyState title="Nenhum context package ainda" />
+  if (contexts.length === 0) return <EmptyKnowledge title="Nenhum pacote de contexto" detail="Agrupe documentos para uma leitura orientada por público e propósito." />
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="knowledge-contexts">
       {contexts.map((context) => (
-        <Link key={context.id} href={`/docs/context/${context.id}`} className="no-underline">
-          <Card>
-            <CardHeader>
-              <CardTitle>{context.title}</CardTitle>
-              <CardDescription>{context.summary ?? context.description ?? "Pacote de leitura versionado."}</CardDescription>
-            </CardHeader>
-            <div className="flex flex-wrap gap-2">
-              <Badge tone={docsToneForStatus(context.status)}>{context.status}</Badge>
-              <Badge tone="neutral">{context.audience}</Badge>
-              <Badge tone="brand">v{context.version}</Badge>
-              {context.mcpUri ? <Badge tone="neutral">{context.mcpUri}</Badge> : null}
-            </div>
-          </Card>
+        <Link href={`/docs/context/${context.id}`} key={context.id}>
+          <span className="knowledge-contexts__icon"><HubIcon name="context" size={20} /></span>
+          <small>{context.audience} · v{context.version}</small>
+          <strong>{context.title}</strong>
+          <p>{context.summary ?? context.description ?? "Pacote de leitura versionado."}</p>
+          <StatusLabel status={docsStatusToHubStatus(context.status)}>{docsHumanStatus(context.status).label}</StatusLabel>
+          {context.mcpUri ? <code>{context.mcpUri}</code> : null}
         </Link>
       ))}
     </div>
@@ -275,21 +221,13 @@ export function ContextGrid({ contexts }: { contexts: ContextPackageDTO[] }) {
 }
 
 export function EntityGrid({ entities }: { entities: KnowledgeNodeDTO[] }) {
-  if (entities.length === 0) return <EmptyState title="Nenhuma entidade ainda" />
+  if (entities.length === 0) return <EmptyKnowledge title="Nenhuma entidade" detail="Entidades surgem da indexação de documentos reais." />
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="knowledge-entities">
       {entities.map((entity) => (
-        <Link key={entity.id} href={`/docs/entities/${entity.id}`} className="no-underline">
-          <Card>
-            <CardHeader>
-              <CardTitle>{entity.name}</CardTitle>
-              <CardDescription>{entity.description ?? "Entidade da memoria institucional."}</CardDescription>
-            </CardHeader>
-            <div className="flex flex-wrap gap-2">
-              <Badge tone="brand">{entity.type}</Badge>
-              <Badge tone="neutral">{entity.slug}</Badge>
-            </div>
-          </Card>
+        <Link href={`/docs/entities/${entity.id}`} key={entity.id}>
+          <HubIcon name="graph" size={18} />
+          <span><small>{entity.type}</small><strong>{entity.name}</strong><p>{entity.description ?? "Entidade da memória institucional."}</p><code>{entity.slug}</code></span>
         </Link>
       ))}
     </div>
@@ -297,21 +235,18 @@ export function EntityGrid({ entities }: { entities: KnowledgeNodeDTO[] }) {
 }
 
 export function RelationList({ relations }: { relations: KnowledgeEdgeDTO[] }) {
-  if (relations.length === 0) return <EmptyState title="Nenhuma relacao ainda" />
+  if (relations.length === 0) return <EmptyKnowledge title="Nenhuma relação" detail="Conexões exigem origem, destino e evidência." />
   return (
-    <Stack gap={3}>
+    <div className="knowledge-relations">
       {relations.map((edge) => (
-        <Card key={edge.id}>
-          <div className="flex flex-wrap gap-2">
-            <Badge tone={docsToneForStatus(edge.status)}>{edge.status}</Badge>
-            <Badge tone="brand">{edge.relationType}</Badge>
-            {edge.confidence !== null ? <Badge tone="neutral">{`${Math.round(edge.confidence * 100)}%`}</Badge> : null}
-          </div>
-          <Text className="mt-2" size="sm">
-            {`${edge.sourceNodeId} -> ${edge.targetNodeId}`}
-          </Text>
-        </Card>
+        <article key={edge.id}>
+          <span className="knowledge-relations__node">{edge.sourceNodeId}</span>
+          <span className="knowledge-relations__edge"><small>{edge.relationType}</small><i aria-hidden="true" /></span>
+          <span className="knowledge-relations__node">{edge.targetNodeId}</span>
+          <StatusLabel status={docsStatusToHubStatus(edge.status)}>{docsHumanStatus(edge.status).label}</StatusLabel>
+          {edge.confidence !== null ? <small>{Math.round(edge.confidence * 100)}% confiança</small> : null}
+        </article>
       ))}
-    </Stack>
+    </div>
   )
 }

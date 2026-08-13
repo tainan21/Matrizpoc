@@ -3,6 +3,62 @@ import type {
   DocumentBlockDTO,
   DocumentDetailDTO,
 } from "@matriz/integration-api-contracts/v1/docs"
+import type { HubStatus } from "../../../ui/environment/types"
+
+const DOC_STATUS_LABELS: Record<string, string> = {
+  approved: "Aprovado",
+  archived: "Arquivado",
+  draft: "Em preparação",
+  deprecated: "Descontinuado",
+  in_review: "Em revisão",
+  outdated: "Precisa ser atualizado",
+  published: "Disponível oficialmente",
+  raw: "Recebido",
+  rejected: "Rejeitado",
+  structured: "Estruturado",
+  suggested: "Sugerido",
+  superseded: "Substituído",
+}
+
+export function docsHumanStatus(status: string) {
+  return {
+    label: DOC_STATUS_LABELS[status] ?? status.replaceAll("_", " "),
+    technical: status,
+  }
+}
+
+export function docsStatusToHubStatus(status: string): HubStatus {
+  if (status === "published") return "official"
+  if (status === "approved") return "complete"
+  if (status === "in_review" || status === "suggested") return "approval"
+  if (status === "draft" || status === "raw" || status === "structured") return "temporary"
+  if (status === "archived" || status === "deprecated" || status === "superseded") return "archived"
+  if (status === "rejected") return "failed"
+  if (status === "outdated") return "attention"
+  return "unknown"
+}
+
+const DOC_ACTIONS = {
+  publish: {
+    label: "Disponibilizar oficialmente",
+    technical: "Publish",
+    consequence: "Cria uma versão oficial e auditável.",
+  },
+  import: {
+    label: "Trazer conteúdo existente",
+    technical: "Import",
+    consequence: "Converte a origem em blocos canônicos.",
+  },
+  review: {
+    label: "Revisar evidências",
+    technical: "Review",
+    consequence: "Permite aceitar ou rejeitar sugestões.",
+  },
+} as const
+
+export function presentDocsAction(action: keyof typeof DOC_ACTIONS) {
+  return DOC_ACTIONS[action]
+}
 
 export interface DocsDocumentVM {
   detail: DocumentDetailDTO
