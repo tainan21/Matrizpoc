@@ -40,6 +40,13 @@ export const HUB_NAV_GROUPS: readonly HubNavGroup[] = [
     label: "Estrutura",
     items: [
       {
+        label: "Arquitetura",
+        href: "/architecture",
+        description: "Mapa de contratos públicos declarados pelos apps",
+        icon: "architecture",
+        keywords: ["mapa", "relações", "manifests", "topologia declarada"],
+      },
+      {
         label: "Registry",
         href: "/registry",
         description: "Apps registrados e seus contratos públicos",

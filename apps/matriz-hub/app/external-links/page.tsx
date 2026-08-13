@@ -1,53 +1,44 @@
-import { Stack, Card, Heading, Text, EmptyState, Badge } from "@matriz/design-ui"
 import { getGlobalExternalLinkStore } from "@matriz/integration-external-links"
+import { HubIcon } from "../../src/ui/environment/icons"
+import { StatusLabel } from "../../src/ui/environment/status"
+import { SurfaceState } from "../../src/ui/environment/SurfaceState"
+import { MetricStrip, OperationalPageHeader } from "../../src/ui/structure/OperationalPage"
 
 export default function ExternalLinksPage() {
-  const store = getGlobalExternalLinkStore()
-  const links = store.list()
+  const links = getGlobalExternalLinkStore().list()
+  const apps = new Set(links.flatMap((link) => [link.localApp, link.externalApp]))
+  const tenants = new Set(links.map((link) => link.tenantId))
 
   return (
-    <Stack gap={6}>
-      <div>
-        <Heading level={1}>External links</Heading>
-        <Text tone="muted">
-          Vinculos entre entidades de apps distintos (ex: contrato → gig, contrato → estabelecimento).
-          Shape pronto para futura persistencia Prisma.
-        </Text>
-      </div>
-
-      {links.length === 0 ? (
-        <Card>
-          <EmptyState
-            title="Nenhum vinculo registrado"
-            description="Gere contratos no Spot ou Seumei para criar external links."
-          />
-        </Card>
-      ) : (
-        <Card>
-          <ul className="flex flex-col divide-y divide-border">
-            {links.map((link) => (
-              <li key={link.id} className="py-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone="success">{link.relationType}</Badge>
-                  <Text>
-                    <code>{`${link.localApp}/${link.localEntityType}#${link.localEntityId}`}</code>
-                    {" → "}
-                    <code>{`${link.externalApp}/${link.externalEntityType}#${link.externalEntityId}`}</code>
-                  </Text>
-                </div>
-                <Text tone="muted" size="sm">
-                  {`Tenant ${link.tenantId} · criado em ${link.createdAt}`}
-                </Text>
-                {link.snapshot ? (
-                  <pre className="mt-2 overflow-x-auto rounded bg-muted p-2 text-xs">
-                    {JSON.stringify(link.snapshot, null, 2)}
-                  </pre>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-    </Stack>
+    <div className="hub-page">
+      <OperationalPageHeader
+        description="Vínculos entre entidades de apps distintos. Esta instância mantém os registros no store de integração atual; a persistência definitiva continua explícita como evolução futura."
+        eyebrow="Estrutura / vínculos externos"
+        status={links.length ? "available" : "waiting"}
+        statusLabel={links.length ? `${links.length} vínculos nesta instância` : "Nenhum vínculo na instância"}
+        title="Relações entre entidades"
+      />
+      <MetricStrip items={[
+        { label: "Vínculos", value: links.length, detail: "store atual", status: links.length ? "available" : "waiting", icon: "link" },
+        { label: "Apps envolvidos", value: apps.size, detail: "origem + destino", status: "available", icon: "ecosystem" },
+        { label: "Tenants", value: tenants.size, detail: "escopo declarado", status: "available", icon: "user" },
+        { label: "Persistência", value: "Processo", detail: "não é banco definitivo", status: "temporary", icon: "database" },
+      ]} />
+      <section className="hub-structure-main">
+        <header className="hub-structure-toolbar"><div><h2>Mapa de vínculos</h2><small>Entidade local → relação → entidade externa</small></div></header>
+        {links.length === 0 ? (
+          <SurfaceState compact kind="empty" title="Nenhum vínculo registrado" description="Ações em Spot, Seumei ou Contracts podem registrar relações nesta instância. Nenhum estado foi simulado." />
+        ) : (
+          <div className="hub-external-links">{links.map((link) => (
+            <article key={link.id}>
+              <div><span className="hub-external-links__mark"><HubIcon name="project" size={18} /></span><p><strong>{link.localApp}</strong><small>{link.localEntityType} · {link.localEntityId}</small></p></div>
+              <div className="hub-external-links__relation"><StatusLabel compact status="available">{link.relationType}</StatusLabel><HubIcon name="chevron" size={18} /></div>
+              <div><span className="hub-external-links__mark"><HubIcon name="link" size={18} /></span><p><strong>{link.externalApp}</strong><small>{link.externalEntityType} · {link.externalEntityId}</small></p></div>
+              <footer><span>Tenant {link.tenantId}</span><time dateTime={link.createdAt}>{new Date(link.createdAt).toLocaleString("pt-BR")}</time></footer>
+            </article>
+          ))}</div>
+        )}
+      </section>
+    </div>
   )
 }

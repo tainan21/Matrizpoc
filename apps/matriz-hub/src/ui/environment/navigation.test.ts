@@ -19,6 +19,7 @@ describe("Hub operational navigation", () => {
         "/projects",
         "/health",
         "/registry",
+        "/architecture",
         "/ecosystem",
         "/events",
         "/telemetry",
