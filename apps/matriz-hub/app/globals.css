@@ -1,4 +1,5 @@
 @import "../../../packages/design/ui/src/utility-shim.css";
+@import "../src/ui/environment/hub-environment.css";
 
 :root {
   color-scheme: light;
