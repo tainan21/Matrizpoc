@@ -1,0 +1,47 @@
+import { describe, expect, it } from "vitest"
+import {
+  HUB_NAV_GROUPS,
+  buildCommandItems,
+  resolveActiveNavItem,
+} from "./navigation"
+
+describe("Hub operational navigation", () => {
+  it("keeps primary existing surfaces unique and reachable", () => {
+    const paths = HUB_NAV_GROUPS.flatMap((group) =>
+      group.items.map((item) => item.href),
+    )
+
+    expect(new Set(paths).size).toBe(paths.length)
+    expect(paths).toEqual(
+      expect.arrayContaining([
+        "/",
+        "/projects",
+        "/health",
+        "/registry",
+        "/ecosystem",
+        "/events",
+        "/telemetry",
+        "/docs",
+        "/praticies",
+      ]),
+    )
+  })
+
+  it("selects the most specific navigation parent for nested routes", () => {
+    expect(resolveActiveNavItem("/docs/context/ctx_1")?.href).toBe(
+      "/docs/context",
+    )
+    expect(resolveActiveNavItem("/projects/matriz-hub")?.href).toBe(
+      "/projects",
+    )
+  })
+
+  it("builds searchable commands with their operational context", () => {
+    expect(buildCommandItems(HUB_NAV_GROUPS)).toContainEqual(
+      expect.objectContaining({
+        href: "/telemetry",
+        groupLabel: "Operação",
+      }),
+    )
+  })
+})
