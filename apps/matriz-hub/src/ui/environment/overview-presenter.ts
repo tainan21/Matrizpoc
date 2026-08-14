@@ -11,10 +11,22 @@ export interface HubOverviewAppSource {
   readonly appId: string
   readonly name: string
   readonly description: string
+  readonly version: string
   readonly enabled: boolean
   readonly capabilitiesCount: number
   readonly routesCount: number
   readonly integrationsCount: number
+  readonly integrations: readonly {
+    readonly targetAppId: string
+    readonly kind: string
+  }[]
+}
+
+export interface HubOverviewChangeSource {
+  readonly id: string
+  readonly label: string
+  readonly actor: string
+  readonly occurredAt: string
 }
 
 export interface HubOverviewProjectSource {
@@ -40,6 +52,7 @@ export interface HubOverviewSource {
   readonly events: readonly HubOverviewActivitySource[]
   readonly telemetry: readonly HubOverviewActivitySource[]
   readonly institutionalUpdatedAt?: string
+  readonly changes?: readonly HubOverviewChangeSource[]
 }
 
 const HEALTH_PRESENTATION: Record<
@@ -152,9 +165,67 @@ export function toHubOverviewVM(source: HubOverviewSource): HubOverviewVM {
       )
     : 0
   const activity = toActivity(source.events, source.telemetry)
+  const registeredAppIds = new Set(source.apps.map((app) => app.appId))
+  const graphNodes = source.apps.map((app) => {
+    const project = projectsById.get(app.appId)
+    const presentation = project
+      ? HEALTH_PRESENTATION[project.healthStatus]
+      : app.enabled
+        ? { status: "available" as const, label: "Sem leitura" }
+        : { status: "unavailable" as const, label: "Desabilitado" }
+
+    return {
+      id: app.appId,
+      label: app.name,
+      description: app.description,
+      version: app.version,
+      status: presentation.status,
+      statusLabel: presentation.label,
+      accentColor: project?.accentColor,
+      readinessScore: project?.readinessScore,
+      capabilitiesCount: app.capabilitiesCount,
+      routesCount: app.routesCount,
+      integrationsCount: app.integrationsCount,
+      lastCheckAt: project?.lastCheckAt,
+      href: `/catalog#${encodeURIComponent(app.appId)}`,
+    }
+  })
+  const graphEdges = source.apps.flatMap((app) =>
+    app.integrations
+      .filter((integration) => registeredAppIds.has(integration.targetAppId))
+      .map((integration, index) => ({
+        id: `${app.appId}:${integration.targetAppId}:${integration.kind}:${index}`,
+        sourceId: app.appId,
+        targetId: integration.targetAppId,
+        kind: integration.kind,
+        status: "available" as const,
+      })),
+  )
+  const changes = (source.changes ?? [])
+    .slice()
+    .sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))
+    .slice(0, 8)
+    .map((change) => ({ ...change, status: "archived" as const }))
+  const actorMap = new Map<string, { count: number; lastSeenAt: string }>()
+  for (const change of source.changes ?? []) {
+    const current = actorMap.get(change.actor)
+    actorMap.set(change.actor, {
+      count: (current?.count ?? 0) + 1,
+      lastSeenAt:
+        !current || change.occurredAt > current.lastSeenAt
+          ? change.occurredAt
+          : current.lastSeenAt,
+    })
+  }
 
   return {
     generatedAt: source.generatedAt,
+    graph: {
+      nodes: graphNodes,
+      edges: graphEdges,
+      defaultSelectedId:
+        graphNodes.find((node) => node.id === "matriz-hub")?.id ?? graphNodes[0]?.id,
+    },
     portfolio: source.apps.map((app) => {
       const project = projectsById.get(app.appId)
       const presentation = project
@@ -245,5 +316,15 @@ export function toHubOverviewVM(source: HubOverviewSource): HubOverviewVM {
         status: source.telemetry.length ? "available" : "waiting",
       },
     ],
+    changes,
+    actors: [...actorMap.entries()]
+      .map(([actor, value]) => ({
+        id: actor,
+        label: actor,
+        activityCount: value.count,
+        lastSeenAt: value.lastSeenAt,
+        status: "archived" as const,
+      }))
+      .sort((left, right) => right.lastSeenAt.localeCompare(left.lastSeenAt)),
   }
 }

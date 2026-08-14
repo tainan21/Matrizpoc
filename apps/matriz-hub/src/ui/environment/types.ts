@@ -145,8 +145,53 @@ export interface HubDataOriginVM {
   readonly status: HubStatus
 }
 
+export interface HubGraphNodeVM {
+  readonly id: string
+  readonly label: string
+  readonly description: string
+  readonly version: string
+  readonly status: HubStatus
+  readonly statusLabel: string
+  readonly accentColor?: string
+  readonly readinessScore?: number
+  readonly capabilitiesCount: number
+  readonly routesCount: number
+  readonly integrationsCount: number
+  readonly lastCheckAt?: string
+  readonly href: string
+}
+
+export interface HubGraphEdgeVM {
+  readonly id: string
+  readonly sourceId: string
+  readonly targetId: string
+  readonly kind: string
+  readonly status: HubStatus
+}
+
+export interface HubRecentChangeVM {
+  readonly id: string
+  readonly label: string
+  readonly actor: string
+  readonly occurredAt: string
+  readonly status: HubStatus
+}
+
+export interface HubRecentActorVM {
+  readonly id: string
+  readonly label: string
+  readonly activityCount: number
+  readonly lastSeenAt: string
+  readonly status: "archived"
+}
+
 export interface HubOverviewVM {
   readonly generatedAt: string
+  readonly graph: {
+    readonly nodes: readonly HubGraphNodeVM[]
+    readonly edges: readonly HubGraphEdgeVM[]
+    readonly defaultSelectedId?: string
+  }
   readonly portfolio: readonly HubPortfolioItemVM[]
   readonly health: HubHealthSummaryVM
   readonly attention: readonly HubAttentionItemVM[]
@@ -154,4 +199,6 @@ export interface HubOverviewVM {
   readonly flow: readonly HubFlowNodeVM[]
   readonly nextAction: HubActionVM
   readonly origins: readonly HubDataOriginVM[]
+  readonly changes: readonly HubRecentChangeVM[]
+  readonly actors: readonly HubRecentActorVM[]
 }
