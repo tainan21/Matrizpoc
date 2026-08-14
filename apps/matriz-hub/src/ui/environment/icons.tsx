@@ -35,6 +35,14 @@ const ICON_PATHS = {
   check: ["m5 12 4 4L19 6"],
   database: ["M5 6c0-2 14-2 14 0v12c0 2-14 2-14 0z", "M5 6c0 2 14 2 14 0", "M5 12c0 2 14 2 14 0"],
   layers: ["m12 3 9 5-9 5-9-5z", "m3 12 9 5 9-5", "m3 16 9 5 9-5"],
+  info: ["M12 11v6", "M12 7h.01", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z"],
+  expand: ["M9 4H4v5", "M15 4h5v5", "M9 20H4v-5", "M15 20h5v-5"],
+  minimize: ["M4 9h5V4", "M20 9h-5V4", "M4 15h5v5", "M20 15h-5v5"],
+  cube: ["m12 3 8 4.5v9L12 21l-8-4.5v-9z", "m4 7.5 8 4.5 8-4.5", "M12 12v9"],
+  map2d: ["m4 6 5-2 6 2 5-2v14l-5 2-6-2-5 2z", "M9 4v14", "M15 6v14"],
+  fit: ["M4 9V4h5", "M15 4h5v5", "M20 15v5h-5", "M9 20H4v-5"],
+  zoomIn: ["M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12z", "m15 15 5 5", "M10 7v6", "M7 10h6"],
+  zoomOut: ["M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12z", "m15 15 5 5", "M7 10h6"],
 } satisfies Record<HubIconName, readonly string[]>
 
 export interface HubIconProps {

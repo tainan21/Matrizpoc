@@ -10,6 +10,7 @@ import type {
   TimelineEventDTO,
 } from "@matriz/integration-api-contracts/v1/docs"
 import { HubIcon } from "../../../ui/environment/icons"
+import { InfoHint } from "../../../ui/environment/InfoHint"
 import { StatusLabel } from "../../../ui/environment/status"
 import {
   docsHumanEventName,
@@ -43,8 +44,7 @@ export function DocsHeader({
     <header className="knowledge-heading">
       <div className="knowledge-heading__copy">
         <span className="knowledge-eyebrow">CONHECIMENTO / MATRIZDOCS</span>
-        <h1>{title}</h1>
-        <p>{description}</p>
+        <span className="knowledge-heading__title"><h1>{title}</h1><InfoHint label={title}>{description}</InfoHint></span>
       </div>
       {action ? <div className="knowledge-heading__actions">{action}</div> : null}
       <div className="knowledge-heading__seal" aria-label="Memória viva, versão 1">

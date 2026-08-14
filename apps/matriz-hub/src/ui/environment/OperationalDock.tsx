@@ -25,11 +25,23 @@ export function OperationalDock() {
       </span>
       <span className="hub-operational-dock__item">
         <StatusMark status="available" label="Dados institucionais em snapshot" />
-        Institucional · snapshot
+        Snapshot institucional
       </span>
       <span className="hub-operational-dock__item">
         <StatusMark status="temporary" label="Atividade mantida por sessão" />
-        Atividade · sessão
+        EventBus · sessão
+      </span>
+      <span className="hub-operational-dock__item">
+        <StatusMark status="temporary" label="Telemetria mantida por sessão" />
+        Telemetria · sessão
+      </span>
+      <span className="hub-operational-dock__item">
+        <StatusMark status="available" label="Ambiente local" />
+        Ambiente · alpha local
+      </span>
+      <span className="hub-operational-dock__item">
+        <StatusMark status="available" label="Persistência real ou fallback explícito" />
+        Persistência · explícita
       </span>
       <time className="hub-operational-dock__item" dateTime={now?.toISOString()} suppressHydrationWarning>
         {now?.toLocaleString("pt-BR", {

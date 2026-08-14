@@ -35,10 +35,10 @@ export function GlobalContextBar({
 }: GlobalContextBarProps) {
   return (
     <header className="hub-global-bar">
-      <Link className="hub-global-bar__brand" href="/" aria-label="Ir para a visão geral do Matriz Hub">
+      <Link className="hub-global-bar__brand" href="/" aria-label="Ir para a visão geral do MyHub">
         <span className="hub-global-bar__mark" aria-hidden="true" />
         <span className="hub-global-bar__brand-copy">
-          <strong>Matriz-Hub</strong>
+          <strong>MyHub</strong>
           <small>ambiente operacional alpha</small>
         </span>
       </Link>
@@ -53,16 +53,16 @@ export function GlobalContextBar({
           <HubIcon name="menu" size={18} />
         </button>
         <span className="hub-global-context__item">
-          <small>Você está aqui</small>
-          <strong>{currentArea}</strong>
+          <small>Projeto ativo</small>
+          <strong title={currentArea}>Matriz Core</strong>
         </span>
         <span className="hub-global-context__item" data-tone="success">
           <small>Ambiente</small>
-          <strong>Alpha local</strong>
+          <strong>alpha local</strong>
         </span>
         <span className="hub-global-context__item">
-          <small>Persistência</small>
-          <strong>Fontes reais + fallback explícito</strong>
+          <small>Sincronização</small>
+          <strong>Fontes reais</strong>
         </span>
       </div>
 

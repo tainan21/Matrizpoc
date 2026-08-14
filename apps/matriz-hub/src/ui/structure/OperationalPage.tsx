@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react"
 import Link from "next/link"
 import { HubIcon } from "../environment/icons"
+import { InfoHint } from "../environment/InfoHint"
 import { StatusLabel, StatusMark } from "../environment/status"
 import type { HubIconName, HubStatus } from "../environment/types"
 
@@ -23,8 +24,7 @@ export function OperationalPageHeader({
     <header className="hub-page-header">
       <div>
         <p className="hub-eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
-        <p>{description}</p>
+        <span className="hub-page-header__title"><h1>{title}</h1><InfoHint label={title}>{description}</InfoHint></span>
       </div>
       <div className="hub-page-header__actions">
         {status ? <StatusLabel status={status}>{statusLabel}</StatusLabel> : null}
@@ -49,7 +49,7 @@ export function MetricStrip({ items }: { readonly items: readonly MetricStripIte
         <div key={item.label} data-status={item.status}>
           <dt><HubIcon name={item.icon} size={16} />{item.label}</dt>
           <dd>{item.value}</dd>
-          {item.detail ? <small>{item.detail}</small> : null}
+          {item.detail ? <span className="hub-metric-strip__detail"><small>{item.detail}</small><InfoHint label={item.label}>{item.detail}</InfoHint></span> : null}
         </div>
       ))}
     </dl>

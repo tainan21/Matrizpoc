@@ -48,6 +48,14 @@ export type HubIconName =
   | "check"
   | "database"
   | "layers"
+  | "info"
+  | "expand"
+  | "minimize"
+  | "cube"
+  | "map2d"
+  | "fit"
+  | "zoomIn"
+  | "zoomOut"
 
 export interface HubNavItem {
   readonly label: string
