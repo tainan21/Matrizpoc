@@ -816,6 +816,9 @@ importers:
 
   packages/flows/themes:
     dependencies:
+      '@matriz/design-system':
+        specifier: workspace:^
+        version: link:../../design/system
       '@matriz/foundation-constants':
         specifier: workspace:^
         version: link:../../foundation/constants
