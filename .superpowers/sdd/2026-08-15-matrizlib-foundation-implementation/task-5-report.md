@@ -78,3 +78,33 @@ surface.
   evidence indicates resource contention rather than a product regression.
 - The Workbench compatibility notice is deliberately compact status text, not a
   new design-system gallery or a `design-ui` adoption.
+
+## Review fix round 1
+
+The previous `EstablishmentActions` and `ThemeSystemPicker` tests inspected
+TSX text. They were replaced with rendered Testing Library contracts running in
+scoped jsdom environments.
+
+### RED / GREEN
+
+- RED: the new component tests initially could not resolve the scoped Testing
+  Library dependencies, then failed with `document is not defined` under the
+  existing Node test environments, and finally exposed the missing automatic
+  JSX transform used by the apps.
+- GREEN: each app now uses jsdom only for `*.test.tsx` and Vite's automatic JSX
+  transform. The SeuMei test renders the real action with only its DI container
+  mocked, clicks the real button, and validates the live status, message,
+  decorative icon, and `aria-describedby` relation. The Workbench test renders
+  the real picker, validates public metadata/token text, clicks Aurora, and
+  observes the local system, semantic alias, and pressed state. A separate
+  package-boundary assertion confirms Workbench remains token-only.
+
+### Verification
+
+- `pnpm --filter @matriz/app-seumei test` — 2 files / 3 tests passed.
+- `pnpm --filter @matriz/app-matriz-workbench test` — 49 files / 206 tests
+  passed.
+- Both app lint and typecheck commands passed.
+- Both app production builds passed with exit code 0.
+- `pnpm install --frozen-lockfile --filter @matriz/app-seumei --filter
+  @matriz/app-matriz-workbench` passed, confirming the scoped lockfile update.
