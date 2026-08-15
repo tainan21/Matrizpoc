@@ -22,6 +22,13 @@ function readAppFile(appId: string, file: "layout.tsx" | "globals.css") {
   return readFileSync(resolve(process.cwd(), "apps", appId, "app", file), "utf8")
 }
 
+const privateDesignCssImport =
+  /@import\s+["'](?:[^"']*packages\/design\/[^"']*\/src\/|@matriz\/design-(?:system|ui)\/src\/)[^"']*\.css["'];/
+
+function hasPrivateDesignCssImport(stylesheet: string) {
+  return privateDesignCssImport.test(stylesheet)
+}
+
 describe("Matriz Lib public-style adoption", () => {
   it("loads design-system CSS through the public entry in every app", () => {
     for (const app of apps) {
@@ -50,10 +57,18 @@ describe("Matriz Lib public-style adoption", () => {
   it("does not import CSS from private design package source paths", () => {
     for (const app of apps) {
       const stylesheet = readAppFile(app.id, "globals.css")
-      expect(stylesheet, `${app.id} must not reach into packages/design/*/src`).not.toMatch(
-        /@import\s+["'][^"']*packages\/design\/[^"']*\/src\/[^"']*\.css["'];/,
+      expect(hasPrivateDesignCssImport(stylesheet), `${app.id} must use public CSS paths`).toBe(
+        false,
       )
     }
+  })
+
+  it.each([
+    '@import "../../../packages/design/ui/src/utility-shim.css";',
+    '@import "@matriz/design-system/src/tokens.css";',
+    '@import "@matriz/design-ui/src/utility-shim.css";',
+  ])("detects a private design CSS import: %s", (stylesheet) => {
+    expect(hasPrivateDesignCssImport(stylesheet)).toBe(true)
   })
 
   it("exposes the Matriz Lib version marker on every root html element", () => {
