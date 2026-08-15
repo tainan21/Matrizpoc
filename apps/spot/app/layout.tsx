@@ -24,7 +24,7 @@ const spotVars = themeToCssVars(appThemes.spot)
 
 export default function SpotRootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" data-theme="light" style={spotVars as Record<string, string>}>
+    <html lang="pt-BR" data-matrizlib="0.1.0" data-theme="light" style={spotVars as Record<string, string>}>
       <body className="bg-surface text-surface-fg antialiased">
         <ThemeController appId="spot" />
         <EcosystemAccess appId="spot" />

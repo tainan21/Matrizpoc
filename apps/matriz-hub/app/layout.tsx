@@ -22,7 +22,7 @@ const hubVars = themeToCssVars(appThemes["matriz-hub"])
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" data-theme="light" style={hubVars as Record<string, string>}>
+    <html lang="pt-BR" data-matrizlib="0.1.0" data-theme="light" style={hubVars as Record<string, string>}>
       <body
         style={{
           margin: 0,

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function WilldashRootLayout({ children }: { children: ReactNode }) {
   const tokens = themeToCssVars(appThemes.willdash)
   return (
-    <html lang="pt-BR" data-theme="light" style={tokens}>
+    <html lang="pt-BR" data-matrizlib="0.1.0" data-theme="light" style={tokens}>
       <body
         style={{
           margin: 0,

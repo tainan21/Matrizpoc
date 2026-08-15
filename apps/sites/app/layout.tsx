@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${sans.variable} ${mono.variable}`} data-theme="dark" style={sitesVars}>
+    <html lang="pt-BR" className={`${sans.variable} ${mono.variable}`} data-matrizlib="0.1.0" data-theme="dark" style={sitesVars}>
       <body><ThemeController appId="sites" /><EcosystemAccess appId="sites" /><SitesBootstrap>{children}</SitesBootstrap></body>
     </html>
   )

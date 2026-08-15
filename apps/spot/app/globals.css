@@ -1,4 +1,5 @@
-@import "../../../packages/design/ui/src/utility-shim.css";
+@import "@matriz/design-system/css";
+@import "@matriz/design-ui/styles.css";
 
 /* Spot global styles.
  *

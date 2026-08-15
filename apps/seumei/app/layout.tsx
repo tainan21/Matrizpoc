@@ -19,7 +19,7 @@ export default function SeumeiRootLayout({ children }: { children: ReactNode }) 
     .join("\n")
 
   return (
-    <html lang="pt-BR" data-theme="light">
+    <html lang="pt-BR" data-matrizlib="0.1.0" data-theme="light">
       <head>
         <style>{`:root { ${styleVars} }`}</style>
       </head>
