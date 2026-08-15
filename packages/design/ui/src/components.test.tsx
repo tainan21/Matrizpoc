@@ -38,6 +38,18 @@ describe("FormField", () => {
     )
   })
 
+  it("keeps the field id authoritative when an input supplies a conflicting id", () => {
+    render(
+      <FormField id="company" label="Company" helper="Use the legal name">
+        <Input id="legal-company" />
+      </FormField>,
+    )
+
+    const input = screen.getByRole("textbox", { name: "Company" })
+    expect(input).toHaveAttribute("id", "company")
+    expect(input).toHaveAccessibleDescription("Use the legal name")
+  })
+
   it("connects a field error to its input and announces the error", () => {
     render(
       <FormField id="company" label="Company" error="Enter the company">

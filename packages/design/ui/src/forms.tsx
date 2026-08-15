@@ -43,7 +43,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     return (
       <input
         ref={ref}
-        id={id ?? field?.id}
+        id={field?.id ?? id}
         className={cn("matriz-input", className)}
         aria-describedby={descriptions}
         aria-errormessage={errorMessage ?? field?.errorMessageId}
