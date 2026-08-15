@@ -85,6 +85,19 @@ Detalhe completo em cada `packages/*/README.md`. Regras gerais:
 - `flows/*` — pode depender de `design/*`, `integration/*`,
   `platform/*`, `access/*`, `foundation/*`.
 
+### MatrizLib local
+
+- `packages/design/system` is the local authority for tokens, declarative themes,
+  public CSS, and metadata. `packages/design/ui` is the local authority for
+  React primitives, component metadata, and Storybook.
+- Both accept only domain-free visual contracts. They do not import apps,
+  `integration/*`, `flows/*`, `access/*`, storage, or HTTP.
+- Apps retain presenters, entities, copy, auth, routes, persistence, and local
+  themes. They consume only public `@matriz/design-system` and
+  `@matriz/design-ui` surfaces, never `packages/design/**/src/**`.
+- The external library remains reference-only. Criteria and migration guidance
+  are in `docs/matrizlib/`.
+
 ### Auth — regra especial (L12)
 
 `packages/platform/auth`:

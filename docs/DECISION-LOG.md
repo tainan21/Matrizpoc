@@ -1,5 +1,16 @@
 # Matriz Decision Log
 
+## 2026-08-15 — Local design packages are canonical MatrizLib
+
+- **Decision:** local `@matriz/design-system` and `@matriz/design-ui` are the
+  canonical authority; the external library is reference-only.
+- **Reason:** this preserves public contracts, domain boundaries, and
+  compatibility without an unapproved dependency or code copy.
+- **Impact:** consumers use local public exports only; Design Alpha and any
+  external library do not enter runtime.
+- **Review when:** a separate portable adoption is approved with public surface,
+  license, security, accessibility, and rollback audited.
+
 ## 2026-08-04 — Broker mockado e fluxo visual de login compartilhado
 
 - **Decisão:** centralizar desafios e sessão mockados no Matriz Hub para Hub,
