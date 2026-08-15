@@ -1,0 +1,220 @@
+.matriz-catalog,
+.catalog-doc {
+  --matriz-color-action: #6d28d9;
+  --matriz-color-action-text: #ffffff;
+  --matriz-color-focus: #7c3aed;
+  min-height: 100vh;
+  background: var(--matriz-color-canvas);
+  color: var(--matriz-color-text);
+  font-family: var(--matriz-font-sans);
+}
+
+.matriz-catalog[data-theme="dark"],
+.catalog-doc[data-theme="dark"] {
+  --matriz-color-action: #9b8cff;
+  --matriz-color-action-text: #0b0818;
+  --matriz-color-focus: #b4a8ff;
+}
+
+.matriz-catalog[data-density="compact"] {
+  --matriz-space-3: 0.5rem;
+  --matriz-space-4: 0.75rem;
+  --matriz-space-6: 1rem;
+  --matriz-space-8: 1.5rem;
+}
+
+.matriz-catalog[data-motion="reduced"] {
+  --matriz-motion-duration-fast: 0ms;
+  --matriz-motion-duration-base: 0ms;
+  --matriz-motion-duration-slow: 0ms;
+}
+
+.matriz-catalog__stage {
+  min-height: 100vh;
+  padding: clamp(1.25rem, 4vw, 4rem);
+}
+
+.catalog-frame {
+  width: min(100%, 68rem);
+  margin-inline: auto;
+}
+
+.catalog-kicker {
+  color: var(--matriz-color-action);
+  font-family: var(--matriz-font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.catalog-rule {
+  border: 0;
+  border-top: 1px solid var(--matriz-color-border);
+  margin: 0;
+}
+
+.catalog-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.7fr) minmax(0, 1.5fr);
+  gap: var(--matriz-space-6);
+  align-items: start;
+  padding-block: var(--matriz-space-4);
+  border-bottom: 1px solid var(--matriz-color-border);
+}
+
+.catalog-row:last-child {
+  border-bottom: 0;
+}
+
+.catalog-specimen {
+  min-height: 11rem;
+  display: grid;
+  align-content: center;
+  padding: clamp(1rem, 3vw, 2rem);
+  border-block: 1px solid var(--matriz-color-border);
+  background: var(--matriz-color-surface);
+}
+
+.catalog-measure {
+  max-width: 42rem;
+}
+
+.catalog-loading-dot {
+  display: inline-block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-right: 0.5rem;
+  border-radius: 999px;
+  background: currentColor;
+  animation: catalog-pulse var(--matriz-motion-duration-slow) var(--matriz-motion-easing-standard) infinite alternate;
+}
+
+.catalog-doc {
+  min-height: 0;
+  margin: -4rem;
+  padding: clamp(2rem, 6vw, 5rem);
+}
+
+.catalog-doc__masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(14rem, 0.7fr);
+  gap: clamp(2rem, 7vw, 7rem);
+  align-items: end;
+  padding-block: 3rem 4rem;
+  border-bottom: 1px solid var(--matriz-color-border);
+}
+
+.catalog-doc h1,
+.catalog-doc h2,
+.catalog-doc h3,
+.catalog-doc p {
+  margin: 0;
+}
+
+.catalog-doc h1 {
+  max-width: 14ch;
+  font-size: clamp(3rem, 8vw, 7rem);
+  line-height: 0.92;
+  letter-spacing: -0.065em;
+}
+
+.catalog-doc h2 {
+  margin-top: 4rem;
+  font-size: clamp(1.75rem, 4vw, 3rem);
+  letter-spacing: -0.04em;
+}
+
+.catalog-doc h3 {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.catalog-doc p {
+  color: var(--matriz-color-text-muted);
+  line-height: 1.7;
+}
+
+.catalog-doc code {
+  font-family: var(--matriz-font-mono);
+  font-size: 0.82em;
+}
+
+.catalog-index,
+.catalog-token-list,
+.catalog-migration-list {
+  padding: 0;
+  margin: 1.5rem 0 0;
+  list-style: none;
+  border-top: 1px solid var(--matriz-color-border);
+}
+
+.catalog-index li,
+.catalog-token-list li,
+.catalog-migration-list li {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.55fr) minmax(0, 1.45fr);
+  gap: 2rem;
+  padding-block: 1.15rem;
+  border-bottom: 1px solid var(--matriz-color-border);
+}
+
+.catalog-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--matriz-color-text);
+  font-family: var(--matriz-font-mono);
+  font-size: 0.78rem;
+}
+
+.catalog-swatch {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+  border: 1px solid var(--matriz-color-border);
+  border-radius: 50%;
+}
+
+.catalog-callout {
+  margin-top: 3rem;
+  padding: 1.25rem 0 1.25rem 1.25rem;
+  border-left: 3px solid var(--matriz-color-action);
+}
+
+.catalog-controls-note {
+  color: var(--matriz-color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+@keyframes catalog-pulse {
+  from { opacity: 0.35; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 720px) {
+  .matriz-catalog__stage {
+    padding: 1rem;
+  }
+
+  .catalog-doc {
+    margin: -2rem;
+    padding: 1.5rem;
+  }
+
+  .catalog-doc__masthead,
+  .catalog-row,
+  .catalog-index li,
+  .catalog-token-list li,
+  .catalog-migration-list li {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-loading-dot {
+    animation: none;
+  }
+}

@@ -1,0 +1,60 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+import { matrizTokenMetadata } from "@matriz/design-system"
+
+<Meta title="MatrizLib/Foundations" />
+
+<div className="catalog-doc" data-matrizlib="" data-theme="light">
+  <div className="catalog-doc__masthead">
+    <div>
+      <span className="catalog-kicker">Foundations</span>
+      <h1>Decisões visuais, não valores soltos.</h1>
+    </div>
+    <p>
+      Tokens semânticos mantêm o mesmo significado entre produtos. O app escolhe a paleta;
+      o componente consome intenção.
+    </p>
+  </div>
+
+  <h2>Cor semântica</h2>
+  <ul className="catalog-token-list">
+    {matrizTokenMetadata
+      .filter(({ name }) => name.startsWith("--matriz-color"))
+      .map((token) => (
+        <li key={token.name}>
+          <span className="catalog-token">
+            <span className="catalog-swatch" style={{ background: `var(${token.name})` }} />
+            {token.name}
+          </span>
+          <p>{token.description}</p>
+        </li>
+      ))}
+  </ul>
+
+  <h2>Ritmo e leitura</h2>
+  <ul className="catalog-index">
+    <li>
+      <strong>Espaço</strong>
+      <p>Escala curta e previsível. Densidade compacta reduz ritmo sem alterar a hierarquia.</p>
+    </li>
+    <li>
+      <strong>Tipografia</strong>
+      <p>Sans para leitura operacional; mono para tokens, códigos e dados técnicos.</p>
+    </li>
+    <li>
+      <strong>Foco</strong>
+      <p>Indicador violeta explícito, separado do estado de hover e perceptível nos dois temas.</p>
+    </li>
+    <li>
+      <strong>Movimento</strong>
+      <p>Durações semânticas que podem chegar a zero pelo contrato de movimento reduzido.</p>
+    </li>
+  </ul>
+
+  <div className="catalog-callout">
+    <h3>Namespace obrigatório</h3>
+    <p>
+      Novos componentes consomem <code>--matriz-*</code>. Aliases legados existem apenas para
+      sustentar a migração incremental.
+    </p>
+  </div>
+</div>
