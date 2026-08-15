@@ -126,6 +126,12 @@ export function getAppearanceVariables(mode: WorkbenchColorMode, system: Workben
     "--wb-shadow-md": tokens.shadowMedium, "--wb-density": tokens.density,
     "--surface-fg": tokens.text, "--color-foreground": tokens.text, "--color-surface": tokens.surface1,
     "--color-background": tokens.canvas, "--color-border": tokens.border, "--accent-fg": tokens.accentText,
+    "--matriz-color-canvas": tokens.canvas, "--matriz-color-surface": tokens.surface1,
+    "--matriz-color-text": tokens.text, "--matriz-color-text-muted": tokens.textSecondary,
+    "--matriz-color-border": tokens.border, "--matriz-color-action": tokens.accent,
+    "--matriz-color-action-text": tokens.accentText, "--matriz-color-focus": tokens.focus,
+    "--matriz-color-success": tokens.success, "--matriz-color-warning": tokens.warning,
+    "--matriz-color-danger": tokens.danger, "--matriz-color-info": tokens.info,
   }
 }
 

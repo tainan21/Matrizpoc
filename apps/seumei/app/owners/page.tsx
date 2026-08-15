@@ -1,20 +1,21 @@
 import { Card, CardHeader, CardTitle, CardDescription, Heading, Text, Stack, EmptyState } from "@matriz/design-ui"
 import { mockTenants } from "@matriz/access-tenants"
 import { getSeumeiContainer } from "../../src/lib/container"
+import { toOwnerViewModel } from "../../src/ui/presenters/owner.presenter"
 
 export default async function SeumeiOwnersPage() {
   const tenant = mockTenants[0]
   const { useCases } = getSeumeiContainer()
   const estabs = await useCases.listEstablishments(tenant.id)
 
-  const entries = await Promise.all(
-    estabs.map(async (e) => ({
-      est: e,
-      owner: await useCases.getOwnerProfile(tenant.id, e.id),
+  const owners = (await Promise.all(
+    estabs.map(async (establishment) => ({
+      establishment,
+      owner: await useCases.getOwnerProfile(tenant.id, establishment.id),
     })),
-  )
-
-  const withOwners = entries.filter((x) => x.owner !== null)
+  )).flatMap(({ establishment, owner }) => (
+    owner ? [toOwnerViewModel(owner, establishment)] : []
+  ))
 
   return (
     <Stack gap={6}>
@@ -25,19 +26,20 @@ export default async function SeumeiOwnersPage() {
         </Text>
       </div>
 
-      {withOwners.length === 0 ? (
+      {owners.length === 0 ? (
         <EmptyState title="Nenhum perfil cadastrado" />
       ) : (
         <Stack gap={4}>
-          {withOwners.map(({ est, owner }) => (
-            <Card key={est.id}>
+          {owners.map((owner) => (
+            <Card key={owner.id}>
               <CardHeader>
-                <CardTitle>{owner!.ownerName}</CardTitle>
-                <CardDescription>{est.name} · {est.city}</CardDescription>
+                <CardTitle>{owner.ownerName}</CardTitle>
+                <CardDescription>{owner.establishmentName} - {owner.establishmentLocation}</CardDescription>
               </CardHeader>
               <Stack gap={2}>
-                <Text size="sm"><strong>Email:</strong> {owner!.email}</Text>
-                <Text size="sm">{owner!.bio}</Text>
+                <Text size="sm"><strong>Email:</strong> {owner.email}</Text>
+                <Text size="sm"><strong>Telefone:</strong> {owner.phoneDisplay}</Text>
+                <Text size="sm">{owner.bio}</Text>
               </Stack>
             </Card>
           ))}
