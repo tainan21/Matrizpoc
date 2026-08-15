@@ -2,14 +2,17 @@
 
 ## Responsibility (L9)
 
-Design tokens, brand helpers and light/dark themes for every Matriz app.
+Pure design tokens, metadata, brand helpers and light/dark themes for every Matriz app.
 
 ## Exposes
 
-- shared spacing, radius and typography scales;
-- light and dark app palettes;
-- semantic CSS-variable generation with `themeToCssVars`;
-- app-local theme lookup through `getAppTheme`.
+- `.`: primitive registries, semantic/component token names, metadata,
+  light/dark app palettes and CSS-variable helpers;
+- `./css`: the namespaced `[data-matrizlib]` CSS contract, including legacy aliases;
+- `./metadata`: descriptive token records for tooling and documentation.
+
+Commercial offer fields are owned by `@matriz/flows-themes`; visual theme
+definitions intentionally contain no pricing or entitlement policy.
 
 ## Must NOT import
 
