@@ -34,10 +34,16 @@
 - Modify: `packages/design/system/src/index.ts`
 - Modify: `packages/design/system/package.json`
 - Modify: `packages/design/system/README.md`
+- Modify: `packages/flows/themes/src/index.ts`
+- Modify: `packages/flows/themes/src/appearance.test.ts`
+- Modify: `packages/flows/themes/package.json`
+- Modify: `apps/matriz-hub/src/domains/capabilities/application/capability-store.ts`
+- Modify: `apps/matriz-hub/src/domains/capabilities/application/capability-store.test.ts`
+- Modify: `apps/matriz-hub/app/settings/appearance/AppearanceSettings.tsx`
 
 **Interfaces:**
 - Produces `primitiveTokens`, `semanticTokenNames`, `componentTokenNames`, `matrizTokenMetadata`, `themeToCssVars`, `themeDefinitionToCssVars`, and public export paths `.`, `./css`, `./metadata`.
-- Retains the existing root exports and legacy CSS variable aliases.
+- Retains the existing root exports and legacy CSS variable aliases. Moves commercial catalog fields to `@matriz/flows-themes` while keeping the current Hub capability behavior.
 
 - [ ] **Step 1: Write failing token-contract tests**
 
@@ -70,7 +76,7 @@ Expected: failure because the split registries and namespaced contract do not ex
 
 - [ ] **Step 3: Implement the minimal split and CSS contract**
 
-Move existing scales to `tokens.ts`, visual theme definitions to `themes.ts`, and descriptive token records to `metadata.ts`. Keep compatibility re-exports in `index.ts`. Use pure readonly data.
+Move existing scales to `tokens.ts`, visual theme definitions to `themes.ts`, and descriptive token records to `metadata.ts`. Move `priceLabel` and `premium` to a `ThemeOffer` catalog in `@matriz/flows-themes`, then adapt the Hub capability store and appearance UI without changing checkout behavior. Keep compatibility re-exports in `index.ts`. Use pure readonly data.
 
 ```ts
 export const semanticTokenNames = [
@@ -111,6 +117,10 @@ Run:
 pnpm --filter @matriz/design-system test
 pnpm --filter @matriz/design-system typecheck
 pnpm --filter @matriz/design-system lint
+pnpm --filter @matriz/flows-themes test
+pnpm --filter @matriz/flows-themes typecheck
+pnpm --filter @matriz/app-matriz-hub test
+pnpm --filter @matriz/app-matriz-hub typecheck
 ```
 
 - [ ] **Step 6: Commit task-owned files**
