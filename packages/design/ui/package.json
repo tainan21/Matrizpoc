@@ -14,7 +14,8 @@
   },
   "scripts": {
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "storybook build && pnpm run check-storybook-runtime",
+    "check-storybook-runtime": "node ./scripts/check-storybook-runtime.mjs",
     "typecheck": "tsc --noEmit && pnpm run typecheck:mdx",
     "typecheck:mdx": "node ./scripts/check-storybook-mdx.mjs",
     "lint": "eslint src .storybook stories",

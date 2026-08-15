@@ -11,6 +11,13 @@ const config: StorybookConfig = {
     name: "@storybook/react-vite",
     options: {},
   },
+  viteFinal: async (config) => ({
+    ...config,
+    esbuild: {
+      ...(typeof config.esbuild === "object" ? config.esbuild : {}),
+      jsx: "automatic",
+    },
+  }),
   core: {
     disableTelemetry: true,
   },
