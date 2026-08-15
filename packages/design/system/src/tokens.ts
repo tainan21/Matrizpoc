@@ -41,14 +41,26 @@ export const fontSizeScale = {
   "4xl": "2.25rem",
 } as const
 
+export const semanticFeedbackColors = {
+  light: {
+    success: "#0f7650",
+    warning: "#854d0e",
+    danger: "#b4233f",
+    info: "#245fbd",
+  },
+  dark: {
+    success: "#57d6a3",
+    warning: "#f0b85a",
+    danger: "#ff7b8a",
+    info: "#82adff",
+  },
+} as const
+
 export const primitiveTokens = {
   color: {
     white: "#ffffff",
     ink: "#0f172a",
-    success: "#16875b",
-    warning: "#b26a14",
-    danger: "#dc4655",
-    info: "#3976d8",
+    ...semanticFeedbackColors.light,
   },
   spacing: spacingScale,
   radius: radiusScale,

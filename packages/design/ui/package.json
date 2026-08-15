@@ -16,7 +16,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src .storybook stories",
     "test": "vitest run --config vitest.config.ts"
   },
   "peerDependencies": {

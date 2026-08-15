@@ -4,10 +4,10 @@
 
   --matriz-primitive-white: #ffffff;
   --matriz-primitive-ink: #0f172a;
-  --matriz-primitive-success: #16875b;
-  --matriz-primitive-warning: #b26a14;
-  --matriz-primitive-danger: #dc4655;
-  --matriz-primitive-info: #3976d8;
+  --matriz-primitive-success: #0f7650;
+  --matriz-primitive-warning: #854d0e;
+  --matriz-primitive-danger: #b4233f;
+  --matriz-primitive-info: #245fbd;
 
   --matriz-color-canvas: #f1f5f9;
   --matriz-color-surface: #ffffff;
@@ -93,6 +93,10 @@
   --matriz-color-action: #9b8cff;
   --matriz-color-action-text: #0b0818;
   --matriz-color-focus: #9b8cff;
+  --matriz-color-success: #57d6a3;
+  --matriz-color-warning: #f0b85a;
+  --matriz-color-danger: #ff7b8a;
+  --matriz-color-info: #82adff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -106,6 +110,10 @@
     --matriz-color-action: #9b8cff;
     --matriz-color-action-text: #0b0818;
     --matriz-color-focus: #9b8cff;
+    --matriz-color-success: #57d6a3;
+    --matriz-color-warning: #f0b85a;
+    --matriz-color-danger: #ff7b8a;
+    --matriz-color-info: #82adff;
   }
 }
 

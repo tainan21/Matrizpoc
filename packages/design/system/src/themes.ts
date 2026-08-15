@@ -1,5 +1,5 @@
 import type { MatrizAppId } from "@matriz/foundation-constants"
-import { primitiveTokens, type SemanticTokenName } from "./tokens"
+import { semanticFeedbackColors, type SemanticTokenName } from "./tokens"
 
 export type MatrizColorMode = "light" | "dark"
 
@@ -82,7 +82,11 @@ export const getAppTheme = (
   mode: MatrizColorMode = "light",
 ): AppThemeTokens => mode === "dark" ? darkAppThemes[appId] : appThemes[appId]
 
-export function themeToCssVars(theme: AppThemeTokens): Record<SemanticTokenName | string, string> {
+export function themeToCssVars(
+  theme: AppThemeTokens,
+  mode: MatrizColorMode = darkAppThemes[theme.appId].surface === theme.surface ? "dark" : "light",
+): Record<SemanticTokenName | string, string> {
+  const feedback = semanticFeedbackColors[mode]
   const semantic = {
     "--matriz-color-canvas": theme.muted,
     "--matriz-color-surface": theme.surface,
@@ -92,10 +96,10 @@ export function themeToCssVars(theme: AppThemeTokens): Record<SemanticTokenName 
     "--matriz-color-action": theme.brandAccent,
     "--matriz-color-action-text": theme.brandAccentFg,
     "--matriz-color-focus": theme.brandAccent,
-    "--matriz-color-success": primitiveTokens.color.success,
-    "--matriz-color-warning": primitiveTokens.color.warning,
-    "--matriz-color-danger": primitiveTokens.color.danger,
-    "--matriz-color-info": primitiveTokens.color.info,
+    "--matriz-color-success": feedback.success,
+    "--matriz-color-warning": feedback.warning,
+    "--matriz-color-danger": feedback.danger,
+    "--matriz-color-info": feedback.info,
   } satisfies Record<SemanticTokenName, string>
 
   return {
@@ -192,7 +196,7 @@ export function themeDefinitionToCssVars(
   const theme = compatible && definition ? { ...baseTheme, ...definition.overrides } : baseTheme
 
   return {
-    ...themeToCssVars(theme),
+    ...themeToCssVars(theme, mode),
     "--matriz-theme-key": compatible ? themeKey : "matriz-base",
     "--matriz-theme-surface": theme.surface,
     "--matriz-theme-surface-fg": theme.surfaceFg,

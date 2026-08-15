@@ -1,23 +1,33 @@
 import { createElement } from "react"
 import type { Decorator, Preview } from "@storybook/react-vite"
+import { addons } from "storybook/preview-api"
 
 import "@matriz/design-system/css"
 import "@matriz/design-ui/styles.css"
 import "./catalog.css"
+import {
+  CatalogDocsContainer,
+  CatalogEnvironment,
+  publishCatalogGlobals,
+} from "./catalog-environment"
+
+const initialCatalogGlobals = {
+  theme: "light",
+  density: "comfortable",
+  motion: "full",
+}
+
+publishCatalogGlobals(initialCatalogGlobals)
+addons.getChannel().on("globalsUpdated", ({ globals }: { globals: Record<string, unknown> }) => {
+  publishCatalogGlobals(globals)
+})
 
 const withCatalogEnvironment: Decorator = (Story, context) => {
-  const theme = context.globals.theme === "dark" ? "dark" : "light"
-  const density = context.globals.density === "compact" ? "compact" : "comfortable"
-  const motion = context.globals.motion === "reduced" ? "reduced" : "full"
-
   return createElement(
-    "div",
+    CatalogEnvironment,
     {
       className: "matriz-catalog",
-      "data-matrizlib": "",
-      "data-theme": theme,
-      "data-density": density,
-      "data-motion": motion,
+      globals: context.globals,
     },
     createElement("div", { className: "matriz-catalog__stage" }, createElement(Story)),
   )
@@ -66,13 +76,12 @@ const preview: Preview = {
       },
     },
   },
-  initialGlobals: {
-    theme: "light",
-    density: "comfortable",
-    motion: "full",
-  },
+  initialGlobals: initialCatalogGlobals,
   parameters: {
     layout: "fullscreen",
+    docs: {
+      container: CatalogDocsContainer,
+    },
     controls: {
       expanded: true,
       sort: "requiredFirst",

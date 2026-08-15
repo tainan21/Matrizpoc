@@ -1,5 +1,5 @@
 .matriz-catalog,
-.catalog-doc {
+.catalog-docs-environment {
   --matriz-color-action: #6d28d9;
   --matriz-color-action-text: #ffffff;
   --matriz-color-focus: #7c3aed;
@@ -10,20 +10,22 @@
 }
 
 .matriz-catalog[data-theme="dark"],
-.catalog-doc[data-theme="dark"] {
+.catalog-docs-environment[data-theme="dark"] {
   --matriz-color-action: #9b8cff;
   --matriz-color-action-text: #0b0818;
   --matriz-color-focus: #b4a8ff;
 }
 
-.matriz-catalog[data-density="compact"] {
+.matriz-catalog[data-density="compact"],
+.catalog-docs-environment[data-density="compact"] {
   --matriz-space-3: 0.5rem;
   --matriz-space-4: 0.75rem;
   --matriz-space-6: 1rem;
   --matriz-space-8: 1.5rem;
 }
 
-.matriz-catalog[data-motion="reduced"] {
+.matriz-catalog[data-motion="reduced"],
+.catalog-docs-environment[data-motion="reduced"] {
   --matriz-motion-duration-fast: 0ms;
   --matriz-motion-duration-base: 0ms;
   --matriz-motion-duration-slow: 0ms;
