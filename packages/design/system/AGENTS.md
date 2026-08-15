@@ -25,6 +25,13 @@ product, price, entitlement, tenant, persistence, or remote theme selection.
 - A request named for a screen, customer, plan, price, or app flow stays in its
   app or flow; it is not a shared token.
 
+## Contribution examples
+
+- Accepted: add an app-independent semantic focus token needed by two apps,
+  together with its TypeScript value, public CSS variable, metadata, and test.
+- Rejected: add a Seumei pricing-banner token or plan/entitlement metadata;
+  those are screen and product policy owned by the app or an appropriate flow.
+
 ## Lifecycle
 
 Keep legacy aliases while a consumer exists. Deprecation needs a public

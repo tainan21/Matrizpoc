@@ -86,3 +86,10 @@ design package source imports app internals, integration, flows, access, storage
 HTTP, or product-domain types. Existing dirty and build-induced files, including
 `next-env.d.ts`, are not staged. No `.env`, logs, build output, cache, or
 screenshots are in the task commit.
+
+## Review follow-up
+
+The sole Minor from Task 6 review is resolved. Both design-package instructions
+now give an explicit accepted and rejected contribution example without changing
+package responsibility, imports, runtime behavior, or public contracts. This
+docs-only round requires Markdown/diff validation; no runtime tests were rerun.

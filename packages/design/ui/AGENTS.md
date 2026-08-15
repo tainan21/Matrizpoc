@@ -23,6 +23,13 @@ Promotion includes the component, metadata, a DOM test, and a use story.
 Deprecation supplies a public replacement, version/date, migration guidance,
 and compatibility for the announced period.
 
+## Contribution examples
+
+- Accepted: promote a domain-free accessible form primitive used by two apps,
+  with metadata, DOM interaction tests, and stories for its relevant states.
+- Rejected: add a checkout or account component that reads auth, routes, plan
+  entities, or repositories; its presenter and composition remain app-local.
+
 ## Accessibility and stories
 
 WCAG 2.2 AA is the engineering baseline. Review native semantics, accessible
