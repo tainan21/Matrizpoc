@@ -21,3 +21,8 @@ Task 5: complete (commits f7258ca..22bd00a, review clean)
 Task 6: documentation complete; package/global lint/type/smoke checks green. Visual and global-build limitations are recorded in task-6-report.md.
 Task 6: fix round 1/5 (1 addressed, 0 open — explicit accepted/rejected package contribution examples).
 Task 6: complete (review clean after docs-only follow-up).
+Task 6 post-completion blocker: fix round 1/5 (1 addressed, 0 open — Storybook
+automatic JSX runtime plus static artifact gate; base 62366233057d2fa77e1ef59737b730cbe5b1afe1,
+commit 5a77d9c).
+Task 6 post-completion blocker: fix round 2/5 (2 addressed, 0 open — scripts
+lint coverage and `.js`/`.mjs` Storybook runtime gate selection).

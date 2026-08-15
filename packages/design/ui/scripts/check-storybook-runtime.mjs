@@ -3,12 +3,16 @@ import { join, resolve } from "node:path"
 
 const assetsDirectory = resolve(import.meta.dirname, "..", "storybook-static", "assets")
 
+export function isJavaScriptModuleFile(fileName) {
+  return fileName.endsWith(".js") || fileName.endsWith(".mjs")
+}
+
 async function findJavaScriptFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true })
   const files = await Promise.all(entries.map(async (entry) => {
     const path = join(directory, entry.name)
     if (entry.isDirectory()) return findJavaScriptFiles(path)
-    return entry.name.endsWith(".js") ? [path] : []
+    return isJavaScriptModuleFile(entry.name) ? [path] : []
   }))
   return files.flat()
 }

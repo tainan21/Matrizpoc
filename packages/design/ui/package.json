@@ -18,7 +18,7 @@
     "check-storybook-runtime": "node ./scripts/check-storybook-runtime.mjs",
     "typecheck": "tsc --noEmit && pnpm run typecheck:mdx",
     "typecheck:mdx": "node ./scripts/check-storybook-mdx.mjs",
-    "lint": "eslint src .storybook stories",
+    "lint": "eslint src .storybook stories scripts",
     "test": "vitest run --config vitest.config.ts"
   },
   "peerDependencies": {

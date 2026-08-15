@@ -87,6 +87,72 @@ HTTP, or product-domain types. Existing dirty and build-induced files, including
 `next-env.d.ts`, are not staged. No `.env`, logs, build output, cache, or
 screenshots are in the task commit.
 
+## Post-Task-6 blocker fix — Storybook JSX runtime
+
+### Root cause and RED evidence
+
+Hypothesis: Storybook Vite was not configured for React's automatic JSX runtime.
+The app sources intentionally omit default `React` imports, so the classic
+transform emitted unresolved global `React.createElement` calls.
+
+- Reproduced from the static catalog at `http://127.0.0.1:6006` with
+  Playwright: Overview's iframe displayed `React is not defined` and logged
+  three console errors.
+- The former static output contained 113 `React.createElement` occurrences in
+  the iframe, catalog component, and story chunks.
+- New config-contract test initially failed with
+  `expected undefined to be type of 'function'` because `viteFinal` was absent.
+- New static-artifact gate initially failed, listing the affected chunks.
+
+### Fix and regression gates
+
+- Added a package-local `viteFinal` configuration that sets Vite esbuild's JSX
+  transform to `automatic` without changing component sources or the dirty
+  `theme-controller.tsx`.
+- Added `storybook-jsx-runtime.test.ts`, which calls the real Storybook config
+  and requires `esbuild.jsx === "automatic"`.
+- Added `check-storybook-runtime.mjs`; `build-storybook` now fails when emitted
+  static JavaScript contains a bare `React.createElement` call.
+
+### GREEN evidence
+
+- `pnpm --filter @matriz/design-ui lint` — exit 0.
+- `pnpm --filter @matriz/design-ui typecheck` — exit 0; MDX validation covered
+  foundations, migration, and overview.
+- `pnpm --filter @matriz/design-ui test` — exit 0; 4 files / 12 tests passed.
+- `pnpm --filter @matriz/design-ui build-storybook` — exit 0; the static
+  runtime gate passed after the build.
+- Playwright against served `storybook-static` rendered Overview correctly with
+  0 console errors; Button rendered, accepted a real click, and remained usable
+  after switching to dark; InfoHint rendered at mobile 390×844, opened its
+  tooltip on click, and closed it with Escape while returning focus to the
+  trigger. The console retained one Storybook 11 forward-compatibility warning:
+  `PopoverProvider` will require `ariaLabel`; it is external to this fix.
+
+Build still reports the existing ignored `"use client"` directive/source-map
+warnings and the Vite chunk-size warning. They do not prevent static execution;
+no build artifacts or browser logs are committed.
+
+Commit: `5a77d9c fix(matrizlib): enforce Storybook automatic JSX runtime`.
+
+## Storybook runtime gate hardening
+
+The release-gate follow-up expands package lint to cover `scripts` and expands
+static output selection to `.js` and `.mjs`. A unit-level gate proves that both
+extensions are selected while non-JavaScript assets are ignored.
+
+`React.createElement` remains a deliberate text check rather than an AST or
+runtime-global analysis. For generated Storybook output, this package's policy
+is stricter and simpler: classic JSX output is forbidden anywhere, because the
+sources intentionally omit default `React` imports and require the automatic
+runtime. Rejecting a bound `React.createElement` occurrence is therefore an
+acceptable false positive that signals a policy violation; accepting classic
+output would reintroduce the proven runtime blocker.
+
+Fresh validation: lint, typecheck, 5 test files / 14 tests, and build-storybook
+with the `.js`/`.mjs` artifact gate all passed. Existing source-map/client
+directive and chunk-size warnings remain non-blocking and unchanged.
+
 ## Review follow-up
 
 The sole Minor from Task 6 review is resolved. Both design-package instructions
