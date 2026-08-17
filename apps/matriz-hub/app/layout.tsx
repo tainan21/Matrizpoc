@@ -10,8 +10,8 @@ import "./globals.css"
 bootstrapMatrizHub()
 
 export const metadata: Metadata = {
-  title: "Matriz Hub",
-  description: "Ponto central de entrada do ecossistema Matriz.",
+  title: "MyHub",
+  description: "Centro operacional do ecossistema Matriz.",
 }
 
 export const viewport = {

@@ -9,9 +9,9 @@ import type { AppManifestDTO } from "@matriz/integration-api-contracts"
 
 export const manifest: AppManifestDTO = {
   appId: "matriz-hub",
-  name: "Matriz Hub",
+  name: "MyHub",
   description:
-    "Ponto central de entrada do ecossistema Matriz. Lista apps disponiveis, consolida eventos, external links, onboarding status e feature flags.",
+    "Centro operacional do ecossistema Matriz para acesso, monitoramento e validacao dos apps.",
   version: "0.1.0",
   contractVersion: "v1",
   primaryRoute: "/",
@@ -24,11 +24,14 @@ export const manifest: AppManifestDTO = {
     { label: "Onboarding status", path: "/onboarding-status", order: 5 },
     { label: "Feature flags", path: "/feature-flags", order: 6 },
     { label: "Telemetria", path: "/telemetry", order: 7 },
+    { label: "Praticies", path: "/praticies", order: 8 },
+    { label: "Aparência", path: "/settings/appearance", order: 9 },
     { label: "Projects", path: "/projects", order: 10 },
     { label: "Health", path: "/health", order: 11 },
-    { label: "Ecosystem", path: "/ecosystem", order: 12 },
-    { label: "Intelligence", path: "/intelligence", order: 13 },
-    { label: "Public", path: "/public", order: 14 },
+    { label: "Health checks", path: "/health/checks", order: 12 },
+    { label: "Ecosystem", path: "/ecosystem", order: 13 },
+    { label: "Intelligence", path: "/intelligence", order: 14 },
+    { label: "Public", path: "/public", order: 15 },
     { label: "MatrizDocs", path: "/docs", order: 20 },
   ],
   capabilities: [
@@ -61,6 +64,17 @@ export const manifest: AppManifestDTO = {
       id: "hub.telemetry.read",
       name: "Ler telemetria consolidada",
       description: "Visualiza envelopes de telemetria de todos os apps registrados.",
+    },
+    {
+      id: "hub.praticies.execute",
+      name: "Executar praticidades locais",
+      description:
+        "Executa automacoes pequenas e seguras do workspace, incluindo a geracao de patterns estruturais.",
+    },
+    {
+      id: "hub.health-checks.execute",
+      name: "Executar health checks",
+      description: "Testa paginas e APIs identificadas pelo registry e pelo workspace local.",
     },
     {
       id: "docs.library",
@@ -160,7 +174,7 @@ export const manifest: AppManifestDTO = {
     hasSpecificStep: false,
   },
   navigationEntry: {
-    label: "Matriz Hub",
+    label: "MyHub",
     path: "/",
     order: 0,
   },

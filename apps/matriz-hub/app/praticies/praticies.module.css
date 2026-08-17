@@ -1,0 +1,998 @@
+.shell {
+  --ink: #151714;
+  --paper: #f2f0e9;
+  --paper-deep: #e8e5db;
+  --line: rgba(21, 23, 20, 0.18);
+  --muted: #686b63;
+  --signal: #c7f36b;
+  --danger: #c84836;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.topbar {
+  height: 4.5rem;
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.85fr) minmax(22rem, 2fr) minmax(13rem, 0.9fr);
+  align-items: center;
+  border-bottom: 1px solid var(--ink);
+}
+
+.brand {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0 1.25rem;
+  border-right: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand > span {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--signal);
+  font-family: "Courier New", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.brand strong {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.topbar > p {
+  margin: 0;
+  padding: 0 1.5rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.environment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0 1.25rem;
+  border-left: 1px solid var(--line);
+  font-family: "Courier New", monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.environment a { color: inherit; text-decoration: none; border-bottom: 1px solid currentColor; }
+
+.environment > span {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: #4b9b58;
+  box-shadow: 0 0 0 0.25rem rgba(75, 155, 88, 0.14);
+}
+
+.canvas {
+  height: calc(100dvh - 4.5rem);
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.8fr) minmax(31rem, 2fr) minmax(17rem, 0.92fr);
+}
+
+.catalog,
+.inspector {
+  min-width: 0;
+  background: var(--paper-deep);
+}
+
+.catalog {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ink);
+}
+
+.catalogTitle,
+.inspectorHeader {
+  height: 3.25rem;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.15rem;
+  border-bottom: 1px solid var(--line);
+  font-family: "Courier New", monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.11em;
+}
+
+.catalogTitle strong {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.catalog nav {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.catalog nav button {
+  position: relative;
+  min-height: 5.4rem;
+  display: grid;
+  grid-template-columns: 1.6rem 1fr;
+  gap: 0.35rem;
+  padding: 1rem 1rem 0.85rem;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease, padding-left 160ms ease;
+}
+
+.catalog nav button:hover,
+.catalog nav button:focus-visible,
+.catalog nav button.activePractice {
+  padding-left: 1.25rem;
+  background: var(--paper);
+  outline: none;
+}
+
+.catalog nav button.activePractice::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 0.28rem;
+  background: var(--signal);
+  content: "";
+}
+
+.catalog nav button > span {
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  font-size: 0.65rem;
+}
+
+.catalog nav button div {
+  min-width: 0;
+}
+
+.catalog nav button strong,
+.catalog nav button small {
+  display: block;
+}
+
+.catalog nav button strong {
+  overflow: hidden;
+  font-size: 0.84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalog nav button small {
+  margin-top: 0.28rem;
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  font-size: 0.59rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.catalog nav button i {
+  grid-column: 2;
+  width: fit-content;
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-style: normal;
+}
+
+.catalog nav button i[data-ready="true"] {
+  color: #397946;
+}
+
+.catalogFooter {
+  margin-top: auto;
+  padding: 1rem 1.15rem 1.25rem;
+  border-top: 1px solid var(--ink);
+}
+
+.catalogFooter span,
+.artifacts > span,
+.guardrails > span {
+  font-family: "Courier New", monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.11em;
+}
+
+.catalogFooter p {
+  max-width: 15rem;
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.workspace {
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px),
+    var(--paper);
+  background-size: 3.5rem 3.5rem;
+}
+
+.workspace::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 72% 32%, transparent 0, var(--paper) 72%);
+  content: "";
+}
+
+.actionScope,
+.patternsWorkspace,
+.utilityWorkspace,
+.plannedWorkspace {
+  width: 100%;
+  height: 100%;
+}
+
+.patternsWorkspace,
+.utilityWorkspace,
+.plannedWorkspace {
+  position: relative;
+  z-index: 1;
+}
+
+.patternsWorkspace {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+}
+
+.workspaceHeading {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 1.5rem;
+  align-content: center;
+  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.5rem, 4vw, 4rem);
+}
+
+.sequence {
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+
+.workspaceHeading h1,
+.utilityWorkspace h1 {
+  margin: 0;
+  font-size: clamp(3.2rem, 6.4vw, 7.4rem);
+  font-weight: 500;
+  letter-spacing: -0.075em;
+  line-height: 0.78;
+}
+
+.workspaceHeading p,
+.utilityWorkspace header > p {
+  max-width: 34rem;
+  margin: clamp(1.6rem, 3vh, 3rem) 0 0;
+  color: var(--muted);
+  font-size: clamp(0.85rem, 1.05vw, 1.04rem);
+  line-height: 1.55;
+}
+
+.executionBand {
+  display: grid;
+  grid-template-columns: 1fr minmax(15rem, 0.65fr);
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  background: rgba(242, 240, 233, 0.88);
+}
+
+.scopeNote {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  align-content: center;
+  gap: 0.25rem 1rem;
+  padding: 1rem clamp(1.5rem, 3vw, 3rem);
+}
+
+.scopeNote span {
+  grid-row: 1 / 3;
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+}
+
+.scopeNote strong {
+  font-size: 0.84rem;
+}
+
+.scopeNote p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.runButton {
+  min-height: 5.8rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1.35rem;
+  border: 0;
+  border-left: 1px solid var(--ink);
+  background: var(--signal);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition: filter 150ms ease, padding-left 150ms ease;
+}
+
+.runButton:hover:not(:disabled),
+.runButton:focus-visible:not(:disabled) {
+  padding-left: 1.65rem;
+  filter: saturate(1.15) brightness(0.98);
+  outline: none;
+}
+
+.runButton:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.runGlyph {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  font-size: 1.2rem;
+}
+
+.runButton strong,
+.runButton small {
+  display: block;
+}
+
+.runButton strong {
+  font-size: 0.88rem;
+}
+
+.runButton small {
+  margin-top: 0.25rem;
+  font-family: "Courier New", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.workspaceMetrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--paper);
+}
+
+.workspaceMetrics > div {
+  min-width: 0;
+  padding: 1rem 1.15rem;
+  border-right: 1px solid var(--line);
+}
+
+.workspaceMetrics > div:last-child {
+  border-right: 0;
+}
+
+.workspaceMetrics strong,
+.workspaceMetrics span {
+  display: block;
+}
+
+.workspaceMetrics strong {
+  font-family: "Courier New", monospace;
+  font-size: clamp(1.25rem, 2vw, 2rem);
+  font-weight: 400;
+}
+
+.workspaceMetrics span {
+  margin-top: 0.25rem;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.59rem;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inspector {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--ink);
+}
+
+.inspectorHeader i {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: #9b9d96;
+}
+
+.inspectorHeader i[data-status="success"] {
+  background: #4b9b58;
+}
+
+.inspectorHeader i[data-status="error"] {
+  background: var(--danger);
+}
+
+.statusBlock {
+  padding: 1.2rem;
+  border-bottom: 1px solid var(--ink);
+}
+
+.statusBlock small,
+.statusBlock strong {
+  display: block;
+}
+
+.statusBlock small {
+  color: var(--muted);
+  font-family: "Courier New", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+}
+
+.statusBlock strong {
+  margin-top: 0.75rem;
+  font-size: clamp(1.2rem, 1.7vw, 1.65rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+.statusBlock p {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.statusBlock p.errorMessage {
+  color: var(--danger);
+}
+
+.artifacts {
+  padding-top: 1.15rem;
+}
+
+.artifacts > span,
+.guardrails > span {
+  display: block;
+  padding: 0 1.15rem 0.7rem;
+  color: var(--muted);
+}
+
+.artifacts > a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1.15rem;
+  border-top: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+  transition: background 150ms ease;
+}
+
+.artifacts > a:last-of-type {
+  border-bottom: 1px solid var(--line);
+}
+
+.artifacts > a:hover,
+.artifacts > a:focus-visible {
+  background: var(--paper);
+  outline: none;
+}
+
+.artifacts a strong,
+.artifacts a code {
+  display: block;
+}
+
+.artifacts a strong {
+  font-size: 0.76rem;
+}
+
+.artifacts a code {
+  margin-top: 0.25rem;
+  color: var(--muted);
+  font-size: 0.58rem;
+}
+
+.artifacts a small {
+  flex: 0 0 auto;
+  font-family: "Courier New", monospace;
+  font-size: 0.6rem;
+}
+
+.artifacts > p {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.guardrails {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--ink);
+}
+
+.guardrails ul {
+  margin: 0;
+  padding: 0 1.15rem 1.15rem;
+  list-style: none;
+}
+
+.guardrails li {
+  padding: 0.34rem 0;
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.guardrails li::before {
+  margin-right: 0.55rem;
+  color: #397946;
+  content: "✓";
+}
+
+.utilityWorkspace {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 1.5rem;
+  align-content: center;
+  padding: clamp(1.5rem, 5vh, 4rem) clamp(1.5rem, 4vw, 4rem);
+}
+
+.utilityWorkspace > header {
+  align-self: end;
+}
+
+.commandList,
+.compassList {
+  grid-column: 2;
+  align-self: start;
+  margin-top: 1rem;
+  border-top: 1px solid var(--ink);
+}
+
+.commandList > button {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.commandList > button:hover,
+.commandList > button:focus-visible {
+  background: rgba(199, 243, 107, 0.18);
+  outline: none;
+}
+
+.commandList span,
+.commandList strong,
+.commandList code {
+  font-size: 0.7rem;
+}
+
+.commandList span {
+  font-family: "Courier New", monospace;
+  font-weight: 700;
+}
+
+.commandList code {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.commandList strong {
+  color: #397946;
+}
+
+.compassList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.compassList a {
+  min-height: 9rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--ink);
+  color: inherit;
+  text-decoration: none;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.compassList a:last-child {
+  border-right: 0;
+}
+
+.compassList a:hover,
+.compassList a:focus-visible {
+  background: var(--signal);
+  transform: translateY(-0.25rem);
+  outline: none;
+}
+
+.compassList span,
+.compassList small {
+  font-family: "Courier New", monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+}
+
+.compassList strong {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+}
+
+.compassList small {
+  margin-top: auto;
+  color: var(--muted);
+}
+
+.plannedWorkspace {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 1.5rem;
+  align-content: center;
+  padding: clamp(1.5rem, 5vh, 4rem) clamp(1.5rem, 4vw, 4rem);
+}
+
+.orbit {
+  grid-column: 2;
+  width: clamp(10rem, 18vw, 16rem);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2.5rem rgba(199, 243, 107, 0.2);
+  animation: breathe 3.5s ease-in-out infinite;
+}
+
+.orbit span {
+  font-family: "Courier New", monospace;
+  font-size: clamp(2rem, 4vw, 4rem);
+}
+
+.plannedWorkspace header {
+  grid-column: 2;
+  max-width: 32rem;
+  margin-top: 2.5rem;
+}
+
+.plannedWorkspace header p {
+  margin: 0;
+  color: #397946;
+  font-family: "Courier New", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
+
+.plannedWorkspace h1 {
+  margin: 0.65rem 0;
+  font-size: clamp(2.4rem, 5vw, 5rem);
+  font-weight: 500;
+  letter-spacing: -0.06em;
+}
+
+.plannedWorkspace header > span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1.5rem rgba(199, 243, 107, 0.14);
+  }
+  50% {
+    box-shadow: 0 0 0 3rem rgba(199, 243, 107, 0.25);
+  }
+}
+
+@media (max-width: 1100px) {
+  .topbar {
+    grid-template-columns: minmax(13rem, 0.8fr) 1.4fr auto;
+  }
+
+  .canvas {
+    grid-template-columns: 13rem minmax(28rem, 1fr) 15rem;
+  }
+
+  .workspaceHeading {
+    grid-template-columns: 1fr;
+  }
+
+  .workspaceHeading h1,
+  .utilityWorkspace h1 {
+    font-size: clamp(3.2rem, 7vw, 5.2rem);
+  }
+
+  .scopeNote {
+    grid-template-columns: 1fr;
+  }
+
+  .scopeNote span {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 860px) and (min-width: 641px) {
+  .topbar {
+    grid-template-columns: 13rem 1fr;
+  }
+
+  .topbar > p {
+    display: none;
+  }
+
+  .environment {
+    grid-column: 2;
+  }
+
+  .canvas {
+    grid-template-columns: 13rem minmax(0, 1fr);
+  }
+
+  .inspector {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 13rem;
+    height: 9rem;
+    display: grid;
+    grid-template-columns: 3.25rem 1fr 1.4fr;
+    border-top: 1px solid var(--ink);
+    border-left: 0;
+  }
+
+  .inspectorHeader {
+    width: 3.25rem;
+    height: 100%;
+    writing-mode: vertical-rl;
+  }
+
+  .statusBlock,
+  .artifacts {
+    min-width: 0;
+    padding: 0.8rem;
+    overflow: hidden;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .artifacts > span,
+  .artifacts > a,
+  .artifacts > p {
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .artifacts > a {
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+  }
+
+  .guardrails {
+    display: none;
+  }
+
+  .patternsWorkspace,
+  .utilityWorkspace,
+  .plannedWorkspace {
+    padding-bottom: 9rem;
+  }
+
+  .workspaceMetrics {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .shell {
+    min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .topbar {
+    height: auto;
+    min-height: 4.25rem;
+    grid-template-columns: 1fr auto;
+  }
+
+  .topbar > p {
+    display: none;
+  }
+
+  .environment {
+    padding: 0 0.9rem;
+    font-size: 0;
+  }
+
+  .canvas {
+    height: auto;
+    display: block;
+  }
+
+  .catalog {
+    border-right: 0;
+  }
+
+  .catalogTitle,
+  .catalogFooter,
+  .catalog nav button small,
+  .catalog nav button i {
+    display: none;
+  }
+
+  .catalog nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(8.25rem, 1fr));
+    overflow-x: auto;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .catalog nav button {
+    min-height: 4.25rem;
+    grid-template-columns: 1.2rem 1fr;
+    padding: 0.8rem;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+  }
+
+  .catalog nav button:hover,
+  .catalog nav button:focus-visible,
+  .catalog nav button.activePractice {
+    padding-left: 0.8rem;
+  }
+
+  .workspace {
+    min-height: 37rem;
+    overflow: visible;
+  }
+
+  .actionScope,
+  .patternsWorkspace,
+  .utilityWorkspace,
+  .plannedWorkspace {
+    height: auto;
+    min-height: 37rem;
+  }
+
+  .workspaceHeading,
+  .utilityWorkspace,
+  .plannedWorkspace {
+    display: block;
+    padding: 2.5rem 1.25rem;
+  }
+
+  .workspaceHeading h1,
+  .utilityWorkspace h1 {
+    margin-top: 1.75rem;
+    font-size: clamp(3.2rem, 18vw, 5.4rem);
+  }
+
+  .executionBand {
+    grid-template-columns: 1fr;
+  }
+
+  .scopeNote {
+    padding: 1rem 1.25rem;
+  }
+
+  .runButton {
+    width: 100%;
+    border-top: 1px solid var(--ink);
+    border-left: 0;
+  }
+
+  .workspaceMetrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .workspaceMetrics > div:nth-child(2) {
+    border-right: 0;
+  }
+
+  .workspaceMetrics > div:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .commandList,
+  .compassList,
+  .plannedWorkspace .orbit,
+  .plannedWorkspace header {
+    margin-top: 2rem;
+  }
+
+  .commandList > button {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+  }
+
+  .commandList > button strong {
+    grid-column: 2;
+  }
+
+  .compassList {
+    display: block;
+  }
+
+  .compassList a {
+    min-height: 7rem;
+    border-right: 0;
+  }
+
+  .orbit {
+    margin-left: 2rem;
+  }
+
+  .inspector {
+    border-top: 1px solid var(--ink);
+    border-left: 0;
+  }
+
+  .guardrails {
+    padding-bottom: 0.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell *,
+  .shell *::before,
+  .shell *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

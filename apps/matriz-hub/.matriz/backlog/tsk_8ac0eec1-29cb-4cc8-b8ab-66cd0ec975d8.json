@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_8ac0eec1-29cb-4cc8-b8ab-66cd0ec975d8",
+  "projectId": "matriz-hub",
+  "title": "Entregar loja instalável e estúdio visual de Praticies",
+  "description": "Disponibilizar catálogo, detalhes, instalação, recentes e layout drag-and-drop usando o flow compartilhado.",
+  "status": "review",
+  "priority": "high",
+  "tags": ["praticies", "apps", "shared-flow", "ux"],
+  "acceptanceCriteria": [
+    { "id": "ac_8e74f231-4fae-48f4-834f-a605c6cbef8e", "text": "Catálogo completo permite instalar, detalhar e desinstalar", "completed": true },
+    { "id": "ac_c88c6994-1ce9-4b1c-abd7-8585ff6b2b3c", "text": "Recentes e layout editado persistem no browser", "completed": true },
+    { "id": "ac_f0d46dd5-78f1-47d9-a918-c620452872aa", "text": "Desktop não rola o documento e mobile permanece responsivo", "completed": true }
+  ],
+  "dependencyIds": [],
+  "references": ["apps/matriz-hub/docs/PRACTICIES.md", "docs/superpowers/specs/2026-08-12-praticies-app-store-design.md"],
+  "createdAt": "2026-08-12T05:10:00.000Z",
+  "updatedAt": "2026-08-12T05:10:00.000Z",
+  "revision": "71da86f7d8bdd2d2"
+}

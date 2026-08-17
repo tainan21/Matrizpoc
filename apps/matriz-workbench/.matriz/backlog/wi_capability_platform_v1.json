@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_capability_platform_v1",
+  "projectId": "matriz-workbench",
+  "kind": "feature",
+  "title": "Consolidar Capability Platform persistente",
+  "description": "Evoluir a fundação CSS-first e o store demo para repositories Prisma, migrations reproduzíveis e prova de sincronização entre os sete apps.",
+  "productStatus": "validation",
+  "validationStatus": "pending",
+  "humanReviewStatus": "pending",
+  "documentationStatus": "current",
+  "priority": "high",
+  "domain": "Plataforma / Capabilities",
+  "responsible": "Produto + Codex",
+  "workScope": { "kind": "project" },
+  "tags": ["capabilities", "themes", "praticies", "marketplace-demo"],
+  "acceptanceCriteria": [
+    { "id": "ac_cap_1", "text": "Tema pessoal compatível é resolvido nos sete apps com fallback seguro", "completed": true },
+    { "id": "ac_cap_2", "text": "Checkout demo cria entitlement sem sugerir cobrança real", "completed": true },
+    { "id": "ac_cap_3", "text": "Instalações e recentes sobrevivem a reinício usando Postgres", "completed": false },
+    { "id": "ac_cap_4", "text": "Isolamento entre tenants é provado por teste de integração", "completed": false },
+    { "id": "ac_cap_5", "text": "Validação visual responsiva dos sete apps é registrada", "completed": false }
+  ],
+  "dependencyIds": [],
+  "references": [
+    { "kind": "repository_file", "path": "docs/capability-platform.md", "label": "Arquitetura da plataforma" },
+    { "kind": "repository_file", "path": "apps/matriz-workbench/.matriz/docs/technical/capability-platform-3-pages.md", "label": "Relatório compacto" }
+  ],
+  "createdAt": "2026-08-13T02:00:00.000Z",
+  "updatedAt": "2026-08-13T02:00:00.000Z",
+  "revision": "capability-platform-v1"
+}

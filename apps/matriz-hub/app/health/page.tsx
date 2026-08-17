@@ -19,6 +19,7 @@ export default async function HealthPage() {
   return (
     <div className="hub-page">
       <OperationalPageHeader
+        actions={<Link className="hub-context-link" href="/health/checks">Executar health checks</Link>}
         description="Sinais publicados pelos projetos, ordenados para revelar primeiro o que está bloqueado, degradado ou sem leitura."
         eyebrow="Centro operacional / saúde"
         status={overall}

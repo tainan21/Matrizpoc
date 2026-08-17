@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_e94cf978-672d-4224-91e0-2d65d0593ffe",
+  "projectId": "matriz-hub",
+  "title": "Implementar Context brief em Praticies",
+  "description": "Compor um handoff curto e versionado usando apenas fontes publicas e configuraveis: docs preferidos, roadmap e mudancas recentes.",
+  "status": "idea",
+  "priority": "medium",
+  "tags": [
+    "praticies",
+    "context",
+    "agents"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_577ff2ea-e6b8-462b-8b66-53d2d5f6a716",
+      "text": "Fontes permitidas e budget de contexto documentados",
+      "completed": false
+    },
+    {
+      "id": "ac_6c16eec8-bedc-43aa-b11e-3c0fe7d9f434",
+      "text": "Preview humano exibido antes da geracao",
+      "completed": false
+    },
+    {
+      "id": "ac_cf776212-b835-4ed8-8392-86e6a34d2941",
+      "text": "Output versionado e sem segredos validado",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    "apps/matriz-hub/docs/PRACTICIES.md"
+  ],
+  "createdAt": "2026-08-12T01:45:00.000Z",
+  "updatedAt": "2026-08-12T01:45:00.000Z",
+  "revision": "cb68397aed05f214"
+}

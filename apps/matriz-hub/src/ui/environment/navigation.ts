@@ -27,6 +27,13 @@ export const HUB_NAV_GROUPS: readonly HubNavGroup[] = [
         keywords: ["status", "readiness", "checks"],
       },
       {
+        label: "Health checks",
+        href: "/health/checks",
+        description: "Teste amplo das páginas e APIs registradas",
+        icon: "activity",
+        keywords: ["rotas", "apis", "validação", "regressão"],
+      },
+      {
         label: "Intelligence",
         href: "/intelligence",
         description: "Leituras institucionais publicadas pelos projetos",

@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { HubLoginScreen } from "../../src/domains/login/presentation/LoginScreen"
 
 export const metadata: Metadata = {
-  title: "Matriz Hub — Entrar",
-  description: "Login do Matriz Hub.",
+  title: "MyHub — Entrar",
+  description: "Login do MyHub.",
 }
 
 export default function HubLoginPage() {

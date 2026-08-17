@@ -11,6 +11,7 @@ export * from "./summaries"
 export * from "./contract-inputs"
 export * from "./onboarding"
 export * from "./docs"
+export * from "./capabilities"
 
 export const API_CONTRACTS_DEFAULT_VERSION = "v1" as const
 export type ApiContractsVersion = typeof API_CONTRACTS_DEFAULT_VERSION

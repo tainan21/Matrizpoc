@@ -14,6 +14,7 @@ const primaryNavigation = [
   { href: "/projects", icon: "⌘", label: "Projetos" },
   { href: "/knowledge", icon: "◇", label: "Conhecimento" },
   { href: "/sites", icon: "▦", label: "Sites" },
+  { href: "/praticies", icon: "+", label: "Praticies" },
 ] satisfies readonly ShellNavigationItem[]
 
 const secondaryNavigation = [

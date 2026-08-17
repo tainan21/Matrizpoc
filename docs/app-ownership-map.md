@@ -107,3 +107,17 @@ Detalhe completo em cada `packages/*/README.md`. Regras gerais:
   (fica sem UI), nenhum `integration/*`.
 - **Razão**: é o motor compartilhado; UI e domínio vivem por app
   (ver ADR 0001).
+
+### Praticies — flow compartilhado
+
+`packages/flows/praticies` compartilha apenas catálogo, instalação, recentes e
+layout de utilitários. Hub e Workbench são consumidores reais e preservam UI,
+rotas, presenters e destinos dentro de cada app.
+
+### Capability Platform e temas
+
+- `packages/design/system` possui somente definições CSS-first, tokens e compatibilidade.
+- `packages/flows/themes` possui apenas política pura de resolução e fallback.
+- `packages/integration/api-contracts/v1` possui DTOs de transporte sem regras de produto.
+- `apps/matriz-hub` é proprietário de catálogo persistente, entitlement, checkout demo, atividade e recomendações.
+- Os demais apps consomem o Hub por HTTP e preservam seus próprios shells, presenters e fallback visual.

@@ -1,0 +1,7150 @@
+{
+  "format": "project-folder-map/v1",
+  "generatedAt": "2026-08-12T16:44:35.376Z",
+  "root": ".",
+  "scope": "directories only; file names and file contents are never read",
+  "summary": {
+    "mappedDirectoryCount": 479,
+    "topLevelDirectoryCount": 12,
+    "skippedSymlinkCount": 0,
+    "inaccessibleDirectoryCount": 0
+  },
+  "exclusionPolicy": [
+    {
+      "name": ".git",
+      "reason": "Git metadata"
+    },
+    {
+      "name": ".patterns",
+      "reason": "Mapper output (prevents self-inclusion)"
+    },
+    {
+      "name": ".playwright-cli",
+      "reason": "browser automation state"
+    },
+    {
+      "name": ".pnpm-store",
+      "reason": "pnpm package cache"
+    },
+    {
+      "name": ".runtime",
+      "reason": "local runtime state"
+    },
+    {
+      "name": ".snapshots",
+      "reason": "local snapshots"
+    },
+    {
+      "name": ".superpowers",
+      "reason": "local tool state"
+    },
+    {
+      "name": ".turbo",
+      "reason": "Turborepo cache"
+    },
+    {
+      "name": ".worktrees",
+      "reason": "separate Git worktrees"
+    },
+    {
+      "name": ".next",
+      "reason": "Next.js build output"
+    },
+    {
+      "name": "node_modules",
+      "reason": "installed dependencies"
+    }
+  ],
+  "inaccessible": [],
+  "boundaryMap": {
+    "applications": [
+      {
+        "name": "contracts",
+        "path": "apps/contracts",
+        "descendantDirectoryCount": 29,
+        "directAreas": [
+          ".matriz",
+          "app",
+          "docs",
+          "src"
+        ]
+      },
+      {
+        "name": "extensions",
+        "path": "apps/extensions",
+        "descendantDirectoryCount": 0,
+        "directAreas": []
+      },
+      {
+        "name": "matriz-hub",
+        "path": "apps/matriz-hub",
+        "descendantDirectoryCount": 124,
+        "directAreas": [
+          ".matriz",
+          "app",
+          "docs",
+          "public",
+          "src"
+        ]
+      },
+      {
+        "name": "matriz-workbench",
+        "path": "apps/matriz-workbench",
+        "descendantDirectoryCount": 93,
+        "directAreas": [
+          ".matriz",
+          "app",
+          "docs",
+          "src"
+        ]
+      },
+      {
+        "name": "seumei",
+        "path": "apps/seumei",
+        "descendantDirectoryCount": 29,
+        "directAreas": [
+          ".matriz",
+          "app",
+          "docs",
+          "src"
+        ]
+      },
+      {
+        "name": "sites",
+        "path": "apps/sites",
+        "descendantDirectoryCount": 22,
+        "directAreas": [
+          ".matriz",
+          "app",
+          "docs",
+          "public",
+          "sites",
+          "src"
+        ]
+      },
+      {
+        "name": "spot",
+        "path": "apps/spot",
+        "descendantDirectoryCount": 29,
+        "directAreas": [
+          ".matriz",
+          "app",
+          "docs",
+          "src"
+        ]
+      },
+      {
+        "name": "willdash",
+        "path": "apps/willdash",
+        "descendantDirectoryCount": 26,
+        "directAreas": [
+          ".matriz",
+          "app",
+          "docs",
+          "src"
+        ]
+      }
+    ],
+    "packageGroups": [
+      {
+        "name": "access",
+        "path": "packages/access",
+        "descendantDirectoryCount": 4,
+        "directAreas": [
+          "permissions",
+          "tenants"
+        ]
+      },
+      {
+        "name": "design",
+        "path": "packages/design",
+        "descendantDirectoryCount": 4,
+        "directAreas": [
+          "system",
+          "ui"
+        ]
+      },
+      {
+        "name": "flows",
+        "path": "packages/flows",
+        "descendantDirectoryCount": 8,
+        "directAreas": [
+          "auth",
+          "ecosystem",
+          "onboarding",
+          "praticies"
+        ]
+      },
+      {
+        "name": "foundation",
+        "path": "packages/foundation",
+        "descendantDirectoryCount": 8,
+        "directAreas": [
+          "constants",
+          "schemas",
+          "types",
+          "utils"
+        ]
+      },
+      {
+        "name": "integration",
+        "path": "packages/integration",
+        "descendantDirectoryCount": 16,
+        "directAreas": [
+          "api-contracts",
+          "events",
+          "external-links",
+          "ingestion",
+          "manifests",
+          "registry-core"
+        ]
+      },
+      {
+        "name": "platform",
+        "path": "packages/platform",
+        "descendantDirectoryCount": 33,
+        "directAreas": [
+          "auth",
+          "config",
+          "db",
+          "env",
+          "i18n",
+          "notifications",
+          "pdf",
+          "storage",
+          "telemetry"
+        ]
+      }
+    ]
+  },
+  "layerSummary": [
+    {
+      "tag": "source-root",
+      "directories": 172
+    },
+    {
+      "tag": "route-layer",
+      "directories": 170
+    },
+    {
+      "tag": "documentation",
+      "directories": 85
+    },
+    {
+      "tag": "api-surface",
+      "directories": 71
+    },
+    {
+      "tag": "integration-layer",
+      "directories": 36
+    },
+    {
+      "tag": "presentation-layer",
+      "directories": 19
+    },
+    {
+      "tag": "domain-layer",
+      "directories": 17
+    },
+    {
+      "tag": "test-double",
+      "directories": 11
+    },
+    {
+      "tag": "application-layer",
+      "directories": 10
+    },
+    {
+      "tag": "repository-abstraction",
+      "directories": 10
+    },
+    {
+      "tag": "ui-components",
+      "directories": 8
+    },
+    {
+      "tag": "composition-root",
+      "directories": 7
+    },
+    {
+      "tag": "static-assets",
+      "directories": 7
+    },
+    {
+      "tag": "view-model-adapter",
+      "directories": 5
+    },
+    {
+      "tag": "database-schema",
+      "directories": 4
+    },
+    {
+      "tag": "library",
+      "directories": 4
+    },
+    {
+      "tag": "configuration",
+      "directories": 3
+    },
+    {
+      "tag": "schema-definition",
+      "directories": 3
+    },
+    {
+      "tag": "manifest-registry",
+      "directories": 2
+    },
+    {
+      "tag": "quality-assurance",
+      "directories": 2
+    },
+    {
+      "tag": "utility",
+      "directories": 2
+    },
+    {
+      "tag": "ui-hooks",
+      "directories": 1
+    }
+  ],
+  "directories": [
+    {
+      "id": 0,
+      "path": ".",
+      "parentId": null,
+      "name": ".",
+      "depth": 0,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 12,
+      "descendantDirectoryCount": 479
+    },
+    {
+      "id": 1,
+      "path": ".github",
+      "parentId": 0,
+      "name": ".github",
+      "depth": 1,
+      "kind": "workspace-area",
+      "tags": [],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 2,
+      "path": ".github/workflows",
+      "parentId": 1,
+      "name": "workflows",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 3,
+      "path": ".matriz",
+      "parentId": 0,
+      "name": ".matriz",
+      "depth": 1,
+      "kind": "workspace-area",
+      "tags": [],
+      "childDirectoryCount": 5,
+      "descendantDirectoryCount": 8
+    },
+    {
+      "id": 4,
+      "path": ".matriz/activity",
+      "parentId": 3,
+      "name": "activity",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 5,
+      "path": ".matriz/adoption-policies",
+      "parentId": 3,
+      "name": "adoption-policies",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 6,
+      "path": ".matriz/backlog",
+      "parentId": 3,
+      "name": "backlog",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 7,
+      "path": ".matriz/control",
+      "parentId": 3,
+      "name": "control",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 8,
+      "path": ".matriz/control/snippets",
+      "parentId": 7,
+      "name": "snippets",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 9,
+      "path": ".matriz/docs",
+      "parentId": 3,
+      "name": "docs",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 10,
+      "path": ".matriz/docs/decisions",
+      "parentId": 9,
+      "name": "decisions",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 11,
+      "path": ".matriz/docs/technical",
+      "parentId": 9,
+      "name": "technical",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 12,
+      "path": "apps",
+      "parentId": 0,
+      "name": "apps",
+      "depth": 1,
+      "kind": "application-portfolio",
+      "tags": [
+        "application-portfolio"
+      ],
+      "childDirectoryCount": 8,
+      "descendantDirectoryCount": 360
+    },
+    {
+      "id": 13,
+      "path": "apps/contracts",
+      "parentId": 12,
+      "name": "contracts",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 29
+    },
+    {
+      "id": 14,
+      "path": "apps/contracts/.matriz",
+      "parentId": 13,
+      "name": ".matriz",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 3,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 15,
+      "path": "apps/contracts/.matriz/activity",
+      "parentId": 14,
+      "name": "activity",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 16,
+      "path": "apps/contracts/.matriz/backlog",
+      "parentId": 14,
+      "name": "backlog",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 17,
+      "path": "apps/contracts/.matriz/control",
+      "parentId": 14,
+      "name": "control",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 18,
+      "path": "apps/contracts/.matriz/control/snippets",
+      "parentId": 17,
+      "name": "snippets",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 19,
+      "path": "apps/contracts/app",
+      "parentId": 13,
+      "name": "app",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 20,
+      "path": "apps/contracts/app/contracts",
+      "parentId": 19,
+      "name": "contracts",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 21,
+      "path": "apps/contracts/app/login",
+      "parentId": 19,
+      "name": "login",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 22,
+      "path": "apps/contracts/app/onboarding",
+      "parentId": 19,
+      "name": "onboarding",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 23,
+      "path": "apps/contracts/app/templates",
+      "parentId": 19,
+      "name": "templates",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 24,
+      "path": "apps/contracts/docs",
+      "parentId": 13,
+      "name": "docs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 25,
+      "path": "apps/contracts/src",
+      "parentId": 13,
+      "name": "src",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 10,
+      "descendantDirectoryCount": 17
+    },
+    {
+      "id": 26,
+      "path": "apps/contracts/src/application",
+      "parentId": 25,
+      "name": "application",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 27,
+      "path": "apps/contracts/src/auth",
+      "parentId": 25,
+      "name": "auth",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 28,
+      "path": "apps/contracts/src/bootstrap",
+      "parentId": 25,
+      "name": "bootstrap",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "composition-root",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 29,
+      "path": "apps/contracts/src/domain",
+      "parentId": 25,
+      "name": "domain",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 30,
+      "path": "apps/contracts/src/domain/models",
+      "parentId": 29,
+      "name": "models",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 31,
+      "path": "apps/contracts/src/domain/repositories",
+      "parentId": 29,
+      "name": "repositories",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 32,
+      "path": "apps/contracts/src/domains",
+      "parentId": 25,
+      "name": "domains",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 33,
+      "path": "apps/contracts/src/domains/login",
+      "parentId": 32,
+      "name": "login",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 34,
+      "path": "apps/contracts/src/domains/login/presentation",
+      "parentId": 33,
+      "name": "presentation",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 35,
+      "path": "apps/contracts/src/integration",
+      "parentId": 25,
+      "name": "integration",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 36,
+      "path": "apps/contracts/src/integration/adapters",
+      "parentId": 35,
+      "name": "adapters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 37,
+      "path": "apps/contracts/src/lib",
+      "parentId": 25,
+      "name": "lib",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "library",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 38,
+      "path": "apps/contracts/src/manifest",
+      "parentId": 25,
+      "name": "manifest",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 39,
+      "path": "apps/contracts/src/mock",
+      "parentId": 25,
+      "name": "mock",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 40,
+      "path": "apps/contracts/src/ui",
+      "parentId": 25,
+      "name": "ui",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 41,
+      "path": "apps/contracts/src/ui/components",
+      "parentId": 40,
+      "name": "components",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "ui-components"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 42,
+      "path": "apps/contracts/src/ui/presenters",
+      "parentId": 40,
+      "name": "presenters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "view-model-adapter"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 43,
+      "path": "apps/extensions",
+      "parentId": 12,
+      "name": "extensions",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 44,
+      "path": "apps/matriz-hub",
+      "parentId": 12,
+      "name": "matriz-hub",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 5,
+      "descendantDirectoryCount": 124
+    },
+    {
+      "id": 45,
+      "path": "apps/matriz-hub/.matriz",
+      "parentId": 44,
+      "name": ".matriz",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 3,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 46,
+      "path": "apps/matriz-hub/.matriz/activity",
+      "parentId": 45,
+      "name": "activity",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 47,
+      "path": "apps/matriz-hub/.matriz/backlog",
+      "parentId": 45,
+      "name": "backlog",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 48,
+      "path": "apps/matriz-hub/.matriz/control",
+      "parentId": 45,
+      "name": "control",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 49,
+      "path": "apps/matriz-hub/.matriz/control/snippets",
+      "parentId": 48,
+      "name": "snippets",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 50,
+      "path": "apps/matriz-hub/app",
+      "parentId": 44,
+      "name": "app",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 17,
+      "descendantDirectoryCount": 85
+    },
+    {
+      "id": 51,
+      "path": "apps/matriz-hub/app/api",
+      "parentId": 50,
+      "name": "api",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 12,
+      "descendantDirectoryCount": 43
+    },
+    {
+      "id": 52,
+      "path": "apps/matriz-hub/app/api/auth",
+      "parentId": 51,
+      "name": "auth",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 6
+    },
+    {
+      "id": 53,
+      "path": "apps/matriz-hub/app/api/auth/mock",
+      "parentId": 52,
+      "name": "mock",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer",
+        "test-double"
+      ],
+      "childDirectoryCount": 5,
+      "descendantDirectoryCount": 5
+    },
+    {
+      "id": 54,
+      "path": "apps/matriz-hub/app/api/auth/mock/challenge",
+      "parentId": 53,
+      "name": "challenge",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 55,
+      "path": "apps/matriz-hub/app/api/auth/mock/email",
+      "parentId": 53,
+      "name": "email",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 56,
+      "path": "apps/matriz-hub/app/api/auth/mock/google",
+      "parentId": 53,
+      "name": "google",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 57,
+      "path": "apps/matriz-hub/app/api/auth/mock/session",
+      "parentId": 53,
+      "name": "session",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 58,
+      "path": "apps/matriz-hub/app/api/auth/mock/verify",
+      "parentId": 53,
+      "name": "verify",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 59,
+      "path": "apps/matriz-hub/app/api/docs",
+      "parentId": 51,
+      "name": "docs",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 13,
+      "descendantDirectoryCount": 20
+    },
+    {
+      "id": 60,
+      "path": "apps/matriz-hub/app/api/docs/context-packages",
+      "parentId": 59,
+      "name": "context-packages",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 61,
+      "path": "apps/matriz-hub/app/api/docs/context-packages/[id]",
+      "parentId": 60,
+      "name": "[id]",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 62,
+      "path": "apps/matriz-hub/app/api/docs/context-packages/[id]/publish",
+      "parentId": 61,
+      "name": "publish",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 63,
+      "path": "apps/matriz-hub/app/api/docs/conversions",
+      "parentId": 59,
+      "name": "conversions",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 64,
+      "path": "apps/matriz-hub/app/api/docs/documents",
+      "parentId": 59,
+      "name": "documents",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 65,
+      "path": "apps/matriz-hub/app/api/docs/documents/[docId]",
+      "parentId": 64,
+      "name": "[docId]",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 66,
+      "path": "apps/matriz-hub/app/api/docs/documents/[docId]/versions",
+      "parentId": 65,
+      "name": "versions",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 67,
+      "path": "apps/matriz-hub/app/api/docs/entities",
+      "parentId": 59,
+      "name": "entities",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 68,
+      "path": "apps/matriz-hub/app/api/docs/exports",
+      "parentId": 59,
+      "name": "exports",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 69,
+      "path": "apps/matriz-hub/app/api/docs/governance",
+      "parentId": 59,
+      "name": "governance",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 70,
+      "path": "apps/matriz-hub/app/api/docs/imports",
+      "parentId": 59,
+      "name": "imports",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 71,
+      "path": "apps/matriz-hub/app/api/docs/mcp",
+      "parentId": 59,
+      "name": "mcp",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 72,
+      "path": "apps/matriz-hub/app/api/docs/relations",
+      "parentId": 59,
+      "name": "relations",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 73,
+      "path": "apps/matriz-hub/app/api/docs/runs",
+      "parentId": 59,
+      "name": "runs",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 74,
+      "path": "apps/matriz-hub/app/api/docs/suggestions",
+      "parentId": 59,
+      "name": "suggestions",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 75,
+      "path": "apps/matriz-hub/app/api/docs/suggestions/[id]",
+      "parentId": 74,
+      "name": "[id]",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 76,
+      "path": "apps/matriz-hub/app/api/docs/suggestions/[id]/accept",
+      "parentId": 75,
+      "name": "accept",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 77,
+      "path": "apps/matriz-hub/app/api/docs/suggestions/[id]/reject",
+      "parentId": 75,
+      "name": "reject",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 78,
+      "path": "apps/matriz-hub/app/api/docs/tasks",
+      "parentId": 59,
+      "name": "tasks",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 79,
+      "path": "apps/matriz-hub/app/api/docs/timeline",
+      "parentId": 59,
+      "name": "timeline",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 80,
+      "path": "apps/matriz-hub/app/api/ecosystem",
+      "parentId": 51,
+      "name": "ecosystem",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 81,
+      "path": "apps/matriz-hub/app/api/ecosystem/cache",
+      "parentId": 80,
+      "name": "cache",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 82,
+      "path": "apps/matriz-hub/app/api/ecosystem/health",
+      "parentId": 80,
+      "name": "health",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 83,
+      "path": "apps/matriz-hub/app/api/events",
+      "parentId": 51,
+      "name": "events",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 84,
+      "path": "apps/matriz-hub/app/api/external-links",
+      "parentId": 51,
+      "name": "external-links",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 85,
+      "path": "apps/matriz-hub/app/api/feature-flags",
+      "parentId": 51,
+      "name": "feature-flags",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 86,
+      "path": "apps/matriz-hub/app/api/institutional",
+      "parentId": 51,
+      "name": "institutional",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 87,
+      "path": "apps/matriz-hub/app/api/institutional/refresh",
+      "parentId": 86,
+      "name": "refresh",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 88,
+      "path": "apps/matriz-hub/app/api/mcp",
+      "parentId": 51,
+      "name": "mcp",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 89,
+      "path": "apps/matriz-hub/app/api/onboarding-status",
+      "parentId": 51,
+      "name": "onboarding-status",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 90,
+      "path": "apps/matriz-hub/app/api/praticies",
+      "parentId": 51,
+      "name": "praticies",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 91,
+      "path": "apps/matriz-hub/app/api/praticies/patterns",
+      "parentId": 90,
+      "name": "patterns",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 92,
+      "path": "apps/matriz-hub/app/api/praticies/patterns/[format]",
+      "parentId": 91,
+      "name": "[format]",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 93,
+      "path": "apps/matriz-hub/app/api/registry",
+      "parentId": 51,
+      "name": "registry",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 94,
+      "path": "apps/matriz-hub/app/api/telemetry",
+      "parentId": 51,
+      "name": "telemetry",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 95,
+      "path": "apps/matriz-hub/app/audit",
+      "parentId": 50,
+      "name": "audit",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 96,
+      "path": "apps/matriz-hub/app/catalog",
+      "parentId": 50,
+      "name": "catalog",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 97,
+      "path": "apps/matriz-hub/app/docs",
+      "parentId": 50,
+      "name": "docs",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 17,
+      "descendantDirectoryCount": 23
+    },
+    {
+      "id": 98,
+      "path": "apps/matriz-hub/app/docs/[docId]",
+      "parentId": 97,
+      "name": "[docId]",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 99,
+      "path": "apps/matriz-hub/app/docs/[docId]/edit",
+      "parentId": 98,
+      "name": "edit",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 100,
+      "path": "apps/matriz-hub/app/docs/[docId]/graph",
+      "parentId": 98,
+      "name": "graph",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 101,
+      "path": "apps/matriz-hub/app/docs/[docId]/timeline",
+      "parentId": 98,
+      "name": "timeline",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 102,
+      "path": "apps/matriz-hub/app/docs/[docId]/versions",
+      "parentId": 98,
+      "name": "versions",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 103,
+      "path": "apps/matriz-hub/app/docs/approvals",
+      "parentId": 97,
+      "name": "approvals",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 104,
+      "path": "apps/matriz-hub/app/docs/context",
+      "parentId": 97,
+      "name": "context",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 105,
+      "path": "apps/matriz-hub/app/docs/context/[contextId]",
+      "parentId": 104,
+      "name": "[contextId]",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 106,
+      "path": "apps/matriz-hub/app/docs/converter",
+      "parentId": 97,
+      "name": "converter",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 107,
+      "path": "apps/matriz-hub/app/docs/entities",
+      "parentId": 97,
+      "name": "entities",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 108,
+      "path": "apps/matriz-hub/app/docs/entities/[entityId]",
+      "parentId": 107,
+      "name": "[entityId]",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 109,
+      "path": "apps/matriz-hub/app/docs/exports",
+      "parentId": 97,
+      "name": "exports",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 110,
+      "path": "apps/matriz-hub/app/docs/governance",
+      "parentId": 97,
+      "name": "governance",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 111,
+      "path": "apps/matriz-hub/app/docs/graph",
+      "parentId": 97,
+      "name": "graph",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 112,
+      "path": "apps/matriz-hub/app/docs/import",
+      "parentId": 97,
+      "name": "import",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 113,
+      "path": "apps/matriz-hub/app/docs/mcp",
+      "parentId": 97,
+      "name": "mcp",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 114,
+      "path": "apps/matriz-hub/app/docs/new",
+      "parentId": 97,
+      "name": "new",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 115,
+      "path": "apps/matriz-hub/app/docs/review-desk",
+      "parentId": 97,
+      "name": "review-desk",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 116,
+      "path": "apps/matriz-hub/app/docs/runs",
+      "parentId": 97,
+      "name": "runs",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 117,
+      "path": "apps/matriz-hub/app/docs/settings",
+      "parentId": 97,
+      "name": "settings",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 118,
+      "path": "apps/matriz-hub/app/docs/suggestions",
+      "parentId": 97,
+      "name": "suggestions",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 119,
+      "path": "apps/matriz-hub/app/docs/tasks",
+      "parentId": 97,
+      "name": "tasks",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 120,
+      "path": "apps/matriz-hub/app/docs/timeline",
+      "parentId": 97,
+      "name": "timeline",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 121,
+      "path": "apps/matriz-hub/app/ecosystem",
+      "parentId": 50,
+      "name": "ecosystem",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 122,
+      "path": "apps/matriz-hub/app/events",
+      "parentId": 50,
+      "name": "events",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 123,
+      "path": "apps/matriz-hub/app/external-links",
+      "parentId": 50,
+      "name": "external-links",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 124,
+      "path": "apps/matriz-hub/app/feature-flags",
+      "parentId": 50,
+      "name": "feature-flags",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 125,
+      "path": "apps/matriz-hub/app/health",
+      "parentId": 50,
+      "name": "health",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 126,
+      "path": "apps/matriz-hub/app/intelligence",
+      "parentId": 50,
+      "name": "intelligence",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 127,
+      "path": "apps/matriz-hub/app/login",
+      "parentId": 50,
+      "name": "login",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 128,
+      "path": "apps/matriz-hub/app/onboarding-status",
+      "parentId": 50,
+      "name": "onboarding-status",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 129,
+      "path": "apps/matriz-hub/app/praticies",
+      "parentId": 50,
+      "name": "praticies",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 130,
+      "path": "apps/matriz-hub/app/praticies/apps",
+      "parentId": 129,
+      "name": "apps",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 131,
+      "path": "apps/matriz-hub/app/projects",
+      "parentId": 50,
+      "name": "projects",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 132,
+      "path": "apps/matriz-hub/app/projects/[id]",
+      "parentId": 131,
+      "name": "[id]",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 133,
+      "path": "apps/matriz-hub/app/public",
+      "parentId": 50,
+      "name": "public",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer",
+        "static-assets"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 134,
+      "path": "apps/matriz-hub/app/registry",
+      "parentId": 50,
+      "name": "registry",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 135,
+      "path": "apps/matriz-hub/app/telemetry",
+      "parentId": 50,
+      "name": "telemetry",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 136,
+      "path": "apps/matriz-hub/docs",
+      "parentId": 44,
+      "name": "docs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 137,
+      "path": "apps/matriz-hub/public",
+      "parentId": 44,
+      "name": "public",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "static-assets"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 138,
+      "path": "apps/matriz-hub/public/audit",
+      "parentId": 137,
+      "name": "audit",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "static-assets"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 139,
+      "path": "apps/matriz-hub/src",
+      "parentId": 44,
+      "name": "src",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 8,
+      "descendantDirectoryCount": 29
+    },
+    {
+      "id": 140,
+      "path": "apps/matriz-hub/src/auth",
+      "parentId": 139,
+      "name": "auth",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 141,
+      "path": "apps/matriz-hub/src/bootstrap",
+      "parentId": 139,
+      "name": "bootstrap",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "composition-root",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 142,
+      "path": "apps/matriz-hub/src/domains",
+      "parentId": 139,
+      "name": "domains",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 3,
+      "descendantDirectoryCount": 17
+    },
+    {
+      "id": 143,
+      "path": "apps/matriz-hub/src/domains/docs",
+      "parentId": 142,
+      "name": "docs",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "source-root"
+      ],
+      "childDirectoryCount": 5,
+      "descendantDirectoryCount": 7
+    },
+    {
+      "id": 144,
+      "path": "apps/matriz-hub/src/domains/docs/application",
+      "parentId": 143,
+      "name": "application",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "documentation",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 145,
+      "path": "apps/matriz-hub/src/domains/docs/domain",
+      "parentId": 143,
+      "name": "domain",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 146,
+      "path": "apps/matriz-hub/src/domains/docs/integration",
+      "parentId": 143,
+      "name": "integration",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 147,
+      "path": "apps/matriz-hub/src/domains/docs/integration/converters",
+      "parentId": 146,
+      "name": "converters",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 148,
+      "path": "apps/matriz-hub/src/domains/docs/integration/prisma",
+      "parentId": 146,
+      "name": "prisma",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "database-schema",
+        "documentation",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 149,
+      "path": "apps/matriz-hub/src/domains/docs/mcp",
+      "parentId": 143,
+      "name": "mcp",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 150,
+      "path": "apps/matriz-hub/src/domains/docs/presentation",
+      "parentId": 143,
+      "name": "presentation",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 151,
+      "path": "apps/matriz-hub/src/domains/login",
+      "parentId": 142,
+      "name": "login",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 152,
+      "path": "apps/matriz-hub/src/domains/login/presentation",
+      "parentId": 151,
+      "name": "presentation",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 153,
+      "path": "apps/matriz-hub/src/domains/praticies",
+      "parentId": 142,
+      "name": "praticies",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 6
+    },
+    {
+      "id": 154,
+      "path": "apps/matriz-hub/src/domains/praticies/application",
+      "parentId": 153,
+      "name": "application",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 155,
+      "path": "apps/matriz-hub/src/domains/praticies/domain",
+      "parentId": 153,
+      "name": "domain",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 156,
+      "path": "apps/matriz-hub/src/domains/praticies/domain/repositories",
+      "parentId": 155,
+      "name": "repositories",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 157,
+      "path": "apps/matriz-hub/src/domains/praticies/integration",
+      "parentId": 153,
+      "name": "integration",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 158,
+      "path": "apps/matriz-hub/src/domains/praticies/integration/filesystem",
+      "parentId": 157,
+      "name": "filesystem",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 159,
+      "path": "apps/matriz-hub/src/domains/praticies/presentation",
+      "parentId": 153,
+      "name": "presentation",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 160,
+      "path": "apps/matriz-hub/src/ecosystem",
+      "parentId": 139,
+      "name": "ecosystem",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 161,
+      "path": "apps/matriz-hub/src/institutional",
+      "parentId": 139,
+      "name": "institutional",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 162,
+      "path": "apps/matriz-hub/src/institutional/components",
+      "parentId": 161,
+      "name": "components",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root",
+        "ui-components"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 163,
+      "path": "apps/matriz-hub/src/institutional/components/public",
+      "parentId": 162,
+      "name": "public",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root",
+        "static-assets",
+        "ui-components"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 164,
+      "path": "apps/matriz-hub/src/institutional/seeds",
+      "parentId": 161,
+      "name": "seeds",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 165,
+      "path": "apps/matriz-hub/src/manifest",
+      "parentId": 139,
+      "name": "manifest",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 166,
+      "path": "apps/matriz-hub/src/mcp",
+      "parentId": 139,
+      "name": "mcp",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 167,
+      "path": "apps/matriz-hub/src/ui",
+      "parentId": 139,
+      "name": "ui",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 168,
+      "path": "apps/matriz-hub/src/ui/components",
+      "parentId": 167,
+      "name": "components",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "ui-components"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 169,
+      "path": "apps/matriz-workbench",
+      "parentId": 12,
+      "name": "matriz-workbench",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 93
+    },
+    {
+      "id": 170,
+      "path": "apps/matriz-workbench/.matriz",
+      "parentId": 169,
+      "name": ".matriz",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 5,
+      "descendantDirectoryCount": 11
+    },
+    {
+      "id": 171,
+      "path": "apps/matriz-workbench/.matriz/activity",
+      "parentId": 170,
+      "name": "activity",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 172,
+      "path": "apps/matriz-workbench/.matriz/agents",
+      "parentId": 170,
+      "name": "agents",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 173,
+      "path": "apps/matriz-workbench/.matriz/agents/requests",
+      "parentId": 172,
+      "name": "requests",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 174,
+      "path": "apps/matriz-workbench/.matriz/agents/runs",
+      "parentId": 172,
+      "name": "runs",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 175,
+      "path": "apps/matriz-workbench/.matriz/backlog",
+      "parentId": 170,
+      "name": "backlog",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 176,
+      "path": "apps/matriz-workbench/.matriz/control",
+      "parentId": 170,
+      "name": "control",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 177,
+      "path": "apps/matriz-workbench/.matriz/control/snippets",
+      "parentId": 176,
+      "name": "snippets",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 178,
+      "path": "apps/matriz-workbench/.matriz/docs",
+      "parentId": 170,
+      "name": "docs",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 3,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 179,
+      "path": "apps/matriz-workbench/.matriz/docs/decisions",
+      "parentId": 178,
+      "name": "decisions",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 180,
+      "path": "apps/matriz-workbench/.matriz/docs/product",
+      "parentId": 178,
+      "name": "product",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 181,
+      "path": "apps/matriz-workbench/.matriz/docs/technical",
+      "parentId": 178,
+      "name": "technical",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 182,
+      "path": "apps/matriz-workbench/app",
+      "parentId": 169,
+      "name": "app",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 3,
+      "descendantDirectoryCount": 57
+    },
+    {
+      "id": 183,
+      "path": "apps/matriz-workbench/app/(workspace)",
+      "parentId": 182,
+      "name": "(workspace)",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 7,
+      "descendantDirectoryCount": 28
+    },
+    {
+      "id": 184,
+      "path": "apps/matriz-workbench/app/(workspace)/control",
+      "parentId": 183,
+      "name": "control",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 185,
+      "path": "apps/matriz-workbench/app/(workspace)/knowledge",
+      "parentId": 183,
+      "name": "knowledge",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 186,
+      "path": "apps/matriz-workbench/app/(workspace)/knowledge/[sourceId]",
+      "parentId": 185,
+      "name": "[sourceId]",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 187,
+      "path": "apps/matriz-workbench/app/(workspace)/praticies",
+      "parentId": 183,
+      "name": "praticies",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 188,
+      "path": "apps/matriz-workbench/app/(workspace)/projects",
+      "parentId": 183,
+      "name": "projects",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 16
+    },
+    {
+      "id": 189,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]",
+      "parentId": 188,
+      "name": "[projectId]",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 8,
+      "descendantDirectoryCount": 14
+    },
+    {
+      "id": 190,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/activity",
+      "parentId": 189,
+      "name": "activity",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 191,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/agents",
+      "parentId": 189,
+      "name": "agents",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 192,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/agents/[requestId]",
+      "parentId": 191,
+      "name": "[requestId]",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 193,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/backlog",
+      "parentId": 189,
+      "name": "backlog",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 194,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/backlog/[itemId]",
+      "parentId": 193,
+      "name": "[itemId]",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 195,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/collaboration",
+      "parentId": 189,
+      "name": "collaboration",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 196,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/collaboration/github",
+      "parentId": 195,
+      "name": "github",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 197,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/collaboration/notifications",
+      "parentId": 195,
+      "name": "notifications",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 198,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/decisions",
+      "parentId": 189,
+      "name": "decisions",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 199,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/dependencies",
+      "parentId": 189,
+      "name": "dependencies",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 200,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/docs",
+      "parentId": 189,
+      "name": "docs",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 201,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/docs/[kind]",
+      "parentId": 200,
+      "name": "[kind]",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 202,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/docs/[kind]/[slug]",
+      "parentId": 201,
+      "name": "[slug]",
+      "depth": 9,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 203,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/[projectId]/roadmap",
+      "parentId": 189,
+      "name": "roadmap",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 204,
+      "path": "apps/matriz-workbench/app/(workspace)/projects/new",
+      "parentId": 188,
+      "name": "new",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 205,
+      "path": "apps/matriz-workbench/app/(workspace)/settings",
+      "parentId": 183,
+      "name": "settings",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 206,
+      "path": "apps/matriz-workbench/app/(workspace)/sites",
+      "parentId": 183,
+      "name": "sites",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 207,
+      "path": "apps/matriz-workbench/app/(workspace)/work",
+      "parentId": 183,
+      "name": "work",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 3,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 208,
+      "path": "apps/matriz-workbench/app/(workspace)/work/backlog",
+      "parentId": 207,
+      "name": "backlog",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 209,
+      "path": "apps/matriz-workbench/app/(workspace)/work/inbox",
+      "parentId": 207,
+      "name": "inbox",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 210,
+      "path": "apps/matriz-workbench/app/(workspace)/work/sprints",
+      "parentId": 207,
+      "name": "sprints",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 211,
+      "path": "apps/matriz-workbench/app/(workspace)/work/sprints/[sprintId]",
+      "parentId": 210,
+      "name": "[sprintId]",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 212,
+      "path": "apps/matriz-workbench/app/api",
+      "parentId": 182,
+      "name": "api",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 26
+    },
+    {
+      "id": 213,
+      "path": "apps/matriz-workbench/app/api/codex",
+      "parentId": 212,
+      "name": "codex",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 10
+    },
+    {
+      "id": 214,
+      "path": "apps/matriz-workbench/app/api/codex/projects",
+      "parentId": 213,
+      "name": "projects",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 8
+    },
+    {
+      "id": 215,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]",
+      "parentId": 214,
+      "name": "[projectId]",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 7
+    },
+    {
+      "id": 216,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests",
+      "parentId": 215,
+      "name": "requests",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 6
+    },
+    {
+      "id": 217,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]",
+      "parentId": 216,
+      "name": "[requestId]",
+      "depth": 9,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 5
+    },
+    {
+      "id": 218,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/approvals",
+      "parentId": 217,
+      "name": "approvals",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 219,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/approvals/[approvalId]",
+      "parentId": 218,
+      "name": "[approvalId]",
+      "depth": 11,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 220,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/cancel",
+      "parentId": 217,
+      "name": "cancel",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 221,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/events",
+      "parentId": 217,
+      "name": "events",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 222,
+      "path": "apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/start",
+      "parentId": 217,
+      "name": "start",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 223,
+      "path": "apps/matriz-workbench/app/api/codex/runtime",
+      "parentId": 213,
+      "name": "runtime",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 224,
+      "path": "apps/matriz-workbench/app/api/collaboration",
+      "parentId": 212,
+      "name": "collaboration",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 14
+    },
+    {
+      "id": 225,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects",
+      "parentId": 224,
+      "name": "projects",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 13
+    },
+    {
+      "id": 226,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]",
+      "parentId": 225,
+      "name": "[projectId]",
+      "depth": 7,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 3,
+      "descendantDirectoryCount": 12
+    },
+    {
+      "id": 227,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/github",
+      "parentId": 226,
+      "name": "github",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 228,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/github/issues",
+      "parentId": 227,
+      "name": "issues",
+      "depth": 9,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 229,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/github/issues/[taskId]",
+      "parentId": 228,
+      "name": "[taskId]",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 230,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/github/pull-requests",
+      "parentId": 227,
+      "name": "pull-requests",
+      "depth": 9,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 231,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/github/pull-requests/[requestId]",
+      "parentId": 230,
+      "name": "[requestId]",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 232,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications",
+      "parentId": 226,
+      "name": "notifications",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 233,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/config",
+      "parentId": 232,
+      "name": "config",
+      "depth": 9,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "configuration",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 234,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/outbox",
+      "parentId": 232,
+      "name": "outbox",
+      "depth": 9,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 235,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/outbox/[notificationId]",
+      "parentId": 234,
+      "name": "[notificationId]",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 236,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/vercel",
+      "parentId": 226,
+      "name": "vercel",
+      "depth": 8,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 237,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/vercel/previews",
+      "parentId": 236,
+      "name": "previews",
+      "depth": 9,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 238,
+      "path": "apps/matriz-workbench/app/api/collaboration/projects/[projectId]/vercel/previews/[requestId]",
+      "parentId": 237,
+      "name": "[requestId]",
+      "depth": 10,
+      "kind": "directory",
+      "tags": [
+        "api-surface",
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 239,
+      "path": "apps/matriz-workbench/app/unlock",
+      "parentId": 182,
+      "name": "unlock",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 240,
+      "path": "apps/matriz-workbench/docs",
+      "parentId": 169,
+      "name": "docs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 241,
+      "path": "apps/matriz-workbench/docs/agent-handbook",
+      "parentId": 240,
+      "name": "agent-handbook",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 242,
+      "path": "apps/matriz-workbench/docs/design",
+      "parentId": 240,
+      "name": "design",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 243,
+      "path": "apps/matriz-workbench/docs/plans",
+      "parentId": 240,
+      "name": "plans",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 244,
+      "path": "apps/matriz-workbench/docs/specs",
+      "parentId": 240,
+      "name": "specs",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 245,
+      "path": "apps/matriz-workbench/src",
+      "parentId": 169,
+      "name": "src",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 9,
+      "descendantDirectoryCount": 17
+    },
+    {
+      "id": 246,
+      "path": "apps/matriz-workbench/src/application",
+      "parentId": 245,
+      "name": "application",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 247,
+      "path": "apps/matriz-workbench/src/application/collaboration",
+      "parentId": 246,
+      "name": "collaboration",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 248,
+      "path": "apps/matriz-workbench/src/application/http",
+      "parentId": 246,
+      "name": "http",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 249,
+      "path": "apps/matriz-workbench/src/auth",
+      "parentId": 245,
+      "name": "auth",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 250,
+      "path": "apps/matriz-workbench/src/bootstrap",
+      "parentId": 245,
+      "name": "bootstrap",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "composition-root",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 251,
+      "path": "apps/matriz-workbench/src/cli",
+      "parentId": 245,
+      "name": "cli",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 252,
+      "path": "apps/matriz-workbench/src/domain",
+      "parentId": 245,
+      "name": "domain",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 253,
+      "path": "apps/matriz-workbench/src/integration",
+      "parentId": 245,
+      "name": "integration",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 254,
+      "path": "apps/matriz-workbench/src/integration/codex",
+      "parentId": 253,
+      "name": "codex",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 255,
+      "path": "apps/matriz-workbench/src/integration/collaboration",
+      "parentId": 253,
+      "name": "collaboration",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 256,
+      "path": "apps/matriz-workbench/src/integration/filesystem",
+      "parentId": 253,
+      "name": "filesystem",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 257,
+      "path": "apps/matriz-workbench/src/integration/sites",
+      "parentId": 253,
+      "name": "sites",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 258,
+      "path": "apps/matriz-workbench/src/manifest",
+      "parentId": 245,
+      "name": "manifest",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 259,
+      "path": "apps/matriz-workbench/src/mcp",
+      "parentId": 245,
+      "name": "mcp",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 260,
+      "path": "apps/matriz-workbench/src/ui",
+      "parentId": 245,
+      "name": "ui",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 261,
+      "path": "apps/matriz-workbench/src/ui/components",
+      "parentId": 260,
+      "name": "components",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "ui-components"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 262,
+      "path": "apps/matriz-workbench/src/ui/presenters",
+      "parentId": 260,
+      "name": "presenters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "view-model-adapter"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 263,
+      "path": "apps/seumei",
+      "parentId": 12,
+      "name": "seumei",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 29
+    },
+    {
+      "id": 264,
+      "path": "apps/seumei/.matriz",
+      "parentId": 263,
+      "name": ".matriz",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 265,
+      "path": "apps/seumei/.matriz/activity",
+      "parentId": 264,
+      "name": "activity",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 266,
+      "path": "apps/seumei/.matriz/control",
+      "parentId": 264,
+      "name": "control",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 267,
+      "path": "apps/seumei/.matriz/control/snippets",
+      "parentId": 266,
+      "name": "snippets",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 268,
+      "path": "apps/seumei/app",
+      "parentId": 263,
+      "name": "app",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 269,
+      "path": "apps/seumei/app/establishments",
+      "parentId": 268,
+      "name": "establishments",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 270,
+      "path": "apps/seumei/app/login",
+      "parentId": 268,
+      "name": "login",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 271,
+      "path": "apps/seumei/app/onboarding",
+      "parentId": 268,
+      "name": "onboarding",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 272,
+      "path": "apps/seumei/app/owners",
+      "parentId": 268,
+      "name": "owners",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 273,
+      "path": "apps/seumei/docs",
+      "parentId": 263,
+      "name": "docs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 274,
+      "path": "apps/seumei/src",
+      "parentId": 263,
+      "name": "src",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 10,
+      "descendantDirectoryCount": 18
+    },
+    {
+      "id": 275,
+      "path": "apps/seumei/src/application",
+      "parentId": 274,
+      "name": "application",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 276,
+      "path": "apps/seumei/src/auth",
+      "parentId": 274,
+      "name": "auth",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 277,
+      "path": "apps/seumei/src/bootstrap",
+      "parentId": 274,
+      "name": "bootstrap",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "composition-root",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 278,
+      "path": "apps/seumei/src/domain",
+      "parentId": 274,
+      "name": "domain",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 279,
+      "path": "apps/seumei/src/domain/models",
+      "parentId": 278,
+      "name": "models",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 280,
+      "path": "apps/seumei/src/domain/repositories",
+      "parentId": 278,
+      "name": "repositories",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 281,
+      "path": "apps/seumei/src/domains",
+      "parentId": 274,
+      "name": "domains",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 282,
+      "path": "apps/seumei/src/domains/login",
+      "parentId": 281,
+      "name": "login",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 283,
+      "path": "apps/seumei/src/domains/login/presentation",
+      "parentId": 282,
+      "name": "presentation",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 284,
+      "path": "apps/seumei/src/integration",
+      "parentId": 274,
+      "name": "integration",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 285,
+      "path": "apps/seumei/src/integration/adapters",
+      "parentId": 284,
+      "name": "adapters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 286,
+      "path": "apps/seumei/src/integration/gateways",
+      "parentId": 284,
+      "name": "gateways",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 287,
+      "path": "apps/seumei/src/lib",
+      "parentId": 274,
+      "name": "lib",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "library",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 288,
+      "path": "apps/seumei/src/manifest",
+      "parentId": 274,
+      "name": "manifest",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 289,
+      "path": "apps/seumei/src/mock",
+      "parentId": 274,
+      "name": "mock",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 290,
+      "path": "apps/seumei/src/ui",
+      "parentId": 274,
+      "name": "ui",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 291,
+      "path": "apps/seumei/src/ui/components",
+      "parentId": 290,
+      "name": "components",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "ui-components"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 292,
+      "path": "apps/seumei/src/ui/presenters",
+      "parentId": 290,
+      "name": "presenters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "view-model-adapter"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 293,
+      "path": "apps/sites",
+      "parentId": 12,
+      "name": "sites",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 6,
+      "descendantDirectoryCount": 22
+    },
+    {
+      "id": 294,
+      "path": "apps/sites/.matriz",
+      "parentId": 293,
+      "name": ".matriz",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 295,
+      "path": "apps/sites/.matriz/activity",
+      "parentId": 294,
+      "name": "activity",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 296,
+      "path": "apps/sites/.matriz/control",
+      "parentId": 294,
+      "name": "control",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 297,
+      "path": "apps/sites/.matriz/control/snippets",
+      "parentId": 296,
+      "name": "snippets",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 298,
+      "path": "apps/sites/app",
+      "parentId": 293,
+      "name": "app",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 299,
+      "path": "apps/sites/app/preview",
+      "parentId": 298,
+      "name": "preview",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 300,
+      "path": "apps/sites/app/preview/[siteId]",
+      "parentId": 299,
+      "name": "[siteId]",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 301,
+      "path": "apps/sites/app/preview/[siteId]/[locale]",
+      "parentId": 300,
+      "name": "[locale]",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 302,
+      "path": "apps/sites/docs",
+      "parentId": 293,
+      "name": "docs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 303,
+      "path": "apps/sites/public",
+      "parentId": 293,
+      "name": "public",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "static-assets"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 304,
+      "path": "apps/sites/public/sites",
+      "parentId": 303,
+      "name": "sites",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "static-assets"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 305,
+      "path": "apps/sites/public/sites/example",
+      "parentId": 304,
+      "name": "example",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "static-assets"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 306,
+      "path": "apps/sites/sites",
+      "parentId": 293,
+      "name": "sites",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 307,
+      "path": "apps/sites/sites/_presets",
+      "parentId": 306,
+      "name": "_presets",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 308,
+      "path": "apps/sites/sites/example",
+      "parentId": 306,
+      "name": "example",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 309,
+      "path": "apps/sites/sites/example/messages",
+      "parentId": 308,
+      "name": "messages",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 310,
+      "path": "apps/sites/src",
+      "parentId": 293,
+      "name": "src",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 5,
+      "descendantDirectoryCount": 5
+    },
+    {
+      "id": 311,
+      "path": "apps/sites/src/application",
+      "parentId": 310,
+      "name": "application",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 312,
+      "path": "apps/sites/src/bootstrap",
+      "parentId": 310,
+      "name": "bootstrap",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "composition-root",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 313,
+      "path": "apps/sites/src/domain",
+      "parentId": 310,
+      "name": "domain",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 314,
+      "path": "apps/sites/src/integration",
+      "parentId": 310,
+      "name": "integration",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 315,
+      "path": "apps/sites/src/manifest",
+      "parentId": 310,
+      "name": "manifest",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 316,
+      "path": "apps/spot",
+      "parentId": 12,
+      "name": "spot",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 29
+    },
+    {
+      "id": 317,
+      "path": "apps/spot/.matriz",
+      "parentId": 316,
+      "name": ".matriz",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 318,
+      "path": "apps/spot/.matriz/activity",
+      "parentId": 317,
+      "name": "activity",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 319,
+      "path": "apps/spot/.matriz/control",
+      "parentId": 317,
+      "name": "control",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 320,
+      "path": "apps/spot/.matriz/control/snippets",
+      "parentId": 319,
+      "name": "snippets",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 321,
+      "path": "apps/spot/app",
+      "parentId": 316,
+      "name": "app",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 322,
+      "path": "apps/spot/app/bands",
+      "parentId": 321,
+      "name": "bands",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 323,
+      "path": "apps/spot/app/gigs",
+      "parentId": 321,
+      "name": "gigs",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 324,
+      "path": "apps/spot/app/login",
+      "parentId": 321,
+      "name": "login",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 325,
+      "path": "apps/spot/app/onboarding",
+      "parentId": 321,
+      "name": "onboarding",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 326,
+      "path": "apps/spot/docs",
+      "parentId": 316,
+      "name": "docs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 327,
+      "path": "apps/spot/src",
+      "parentId": 316,
+      "name": "src",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 10,
+      "descendantDirectoryCount": 18
+    },
+    {
+      "id": 328,
+      "path": "apps/spot/src/application",
+      "parentId": 327,
+      "name": "application",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 329,
+      "path": "apps/spot/src/auth",
+      "parentId": 327,
+      "name": "auth",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 330,
+      "path": "apps/spot/src/bootstrap",
+      "parentId": 327,
+      "name": "bootstrap",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "composition-root",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 331,
+      "path": "apps/spot/src/domain",
+      "parentId": 327,
+      "name": "domain",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 332,
+      "path": "apps/spot/src/domain/models",
+      "parentId": 331,
+      "name": "models",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 333,
+      "path": "apps/spot/src/domain/repositories",
+      "parentId": 331,
+      "name": "repositories",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 334,
+      "path": "apps/spot/src/domains",
+      "parentId": 327,
+      "name": "domains",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 335,
+      "path": "apps/spot/src/domains/login",
+      "parentId": 334,
+      "name": "login",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 336,
+      "path": "apps/spot/src/domains/login/presentation",
+      "parentId": 335,
+      "name": "presentation",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 337,
+      "path": "apps/spot/src/integration",
+      "parentId": 327,
+      "name": "integration",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 338,
+      "path": "apps/spot/src/integration/adapters",
+      "parentId": 337,
+      "name": "adapters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 339,
+      "path": "apps/spot/src/integration/gateways",
+      "parentId": 337,
+      "name": "gateways",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "integration-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 340,
+      "path": "apps/spot/src/lib",
+      "parentId": 327,
+      "name": "lib",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "library",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 341,
+      "path": "apps/spot/src/manifest",
+      "parentId": 327,
+      "name": "manifest",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 342,
+      "path": "apps/spot/src/mock",
+      "parentId": 327,
+      "name": "mock",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 343,
+      "path": "apps/spot/src/ui",
+      "parentId": 327,
+      "name": "ui",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 344,
+      "path": "apps/spot/src/ui/components",
+      "parentId": 343,
+      "name": "components",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "ui-components"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 345,
+      "path": "apps/spot/src/ui/presenters",
+      "parentId": 343,
+      "name": "presenters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "view-model-adapter"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 346,
+      "path": "apps/willdash",
+      "parentId": 12,
+      "name": "willdash",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 26
+    },
+    {
+      "id": 347,
+      "path": "apps/willdash/.matriz",
+      "parentId": 346,
+      "name": ".matriz",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 348,
+      "path": "apps/willdash/.matriz/activity",
+      "parentId": 347,
+      "name": "activity",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 349,
+      "path": "apps/willdash/app",
+      "parentId": 346,
+      "name": "app",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 6,
+      "descendantDirectoryCount": 6
+    },
+    {
+      "id": 350,
+      "path": "apps/willdash/app/activities",
+      "parentId": 349,
+      "name": "activities",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 351,
+      "path": "apps/willdash/app/dashboards",
+      "parentId": 349,
+      "name": "dashboards",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 352,
+      "path": "apps/willdash/app/goals",
+      "parentId": 349,
+      "name": "goals",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 353,
+      "path": "apps/willdash/app/login",
+      "parentId": 349,
+      "name": "login",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 354,
+      "path": "apps/willdash/app/onboarding",
+      "parentId": 349,
+      "name": "onboarding",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 355,
+      "path": "apps/willdash/app/telemetry",
+      "parentId": 349,
+      "name": "telemetry",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "route-layer"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 356,
+      "path": "apps/willdash/docs",
+      "parentId": 346,
+      "name": "docs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 357,
+      "path": "apps/willdash/src",
+      "parentId": 346,
+      "name": "src",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 9,
+      "descendantDirectoryCount": 15
+    },
+    {
+      "id": 358,
+      "path": "apps/willdash/src/application",
+      "parentId": 357,
+      "name": "application",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "application-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 359,
+      "path": "apps/willdash/src/auth",
+      "parentId": 357,
+      "name": "auth",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 360,
+      "path": "apps/willdash/src/bootstrap",
+      "parentId": 357,
+      "name": "bootstrap",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "composition-root",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 361,
+      "path": "apps/willdash/src/domain",
+      "parentId": 357,
+      "name": "domain",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 362,
+      "path": "apps/willdash/src/domain/models",
+      "parentId": 361,
+      "name": "models",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 363,
+      "path": "apps/willdash/src/domain/repositories",
+      "parentId": 361,
+      "name": "repositories",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "domain-layer",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 364,
+      "path": "apps/willdash/src/domains",
+      "parentId": 357,
+      "name": "domains",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 365,
+      "path": "apps/willdash/src/domains/login",
+      "parentId": 364,
+      "name": "login",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 366,
+      "path": "apps/willdash/src/domains/login/presentation",
+      "parentId": 365,
+      "name": "presentation",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 367,
+      "path": "apps/willdash/src/lib",
+      "parentId": 357,
+      "name": "lib",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "library",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 368,
+      "path": "apps/willdash/src/manifest",
+      "parentId": 357,
+      "name": "manifest",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 369,
+      "path": "apps/willdash/src/mock",
+      "parentId": 357,
+      "name": "mock",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "source-root",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 370,
+      "path": "apps/willdash/src/ui",
+      "parentId": 357,
+      "name": "ui",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 371,
+      "path": "apps/willdash/src/ui/components",
+      "parentId": 370,
+      "name": "components",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "ui-components"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 372,
+      "path": "apps/willdash/src/ui/presenters",
+      "parentId": 370,
+      "name": "presenters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "app-boundary",
+        "presentation-layer",
+        "source-root",
+        "view-model-adapter"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 373,
+      "path": "backlog",
+      "parentId": 0,
+      "name": "backlog",
+      "depth": 1,
+      "kind": "workspace-area",
+      "tags": [],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 374,
+      "path": "backlog/babylon",
+      "parentId": 373,
+      "name": "babylon",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 375,
+      "path": "backlog/fundacao",
+      "parentId": 373,
+      "name": "fundacao",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 376,
+      "path": "docs",
+      "parentId": 0,
+      "name": "docs",
+      "depth": 1,
+      "kind": "documentation",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 9
+    },
+    {
+      "id": 377,
+      "path": "docs/adr",
+      "parentId": 376,
+      "name": "adr",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 378,
+      "path": "docs/audit",
+      "parentId": 376,
+      "name": "audit",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 379,
+      "path": "docs/audit/assets",
+      "parentId": 378,
+      "name": "assets",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 380,
+      "path": "docs/audit/assets/2026-07-27",
+      "parentId": 379,
+      "name": "2026-07-27",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 381,
+      "path": "docs/audit/assets/2026-07-27/showcase",
+      "parentId": 380,
+      "name": "showcase",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 382,
+      "path": "docs/historico",
+      "parentId": 376,
+      "name": "historico",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 383,
+      "path": "docs/superpowers",
+      "parentId": 376,
+      "name": "superpowers",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 384,
+      "path": "docs/superpowers/plans",
+      "parentId": 383,
+      "name": "plans",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 385,
+      "path": "docs/superpowers/specs",
+      "parentId": 383,
+      "name": "specs",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "documentation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 386,
+      "path": "emails",
+      "parentId": 0,
+      "name": "emails",
+      "depth": 1,
+      "kind": "email-templates",
+      "tags": [
+        "email-templates"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 387,
+      "path": "i18n",
+      "parentId": 0,
+      "name": "i18n",
+      "depth": 1,
+      "kind": "localization",
+      "tags": [
+        "localization"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 388,
+      "path": "packages",
+      "parentId": 0,
+      "name": "packages",
+      "depth": 1,
+      "kind": "shared-package-portfolio",
+      "tags": [
+        "shared-package-portfolio"
+      ],
+      "childDirectoryCount": 6,
+      "descendantDirectoryCount": 79
+    },
+    {
+      "id": 389,
+      "path": "packages/access",
+      "parentId": 388,
+      "name": "access",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 390,
+      "path": "packages/access/permissions",
+      "parentId": 389,
+      "name": "permissions",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 391,
+      "path": "packages/access/permissions/src",
+      "parentId": 390,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 392,
+      "path": "packages/access/tenants",
+      "parentId": 389,
+      "name": "tenants",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 393,
+      "path": "packages/access/tenants/src",
+      "parentId": 392,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 394,
+      "path": "packages/design",
+      "parentId": 388,
+      "name": "design",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 395,
+      "path": "packages/design/system",
+      "parentId": 394,
+      "name": "system",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 396,
+      "path": "packages/design/system/src",
+      "parentId": 395,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 397,
+      "path": "packages/design/ui",
+      "parentId": 394,
+      "name": "ui",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "presentation-layer"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 398,
+      "path": "packages/design/ui/src",
+      "parentId": 397,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "presentation-layer",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 399,
+      "path": "packages/flows",
+      "parentId": 388,
+      "name": "flows",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 8
+    },
+    {
+      "id": 400,
+      "path": "packages/flows/auth",
+      "parentId": 399,
+      "name": "auth",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 401,
+      "path": "packages/flows/auth/src",
+      "parentId": 400,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 402,
+      "path": "packages/flows/ecosystem",
+      "parentId": 399,
+      "name": "ecosystem",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 403,
+      "path": "packages/flows/ecosystem/src",
+      "parentId": 402,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 404,
+      "path": "packages/flows/onboarding",
+      "parentId": 399,
+      "name": "onboarding",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 405,
+      "path": "packages/flows/onboarding/src",
+      "parentId": 404,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 406,
+      "path": "packages/flows/praticies",
+      "parentId": 399,
+      "name": "praticies",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 407,
+      "path": "packages/flows/praticies/src",
+      "parentId": 406,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 408,
+      "path": "packages/foundation",
+      "parentId": 388,
+      "name": "foundation",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 8
+    },
+    {
+      "id": 409,
+      "path": "packages/foundation/constants",
+      "parentId": 408,
+      "name": "constants",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 410,
+      "path": "packages/foundation/constants/src",
+      "parentId": 409,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 411,
+      "path": "packages/foundation/schemas",
+      "parentId": 408,
+      "name": "schemas",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "schema-definition"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 412,
+      "path": "packages/foundation/schemas/src",
+      "parentId": 411,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "schema-definition",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 413,
+      "path": "packages/foundation/types",
+      "parentId": 408,
+      "name": "types",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 414,
+      "path": "packages/foundation/types/src",
+      "parentId": 413,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 415,
+      "path": "packages/foundation/utils",
+      "parentId": 408,
+      "name": "utils",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "utility"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 416,
+      "path": "packages/foundation/utils/src",
+      "parentId": 415,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root",
+        "utility"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 417,
+      "path": "packages/integration",
+      "parentId": 388,
+      "name": "integration",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 6,
+      "descendantDirectoryCount": 16
+    },
+    {
+      "id": 418,
+      "path": "packages/integration/api-contracts",
+      "parentId": 417,
+      "name": "api-contracts",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 419,
+      "path": "packages/integration/api-contracts/src",
+      "parentId": 418,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 3
+    },
+    {
+      "id": 420,
+      "path": "packages/integration/api-contracts/src/v1",
+      "parentId": 419,
+      "name": "v1",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 421,
+      "path": "packages/integration/api-contracts/src/v1/docs",
+      "parentId": 420,
+      "name": "docs",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "documentation",
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 422,
+      "path": "packages/integration/api-contracts/src/v1/institutional",
+      "parentId": 420,
+      "name": "institutional",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 423,
+      "path": "packages/integration/events",
+      "parentId": 417,
+      "name": "events",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 424,
+      "path": "packages/integration/events/src",
+      "parentId": 423,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 425,
+      "path": "packages/integration/external-links",
+      "parentId": 417,
+      "name": "external-links",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 426,
+      "path": "packages/integration/external-links/src",
+      "parentId": 425,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 427,
+      "path": "packages/integration/ingestion",
+      "parentId": 417,
+      "name": "ingestion",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 428,
+      "path": "packages/integration/ingestion/src",
+      "parentId": 427,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 429,
+      "path": "packages/integration/ingestion/src/adapters",
+      "parentId": 428,
+      "name": "adapters",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 430,
+      "path": "packages/integration/manifests",
+      "parentId": 417,
+      "name": "manifests",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "manifest-registry",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 431,
+      "path": "packages/integration/manifests/src",
+      "parentId": 430,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "manifest-registry",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 432,
+      "path": "packages/integration/registry-core",
+      "parentId": 417,
+      "name": "registry-core",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 433,
+      "path": "packages/integration/registry-core/src",
+      "parentId": 432,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "integration-layer",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 434,
+      "path": "packages/platform",
+      "parentId": 388,
+      "name": "platform",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 9,
+      "descendantDirectoryCount": 33
+    },
+    {
+      "id": 435,
+      "path": "packages/platform/auth",
+      "parentId": 434,
+      "name": "auth",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 11
+    },
+    {
+      "id": 436,
+      "path": "packages/platform/auth/src",
+      "parentId": 435,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 10
+    },
+    {
+      "id": 437,
+      "path": "packages/platform/auth/src/v1",
+      "parentId": 436,
+      "name": "v1",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 9,
+      "descendantDirectoryCount": 9
+    },
+    {
+      "id": 438,
+      "path": "packages/platform/auth/src/v1/guards",
+      "parentId": 437,
+      "name": "guards",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 439,
+      "path": "packages/platform/auth/src/v1/hooks",
+      "parentId": 437,
+      "name": "hooks",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root",
+        "ui-hooks"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 440,
+      "path": "packages/platform/auth/src/v1/mappers",
+      "parentId": 437,
+      "name": "mappers",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 441,
+      "path": "packages/platform/auth/src/v1/mock",
+      "parentId": 437,
+      "name": "mock",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root",
+        "test-double"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 442,
+      "path": "packages/platform/auth/src/v1/provider",
+      "parentId": 437,
+      "name": "provider",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 443,
+      "path": "packages/platform/auth/src/v1/server",
+      "parentId": 437,
+      "name": "server",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 444,
+      "path": "packages/platform/auth/src/v1/services",
+      "parentId": 437,
+      "name": "services",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 445,
+      "path": "packages/platform/auth/src/v1/storage",
+      "parentId": 437,
+      "name": "storage",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 446,
+      "path": "packages/platform/auth/src/v1/strategies",
+      "parentId": 437,
+      "name": "strategies",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 447,
+      "path": "packages/platform/config",
+      "parentId": 434,
+      "name": "config",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "configuration",
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 448,
+      "path": "packages/platform/config/src",
+      "parentId": 447,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "configuration",
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 449,
+      "path": "packages/platform/db",
+      "parentId": 434,
+      "name": "db",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 6
+    },
+    {
+      "id": 450,
+      "path": "packages/platform/db/src",
+      "parentId": 449,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 5
+    },
+    {
+      "id": 451,
+      "path": "packages/platform/db/src/repositories",
+      "parentId": 450,
+      "name": "repositories",
+      "depth": 5,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 4,
+      "descendantDirectoryCount": 4
+    },
+    {
+      "id": 452,
+      "path": "packages/platform/db/src/repositories/contracts",
+      "parentId": 451,
+      "name": "contracts",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 453,
+      "path": "packages/platform/db/src/repositories/core",
+      "parentId": 451,
+      "name": "core",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 454,
+      "path": "packages/platform/db/src/repositories/hub",
+      "parentId": 451,
+      "name": "hub",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 455,
+      "path": "packages/platform/db/src/repositories/seumei",
+      "parentId": 451,
+      "name": "seumei",
+      "depth": 6,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "repository-abstraction",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 456,
+      "path": "packages/platform/env",
+      "parentId": 434,
+      "name": "env",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 457,
+      "path": "packages/platform/env/src",
+      "parentId": 456,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 458,
+      "path": "packages/platform/i18n",
+      "parentId": 434,
+      "name": "i18n",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 459,
+      "path": "packages/platform/i18n/src",
+      "parentId": 458,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 460,
+      "path": "packages/platform/notifications",
+      "parentId": 434,
+      "name": "notifications",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 461,
+      "path": "packages/platform/notifications/src",
+      "parentId": 460,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 462,
+      "path": "packages/platform/pdf",
+      "parentId": 434,
+      "name": "pdf",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 463,
+      "path": "packages/platform/pdf/src",
+      "parentId": 462,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 464,
+      "path": "packages/platform/storage",
+      "parentId": 434,
+      "name": "storage",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 465,
+      "path": "packages/platform/storage/src",
+      "parentId": 464,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 466,
+      "path": "packages/platform/telemetry",
+      "parentId": 434,
+      "name": "telemetry",
+      "depth": 3,
+      "kind": "directory",
+      "tags": [
+        "package-boundary"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 467,
+      "path": "packages/platform/telemetry/src",
+      "parentId": 466,
+      "name": "src",
+      "depth": 4,
+      "kind": "directory",
+      "tags": [
+        "package-boundary",
+        "source-root"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 468,
+      "path": "prisma",
+      "parentId": 0,
+      "name": "prisma",
+      "depth": 1,
+      "kind": "database-schema",
+      "tags": [
+        "database-schema"
+      ],
+      "childDirectoryCount": 2,
+      "descendantDirectoryCount": 2
+    },
+    {
+      "id": 469,
+      "path": "prisma/migrations",
+      "parentId": 468,
+      "name": "migrations",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "database-schema"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 470,
+      "path": "prisma/schemas",
+      "parentId": 468,
+      "name": "schemas",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "database-schema",
+        "schema-definition"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 471,
+      "path": "scripts",
+      "parentId": 0,
+      "name": "scripts",
+      "depth": 1,
+      "kind": "automation",
+      "tags": [
+        "automation"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 472,
+      "path": "tests",
+      "parentId": 0,
+      "name": "tests",
+      "depth": 1,
+      "kind": "quality-assurance",
+      "tags": [
+        "quality-assurance"
+      ],
+      "childDirectoryCount": 1,
+      "descendantDirectoryCount": 1
+    },
+    {
+      "id": 473,
+      "path": "tests/smoke",
+      "parentId": 472,
+      "name": "smoke",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [
+        "contract-smoke-tests",
+        "quality-assurance"
+      ],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 474,
+      "path": "tooling",
+      "parentId": 0,
+      "name": "tooling",
+      "depth": 1,
+      "kind": "developer-tooling",
+      "tags": [
+        "developer-tooling"
+      ],
+      "childDirectoryCount": 5,
+      "descendantDirectoryCount": 5
+    },
+    {
+      "id": 475,
+      "path": "tooling/eslint-config",
+      "parentId": 474,
+      "name": "eslint-config",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 476,
+      "path": "tooling/scripts",
+      "parentId": 474,
+      "name": "scripts",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 477,
+      "path": "tooling/tailwind-preset",
+      "parentId": 474,
+      "name": "tailwind-preset",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 478,
+      "path": "tooling/tsconfig",
+      "parentId": 474,
+      "name": "tsconfig",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    },
+    {
+      "id": 479,
+      "path": "tooling/vitest-config",
+      "parentId": 474,
+      "name": "vitest-config",
+      "depth": 2,
+      "kind": "directory",
+      "tags": [],
+      "childDirectoryCount": 0,
+      "descendantDirectoryCount": 0
+    }
+  ]
+}

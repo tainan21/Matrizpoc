@@ -16,6 +16,7 @@ explorer, onboarding status and feature flags.
 6. `app/` — Next.js routes.
 7. `src/api/` — route handlers (`/api/registry`, `/api/events`, `/api/telemetry`, etc.).
 8. `docs/README.md` — visao consolidada do app (dominio, integracoes, regras).
+9. `docs/PRACTICIES.md` — arquitetura e evolução da bancada de utilidades locais.
 
 ## Packages relevant to this app
 - `@matriz/integration-registry-core`, `@matriz/integration-manifests`, `@matriz/integration-events`, `@matriz/integration-external-links`, `@matriz/integration-api-contracts`
@@ -26,3 +27,12 @@ explorer, onboarding status and feature flags.
 - You may import `@apps/<app>/public-contract` to read their manifests.
 - You MUST NOT import `apps/<app>/src/**` or `apps/<app>/app/**`.
 - UI must go through presenters in `src/ui/presenters/` (L6).
+
+## Praticies
+
+- A rota imersiva `/praticies` continua dentro do `AuthGate`, mas não usa o
+  `HubShell` para ocupar o viewport inteiro.
+- Toda automação nova precisa de escopo fixo, output explícito e ausência de
+  input de caminho arbitrário.
+- Mantenha utilidades em `src/domains/praticies` enquanto apenas o Hub as
+  consumir. Não extraia para package por antecipação.

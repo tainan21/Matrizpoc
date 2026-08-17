@@ -19,6 +19,8 @@
   "dependencies": {
     "@matriz/design-system": "workspace:*",
     "@matriz/flows-ecosystem": "workspace:^",
+    "@matriz/flows-praticies": "workspace:^",
+    "@matriz/platform-storage": "workspace:^",
     "@matriz/foundation-types": "workspace:*",
     "@matriz/integration-api-contracts": "workspace:*",
     "@matriz/integration-registry-core": "workspace:*",

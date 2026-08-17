@@ -33,7 +33,7 @@ $env:WORKBENCH_LOCAL_TOKEN = "choose-a-long-local-secret"
 pnpm --filter @matriz/app-matriz-workbench dev
 ```
 
-Open `http://127.0.0.1:3005` and unlock with the same token.
+Open `http://localhost:3005` and unlock with the same token. Use `localhost` consistently so the local Hub session can be shared safely between ports.
 
 For local development and automated tests, the short token `1234` is also
 accepted to make validation faster. This shortcut is disabled when
@@ -55,6 +55,7 @@ Markdown stores human knowledge, and monthly JSONL files store append-only
 activity. No database or internet connection is required.
 
 See `docs/AGENT-START-HERE.md`, `docs/FILE-PROTOCOL.md` and `docs/MCP.md`.
+O launcher compartilhado de utilitários está descrito em `docs/PRACTICIES.md`.
 Federated repositories, blueprints and Sites are described in
 `docs/FEDERATED-PORTFOLIO.md`, `docs/PROJECT-BLUEPRINTS.md` and
 `docs/SITES-INTEGRATION.md`.

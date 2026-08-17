@@ -18,7 +18,7 @@ export const hubAuthConfig: AuthProviderConfig = {
 }
 
 export const hubLoginSkin: LoginSkin = {
-  appId: "matriz-hub", product: "Matriz Hub", productLabel: "Ecossistema", mark: "M",
+  appId: "matriz-hub", product: "MyHub", productLabel: "Ecossistema", mark: "M",
   eyebrow: "Uma identidade, varias plataformas", headline: "Entre uma vez. Circule por toda a Matriz.",
   description: "Acesse produtos independentes com a mesma identidade local, sem apagar o contexto de cada operacao.",
   panelTitle: "Acesse o ecossistema.", footer: "SSO local · quatro metodos mockados · sem cadastro",
@@ -27,7 +27,7 @@ export const hubLoginSkin: LoginSkin = {
 }
 
 export const hubLoginCopy = {
-  headline: "Matriz Hub",
+  headline: "MyHub",
   tagline: "Ponto central do ecossistema. Acesso por link magico.",
   emailPlaceholder: "voce@matriz.com",
 } as const

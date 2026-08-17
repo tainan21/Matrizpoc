@@ -610,3 +610,178 @@ model DocAccessPolicy {
   @@index([tenantId, visibility])
   @@map("doc_access_policies")
 }
+
+// ---------------------------------------------------------------------------
+// Capability Platform V1 — Hub-owned persistent projections.
+// Theme tokens deliberately remain code-owned; records reference themeKey.
+// ---------------------------------------------------------------------------
+
+model CapabilityPracticyCategory {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  label     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items     CapabilityPracticyCatalogItem[]
+  @@map("capability_practicy_categories")
+}
+
+model CapabilityPracticyCatalogItem {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  categoryId  String?
+  name        String
+  summary     String
+  kind        String
+  iconKey     String
+  availability String
+  metadata    Json?
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  category    CapabilityPracticyCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  @@index([categoryId])
+  @@index([availability])
+  @@map("capability_practicy_catalog_items")
+}
+
+model CapabilityPracticyInstallation {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String
+  practicyKey String
+  favorite    Boolean  @default(false)
+  installedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([tenantId, userId, practicyKey])
+  @@index([tenantId, userId, installedAt])
+  @@map("capability_practicy_installations")
+}
+
+model CapabilityPracticyUsage {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String
+  practicyKey String
+  event       String
+  occurredAt  DateTime @default(now())
+  metadata    Json?
+  @@index([tenantId, userId, occurredAt])
+  @@index([practicyKey, occurredAt])
+  @@map("capability_practicy_usage")
+}
+
+model CapabilityRecentItem {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String
+  kind        String
+  resourceKey String
+  openedAt    DateTime @default(now())
+  metadata    Json?
+  @@unique([tenantId, userId, kind, resourceKey])
+  @@index([tenantId, userId, openedAt])
+  @@map("capability_recent_items")
+}
+
+model CapabilityDashboardLayout {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  layout    Json
+  revision  Int      @default(1)
+  updatedAt DateTime @updatedAt
+  @@unique([tenantId, userId])
+  @@map("capability_dashboard_layouts")
+}
+
+model CapabilityThemePreference {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  appId     String
+  themeKey  String?
+  themeVersion Int?
+  dismissedOrganizationThemeAt DateTime?
+  updatedAt DateTime @updatedAt
+  @@unique([tenantId, userId, appId])
+  @@index([tenantId, userId])
+  @@map("capability_theme_preferences")
+}
+
+model CapabilityTenantThemeRecommendation {
+  id        String   @id @default(cuid())
+  tenantId  String   @unique
+  themeKey  String
+  themeVersion Int
+  updatedByUserId String
+  updatedAt DateTime @updatedAt
+  @@map("capability_tenant_theme_recommendations")
+}
+
+model CapabilityAccessibilityPreference {
+  id              String   @id @default(cuid())
+  tenantId        String
+  userId          String
+  contrast        String   @default("default")
+  motion          String   @default("default")
+  fontScale       String   @default("default")
+  density         String   @default("default")
+  updatedAt       DateTime @updatedAt
+  @@unique([tenantId, userId])
+  @@map("capability_accessibility_preferences")
+}
+
+model CapabilityThemeEntitlement {
+  id          String   @id @default(cuid())
+  tenantId    String
+  ownerType   String
+  ownerId     String
+  themeKey    String
+  themeVersion Int
+  status      String   @default("active")
+  source      String
+  acquiredAt  DateTime @default(now())
+  @@unique([tenantId, ownerType, ownerId, themeKey])
+  @@index([tenantId, ownerType, ownerId])
+  @@map("capability_theme_entitlements")
+}
+
+model CapabilityMarketplaceDemoOrder {
+  id          String   @id @default(cuid())
+  tenantId    String
+  userId      String
+  ownerType   String
+  ownerId     String
+  status      String
+  currency    String
+  totalMinor  Int
+  createdAt   DateTime @default(now())
+  items       CapabilityMarketplaceDemoOrderItem[]
+  @@index([tenantId, userId, createdAt])
+  @@map("capability_marketplace_demo_orders")
+}
+
+model CapabilityMarketplaceDemoOrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  themeKey    String
+  themeVersion Int
+  priceMinor  Int
+  metadata    Json?
+  order       CapabilityMarketplaceDemoOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  @@index([orderId])
+  @@map("capability_marketplace_demo_order_items")
+}
+
+model CapabilityEvent {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  name       String
+  metadata   Json?
+  occurredAt DateTime @default(now())
+  @@index([tenantId, occurredAt])
+  @@index([tenantId, name, occurredAt])
+  @@map("capability_events")
+}

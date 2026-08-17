@@ -11,6 +11,18 @@
 - **Review when:** a separate portable adoption is approved with public surface,
   license, security, accessibility, and rollback audited.
 
+## 2026-08-12 — Estado de Praticies compartilhado como flow
+
+- **Decisão:** criar `@matriz/flows-praticies` para regras versionadas de
+  catálogo, instalação, recentes e layout, com Hub e Workbench como consumidores.
+- **Motivo:** o segundo consumidor tornou a extração legítima; compartilhar o
+  domínio transversal reduz duplicação sem compartilhar componentes ou semântica
+  forte de um app.
+- **Impacto:** cada app mantém presenter, links, UI e namespace de browser. O
+  estado não entra em `.matriz/**` e nenhuma automação é executada pelo package.
+- **Revisar quando:** catálogo remoto, sincronização multiusuário, permissões ou
+  execução de plugins reais entrarem no escopo.
+
 ## 2026-08-04 — Broker mockado e fluxo visual de login compartilhado
 
 - **Decisão:** centralizar desafios e sessão mockados no Matriz Hub para Hub,
@@ -40,3 +52,9 @@ próximos do app responsável.
   banco. Tooling file-backed sem banco não recebe schema Prisma vazio.
 - **Revisar quando:** multiusuário, sincronização cloud ou persistência remota
   forem requisitos reais.
+# 2026-08-13 — Capability Platform CSS-first
+
+- Decisão: temas permanecem versionados em código; Hub guarda preferências e direitos, nunca CSS arbitrário.
+- Motivo: segurança, fallback previsível e adoção simples entre 2 ou 100 apps.
+- Impacto: `design/system`, `flows/themes`, Capability API e schema Hub formam a superfície pública.
+- Revisar quando: publicação remota de temas ou a biblioteca de 74 sistemas entrar no produto.
