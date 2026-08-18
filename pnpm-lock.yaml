@@ -336,6 +336,9 @@ importers:
 
   apps/matrizlib:
     dependencies:
+      '@matriz/design-ui':
+        specifier: workspace:*
+        version: link:../../packages/design/ui
       '@matriz/flows-onboarding':
         specifier: workspace:*
         version: link:../../packages/flows/onboarding

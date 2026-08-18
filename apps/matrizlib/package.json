@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@matriz/design-ui": "workspace:*",
     "@matriz/flows-onboarding": "workspace:*",
     "@matriz/foundation-types": "workspace:*",
     "@matriz/integration-api-contracts": "workspace:*",
