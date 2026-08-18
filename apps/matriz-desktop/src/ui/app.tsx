@@ -1,0 +1,181 @@
+import { Badge, Button, Input } from "@matriz/design-ui/primitives"
+import { useEffect, useMemo, useState } from "react"
+
+import { GATES, MATRIZ_DESKTOP_APPS, QUICK_TARGETS } from "../application/catalog"
+import type { DesktopGateway } from "../application/desktop-gateway"
+import type {
+  AppRuntime,
+  DesktopSettings,
+  DoctorCheck,
+  GateId,
+  WorkspacePulse,
+} from "../domain/types"
+import { Icons } from "./icons"
+import { filterPorts, presentPorts } from "./presenters"
+import { useDesktop } from "./use-desktop"
+
+type View = "ports" | "apps" | "actions" | "doctor" | "settings"
+type SoundId =
+  | "system.start"
+  | "system.end"
+  | "interaction"
+  | "navigation"
+  | "success"
+  | "error"
+
+export interface Feedback {
+  play(id: SoundId): unknown
+  configure?(settings: DesktopSettings): void
+  initialize?(): void
+}
+
+const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = [
+  { id: "ports", label: "Portas", icon: "ports" },
+  { id: "apps", label: "Apps", icon: "apps" },
+  { id: "actions", label: "Ações", icon: "actions" },
+  { id: "doctor", label: "Doctor", icon: "doctor" },
+  { id: "settings", label: "Ajustes", icon: "settings" },
+]
+
+export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; feedback: Feedback }) {
+  const desktop = useDesktop(gateway)
+  const [view, setView] = useState<View>("ports")
+  const [query, setQuery] = useState("")
+  const [confirmAll, setConfirmAll] = useState(false)
+  const [apps, setApps] = useState<readonly AppRuntime[]>([])
+  const [checks, setChecks] = useState<readonly DoctorCheck[]>([])
+  const [pulse, setPulse] = useState<WorkspacePulse>()
+  const [activeGate, setActiveGate] = useState<GateId>()
+  const [workspacePath, setWorkspacePath] = useState("")
+
+  const ports = useMemo(
+    () => filterPorts(presentPorts(desktop.snapshot.ports), query),
+    [desktop.snapshot.ports, query],
+  )
+
+  useEffect(() => {
+    if (!desktop.settings) return
+    feedback.configure?.(desktop.settings)
+    feedback.initialize?.()
+  }, [desktop.settings, feedback])
+
+  useEffect(() => {
+    if (view === "apps") void gateway.appStatuses().then(setApps).catch(() => setApps([]))
+    if (view === "doctor") void gateway.doctor().then(setChecks).catch(() => setChecks([]))
+    if (view === "actions") void gateway.workspacePulse().then(setPulse).catch(() => setPulse(undefined))
+  }, [gateway, view])
+
+  const chooseView = (next: View) => {
+    setView(next)
+    void feedback.play("navigation")
+  }
+
+  const kill = async (pid: number) => {
+    try {
+      const snapshot = await desktop.execute(
+        () => gateway.kill({ pid, snapshotId: desktop.snapshot.snapshotId }),
+        `PID ${pid} encerrado`,
+      )
+      if (snapshot) desktop.setSnapshot(snapshot)
+      void feedback.play("success")
+    } catch {
+      void feedback.play("error")
+    }
+  }
+
+  const killAll = async () => {
+    if (!confirmAll) {
+      setConfirmAll(true)
+      window.setTimeout(() => setConfirmAll(false), 3_000)
+      return
+    }
+    const pids = [...new Set(ports.map(({ pid }) => pid))]
+    if (!pids.length) return
+    try {
+      const snapshot = await desktop.execute(
+        () => gateway.killMany({ pids, snapshotId: desktop.snapshot.snapshotId }),
+        `${pids.length} processos encerrados`,
+      )
+      if (snapshot) desktop.setSnapshot(snapshot)
+      setConfirmAll(false)
+      void feedback.play("success")
+    } catch {
+      void feedback.play("error")
+    }
+  }
+
+  const saveSettings = async (patch: Partial<DesktopSettings>) => {
+    if (!desktop.settings) return
+    const next = { ...desktop.settings, ...patch }
+    desktop.setSettings(next)
+    try {
+      const saved = await gateway.writeSettings(next)
+      desktop.setSettings(saved)
+      feedback.configure?.(saved)
+      void feedback.play("interaction")
+    } catch {
+      desktop.setSettings(desktop.settings)
+      void feedback.play("error")
+    }
+  }
+
+  return (
+    <div className="control-shell" data-matrizlib="0.1.0" data-theme="dark">
+      <header className="titlebar" data-tauri-drag-region>
+        <span className="mark" aria-hidden="true">M</span>
+        <strong data-tauri-drag-region>MATRIZ / CONTROL</strong>
+        <span className="live-count" title="Listeners ativos">{desktop.snapshot.ports.length.toString().padStart(2, "0")}</span>
+        <button className="window-action" aria-label="Atualizar" onClick={() => void desktop.refresh()}><Icons.refresh /></button>
+        <button className="window-action" aria-label="Ocultar" onClick={() => void gateway.hide()}><Icons.close /></button>
+      </header>
+
+      <nav className="mode-rail" aria-label="Modos">
+        {VIEWS.map((item) => {
+          const ViewIcon = Icons[item.icon]
+          return <button key={item.id} aria-label={item.label} aria-current={view === item.id ? "page" : undefined} onClick={() => chooseView(item.id)}><ViewIcon /><span>{item.label}</span></button>
+        })}
+      </nav>
+
+      <main className="control-main">
+        {view === "ports" ? (
+          <section aria-labelledby="ports-title">
+            <div className="section-head"><div><span className="eyebrow">P0 / LIVE</span><h1 id="ports-title">PORTAS</h1></div><Badge tone={ports.length ? "success" : "neutral"}>{ports.length} ON</Badge></div>
+            <div className="port-tools"><Input aria-label="Buscar portas" placeholder="porta · pid · processo" value={query} onChange={(event) => setQuery(event.target.value)} /><Button variant={confirmAll ? "primary" : "secondary"} className="danger-button" disabled={!ports.length || desktop.busy} onClick={() => void killAll()}>{confirmAll ? "CONFIRMAR" : "KILL ALL"}</Button></div>
+            <div className="port-list" role="list">
+              {ports.map((process) => <div className="port-row" role="listitem" key={`${process.port}-${process.pid}`}><span className={`status-dot ${process.state}`} /><strong>{process.port}</strong><span className="process"><b>{process.processName}</b><small>PID {process.pid}</small></span><button className="kill-action" aria-label={`Encerrar PID ${process.pid}`} onClick={() => void kill(process.pid)} disabled={desktop.busy}><Icons.kill /></button></div>)}
+              {!ports.length ? <div className="zero-state"><span>00</span><b>LIVRE</b></div> : null}
+            </div>
+          </section>
+        ) : null}
+
+        {view === "apps" ? <AppsView apps={apps} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} /> : null}
+        {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} /> : null}
+        {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
+        {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { await gateway.selectWorkspace(workspacePath); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
+      </main>
+
+      <footer><span className={desktop.message.includes("não") ? "error" : ""} role="status" aria-live="polite">{desktop.message}</span><kbd>Ctrl Shift M</kbd></footer>
+    </div>
+  )
+}
+
+function AppsView({ apps, gateway, refresh, feedback }: { apps: readonly AppRuntime[]; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback }) {
+  const states = new Map(apps.map((app) => [app.id, app]))
+  const act = async (id: (typeof MATRIZ_DESKTOP_APPS)[number]["id"], ready: boolean) => {
+    try { if (ready) await gateway.stopApp(id); else await gateway.startApp(id); void feedback.play("success"); window.setTimeout(() => void refresh(), 650) } catch { void feedback.play("error") }
+  }
+  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 08</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; return <article className="app-tile" key={app.id}><span className={`status-dot ${ready ? "ready" : "stopped"}`} /><div><strong>{app.label}</strong><small>:{app.port}</small></div><button aria-label={`${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{ready ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
+}
+
+function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback }) {
+  const run = async (id: GateId) => { setActiveGate(id); try { const result = await gateway.runGate(id); void feedback.play(result.success ? "success" : "error") } catch { void feedback.play("error") } finally { setActiveGate(undefined) } }
+  return <section aria-labelledby="actions-title"><div className="section-head"><div><span className="eyebrow">WORKSPACE / {pulse?.clean ? "CLEAN" : `${pulse?.changedFiles ?? "—"} Δ`}</span><h1 id="actions-title">AÇÕES</h1></div><Badge tone={pulse?.clean ? "success" : "warning"}>{pulse?.branch ?? "—"}</Badge></div><h2>GATES</h2><div className="action-grid">{GATES.map((gate) => <Button variant="secondary" key={gate.id} disabled={Boolean(activeGate)} onClick={() => void run(gate.id)}>{activeGate === gate.id ? "•••" : gate.label}</Button>)}</div><h2>JUMP</h2><div className="jump-list">{QUICK_TARGETS.map((target) => <button key={target.id} onClick={() => void gateway.openTarget(target.id)}><span>{target.label}</span><Icons.external /></button>)}</div></section>
+}
+
+function DoctorView({ checks, refresh }: { checks: readonly DoctorCheck[]; refresh(): Promise<unknown> }) {
+  return <section aria-labelledby="doctor-title"><div className="section-head"><div><span className="eyebrow">LOCAL / DIAGNÓSTICO</span><h1 id="doctor-title">DOCTOR</h1></div><button className="round-action" aria-label="Executar diagnóstico" onClick={() => void refresh()}><Icons.refresh /></button></div><div className="check-list">{checks.map((check) => <div key={check.id}><span className={`status-dot ${check.ok ? "ready" : "degraded"}`} /><strong>{check.id.toUpperCase()}</strong><small>{check.value}</small></div>)}</div></section>
+}
+
+function SettingsView({ settings, workspacePath, setWorkspacePath, save, selectWorkspace, quit }: { settings: DesktopSettings; workspacePath: string; setWorkspacePath(value: string): void; save(patch: Partial<DesktopSettings>): Promise<void>; selectWorkspace(): Promise<void>; quit(): void }) {
+  return <section aria-labelledby="settings-title"><div className="section-head"><div><span className="eyebrow">LOCAL / PREFERÊNCIAS</span><h1 id="settings-title">AJUSTES</h1></div></div><div className="settings-list"><label><span>Sons</span><input type="checkbox" checked={settings.soundsEnabled} onChange={(event) => void save({ soundsEnabled: event.target.checked })} /></label><label><span>Volume</span><input aria-label="Volume" type="range" min="0" max="1" step="0.05" value={settings.volume} onChange={(event) => void save({ volume: Number(event.target.value) })} /></label><label><span>Tray ao fechar</span><input type="checkbox" checked={settings.closeToTray} onChange={(event) => void save({ closeToTray: event.target.checked })} /></label><label><span>Iniciar com Windows</span><input type="checkbox" checked={settings.startWithWindows} onChange={(event) => void save({ startWithWindows: event.target.checked })} /></label></div><div className="workspace-field"><Input aria-label="Workspace" placeholder="C:\Apps\matriz-infra-hub" value={workspacePath} onChange={(event) => setWorkspacePath(event.target.value)} /><Button variant="secondary" onClick={() => void selectWorkspace()}>USAR</Button></div><Button className="quit-button" variant="ghost" onClick={quit}>SAIR DO CONTROL</Button></section>
+}

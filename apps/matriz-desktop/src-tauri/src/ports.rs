@@ -91,6 +91,11 @@ fn parse_rows<T: Copy>(
             port,
             process_name,
             executable_path,
+            state: if (3000..=3007).contains(&port) {
+                "ready"
+            } else {
+                "external"
+            },
         });
     }
     Ok(result)

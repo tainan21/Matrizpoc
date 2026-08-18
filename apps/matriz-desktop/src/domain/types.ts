@@ -41,3 +41,29 @@ export interface DesktopSettings {
   readonly volume: number
   readonly startWithWindows: boolean
 }
+
+export interface AppRuntime {
+  readonly id: DesktopAppId
+  readonly port: number
+  readonly status: "stopped" | "starting" | "ready" | "degraded"
+  readonly pid?: number
+}
+
+export interface GateResult {
+  readonly gateId: GateId
+  readonly success: boolean
+  readonly durationMs: number
+  readonly output: readonly string[]
+}
+
+export interface DoctorCheck {
+  readonly id: "workspace" | "node" | "pnpm" | "git"
+  readonly ok: boolean
+  readonly value: string
+}
+
+export interface WorkspacePulse {
+  readonly branch: string
+  readonly changedFiles: number
+  readonly clean: boolean
+}

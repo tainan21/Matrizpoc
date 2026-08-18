@@ -6,6 +6,7 @@ fn observed(pid: u32) -> ObservedProcess {
         port: 3000,
         process_name: "node.exe".into(),
         executable_path: None,
+        state: "external",
     }
 }
 

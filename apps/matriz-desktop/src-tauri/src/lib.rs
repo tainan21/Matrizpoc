@@ -27,6 +27,7 @@ pub struct ObservedProcess {
     pub port: u16,
     pub process_name: String,
     pub executable_path: Option<String>,
+    pub state: &'static str,
 }
 
 #[cfg(test)]
@@ -37,6 +38,7 @@ impl ObservedProcess {
             port,
             process_name: "test.exe".into(),
             executable_path: None,
+            state: "external",
         }
     }
 }
