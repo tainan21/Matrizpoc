@@ -24,60 +24,77 @@ type AuditGroup =
 interface AuditFacts {
   readonly potentialConsumers: string
   readonly domainBoundary: string
+  readonly accessibilityExpectations: readonly string[]
 }
 
 const auditFacts: Record<AuditGroup, AuditFacts> = {
   structure: {
     potentialConsumers: "Apps Contracts, Seumei, Spot and WillDash, subject to audited usage.",
     domainBoundary: "Structure, tokens and children only; no route, data or product domain.",
+    accessibilityExpectations: ["Preserve semantic landmarks and reading order supplied by consumers."],
   },
   typography: {
     potentialConsumers: "Apps with audited typography and visual-action usage.",
     domainBoundary: "Typography or visual action only; no business rule.",
+    accessibilityExpectations: ["Preserve semantic heading order and visible keyboard focus for actions."],
   },
   field: {
     potentialConsumers: "Audited forms across Contracts, Seumei, Sites, Spot and WillDash.",
     domainBoundary: "Field semantics and local interaction; no submit, auth or persistence.",
+    accessibilityExpectations: ["Associate every control with a persistent label and its validation message."],
   },
   feedback: {
     potentialConsumers: "Audited state presentation across Contracts, Seumei, Spot and WillDash.",
     domainBoundary: "Presents state received through props; it does not decide product rules.",
+    accessibilityExpectations: ["Expose status with text and appropriate live-region semantics when content changes."],
   },
   theme: {
     potentialConsumers: "Login, shell and theme surfaces in the audited applications.",
     domainBoundary: "Composition and theme through props; no session, registry or authorization.",
+    accessibilityExpectations: ["Keep theme controls keyboard operable and announce their current state."],
   },
   navigation: {
     potentialConsumers: "Authenticated shells and routes; a second equivalent use remains to be proven.",
     domainBoundary: "Visual navigation from supplied items and links; no router or permissions.",
+    accessibilityExpectations: ["Expose current location and keep every destination keyboard reachable."],
   },
   validation: {
     potentialConsumers: "Login flows and local actions; an independent real case remains to be proven.",
     domainBoundary: "Visual field and validation behavior; no product schema, submit or API.",
+    accessibilityExpectations: ["Connect errors to their controls and move focus only when explicitly requested."],
   },
   state: {
     potentialConsumers: "Empty and feedback states in gigs, establishments and telemetry routes.",
     domainBoundary: "UI feedback and state only; no retries, fetch or product domain.",
+    accessibilityExpectations: ["Announce asynchronous state changes without stealing focus."],
   },
   overlay: {
     potentialConsumers: "Actions for gigs, establishments or goals; independent cases remain unproven.",
     domainBoundary: "Focus, opening and local composition; no product action.",
+    accessibilityExpectations: ["Manage initial focus, focus containment, Escape, and focus restoration."],
   },
   data: {
     potentialConsumers: "Lists, metrics, goals and activity views; no common component is proven.",
     domainBoundary: "Renders prepared view models; no entities, repositories, search or telemetry.",
+    accessibilityExpectations: ["Preserve row, header, sort, and selection semantics for assistive technology."],
   },
   shell: {
     potentialConsumers: "Application layouts and shells; an equal pattern in two consumers is unproven.",
     domainBoundary: "Layout and navigation through props; no application knowledge.",
+    accessibilityExpectations: ["Keep landmarks ordered and navigation available at every supported viewport."],
   },
   accessibility: {
     potentialConsumers: "Any accessible route; no canonical same-named export or use is proven.",
     domainBoundary: "Accessibility or visual utility only; no product state.",
+    accessibilityExpectations: ["Follow the named WAI-ARIA pattern and remain testable with keyboard and screen readers."],
   },
   identity: {
     potentialConsumers: "Login, shell or theme surfaces; no canonical same-named export or use is proven.",
     domainBoundary: "Identity, tenant or theme visuals through props; no session, tenant data or registry.",
+    accessibilityExpectations: [
+      "Expose the current tenant and every option with an accessible name.",
+      "Support keyboard navigation and preserve visible focus throughout selection.",
+    ],
   },
 }
 
@@ -256,6 +273,7 @@ function createCatalogEntry([
     evidence: evidenceFor(id, Boolean(packageMetadata)),
     potentialConsumers: facts.potentialConsumers,
     domainBoundary: facts.domainBoundary,
+    accessibilityExpectations: facts.accessibilityExpectations,
   } as const
 
   if (packageMetadata) {

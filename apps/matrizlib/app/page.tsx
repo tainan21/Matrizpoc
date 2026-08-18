@@ -7,7 +7,7 @@ import { TokenSpecimen } from "../src/ui/token-specimen"
 
 const availableCount = componentCatalog.filter((entry) => entry.stage === "available").length
 const qualifiedCount = componentCatalog.filter(
-  (entry) => entry.qualification === "qualified",
+  (entry) => entry.stage === "candidate" && entry.qualification === "qualified",
 ).length
 
 const authorityRows = [

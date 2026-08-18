@@ -98,6 +98,12 @@ export function ComponentDetail({
       <div className="component-reference">
         <ReferenceList title="Tokens" items={component.tokens} />
         <ReferenceList title="Acessibilidade" items={component.accessibility} />
+        {component.stage === "candidate" ? (
+          <ReferenceList
+            title="Expectativas de acessibilidade"
+            items={component.accessibilityExpectations}
+          />
+        ) : null}
         <ReferenceList title="Relacionados" items={component.related} />
       </div>
 

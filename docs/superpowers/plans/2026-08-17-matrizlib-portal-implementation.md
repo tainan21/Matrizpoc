@@ -416,4 +416,3 @@ Run: `git fetch origin`, check ancestry, merge `origin/main` only if it is not a
 - [ ] **Step 8: Push and confirm synchronization**
 
 Run: `git push -u origin codex/matriz-hub-alpha` and verify `git status --short --branch` reports a clean synchronized worktree.
-

@@ -29,6 +29,8 @@ describe("ComponentDetail", () => {
     expect(screen.getByText("Anatomia pretendida")).toBeVisible()
     expect(screen.getByText("Estados previstos")).toBeVisible()
     expect(screen.getByText(/não possui export público/i)).toBeVisible()
+    expect(screen.getByRole("heading", { name: "Expectativas de acessibilidade" })).toBeVisible()
+    expect(screen.getByText(/keyboard navigation/i)).toBeVisible()
     expect(screen.queryByText(/import \{/)).not.toBeInTheDocument()
     expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })

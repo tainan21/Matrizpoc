@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest"
 
 const apps = [
   { id: "matriz-hub", usesDesignUi: true },
+  { id: "matrizlib", usesDesignUi: true },
   { id: "matriz-workbench", usesDesignUi: false },
   { id: "seumei", usesDesignUi: true },
   { id: "spot", usesDesignUi: true },

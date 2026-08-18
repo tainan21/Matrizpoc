@@ -8,15 +8,12 @@ import { ThemeLab } from "./theme-lab"
 afterEach(cleanup)
 
 describe("ThemeLab", () => {
-  it("applies a canonical theme to the isolated specimen", async () => {
-    const user = userEvent.setup()
-
+  it("offers only themes registered as compatible with MatrizLib", () => {
     render(<ThemeLab />)
-    await user.selectOptions(screen.getByLabelText("Tema"), "aurora")
 
-    expect(screen.getByTestId("theme-specimen")).toHaveStyle({
-      "--matriz-theme-key": "aurora",
-    })
+    expect(screen.getByRole("option", { name: "Matriz Base" })).toBeInTheDocument()
+    expect(screen.queryByRole("option", { name: "Aurora" })).not.toBeInTheDocument()
+    expect(screen.getByText(/superfície do próprio MatrizLib/i)).toBeVisible()
   })
 
   it("keeps mode, density, and viewport changes inside the specimen", async () => {

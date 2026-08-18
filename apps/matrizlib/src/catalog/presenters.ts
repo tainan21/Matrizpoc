@@ -51,6 +51,7 @@ export interface ComponentCatalogDetailViewModel extends ComponentCatalogCardVie
   readonly tags: readonly string[]
   readonly tokens: readonly string[]
   readonly accessibility: readonly string[]
+  readonly accessibilityExpectations: readonly string[]
   readonly related: readonly string[]
   readonly evidence: string
   readonly potentialConsumers: string
@@ -101,6 +102,7 @@ export function toComponentCatalogDetailViewModel(
     tags: metadata ? [...metadata.tags] : [],
     tokens: metadata ? [...metadata.tokens] : [],
     accessibility: metadata ? [...metadata.accessibility] : [],
+    accessibilityExpectations: [...entry.accessibilityExpectations],
     related: metadata ? [...metadata.related] : [],
     evidence: entry.evidence,
     potentialConsumers: entry.potentialConsumers,

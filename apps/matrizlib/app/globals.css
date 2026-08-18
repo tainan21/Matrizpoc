@@ -1,3 +1,6 @@
+@import "@matriz/design-system/css";
+@import "@matriz/design-ui/styles.css";
+
 :root {
   scroll-behavior: smooth;
 }
@@ -1904,8 +1907,29 @@ select:focus-visible {
     width: min(100% - 1.5rem, 90rem);
   }
 
+  .site-header__inner {
+    min-height: 6.75rem;
+    flex-wrap: wrap;
+    padding-block: var(--matriz-space-2);
+  }
+
+  .site-header__actions {
+    flex-wrap: wrap;
+  }
+
   .site-header__nav {
-    display: none;
+    width: 100%;
+    order: 2;
+  }
+
+  .site-header__nav > div {
+    justify-content: space-between;
+  }
+
+  .site-header__nav a {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
   }
 
   .site-header__theme span:last-child {

@@ -51,6 +51,10 @@ describe("catalog presenters", () => {
       tags: [],
       tokens: [],
       accessibility: [],
+      accessibilityExpectations: [
+        "Expose the current tenant and every option with an accessible name.",
+        "Support keyboard navigation and preserve visible focus throughout selection.",
+      ],
       related: [],
     })
     expect("packageMetadata" in viewModel).toBe(false)

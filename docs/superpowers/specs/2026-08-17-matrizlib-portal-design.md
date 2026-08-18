@@ -191,4 +191,3 @@ honest candidate previews, tests, ecosystem memory, documentation, and Git
 integration. It does not bulk-port every external implementation, replace the
 current theme registry, add publishing infrastructure, or promise all 99 entries
 as stable exports.
-

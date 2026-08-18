@@ -4,7 +4,7 @@ import type { CSSProperties, ChangeEvent } from "react"
 import { useState } from "react"
 import {
   themeDefinitionToCssVars,
-  themeRegistry,
+  listCompatibleThemes,
   type MatrizColorMode,
   type ThemeKey,
 } from "@matriz/design-system"
@@ -16,7 +16,7 @@ import {
   type ThemeLabViewport,
 } from "./theme-specimen"
 
-const LAB_APP_ID = "matriz-workbench" as const
+const LAB_APP_ID = "matrizlib" as const
 
 const densityOptions: readonly { readonly label: string; readonly value: ThemeLabDensity }[] = [
   { label: "Confortável", value: "comfortable" },
@@ -29,9 +29,7 @@ const viewportOptions: readonly { readonly label: string; readonly value: ThemeL
   { label: "Mobile · 390", value: "mobile" },
 ]
 
-const compatibleThemes = themeRegistry.filter((theme) =>
-  theme.compatibleApps.includes(LAB_APP_ID),
-)
+const compatibleThemes = listCompatibleThemes(LAB_APP_ID)
 
 type CssVariableStyle = CSSProperties & Record<`--${string}`, string>
 
@@ -126,8 +124,8 @@ export function ThemeLab() {
       />
 
       <p className="theme-lab__boundary">
-        O laboratório usa uma superfície compatível do Matriz Workbench apenas para comparar
-        definições registradas. A seleção vive neste componente e não grava entitlement,
+        O laboratório usa a superfície do próprio MatrizLib e oferece somente definições que o
+        registry declara compatíveis. A seleção vive neste componente e não grava entitlement,
         preferência do Hub ou CSS arbitrário.
       </p>
     </section>

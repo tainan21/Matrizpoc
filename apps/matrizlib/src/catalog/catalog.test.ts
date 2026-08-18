@@ -154,6 +154,7 @@ describe("componentCatalog integrity", () => {
 
     expect(candidates).toHaveLength(85)
     expect(candidates.every((entry) => !entry.importPath && !entry.packageMetadata)).toBe(true)
+    expect(candidates.every((entry) => entry.accessibilityExpectations.length > 0)).toBe(true)
   })
 
   it("keeps slugs unique and every entry traceable to audit evidence", () => {

@@ -1,8 +1,6 @@
 import type { Metadata } from "next"
 
 import { ThemeController } from "@matriz/design-ui"
-import "@matriz/design-ui/styles.css"
-
 import { MatrizLibBootstrapProvider } from "../src/bootstrap/bootstrap-provider"
 import { SiteFooter } from "../src/ui/site-footer"
 import { SiteHeader } from "../src/ui/site-header"
@@ -19,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html data-matrizlib lang="pt-BR" suppressHydrationWarning>
+    <html data-matrizlib="0.1.0" lang="pt-BR" suppressHydrationWarning>
       <body id="top">
         <MatrizLibBootstrapProvider>
           <ThemeController appId="matrizlib" />

@@ -135,4 +135,3 @@ surface, accessibility review, and rollback path.
    already exist.
 7. New themes enter the canonical registry later without restructuring the
    portal or duplicating commercial/persistence concerns.
-

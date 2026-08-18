@@ -31,6 +31,7 @@ interface ComponentCatalogEntryBase {
   readonly evidence: string
   readonly potentialConsumers: string
   readonly domainBoundary: string
+  readonly accessibilityExpectations: readonly string[]
 }
 
 export interface AvailableComponentCatalogEntry extends ComponentCatalogEntryBase {
