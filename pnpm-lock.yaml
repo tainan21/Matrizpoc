@@ -155,6 +155,18 @@ importers:
         specifier: 5.6.3
         version: 5.6.3
 
+  apps/matriz-desktop:
+    dependencies:
+      '@matriz/integration-api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/api-contracts
+      '@matriz/integration-registry-core':
+        specifier: workspace:*
+        version: link:../../packages/integration/registry-core
+      '@matriz/platform-config':
+        specifier: workspace:*
+        version: link:../../packages/platform/config
+
   apps/matriz-hub:
     dependencies:
       '@matriz/access-tenants':

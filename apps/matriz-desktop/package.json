@@ -1,0 +1,11 @@
+{
+  "name": "@matriz/app-matriz-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-registry-core": "workspace:*",
+    "@matriz/platform-config": "workspace:*"
+  }
+}

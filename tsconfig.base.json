@@ -67,6 +67,7 @@
       "@matriz/foundation-constants": ["./packages/foundation/constants/src/index.ts"],
       "@matriz/foundation-schemas": ["./packages/foundation/schemas/src/index.ts"],
       "@apps/matriz-hub/public-contract": ["./apps/matriz-hub/public-contract.ts"],
+      "@apps/matriz-desktop/public-contract": ["./apps/matriz-desktop/public-contract.ts"],
       "@apps/matrizlib/public-contract": ["./apps/matrizlib/public-contract.ts"],
       "@apps/matriz-workbench/public-contract": ["./apps/matriz-workbench/public-contract.ts"],
       "@apps/sites/public-contract": ["./apps/sites/public-contract.ts"],

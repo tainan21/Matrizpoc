@@ -21,6 +21,7 @@ import { join, relative, resolve } from "node:path"
 
 const APPS = [
   "matriz-hub",
+  "matriz-desktop",
   "matriz-workbench",
   "sites",
   "spot",
