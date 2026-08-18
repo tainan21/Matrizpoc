@@ -14,4 +14,16 @@ describe("CSS-first theme registry", () => {
     expect(listCompatibleThemes("spot").map((theme) => theme.key)).not.toContain("midnight-graphite")
     expect(listCompatibleThemes("matriz-hub").map((theme) => theme.key)).toContain("midnight-graphite")
   })
+
+  it("provides the native Control surface with Matriz themes", () => {
+    expect(listCompatibleThemes("matriz-desktop").map((theme) => theme.key)).toEqual([
+      "matriz-base",
+      "midnight-graphite",
+    ])
+    expect(
+      themeDefinitionToCssVars("matriz-base", "matriz-desktop", "dark")[
+        "--matriz-theme-accent"
+      ],
+    ).toBe("#9a66ff")
+  })
 })

@@ -20,6 +20,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#0f172a", brandAccentFg: "#f8fafc",
     surface: "#ffffff", surfaceFg: "#0f172a", muted: "#f1f5f9", mutedFg: "#475569", border: "#e2e8f0",
   },
+  "matriz-desktop": {
+    appId: "matriz-desktop", label: "Matriz Control", brandAccent: "#7c3aed", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#17131d", muted: "#f5f3f8", mutedFg: "#61586d", border: "#e1d9e8",
+  },
   matrizlib: {
     appId: "matrizlib", label: "MatrizLib", brandAccent: "#7c3aed", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17171c", muted: "#f5f3ff", mutedFg: "#5b5870", border: "#ddd6fe",
@@ -54,6 +58,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   "matriz-hub": {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
     surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246",
+  },
+  "matriz-desktop": {
+    appId: "matriz-desktop", label: "Matriz Control", brandAccent: "#9a66ff", brandAccentFg: "#0b0712",
+    surface: "#0f0c16", surfaceFg: "#f5f1fb", muted: "#08070d", mutedFg: "#8e879d", border: "#332741",
   },
   matrizlib: {
     appId: "matrizlib", label: "MatrizLib", brandAccent: "#a78bfa", brandAccentFg: "#160b2e",
@@ -158,7 +166,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-hub", "matrizlib", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash",
+  "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash",
 ]
 
 export const themeRegistry = [
@@ -168,7 +176,7 @@ export const themeRegistry = [
   },
   {
     key: "midnight-graphite", version: 1, label: "Midnight Graphite",
-    description: "Grafite profundo, violeta frio e contraste editorial.", compatibleApps: ["matriz-hub", "matriz-workbench", "sites"],
+    description: "Grafite profundo, violeta frio e contraste editorial.", compatibleApps: ["matriz-hub", "matriz-desktop", "matriz-workbench", "sites"],
     overrides: { brandAccent: "#8b5cf6", brandAccentFg: "#070b13", surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246" },
   },
   {
@@ -196,7 +204,7 @@ export function listCompatibleThemes(appId: MatrizAppId): readonly ThemeDefiniti
 export function themeDefinitionToCssVars(
   themeKey: string,
   appId: MatrizAppId,
-  mode: MatrizColorMode = appId === "matriz-hub" || appId === "matriz-workbench" ? "dark" : "light",
+  mode: MatrizColorMode = appId === "matriz-hub" || appId === "matriz-desktop" || appId === "matriz-workbench" ? "dark" : "light",
 ): Record<string, string> {
   const definition = getThemeDefinition(themeKey)
   const compatible = definition?.compatibleApps.includes(appId) ?? false
