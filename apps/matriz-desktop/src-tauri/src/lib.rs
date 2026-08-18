@@ -6,6 +6,7 @@ mod settings;
 mod shell;
 mod state;
 mod tasks;
+pub mod terminal;
 mod workspace;
 
 use std::fmt;
@@ -14,6 +15,7 @@ use serde::{Deserialize, Serialize};
 use state::NativeState;
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
+use terminal::{TerminalEvent, TerminalManager, TerminalSession};
 use workspace::OperationsState;
 
 pub use catalog::{app_definition, gate_definition, quick_target};
@@ -264,7 +266,66 @@ fn hide_window(app: tauri::AppHandle) {
 
 #[tauri::command]
 fn quit_app(app: tauri::AppHandle) {
+    app.state::<TerminalManager>().shutdown();
     app.exit(0);
+}
+
+#[tauri::command]
+fn create_terminal(
+    terminals: tauri::State<'_, TerminalManager>,
+    operations: tauri::State<'_, OperationsState>,
+) -> Result<TerminalSession, String> {
+    terminals.create_shell(&operations.root()?)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn write_terminal(
+    terminals: tauri::State<'_, TerminalManager>,
+    session_id: String,
+    data: String,
+) -> Result<(), String> {
+    terminals.write(&session_id, &data)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn resize_terminal(
+    terminals: tauri::State<'_, TerminalManager>,
+    session_id: String,
+    columns: u16,
+    rows: u16,
+) -> Result<(), String> {
+    terminals.resize(&session_id, columns, rows)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn interrupt_terminal(
+    terminals: tauri::State<'_, TerminalManager>,
+    session_id: String,
+) -> Result<(), String> {
+    terminals.interrupt(&session_id)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn close_terminal(
+    terminals: tauri::State<'_, TerminalManager>,
+    session_id: String,
+) -> Result<(), String> {
+    terminals.close(&session_id)
+}
+
+#[tauri::command]
+fn list_terminals(
+    terminals: tauri::State<'_, TerminalManager>,
+) -> Result<Vec<TerminalSession>, String> {
+    terminals.list()
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn subscribe_terminal(
+    terminals: tauri::State<'_, TerminalManager>,
+    on_event: tauri::ipc::Channel<TerminalEvent>,
+) -> Result<(), String> {
+    terminals.subscribe(on_event)
 }
 
 pub fn run() {
@@ -276,6 +337,7 @@ pub fn run() {
         ))
         .manage(NativeState::new())
         .manage(OperationsState::discover())
+        .manage(TerminalManager::default())
         .setup(|app| {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
             app.manage(SettingsStore::at(settings_path));
@@ -311,7 +373,14 @@ pub fn run() {
             read_settings,
             write_settings,
             hide_window,
-            quit_app
+            quit_app,
+            create_terminal,
+            write_terminal,
+            resize_terminal,
+            interrupt_terminal,
+            close_terminal,
+            list_terminals,
+            subscribe_terminal
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");
