@@ -2,6 +2,8 @@ mod catalog;
 mod doctor;
 mod ports;
 mod processes;
+mod settings;
+mod shell;
 mod state;
 mod tasks;
 mod workspace;
@@ -10,9 +12,12 @@ use std::fmt;
 
 use serde::{Deserialize, Serialize};
 use state::NativeState;
+use tauri::Manager;
+use tauri_plugin_autostart::ManagerExt;
 use workspace::OperationsState;
 
 pub use catalog::{app_definition, gate_definition, quick_target};
+pub use settings::{DesktopSettings, SettingsStore};
 pub use workspace::validate_workspace;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -205,10 +210,72 @@ fn get_workspace_pulse(
     doctor::workspace_pulse(&state)
 }
 
+#[tauri::command]
+fn read_settings(store: tauri::State<'_, SettingsStore>) -> Result<DesktopSettings, String> {
+    store.read()
+}
+
+#[tauri::command]
+fn write_settings(
+    app: tauri::AppHandle,
+    store: tauri::State<'_, SettingsStore>,
+    settings: DesktopSettings,
+) -> Result<DesktopSettings, String> {
+    let settings = settings.normalized();
+    store.write(&settings)?;
+    if settings.start_with_windows {
+        app.autolaunch()
+            .enable()
+            .map_err(|error| error.to_string())?;
+    } else {
+        app.autolaunch()
+            .disable()
+            .map_err(|error| error.to_string())?;
+    }
+    Ok(settings)
+}
+
+#[tauri::command]
+fn hide_window(app: tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.hide();
+    }
+}
+
+#[tauri::command]
+fn quit_app(app: tauri::AppHandle) {
+    app.exit(0);
+}
+
 pub fn run() {
     tauri::Builder::default()
+        .plugin(shell::shortcut_plugin())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .manage(NativeState::new())
         .manage(OperationsState::discover())
+        .setup(|app| {
+            let settings_path = app.path().app_config_dir()?.join("settings.json");
+            app.manage(SettingsStore::at(settings_path));
+            shell::install_tray(app.handle())?;
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let close_to_tray = window
+                    .app_handle()
+                    .state::<SettingsStore>()
+                    .read()
+                    .map(|settings| settings.close_to_tray)
+                    .unwrap_or(true);
+                if close_to_tray {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             get_snapshot,
             terminate_process,
@@ -220,7 +287,11 @@ pub fn run() {
             run_gate,
             open_target,
             run_doctor,
-            get_workspace_pulse
+            get_workspace_pulse,
+            read_settings,
+            write_settings,
+            hide_window,
+            quit_app
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");
