@@ -12,6 +12,8 @@ export const manifest: AppManifestDTO = {
     { id: "desktop.ports.manage", name: "Gerenciar portas", description: "Inspeciona portas TCP e encerra processos observados com segurança." },
     { id: "desktop.apps.launch", name: "Operar apps", description: "Inicia e encerra apenas aplicações Matriz allowlisted." },
     { id: "desktop.health.read", name: "Ler saúde local", description: "Resume readiness, workspace e ambiente de desenvolvimento." },
+    { id: "desktop.terminal.manage", name: "Operar terminal", description: "Hospeda sessões PowerShell isoladas e operações Matriz observáveis." },
+    { id: "desktop.native.launch", name: "Operar apps nativos", description: "Gera, instala e inicia entregas desktop allowlisted." },
   ],
   eventsProduced: [],
   eventsConsumed: [],

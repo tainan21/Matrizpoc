@@ -83,6 +83,20 @@
 Decisões curtas que alteram os limites do monorepo. ADRs detalhados permanecem
 próximos do app responsável.
 
+## 2026-08-18 — Terminal ConPTY e Seumei nativo permanecem app-local
+
+- **Decisão:** o Matriz Control hospeda até seis sessões ConPTY e mantém toda
+  automação em catálogo tipado; `apps/seumei/desktop` entrega o mesmo domínio
+  Seumei em Tauri, com persistência local e instalador NSIS independente.
+- **Motivo:** terminal explícito precisa de semântica real de console, enquanto
+  ações automáticas não devem receber comandos da UI. O segundo shell Tauri
+  ainda não justifica extrair um framework desktop compartilhado.
+- **Impacto:** Control pode gerar, instalar e abrir Seumei; o binário Seumei não
+  depende de Hub, Node ou servidor local. CI publica os dois instaladores como
+  artefatos separados. Outputs continuam ignorados.
+- **Revisar quando:** existir terceiro app nativo ou um canal assinado de release
+  que permita ao Matriz Hub oferecer download e deep link confiáveis.
+
 ## 2026-07-28 — Matriz Workbench file-backed
 
 - **Decisão:** criar `apps/matriz-workbench` como ferramenta local-first, com

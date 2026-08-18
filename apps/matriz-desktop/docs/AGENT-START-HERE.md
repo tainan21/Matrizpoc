@@ -5,6 +5,9 @@ Matriz Control is a compact Windows utility. Start with
 gateway, and finally `src-tauri`. Every privileged command is allowlisted and
 validated in Rust. The webview never receives generic OS authority.
 
-Primary UI modes are Ports, Apps, Actions, Doctor and Settings. There are no
-web routes. Keep new capabilities behind `DesktopGateway`, add Rust
-authorization tests first, and never accept raw shell arguments from React.
+Primary UI modes are Ports, Apps, Terminal, Actions, Doctor and Settings. The
+terminal is the sole intentional arbitrary-input surface and is hosted by a
+bounded ConPTY session; automated actions still accept catalog IDs only.
+`Ctrl+K` opens the Command Deck. Seumei exposes explicit Web and Native modes.
+There are no web routes. Keep new capabilities behind `DesktopGateway`, add
+Rust authorization tests first, and never accept raw shell arguments from React.

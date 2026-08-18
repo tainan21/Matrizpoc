@@ -82,7 +82,13 @@ como dimensão de cada app: a estratégia padrão vive localmente em
 - **Não pode importar**: `src/**` ou `app/**` de outro app.
 - **Autoridade privilegiada**: exclusiva de `src-tauri`; o renderer consome
   apenas o gateway tipado.
+- **Terminal**: entrada arbitrária existe somente dentro da sessão ConPTY
+  explícita; cards, Command Deck e integrações continuam allowlisted.
 - **Auth**: não participa de onboarding nem autenticação web.
+
+O shell nativo de Seumei vive em `apps/seumei/desktop` porque é outra entrega
+do mesmo domínio, não um novo app. Pode consumir `apps/seumei/src/**` localmente,
+mas não torna esses internals públicos nem os move para packages.
 
 ## Packages (resumo)
 

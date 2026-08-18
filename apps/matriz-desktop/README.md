@@ -21,13 +21,21 @@ native consumer exists.
 - **P0:** listener/PID inventory with snapshot-authorized kill and kill-all;
   allowlisted app launcher; ports 3000–3007 readiness.
 - **P1:** tray and `Ctrl+Shift+M`; Git pulse; local doctor; four repository
-  gates; fixed Explorer/Terminal/app jumps.
+  gates; fixed Explorer/Terminal/app jumps; six bounded PowerShell tabs with
+  observable app and gate output.
 - **P2:** versioned local preferences for sound, volume, close-to-tray and
-  Windows startup.
+  Windows startup; Web/Native lifecycle for standalone Seumei.
+
+`Ctrl+K` opens the Matriz Command Deck. It ranks apps, gates, targets, sessions
+and currently observed PIDs; destructive actions require a second explicit
+confirmation. This is the only UI shortcut layer and never accepts executable
+paths or generated arguments.
 
 The webview cannot submit executable names, arguments, URLs or arbitrary
-process targets. Rust resolves typed catalog IDs, validates workspaces and
-rejects protected, stale or unobserved PIDs.
+process targets for automation. Rust resolves typed catalog IDs, validates
+workspaces and rejects protected, stale or unobserved PIDs. The visible terminal
+is deliberately different: it is an explicit user console backed by ConPTY,
+limited to six sessions and bounded input/output buffers.
 
 ## Commands
 
@@ -60,3 +68,6 @@ bootstrapper only when the runtime is absent.
   capability only when a concrete product behavior exists.
 - Updater signing/distribution is reserved for the first trusted release
   channel; the NSIS artifact is currently unsigned.
+- Seumei can be generated, installed and opened from Apps → `NATIVO`. A future
+  Matriz Hub download must consume the signed CI release artifact; build output
+  is never copied into the web app or committed as public content.

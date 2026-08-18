@@ -36,6 +36,7 @@ Then inspect only the relevant local layer:
 - `src/mock/`
 - `src/ui/`
 - `app/`
+- `desktop/` (native delivery only; domain remains under `src/`)
 
 ## What Seumei owns
 Seumei owns establishment, restaurant, venue and operations-related business behavior.
@@ -79,6 +80,7 @@ Prefer scoped commands while working on Seumei:
 - `pnpm --filter <seumei-package-name> dev`
 - `pnpm --filter <seumei-package-name> lint`
 - `pnpm --filter <seumei-package-name> typecheck`
+- `pnpm --filter @matriz/app-seumei package:desktop`
 
 ## Output style
 When changing Seumei, always state:
