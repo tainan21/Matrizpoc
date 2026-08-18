@@ -334,6 +334,55 @@ importers:
         specifier: 2.1.2
         version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1)
 
+  apps/matrizlib:
+    dependencies:
+      '@matriz/flows-onboarding':
+        specifier: workspace:*
+        version: link:../../packages/flows/onboarding
+      '@matriz/foundation-types':
+        specifier: workspace:*
+        version: link:../../packages/foundation/types
+      '@matriz/integration-api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/api-contracts
+      '@matriz/integration-events':
+        specifier: workspace:*
+        version: link:../../packages/integration/events
+      '@matriz/integration-registry-core':
+        specifier: workspace:*
+        version: link:../../packages/integration/registry-core
+      '@matriz/platform-config':
+        specifier: workspace:*
+        version: link:../../packages/platform/config
+      '@matriz/platform-telemetry':
+        specifier: workspace:*
+        version: link:../../packages/platform/telemetry
+      next:
+        specifier: 16.2.4
+        version: 16.2.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+    devDependencies:
+      '@types/node':
+        specifier: 22.7.5
+        version: 22.7.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1)
+
   apps/seumei:
     dependencies:
       '@matriz/access-tenants':
