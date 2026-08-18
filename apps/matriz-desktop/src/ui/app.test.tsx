@@ -98,4 +98,21 @@ describe("Matriz Control", () => {
     )
     expect(screen.getByRole("button", { name: "Terminal · 1 ativa" })).toBeVisible()
   })
+
+  it("opens the global command deck and executes only the observed PID", async () => {
+    const desktop = gateway()
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true })
+    const search = screen.getByRole("combobox", { name: "Buscar ações" })
+    fireEvent.change(search, { target: { value: "encerrar 3210" } })
+    fireEvent.keyDown(search, { key: "Enter" })
+    expect(screen.getByText("ENTER NOVAMENTE")).toBeVisible()
+    fireEvent.keyDown(search, { key: "Enter" })
+
+    await waitFor(() =>
+      expect(desktop.kill).toHaveBeenCalledWith({ pid: 3210, snapshotId: "observed" }),
+    )
+  })
 })

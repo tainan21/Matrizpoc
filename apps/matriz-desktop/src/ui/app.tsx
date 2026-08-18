@@ -2,6 +2,7 @@ import { Badge, Button, Input } from "@matriz/design-ui/primitives"
 import { useEffect, useMemo, useState } from "react"
 
 import { GATES, MATRIZ_DESKTOP_APPS, QUICK_TARGETS } from "../application/catalog"
+import type { DeckCommand } from "../application/command-deck"
 import type { DesktopGateway } from "../application/desktop-gateway"
 import type {
   AppRuntime,
@@ -12,6 +13,7 @@ import type {
   WorkspacePulse,
 } from "../domain/types"
 import { Icons } from "./icons"
+import { CommandDeck } from "./command-deck/command-deck"
 import { filterPorts, presentPorts } from "./presenters"
 import { useDesktop } from "./use-desktop"
 import { TerminalPane } from "./terminal/terminal-pane"
@@ -58,6 +60,14 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
     () => filterPorts(presentPorts(desktop.snapshot.ports), query),
     [desktop.snapshot.ports, query],
   )
+
+  const deckCommands = useMemo<readonly DeckCommand[]>(() => [
+    { id: "terminal:new", label: "Nova sessão PowerShell", keywords: ["terminal", "console", "shell"], group: "Terminal", status: `${terminal.state.sessions.length}/6` },
+    ...MATRIZ_DESKTOP_APPS.map((app) => ({ id: `app:${app.id}`, label: `Iniciar ${app.label}`, keywords: ["app", "web", `${app.port}`], group: "Apps" as const, status: apps.find(({ id }) => id === app.id)?.status ?? "pronto" })),
+    ...GATES.map((gate) => ({ id: `gate:${gate.id}`, label: `Rodar ${gate.label}`, keywords: ["gate", "validar", "check"], group: "Gates" as const, status: "terminal" })),
+    ...QUICK_TARGETS.map((target) => ({ id: `target:${target.id}`, label: `Abrir ${target.label}`, keywords: ["abrir", "jump", "atalho"], group: "Ações" as const })),
+    ...ports.map((process) => ({ id: `kill:${process.pid}`, label: `Encerrar ${process.processName}`, keywords: ["kill", "porta", `${process.port}`, `${process.pid}`], group: "Portas" as const, status: `:${process.port} · PID ${process.pid}`, destructive: true })),
+  ], [apps, ports, terminal.state.sessions.length])
 
   useEffect(() => {
     if (!desktop.settings) return
@@ -125,6 +135,24 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
     }
   }
 
+  const executeDeck = async (id: string) => {
+    if (id === "terminal:new") {
+      await terminal.create()
+      setView("terminal")
+    } else {
+      const app = MATRIZ_DESKTOP_APPS.find((item) => id === `app:${item.id}`)
+      const gate = GATES.find((item) => id === `gate:${item.id}`)
+      const target = QUICK_TARGETS.find((item) => id === `target:${item.id}`)
+      const process = ports.find((item) => id === `kill:${item.pid}`)
+      if (app) await terminal.startOperation(`app.${app.id}.web`)
+      else if (gate) await terminal.startOperation(`gate.${gate.id}`)
+      else if (target) await gateway.openTarget(target.id)
+      else if (process) await kill(process.pid)
+      else throw new Error("Ação não disponível")
+    }
+    void feedback.play("interaction")
+  }
+
   return (
     <div className={`control-shell${terminal.state.sessions.length && view !== "terminal" ? " has-terminal-dock" : ""}`} data-matrizlib="0.1.0" data-theme="dark">
       <header className="titlebar" data-tauri-drag-region>
@@ -176,6 +204,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
       ) : null}
 
       <footer><span className={desktop.message.includes("não") ? "error" : ""} role="status" aria-live="polite">{desktop.message}</span><kbd>Ctrl Shift M</kbd></footer>
+      <CommandDeck commands={deckCommands} execute={executeDeck} />
     </div>
   )
 }
