@@ -1,5 +1,20 @@
 # Matriz Decision Log
 
+## 2026-08-18 — MatrizLib portal is the eighth app
+
+- **Decision:** register `apps/matrizlib` on port 3007 as the public reference
+  portal for the canonical local design packages, with an audited C001-C099
+  catalog, theme laboratory, and architecture guide.
+- **Reason:** make contracts and migration evidence discoverable without moving
+  product domain into a package or turning documentation into an API authority.
+- **Impact:** `@matriz/design-system` still owns tokens/themes and
+  `@matriz/design-ui` still owns stable React exports. Fourteen catalog entries
+  are available and 85 remain explicit candidates. `C:\Apps\matrizlibUI` is
+  reference-only; screenshots and `.next/` stay untracked, while the official
+  generated `next-env.d.ts` is versioned.
+- **Review when:** a candidate has two real consumers and an audited stable
+  surface, or a portable external-library adoption is separately approved.
+
 ## 2026-08-15 — Local design packages are canonical MatrizLib
 
 - **Decision:** local `@matriz/design-system` and `@matriz/design-ui` are the

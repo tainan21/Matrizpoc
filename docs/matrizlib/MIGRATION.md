@@ -1,5 +1,9 @@
 # Migrating to MatrizLib public contracts
 
+The portal is an adoption guide, not an alternate package. Consumers migrate
+to `@matriz/design-system` and `@matriz/design-ui`; they never import from
+`apps/matrizlib`.
+
 ## Allowed imports
 
 Use published surfaces only:
@@ -30,3 +34,20 @@ price/tenant policy, or remote theme selection.
 
 If a replacement changes product behavior or needs a domain contract, revert the
 surface to app-local. Do not create a shared package to bypass that boundary.
+
+## Candidate promotion
+
+A C001-C099 candidate becomes `available` only after the public package exports
+the implementation and publishes matching component metadata. Before promotion:
+
+1. prove two independent consumers and stable visual semantics;
+2. keep entities, repositories, routing, copy, and authorization app-local;
+3. cover keyboard, focus, error, long-content, reduced-motion, light/dark, and
+   mobile behavior;
+4. add the public export and metadata in the owning design package;
+5. update the portal entry without inventing an alias or deep import.
+
+The current backlog is 85 candidates. C019-C022 are especially important to
+reconcile: the audit found related public exports, but they do not yet have a
+matching canonical component-metadata contract. Their candidate status prevents
+the portal from promising an unsupported import surface.
