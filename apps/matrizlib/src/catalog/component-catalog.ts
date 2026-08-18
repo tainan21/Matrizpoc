@@ -252,6 +252,7 @@ function createCatalogEntry([
     slug: toSlug(name),
     category,
     qualification: qualificationFor(id),
+    hasAuditedPublicExport: auditedExistingExportIds.has(id),
     evidence: evidenceFor(id, Boolean(packageMetadata)),
     potentialConsumers: facts.potentialConsumers,
     domainBoundary: facts.domainBoundary,

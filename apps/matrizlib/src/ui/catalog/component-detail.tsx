@@ -73,13 +73,25 @@ export function ComponentDetail({
       ) : (
         <section className="component-contract component-contract--candidate">
           <div>
-            <span className="eyebrow">Contrato ainda não publicado</span>
+            <span className="eyebrow">
+              {component.hasAuditedPublicExport
+                ? "Metadata do catálogo pendente"
+                : "Contrato ainda não publicado"}
+            </span>
             <Heading level={2}>Documentação, não promessa de API.</Heading>
           </div>
-          <Text>
-            Este candidato não possui export público, import documentado ou comportamento de
-            runtime. A anatomia acima registra intenção para avaliação.
-          </Text>
+          {component.hasAuditedPublicExport ? (
+            <Text>
+              Este candidato possui export público auditado, mas ainda não está qualificado por um
+              metadata canônico no catálogo. Por isso, esta página não publica import nem preview ao
+              vivo.
+            </Text>
+          ) : (
+            <Text>
+              Este candidato não possui export público, import documentado ou comportamento de
+              runtime. A anatomia acima registra intenção para avaliação.
+            </Text>
+          )}
         </section>
       )}
 

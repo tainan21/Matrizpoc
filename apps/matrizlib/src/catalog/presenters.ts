@@ -40,6 +40,7 @@ export interface ComponentCatalogCardViewModel {
   readonly stageLabel: string
   readonly qualification: ComponentCatalogQualification
   readonly qualificationLabel: string
+  readonly hasAuditedPublicExport: boolean
   readonly description: string
 }
 
@@ -80,6 +81,7 @@ export function toComponentCatalogCardViewModel(
     stageLabel: stageLabels[entry.stage],
     qualification: entry.qualification,
     qualificationLabel: qualificationLabels[entry.qualification],
+    hasAuditedPublicExport: entry.hasAuditedPublicExport,
     description: entry.description,
   }
 }

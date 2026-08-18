@@ -60,6 +60,8 @@ const candidateSpecimens = {
   },
 } as const
 
+const minimumTouchTarget = { minHeight: "2.75rem" } as const
+
 function LivePreview({ name }: { readonly name: string }) {
   switch (name) {
     case "Stack":
@@ -93,20 +95,29 @@ function LivePreview({ name }: { readonly name: string }) {
     case "Text":
       return <Text tone="muted">Texto de apoio com tom semântico.</Text>
     case "Button":
-      return <Button>Ação principal</Button>
+      return <Button style={minimumTouchTarget}>Ação principal</Button>
     case "Label":
       return (
         <Stack gap={2}>
           <Label htmlFor="label-preview-field">Nome do campo</Label>
-          <Input id="label-preview-field" />
+          <Input id="label-preview-field" style={minimumTouchTarget} />
         </Stack>
       )
     case "Input":
-      return <Input aria-label="Campo de exemplo" placeholder="Digite um valor" />
+      return (
+        <Stack gap={2}>
+          <Label htmlFor="input-preview-field">Valor de exemplo</Label>
+          <Input
+            id="input-preview-field"
+            placeholder="Digite um valor"
+            style={minimumTouchTarget}
+          />
+        </Stack>
+      )
     case "FormField":
       return (
         <FormField id="form-field-preview" label="E-mail" helper="Use seu endereço de trabalho.">
-          <Input type="email" />
+          <Input style={minimumTouchTarget} type="email" />
         </FormField>
       )
     case "Badge":
@@ -161,7 +172,11 @@ export function ComponentPreview({
       aria-label={`Anatomia planejada de ${component.name}`}
       className="component-preview component-preview--candidate"
     >
-      <span className="component-preview__label">Specimen editorial · sem API publicada</span>
+      <span className="component-preview__label">
+        {component.hasAuditedPublicExport
+          ? "Export público auditado · metadata pendente"
+          : "Specimen editorial · sem API publicada"}
+      </span>
       <div className="candidate-specimen" aria-hidden="true">
         <span className="candidate-specimen__trigger">01</span>
         <span className="candidate-specimen__body">{component.name}</span>

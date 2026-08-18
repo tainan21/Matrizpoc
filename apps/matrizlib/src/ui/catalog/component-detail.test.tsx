@@ -32,4 +32,42 @@ describe("ComponentDetail", () => {
     expect(screen.queryByText(/import \{/)).not.toBeInTheDocument()
     expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
+
+  it("distinguishes a public export that is still missing catalog metadata", () => {
+    const entry = componentCatalog.find((item) => item.name === "ThemeToggle")!
+
+    render(<ComponentDetail component={toComponentCatalogDetailViewModel(entry)} />)
+
+    expect(screen.getByText("Export público auditado · metadata pendente")).toBeVisible()
+    expect(screen.getByText(/metadata canônico no catálogo/i)).toBeVisible()
+    expect(screen.queryByText(/não possui export público/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/import \{/)).not.toBeInTheDocument()
+  })
+
+  it("gives the standalone Input preview a persistent visible label", () => {
+    const entry = componentCatalog.find((item) => item.name === "Input")!
+
+    render(<ComponentDetail component={toComponentCatalogDetailViewModel(entry)} />)
+
+    const input = screen.getByRole("textbox", { name: "Valor de exemplo" })
+    expect(screen.getByText("Valor de exemplo")).toHaveAttribute("for", input.id)
+  })
+
+  it("keeps the live Button preview target at least 44 pixels tall", () => {
+    const entry = componentCatalog.find((item) => item.name === "Button")!
+
+    render(<ComponentDetail component={toComponentCatalogDetailViewModel(entry)} />)
+
+    expect(screen.getByRole("button", { name: "Ação principal" }).style.minHeight).toBe("2.75rem")
+  })
+
+  it("keeps the live Input preview target at least 44 pixels tall", () => {
+    const entry = componentCatalog.find((item) => item.name === "Input")!
+
+    render(<ComponentDetail component={toComponentCatalogDetailViewModel(entry)} />)
+
+    expect(screen.getByRole("textbox", { name: "Valor de exemplo" }).style.minHeight).toBe(
+      "2.75rem",
+    )
+  })
 })

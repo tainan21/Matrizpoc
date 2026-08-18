@@ -26,6 +26,7 @@ interface ComponentCatalogEntryBase {
   readonly slug: string
   readonly category: ComponentCatalogCategory
   readonly qualification: ComponentCatalogQualification
+  readonly hasAuditedPublicExport: boolean
   readonly description: string
   readonly evidence: string
   readonly potentialConsumers: string
