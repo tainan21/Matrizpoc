@@ -13,6 +13,8 @@ describe("SoundsPage", () => {
     expect(screen.getByRole("heading", { level: 1, name: "Sons" })).toBeVisible()
     const summary = screen.getByLabelText("Resumo do catálogo de sons")
     expect(within(summary).getAllByText("12")).toHaveLength(2)
+    expect(within(summary).getByText("Pack ativo")).toBeVisible()
+    expect(within(summary).getByText("Matriz Default")).toBeVisible()
     expect(screen.getByRole("region", { name: "Explorar sons" })).toBeVisible()
   })
 })

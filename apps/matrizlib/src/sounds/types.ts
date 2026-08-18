@@ -19,7 +19,7 @@ export interface SoundCatalogPageViewModel {
     readonly total: number
     readonly available: number
     readonly categories: number
-    readonly packs: number
+    readonly activePack: string
   }
   readonly items: readonly SoundCatalogItemViewModel[]
 }

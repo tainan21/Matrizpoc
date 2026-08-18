@@ -1,12 +1,12 @@
 import { Heading, Text } from "@matriz/design-ui"
-import { soundCatalog, soundRegistry } from "@matriz/design-ui/sounds"
+import { sound, soundCatalog, soundRegistry } from "@matriz/design-ui/sounds"
 
 import { toSoundCatalogPageViewModel, toSoundPackViewModels } from "../../src/sounds/presenters"
 import { SoundExplorer } from "../../src/ui/sounds/sound-explorer"
 
 export default function SoundsPage() {
   const packs = soundRegistry.listPacks()
-  const { summary } = toSoundCatalogPageViewModel(soundCatalog, packs)
+  const { summary } = toSoundCatalogPageViewModel(soundCatalog, packs, sound.getPack())
 
   return (
     <main className="catalog-page sound-page" id="main-content">
@@ -20,7 +20,7 @@ export default function SoundsPage() {
           <div><dt>Total</dt><dd><strong>{summary.total}</strong></dd></div>
           <div><dt>Disponíveis</dt><dd><strong>{summary.available}</strong></dd></div>
           <div><dt>Categorias</dt><dd><strong>{summary.categories}</strong></dd></div>
-          <div><dt>Packs</dt><dd><strong>{summary.packs}</strong></dd></div>
+          <div><dt>Pack ativo</dt><dd><strong>{summary.activePack}</strong></dd></div>
         </dl>
       </header>
       <SoundExplorer entries={soundCatalog} packs={toSoundPackViewModels(packs)} />

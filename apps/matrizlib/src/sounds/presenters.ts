@@ -27,13 +27,15 @@ export function toSoundPackViewModels(packs: readonly SoundPack[]): SoundPackVie
 export function toSoundCatalogPageViewModel(
   entries: readonly SoundDefinition[],
   packs: readonly SoundPack[],
+  activePackId = packs[0]?.id,
 ): SoundCatalogPageViewModel {
+  const activePack = packs.find(({ id }) => id === activePackId) ?? packs[0]
   return {
     summary: {
       total: entries.length,
       available: entries.filter(({ status }) => status === "available").length,
       categories: new Set(entries.map(({ category }) => category)).size,
-      packs: packs.length,
+      activePack: activePack?.name ?? "Nenhum",
     },
     items: entries.map((entry) => ({
       ...entry,

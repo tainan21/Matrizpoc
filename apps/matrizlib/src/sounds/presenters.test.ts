@@ -7,7 +7,12 @@ describe("sound catalog presenters", () => {
   it("presents useful metrics and human labels", () => {
     const viewModel = toSoundCatalogPageViewModel(soundCatalog, soundRegistry.listPacks())
 
-    expect(viewModel.summary).toEqual({ total: 12, available: 12, categories: 5, packs: 1 })
+    expect(viewModel.summary).toEqual({
+      total: 12,
+      available: 12,
+      categories: 5,
+      activePack: "Matriz Default",
+    })
     expect(viewModel.items.find(({ id }) => id === "system.start")).toMatchObject({
       categoryLabel: "Sistema",
       statusLabel: "Disponível",
