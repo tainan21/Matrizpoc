@@ -60,6 +60,11 @@ describe("MatrizLib token contract", () => {
     }
   })
 
+  it("resolves the MatrizLib base theme in both color modes", () => {
+    expect(themeDefinitionToCssVars("matriz-base", "matrizlib", "light")["--matriz-theme-key"]).toBe("matriz-base")
+    expect(themeDefinitionToCssVars("matriz-base", "matrizlib", "dark")["--matriz-color-text"]).toBeTruthy()
+  })
+
   it("falls back unknown registry keys to Matriz Base", () => {
     const fallback = themeDefinitionToCssVars("not-registered", "matriz-hub", "light")
     const base = themeDefinitionToCssVars("matriz-base", "matriz-hub", "light")

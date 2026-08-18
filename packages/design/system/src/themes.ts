@@ -20,6 +20,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#0f172a", brandAccentFg: "#f8fafc",
     surface: "#ffffff", surfaceFg: "#0f172a", muted: "#f1f5f9", mutedFg: "#475569", border: "#e2e8f0",
   },
+  matrizlib: {
+    appId: "matrizlib", label: "MatrizLib", brandAccent: "#7c3aed", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#17171c", muted: "#f5f3ff", mutedFg: "#5b5870", border: "#ddd6fe",
+  },
   "matriz-workbench": {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#5b5bd6", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17171c", muted: "#f5f5f7", mutedFg: "#666671", border: "#dfdfe5",
@@ -50,6 +54,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   "matriz-hub": {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
     surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246",
+  },
+  matrizlib: {
+    appId: "matrizlib", label: "MatrizLib", brandAccent: "#a78bfa", brandAccentFg: "#160b2e",
+    surface: "#100d18", surfaceFg: "#f7f5ff", muted: "#1a1429", mutedFg: "#c4bdd7", border: "#352650",
   },
   "matriz-workbench": {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
@@ -150,7 +158,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash",
+  "matriz-hub", "matrizlib", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash",
 ]
 
 export const themeRegistry = [

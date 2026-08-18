@@ -9,7 +9,7 @@ import type { MatrizAppId } from "@matriz/foundation-constants"
 const labels: Record<MatrizAppId, string> = {
   "matriz-hub": "Hub · 3000", spot: "Spot · 3001", seumei: "Seumei · 3002",
   contracts: "Contracts · 3003", willdash: "WillDash · 3004",
-  "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006",
+  "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006", matrizlib: "MatrizLib · 3007",
 }
 
 function CacheProof({ appId }: { appId: MatrizAppId }) {
