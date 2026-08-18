@@ -1,0 +1,15 @@
+[package]
+name = "seumei-desktop"
+version = "0.1.0"
+description = "Seumei native local operations app"
+edition = "2021"
+
+[lib]
+name = "seumei_desktop_native"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.5.1", features = [] }
+
+[dependencies]
+tauri = { version = "2.11.5", features = [] }

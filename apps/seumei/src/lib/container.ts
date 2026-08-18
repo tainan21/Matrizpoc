@@ -1,7 +1,7 @@
 /**
  * Seumei DI container.
  */
-import { createInMemoryStore } from "@matriz/platform-storage"
+import { createInMemoryStore, type KeyValueStore } from "@matriz/platform-storage"
 import { createSeumeiRepositories } from "../mock/repositories"
 import { createSeumeiUseCases, type SeumeiUseCases } from "../application/use-cases"
 import {
@@ -16,12 +16,15 @@ export interface SeumeiContainer {
 
 let cached: SeumeiContainer | undefined
 
-export function getSeumeiContainer(): SeumeiContainer {
-  if (cached) return cached
-  const store = createInMemoryStore()
+export function createSeumeiContainer(store: KeyValueStore): SeumeiContainer {
   const repos = createSeumeiRepositories(store)
   const useCases = createSeumeiUseCases(repos)
   const contracts = resolveSeumeiContractsGateway()
-  cached = { useCases, gateways: { contracts } }
+  return { useCases, gateways: { contracts } }
+}
+
+export function getSeumeiContainer(): SeumeiContainer {
+  if (cached) return cached
+  cached = createSeumeiContainer(createInMemoryStore())
   return cached
 }

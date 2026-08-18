@@ -524,6 +524,9 @@ importers:
       '@matriz/platform-telemetry':
         specifier: workspace:*
         version: link:../../packages/platform/telemetry
+      '@tauri-apps/api':
+        specifier: 2.11.1
+        version: 2.11.1
       next:
         specifier: 16.2.4
         version: 16.2.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -540,6 +543,9 @@ importers:
         specifier: 5.0.0-rc.2
         version: 5.0.0-rc.2(@types/react@19.2.14)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
     devDependencies:
+      '@tauri-apps/cli':
+        specifier: 2.11.4
+        version: 2.11.4
       '@testing-library/jest-dom':
         specifier: 6.9.1
         version: 6.9.1
@@ -555,12 +561,18 @@ importers:
       '@types/react-dom':
         specifier: 19.2.3
         version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 4.3.4
+        version: 4.3.4(vite@5.4.21(@types/node@22.7.5))
       jsdom:
         specifier: 30.0.1
         version: 30.0.1
       typescript:
         specifier: 5.6.3
         version: 5.6.3
+      vite:
+        specifier: 5.4.21
+        version: 5.4.21(@types/node@22.7.5)
       vitest:
         specifier: 2.1.2
         version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1)
