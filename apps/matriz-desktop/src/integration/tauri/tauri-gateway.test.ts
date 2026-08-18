@@ -30,4 +30,35 @@ describe("Tauri desktop gateway", () => {
       ["open_target", { targetId: "workspace" }],
     ])
   })
+
+  it("maps terminal lifecycle to typed native commands", async () => {
+    const invoke = vi.fn().mockResolvedValue(undefined)
+    const channel = { onmessage: undefined as unknown }
+    const createChannel = vi.fn(() => channel)
+    const gateway = createTauriGateway(invoke, createChannel)
+    const listener = vi.fn()
+
+    await gateway.createTerminal()
+    await gateway.writeTerminal("session-1", "Get-Location\r")
+    await gateway.resizeTerminal("session-1", 120, 40)
+    await gateway.interruptTerminal("session-1")
+    await gateway.closeTerminal("session-1")
+    await gateway.listTerminals()
+    await gateway.subscribeTerminal(listener)
+    await gateway.startManagedOperation("app.seumei.native.build")
+    await gateway.getNativeAppRuntime()
+
+    expect(createChannel).toHaveBeenCalledWith(listener)
+    expect(invoke.mock.calls).toEqual([
+      ["create_terminal"],
+      ["write_terminal", { sessionId: "session-1", data: "Get-Location\r" }],
+      ["resize_terminal", { sessionId: "session-1", columns: 120, rows: 40 }],
+      ["interrupt_terminal", { sessionId: "session-1" }],
+      ["close_terminal", { sessionId: "session-1" }],
+      ["list_terminals"],
+      ["subscribe_terminal", { onEvent: channel }],
+      ["start_managed_operation", { operationId: "app.seumei.native.build" }],
+      ["get_native_app_runtime"],
+    ])
+  })
 })

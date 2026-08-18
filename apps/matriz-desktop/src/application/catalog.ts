@@ -1,4 +1,4 @@
-import type { DesktopAppId, GateId, QuickTargetId } from "../domain/types"
+import type { DesktopAppId, GateId, ManagedOperationId, QuickTargetId } from "../domain/types"
 
 export interface DesktopAppDefinition {
   readonly id: DesktopAppId
@@ -38,3 +38,17 @@ export const QUICK_TARGETS: readonly { readonly id: QuickTargetId; readonly labe
     { id: "matrizlib", label: "MatrizLib" },
     { id: "workbench", label: "Workbench" },
   ])
+
+export const MANAGED_OPERATIONS: readonly {
+  readonly id: ManagedOperationId
+  readonly label: string
+}[] = Object.freeze([
+  ...MATRIZ_DESKTOP_APPS.map((app) => ({
+    id: `app.${app.id}.web` as const,
+    label: `${app.label} / Web`,
+  })),
+  { id: "app.seumei.native.build", label: "Seumei / Gerar" },
+  { id: "app.seumei.native.install", label: "Seumei / Instalar" },
+  { id: "app.seumei.native.start", label: "Seumei / Nativo" },
+  ...GATES.map((gate) => ({ id: `gate.${gate.id}` as const, label: gate.label })),
+])

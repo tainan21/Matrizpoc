@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { GATES, MATRIZ_DESKTOP_APPS, QUICK_TARGETS } from "./catalog"
+import { GATES, MANAGED_OPERATIONS, MATRIZ_DESKTOP_APPS, QUICK_TARGETS } from "./catalog"
 
 describe("desktop operational catalog", () => {
   it("maps every Matriz web app to one unique development port", () => {
@@ -25,5 +25,26 @@ describe("desktop operational catalog", () => {
       "workbench",
     ])
     expect([...GATES, ...QUICK_TARGETS].some((entry) => "command" in entry)).toBe(false)
+  })
+
+  it("offers only typed managed operation identifiers", () => {
+    expect(MANAGED_OPERATIONS.map(({ id }) => id)).toEqual([
+      "app.matriz-hub.web",
+      "app.spot.web",
+      "app.seumei.web",
+      "app.contracts.web",
+      "app.willdash.web",
+      "app.matriz-workbench.web",
+      "app.sites.web",
+      "app.matrizlib.web",
+      "app.seumei.native.build",
+      "app.seumei.native.install",
+      "app.seumei.native.start",
+      "gate.typecheck",
+      "gate.lint",
+      "gate.test:smoke",
+      "gate.prisma:validate",
+    ])
+    expect(MANAGED_OPERATIONS.some((entry) => "command" in entry)).toBe(false)
   })
 })

@@ -11,6 +11,13 @@ export type DesktopAppId =
 export type GateId = "typecheck" | "lint" | "test:smoke" | "prisma:validate"
 export type QuickTargetId = "workspace" | "terminal" | "hub" | "matrizlib" | "workbench"
 export type PortState = "external" | "starting" | "ready" | "degraded"
+export type TerminalStatus = "starting" | "running" | "succeeded" | "failed" | "exited"
+export type ManagedOperationId =
+  | `app.${DesktopAppId}.web`
+  | "app.seumei.native.build"
+  | "app.seumei.native.install"
+  | "app.seumei.native.start"
+  | `gate.${GateId}`
 
 export interface PortProcess {
   readonly port: number
@@ -66,4 +73,30 @@ export interface WorkspacePulse {
   readonly branch: string
   readonly changedFiles: number
   readonly clean: boolean
+}
+
+export interface TerminalSession {
+  readonly id: string
+  readonly title: string
+  readonly kind: "shell" | "managed"
+  readonly status: TerminalStatus
+  readonly cwd: string
+  readonly exitCode?: number
+  readonly tail: string
+}
+
+export type TerminalEvent =
+  | { readonly event: "output"; readonly data: TerminalChunk }
+  | { readonly event: "state"; readonly data: TerminalSession }
+
+export interface TerminalChunk {
+  readonly sessionId: string
+  readonly sequence: number
+  readonly data: string
+}
+
+export interface NativeAppRuntime {
+  readonly appId: "seumei"
+  readonly state: "not-built" | "built" | "installed" | "running"
+  readonly version?: string
 }

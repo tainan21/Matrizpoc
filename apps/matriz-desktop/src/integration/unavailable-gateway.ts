@@ -28,4 +28,13 @@ export const unavailableGateway: DesktopGateway = {
   writeSettings: async () => unavailable(),
   hide: async () => unavailable(),
   quit: async () => unavailable(),
+  createTerminal: async () => unavailable(),
+  writeTerminal: async () => unavailable(),
+  resizeTerminal: async () => unavailable(),
+  interruptTerminal: async () => unavailable(),
+  closeTerminal: async () => unavailable(),
+  listTerminals: async () => [],
+  subscribeTerminal: async () => undefined,
+  startManagedOperation: async () => unavailable(),
+  getNativeAppRuntime: async () => ({ appId: "seumei", state: "not-built" }),
 }

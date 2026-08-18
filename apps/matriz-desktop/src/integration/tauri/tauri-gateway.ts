@@ -1,4 +1,4 @@
-import { invoke as tauriInvoke } from "@tauri-apps/api/core"
+import { Channel, invoke as tauriInvoke } from "@tauri-apps/api/core"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
 import type {
@@ -9,13 +9,24 @@ import type {
   DoctorCheck,
   GateId,
   GateResult,
+  TerminalEvent,
   QuickTargetId,
   WorkspacePulse,
 } from "../../domain/types"
 
 export type Invoke = <T>(command: string, args?: Record<string, unknown>) => Promise<T>
+export type ChannelFactory = (listener: (event: TerminalEvent) => void) => unknown
 
-export function createTauriGateway(invoke: Invoke = tauriInvoke): DesktopGateway {
+function createTauriChannel(listener: (event: TerminalEvent) => void): Channel<TerminalEvent> {
+  const channel = new Channel<TerminalEvent>()
+  channel.onmessage = listener
+  return channel
+}
+
+export function createTauriGateway(
+  invoke: Invoke = tauriInvoke,
+  createChannel: ChannelFactory = createTauriChannel,
+): DesktopGateway {
   return {
     snapshot: () => invoke<DesktopSnapshot>("get_snapshot"),
     kill: (request) => invoke<DesktopSnapshot>("terminate_process", { request }),
@@ -32,5 +43,17 @@ export function createTauriGateway(invoke: Invoke = tauriInvoke): DesktopGateway
     writeSettings: (settings) => invoke<DesktopSettings>("write_settings", { settings }),
     hide: () => invoke<void>("hide_window"),
     quit: () => invoke<void>("quit_app"),
+    createTerminal: () => invoke("create_terminal"),
+    writeTerminal: (sessionId, data) => invoke<void>("write_terminal", { sessionId, data }),
+    resizeTerminal: (sessionId, columns, rows) =>
+      invoke<void>("resize_terminal", { sessionId, columns, rows }),
+    interruptTerminal: (sessionId) => invoke<void>("interrupt_terminal", { sessionId }),
+    closeTerminal: (sessionId) => invoke<void>("close_terminal", { sessionId }),
+    listTerminals: () => invoke("list_terminals"),
+    subscribeTerminal: (listener) =>
+      invoke<void>("subscribe_terminal", { onEvent: createChannel(listener) }),
+    startManagedOperation: (operationId) =>
+      invoke("start_managed_operation", { operationId }),
+    getNativeAppRuntime: () => invoke("get_native_app_runtime"),
   }
 }

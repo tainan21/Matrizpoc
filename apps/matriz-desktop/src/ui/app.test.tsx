@@ -38,6 +38,29 @@ function gateway(): DesktopGateway {
     writeSettings: vi.fn().mockImplementation(async (settings) => settings),
     hide: vi.fn().mockResolvedValue(undefined),
     quit: vi.fn().mockResolvedValue(undefined),
+    createTerminal: vi.fn().mockResolvedValue({
+      id: "shell-1",
+      title: "PowerShell",
+      kind: "shell",
+      status: "running",
+      cwd: "C:\\Apps\\matriz-infra-hub",
+      tail: "",
+    }),
+    writeTerminal: vi.fn().mockResolvedValue(undefined),
+    resizeTerminal: vi.fn().mockResolvedValue(undefined),
+    interruptTerminal: vi.fn().mockResolvedValue(undefined),
+    closeTerminal: vi.fn().mockResolvedValue(undefined),
+    listTerminals: vi.fn().mockResolvedValue([]),
+    subscribeTerminal: vi.fn().mockResolvedValue(undefined),
+    startManagedOperation: vi.fn().mockResolvedValue({
+      id: "managed-1",
+      title: "SEUMEI / WEB",
+      kind: "managed",
+      status: "starting",
+      cwd: "C:\\Apps\\matriz-infra-hub",
+      tail: "",
+    }),
+    getNativeAppRuntime: vi.fn().mockResolvedValue({ appId: "seumei", state: "not-built" }),
   }
 }
 
