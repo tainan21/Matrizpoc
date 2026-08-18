@@ -259,7 +259,7 @@ select:focus-visible {
 
 .sound-global-controls {
   display: grid;
-  grid-template-columns: minmax(9rem, 1fr) auto auto minmax(15rem, 1.4fr);
+  grid-template-columns: minmax(9rem, 1fr) auto auto minmax(11rem, 1fr) minmax(15rem, 1.4fr);
   align-items: end;
   gap: 0.75rem;
   padding: 1rem;

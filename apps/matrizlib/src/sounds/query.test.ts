@@ -10,6 +10,9 @@ describe("filterSoundCatalog", () => {
     ])
     expect(filterSoundCatalog(soundCatalog, { category: "system" })).toHaveLength(2)
     expect(filterSoundCatalog(soundCatalog, { status: "available" })).toHaveLength(12)
+    expect(filterSoundCatalog(soundCatalog, { query: "inicializacao" }).map(({ id }) => id)).toEqual([
+      "system.start",
+    ])
   })
 
   it("uses pack membership without exposing physical assets", () => {

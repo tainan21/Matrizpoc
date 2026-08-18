@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { matrizDefaultSoundPack } from "./default-pack"
-import { createMemorySoundPreferenceStore } from "./preferences"
+import { DEFAULT_SOUND_PREFERENCES, createMemorySoundPreferenceStore } from "./preferences"
 import { createSoundRegistry } from "./registry"
 import { createSoundSystem } from "./system"
 import type { SoundAudioDriver } from "./driver"
@@ -70,6 +70,12 @@ describe("sound system", () => {
     })
     const system = createSoundSystem({ preferences, driver: createDriver() })
 
+    expect(system.getState()).toEqual({
+      ...DEFAULT_SOUND_PREFERENCES,
+      initialized: false,
+      playingId: undefined,
+    })
+
     await system.initialize()
 
     expect(system.getState()).toEqual({
@@ -81,6 +87,23 @@ describe("sound system", () => {
       playingId: undefined,
     })
     expect(Object.isFrozen(system.getState())).toBe(true)
+  })
+
+  it("clears stale playing state when replacement playback is rejected", async () => {
+    let attempt = 0
+    const driver: SoundAudioDriver = {
+      async play() {
+        attempt += 1
+        if (attempt === 2) throw new Error("device unavailable")
+      },
+      stop: vi.fn(),
+    }
+    const system = createSoundSystem({ driver, preferences: createMemorySoundPreferenceStore() })
+
+    await system.play("success")
+    expect(system.getState().playingId).toBe("success")
+    await expect(system.play("error")).resolves.toMatchObject({ status: "skipped" })
+    expect(system.getState().playingId).toBeUndefined()
   })
 
   it("respects enable, mute, volume and persists every global change", async () => {

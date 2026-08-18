@@ -40,7 +40,14 @@ function normalizePreferences(value: unknown): SoundPreferences {
 }
 
 export function createBrowserSoundPreferenceStore(storage?: StorageLike): SoundPreferenceStore {
-  const target = storage ?? (typeof window !== "undefined" ? window.localStorage : undefined)
+  let target = storage
+  if (!target && typeof window !== "undefined") {
+    try {
+      target = window.localStorage
+    } catch {
+      // Storage can be denied for opaque origins or by browser policy.
+    }
+  }
   return {
     read() {
       if (!target) return { ...DEFAULT_SOUND_PREFERENCES }

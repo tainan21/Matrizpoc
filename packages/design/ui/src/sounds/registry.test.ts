@@ -60,6 +60,15 @@ describe("canonical sound catalog", () => {
 })
 
 describe("sound registry", () => {
+  it("publishes deeply immutable IDs, definitions and default assets", () => {
+    const registry = createSoundRegistry()
+    const definition = registry.getSound("notification")
+    const pack = registry.getPack("matriz-default")!
+
+    expect(Object.isFrozen(SOUND_IDS)).toBe(true)
+    expect(Object.isFrozen(definition)).toBe(true)
+    expect(Object.isFrozen(pack.assets.notification)).toBe(true)
+  })
   it("returns immutable snapshots instead of mutable internals", () => {
     const registry = createSoundRegistry()
     const packs = registry.listPacks()

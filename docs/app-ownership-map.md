@@ -90,7 +90,8 @@ Detalhe completo em cada `packages/*/README.md`. Regras gerais:
 
 - `packages/design/system` is the local authority for tokens, declarative themes,
   public CSS, and metadata. `packages/design/ui` is the local authority for
-  React primitives, component metadata, and Storybook.
+  React primitives, component metadata, Storybook, and the domain-free semantic
+  sound registry/runtime exposed by `@matriz/design-ui/sounds`.
 - Both accept only domain-free visual contracts. They do not import apps,
   `integration/*`, `flows/*`, `access/*`, storage, or HTTP.
 - Apps retain presenters, entities, copy, auth, routes, persistence, and local
@@ -98,6 +99,8 @@ Detalhe completo em cada `packages/*/README.md`. Regras gerais:
   `@matriz/design-ui` surfaces, never `packages/design/**/src/**`.
 - The external library remains reference-only. Criteria and migration guidance
   are in `docs/matrizlib/`.
+- `apps/matrizlib` owns the `/sounds` documentation and preview experience; it
+  consumes the shared sound surface and does not duplicate audio assets or IDs.
 
 ### Auth — regra especial (L12)
 

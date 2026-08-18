@@ -60,14 +60,11 @@ function isAutoplayRejection(error: unknown): boolean {
 export function createSoundSystem(dependencies: CreateSoundSystemDependencies = {}): SoundSystem {
   const registry = dependencies.registry ?? soundRegistry
   const preferenceStore = dependencies.preferences ?? createBrowserSoundPreferenceStore()
-  const persisted = preferenceStore.read()
-  const initialPack = registry.getPack(persisted.packId) ? persisted.packId : DEFAULT_SOUND_PREFERENCES.packId
   const listeners = new Set<(state: SoundSystemState) => void>()
   const driver = dependencies.driver
   const activationTarget = dependencies.activationTarget
   let state: SoundSystemState = {
-    ...persisted,
-    packId: initialPack,
+    ...DEFAULT_SOUND_PREFERENCES,
     initialized: false,
     playingId: undefined,
   }
@@ -126,7 +123,10 @@ export function createSoundSystem(dependencies: CreateSoundSystemDependencies = 
     const asset = pack?.assets[id]
     if (!asset) return { status: "skipped", id, reason: "unavailable" }
 
-    if (state.playingId) driver.stop()
+    if (state.playingId) {
+      driver.stop()
+      update({ playingId: undefined }, false)
+    }
     try {
       await driver.play(asset.source, clampSoundVolume(state.volume * definition.defaultVolume), () => {
         if (state.playingId === id) update({ playingId: undefined }, false)
@@ -144,7 +144,13 @@ export function createSoundSystem(dependencies: CreateSoundSystemDependencies = 
 
   const system: SoundSystem = {
     async initialize(options) {
-      if (!state.initialized) update({ initialized: true }, false)
+      if (!state.initialized) {
+        const persisted = preferenceStore.read()
+        const packId = registry.getPack(persisted.packId)
+          ? persisted.packId
+          : DEFAULT_SOUND_PREFERENCES.packId
+        update({ ...persisted, packId, initialized: true }, false)
+      }
       return options?.startup ? attemptPlay("system.start", true) : undefined
     },
     async play(id) {

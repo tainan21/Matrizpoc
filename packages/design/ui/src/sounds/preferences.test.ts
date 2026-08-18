@@ -65,4 +65,22 @@ describe("sound preference stores", () => {
     expect(store.read()).toEqual({ enabled: false, muted: true, volume: 0.2, packId: "matriz-default" })
     expect(store.read()).not.toBe(store.read())
   })
+
+  it("does not throw when browser storage access is denied", () => {
+    const browser = globalThis as typeof globalThis & { window?: Window }
+    const previous = browser.window
+    Object.defineProperty(browser, "window", {
+      configurable: true,
+      value: Object.defineProperty({}, "localStorage", {
+        get() {
+          throw new DOMException("Denied", "SecurityError")
+        },
+      }),
+    })
+
+    expect(() => createBrowserSoundPreferenceStore()).not.toThrow()
+    expect(createBrowserSoundPreferenceStore().read()).toEqual(DEFAULT_SOUND_PREFERENCES)
+
+    Object.defineProperty(browser, "window", { configurable: true, value: previous })
+  })
 })

@@ -1,6 +1,6 @@
 import type { SoundDefinition, SoundId } from "./types"
 
-export const SOUND_IDS = [
+export const SOUND_IDS = Object.freeze([
   "system.start",
   "system.end",
   "notification",
@@ -13,9 +13,9 @@ export const SOUND_IDS = [
   "navigation",
   "open",
   "close",
-] as const satisfies readonly SoundId[]
+] as const satisfies readonly SoundId[])
 
-export const soundCatalog = Object.freeze([
+const definitions = [
   { id: "system.start", name: "Inicialização", description: "Confirma que uma experiência Matriz foi iniciada.", category: "system", status: "available", assetKey: "system-start.wav", defaultVolume: 0.7, defaultEnabled: true, accessibility: "Reproduzir somente quando o produto solicitar inicialização e a política do ambiente permitir." },
   { id: "system.end", name: "Encerramento", description: "Sinaliza encerramento ou logout sem bloquear o fluxo.", category: "system", status: "available", assetKey: "system-end.wav", defaultVolume: 0.65, defaultEnabled: true, accessibility: "Nunca aguardar o término do áudio para concluir logout ou fechamento." },
   { id: "notification", name: "Notificação", description: "Informa uma atualização administrativa ou geral.", category: "communication", status: "available", assetKey: "notification.wav", defaultVolume: 0.7, defaultEnabled: true, accessibility: "A notificação precisa manter alternativa visual e textual equivalente." },
@@ -28,4 +28,8 @@ export const soundCatalog = Object.freeze([
   { id: "navigation", name: "Navegação", description: "Confirma uma mudança de contexto ou rota concluída.", category: "interaction", status: "available", assetKey: "navigation.wav", defaultVolume: 0.48, defaultEnabled: true, accessibility: "Tocar após a navegação confirmada e nunca como pré-requisito da rota." },
   { id: "open", name: "Abrir", description: "Sinaliza a abertura de uma superfície temporária.", category: "interaction", status: "available", assetKey: "open.wav", defaultVolume: 0.46, defaultEnabled: true, accessibility: "O foco e o estado expandido continuam sendo as indicações primárias." },
   { id: "close", name: "Fechar", description: "Sinaliza o fechamento de uma superfície temporária.", category: "interaction", status: "available", assetKey: "close.wav", defaultVolume: 0.44, defaultEnabled: true, accessibility: "O retorno de foco continua obrigatório mesmo quando o som estiver desativado." },
-] satisfies readonly SoundDefinition[])
+] satisfies readonly SoundDefinition[]
+
+export const soundCatalog: readonly SoundDefinition[] = Object.freeze(
+  definitions.map((definition) => Object.freeze(definition)),
+)

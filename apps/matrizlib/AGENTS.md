@@ -10,6 +10,7 @@ system and UI package. Keep all portal-specific code inside `apps/matrizlib`.
 - `/` — editorial entry point.
 - `/components` and `/components/[slug]` — component catalog.
 - `/themes` — canonical theme laboratory.
+- `/sounds` — shared semantic sound catalog, pack and preference controls.
 - `/architecture` — package ownership and migration guidance.
 
 ## Boundaries
@@ -18,6 +19,8 @@ system and UI package. Keep all portal-specific code inside `apps/matrizlib`.
   required; never import `apps/<app>/src/**`.
 - Consume stable design and integration APIs through their public package
   exports only.
+- Consume sound contracts and runtime only through `@matriz/design-ui/sounds`;
+  never create app-local audio primitives or physical asset IDs.
 - Keep catalog entries, presenters, route composition, and documentation local.
 - Do not add a database, repository, product-domain entity, product event, or
   external runtime dependency for `C:\Apps\matrizlibUI`.

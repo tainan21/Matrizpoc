@@ -63,6 +63,7 @@ describe("SoundExplorer", () => {
     fireEvent.change(screen.getByLabelText("Categoria"), { target: { value: "system" } })
     expect(screen.getAllByRole("listitem")).toHaveLength(2)
     expect(screen.getByLabelText("Pack")).toHaveValue("all")
+    expect(screen.getByLabelText("Pack ativo")).toHaveValue("matriz-default")
   })
 
   it("controls global preferences and one active preview", async () => {
@@ -82,6 +83,9 @@ describe("SoundExplorer", () => {
 
     fireEvent.change(screen.getByLabelText("Volume global"), { target: { value: "35" } })
     expect(soundSystem.setVolume).toHaveBeenCalledWith(0.35)
+
+    fireEvent.change(screen.getByLabelText("Pack ativo"), { target: { value: "matriz-default" } })
+    expect(soundSystem.setPack).toHaveBeenCalledWith("matriz-default")
 
     const notification = screen.getByRole("heading", { name: "Notificação" }).closest("li")!
     fireEvent.click(within(notification).getByRole("button", { name: "Ouvir Notificação" }))

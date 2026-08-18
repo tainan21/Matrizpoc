@@ -97,6 +97,17 @@ export function SoundExplorer({ entries, packs, soundSystem = sound }: SoundExpl
         >
           {systemState.muted ? "Restaurar sons" : "Silenciar sons"}
         </Button>
+        <div className="catalog-control sound-pack-control">
+          <Label htmlFor="active-sound-pack">Pack ativo</Label>
+          <select
+            id="active-sound-pack"
+            className="catalog-select"
+            value={systemState.packId}
+            onChange={(event) => soundSystem.setPack(event.currentTarget.value)}
+          >
+            {packs.map((pack) => <option key={pack.id} value={pack.id}>{pack.name}</option>)}
+          </select>
+        </div>
         <div className="sound-volume-control">
           <Label htmlFor="sound-volume">Volume global</Label>
           <input
