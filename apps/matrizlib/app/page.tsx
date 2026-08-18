@@ -31,6 +31,27 @@ const authorityRows = [
   },
 ] as const
 
+const languagePillars = [
+  {
+    index: "01",
+    title: "Componentes",
+    description: "Primitivos, contratos e padrões de composição auditados.",
+    href: "/components",
+  },
+  {
+    index: "02",
+    title: "Temas",
+    description: "Atmosferas canônicas construídas sobre tokens semânticos.",
+    href: "/themes",
+  },
+  {
+    index: "03",
+    title: "Sons",
+    description: "Feedback semântico compartilhado, opcional e substituível.",
+    href: "/sounds",
+  },
+] as const
+
 export default function HomePage() {
   return (
     <main id="main-content">
@@ -72,6 +93,30 @@ export default function HomePage() {
             <strong>{String(availableCount).padStart(2, "0")}</strong>
             <span>contratos publicados</span>
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="language-title" className="language-section">
+        <Reveal className="language-section__intro">
+          <Text className="eyebrow" size="xs">
+            Linguagem compartilhada
+          </Text>
+          <Heading id="language-title" level={2}>
+            Uma fundação.
+            <br /> Três pilares.
+          </Heading>
+        </Reveal>
+        <div className="language-pillars">
+          {languagePillars.map((pillar) => (
+            <Reveal className="language-pillar" key={pillar.index}>
+              <span className="language-pillar__index">{pillar.index}</span>
+              <Heading level={3}>{pillar.title}</Heading>
+              <Text tone="muted">{pillar.description}</Text>
+              <Link aria-label={`Explorar ${pillar.title}`} href={pillar.href}>
+                Explorar <span aria-hidden="true">↗</span>
+              </Link>
+            </Reveal>
+          ))}
         </div>
       </section>
 

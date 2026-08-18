@@ -43,7 +43,7 @@ export function bootstrap(): MatrizLibBootstrapConfig {
     getGlobalOnboardingStore()
     registerAppStep(MATRIZLIB_APP_ID, {
       title: "Conheça a MatrizLib",
-      description: "Referências públicas de componentes, temas e arquitetura.",
+      description: "Referências públicas de componentes, temas e sons.",
       payloadSchema: appOnboardingPayloadSchemas.matrizlib,
     })
 

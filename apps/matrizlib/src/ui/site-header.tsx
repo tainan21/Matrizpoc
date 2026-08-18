@@ -1,10 +1,10 @@
 import { Inline, ThemeToggle } from "@matriz/design-ui"
 import Link from "next/link"
 
-const navigation = [
+const primaryNavigation = [
   { href: "/components", label: "Componentes" },
   { href: "/themes", label: "Temas" },
-  { href: "/architecture", label: "Arquitetura" },
+  { href: "/sounds", label: "Sons" },
 ] as const
 
 export function SiteHeader() {
@@ -21,16 +21,23 @@ export function SiteHeader() {
           <span>MatrizLib</span>
         </Link>
 
-        <Inline className="site-header__actions" gap={4} justify="end" wrap={false}>
-          <nav aria-label="Navegação principal" className="site-header__nav">
-            <Inline gap={4} wrap={false}>
-              {navigation.map((item) => (
-                <Link href={item.href} key={item.href}>
-                  {item.label}
-                </Link>
-              ))}
-            </Inline>
-          </nav>
+        <Inline className="site-header__actions" gap={3} justify="end" wrap>
+          <div className="site-header__navigation">
+            <nav aria-label="Navegação principal" className="site-header__nav">
+              <Inline gap={4} wrap>
+                {primaryNavigation.map((item) => (
+                  <Link href={item.href} key={item.href}>
+                    {item.label}
+                  </Link>
+                ))}
+              </Inline>
+            </nav>
+            <nav aria-label="Navegação técnica" className="site-header__technical">
+              <Inline gap={2} wrap>
+                <Link href="/architecture">Arquitetura</Link>
+              </Inline>
+            </nav>
+          </div>
           <ThemeToggle appId="matrizlib" className="site-header__theme" />
         </Inline>
       </Inline>

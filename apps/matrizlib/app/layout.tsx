@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s · MatrizLib",
   },
   description:
-    "Referência pública para componentes, temas e decisões de arquitetura do ecossistema Matriz.",
+    "Referência pública para componentes, temas e sons do ecossistema Matriz.",
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
