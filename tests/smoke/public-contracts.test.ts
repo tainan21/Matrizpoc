@@ -11,6 +11,7 @@ import * as spot from "../../apps/spot/public-contract"
 import * as seumei from "../../apps/seumei/public-contract"
 import * as contracts from "../../apps/contracts/public-contract"
 import * as willdash from "../../apps/willdash/public-contract"
+import * as sounds from "@matriz/design-ui/sounds"
 
 const APPS = [
   ["matriz-hub", hub],
@@ -31,4 +32,12 @@ describe("public-contract.ts surface (L3)", () => {
       expect(manifest).not.toBeNull()
     })
   }
+
+  it("exposes the sound system only through the design package", () => {
+    expect(sounds.SOUND_IDS).toHaveLength(12)
+    expect(sounds.soundRegistry.listSounds()).toHaveLength(12)
+    expect(sounds.sound).toBeTypeOf("object")
+    expect(sounds.createSoundSystem).toBeTypeOf("function")
+    expect(sounds.playNavigationFeedback).toBeTypeOf("function")
+  })
 })

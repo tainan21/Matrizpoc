@@ -1,6 +1,7 @@
 export * from "./catalog"
 export * from "./default-pack"
 export * from "./driver"
+export * from "./integrations"
 export * from "./preferences"
 export * from "./registry"
 export * from "./system"

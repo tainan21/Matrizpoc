@@ -13,7 +13,15 @@ never fetches, persists, or interprets product entities.
 - Forbidden: `apps/**`, any internal `packages/*/src/**`, `integration`,
   `flows`, `access`, storage, HTTP, auth, routing, and product types.
 - Apps use only `@matriz/design-ui`, `@matriz/design-ui/primitives`,
-  `@matriz/design-ui/styles.css`, and `@matriz/design-ui/metadata`.
+  `@matriz/design-ui/styles.css`, `@matriz/design-ui/metadata`, and
+  `@matriz/design-ui/sounds`.
+
+## Sound boundary
+
+- Browser audio primitives live only in `src/sounds/driver.ts`.
+- Consumers use semantic IDs; physical assets remain pack-owned.
+- Navigation and component feedback are opt-in and framework-neutral.
+- Playback failure must not block or fail product behavior.
 
 ## Promotion and lifecycle
 

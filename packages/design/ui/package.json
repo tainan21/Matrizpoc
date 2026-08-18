@@ -10,7 +10,8 @@
     ".": "./src/index.ts",
     "./primitives": "./src/primitives.tsx",
     "./styles.css": "./src/utility-shim.css",
-    "./metadata": "./src/metadata.ts"
+    "./metadata": "./src/metadata.ts",
+    "./sounds": "./src/sounds/index.ts"
   },
   "scripts": {
     "storybook": "storybook dev -p 6006",
