@@ -1,5 +1,20 @@
 # Matriz Decision Log
 
+## 2026-08-18 — MatrizLib sound language is a public design-ui subpath
+
+- **Decision:** publish typed semantic sound contracts, registry, packs,
+  preferences, and playback through `@matriz/design-ui/sounds`; make Sounds an
+  equal portal pillar beside Components and Themes.
+- **Reason:** products need one opt-in feedback language without direct audio
+  calls, physical-filename coupling, a competing configuration system, or a
+  new premature package.
+- **Impact:** 12 complete real WAV cues ship in `Matriz Default`; packs are
+  replaceable without changing calls. Browser startup respects user activation,
+  shutdown never blocks, and audible state always requires an equivalent visual
+  or textual state. The portal owns catalog UI only.
+- **Review when:** two or more packs need independent distribution, native
+  drivers become real consumers, or shared component sound props stabilize.
+
 ## 2026-08-18 — MatrizLib portal is the eighth app
 
 - **Decision:** register `apps/matrizlib` on port 3007 as the public reference

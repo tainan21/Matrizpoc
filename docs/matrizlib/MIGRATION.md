@@ -14,11 +14,37 @@ import "@matriz/design-system/css"
 import { Button } from "@matriz/design-ui"
 import "@matriz/design-ui/styles.css"
 import { componentMetadata } from "@matriz/design-ui/metadata"
+import { sound } from "@matriz/design-ui/sounds"
 ```
 
 Never import `packages/design/**/src/**`, `apps/**`, an external library, or
 internal barrels. A design package never receives a repository, DTO, entity,
 price/tenant policy, or remote theme selection.
+
+## Sound adoption
+
+Initialize once at the product shell. Browsers may defer `system.start` until a
+legitimate interaction; the runtime follows that policy and never attempts to
+bypass it.
+
+```ts
+import { sound } from "@matriz/design-ui/sounds"
+
+void sound.initialize({ startup: true })
+void sound.play("message")
+void sound.play("order")
+void sound.play("navigation")
+void sound.play("system.end") // fire-and-forget on logout when appropriate
+```
+
+Use the optional navigation/interaction helpers or a component's future
+opt-in sound prop. Do not attach audio to every control, block a functional flow
+until playback ends, or treat sound as the only status/error indication.
+
+To replace sounds, register a complete `SoundPack` with all typed IDs and select
+its ID through the public runtime. Consumers continue calling semantic IDs and
+never reference filenames. Preferences are persisted under the versioned
+`matriz:sound-preferences:v1` contract; do not create a second audio preference.
 
 ## Safe path
 

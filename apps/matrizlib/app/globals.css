@@ -307,6 +307,7 @@ select:focus-visible {
 }
 
 .sound-item {
+  content-visibility: visible;
   gap: 1rem;
 }
 

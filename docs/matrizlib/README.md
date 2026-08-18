@@ -2,11 +2,11 @@
 
 `apps/matrizlib` is the eighth Matriz application and the public reference
 portal for the local design contracts. It runs on `http://localhost:3007` and
-publishes five route families: `/`, `/components`, `/components/[slug]`,
-`/themes`, and `/architecture`.
+publishes six route families: `/`, `/components`, `/components/[slug]`,
+`/themes`, `/sounds`, and `/architecture`.
 
 The canonical MatrizLib in this monorepo is `@matriz/design-system` (tokens,
-CSS, and metadata) plus `@matriz/design-ui` (React primitives and Storybook).
+CSS, and metadata) plus `@matriz/design-ui` (React primitives, sounds, and Storybook).
 The external library is reference-only: it is not a dependency, runtime source,
 or API authority until a separate portable adoption is approved.
 
@@ -17,6 +17,7 @@ or API authority until a separate portable adoption is approved.
 | Token values, names, themes, CSS | code and `@matriz/design-system/css` |
 | Token/component description | public `./metadata` subpaths |
 | Primitive behavior | code published by `@matriz/design-ui` |
+| Sound IDs, metadata, packs, preferences and playback | `@matriz/design-ui/sounds` |
 | Demonstrable scenarios | `@matriz/design-ui` stories |
 | Domain decision, copy, state | owning app |
 
@@ -35,6 +36,19 @@ The portal owns descriptions, navigation, filtering, specimens, and migration
 guidance. It does not own package exports, product behavior, persistence, Hub
 entitlements, or theme values. `C:\Apps\matrizlibUI` remains a reference-only
 source and is never a runtime dependency, alias, or copy source.
+
+## Three product-language pillars
+
+Components, Themes, and Sounds are equal first-class areas. The sound contract
+contains 12 typed semantic events and one complete `Matriz Default` pack. Its
+real WAV assets are intentionally compact starter cues: replace a pack's asset
+map to evolve the sound design without changing consumer calls such as
+`sound.play("notification")`.
+
+The `/sounds` portal route owns only presentation, filtering, and preview. The
+shared package owns registry validation, one-active-preview playback, versioned
+preferences, volume, mute, enable/disable, startup activation handling, and
+non-blocking shutdown feedback. Products must not instantiate `Audio` directly.
 
 ## Local validation
 
