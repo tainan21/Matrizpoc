@@ -3,8 +3,8 @@ use std::{collections::HashSet, sync::Mutex};
 use uuid::Uuid;
 
 use crate::{
-    authorize_batch, ports::enumerate_listeners, DesktopSnapshot, TerminationError,
-    TerminationRequest, TerminationsRequest,
+    authorize_batch, ownership_is_current, ports::enumerate_listeners, DesktopSnapshot,
+    TerminationError, TerminationRequest, TerminationsRequest,
 };
 use crate::{processes::ProcessTerminator, processes::WindowsProcessTerminator};
 
@@ -67,6 +67,15 @@ impl<T: ProcessTerminator> NativeState<T> {
             std::process::id(),
         )
         .map_err(|error| error.to_string())?;
+
+        let current = enumerate_listeners()?;
+        if request
+            .pids
+            .iter()
+            .any(|pid| !ownership_is_current(*pid, &snapshot.ports, &current))
+        {
+            return Err("Process ownership changed; refresh before terminating".into());
+        }
 
         for pid in &request.pids {
             self.terminator.terminate(*pid)?;

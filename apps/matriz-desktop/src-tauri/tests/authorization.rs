@@ -55,3 +55,21 @@ fn duplicate_batch_pids_are_rejected() {
         Err(TerminationError::DuplicateProcess)
     );
 }
+
+#[test]
+fn process_ownership_must_still_match_the_observed_listener() {
+    let snapshot = vec![observed(4010)];
+    let recycled = vec![ObservedProcess {
+        pid: 4010,
+        port: 3001,
+        process_name: "other.exe".into(),
+        executable_path: None,
+        state: "external",
+    }];
+    assert!(!matriz_desktop_native::ownership_is_current(
+        4010, &snapshot, &recycled
+    ));
+    assert!(matriz_desktop_native::ownership_is_current(
+        4010, &snapshot, &snapshot
+    ));
+}

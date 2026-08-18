@@ -139,6 +139,24 @@ pub fn authorize_batch(
     Ok(())
 }
 
+pub fn ownership_is_current(
+    pid: u32,
+    observed: &[ObservedProcess],
+    current: &[ObservedProcess],
+) -> bool {
+    observed
+        .iter()
+        .filter(|process| process.pid == pid)
+        .any(|before| {
+            current.iter().any(|now| {
+                now.pid == before.pid
+                    && now.port == before.port
+                    && now.process_name == before.process_name
+                    && now.executable_path == before.executable_path
+            })
+        })
+}
+
 #[tauri::command]
 fn get_snapshot(state: tauri::State<'_, NativeState>) -> Result<DesktopSnapshot, String> {
     state.refresh()
