@@ -10,6 +10,7 @@ import type {
   DoctorCheck,
   GateId,
   ManagedOperationId,
+  NativeAppRuntime,
   WorkspacePulse,
 } from "../domain/types"
 import { Icons } from "./icons"
@@ -51,6 +52,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   const [query, setQuery] = useState("")
   const [confirmAll, setConfirmAll] = useState(false)
   const [apps, setApps] = useState<readonly AppRuntime[]>([])
+  const [nativeApp, setNativeApp] = useState<NativeAppRuntime>({ appId: "seumei", state: "not-built" })
   const [checks, setChecks] = useState<readonly DoctorCheck[]>([])
   const [pulse, setPulse] = useState<WorkspacePulse>()
   const [activeGate, setActiveGate] = useState<GateId>()
@@ -76,7 +78,10 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   }, [desktop.settings, feedback])
 
   useEffect(() => {
-    if (view === "apps") void gateway.appStatuses().then(setApps).catch(() => setApps([]))
+    if (view === "apps") {
+      void gateway.appStatuses().then(setApps).catch(() => setApps([]))
+      void gateway.getNativeAppRuntime().then(setNativeApp).catch(() => setNativeApp({ appId: "seumei", state: "not-built" }))
+    }
     if (view === "doctor") void gateway.doctor().then(setChecks).catch(() => setChecks([]))
     if (view === "actions") void gateway.workspacePulse().then(setPulse).catch(() => setPulse(undefined))
   }, [gateway, view])
@@ -186,7 +191,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
           </section>
         ) : null}
 
-        {view === "apps" ? <AppsView apps={apps} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} startOperation={terminal.startOperation} /> : null}
+        {view === "apps" ? <AppsView apps={apps} nativeApp={nativeApp} setNativeApp={setNativeApp} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void terminal.create()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
@@ -209,12 +214,23 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   )
 }
 
-function AppsView({ apps, gateway, refresh, feedback, startOperation }: { apps: readonly AppRuntime[]; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {
+function AppsView({ apps, nativeApp, setNativeApp, gateway, refresh, feedback, startOperation }: { apps: readonly AppRuntime[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {
+  const [seumeiMode, setSeumeiMode] = useState<"web" | "native">("web")
   const states = new Map(apps.map((app) => [app.id, app]))
   const act = async (id: (typeof MATRIZ_DESKTOP_APPS)[number]["id"], ready: boolean) => {
-    try { if (ready) await gateway.stopApp(id); else await startOperation(`app.${id}.web`); void feedback.play(ready ? "success" : "navigation"); window.setTimeout(() => void refresh(), 650) } catch { void feedback.play("error") }
+    try {
+      if (id === "seumei" && seumeiMode === "native") {
+        if (nativeApp.state === "not-built") await startOperation("app.seumei.native.build")
+        else if (nativeApp.state === "built") setNativeApp(await gateway.installNativeApp())
+        else setNativeApp(await gateway.startNativeApp())
+      } else if (ready) await gateway.stopApp(id)
+      else await startOperation(`app.${id}.web`)
+      void feedback.play(ready ? "success" : "navigation")
+      window.setTimeout(() => void refresh(), 650)
+    } catch { void feedback.play("error") }
   }
-  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 08</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; return <article className="app-tile" key={app.id}><span className={`status-dot ${ready ? "ready" : "stopped"}`} /><div><strong>{app.label}</strong><small>:{app.port}</small></div><button aria-label={`${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{ready ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
+  const nativeAction = nativeApp.state === "not-built" ? "Gerar" : nativeApp.state === "built" ? "Instalar" : "Abrir"
+  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 08</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const native = app.id === "seumei" && seumeiMode === "native"; return <article className={`app-tile${app.id === "seumei" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${native ? (nativeApp.state === "running" ? "ready" : "stopped") : (ready ? "ready" : "stopped")}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : `:${app.port}`}</small></div>{app.id === "seumei" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Seumei"><button aria-label="Seumei Web" aria-pressed={seumeiMode === "web"} onClick={() => setSeumeiMode("web")}>WEB</button><button aria-label="Seumei Nativo" aria-pressed={seumeiMode === "native"} onClick={() => setSeumeiMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Seumei nativo` : `${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{!native && ready ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
 }
 
 function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback, startOperation }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {

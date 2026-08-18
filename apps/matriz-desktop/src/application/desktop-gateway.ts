@@ -41,4 +41,6 @@ export interface DesktopGateway {
   subscribeTerminal(listener: (event: TerminalEvent) => void): Promise<void>
   startManagedOperation(operationId: ManagedOperationId): Promise<TerminalSession>
   getNativeAppRuntime(): Promise<NativeAppRuntime>
+  installNativeApp(): Promise<NativeAppRuntime>
+  startNativeApp(): Promise<NativeAppRuntime>
 }

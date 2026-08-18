@@ -47,6 +47,8 @@ describe("Tauri desktop gateway", () => {
     await gateway.subscribeTerminal(listener)
     await gateway.startManagedOperation("app.seumei.native.build")
     await gateway.getNativeAppRuntime()
+    await gateway.installNativeApp()
+    await gateway.startNativeApp()
 
     expect(createChannel).toHaveBeenCalledWith(listener)
     expect(invoke.mock.calls).toEqual([
@@ -59,6 +61,8 @@ describe("Tauri desktop gateway", () => {
       ["subscribe_terminal", { onEvent: channel }],
       ["start_managed_operation", { operationId: "app.seumei.native.build" }],
       ["get_native_app_runtime"],
+      ["install_native_app"],
+      ["start_native_app"],
     ])
   })
 })

@@ -1,5 +1,6 @@
 mod catalog;
 mod doctor;
+mod native_apps;
 mod ports;
 mod processes;
 mod settings;
@@ -21,6 +22,7 @@ use workspace::OperationsState;
 pub use catalog::{
     app_definition, gate_definition, managed_operation, quick_target, ManagedOperationKind,
 };
+pub use native_apps::{classify_native_app, native_executable_name, NativeAppState};
 pub use settings::{DesktopSettings, SettingsStore};
 pub use workspace::validate_workspace;
 
@@ -303,6 +305,27 @@ fn start_managed_operation(
     terminals.start_managed(&operations.root()?, &operation)
 }
 
+#[tauri::command]
+fn get_native_app_runtime(
+    operations: tauri::State<'_, OperationsState>,
+) -> Result<native_apps::NativeAppRuntime, String> {
+    Ok(native_apps::runtime(&operations.root()?))
+}
+
+#[tauri::command]
+fn install_native_app(
+    operations: tauri::State<'_, OperationsState>,
+) -> Result<native_apps::NativeAppRuntime, String> {
+    native_apps::install(&operations.root()?)
+}
+
+#[tauri::command]
+fn start_native_app(
+    operations: tauri::State<'_, OperationsState>,
+) -> Result<native_apps::NativeAppRuntime, String> {
+    native_apps::start(&operations.root()?)
+}
+
 #[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
@@ -406,7 +429,10 @@ pub fn run() {
             interrupt_terminal,
             close_terminal,
             list_terminals,
-            subscribe_terminal
+            subscribe_terminal,
+            get_native_app_runtime,
+            install_native_app,
+            start_native_app
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");

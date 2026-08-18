@@ -55,5 +55,7 @@ export function createTauriGateway(
     startManagedOperation: (operationId) =>
       invoke("start_managed_operation", { operationId }),
     getNativeAppRuntime: () => invoke("get_native_app_runtime"),
+    installNativeApp: () => invoke("install_native_app"),
+    startNativeApp: () => invoke("start_native_app"),
   }
 }

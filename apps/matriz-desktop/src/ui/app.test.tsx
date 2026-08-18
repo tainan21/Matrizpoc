@@ -1,12 +1,13 @@
 import "@testing-library/jest-dom/vitest"
 
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
 import type { DesktopGateway } from "../application/desktop-gateway"
 import { ControlApp } from "./app"
 
 afterEach(cleanup)
+beforeAll(() => vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null))
 
 function gateway(): DesktopGateway {
   return {
@@ -61,6 +62,8 @@ function gateway(): DesktopGateway {
       tail: "",
     }),
     getNativeAppRuntime: vi.fn().mockResolvedValue({ appId: "seumei", state: "not-built" }),
+    installNativeApp: vi.fn().mockResolvedValue({ appId: "seumei", state: "installed", version: "0.1.0" }),
+    startNativeApp: vi.fn().mockResolvedValue({ appId: "seumei", state: "running", version: "0.1.0" }),
   }
 }
 
@@ -114,5 +117,19 @@ describe("Matriz Control", () => {
     await waitFor(() =>
       expect(desktop.kill).toHaveBeenCalledWith({ pid: 3210, snapshotId: "observed" }),
     )
+  })
+
+  it("switches Seumei from Web to its native lifecycle", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.getNativeAppRuntime).mockResolvedValue({ appId: "seumei", state: "built", version: "0.1.0" })
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Seumei Nativo" }))
+    fireEvent.click(screen.getByRole("button", { name: "Instalar Seumei nativo" }))
+
+    await waitFor(() => expect(desktop.installNativeApp).toHaveBeenCalledOnce())
+    expect(screen.getByText("INSTALLED")).toBeVisible()
   })
 })
