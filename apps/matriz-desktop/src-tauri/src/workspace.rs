@@ -8,7 +8,9 @@ use std::{
 use serde::Serialize;
 
 use crate::catalog::{app_definition, apps, quick_target, QuickTarget};
+use crate::listener_pid_for_app;
 use crate::ports::enumerate_listeners;
+use crate::processes::{ProcessTerminator, WindowsProcessTerminator};
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -98,6 +100,10 @@ impl OperationsState {
                 .kill()
                 .map_err(|error| format!("Unable to stop {app_id}: {error}"))?;
             let _ = child.wait();
+        } else {
+            let listeners = enumerate_listeners()?;
+            let pid = listener_pid_for_app(app_id, &listeners)?;
+            WindowsProcessTerminator.terminate(pid)?;
         }
         Ok(())
     }

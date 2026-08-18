@@ -12,6 +12,8 @@ use serde::Serialize;
 use tauri::ipc::Channel;
 use uuid::Uuid;
 
+use crate::catalog::{ManagedOperationDefinition, ManagedOperationKind};
+
 pub const MAX_SESSIONS: usize = 6;
 pub const MAX_CHUNK_BYTES: usize = 64 * 1024;
 pub const MAX_TAIL_BYTES: usize = 256 * 1024;
@@ -82,6 +84,33 @@ pub struct TerminalManager {
 
 impl TerminalManager {
     pub fn create_shell(&self, root: &Path) -> Result<TerminalSession, String> {
+        let shell = preferred_shell();
+        self.spawn(root, shell_label(&shell), "shell", &shell, &[])
+    }
+
+    pub fn start_managed(
+        &self,
+        root: &Path,
+        operation: &ManagedOperationDefinition,
+    ) -> Result<TerminalSession, String> {
+        if operation.kind != ManagedOperationKind::Command {
+            return Err("Native application operation is not a terminal command".into());
+        }
+        let program = operation
+            .program
+            .as_deref()
+            .ok_or_else(|| "Managed operation has no executable".to_owned())?;
+        self.spawn(root, &operation.title, "managed", program, &operation.args)
+    }
+
+    fn spawn(
+        &self,
+        root: &Path,
+        title: &str,
+        kind: &'static str,
+        program: &str,
+        args: &[String],
+    ) -> Result<TerminalSession, String> {
         let mut sessions = self.sessions.lock().map_err(|_| "Terminal lock poisoned")?;
         if sessions.len() >= MAX_SESSIONS {
             return Err(format!("Terminal session limit reached ({MAX_SESSIONS})"));
@@ -96,13 +125,13 @@ impl TerminalManager {
         let pair = native_pty_system()
             .openpty(size)
             .map_err(|error| format!("Unable to create Windows terminal: {error}"))?;
-        let shell = preferred_shell();
-        let mut command = CommandBuilder::new(&shell);
+        let mut command = CommandBuilder::new(program);
+        command.args(args);
         command.cwd(root);
         let mut child = pair
             .slave
             .spawn_command(command)
-            .map_err(|error| format!("Unable to start PowerShell: {error}"))?;
+            .map_err(|error| format!("Unable to start terminal process: {error}"))?;
         drop(pair.slave);
 
         let mut reader = pair
@@ -117,8 +146,8 @@ impl TerminalManager {
         let id = Uuid::new_v4().to_string();
         let metadata = TerminalSession {
             id: id.clone(),
-            title: shell_label(&shell).to_owned(),
-            kind: "shell",
+            title: title.to_owned(),
+            kind,
             status: "running",
             cwd: root.display().to_string(),
             exit_code: None,

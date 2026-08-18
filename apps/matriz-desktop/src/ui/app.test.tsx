@@ -84,4 +84,18 @@ describe("Matriz Control", () => {
       expect(screen.getByRole("button", { name: label })).toBeVisible()
     }
   })
+
+  it("starts Seumei Web in an observable terminal and keeps activity in the rail", async () => {
+    const desktop = gateway()
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Iniciar Seumei" }))
+
+    await waitFor(() =>
+      expect(desktop.startManagedOperation).toHaveBeenCalledWith("app.seumei.web"),
+    )
+    expect(screen.getByRole("button", { name: "Terminal · 1 ativa" })).toBeVisible()
+  })
 })

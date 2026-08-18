@@ -18,6 +18,22 @@ pub enum QuickTarget {
     Url(&'static str),
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ManagedOperationKind {
+    Command,
+    NativeInstall,
+    NativeStart,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ManagedOperationDefinition {
+    pub id: String,
+    pub title: String,
+    pub kind: ManagedOperationKind,
+    pub program: Option<String>,
+    pub args: Vec<String>,
+}
+
 const APPS: [AppDefinition; 8] = [
     AppDefinition {
         id: "matriz-hub",
@@ -108,4 +124,58 @@ pub fn quick_target(id: &str) -> Result<QuickTarget, String> {
 
 pub fn apps() -> &'static [AppDefinition] {
     &APPS
+}
+
+pub fn managed_operation(id: &str) -> Result<ManagedOperationDefinition, String> {
+    if let Some(app_id) = id
+        .strip_prefix("app.")
+        .and_then(|value| value.strip_suffix(".web"))
+    {
+        let app = app_definition(app_id)?;
+        return Ok(ManagedOperationDefinition {
+            id: id.to_owned(),
+            title: format!("{} / WEB", app.id.to_uppercase()),
+            kind: ManagedOperationKind::Command,
+            program: Some("pnpm.cmd".into()),
+            args: ["--filter", app.package_name, "dev"]
+                .map(str::to_owned)
+                .into(),
+        });
+    }
+    if let Some(gate_id) = id.strip_prefix("gate.") {
+        let gate = gate_definition(gate_id)?;
+        return Ok(ManagedOperationDefinition {
+            id: id.to_owned(),
+            title: format!("{} / GATE", gate.id.to_uppercase()),
+            kind: ManagedOperationKind::Command,
+            program: Some("pnpm.cmd".into()),
+            args: ["run", gate.script].map(str::to_owned).into(),
+        });
+    }
+    match id {
+        "app.seumei.native.build" => Ok(ManagedOperationDefinition {
+            id: id.to_owned(),
+            title: "SEUMEI / BUILD".into(),
+            kind: ManagedOperationKind::Command,
+            program: Some("pnpm.cmd".into()),
+            args: ["--filter", "@matriz/app-seumei", "package:desktop"]
+                .map(str::to_owned)
+                .into(),
+        }),
+        "app.seumei.native.install" => Ok(ManagedOperationDefinition {
+            id: id.to_owned(),
+            title: "SEUMEI / INSTALL".into(),
+            kind: ManagedOperationKind::NativeInstall,
+            program: None,
+            args: Vec::new(),
+        }),
+        "app.seumei.native.start" => Ok(ManagedOperationDefinition {
+            id: id.to_owned(),
+            title: "SEUMEI / NATIVE".into(),
+            kind: ManagedOperationKind::NativeStart,
+            program: None,
+            args: Vec::new(),
+        }),
+        _ => Err(format!("Unknown managed operation: {id}")),
+    }
 }

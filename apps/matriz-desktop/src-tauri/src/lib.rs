@@ -18,7 +18,9 @@ use tauri_plugin_autostart::ManagerExt;
 use terminal::{TerminalEvent, TerminalManager, TerminalSession};
 use workspace::OperationsState;
 
-pub use catalog::{app_definition, gate_definition, quick_target};
+pub use catalog::{
+    app_definition, gate_definition, managed_operation, quick_target, ManagedOperationKind,
+};
 pub use settings::{DesktopSettings, SettingsStore};
 pub use workspace::validate_workspace;
 
@@ -159,6 +161,19 @@ pub fn ownership_is_current(
         })
 }
 
+pub fn listener_pid_for_app(app_id: &str, listeners: &[ObservedProcess]) -> Result<u32, String> {
+    let app = app_definition(app_id)?;
+    let pid = listeners
+        .iter()
+        .find(|listener| listener.port == app.port)
+        .map(|listener| listener.pid)
+        .ok_or_else(|| format!("{} is not listening on port {}", app.id, app.port))?;
+    if pid <= 4 || pid == std::process::id() {
+        return Err("Protected process cannot be stopped".into());
+    }
+    Ok(pid)
+}
+
 #[tauri::command]
 fn get_snapshot(state: tauri::State<'_, NativeState>) -> Result<DesktopSnapshot, String> {
     state.refresh()
@@ -279,6 +294,16 @@ fn create_terminal(
 }
 
 #[tauri::command(rename_all = "camelCase")]
+fn start_managed_operation(
+    terminals: tauri::State<'_, TerminalManager>,
+    operations: tauri::State<'_, OperationsState>,
+    operation_id: String,
+) -> Result<TerminalSession, String> {
+    let operation = managed_operation(&operation_id)?;
+    terminals.start_managed(&operations.root()?, &operation)
+}
+
+#[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
     session_id: String,
@@ -375,6 +400,7 @@ pub fn run() {
             hide_window,
             quit_app,
             create_terminal,
+            start_managed_operation,
             write_terminal,
             resize_terminal,
             interrupt_terminal,

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useReducer, useRef } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
 import type { TerminalSession } from "../../domain/types"
+import type { ManagedOperationId } from "../../domain/types"
 import { createTerminalState, terminalReducer } from "./terminal-store"
 
 type OutputSink = (data: string) => void
@@ -54,6 +55,17 @@ export function useTerminalRuntime(gateway: DesktopGateway) {
     [gateway],
   )
 
+  const startOperation = useCallback(
+    async (operationId: ManagedOperationId) => {
+      const session = await gateway.startManagedOperation(operationId)
+      dispatch({ type: "upsert", session })
+      dispatch({ type: "activate", sessionId: session.id })
+      dispatch({ type: "dock", open: true })
+      return session
+    },
+    [gateway],
+  )
+
   const register = useCallback((session: TerminalSession, sink: OutputSink) => {
     sinks.current.set(session.id, sink)
     if (session.tail) sink(session.tail)
@@ -66,10 +78,10 @@ export function useTerminalRuntime(gateway: DesktopGateway) {
     state,
     create,
     close,
+    startOperation,
     activate: (sessionId: string) => dispatch({ type: "activate", sessionId }),
     interrupt: (sessionId: string) => gateway.interruptTerminal(sessionId),
     setDockOpen: (open: boolean) => dispatch({ type: "dock", open }),
     register,
   }
 }
-

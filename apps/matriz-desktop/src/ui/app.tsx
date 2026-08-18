@@ -8,6 +8,7 @@ import type {
   DesktopSettings,
   DoctorCheck,
   GateId,
+  ManagedOperationId,
   WorkspacePulse,
 } from "../domain/types"
 import { Icons } from "./icons"
@@ -137,7 +138,11 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
       <nav className="mode-rail" aria-label="Modos">
         {VIEWS.map((item) => {
           const ViewIcon = Icons[item.icon]
-          return <button key={item.id} aria-label={item.label} aria-current={view === item.id ? "page" : undefined} onClick={() => chooseView(item.id)}><ViewIcon /><span>{item.label}</span></button>
+          const terminalCount = item.id === "terminal" ? terminal.state.sessions.length : 0
+          const label = terminalCount
+            ? `Terminal · ${terminalCount} ${terminalCount === 1 ? "ativa" : "ativas"}`
+            : item.label
+          return <button key={item.id} aria-label={label} aria-current={view === item.id ? "page" : undefined} onClick={() => chooseView(item.id)}><ViewIcon /><span>{item.label}</span>{terminalCount ? <i className="mode-activity" aria-hidden="true">{terminalCount}</i> : null}</button>
         })}
       </nav>
 
@@ -153,9 +158,9 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
           </section>
         ) : null}
 
-        {view === "apps" ? <AppsView apps={apps} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} /> : null}
+        {view === "apps" ? <AppsView apps={apps} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void terminal.create()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
-        {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} /> : null}
+        {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
         {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { await gateway.selectWorkspace(workspacePath); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>
@@ -175,16 +180,16 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   )
 }
 
-function AppsView({ apps, gateway, refresh, feedback }: { apps: readonly AppRuntime[]; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback }) {
+function AppsView({ apps, gateway, refresh, feedback, startOperation }: { apps: readonly AppRuntime[]; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {
   const states = new Map(apps.map((app) => [app.id, app]))
   const act = async (id: (typeof MATRIZ_DESKTOP_APPS)[number]["id"], ready: boolean) => {
-    try { if (ready) await gateway.stopApp(id); else await gateway.startApp(id); void feedback.play("success"); window.setTimeout(() => void refresh(), 650) } catch { void feedback.play("error") }
+    try { if (ready) await gateway.stopApp(id); else await startOperation(`app.${id}.web`); void feedback.play(ready ? "success" : "navigation"); window.setTimeout(() => void refresh(), 650) } catch { void feedback.play("error") }
   }
   return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 08</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; return <article className="app-tile" key={app.id}><span className={`status-dot ${ready ? "ready" : "stopped"}`} /><div><strong>{app.label}</strong><small>:{app.port}</small></div><button aria-label={`${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{ready ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
 }
 
-function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback }) {
-  const run = async (id: GateId) => { setActiveGate(id); try { const result = await gateway.runGate(id); void feedback.play(result.success ? "success" : "error") } catch { void feedback.play("error") } finally { setActiveGate(undefined) } }
+function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback, startOperation }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {
+  const run = async (id: GateId) => { setActiveGate(id); try { await startOperation(`gate.${id}`); void feedback.play("navigation") } catch { void feedback.play("error") } finally { setActiveGate(undefined) } }
   return <section aria-labelledby="actions-title"><div className="section-head"><div><span className="eyebrow">WORKSPACE / {pulse?.clean ? "CLEAN" : `${pulse?.changedFiles ?? "—"} Δ`}</span><h1 id="actions-title">AÇÕES</h1></div><Badge tone={pulse?.clean ? "success" : "warning"}>{pulse?.branch ?? "—"}</Badge></div><h2>GATES</h2><div className="action-grid">{GATES.map((gate) => <Button variant="secondary" key={gate.id} disabled={Boolean(activeGate)} onClick={() => void run(gate.id)}>{activeGate === gate.id ? "•••" : gate.label}</Button>)}</div><h2>JUMP</h2><div className="jump-list">{QUICK_TARGETS.map((target) => <button key={target.id} onClick={() => void gateway.openTarget(target.id)}><span>{target.label}</span><Icons.external /></button>)}</div></section>
 }
 

@@ -16,6 +16,7 @@ button { color: inherit; }
 .mode-rail { display: grid; grid-template-columns: repeat(6, 1fr); padding: 7px 10px; gap: 5px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.012); }
 .mode-rail button { min-width: 0; border: 1px solid transparent; background: transparent; color: #7f778c; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 7px; cursor: pointer; font-size: 10px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
 .mode-rail svg { width: 17px; height: 17px; }
+.mode-activity { min-width: 15px; height: 15px; display: grid; place-items: center; border-radius: 8px; color: #0a0710; background: #68e7ac; box-shadow: 0 0 9px rgba(104,231,172,.35); font: 900 8px var(--matriz-font-mono); }
 .mode-rail button:hover { color: #d9cee9; background: rgba(255,255,255,.035); }
 .mode-rail button[aria-current="page"] { color: white; border-color: rgba(165,117,255,.3); background: linear-gradient(180deg, rgba(154,102,255,.16), rgba(154,102,255,.06)); box-shadow: inset 0 -2px var(--violet); }
 .control-main { overflow: auto; padding: 21px 22px 26px; scrollbar-width: thin; scrollbar-color: #3d2b59 transparent; }
