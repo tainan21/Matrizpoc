@@ -2,7 +2,7 @@
  * Institutional bootstrap (Hub-side, V1.2).
  *
  * Monta o InstitutionalRegistry global a partir de:
- *   - local_contract_import dos 5 apps internos (via public-contract +
+ *   - local_contract_import dos 8 apps internos (via public-contract +
  *     decoration institucional Hub-side);
  *   - snapshot_pull da fonte externa institucional simulada
  *     "Matriz Ventures Registry" (seed JSON estatica).

@@ -1,7 +1,7 @@
 /**
  * Smoke test — manifests (L2 + L8).
  *
- * Valida que os 5 manifests reais (source of truth em apps/<x>/src/manifest/manifest.ts)
+ * Valida que os 8 manifests reais (source of truth em apps/<x>/src/manifest/manifest.ts)
  * sao coerentes com o schema Zod AppManifestDTO de integration/api-contracts.
  * Acesso via `@apps/<app>/public-contract`, unico barrel permitido (L3).
  */

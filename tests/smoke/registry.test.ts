@@ -1,7 +1,7 @@
 /**
  * Smoke test — registry (L8).
  *
- * Valida que o Registry ingere os 5 manifests reais e expoe os lookups usados
+ * Valida que o Registry ingere os 8 manifests reais e expoe os lookups usados
  * pelo Hub (findByCapability, findByEventProduced, findByEventConsumed,
  * findByIntegrationTarget, findWithOnboardingSupport, toNavigation).
  */
@@ -16,6 +16,7 @@ import { manifest as spotManifest } from "@apps/spot/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
+import { bootstrapMatrizHub } from "../../apps/matriz-hub/src/bootstrap/index"
 
 const allManifests = [
   hubManifest,
@@ -96,5 +97,12 @@ describe("registry", () => {
 
   it("registra matrizlib com a baseUrl oficial", () => {
     expect(registry.get("matrizlib")?.baseUrl).toBe("http://localhost:3007")
+  })
+
+  it("bootstrap real do Hub registra matrizlib com a baseUrl oficial", () => {
+    const result = bootstrapMatrizHub()
+    expect(result.registeredApps).toContain("matrizlib")
+    expect(result.registeredApps).toHaveLength(8)
+    expect(monorepoConfig.baseUrls.matrizlib).toBe("http://localhost:3007")
   })
 })
