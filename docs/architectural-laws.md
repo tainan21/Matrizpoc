@@ -118,7 +118,7 @@ Localização: `tests/smoke/` na raiz. Runner: **vitest**.
 Cobertura mínima:
 
 - `manifests.test.ts` — cada manifest real satisfaz `AppManifestDTO`
-- `registry.test.ts` — registry carrega 7 apps, faz lookups
+- `registry.test.ts` — registry carrega 8 apps, faz lookups
 - `dtos.test.ts` — amostras válidas/inválidas dos DTOs principais
 - `external-links.test.ts` — `createLink` + `findLinksFor`
 - `events.test.ts` — emit/on/history/off dos 6 eventos obrigatórios

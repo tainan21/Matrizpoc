@@ -6,6 +6,7 @@
  */
 import { describe, it, expect } from "vitest"
 import * as hub from "../../apps/matriz-hub/public-contract"
+import * as matrizlib from "../../apps/matrizlib/public-contract"
 import * as spot from "../../apps/spot/public-contract"
 import * as seumei from "../../apps/seumei/public-contract"
 import * as contracts from "../../apps/contracts/public-contract"
@@ -13,6 +14,7 @@ import * as willdash from "../../apps/willdash/public-contract"
 
 const APPS = [
   ["matriz-hub", hub],
+  ["matrizlib", matrizlib],
   ["spot", spot],
   ["seumei", seumei],
   ["contracts", contracts],

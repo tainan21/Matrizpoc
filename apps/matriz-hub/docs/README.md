@@ -34,7 +34,7 @@ app/                        # Next.js routes
   api/                      # route handlers (JSON read-only)
 src/
   manifest/manifest.ts      # L2 — source of truth
-  bootstrap/index.ts        # L11 — registra 5 manifests + TelemetryClient
+  bootstrap/index.ts        # L11 — registra 8 manifests + TelemetryClient
   ui/components/HubShell.tsx
   domains/praticies/        # domain -> application -> integration -> presentation
   ui/presenters/            # L6 — manifests -> ViewModels

@@ -14,9 +14,10 @@ como dimensão de cada app: a estratégia padrão vive localmente em
 - **Expõe**: `apps/matriz-hub/public-contract.ts` → `{ manifest }`.
 - **Não expõe**: `src/auth/**`, `src/domains/**`, `src/ui/**`,
   `src/bootstrap/**`, `src/manifest/**`.
-- **Pode importar**: `packages/*`, `@apps/spot/public-contract`,
-  `@apps/seumei/public-contract`, `@apps/contracts/public-contract`,
-  `@apps/willdash/public-contract`.
+- **Pode importar**: `packages/*`, `@apps/matrizlib/public-contract`,
+  `@apps/matriz-workbench/public-contract`, `@apps/sites/public-contract`,
+  `@apps/spot/public-contract`, `@apps/seumei/public-contract`,
+  `@apps/contracts/public-contract`, `@apps/willdash/public-contract`.
 - **Não pode importar**: qualquer `apps/<X>/src/**`.
 - **Auth**: estratégia padrão = **magic link**. Adoção em
   `apps/matriz-hub/src/auth/`. Login em
