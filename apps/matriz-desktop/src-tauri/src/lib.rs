@@ -1,11 +1,19 @@
+mod catalog;
+mod doctor;
 mod ports;
 mod processes;
 mod state;
+mod tasks;
+mod workspace;
 
 use std::fmt;
 
 use serde::{Deserialize, Serialize};
 use state::NativeState;
+use workspace::OperationsState;
+
+pub use catalog::{app_definition, gate_definition, quick_target};
+pub use workspace::validate_workspace;
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -145,13 +153,74 @@ fn terminate_processes(
     state.terminate_many(&request)
 }
 
+#[tauri::command(rename_all = "camelCase")]
+fn select_workspace(
+    state: tauri::State<'_, OperationsState>,
+    path: String,
+) -> Result<String, String> {
+    state
+        .select_workspace(std::path::Path::new(&path))
+        .map(|path| path.display().to_string())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn start_app(state: tauri::State<'_, OperationsState>, app_id: String) -> Result<(), String> {
+    state.start_app(&app_id)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn stop_app(state: tauri::State<'_, OperationsState>, app_id: String) -> Result<(), String> {
+    state.stop_app(&app_id)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn get_app_statuses(
+    state: tauri::State<'_, OperationsState>,
+) -> Result<Vec<workspace::AppRuntime>, String> {
+    state.app_statuses()
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn run_gate(
+    state: tauri::State<'_, OperationsState>,
+    gate_id: String,
+) -> Result<tasks::GateResult, String> {
+    tasks::run_gate(&state, &gate_id)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn open_target(state: tauri::State<'_, OperationsState>, target_id: String) -> Result<(), String> {
+    state.open_target(&target_id)
+}
+
+#[tauri::command]
+fn run_doctor(state: tauri::State<'_, OperationsState>) -> Vec<doctor::DoctorCheck> {
+    doctor::run_doctor(&state)
+}
+
+#[tauri::command]
+fn get_workspace_pulse(
+    state: tauri::State<'_, OperationsState>,
+) -> Result<doctor::WorkspacePulse, String> {
+    doctor::workspace_pulse(&state)
+}
+
 pub fn run() {
     tauri::Builder::default()
         .manage(NativeState::new())
+        .manage(OperationsState::discover())
         .invoke_handler(tauri::generate_handler![
             get_snapshot,
             terminate_process,
-            terminate_processes
+            terminate_processes,
+            select_workspace,
+            start_app,
+            stop_app,
+            get_app_statuses,
+            run_gate,
+            open_target,
+            run_doctor,
+            get_workspace_pulse
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");
