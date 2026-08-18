@@ -7,6 +7,7 @@ Matriz/
 ├─ apps/
 │  ├─ matriz-hub/   (Next.js 15 + public-contract.ts)
 │  ├─ matriz-workbench/ (Next.js local-first + MCP STDIO)
+│  ├─ matriz-desktop/ (Tauri 2 + React, Windows developer utility)
 │  ├─ spot/
 │  ├─ seumei/
 │  ├─ contracts/

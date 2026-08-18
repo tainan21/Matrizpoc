@@ -1,5 +1,19 @@
 # Matriz Decision Log
 
+## 2026-08-18 — Tauri establishes the Matriz native application boundary
+
+- **Decision:** create `apps/matriz-desktop` as Matriz Control using Tauri 2,
+  Rust and the existing React/MatrizLib surface; ship Windows x64 through a
+  current-user NSIS installer.
+- **Reason:** the first desktop product needs low idle cost, fast startup and
+  direct Windows process/tray integration without embedding a second Node
+  runtime or exposing a generic shell to the renderer.
+- **Impact:** Win32 authority stays app-local and every privileged operation is
+  allowlisted in Rust. The first release provides nine compact developer
+  capabilities and becomes the reference shape for future native apps.
+- **Review when:** a second native app proves a stable shared shell contract,
+  a signed update channel exists, or macOS/Linux become release targets.
+
 ## 2026-08-18 — MatrizLib sound language is a public design-ui subpath
 
 - **Decision:** publish typed semantic sound contracts, registry, packs,

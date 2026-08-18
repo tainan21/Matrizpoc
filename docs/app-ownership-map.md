@@ -72,6 +72,18 @@ como dimensão de cada app: a estratégia padrão vive localmente em
 - **Auth**: estratégia padrão = **magic link**. UI âmbar via
   `appThemes.willdash`.
 
+### matriz-desktop
+
+- **Responsabilidade**: utility Windows local para portas, processos e ações
+  operacionais allowlisted do workspace Matriz.
+- **Expõe**: somente manifest via `public-contract.ts`.
+- **Não expõe**: Win32, shell, filesystem, processos ou internals da UI.
+- **Pode importar**: superfícies públicas domain-free de `packages/*`.
+- **Não pode importar**: `src/**` ou `app/**` de outro app.
+- **Autoridade privilegiada**: exclusiva de `src-tauri`; o renderer consome
+  apenas o gateway tipado.
+- **Auth**: não participa de onboarding nem autenticação web.
+
 ## Packages (resumo)
 
 Detalhe completo em cada `packages/*/README.md`. Regras gerais:

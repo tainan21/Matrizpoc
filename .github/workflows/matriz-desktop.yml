@@ -1,0 +1,42 @@
+name: matriz-desktop
+
+on:
+  pull_request:
+    paths:
+      - "apps/matriz-desktop/**"
+      - "packages/design/**"
+      - "packages/foundation/**"
+      - "packages/integration/**"
+      - ".github/workflows/matriz-desktop.yml"
+  workflow_dispatch:
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/matriz-desktop/src-tauri
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @matriz/app-matriz-desktop test
+      - run: pnpm --filter @matriz/app-matriz-desktop typecheck
+      - run: pnpm --filter @matriz/app-matriz-desktop lint
+      - run: cargo test --manifest-path apps/matriz-desktop/src-tauri/Cargo.toml
+      - run: cargo clippy --manifest-path apps/matriz-desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+      - run: pnpm --filter @matriz/app-matriz-desktop package
+      - uses: actions/upload-artifact@v4
+        with:
+          name: matriz-control-windows-x64
+          path: apps/matriz-desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error

@@ -30,7 +30,21 @@
     }
   },
   "bundle": {
-    "active": false,
-    "targets": ["nsis"]
+    "active": true,
+    "targets": ["nsis"],
+    "publisher": "Matriz",
+    "copyright": "Copyright © 2026 Matriz",
+    "category": "DeveloperTool",
+    "shortDescription": "Controle local do ecossistema Matriz",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "displayLanguageSelector": false
+      }
+    }
   }
 }

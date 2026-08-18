@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "tauri dev",
     "dev:web": "vite --host 127.0.0.1 --port 1420",
     "build": "vite build",
+    "build:native": "tauri build --no-bundle",
+    "package": "tauri build --bundles nsis",
     "test": "vitest run --config vitest.config.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src public-contract.ts --max-warnings 0",
