@@ -80,7 +80,7 @@ describe("Matriz Control", () => {
   it("keeps all primary modes keyboard reachable", async () => {
     render(<ControlApp gateway={gateway()} feedback={{ play: vi.fn() }} />)
     await screen.findByText("3000")
-    for (const label of ["Portas", "Apps", "Ações", "Doctor", "Ajustes"]) {
+    for (const label of ["Portas", "Apps", "Terminal", "Ações", "Doctor", "Ajustes"]) {
       expect(screen.getByRole("button", { name: label })).toBeVisible()
     }
   })

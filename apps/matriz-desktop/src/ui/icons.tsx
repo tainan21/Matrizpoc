@@ -15,6 +15,9 @@ export const Icons = {
   apps: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><rect x="4" y="4" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><rect x="14" y="4" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><rect x="4" y="14" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><rect x="14" y="14" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/></Icon>
   ),
+  terminal: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><path d="m5 7 4 4-4 4m7 1h7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" strokeWidth="1.5"/></Icon>
+  ),
   actions: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><path d="M13 2 5 14h6l-1 8 9-13h-6V2Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></Icon>
   ),

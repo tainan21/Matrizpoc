@@ -13,8 +13,11 @@ import type {
 import { Icons } from "./icons"
 import { filterPorts, presentPorts } from "./presenters"
 import { useDesktop } from "./use-desktop"
+import { TerminalPane } from "./terminal/terminal-pane"
+import { TerminalView } from "./terminal/terminal-view"
+import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
 
-type View = "ports" | "apps" | "actions" | "doctor" | "settings"
+type View = "ports" | "apps" | "terminal" | "actions" | "doctor" | "settings"
 type SoundId =
   | "system.start"
   | "system.end"
@@ -32,6 +35,7 @@ export interface Feedback {
 const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = [
   { id: "ports", label: "Portas", icon: "ports" },
   { id: "apps", label: "Apps", icon: "apps" },
+  { id: "terminal", label: "Terminal", icon: "terminal" },
   { id: "actions", label: "Ações", icon: "actions" },
   { id: "doctor", label: "Doctor", icon: "doctor" },
   { id: "settings", label: "Ajustes", icon: "settings" },
@@ -39,6 +43,7 @@ const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = 
 
 export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; feedback: Feedback }) {
   const desktop = useDesktop(gateway)
+  const terminal = useTerminalRuntime(gateway)
   const [view, setView] = useState<View>("ports")
   const [query, setQuery] = useState("")
   const [confirmAll, setConfirmAll] = useState(false)
@@ -120,7 +125,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   }
 
   return (
-    <div className="control-shell" data-matrizlib="0.1.0" data-theme="dark">
+    <div className={`control-shell${terminal.state.sessions.length && view !== "terminal" ? " has-terminal-dock" : ""}`} data-matrizlib="0.1.0" data-theme="dark">
       <header className="titlebar" data-tauri-drag-region>
         <span className="mark" aria-hidden="true">M</span>
         <strong data-tauri-drag-region>MATRIZ / CONTROL</strong>
@@ -149,10 +154,21 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         ) : null}
 
         {view === "apps" ? <AppsView apps={apps} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} /> : null}
+        {view === "terminal" ? <TerminalView state={terminal.state} create={() => void terminal.create()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
         {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { await gateway.selectWorkspace(workspacePath); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>
+
+      {terminal.state.sessions.length && view !== "terminal" ? (
+        <aside className={`terminal-dock${terminal.state.dockOpen ? " is-open" : ""}`}>
+          {terminal.state.dockOpen ? (
+            <><button className="terminal-dock-toggle" onClick={() => terminal.setDockOpen(false)}>TERMINAL ↓</button><TerminalView compact state={terminal.state} create={() => void terminal.create()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /></>
+          ) : (
+            <button className="terminal-dock-summary" onClick={() => terminal.setDockOpen(true)}><span className={`terminal-state terminal-state--${terminal.state.sessions.some(({ status }) => status === "failed") ? "failed" : "running"}`} /><strong>TERMINAL</strong><span>{terminal.state.sessions.length.toString().padStart(2, "0")}</span><small>{terminal.state.sessions.find(({ id }) => id === terminal.state.activeId)?.title}</small><b>↑</b></button>
+          )}
+        </aside>
+      ) : null}
 
       <footer><span className={desktop.message.includes("não") ? "error" : ""} role="status" aria-live="polite">{desktop.message}</span><kbd>Ctrl Shift M</kbd></footer>
     </div>
