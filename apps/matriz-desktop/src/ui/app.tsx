@@ -52,7 +52,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   const [query, setQuery] = useState("")
   const [confirmAll, setConfirmAll] = useState(false)
   const [apps, setApps] = useState<readonly AppRuntime[]>([])
-  const [nativeApp, setNativeApp] = useState<NativeAppRuntime>({ appId: "seumei", state: "not-built" })
+  const [nativeApp, setNativeApp] = useState<NativeAppRuntime>({ appId: "matriz-admin", state: "not-built" })
   const [checks, setChecks] = useState<readonly DoctorCheck[]>([])
   const [pulse, setPulse] = useState<WorkspacePulse>()
   const [activeGate, setActiveGate] = useState<GateId>()
@@ -80,7 +80,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   useEffect(() => {
     if (view === "apps") {
       void gateway.appStatuses().then(setApps).catch(() => setApps([]))
-      void gateway.getNativeAppRuntime().then(setNativeApp).catch(() => setNativeApp({ appId: "seumei", state: "not-built" }))
+      void gateway.getNativeAppRuntime().then(setNativeApp).catch(() => setNativeApp({ appId: "matriz-admin", state: "not-built" }))
     }
     if (view === "doctor") void gateway.doctor().then(setChecks).catch(() => setChecks([]))
     if (view === "actions") void gateway.workspacePulse().then(setPulse).catch(() => setPulse(undefined))
@@ -215,12 +215,12 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 }
 
 function AppsView({ apps, nativeApp, setNativeApp, gateway, refresh, feedback, startOperation }: { apps: readonly AppRuntime[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {
-  const [seumeiMode, setSeumeiMode] = useState<"web" | "native">("web")
+  const [adminMode, setAdminMode] = useState<"web" | "native">("web")
   const states = new Map(apps.map((app) => [app.id, app]))
   const act = async (id: (typeof MATRIZ_DESKTOP_APPS)[number]["id"], ready: boolean) => {
     try {
-      if (id === "seumei" && seumeiMode === "native") {
-        if (nativeApp.state === "not-built") await startOperation("app.seumei.native.build")
+      if (id === "matriz-admin" && adminMode === "native") {
+        if (nativeApp.state === "not-built") await startOperation("app.matriz-admin.native.build")
         else if (nativeApp.state === "built") setNativeApp(await gateway.installNativeApp())
         else setNativeApp(await gateway.startNativeApp())
       } else if (ready) await gateway.stopApp(id)
@@ -230,7 +230,7 @@ function AppsView({ apps, nativeApp, setNativeApp, gateway, refresh, feedback, s
     } catch { void feedback.play("error") }
   }
   const nativeAction = nativeApp.state === "not-built" ? "Gerar" : nativeApp.state === "built" ? "Instalar" : "Abrir"
-  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 08</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const native = app.id === "seumei" && seumeiMode === "native"; return <article className={`app-tile${app.id === "seumei" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${native ? (nativeApp.state === "running" ? "ready" : "stopped") : (ready ? "ready" : "stopped")}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : `:${app.port}`}</small></div>{app.id === "seumei" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Seumei"><button aria-label="Seumei Web" aria-pressed={seumeiMode === "web"} onClick={() => setSeumeiMode("web")}>WEB</button><button aria-label="Seumei Nativo" aria-pressed={seumeiMode === "native"} onClick={() => setSeumeiMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Seumei nativo` : `${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{!native && ready ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
+  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 09</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const native = app.id === "matriz-admin" && adminMode === "native"; return <article className={`app-tile${app.id === "matriz-admin" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${native ? (nativeApp.state === "running" ? "ready" : "stopped") : (ready ? "ready" : "stopped")}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : `:${app.port}`}</small></div>{app.id === "matriz-admin" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Matriz Admin"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Matriz Admin nativo` : `${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{!native && ready ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
 }
 
 function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback, startOperation }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {

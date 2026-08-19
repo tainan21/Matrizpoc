@@ -36,7 +36,7 @@ export const unavailableGateway: DesktopGateway = {
   listTerminals: async () => [],
   subscribeTerminal: async () => undefined,
   startManagedOperation: async () => unavailable(),
-  getNativeAppRuntime: async () => ({ appId: "seumei", state: "not-built" }),
+  getNativeAppRuntime: async () => ({ appId: "matriz-admin", state: "not-built" }),
   installNativeApp: async () => unavailable(),
   startNativeApp: async () => unavailable(),
 }

@@ -10,7 +10,7 @@ export interface DesktopAppDefinition {
 export const MATRIZ_DESKTOP_APPS: readonly DesktopAppDefinition[] = Object.freeze([
   { id: "matriz-hub", label: "Hub", packageName: "@matriz/app-matriz-hub", port: 3000 },
   { id: "spot", label: "Spot", packageName: "@matriz/app-spot", port: 3001 },
-  { id: "seumei", label: "Seumei", packageName: "@matriz/app-seumei", port: 3002 },
+  { id: "matriz-admin", label: "Matriz Admin", packageName: "@matriz/app-matriz-admin", port: 3002 },
   { id: "contracts", label: "Contracts", packageName: "@matriz/app-contracts", port: 3003 },
   { id: "willdash", label: "Willdash", packageName: "@matriz/app-willdash", port: 3004 },
   {
@@ -21,6 +21,7 @@ export const MATRIZ_DESKTOP_APPS: readonly DesktopAppDefinition[] = Object.freez
   },
   { id: "sites", label: "Sites", packageName: "@matriz/app-sites", port: 3006 },
   { id: "matrizlib", label: "MatrizLib", packageName: "@matriz/app-matrizlib", port: 3007 },
+  { id: "seumei", label: "Seumei", packageName: "@matriz/app-seumei", port: 3008 },
 ])
 
 export const GATES: readonly { readonly id: GateId; readonly label: string }[] = Object.freeze([
@@ -47,8 +48,8 @@ export const MANAGED_OPERATIONS: readonly {
     id: `app.${app.id}.web` as const,
     label: `${app.label} / Web`,
   })),
-  { id: "app.seumei.native.build", label: "Seumei / Gerar" },
-  { id: "app.seumei.native.install", label: "Seumei / Instalar" },
-  { id: "app.seumei.native.start", label: "Seumei / Nativo" },
+  { id: "app.matriz-admin.native.build", label: "Matriz Admin / Gerar" },
+  { id: "app.matriz-admin.native.install", label: "Matriz Admin / Instalar" },
+  { id: "app.matriz-admin.native.start", label: "Matriz Admin / Nativo" },
   ...GATES.map((gate) => ({ id: `gate.${gate.id}` as const, label: gate.label })),
 ])

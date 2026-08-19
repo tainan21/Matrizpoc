@@ -34,7 +34,7 @@ pub struct ManagedOperationDefinition {
     pub args: Vec<String>,
 }
 
-const APPS: [AppDefinition; 8] = [
+const APPS: [AppDefinition; 9] = [
     AppDefinition {
         id: "matriz-hub",
         package_name: "@matriz/app-matriz-hub",
@@ -46,8 +46,8 @@ const APPS: [AppDefinition; 8] = [
         port: 3001,
     },
     AppDefinition {
-        id: "seumei",
-        package_name: "@matriz/app-seumei",
+        id: "matriz-admin",
+        package_name: "@matriz/app-matriz-admin",
         port: 3002,
     },
     AppDefinition {
@@ -74,6 +74,11 @@ const APPS: [AppDefinition; 8] = [
         id: "matrizlib",
         package_name: "@matriz/app-matrizlib",
         port: 3007,
+    },
+    AppDefinition {
+        id: "seumei",
+        package_name: "@matriz/app-seumei",
+        port: 3008,
     },
 ];
 
@@ -153,25 +158,25 @@ pub fn managed_operation(id: &str) -> Result<ManagedOperationDefinition, String>
         });
     }
     match id {
-        "app.seumei.native.build" => Ok(ManagedOperationDefinition {
+        "app.matriz-admin.native.build" => Ok(ManagedOperationDefinition {
             id: id.to_owned(),
-            title: "SEUMEI / BUILD".into(),
+            title: "MATRIZ ADMIN / BUILD".into(),
             kind: ManagedOperationKind::Command,
             program: Some("pnpm.cmd".into()),
-            args: ["--filter", "@matriz/app-seumei", "package:desktop"]
+            args: ["--filter", "@matriz/app-matriz-admin", "package:desktop"]
                 .map(str::to_owned)
                 .into(),
         }),
-        "app.seumei.native.install" => Ok(ManagedOperationDefinition {
+        "app.matriz-admin.native.install" => Ok(ManagedOperationDefinition {
             id: id.to_owned(),
-            title: "SEUMEI / INSTALL".into(),
+            title: "MATRIZ ADMIN / INSTALL".into(),
             kind: ManagedOperationKind::NativeInstall,
             program: None,
             args: Vec::new(),
         }),
-        "app.seumei.native.start" => Ok(ManagedOperationDefinition {
+        "app.matriz-admin.native.start" => Ok(ManagedOperationDefinition {
             id: id.to_owned(),
-            title: "SEUMEI / NATIVE".into(),
+            title: "MATRIZ ADMIN / NATIVE".into(),
             kind: ManagedOperationKind::NativeStart,
             program: None,
             args: Vec::new(),

@@ -1,6 +1,7 @@
 export type DesktopAppId =
   | "matriz-hub"
   | "spot"
+  | "matriz-admin"
   | "seumei"
   | "contracts"
   | "willdash"
@@ -14,9 +15,9 @@ export type PortState = "external" | "starting" | "ready" | "degraded"
 export type TerminalStatus = "starting" | "running" | "succeeded" | "failed" | "exited"
 export type ManagedOperationId =
   | `app.${DesktopAppId}.web`
-  | "app.seumei.native.build"
-  | "app.seumei.native.install"
-  | "app.seumei.native.start"
+  | "app.matriz-admin.native.build"
+  | "app.matriz-admin.native.install"
+  | "app.matriz-admin.native.start"
   | `gate.${GateId}`
 
 export interface PortProcess {
@@ -96,7 +97,7 @@ export interface TerminalChunk {
 }
 
 export interface NativeAppRuntime {
-  readonly appId: "seumei"
+  readonly appId: "matriz-admin"
   readonly state: "not-built" | "built" | "installed" | "running"
   readonly version?: string
 }

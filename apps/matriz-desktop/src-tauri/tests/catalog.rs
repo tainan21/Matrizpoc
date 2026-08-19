@@ -30,13 +30,13 @@ fn managed_operations_resolve_programs_and_arguments_without_shell_strings() {
     let gate = managed_operation("gate.typecheck").expect("known gate operation");
     assert_eq!(gate.args, ["run", "typecheck"].map(str::to_owned));
 
-    let build = managed_operation("app.seumei.native.build").expect("known native build");
+    let build = managed_operation("app.matriz-admin.native.build").expect("known native build");
     assert_eq!(
         build.args,
-        ["--filter", "@matriz/app-seumei", "package:desktop"].map(str::to_owned)
+        ["--filter", "@matriz/app-matriz-admin", "package:desktop"].map(str::to_owned)
     );
     assert_eq!(
-        managed_operation("app.seumei.native.install")
+        managed_operation("app.matriz-admin.native.install")
             .expect("known native install")
             .kind,
         ManagedOperationKind::NativeInstall

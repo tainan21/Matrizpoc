@@ -45,7 +45,7 @@ describe("Tauri desktop gateway", () => {
     await gateway.closeTerminal("session-1")
     await gateway.listTerminals()
     await gateway.subscribeTerminal(listener)
-    await gateway.startManagedOperation("app.seumei.native.build")
+    await gateway.startManagedOperation("app.matriz-admin.native.build")
     await gateway.getNativeAppRuntime()
     await gateway.installNativeApp()
     await gateway.startNativeApp()
@@ -59,7 +59,7 @@ describe("Tauri desktop gateway", () => {
       ["close_terminal", { sessionId: "session-1" }],
       ["list_terminals"],
       ["subscribe_terminal", { onEvent: channel }],
-      ["start_managed_operation", { operationId: "app.seumei.native.build" }],
+      ["start_managed_operation", { operationId: "app.matriz-admin.native.build" }],
       ["get_native_app_runtime"],
       ["install_native_app"],
       ["start_native_app"],
