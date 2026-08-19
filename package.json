@@ -5,7 +5,7 @@
   "description": "Matriz Monorepo POC V1 — multi-app ecosystem with shared packages, manifests, registry, external links and event bus.",
   "packageManager": "pnpm@9.12.0",
   "scripts": {
-    "build": "turbo run build --concurrency=4",
+    "build": "turbo run build --concurrency=1",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint --concurrency=4",
     "typecheck": "turbo run typecheck --concurrency=4",
