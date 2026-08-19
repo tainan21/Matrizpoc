@@ -14,9 +14,11 @@ const snapshot: SeumeiDesktopSnapshot = {
   owners: [{ id: "owner", ownerName: "Joana", email: "joana@example.com", phoneDisplay: "—", bio: "Produtora", establishmentName: "Bar da Matriz", establishmentLocation: "São Paulo" }],
 }
 
-describe("Seumei Desktop", () => {
+describe("Matriz Admin Desktop", () => {
   it("keeps the local runtime explicit and navigates without a web router", () => {
     render(<SeumeiDesktopApp snapshot={snapshot} play={vi.fn()} />)
+    expect(screen.getByText("MATRIZ ADMIN / DESKTOP")).toBeVisible()
+    expect(screen.getByRole("navigation", { name: "Matriz Admin" })).toBeVisible()
     expect(screen.getAllByText("LOCAL")).toHaveLength(2)
     expect(screen.getByText("Bar da Matriz")).toBeVisible()
 

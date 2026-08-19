@@ -5,9 +5,7 @@ import type {
   CreateContractFromEstablishmentInput,
   ContractSummaryDTO,
 } from "@matriz/integration-api-contracts"
-import { asAppId } from "@matriz/foundation-types"
 import { monorepoConfig } from "@matriz/platform-config"
-import { getGlobalEventBus } from "@matriz/integration-events"
 
 export interface SeumeiContractsGateway {
   requestContractFromEstablishment(
@@ -31,25 +29,15 @@ export function createHttpSeumeiContractsGateway(): SeumeiContractsGateway {
 }
 
 export function createInBrowserSeumeiContractsGateway(): SeumeiContractsGateway {
-  const bus = getGlobalEventBus()
   return {
     async requestContractFromEstablishment(input) {
-      bus.emit("seumei.establishment.selected", {
-        sourceApp: asAppId("seumei"),
-        tenantId: input.tenantId,
-        payload: {
-          establishmentId: input.establishment.id,
-          tenantId: input.tenantId,
-          name: input.establishment.name,
-        },
-      })
       const now = new Date().toISOString()
       const summary: ContractSummaryDTO = {
         id: `ctr_${input.establishment.id}`,
         tenantId: input.tenantId,
         title: `Servico - ${input.establishment.name}`,
         status: "draft",
-        originApp: "seumei",
+        originApp: "matriz-admin",
         createdAt: now,
         parties: [
           { name: input.establishment.ownerName, role: "Prestador" },

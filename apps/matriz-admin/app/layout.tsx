@@ -8,12 +8,12 @@ import { SeumeiAuthAdoption } from "../src/auth/provider"
 import { EcosystemAccess } from "@matriz/flows-ecosystem"
 
 export const metadata: Metadata = {
-  title: "Seumei — Matriz",
+  title: "Matriz Admin",
   description: "App de estabelecimentos e operação do ecossistema Matriz.",
 }
 
-export default function SeumeiRootLayout({ children }: { children: ReactNode }) {
-  const cssVars = themeToCssVars(appThemes.seumei)
+export default function MatrizAdminRootLayout({ children }: { children: ReactNode }) {
+  const cssVars = themeToCssVars(appThemes["matriz-admin"])
   const styleVars = Object.entries(cssVars)
     .map(([k, v]) => `${k}: ${v};`)
     .join("\n")
@@ -24,8 +24,8 @@ export default function SeumeiRootLayout({ children }: { children: ReactNode }) 
         <style>{`:root { ${styleVars} }`}</style>
       </head>
       <body style={{ margin: 0, background: "var(--color-background)", color: "var(--color-foreground)" }}>
-        <ThemeController appId="seumei" />
-        <EcosystemAccess appId="seumei" />
+        <ThemeController appId="matriz-admin" />
+        <EcosystemAccess appId="matriz-admin" />
         <BootstrapGuard>
           <SeumeiAuthAdoption>{children}</SeumeiAuthAdoption>
         </BootstrapGuard>

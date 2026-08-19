@@ -1,5 +1,5 @@
 /**
- * Seumei — Bootstrap (L11).
+ * Matriz Admin — Bootstrap (L11).
  *
  * Ponto de entrada unico em runtime. Chamado pelo `app/layout.tsx`.
  * Responsabilidades:
@@ -20,49 +20,41 @@ import {
 } from "@matriz/platform-telemetry"
 import { manifest } from "../manifest/manifest"
 
-const SEUMEI_APP_ID = asAppId("seumei")
+const MATRIZ_ADMIN_APP_ID = asAppId("matriz-admin")
 let booted = false
 let telemetry: TelemetryClient | undefined
 
-export function getSeumeiTelemetry(): TelemetryClient {
+export function getMatrizAdminTelemetry(): TelemetryClient {
   if (!telemetry) {
-    telemetry = createTelemetryClient(SEUMEI_APP_ID)
+    telemetry = createTelemetryClient(MATRIZ_ADMIN_APP_ID)
     registerTelemetryClient(telemetry)
   }
   return telemetry
 }
 
-export function bootstrapSeumei(): { appId: string } {
+export function bootstrapMatrizAdmin(): { appId: string } {
   if (booted) return { appId: manifest.appId }
 
   const registry = getGlobalRegistry()
   registry.registerApp(manifest, {
-    baseUrl: monorepoConfig.baseUrls.seumei,
+    baseUrl: monorepoConfig.baseUrls["matriz-admin"],
     enabled: true,
   })
 
-  const t = getSeumeiTelemetry()
+  const t = getMatrizAdminTelemetry()
   const bus = getGlobalEventBus()
   bus.on("contract.created", (envelope) => {
-    if (envelope.payload.originApp !== "seumei") return
+    if (envelope.payload.originApp !== "matriz-admin") return
     t.track({
       tenantId: asTenantId(envelope.tenantId),
-      type: "seumei.contract.confirmed",
+      type: "matriz-admin.contract.confirmed",
       properties: { contractId: envelope.payload.contractId },
     })
   })
-  bus.on("seumei.establishment.selected", (envelope) => {
-    t.track({
-      tenantId: asTenantId(envelope.tenantId),
-      type: "seumei.establishment.selected",
-      properties: { establishmentId: envelope.payload.establishmentId, name: envelope.payload.name },
-    })
-  })
-
-  registerAppStep(SEUMEI_APP_ID, {
-    title: "Operacao do estabelecimento",
-    description: "Tipo, regioes atendidas e modelo de operacao.",
-    payloadSchema: appOnboardingPayloadSchemas.seumei,
+  registerAppStep(MATRIZ_ADMIN_APP_ID, {
+    title: "Administracao Matriz",
+    description: "Preferencias administrativas do ecossistema.",
+    payloadSchema: appOnboardingPayloadSchemas["matriz-admin"],
   })
 
   booted = true

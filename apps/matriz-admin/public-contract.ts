@@ -1,5 +1,5 @@
 /**
- * Seumei — PUBLIC CONTRACT (manifest-only, L2/L3).
+ * Matriz Admin — PUBLIC CONTRACT (manifest-only, L2/L3).
  */
 export { manifest } from "./src/manifest/manifest"
-export type { SeumeiManifest } from "./src/manifest/manifest"
+export type { MatrizAdminManifest } from "./src/manifest/manifest"

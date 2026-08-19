@@ -29,15 +29,15 @@ export function SeumeiDesktopApp({
   return (
     <div className="seumei-shell" data-matrizlib="0.1.0" data-theme="dark">
       <header className="seumei-titlebar" data-tauri-drag-region>
-        <span className="seumei-mark" aria-hidden="true">S</span>
-        <strong data-tauri-drag-region>SEUMEI</strong>
+        <span className="seumei-mark" aria-hidden="true">M</span>
+        <strong data-tauri-drag-region>MATRIZ ADMIN</strong>
         <span className="runtime-pill"><i />LOCAL</span>
         <WindowButtons />
       </header>
 
       <aside className="seumei-rail">
         <div className="rail-index"><small>OP / 01</small><b>OPERAÇÃO</b></div>
-        <nav aria-label="Seumei">
+        <nav aria-label="Matriz Admin">
           {NAV.map((item) => <button key={item.id} type="button" aria-label={item.label} aria-current={view === item.id ? "page" : undefined} onClick={() => select(item.id)}><span aria-hidden="true">{item.glyph}</span><b>{item.label}</b></button>)}
         </nav>
         <div className="rail-state"><i /><span>SYNC</span><b>LOCAL</b></div>
@@ -49,7 +49,7 @@ export function SeumeiDesktopApp({
         {view === "owners" ? <Owners snapshot={snapshot} /> : null}
         {view === "settings" ? <Settings sounds={sounds} setSounds={(enabled) => { setSounds(enabled); if (enabled) void play("interaction") }} /> : null}
       </main>
-      <footer className="seumei-status"><span>SEUMEI / DESKTOP</span><b>{new Date().getFullYear()}</b><span>v0.1.0</span></footer>
+      <footer className="seumei-status"><span>MATRIZ ADMIN / DESKTOP</span><b>{new Date().getFullYear()}</b><span>v0.1.0</span></footer>
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { sharedSteps, getRegisteredAppStep } from "@matriz/flows-onboarding"
 import { asAppId } from "@matriz/foundation-types"
 
 export default function SeumeiOnboardingPage() {
-  const appStep = getRegisteredAppStep(asAppId("seumei"))
+  const appStep = getRegisteredAppStep(asAppId("matriz-admin"))
 
   return (
     <Stack gap={6}>

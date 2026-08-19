@@ -23,6 +23,7 @@ import type { AuthIdentity } from "../types"
 const KNOWN_APP_IDS: readonly AppIdLiteral[] = [
   "matriz-hub",
   "spot",
+  "matriz-admin",
   "seumei",
   "contracts",
   "willdash",

@@ -1,18 +1,18 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Seumei",
+  "productName": "Matriz Admin",
   "version": "0.1.0",
-  "identifier": "com.matriz.seumei",
+  "identifier": "com.matriz.admin",
   "build": {
-    "beforeDevCommand": "corepack pnpm --filter @matriz/app-seumei dev:desktop:web",
+    "beforeDevCommand": "corepack pnpm --filter @matriz/app-matriz-admin dev:desktop:web",
     "devUrl": "http://127.0.0.1:1421",
-    "beforeBuildCommand": "corepack pnpm --filter @matriz/app-seumei build:desktop:web",
+    "beforeBuildCommand": "corepack pnpm --filter @matriz/app-matriz-admin build:desktop:web",
     "frontendDist": "../dist"
   },
   "app": {
     "windows": [{
       "label": "main",
-      "title": "Seumei",
+      "title": "Matriz Admin",
       "width": 1040,
       "height": 700,
       "minWidth": 620,
@@ -33,7 +33,7 @@
     "publisher": "Matriz",
     "copyright": "Copyright © 2026 Matriz",
     "category": "Business",
-    "shortDescription": "Operação local Seumei",
+    "shortDescription": "Operação local Matriz Admin",
     "windows": {
       "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true },
       "nsis": { "installMode": "currentUser", "displayLanguageSelector": false }

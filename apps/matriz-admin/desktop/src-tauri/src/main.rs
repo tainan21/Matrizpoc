@@ -1,3 +1,3 @@
 fn main() {
-    seumei_desktop_native::run()
+    matriz_admin_desktop_native::run()
 }

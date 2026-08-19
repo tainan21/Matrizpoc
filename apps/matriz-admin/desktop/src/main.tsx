@@ -13,9 +13,9 @@ import { SeumeiDesktopApp } from "./app"
 import "./styles.css"
 
 const root = document.getElementById("root")
-if (!root) throw new Error("Seumei desktop root not found")
+if (!root) throw new Error("Matriz Admin desktop root not found")
 
-const store = createNamespacedStore(createLocalStorageStore(), "seumei-desktop:v1")
+const store = createNamespacedStore(createLocalStorageStore(), "matriz-admin-desktop:v1")
 const container = createSeumeiContainer(store)
 const snapshot = await toDesktopSnapshot(container.useCases, asTenantId("tenant-matriz"))
 

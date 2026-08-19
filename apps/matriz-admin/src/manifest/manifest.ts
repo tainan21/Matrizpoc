@@ -1,11 +1,11 @@
 /**
- * Seumei — App Manifest (source of truth per L2).
+ * Matriz Admin — App Manifest (source of truth per L2).
  */
 import type { AppManifestDTO } from "@matriz/integration-api-contracts"
 
 export const manifest: AppManifestDTO = {
-  appId: "seumei",
-  name: "Seumei",
+  appId: "matriz-admin",
+  name: "Matriz Admin",
   description:
     "Gestao de estabelecimentos e operacao. Permite selecionar estabelecimento e gerar contrato via Contracts.",
   version: "0.1.0",
@@ -33,7 +33,7 @@ export const manifest: AppManifestDTO = {
       description: "Solicita geracao de contrato a partir de estabelecimento.",
     },
   ],
-  eventsProduced: ["seumei.establishment.selected"],
+  eventsProduced: [],
   eventsConsumed: ["onboarding.completed", "contract.created"],
   integrations: [
     {
@@ -52,10 +52,10 @@ export const manifest: AppManifestDTO = {
     hasSpecificStep: true,
     specificStepTitle: "Perfil de estabelecimento",
   },
-  navigationEntry: { label: "Seumei", path: "/", order: 2 },
+  navigationEntry: { label: "Matriz Admin", path: "/", order: 2 },
   ownership: {
     domainSummary: "Dominio de estabelecimentos e operacao.",
-    maintainers: ["matriz-seumei"],
+    maintainers: ["matriz-admin"],
   },
   widgets: [
     {
@@ -66,4 +66,4 @@ export const manifest: AppManifestDTO = {
   ],
 }
 
-export type SeumeiManifest = typeof manifest
+export type MatrizAdminManifest = typeof manifest

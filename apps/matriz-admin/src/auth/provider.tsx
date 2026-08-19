@@ -4,7 +4,7 @@ import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { TenantProvider } from "@matriz/access-tenants/client"
-import { seumeiAuthConfig } from "./config"
+import { matrizAdminAuthConfig } from "./config"
 import { AppShell } from "../ui/components/AppShell"
 
 function RedirectToLogin(): null {
@@ -91,7 +91,7 @@ function SeumeiAuthShell({ children }: { children: React.ReactNode }) {
 
 export function SeumeiAuthAdoption({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider config={seumeiAuthConfig}>
+    <AuthProvider config={matrizAdminAuthConfig}>
       <TenantProvider>
         <SeumeiAuthShell>{children}</SeumeiAuthShell>
       </TenantProvider>

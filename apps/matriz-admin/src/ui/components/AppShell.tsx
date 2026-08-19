@@ -16,7 +16,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <Container>
           <div className="flex items-center justify-between gap-6 py-4">
             <Link href="/" className="flex items-center gap-3 text-surface-fg no-underline">
-              <Badge tone="brand">Seu Mei</Badge>
+              <Badge tone="brand">Matriz Admin</Badge>
               <span className="text-sm text-muted-fg">{manifest.description}</span>
             </Link>
             <nav className="flex gap-4">
@@ -36,7 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               Voltar ao Hub
             </a>
-            <ThemeToggle appId="seumei" />
+            <ThemeToggle appId="matriz-admin" />
           </div>
         </Container>
       </header>

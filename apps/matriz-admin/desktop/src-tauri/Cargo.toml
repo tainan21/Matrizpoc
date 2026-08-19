@@ -1,11 +1,11 @@
 [package]
-name = "seumei-desktop"
+name = "matriz-admin-desktop"
 version = "0.1.0"
-description = "Seumei native local operations app"
+description = "Matriz Admin native operations app"
 edition = "2021"
 
 [lib]
-name = "seumei_desktop_native"
+name = "matriz_admin_desktop_native"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]
