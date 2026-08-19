@@ -86,7 +86,8 @@ The split is atomic at repository level:
 - new package: `@matriz/app-seumei`;
 - new public identity: `seumei`.
 
-The new Seumei takes port `3007`. Matriz Admin retains port `3002` so the
+The new Seumei takes port `3008`; port `3007` remains reserved for MatrizLib.
+Matriz Admin retains port `3002` so the
 existing native Control workflow and local operational expectations have a
 stable administrative endpoint. Hub, registry, ownership documentation,
 visual audit tooling, deployment matrices, auth strategies, themes, and smoke
@@ -106,7 +107,7 @@ produces or obtains a session carrying the stable Seumei app identity and a
 tenant ID. A protected home redirects unauthenticated users to `/login`.
 
 Matriz Hub imports the new Seumei manifest through its public contract and the
-Matriz Admin manifest independently. Navigation into Seumei targets port 3007;
+Matriz Admin manifest independently. Navigation into Seumei targets port 3008;
 navigation into Matriz Admin targets port 3002.
 
 ## Reference-source migration
