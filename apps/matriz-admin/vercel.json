@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm -w turbo run build --filter=@matriz/app-seumei...",
+  "buildCommand": "pnpm -w turbo run build --filter=@matriz/app-matriz-admin...",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "nextjs",
   "outputDirectory": ".next",

@@ -24,7 +24,8 @@ native consumer exists.
   gates; fixed Explorer/Terminal/app jumps; six bounded PowerShell tabs with
   observable app and gate output.
 - **P2:** versioned local preferences for sound, volume, close-to-tray and
-  Windows startup; Web/Native lifecycle for standalone Seumei.
+  Windows startup; Web/Native lifecycle for standalone Matriz Admin and a
+  separate Seumei Web lifecycle on port 3008.
 
 `Ctrl+K` opens the Matriz Command Deck. It ranks apps, gates, targets, sessions
 and currently observed PIDs; destructive actions require a second explicit
@@ -68,6 +69,6 @@ bootstrapper only when the runtime is absent.
   capability only when a concrete product behavior exists.
 - Updater signing/distribution is reserved for the first trusted release
   channel; the NSIS artifact is currently unsigned.
-- Seumei can be generated, installed and opened from Apps → `NATIVO`. A future
+- Matriz Admin can be generated, installed and opened from Apps → `NATIVO`. A future
   Matriz Hub download must consume the signed CI release artifact; build output
   is never copied into the web app or committed as public content.

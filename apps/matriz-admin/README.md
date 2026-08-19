@@ -1,24 +1,13 @@
-# seumei
+# Matriz Admin
 
-## Ownership (L9)
-- Responsibility: domínio de estabelecimentos e operação.
-- Exposes: `public-contract.ts` (manifest-only).
-- Must NOT import other apps.
-
-## Desktop
-
-`desktop/` is the standalone Windows delivery surface of the same Seumei app.
-It reuses app-local use cases and presenters, composes repositories with a
-namespaced local store, and does not require Next.js, Node or Matriz Hub at
-runtime.
+Aplicação administrativa do ecossistema Matriz para operar clientes e estabelecimentos de Seumei, Spot, WillDash e futuros produtos. Esta pasta preserva temporariamente partes do antigo domínio Seumei enquanto a migração ocorre por fatias.
 
 ```powershell
-pnpm --filter @matriz/app-seumei dev:desktop
-pnpm --filter @matriz/app-seumei build:desktop
-pnpm --filter @matriz/app-seumei package:desktop
+pnpm --filter @matriz/app-matriz-admin dev
+pnpm --filter @matriz/app-matriz-admin test
+pnpm --filter @matriz/app-matriz-admin package:desktop
 ```
 
-The current-user NSIS installer is produced at
-`desktop/src-tauri/target/release/bundle/nsis/Seumei_<version>_x64-setup.exe`.
-Do not commit `dist/`, `target/` or installers. Control owns the local
-build/install/start UX; a future Hub download must point to a signed release.
+Web: porta `3002`. O instalador fica em `desktop/src-tauri/target/release/bundle/nsis/Matriz Admin_<version>_x64-setup.exe`.
+
+Matriz Admin não é dona do banco Seumei. Integrações futuras devem usar APIs/gateways tenant-scoped.

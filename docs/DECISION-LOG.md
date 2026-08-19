@@ -116,3 +116,9 @@ próximos do app responsável.
 - Motivo: segurança, fallback previsível e adoção simples entre 2 ou 100 apps.
 - Impacto: `design/system`, `flows/themes`, Capability API e schema Hub formam a superfície pública.
 - Revisar quando: publicação remota de temas ou a biblioteca de 74 sistemas entrar no produto.
+## 2026-08-19 — Separar Matriz Admin e Seumei
+
+- **Decisão:** promover a antiga `apps/seumei` para `apps/matriz-admin` e iniciar a Seumei permanente em `apps/seumeiapp`, mantendo `seumei` como ID público.
+- **Motivo:** administração de todos os clientes e operação do produto Seumei possuem responsabilidades, ritmos e superfícies de dados diferentes.
+- **Impacto:** Admin usa porta 3002 e possui instalador Tauri; Seumei usa porta 3008, autenticação Hub e é dona do schema Seumei. Matriz Control opera ambas e associa o ciclo nativo ao Admin.
+- **Revisar quando:** a primeira API administrativa cross-product estiver estável ou a migração dos oito slices terminar.

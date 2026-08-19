@@ -16,7 +16,8 @@ como dimensão de cada app: a estratégia padrão vive localmente em
   `src/bootstrap/**`, `src/manifest/**`.
 - **Pode importar**: `packages/*`, `@apps/matrizlib/public-contract`,
   `@apps/matriz-workbench/public-contract`, `@apps/sites/public-contract`,
-  `@apps/spot/public-contract`, `@apps/seumei/public-contract`,
+  `@apps/spot/public-contract`, `@apps/matriz-admin/public-contract`,
+  `@apps/seumei/public-contract`,
   `@apps/contracts/public-contract`, `@apps/willdash/public-contract`.
 - **Não pode importar**: qualquer `apps/<X>/src/**`.
 - **Auth**: estratégia padrão = **magic link**. Adoção em
@@ -86,9 +87,10 @@ como dimensão de cada app: a estratégia padrão vive localmente em
   explícita; cards, Command Deck e integrações continuam allowlisted.
 - **Auth**: não participa de onboarding nem autenticação web.
 
-O shell nativo de Seumei vive em `apps/seumei/desktop` porque é outra entrega
-do mesmo domínio, não um novo app. Pode consumir `apps/seumei/src/**` localmente,
-mas não torna esses internals públicos nem os move para packages.
+O shell nativo de Matriz Admin vive em `apps/matriz-admin/desktop` porque é outra
+entrega do mesmo app. Pode consumir `apps/matriz-admin/src/**` localmente. A
+Seumei permanente vive em `apps/seumeiapp`, possui o schema Seumei e não pode
+ser importada internamente pelo Admin.
 
 ## Packages (resumo)
 
