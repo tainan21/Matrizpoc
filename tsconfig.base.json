@@ -72,7 +72,8 @@
       "@apps/matriz-workbench/public-contract": ["./apps/matriz-workbench/public-contract.ts"],
       "@apps/sites/public-contract": ["./apps/sites/public-contract.ts"],
       "@apps/spot/public-contract": ["./apps/spot/public-contract.ts"],
-      "@apps/seumei/public-contract": ["./apps/seumei/public-contract.ts"],
+      "@apps/matriz-admin/public-contract": ["./apps/matriz-admin/public-contract.ts"],
+      "@apps/seumei/public-contract": ["./apps/seumeiapp/public-contract.ts"],
       "@apps/contracts/public-contract": ["./apps/contracts/public-contract.ts"],
       "@apps/willdash/public-contract": ["./apps/willdash/public-contract.ts"]
     }

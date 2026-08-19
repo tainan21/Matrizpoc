@@ -14,7 +14,8 @@ const APPS = [
   "matriz-workbench",
   "sites",
   "spot",
-  "seumei",
+  "matriz-admin",
+  "seumeiapp",
   "contracts",
   "willdash",
 ] as const

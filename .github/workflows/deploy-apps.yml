@@ -8,6 +8,7 @@ name: deploy-apps
 # Required repository secrets (see docs/build-deploy-model.md):
 #   VERCEL_DEPLOY_HOOK_MATRIZ_HUB
 #   VERCEL_DEPLOY_HOOK_SPOT
+#   VERCEL_DEPLOY_HOOK_MATRIZ_ADMIN
 #   VERCEL_DEPLOY_HOOK_SEUMEI
 #   VERCEL_DEPLOY_HOOK_CONTRACTS
 #   VERCEL_DEPLOY_HOOK_WILLDASH
@@ -20,7 +21,7 @@ on:
         required: true
         default: "all"
         type: choice
-        options: [all, matriz-hub, spot, seumei, contracts, willdash]
+        options: [all, matriz-hub, spot, matriz-admin, seumei, contracts, willdash]
   push:
     branches: [main]
     paths:
@@ -54,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [matriz-hub, spot, seumei, contracts, willdash]
+        app: [matriz-hub, spot, matriz-admin, seumei, contracts, willdash]
     steps:
       - name: Select deploy hook for ${{ matrix.app }}
         id: hook
@@ -62,6 +63,7 @@ jobs:
           case "${{ matrix.app }}" in
             matriz-hub) echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_MATRIZ_HUB }}" >> "$GITHUB_OUTPUT" ;;
             spot)       echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_SPOT }}"       >> "$GITHUB_OUTPUT" ;;
+            matriz-admin) echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_MATRIZ_ADMIN }}" >> "$GITHUB_OUTPUT" ;;
             seumei)     echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_SEUMEI }}"     >> "$GITHUB_OUTPUT" ;;
             contracts)  echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_CONTRACTS }}"  >> "$GITHUB_OUTPUT" ;;
             willdash)   echo "url=${{ secrets.VERCEL_DEPLOY_HOOK_WILLDASH }}"   >> "$GITHUB_OUTPUT" ;;

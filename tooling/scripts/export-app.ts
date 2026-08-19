@@ -18,7 +18,7 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 
-const APPS = ["matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"] as const
+const APPS = ["matriz-hub", "matriz-workbench", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash"] as const
 type AppId = (typeof APPS)[number]
 
 const PUBLISHED_VERSION = "1.1.0"
@@ -51,7 +51,7 @@ function main(): void {
   if (!APPS.includes(rawApp as AppId)) fail(`unknown app "${rawApp}"`)
 
   const root = resolve(__dirname, "..", "..")
-  const src = resolve(root, "apps", rawApp)
+  const src = resolve(root, "apps", rawApp === "seumei" ? "seumeiapp" : rawApp)
   const dst = resolve(rawOut)
 
   if (!existsSync(src)) fail(`app dir not found: ${src}`)

@@ -13,6 +13,7 @@ import { manifest as desktopManifest } from "@apps/matriz-desktop/public-contrac
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
+import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
@@ -24,13 +25,14 @@ const allManifests = [
   { appId: "matriz-workbench", manifest: workbenchManifest },
   { appId: "sites", manifest: sitesManifest },
   { appId: "spot", manifest: spotManifest },
+  { appId: "matriz-admin", manifest: matrizAdminManifest },
   { appId: "seumei", manifest: seumeiManifest },
   { appId: "contracts", manifest: contractsManifest },
   { appId: "willdash", manifest: willdashManifest },
 ] as const
 
 describe("manifests", () => {
-  it("todos os 9 manifests satisfazem AppManifestDTO (Zod)", () => {
+  it("todos os 10 manifests satisfazem AppManifestDTO (Zod)", () => {
     for (const { appId, manifest } of allManifests) {
       const result = appManifestSchema.safeParse(manifest)
       if (!result.success) {

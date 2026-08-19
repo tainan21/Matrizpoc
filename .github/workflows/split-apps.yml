@@ -15,7 +15,7 @@ on:
         description: "App to split"
         required: true
         type: choice
-        options: [matriz-hub, spot, seumei, contracts, willdash]
+        options: [matriz-hub, spot, matriz-admin, seumei, contracts, willdash]
       destination:
         description: "Destination repo (e.g. matriz/spot)"
         required: true

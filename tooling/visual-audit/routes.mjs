@@ -4,7 +4,8 @@ import { join, relative, sep } from "node:path"
 export const apps = [
   { id: "matriz-hub", host: "localhost", port: 3000 },
   { id: "spot", host: "localhost", port: 3001 },
-  { id: "seumei", host: "localhost", port: 3002 },
+  { id: "matriz-admin", host: "localhost", port: 3002 },
+  { id: "seumei", directory: "seumeiapp", host: "localhost", port: 3008 },
   { id: "contracts", host: "localhost", port: 3003 },
   { id: "willdash", host: "localhost", port: 3004 },
   { id: "matriz-workbench", host: "127.0.0.1", port: 3005 },
@@ -14,6 +15,7 @@ export const apps = [
 const accessRoutes = new Set([
   "matriz-hub:/login",
   "spot:/login",
+  "matriz-admin:/login",
   "seumei:/login",
   "contracts:/login",
   "willdash:/login",
@@ -25,8 +27,9 @@ const tvRoutes = new Set([
   "matriz-hub:/telemetry",
   "spot:/login",
   "spot:/gigs",
+  "matriz-admin:/login",
+  "matriz-admin:/establishments",
   "seumei:/login",
-  "seumei:/establishments",
   "contracts:/login",
   "contracts:/contracts",
   "willdash:/login",
@@ -142,7 +145,7 @@ export function mergeCaptureResults(previousResults, currentResults, requestedVi
 export function discoverRoutes(repoRoot, resolved = {}) {
   let index = 0
   return apps.flatMap((app) => {
-    const appDirectory = join(repoRoot, "apps", app.id)
+    const appDirectory = join(repoRoot, "apps", app.directory ?? app.id)
     if (!existsSync(join(appDirectory, "app"))) return []
     return walk(join(appDirectory, "app"))
       .map((file) => toPattern(appDirectory, file))
