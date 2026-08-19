@@ -6,12 +6,20 @@ import {
   externalLinkSchema,
   telemetryEventSchema,
   appManifestSchema,
+  appIdSchema,
 } from "@matriz/integration-api-contracts"
+import { monorepoConfig } from "@matriz/platform-config"
 
 /**
  * Smoke test — DTOs publicos (L7 + L8)
  */
 describe("smoke: dtos", () => {
+  it("registers Matriz Admin and keeps Seumei on its dedicated port", () => {
+    expect(appIdSchema.parse("matriz-admin")).toBe("matriz-admin")
+    expect(monorepoConfig.baseUrls["matriz-admin"]).toBe("http://localhost:3002")
+    expect(monorepoConfig.baseUrls.seumei).toBe("http://localhost:3008")
+  })
+
   it("CreateContractFromGigInput: valid sample parses", () => {
     const sample = {
       tenantId: "tenant-acme",

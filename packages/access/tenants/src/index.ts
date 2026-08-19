@@ -27,7 +27,7 @@ export const mockTenants: readonly Tenant[] = [
     id: asTenantId(MATRIZ_MOCK_TENANT_IDS[0]),
     name: "Demo Studio",
     slug: "demo",
-    enabledApps: ["matriz-hub", "spot", "seumei", "contracts", "willdash"],
+    enabledApps: ["matriz-hub", "spot", "matriz-admin", "seumei", "contracts", "willdash"],
   },
   {
     id: asTenantId(MATRIZ_MOCK_TENANT_IDS[1]),

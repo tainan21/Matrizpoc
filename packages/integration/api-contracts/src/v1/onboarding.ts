@@ -74,6 +74,7 @@ export const appOnboardingPayloadSchemas = {
   "matriz-workbench": z.object({}),
   sites: z.object({}),
   spot: spotOnboardingPayloadSchema,
+  "matriz-admin": z.object({}),
   seumei: seumeiOnboardingPayloadSchema,
   contracts: contractsOnboardingPayloadSchema,
   willdash: willdashOnboardingPayloadSchema,
