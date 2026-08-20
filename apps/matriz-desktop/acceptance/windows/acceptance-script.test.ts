@@ -12,6 +12,7 @@ const testDirectory = path.dirname(fileURLToPath(import.meta.url))
 const appRoot = path.resolve(testDirectory, "../..")
 const workspaceRoot = path.resolve(appRoot, "../..")
 const scriptPath = path.join(testDirectory, "matriz-control-acceptance.ps1")
+const measureScriptPath = path.join(testDirectory, "measure-process.ps1")
 const listenerScriptPath = path.join(testDirectory, "probe-listener.ps1")
 const installedRoot = path.join(process.env.LOCALAPPDATA ?? "", "Matriz Control")
 const installedExecutable = path.join(installedRoot, "matriz-control.exe")
@@ -157,5 +158,25 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
 
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain("Package execution is disabled until installed lifecycle acceptance")
+  })
+
+  it("refuses to measure a PID that is not the exact Matriz Control executable", () => {
+    const result = spawnSync("pwsh", [
+      "-NoProfile",
+      "-File",
+      measureScriptPath,
+      "-Pid",
+      String(process.pid),
+      "-DurationSeconds",
+      "1",
+      "-OutputRoot",
+      outputRoot,
+    ], {
+      cwd: workspaceRoot,
+      encoding: "utf8",
+    })
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("is not the Matriz Control executable")
   })
 })
