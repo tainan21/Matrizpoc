@@ -2,10 +2,13 @@ import { NextResponse } from "next/server"
 import { createMockAuthState, type AuthResult, type AuthSession } from "@matriz/platform-auth"
 import { getMockAuthCorsHeaders, isAllowedMockAuthOrigin } from "./mock-auth-cors"
 
-const globalState = globalThis as typeof globalThis & { __matrizMockAuth?: ReturnType<typeof createMockAuthState> }
+const globalState = globalThis as typeof globalThis & {
+  __matrizMockAuth?: ReturnType<typeof createMockAuthState>
+  __matrizMockRequestSessions?: Map<string, AuthSession>
+}
 export const mockAuthState = globalState.__matrizMockAuth ??= createMockAuthState()
 export const MOCK_SESSION_COOKIE = "matriz_mock_session"
-const requestSessions = new Map<string, AuthSession>()
+const requestSessions = globalState.__matrizMockRequestSessions ??= new Map<string, AuthSession>()
 
 function readSessionToken(request: Request): string | undefined {
   const pair = request.headers.get("cookie")?.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${MOCK_SESSION_COOKIE}=`))

@@ -122,3 +122,10 @@ próximos do app responsável.
 - **Motivo:** administração de todos os clientes e operação do produto Seumei possuem responsabilidades, ritmos e superfícies de dados diferentes.
 - **Impacto:** Admin usa porta 3002 e possui instalador Tauri; Seumei usa porta 3008, autenticação Hub e é dona do schema Seumei. Matriz Control opera ambas e associa o ciclo nativo ao Admin.
 - **Revisar quando:** a primeira API administrativa cross-product estiver estável ou a migração dos oito slices terminar.
+
+## 2026-08-20 — Sessão mock cobre todas as portas web registradas
+
+- **Decisão:** permitir no CORS mock do Hub as portas loopback 3000–3008 e manter o registro de sessões HTTP mock no estado global do processo.
+- **Motivo:** a validação real da Seumei em 3008 provou que a allowlist terminava em 3006 e que handlers compilados separadamente não compartilhavam o `Map` local de sessões.
+- **Impacto:** MatrizLib 3007 e Seumei 3008 conseguem autenticar; origens externas e 3009+ continuam negadas. Apenas o broker de desenvolvimento muda.
+- **Revisar quando:** o broker mock for removido em favor da sessão persistente/implantada.
