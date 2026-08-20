@@ -5,10 +5,15 @@ import { usePathname, useRouter } from "next/navigation"
 import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { bootstrapSeumei } from "../bootstrap"
 import { seumeiAuthConfig } from "../auth/config"
+import { safeReturnPath } from "../application/safe-return-path"
 
 function RedirectToLogin() {
   const router = useRouter()
-  useEffect(() => router.replace("/login"), [router])
+  const pathname = usePathname()
+  useEffect(() => {
+    const returnTo = safeReturnPath(pathname ?? "/")
+    router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+  }, [pathname, router])
   return null
 }
 
