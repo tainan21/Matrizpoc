@@ -1,4 +1,5 @@
-import type { CompanyRole, SessionActor } from "../company"
+import type { SessionActor } from "../../types/session-actor"
+import type { CompanyRole } from "../company"
 
 export interface CoreUser {
   readonly id: string

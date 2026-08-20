@@ -20,6 +20,7 @@
     "@matriz/flows-onboarding": "workspace:*",
     "@matriz/foundation-types": "workspace:*",
     "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-events": "workspace:*",
     "@matriz/integration-manifests": "workspace:*",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-auth": "workspace:*",

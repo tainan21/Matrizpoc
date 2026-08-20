@@ -2,7 +2,7 @@ import { cookies, headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { createCompanyServices } from "../application/composition"
 import { resolveSeumeiSession } from "./server-session"
-import { ACTIVE_COMPANY_COOKIE } from "./active-company"
+import { ACTIVE_COMPANY_COOKIE } from "../application/active-company"
 
 export async function requirePageSession() {
   const requestHeaders = await headers()

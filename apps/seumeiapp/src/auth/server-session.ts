@@ -1,5 +1,5 @@
 import { monorepoConfig } from "@matriz/platform-config"
-import type { SessionActor } from "../domain/company"
+import type { SessionActor } from "../types/session-actor"
 
 export type SeumeiSessionResolution =
   | { readonly kind: "authenticated"; readonly actor: SessionActor }

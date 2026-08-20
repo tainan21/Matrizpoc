@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
-import { CompanyAccessDeniedError } from "../application/company-access"
 import type { CompanyRepository } from "../domain/repositories/company-repository"
 import type { CoreAccessRepository } from "../domain/repositories/core-access-repository"
+import { CompanyAccessDeniedError } from "./company-access"
 import { resolveActiveCompanyContext } from "./active-company"
 
 const actor = { sessionUserId: "session_a", name: "Ana", email: "ana@example.com" }

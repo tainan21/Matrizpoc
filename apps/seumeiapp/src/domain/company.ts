@@ -19,12 +19,6 @@ export type OnboardingStep =
   | "REVIEW"
   | "COMPLETED"
 
-export interface SessionActor {
-  readonly sessionUserId: string
-  readonly name: string
-  readonly email: string
-}
-
 export interface Company {
   readonly id: string
   readonly tenantId: string

@@ -1,8 +1,8 @@
-import { resolveAuthorizedCompany } from "../application/company-access"
-import type { AuthorizedCompanyContext } from "../application/company-onboarding"
-import type { SessionActor } from "../domain/company"
+import type { SessionActor } from "../types/session-actor"
 import type { CompanyRepository } from "../domain/repositories/company-repository"
 import type { CoreAccessRepository } from "../domain/repositories/core-access-repository"
+import { resolveAuthorizedCompany } from "./company-access"
+import type { AuthorizedCompanyContext } from "./company-onboarding"
 
 export const ACTIVE_COMPANY_COOKIE = "seumei_active_company"
 

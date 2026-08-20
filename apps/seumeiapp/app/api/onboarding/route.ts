@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server"
-import { ACTIVE_COMPANY_COOKIE } from "../../../src/auth/active-company"
+import { ACTIVE_COMPANY_COOKIE } from "../../../src/application/active-company"
 import {
   completeOnboardingHandler,
   readOnboardingHandler,

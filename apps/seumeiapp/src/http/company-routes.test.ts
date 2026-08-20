@@ -57,6 +57,13 @@ describe("company HTTP boundaries", () => {
     await expect(selectCompanyHandler(actor, { companyId: "company_b" }, svc)).resolves.toEqual({ status: 403, body: { error: "company_forbidden" } })
   })
 
+  it("preserves the public selection event only after authorization", async () => {
+    const companySelected = vi.fn()
+    const result = await selectCompanyHandler(actor, { companyId: "company_a" }, services({ events: { companySelected } }))
+    expect(result.status).toBe(200)
+    expect(companySelected).toHaveBeenCalledWith(company)
+  })
+
   it("maps optimistic onboarding conflicts to 409", async () => {
     const companies = {
       findByIdForTenantIds: vi.fn().mockResolvedValue(company),

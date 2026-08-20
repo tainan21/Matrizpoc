@@ -603,6 +603,9 @@ importers:
       '@matriz/integration-api-contracts':
         specifier: workspace:*
         version: link:../../packages/integration/api-contracts
+      '@matriz/integration-events':
+        specifier: workspace:*
+        version: link:../../packages/integration/events
       '@matriz/integration-manifests':
         specifier: workspace:*
         version: link:../../packages/integration/manifests

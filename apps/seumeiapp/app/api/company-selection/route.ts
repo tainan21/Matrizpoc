@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server"
-import { ACTIVE_COMPANY_COOKIE } from "../../../src/auth/active-company"
+import { ACTIVE_COMPANY_COOKIE } from "../../../src/application/active-company"
 import { selectCompanyHandler } from "../../../src/http/company-handlers"
 import { executeCompanyRequest, readJson } from "../../../src/http/next-boundary"
 

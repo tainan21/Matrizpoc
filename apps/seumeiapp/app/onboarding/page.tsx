@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { CompanyAccessDeniedError } from "../../src/application/company-access"
 import { readCompanyOnboarding } from "../../src/application/company-onboarding"
-import { resolveActiveCompanyContext } from "../../src/auth/active-company"
+import { resolveActiveCompanyContext } from "../../src/application/active-company"
 import { resolveCompanyPageFoundation } from "../../src/auth/server-page-context"
 import { CompanyOnboarding } from "../../src/ui/CompanyOnboarding"
 import { SystemState } from "../../src/ui/SystemState"

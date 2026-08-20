@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
-import type { Company, SessionActor } from "../domain/company"
+import type { Company } from "../domain/company"
+import type { SessionActor } from "../types/session-actor"
 import { normalizeCompanyInput } from "../domain/company"
 import type { CompanyRepository } from "../domain/repositories/company-repository"
 import type { CoreAccessRepository } from "../domain/repositories/core-access-repository"

@@ -21,8 +21,9 @@ import {
   provisionCompany,
   type IdGenerator,
 } from "../application/provision-company"
-import { resolveActiveCompanyContext } from "../auth/active-company"
-import { InvalidCompanyInputError, type SessionActor } from "../domain/company"
+import { resolveActiveCompanyContext } from "../application/active-company"
+import { InvalidCompanyInputError, type Company } from "../domain/company"
+import type { SessionActor } from "../types/session-actor"
 import type { CompanyRepository } from "../domain/repositories/company-repository"
 import type { CoreAccessRepository } from "../domain/repositories/core-access-repository"
 import {
@@ -36,6 +37,7 @@ export interface CompanyHttpServices {
   readonly core: CoreAccessRepository
   readonly companies: CompanyRepository
   readonly ids: IdGenerator
+  readonly events?: { companySelected(company: Company): void }
 }
 
 export interface HttpResult {
@@ -142,6 +144,7 @@ export async function selectCompanyHandler(
       services.core,
       services.companies,
     )
+    services.events?.companySelected(selected.company)
     return { status: 200, body: { company: toCompanyChoiceViewModel(selected.company) } }
   } catch (error) {
     return mappedError(error)
