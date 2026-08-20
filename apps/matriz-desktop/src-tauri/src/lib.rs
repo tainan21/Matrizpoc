@@ -1,4 +1,5 @@
 mod catalog;
+pub mod command_contract;
 mod doctor;
 mod native_apps;
 mod ports;

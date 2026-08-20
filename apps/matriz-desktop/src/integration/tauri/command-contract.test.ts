@@ -1,0 +1,115 @@
+import { describe, expect, it, vi } from "vitest"
+
+import { TAURI_COMMAND_CONTRACT } from "./command-contract"
+import { createTauriGateway, type Invoke } from "./tauri-gateway"
+
+describe("Tauri command contract", () => {
+  it("defines exactly one native command for every DesktopGateway method", () => {
+    expect(TAURI_COMMAND_CONTRACT).toEqual({
+      snapshot: "get_snapshot",
+      kill: "terminate_process",
+      killMany: "terminate_processes",
+      startApp: "start_app",
+      stopApp: "stop_app",
+      appStatuses: "get_app_statuses",
+      runGate: "run_gate",
+      openTarget: "open_target",
+      selectWorkspace: "select_workspace",
+      doctor: "run_doctor",
+      workspacePulse: "get_workspace_pulse",
+      readSettings: "read_settings",
+      writeSettings: "write_settings",
+      hide: "hide_window",
+      quit: "quit_app",
+      createTerminal: "create_terminal",
+      writeTerminal: "write_terminal",
+      resizeTerminal: "resize_terminal",
+      interruptTerminal: "interrupt_terminal",
+      closeTerminal: "close_terminal",
+      listTerminals: "list_terminals",
+      subscribeTerminal: "subscribe_terminal",
+      startManagedOperation: "start_managed_operation",
+      getNativeAppRuntime: "get_native_app_runtime",
+      installNativeApp: "install_native_app",
+      startNativeApp: "start_native_app",
+    })
+    expect(Object.isFrozen(TAURI_COMMAND_CONTRACT)).toBe(true)
+  })
+
+  it("serializes every gateway method with exact camelCase argument keys", async () => {
+    const calls: { command: string; args: Record<string, unknown> | undefined }[] = []
+    const invoke: Invoke = vi.fn(async (command, args) => {
+      calls.push({ command, args })
+      return undefined as never
+    })
+    const gateway = createTauriGateway(invoke, () => "acceptance-channel")
+    const settings = {
+      closeToTray: true,
+      soundsEnabled: false,
+      volume: 0.25,
+      startWithWindows: false,
+    }
+
+    await gateway.snapshot()
+    await gateway.kill({ pid: 321, snapshotId: "snapshot-1" })
+    await gateway.killMany({ pids: [321, 654], snapshotId: "snapshot-1" })
+    await gateway.startApp("matriz-hub")
+    await gateway.stopApp("matriz-hub")
+    await gateway.appStatuses()
+    await gateway.runGate("lint")
+    await gateway.openTarget("workspace")
+    await gateway.selectWorkspace("C:\\Apps\\matriz-infra-hub")
+    await gateway.doctor()
+    await gateway.workspacePulse()
+    await gateway.readSettings()
+    await gateway.writeSettings(settings)
+    await gateway.hide()
+    await gateway.quit()
+    await gateway.createTerminal()
+    await gateway.writeTerminal("term-1", "echo ok\r")
+    await gateway.resizeTerminal("term-1", 120, 40)
+    await gateway.interruptTerminal("term-1")
+    await gateway.closeTerminal("term-1")
+    await gateway.listTerminals()
+    await gateway.subscribeTerminal(() => undefined)
+    await gateway.startManagedOperation("gate.lint")
+    await gateway.getNativeAppRuntime()
+    await gateway.installNativeApp()
+    await gateway.startNativeApp()
+
+    expect(calls).toEqual([
+      { command: "get_snapshot", args: undefined },
+      { command: "terminate_process", args: { request: { pid: 321, snapshotId: "snapshot-1" } } },
+      {
+        command: "terminate_processes",
+        args: { request: { pids: [321, 654], snapshotId: "snapshot-1" } },
+      },
+      { command: "start_app", args: { appId: "matriz-hub" } },
+      { command: "stop_app", args: { appId: "matriz-hub" } },
+      { command: "get_app_statuses", args: undefined },
+      { command: "run_gate", args: { gateId: "lint" } },
+      { command: "open_target", args: { targetId: "workspace" } },
+      { command: "select_workspace", args: { path: "C:\\Apps\\matriz-infra-hub" } },
+      { command: "run_doctor", args: undefined },
+      { command: "get_workspace_pulse", args: undefined },
+      { command: "read_settings", args: undefined },
+      { command: "write_settings", args: { settings } },
+      { command: "hide_window", args: undefined },
+      { command: "quit_app", args: undefined },
+      { command: "create_terminal", args: undefined },
+      { command: "write_terminal", args: { sessionId: "term-1", data: "echo ok\r" } },
+      {
+        command: "resize_terminal",
+        args: { sessionId: "term-1", columns: 120, rows: 40 },
+      },
+      { command: "interrupt_terminal", args: { sessionId: "term-1" } },
+      { command: "close_terminal", args: { sessionId: "term-1" } },
+      { command: "list_terminals", args: undefined },
+      { command: "subscribe_terminal", args: { onEvent: "acceptance-channel" } },
+      { command: "start_managed_operation", args: { operationId: "gate.lint" } },
+      { command: "get_native_app_runtime", args: undefined },
+      { command: "install_native_app", args: undefined },
+      { command: "start_native_app", args: undefined },
+    ])
+  })
+})

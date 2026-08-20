@@ -13,6 +13,7 @@ import type {
   QuickTargetId,
   WorkspacePulse,
 } from "../../domain/types"
+import { TAURI_COMMAND_CONTRACT as commands } from "./command-contract"
 
 export type Invoke = <T>(command: string, args?: Record<string, unknown>) => Promise<T>
 export type ChannelFactory = (listener: (event: TerminalEvent) => void) => unknown
@@ -28,34 +29,34 @@ export function createTauriGateway(
   createChannel: ChannelFactory = createTauriChannel,
 ): DesktopGateway {
   return {
-    snapshot: () => invoke<DesktopSnapshot>("get_snapshot"),
-    kill: (request) => invoke<DesktopSnapshot>("terminate_process", { request }),
-    killMany: (request) => invoke<DesktopSnapshot>("terminate_processes", { request }),
-    startApp: (appId: DesktopAppId) => invoke<void>("start_app", { appId }),
-    stopApp: (appId: DesktopAppId) => invoke<void>("stop_app", { appId }),
-    appStatuses: () => invoke<readonly AppRuntime[]>("get_app_statuses"),
-    runGate: (gateId: GateId) => invoke<GateResult>("run_gate", { gateId }),
-    openTarget: (targetId: QuickTargetId) => invoke<void>("open_target", { targetId }),
-    selectWorkspace: (path) => invoke<string>("select_workspace", { path }),
-    doctor: () => invoke<readonly DoctorCheck[]>("run_doctor"),
-    workspacePulse: () => invoke<WorkspacePulse>("get_workspace_pulse"),
-    readSettings: () => invoke<DesktopSettings>("read_settings"),
-    writeSettings: (settings) => invoke<DesktopSettings>("write_settings", { settings }),
-    hide: () => invoke<void>("hide_window"),
-    quit: () => invoke<void>("quit_app"),
-    createTerminal: () => invoke("create_terminal"),
-    writeTerminal: (sessionId, data) => invoke<void>("write_terminal", { sessionId, data }),
+    snapshot: () => invoke<DesktopSnapshot>(commands.snapshot),
+    kill: (request) => invoke<DesktopSnapshot>(commands.kill, { request }),
+    killMany: (request) => invoke<DesktopSnapshot>(commands.killMany, { request }),
+    startApp: (appId: DesktopAppId) => invoke<void>(commands.startApp, { appId }),
+    stopApp: (appId: DesktopAppId) => invoke<void>(commands.stopApp, { appId }),
+    appStatuses: () => invoke<readonly AppRuntime[]>(commands.appStatuses),
+    runGate: (gateId: GateId) => invoke<GateResult>(commands.runGate, { gateId }),
+    openTarget: (targetId: QuickTargetId) => invoke<void>(commands.openTarget, { targetId }),
+    selectWorkspace: (path) => invoke<string>(commands.selectWorkspace, { path }),
+    doctor: () => invoke<readonly DoctorCheck[]>(commands.doctor),
+    workspacePulse: () => invoke<WorkspacePulse>(commands.workspacePulse),
+    readSettings: () => invoke<DesktopSettings>(commands.readSettings),
+    writeSettings: (settings) => invoke<DesktopSettings>(commands.writeSettings, { settings }),
+    hide: () => invoke<void>(commands.hide),
+    quit: () => invoke<void>(commands.quit),
+    createTerminal: () => invoke(commands.createTerminal),
+    writeTerminal: (sessionId, data) => invoke<void>(commands.writeTerminal, { sessionId, data }),
     resizeTerminal: (sessionId, columns, rows) =>
-      invoke<void>("resize_terminal", { sessionId, columns, rows }),
-    interruptTerminal: (sessionId) => invoke<void>("interrupt_terminal", { sessionId }),
-    closeTerminal: (sessionId) => invoke<void>("close_terminal", { sessionId }),
-    listTerminals: () => invoke("list_terminals"),
+      invoke<void>(commands.resizeTerminal, { sessionId, columns, rows }),
+    interruptTerminal: (sessionId) => invoke<void>(commands.interruptTerminal, { sessionId }),
+    closeTerminal: (sessionId) => invoke<void>(commands.closeTerminal, { sessionId }),
+    listTerminals: () => invoke(commands.listTerminals),
     subscribeTerminal: (listener) =>
-      invoke<void>("subscribe_terminal", { onEvent: createChannel(listener) }),
+      invoke<void>(commands.subscribeTerminal, { onEvent: createChannel(listener) }),
     startManagedOperation: (operationId) =>
-      invoke("start_managed_operation", { operationId }),
-    getNativeAppRuntime: () => invoke("get_native_app_runtime"),
-    installNativeApp: () => invoke("install_native_app"),
-    startNativeApp: () => invoke("start_native_app"),
+      invoke(commands.startManagedOperation, { operationId }),
+    getNativeAppRuntime: () => invoke(commands.getNativeAppRuntime),
+    installNativeApp: () => invoke(commands.installNativeApp),
+    startNativeApp: () => invoke(commands.startNativeApp),
   }
 }

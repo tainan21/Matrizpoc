@@ -50,7 +50,8 @@ fn installed_candidates() -> Vec<PathBuf> {
         .unwrap_or_default();
     vec![
         base.join("Matriz Admin").join(MATRIZ_ADMIN_EXECUTABLE),
-        base.join("Programs/Matriz Admin").join(MATRIZ_ADMIN_EXECUTABLE),
+        base.join("Programs/Matriz Admin")
+            .join(MATRIZ_ADMIN_EXECUTABLE),
     ]
 }
 
