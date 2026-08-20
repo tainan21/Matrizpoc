@@ -1,7 +1,7 @@
 # Seumei Company Shell, Memberships and Permissions Design
 
 **Date:** 2026-08-20  
-**Status:** Approved in conversation; awaiting written-spec review  
+**Status:** Implemented; final integrated verification in progress  
 **Scope:** `apps/seumeiapp`, the Core Prisma schema/migration required for membership invitations, and truthful Seumei documentation/manifest updates
 
 ## Context
