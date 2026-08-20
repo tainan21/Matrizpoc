@@ -124,3 +124,75 @@ model SeumeiPreference {
 
   @@map("seumei_preferences")
 }
+
+// ---------------------------------------------------------------------------
+// Company — customer business and the Seumei-side projection of one tenant.
+// ---------------------------------------------------------------------------
+model Company {
+  id                String               @id @default(cuid())
+  tenantId          String               @unique
+  name              String
+  slug              String               @unique
+  createdByUserId   String
+  idempotencyKey    String
+  status            CompanyStatus        @default(PROVISIONING)
+  operationType     CompanyOperationType?
+  city              String?
+  country           String               @default("BR")
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+
+  onboarding CompanyOnboarding?
+
+  @@unique([createdByUserId, idempotencyKey])
+  @@index([createdByUserId, status])
+  @@map("companies")
+}
+
+enum CompanyStatus {
+  PROVISIONING
+  ONBOARDING
+  ACTIVE
+  PROVISIONING_FAILED
+}
+
+enum CompanyOperationType {
+  PHYSICAL_STORE
+  ONLINE_STORE
+  SERVICE
+  HYBRID
+}
+
+// ---------------------------------------------------------------------------
+// CompanyOnboarding — resumable tenant-scoped setup for one company.
+// ---------------------------------------------------------------------------
+model CompanyOnboarding {
+  id                 String                   @id @default(cuid())
+  companyId          String                   @unique
+  tenantId           String                   @unique
+  currentStep        CompanyOnboardingStep    @default(IDENTITY)
+  version            Int                      @default(1)
+  draftName          String
+  draftSlug          String
+  draftOperationType CompanyOperationType?
+  draftCity          String?
+  draftCountry       String                   @default("BR")
+  draftCurrency      String                   @default("BRL")
+  completedSteps     String[]
+  startedAt          DateTime                 @default(now())
+  completedAt        DateTime?
+  updatedAt          DateTime                 @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, currentStep])
+  @@map("company_onboarding")
+}
+
+enum CompanyOnboardingStep {
+  IDENTITY
+  OPERATION
+  PREFERENCES
+  REVIEW
+  COMPLETED
+}
