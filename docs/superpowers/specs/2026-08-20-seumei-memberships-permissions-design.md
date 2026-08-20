@@ -1,7 +1,7 @@
 # Seumei Company Shell, Memberships and Permissions Design
 
 **Date:** 2026-08-20  
-**Status:** Implemented; final integrated verification in progress  
+**Status:** Implemented and verified on 2026-08-20  
 **Scope:** `apps/seumeiapp`, the Core Prisma schema/migration required for membership invitations, and truthful Seumei documentation/manifest updates
 
 ## Context
@@ -203,3 +203,12 @@ The slice is complete when:
 8. two-tenant negative tests prove isolation with known IDs;
 9. the shell, member directory and invitation journey work on desktop and mobile;
 10. ledger, schema migration, manifest, documentation, tests and committed gates describe the same real capability.
+
+## Verification record
+
+- Seumei: 26 test files and 137 tests passed; scoped lint, typecheck and production build passed.
+- Monorepo: 23 smoke files and 154 tests passed; global lint (37 tasks), typecheck (37 tasks) and build (10 tasks) passed.
+- Prisma: all six schemas validated; the additive Core migration applied successfully over the pre-slice Core schema in disposable PostgreSQL.
+- Browser: OWNER created two companies, resumed and completed onboarding, invited a VIEWER, and changed the accepted role to MEMBER. Wrong-email acceptance was denied; VIEWER and MEMBER administrative mutations returned 403; selecting the known company ID from the other tenant returned 403.
+- Persistence: the accepted invitation retained a 64-character hash and no plaintext token row; memberships persisted across refresh and a new browser session.
+- UX: desktop and 390 × 844 mobile flows were exercised, keyboard focus remained visible, document width matched viewport width and browser console errors were limited to deliberately exercised 403 responses.
