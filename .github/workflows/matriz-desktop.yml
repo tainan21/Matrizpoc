@@ -4,14 +4,17 @@ on:
   pull_request:
     paths:
       - "apps/matriz-desktop/**"
-      - "apps/seumei/desktop/**"
-      - "apps/seumei/src/lib/container*"
-      - "apps/seumei/src/ui/presenters/desktop.presenter*"
+      - "apps/matriz-admin/desktop/**"
+      - "apps/matriz-admin/package.json"
       - "packages/design/**"
       - "packages/foundation/**"
       - "packages/integration/**"
       - ".github/workflows/matriz-desktop.yml"
   workflow_dispatch:
+
+concurrency:
+  group: matriz-desktop-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   windows-installer:
@@ -32,25 +35,33 @@ jobs:
         with:
           workspaces: |
             apps/matriz-desktop/src-tauri
-            apps/seumei/desktop/src-tauri
+            apps/matriz-admin/desktop/src-tauri
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @matriz/app-matriz-desktop test
       - run: pnpm --filter @matriz/app-matriz-desktop typecheck
       - run: pnpm --filter @matriz/app-matriz-desktop lint
+      - run: cargo fmt --manifest-path apps/matriz-desktop/src-tauri/Cargo.toml -- --check
       - run: cargo test --manifest-path apps/matriz-desktop/src-tauri/Cargo.toml
       - run: cargo clippy --manifest-path apps/matriz-desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
       - run: pnpm --filter @matriz/app-matriz-desktop package
-      - run: pnpm --filter @matriz/app-seumei test
-      - run: pnpm --filter @matriz/app-seumei typecheck
-      - run: pnpm --filter @matriz/app-seumei lint
-      - run: pnpm --filter @matriz/app-seumei package:desktop
+      - run: pnpm --filter @matriz/app-matriz-admin test
+      - run: pnpm --filter @matriz/app-matriz-admin typecheck
+      - run: pnpm --filter @matriz/app-matriz-admin lint
+      - run: cargo fmt --manifest-path apps/matriz-admin/desktop/src-tauri/Cargo.toml -- --check
+      - run: cargo test --manifest-path apps/matriz-admin/desktop/src-tauri/Cargo.toml
+      - run: cargo clippy --manifest-path apps/matriz-admin/desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+      - run: pwsh -NoProfile -File apps/matriz-desktop/scripts/package-matriz-admin.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: matriz-control-windows-x64
-          path: apps/matriz-desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+          path: |
+            apps/matriz-desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+            apps/matriz-desktop/src-tauri/target/release/bundle/nsis/*-setup.exe.sha256
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         with:
-          name: seumei-windows-x64
-          path: apps/seumei/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+          name: matriz-admin-windows-x64
+          path: |
+            apps/matriz-admin/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+            apps/matriz-admin/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe.sha256
           if-no-files-found: error
