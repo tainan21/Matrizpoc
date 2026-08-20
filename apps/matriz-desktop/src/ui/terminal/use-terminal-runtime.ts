@@ -11,6 +11,7 @@ export function useTerminalRuntime(gateway: DesktopGateway) {
   const [state, dispatch] = useReducer(terminalReducer, undefined, () => createTerminalState())
   const sinks = useRef(new Map<string, OutputSink>())
   const sequences = useRef(new Map<string, number>())
+  const closedSessions = useRef(new Set<string>())
 
   useEffect(() => {
     let active = true
@@ -20,9 +21,11 @@ export function useTerminalRuntime(gateway: DesktopGateway) {
     void gateway.subscribeTerminal((event) => {
       if (!active) return
       if (event.event === "state") {
+        if (closedSessions.current.has(event.data.id)) return
         dispatch({ type: "upsert", session: event.data })
         return
       }
+      if (closedSessions.current.has(event.data.sessionId)) return
       const previous = sequences.current.get(event.data.sessionId) ?? 0
       if (event.data.sequence <= previous) return
       sequences.current.set(event.data.sessionId, event.data.sequence)
@@ -47,7 +50,13 @@ export function useTerminalRuntime(gateway: DesktopGateway) {
 
   const close = useCallback(
     async (sessionId: string) => {
-      await gateway.closeTerminal(sessionId)
+      closedSessions.current.add(sessionId)
+      try {
+        await gateway.closeTerminal(sessionId)
+      } catch (error) {
+        closedSessions.current.delete(sessionId)
+        throw error
+      }
       sinks.current.delete(sessionId)
       sequences.current.delete(sessionId)
       dispatch({ type: "remove", sessionId })

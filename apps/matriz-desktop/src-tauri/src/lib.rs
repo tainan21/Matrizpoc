@@ -201,11 +201,16 @@ fn terminate_processes(
 #[tauri::command(rename_all = "camelCase")]
 fn select_workspace(
     state: tauri::State<'_, OperationsState>,
+    store: tauri::State<'_, SettingsStore>,
     path: String,
 ) -> Result<String, String> {
-    state
-        .select_workspace(std::path::Path::new(&path))
-        .map(|path| path.display().to_string())
+    let canonical = validate_workspace(std::path::Path::new(&path))?;
+    let canonical_string = canonical.display().to_string();
+    let mut settings = store.read()?;
+    settings.workspace_path = Some(canonical_string.clone());
+    store.write(&settings)?;
+    state.select_workspace(&canonical)?;
+    Ok(canonical_string)
 }
 
 #[tauri::command(rename_all = "camelCase")]
@@ -389,7 +394,11 @@ pub fn run() {
         .manage(TerminalManager::default())
         .setup(|app| {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
-            app.manage(SettingsStore::at(settings_path));
+            let settings = SettingsStore::at(settings_path);
+            let saved = settings.read().unwrap_or_default();
+            app.state::<OperationsState>()
+                .restore_workspace(saved.workspace_path.as_deref());
+            app.manage(settings);
             shell::install_tray(app.handle())?;
             Ok(())
         })

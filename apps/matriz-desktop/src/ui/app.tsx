@@ -11,6 +11,7 @@ import type {
   GateId,
   ManagedOperationId,
   NativeAppRuntime,
+  TerminalSession,
   WorkspacePulse,
 } from "../domain/types"
 import { Icons } from "./icons"
@@ -73,14 +74,18 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 
   useEffect(() => {
     if (!desktop.settings) return
+    setWorkspacePath(desktop.settings.workspacePath ?? "")
     feedback.configure?.(desktop.settings)
     feedback.initialize?.()
   }, [desktop.settings, feedback])
 
   useEffect(() => {
     if (view === "apps") {
-      void gateway.appStatuses().then(setApps).catch(() => setApps([]))
+      const refreshApps = () => void gateway.appStatuses().then(setApps).catch(() => setApps([]))
+      refreshApps()
       void gateway.getNativeAppRuntime().then(setNativeApp).catch(() => setNativeApp({ appId: "matriz-admin", state: "not-built" }))
+      const interval = window.setInterval(refreshApps, 1_000)
+      return () => window.clearInterval(interval)
     }
     if (view === "doctor") void gateway.doctor().then(setChecks).catch(() => setChecks([]))
     if (view === "actions") void gateway.workspacePulse().then(setPulse).catch(() => setPulse(undefined))
@@ -89,6 +94,15 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   const chooseView = (next: View) => {
     setView(next)
     void feedback.play("navigation")
+  }
+
+  const createTerminal = async () => {
+    try {
+      await desktop.execute(terminal.create, "Terminal iniciado")
+      void feedback.play("success")
+    } catch {
+      void feedback.play("error")
+    }
   }
 
   const kill = async (pid: number) => {
@@ -142,7 +156,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 
   const executeDeck = async (id: string) => {
     if (id === "terminal:new") {
-      await terminal.create()
+      await createTerminal()
       setView("terminal")
     } else {
       const app = MATRIZ_DESKTOP_APPS.find((item) => id === `app:${item.id}`)
@@ -191,17 +205,17 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
           </section>
         ) : null}
 
-        {view === "apps" ? <AppsView apps={apps} nativeApp={nativeApp} setNativeApp={setNativeApp} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} startOperation={terminal.startOperation} /> : null}
-        {view === "terminal" ? <TerminalView state={terminal.state} create={() => void terminal.create()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
+        {view === "apps" ? <AppsView apps={apps} sessions={terminal.state.sessions} nativeApp={nativeApp} setNativeApp={setNativeApp} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} startOperation={terminal.startOperation} closeOperation={terminal.close} /> : null}
+        {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
-        {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { await gateway.selectWorkspace(workspacePath); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
+        {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>
 
       {terminal.state.sessions.length && view !== "terminal" ? (
         <aside className={`terminal-dock${terminal.state.dockOpen ? " is-open" : ""}`}>
           {terminal.state.dockOpen ? (
-            <><button className="terminal-dock-toggle" onClick={() => terminal.setDockOpen(false)}>TERMINAL ↓</button><TerminalView compact state={terminal.state} create={() => void terminal.create()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /></>
+            <><button className="terminal-dock-toggle" onClick={() => terminal.setDockOpen(false)}>TERMINAL ↓</button><TerminalView compact state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /></>
           ) : (
             <button className="terminal-dock-summary" onClick={() => terminal.setDockOpen(true)}><span className={`terminal-state terminal-state--${terminal.state.sessions.some(({ status }) => status === "failed") ? "failed" : "running"}`} /><strong>TERMINAL</strong><span>{terminal.state.sessions.length.toString().padStart(2, "0")}</span><small>{terminal.state.sessions.find(({ id }) => id === terminal.state.activeId)?.title}</small><b>↑</b></button>
           )}
@@ -214,7 +228,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   )
 }
 
-function AppsView({ apps, nativeApp, setNativeApp, gateway, refresh, feedback, startOperation }: { apps: readonly AppRuntime[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {
+function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, refresh, feedback, startOperation, closeOperation }: { apps: readonly AppRuntime[]; sessions: readonly TerminalSession[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown>; closeOperation(id: string): Promise<unknown> }) {
   const [adminMode, setAdminMode] = useState<"web" | "native">("web")
   const states = new Map(apps.map((app) => [app.id, app]))
   const act = async (id: (typeof MATRIZ_DESKTOP_APPS)[number]["id"], ready: boolean) => {
@@ -223,8 +237,12 @@ function AppsView({ apps, nativeApp, setNativeApp, gateway, refresh, feedback, s
         if (nativeApp.state === "not-built") await startOperation("app.matriz-admin.native.build")
         else if (nativeApp.state === "built") setNativeApp(await gateway.installNativeApp())
         else setNativeApp(await gateway.startNativeApp())
-      } else if (ready) await gateway.stopApp(id)
-      else await startOperation(`app.${id}.web`)
+      } else if (ready) {
+        const operationId = `app.${id}.web` as ManagedOperationId
+        const managed = sessions.find((session) => session.operationId === operationId)
+        if (managed) await closeOperation(managed.id)
+        else await gateway.stopApp(id)
+      } else await startOperation(`app.${id}.web`)
       void feedback.play(ready ? "success" : "navigation")
       window.setTimeout(() => void refresh(), 650)
     } catch { void feedback.play("error") }

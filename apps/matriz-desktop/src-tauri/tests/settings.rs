@@ -39,7 +39,34 @@ fn settings_write_is_readable_as_a_complete_document() {
         sounds_enabled: false,
         volume: 0.7,
         start_with_windows: true,
+        workspace_path: Some("C:\\Apps\\matriz-infra-hub".into()),
     };
     store.write(&desired).expect("atomic settings write");
     assert_eq!(store.read().expect("stored settings"), desired);
+}
+
+#[test]
+fn version_one_settings_without_workspace_remain_compatible() {
+    let directory = tempfile::tempdir().expect("settings fixture");
+    let path = directory.path().join("settings.json");
+    fs::write(
+        &path,
+        r#"{
+          "version": 1,
+          "settings": {
+            "closeToTray": false,
+            "soundsEnabled": false,
+            "volume": 0.7,
+            "startWithWindows": true
+          }
+        }"#,
+    )
+    .expect("legacy settings");
+
+    let restored = SettingsStore::at(path).read().expect("compatible settings");
+    assert!(!restored.close_to_tray);
+    assert!(!restored.sounds_enabled);
+    assert_eq!(restored.volume, 0.7);
+    assert!(restored.start_with_windows);
+    assert_eq!(restored.workspace_path, None);
 }

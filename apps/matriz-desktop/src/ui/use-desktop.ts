@@ -11,10 +11,10 @@ export function useDesktop(gateway: DesktopGateway) {
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState("Pronto")
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (announce = true) => {
     try {
       setSnapshot(await gateway.snapshot())
-      setMessage("Atualizado")
+      if (announce) setMessage("Atualizado")
     } catch (error) {
       setMessage(error instanceof Error ? error.message : String(error))
     }
@@ -35,10 +35,10 @@ export function useDesktop(gateway: DesktopGateway) {
   }, [])
 
   useEffect(() => {
-    void refresh()
+    void refresh(false)
     void gateway.readSettings().then(setSettings).catch(() => undefined)
     const timer = window.setInterval(() => {
-      if (document.visibilityState === "visible") void refresh()
+      if (document.visibilityState === "visible") void refresh(false)
     }, 5_000)
     return () => window.clearInterval(timer)
   }, [gateway, refresh])

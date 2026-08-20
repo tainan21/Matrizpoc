@@ -50,6 +50,11 @@ impl OperationsState {
         Ok(canonical)
     }
 
+    pub fn restore_workspace(&self, path: Option<&str>) -> bool {
+        path.and_then(|path| self.select_workspace(Path::new(path)).ok())
+            .is_some()
+    }
+
     pub fn root(&self) -> Result<PathBuf, String> {
         self.root
             .lock()
@@ -157,6 +162,29 @@ impl OperationsState {
 
     pub(crate) fn gate_slot(&self) -> &Arc<Mutex<Option<String>>> {
         &self.active_gate
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::OperationsState;
+    use std::fs;
+
+    #[test]
+    fn restores_only_a_valid_saved_workspace() {
+        let directory = tempfile::tempdir().expect("workspace fixture");
+        fs::write(directory.path().join("package.json"), "{}").expect("package marker");
+        fs::write(directory.path().join("pnpm-workspace.yaml"), "packages: []")
+            .expect("workspace marker");
+        let state = OperationsState::default();
+
+        assert!(!state.restore_workspace(Some("missing-workspace")));
+        assert!(state.root().is_err());
+        assert!(state.restore_workspace(directory.path().to_str()));
+        assert_eq!(
+            state.root().expect("restored root"),
+            directory.path().canonicalize().expect("canonical fixture")
+        );
     }
 }
 

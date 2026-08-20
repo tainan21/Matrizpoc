@@ -7,12 +7,13 @@ use std::{
     thread,
 };
 
-use portable_pty::{native_pty_system, ChildKiller, CommandBuilder, MasterPty, PtySize};
+use portable_pty::{native_pty_system, CommandBuilder, MasterPty, PtySize};
 use serde::Serialize;
 use tauri::ipc::Channel;
 use uuid::Uuid;
 
 use crate::catalog::{ManagedOperationDefinition, ManagedOperationKind};
+use crate::processes::{ProcessTerminator, WindowsProcessTerminator};
 
 pub const MAX_SESSIONS: usize = 6;
 pub const MAX_CHUNK_BYTES: usize = 64 * 1024;
@@ -41,6 +42,8 @@ pub struct TerminalSession {
     pub id: String,
     pub title: String,
     pub kind: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub operation_id: Option<String>,
     pub status: &'static str,
     pub cwd: String,
     pub exit_code: Option<u32>,
@@ -60,17 +63,15 @@ pub enum TerminalEvent {
         sequence: u64,
         data: String,
     },
-    State {
-        session: TerminalSession,
-    },
+    State(TerminalSession),
 }
 
 struct SessionRecord {
     metadata: TerminalSession,
     sequence: u64,
-    master: Box<dyn MasterPty + Send>,
-    writer: Box<dyn Write + Send>,
-    killer: Box<dyn ChildKiller + Send + Sync>,
+    pid: u32,
+    master: Option<Box<dyn MasterPty + Send>>,
+    writer: Option<Box<dyn Write + Send>>,
 }
 
 type SharedSession = Arc<Mutex<SessionRecord>>;
@@ -85,7 +86,7 @@ pub struct TerminalManager {
 impl TerminalManager {
     pub fn create_shell(&self, root: &Path) -> Result<TerminalSession, String> {
         let shell = preferred_shell();
-        self.spawn(root, shell_label(&shell), "shell", &shell, &[])
+        self.spawn(root, shell_label(&shell), "shell", None, &shell, &[])
     }
 
     pub fn start_managed(
@@ -100,7 +101,19 @@ impl TerminalManager {
             .program
             .as_deref()
             .ok_or_else(|| "Managed operation has no executable".to_owned())?;
-        self.spawn(root, &operation.title, "managed", program, &operation.args)
+        let (program, args) = if program.eq_ignore_ascii_case("pnpm.cmd") {
+            corepack_pnpm_command(&operation.args)?
+        } else {
+            (program.to_owned(), operation.args.clone())
+        };
+        self.spawn(
+            root,
+            &operation.title,
+            "managed",
+            Some(&operation.id),
+            &program,
+            &args,
+        )
     }
 
     fn spawn(
@@ -108,10 +121,23 @@ impl TerminalManager {
         root: &Path,
         title: &str,
         kind: &'static str,
+        operation_id: Option<&str>,
         program: &str,
         args: &[String],
     ) -> Result<TerminalSession, String> {
         let mut sessions = self.sessions.lock().map_err(|_| "Terminal lock poisoned")?;
+        if let Some(operation_id) = operation_id {
+            for session in sessions.values() {
+                let session = session
+                    .lock()
+                    .map_err(|_| "Terminal session lock poisoned")?;
+                if session.metadata.operation_id.as_deref() == Some(operation_id)
+                    && session.metadata.status == "running"
+                {
+                    return Ok(session.metadata.clone());
+                }
+            }
+        }
         if sessions.len() >= MAX_SESSIONS {
             return Err(format!("Terminal session limit reached ({MAX_SESSIONS})"));
         }
@@ -142,12 +168,15 @@ impl TerminalManager {
             .master
             .take_writer()
             .map_err(|error| format!("Unable to write terminal: {error}"))?;
-        let killer = child.clone_killer();
+        let pid = child
+            .process_id()
+            .ok_or_else(|| "Terminal process did not expose a PID".to_owned())?;
         let id = Uuid::new_v4().to_string();
         let metadata = TerminalSession {
             id: id.clone(),
             title: title.to_owned(),
             kind,
+            operation_id: operation_id.map(str::to_owned),
             status: "running",
             cwd: root.display().to_string(),
             exit_code: None,
@@ -156,9 +185,9 @@ impl TerminalManager {
         let record = Arc::new(Mutex::new(SessionRecord {
             metadata: metadata.clone(),
             sequence: 0,
-            master: pair.master,
-            writer,
-            killer,
+            pid,
+            master: Some(pair.master),
+            writer: Some(writer),
         }));
         sessions.insert(id.clone(), Arc::clone(&record));
         drop(sessions);
@@ -214,15 +243,10 @@ impl TerminalManager {
                 }
                 session.metadata.clone()
             };
-            send_event(&exit_subscriber, TerminalEvent::State { session: metadata });
+            send_event(&exit_subscriber, TerminalEvent::State(metadata));
         });
 
-        send_event(
-            &self.subscriber,
-            TerminalEvent::State {
-                session: metadata.clone(),
-            },
-        );
+        send_event(&self.subscriber, TerminalEvent::State(metadata.clone()));
         Ok(metadata)
     }
 
@@ -248,6 +272,8 @@ impl TerminalManager {
             .lock()
             .map_err(|_| "Terminal session lock poisoned".to_owned())?
             .writer
+            .as_mut()
+            .ok_or_else(|| "Terminal session is closing".to_owned())?
             .write_all(data.as_bytes())
             .map_err(|error| format!("Unable to write terminal: {error}"));
         result
@@ -259,6 +285,8 @@ impl TerminalManager {
             .lock()
             .map_err(|_| "Terminal session lock poisoned".to_owned())?
             .master
+            .as_ref()
+            .ok_or_else(|| "Terminal session is closing".to_owned())?
             .resize(size)
             .map_err(|error| format!("Unable to resize terminal: {error}"))
     }
@@ -268,19 +296,27 @@ impl TerminalManager {
     }
 
     pub fn close(&self, session_id: &str) -> Result<(), String> {
-        let session = self
-            .sessions
+        let session = self.session(session_id)?;
+        let (pid, is_running) = session
+            .lock()
+            .map(|session| (session.pid, session.metadata.status == "running"))
+            .map_err(|_| "Terminal session lock poisoned".to_owned())?;
+        if is_running {
+            WindowsProcessTerminator.terminate(pid)?;
+        }
+        let (writer, master) = {
+            let mut session = session
+                .lock()
+                .map_err(|_| "Terminal session lock poisoned".to_owned())?;
+            (session.writer.take(), session.master.take())
+        };
+        drop(writer);
+        drop(master);
+        self.sessions
             .lock()
             .map_err(|_| "Terminal lock poisoned")?
-            .remove(session_id)
-            .ok_or_else(|| "Unknown terminal session".to_owned())?;
-        let result = session
-            .lock()
-            .map_err(|_| "Terminal session lock poisoned".to_owned())?
-            .killer
-            .kill()
-            .map_err(|error| format!("Unable to close terminal: {error}"));
-        result
+            .remove(session_id);
+        Ok(())
     }
 
     pub fn subscribe(&self, channel: Channel<TerminalEvent>) -> Result<(), String> {
@@ -289,7 +325,7 @@ impl TerminalManager {
             .lock()
             .map_err(|_| "Terminal subscriber lock poisoned")? = Some(channel);
         for session in self.list()? {
-            send_event(&self.subscriber, TerminalEvent::State { session });
+            send_event(&self.subscriber, TerminalEvent::State(session));
         }
         Ok(())
     }
@@ -307,7 +343,11 @@ impl TerminalManager {
             .unwrap_or_default();
         for session in sessions {
             if let Ok(mut session) = session.lock() {
-                let _ = session.killer.kill();
+                if session.metadata.status == "running" {
+                    let _ = WindowsProcessTerminator.terminate(session.pid);
+                }
+                session.writer.take();
+                session.master.take();
             }
         }
     }
@@ -323,21 +363,85 @@ impl TerminalManager {
 }
 
 fn preferred_shell() -> String {
-    Command::new("where.exe")
-        .arg("pwsh.exe")
-        .output()
-        .ok()
-        .filter(|output| output.status.success())
-        .map(|_| "pwsh.exe")
-        .unwrap_or("powershell.exe")
-        .to_owned()
+    ["pwsh.exe", "powershell.exe"]
+        .into_iter()
+        .find_map(resolve_executable)
+        .unwrap_or_else(windows_powershell_fallback)
+}
+
+fn resolve_executable(name: &str) -> Option<String> {
+    let output = Command::new("where.exe").arg(name).output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(Path::new)
+        .find(|path| path.is_absolute() && path.is_file())
+        .map(|path| path.display().to_string())
+}
+
+fn windows_powershell_fallback() -> String {
+    std::env::var_os("SystemRoot")
+        .map(std::path::PathBuf::from)
+        .map(|root| {
+            root.join("System32/WindowsPowerShell/v1.0/powershell.exe")
+                .display()
+                .to_string()
+        })
+        .unwrap_or_else(|| "powershell.exe".to_owned())
+}
+
+fn corepack_pnpm_command(args: &[String]) -> Result<(String, Vec<String>), String> {
+    let node = resolve_executable("node.exe")
+        .ok_or_else(|| "Node.js executable was not found".to_owned())?;
+    let corepack = Path::new(&node)
+        .parent()
+        .map(|directory| directory.join("node_modules/corepack/dist/corepack.js"))
+        .filter(|path| path.is_file())
+        .ok_or_else(|| "Corepack runtime was not found beside Node.js".to_owned())?;
+    let mut corepack_args = vec![corepack.display().to_string(), "pnpm".to_owned()];
+    corepack_args.extend_from_slice(args);
+    Ok((node, corepack_args))
 }
 
 fn shell_label(shell: &str) -> &str {
-    if shell.eq_ignore_ascii_case("pwsh.exe") {
+    let executable = Path::new(shell)
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or(shell);
+    if executable.eq_ignore_ascii_case("pwsh.exe") {
         "PowerShell 7"
     } else {
         "PowerShell"
+    }
+}
+
+#[cfg(test)]
+mod shell_tests {
+    use super::{corepack_pnpm_command, preferred_shell};
+    use std::path::Path;
+
+    #[cfg(windows)]
+    #[test]
+    fn preferred_shell_resolves_to_an_existing_absolute_executable() {
+        let shell = preferred_shell();
+        let path = Path::new(&shell);
+        assert!(path.is_absolute(), "resolved shell was {shell}");
+        assert!(path.is_file(), "resolved shell did not exist: {shell}");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn managed_pnpm_uses_node_and_corepack_instead_of_a_batch_shim() {
+        let (program, args) = corepack_pnpm_command(&["--version".to_owned()]).expect("corepack");
+
+        assert!(Path::new(&program).is_absolute());
+        assert!(Path::new(&program).is_file());
+        assert!(Path::new(&args[0]).is_file());
+        assert_eq!(&args[1..], ["pnpm", "--version"]);
     }
 }
 

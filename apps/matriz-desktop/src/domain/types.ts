@@ -48,6 +48,7 @@ export interface DesktopSettings {
   readonly soundsEnabled: boolean
   readonly volume: number
   readonly startWithWindows: boolean
+  readonly workspacePath?: string
 }
 
 export interface AppRuntime {
@@ -80,6 +81,7 @@ export interface TerminalSession {
   readonly id: string
   readonly title: string
   readonly kind: "shell" | "managed"
+  readonly operationId?: ManagedOperationId
   readonly status: TerminalStatus
   readonly cwd: string
   readonly exitCode?: number

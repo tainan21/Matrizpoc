@@ -35,6 +35,7 @@ function gateway(): DesktopGateway {
       soundsEnabled: false,
       volume: 0.45,
       startWithWindows: false,
+      workspacePath: "C:\\Apps\\matriz-infra-hub",
     }),
     writeSettings: vi.fn().mockImplementation(async (settings) => settings),
     hide: vi.fn().mockResolvedValue(undefined),
@@ -57,6 +58,7 @@ function gateway(): DesktopGateway {
       id: "managed-1",
       title: "SEUMEI / WEB",
       kind: "managed",
+      operationId: "app.seumei.web",
       status: "starting",
       cwd: "C:\\Apps\\matriz-infra-hub",
       tail: "",
@@ -100,6 +102,32 @@ describe("Matriz Control", () => {
       expect(desktop.startManagedOperation).toHaveBeenCalledWith("app.seumei.web"),
     )
     expect(screen.getByRole("button", { name: "Terminal · 1 ativa" })).toBeVisible()
+  })
+
+  it("stops a ready app through its owned terminal session", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.appStatuses).mockResolvedValue([
+      { id: "seumei", port: 3008, status: "ready", pid: 4321 },
+    ])
+    vi.mocked(desktop.listTerminals).mockResolvedValue([
+      {
+        id: "managed-seumei",
+        title: "SEUMEI / WEB",
+        kind: "managed",
+        operationId: "app.seumei.web",
+        status: "running",
+        cwd: "C:\\Apps\\matriz-infra-hub",
+        tail: "",
+      },
+    ])
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Parar Seumei" }))
+
+    await waitFor(() => expect(desktop.closeTerminal).toHaveBeenCalledWith("managed-seumei"))
+    expect(desktop.stopApp).not.toHaveBeenCalled()
   })
 
   it("opens the global command deck and executes only the observed PID", async () => {

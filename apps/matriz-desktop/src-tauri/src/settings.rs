@@ -16,6 +16,8 @@ pub struct DesktopSettings {
     pub sounds_enabled: bool,
     pub volume: f64,
     pub start_with_windows: bool,
+    #[serde(default)]
+    pub workspace_path: Option<String>,
 }
 
 impl Default for DesktopSettings {
@@ -25,6 +27,7 @@ impl Default for DesktopSettings {
             sounds_enabled: true,
             volume: 0.45,
             start_with_windows: false,
+            workspace_path: None,
         }
     }
 }
