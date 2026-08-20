@@ -2,7 +2,6 @@
 
 import { useEffect, type ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { TenantProvider } from "@matriz/access-tenants/client"
 import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { bootstrapSeumei } from "../bootstrap"
 import { seumeiAuthConfig } from "../auth/config"
@@ -29,5 +28,5 @@ function Guard({ children }: { children: ReactNode }) {
 }
 
 export function SeumeiAuthShell({ children }: { children: ReactNode }) {
-  return <AuthProvider config={seumeiAuthConfig}><TenantProvider><Guard>{children}</Guard></TenantProvider></AuthProvider>
+  return <AuthProvider config={seumeiAuthConfig}><Guard>{children}</Guard></AuthProvider>
 }
