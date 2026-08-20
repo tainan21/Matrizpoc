@@ -419,32 +419,6 @@ fn shell_label(shell: &str) -> &str {
     }
 }
 
-#[cfg(test)]
-mod shell_tests {
-    use super::{corepack_pnpm_command, preferred_shell};
-    use std::path::Path;
-
-    #[cfg(windows)]
-    #[test]
-    fn preferred_shell_resolves_to_an_existing_absolute_executable() {
-        let shell = preferred_shell();
-        let path = Path::new(&shell);
-        assert!(path.is_absolute(), "resolved shell was {shell}");
-        assert!(path.is_file(), "resolved shell did not exist: {shell}");
-    }
-
-    #[cfg(windows)]
-    #[test]
-    fn managed_pnpm_uses_node_and_corepack_instead_of_a_batch_shim() {
-        let (program, args) = corepack_pnpm_command(&["--version".to_owned()]).expect("corepack");
-
-        assert!(Path::new(&program).is_absolute());
-        assert!(Path::new(&program).is_file());
-        assert!(Path::new(&args[0]).is_file());
-        assert_eq!(&args[1..], ["pnpm", "--version"]);
-    }
-}
-
 fn send_event(subscriber: &Subscriber, event: TerminalEvent) {
     if let Ok(channel) = subscriber.lock() {
         if let Some(channel) = channel.as_ref() {
@@ -489,4 +463,30 @@ pub fn bounded_tail(value: &str, maximum: usize) -> String {
         start += 1;
     }
     value[start..].to_owned()
+}
+
+#[cfg(test)]
+mod shell_tests {
+    use super::{corepack_pnpm_command, preferred_shell};
+    use std::path::Path;
+
+    #[cfg(windows)]
+    #[test]
+    fn preferred_shell_resolves_to_an_existing_absolute_executable() {
+        let shell = preferred_shell();
+        let path = Path::new(&shell);
+        assert!(path.is_absolute(), "resolved shell was {shell}");
+        assert!(path.is_file(), "resolved shell did not exist: {shell}");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn managed_pnpm_uses_node_and_corepack_instead_of_a_batch_shim() {
+        let (program, args) = corepack_pnpm_command(&["--version".to_owned()]).expect("corepack");
+
+        assert!(Path::new(&program).is_absolute());
+        assert!(Path::new(&program).is_file());
+        assert!(Path::new(&args[0]).is_file());
+        assert_eq!(&args[1..], ["pnpm", "--version"]);
+    }
 }

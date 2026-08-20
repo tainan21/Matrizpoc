@@ -43,4 +43,5 @@ export interface DesktopGateway {
   getNativeAppRuntime(): Promise<NativeAppRuntime>
   installNativeApp(): Promise<NativeAppRuntime>
   startNativeApp(): Promise<NativeAppRuntime>
+  stopNativeApp(): Promise<NativeAppRuntime>
 }

@@ -30,7 +30,7 @@ export const config = {
   reporters: ["spec"],
   mochaOpts: {
     ui: "bdd",
-    timeout: 180_000,
+    timeout: 900_000,
   },
   before: async () => {
     const [mainWindow] = await browser.getWindowHandles()

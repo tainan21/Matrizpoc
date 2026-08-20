@@ -37,6 +37,8 @@ export interface Feedback {
   initialize?(): void
 }
 
+type ExecuteAction = <T>(action: () => Promise<T>, success: string) => Promise<T>
+
 const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = [
   { id: "ports", label: "Portas", icon: "ports" },
   { id: "apps", label: "Apps", icon: "apps" },
@@ -205,7 +207,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
           </section>
         ) : null}
 
-        {view === "apps" ? <AppsView apps={apps} sessions={terminal.state.sessions} nativeApp={nativeApp} setNativeApp={setNativeApp} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} startOperation={terminal.startOperation} closeOperation={terminal.close} /> : null}
+        {view === "apps" ? <AppsView apps={apps} sessions={terminal.state.sessions} nativeApp={nativeApp} setNativeApp={setNativeApp} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} executeAction={desktop.execute} startOperation={terminal.startOperation} closeOperation={terminal.close} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
@@ -222,33 +224,36 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         </aside>
       ) : null}
 
-      <footer><span className={desktop.message.includes("não") ? "error" : ""} role="status" aria-live="polite">{desktop.message}</span><kbd>Ctrl Shift M</kbd></footer>
+      <footer><span className={desktop.message.includes("não") ? "error" : ""} role="status" aria-live="polite">{desktop.message}</span><kbd>Ctrl K</kbd></footer>
       <CommandDeck commands={deckCommands} execute={executeDeck} />
     </div>
   )
 }
 
-function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, refresh, feedback, startOperation, closeOperation }: { apps: readonly AppRuntime[]; sessions: readonly TerminalSession[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown>; closeOperation(id: string): Promise<unknown> }) {
+function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, refresh, feedback, executeAction, startOperation, closeOperation }: { apps: readonly AppRuntime[]; sessions: readonly TerminalSession[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; executeAction: ExecuteAction; startOperation(id: ManagedOperationId): Promise<unknown>; closeOperation(id: string): Promise<unknown> }) {
   const [adminMode, setAdminMode] = useState<"web" | "native">("web")
   const states = new Map(apps.map((app) => [app.id, app]))
   const act = async (id: (typeof MATRIZ_DESKTOP_APPS)[number]["id"], ready: boolean) => {
     try {
-      if (id === "matriz-admin" && adminMode === "native") {
-        if (nativeApp.state === "not-built") await startOperation("app.matriz-admin.native.build")
-        else if (nativeApp.state === "built") setNativeApp(await gateway.installNativeApp())
-        else setNativeApp(await gateway.startNativeApp())
-      } else if (ready) {
-        const operationId = `app.${id}.web` as ManagedOperationId
-        const managed = sessions.find((session) => session.operationId === operationId)
-        if (managed) await closeOperation(managed.id)
-        else await gateway.stopApp(id)
-      } else await startOperation(`app.${id}.web`)
+      await executeAction(async () => {
+        if (id === "matriz-admin" && adminMode === "native") {
+          if (nativeApp.state === "not-built") await startOperation("app.matriz-admin.native.build")
+          else if (nativeApp.state === "built") setNativeApp(await gateway.installNativeApp())
+          else if (nativeApp.state === "installed") setNativeApp(await gateway.startNativeApp())
+          else setNativeApp(await gateway.stopNativeApp())
+        } else if (ready) {
+          const operationId = `app.${id}.web` as ManagedOperationId
+          const managed = sessions.find((session) => session.operationId === operationId)
+          if (managed) await closeOperation(managed.id)
+          else await gateway.stopApp(id)
+        } else await startOperation(`app.${id}.web`)
+      }, id === "matriz-admin" && adminMode === "native" ? `${nativeAction} concluído` : ready ? `${id} parado` : `${id} iniciado`)
       void feedback.play(ready ? "success" : "navigation")
       window.setTimeout(() => void refresh(), 650)
     } catch { void feedback.play("error") }
   }
-  const nativeAction = nativeApp.state === "not-built" ? "Gerar" : nativeApp.state === "built" ? "Instalar" : "Abrir"
-  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 09</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const native = app.id === "matriz-admin" && adminMode === "native"; return <article className={`app-tile${app.id === "matriz-admin" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${native ? (nativeApp.state === "running" ? "ready" : "stopped") : (ready ? "ready" : "stopped")}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : `:${app.port}`}</small></div>{app.id === "matriz-admin" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Matriz Admin"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Matriz Admin nativo` : `${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{!native && ready ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
+  const nativeAction = nativeApp.state === "not-built" ? "Gerar" : nativeApp.state === "built" ? "Instalar" : nativeApp.state === "installed" ? "Abrir" : "Fechar"
+  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 09</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const native = app.id === "matriz-admin" && adminMode === "native"; const nativeRunning = native && nativeApp.state === "running"; return <article className={`app-tile${app.id === "matriz-admin" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${nativeRunning || (!native && ready) ? "ready" : "stopped"}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : `:${app.port}`}</small></div>{app.id === "matriz-admin" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Matriz Admin"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Matriz Admin nativo` : `${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{nativeRunning || (!native && ready) ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
 }
 
 function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback, startOperation }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {

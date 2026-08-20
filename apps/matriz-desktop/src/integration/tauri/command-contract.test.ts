@@ -32,6 +32,7 @@ describe("Tauri command contract", () => {
       getNativeAppRuntime: "get_native_app_runtime",
       installNativeApp: "install_native_app",
       startNativeApp: "start_native_app",
+      stopNativeApp: "stop_native_app",
     })
     expect(Object.isFrozen(TAURI_COMMAND_CONTRACT)).toBe(true)
   })
@@ -76,6 +77,7 @@ describe("Tauri command contract", () => {
     await gateway.getNativeAppRuntime()
     await gateway.installNativeApp()
     await gateway.startNativeApp()
+    await gateway.stopNativeApp()
 
     expect(calls).toEqual([
       { command: "get_snapshot", args: undefined },
@@ -110,6 +112,7 @@ describe("Tauri command contract", () => {
       { command: "get_native_app_runtime", args: undefined },
       { command: "install_native_app", args: undefined },
       { command: "start_native_app", args: undefined },
+      { command: "stop_native_app", args: undefined },
     ])
   })
 })

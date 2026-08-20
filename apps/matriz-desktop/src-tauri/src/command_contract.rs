@@ -25,4 +25,5 @@ pub const COMMAND_NAMES: &[&str] = &[
     "get_native_app_runtime",
     "install_native_app",
     "start_native_app",
+    "stop_native_app",
 ];

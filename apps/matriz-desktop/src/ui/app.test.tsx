@@ -66,6 +66,7 @@ function gateway(): DesktopGateway {
     getNativeAppRuntime: vi.fn().mockResolvedValue({ appId: "matriz-admin", state: "not-built" }),
     installNativeApp: vi.fn().mockResolvedValue({ appId: "matriz-admin", state: "installed", version: "0.1.0" }),
     startNativeApp: vi.fn().mockResolvedValue({ appId: "matriz-admin", state: "running", version: "0.1.0" }),
+    stopNativeApp: vi.fn().mockResolvedValue({ appId: "matriz-admin", state: "installed", version: "0.1.0" }),
   }
 }
 
@@ -159,5 +160,33 @@ describe("Matriz Control", () => {
 
     await waitFor(() => expect(desktop.installNativeApp).toHaveBeenCalledOnce())
     expect(screen.getByText("INSTALLED")).toBeVisible()
+  })
+
+  it("stops a running Matriz Admin native process from the same compact action", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.getNativeAppRuntime).mockResolvedValue({ appId: "matriz-admin", state: "running", version: "0.1.0" })
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Matriz Admin Nativo" }))
+    fireEvent.click(screen.getByRole("button", { name: "Fechar Matriz Admin nativo" }))
+
+    await waitFor(() => expect(desktop.stopNativeApp).toHaveBeenCalledOnce())
+    expect(screen.getByText("INSTALLED")).toBeVisible()
+  })
+
+  it("surfaces native installer verification failures as operational feedback", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.getNativeAppRuntime).mockResolvedValue({ appId: "matriz-admin", state: "built", version: "0.1.0" })
+    vi.mocked(desktop.installNativeApp).mockRejectedValue(new Error("Installer sem hash confiável"))
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Matriz Admin Nativo" }))
+    fireEvent.click(screen.getByRole("button", { name: "Instalar Matriz Admin nativo" }))
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Installer sem hash confiável")
   })
 })

@@ -49,6 +49,7 @@ describe("Tauri desktop gateway", () => {
     await gateway.getNativeAppRuntime()
     await gateway.installNativeApp()
     await gateway.startNativeApp()
+    await gateway.stopNativeApp()
 
     expect(createChannel).toHaveBeenCalledWith(listener)
     expect(invoke.mock.calls).toEqual([
@@ -63,6 +64,7 @@ describe("Tauri desktop gateway", () => {
       ["get_native_app_runtime"],
       ["install_native_app"],
       ["start_native_app"],
+      ["stop_native_app"],
     ])
   })
 })

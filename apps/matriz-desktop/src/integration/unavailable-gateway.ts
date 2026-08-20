@@ -39,4 +39,5 @@ export const unavailableGateway: DesktopGateway = {
   getNativeAppRuntime: async () => ({ appId: "matriz-admin", state: "not-built" }),
   installNativeApp: async () => unavailable(),
   startNativeApp: async () => unavailable(),
+  stopNativeApp: async () => unavailable(),
 }

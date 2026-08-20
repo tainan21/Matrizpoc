@@ -162,10 +162,17 @@ pub fn managed_operation(id: &str) -> Result<ManagedOperationDefinition, String>
             id: id.to_owned(),
             title: "MATRIZ ADMIN / BUILD".into(),
             kind: ManagedOperationKind::Command,
-            program: Some("pnpm.cmd".into()),
-            args: ["--filter", "@matriz/app-matriz-admin", "package:desktop"]
-                .map(str::to_owned)
-                .into(),
+            program: Some("powershell.exe".into()),
+            args: [
+                "-NoProfile",
+                "-NonInteractive",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "apps/matriz-desktop/scripts/package-matriz-admin.ps1",
+            ]
+            .map(str::to_owned)
+            .into(),
         }),
         "app.matriz-admin.native.install" => Ok(ManagedOperationDefinition {
             id: id.to_owned(),

@@ -58,5 +58,6 @@ export function createTauriGateway(
     getNativeAppRuntime: () => invoke(commands.getNativeAppRuntime),
     installNativeApp: () => invoke(commands.installNativeApp),
     startNativeApp: () => invoke(commands.startNativeApp),
+    stopNativeApp: () => invoke(commands.stopNativeApp),
   }
 }

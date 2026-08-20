@@ -31,9 +31,18 @@ fn managed_operations_resolve_programs_and_arguments_without_shell_strings() {
     assert_eq!(gate.args, ["run", "typecheck"].map(str::to_owned));
 
     let build = managed_operation("app.matriz-admin.native.build").expect("known native build");
+    assert_eq!(build.program.as_deref(), Some("powershell.exe"));
     assert_eq!(
         build.args,
-        ["--filter", "@matriz/app-matriz-admin", "package:desktop"].map(str::to_owned)
+        [
+            "-NoProfile",
+            "-NonInteractive",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            "apps/matriz-desktop/scripts/package-matriz-admin.ps1",
+        ]
+        .map(str::to_owned)
     );
     assert_eq!(
         managed_operation("app.matriz-admin.native.install")

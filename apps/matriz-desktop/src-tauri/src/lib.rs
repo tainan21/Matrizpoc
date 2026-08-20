@@ -332,6 +332,13 @@ fn start_native_app(
     native_apps::start(&operations.root()?)
 }
 
+#[tauri::command]
+fn stop_native_app(
+    operations: tauri::State<'_, OperationsState>,
+) -> Result<native_apps::NativeAppRuntime, String> {
+    native_apps::stop(&operations.root()?)
+}
+
 #[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
@@ -442,7 +449,8 @@ pub fn run() {
             subscribe_terminal,
             get_native_app_runtime,
             install_native_app,
-            start_native_app
+            start_native_app,
+            stop_native_app
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");

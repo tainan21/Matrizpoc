@@ -165,6 +165,17 @@ impl OperationsState {
     }
 }
 
+pub fn validate_workspace(path: &Path) -> Result<PathBuf, String> {
+    let canonical = path
+        .canonicalize()
+        .map_err(|error| format!("Invalid workspace path: {error}"))?;
+    if !canonical.join("package.json").is_file() || !canonical.join("pnpm-workspace.yaml").is_file()
+    {
+        return Err("Selected folder is not a Matriz pnpm workspace".into());
+    }
+    Ok(canonical)
+}
+
 #[cfg(test)]
 mod tests {
     use super::OperationsState;
@@ -186,15 +197,4 @@ mod tests {
             directory.path().canonicalize().expect("canonical fixture")
         );
     }
-}
-
-pub fn validate_workspace(path: &Path) -> Result<PathBuf, String> {
-    let canonical = path
-        .canonicalize()
-        .map_err(|error| format!("Invalid workspace path: {error}"))?;
-    if !canonical.join("package.json").is_file() || !canonical.join("pnpm-workspace.yaml").is_file()
-    {
-        return Err("Selected folder is not a Matriz pnpm workspace".into());
-    }
-    Ok(canonical)
 }
