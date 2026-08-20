@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest"
 import { CompanyAccessDeniedError } from "../application/company-access"
 import { OnboardingConflictError } from "../application/company-onboarding"
 import type { CompanyRepository } from "../domain/repositories/company-repository"
-import type { CoreAccessRepository } from "../domain/repositories/core-access-repository"
+import type { CompleteCoreAccessRepository } from "../domain/repositories/core-access-repository"
 import {
   createCompanyHandler,
   listCompaniesHandler,
@@ -20,7 +20,7 @@ function services(overrides: Partial<CompanyHttpServices> = {}): CompanyHttpServ
     core: {
       resolveUser: vi.fn().mockResolvedValue({ id: "user_a", name: "Ana", email: actor.email }),
       listSeumeiMemberships: vi.fn().mockResolvedValue([{ tenantId: "tenant_a", role: "OWNER" }]),
-    } as unknown as CoreAccessRepository,
+    } as unknown as CompleteCoreAccessRepository,
     companies: {
       listVisibleByTenantIds: vi.fn().mockResolvedValue([company]),
       findByIdForTenantIds: vi.fn().mockResolvedValue(company),

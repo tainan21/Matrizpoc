@@ -25,7 +25,7 @@ import { resolveActiveCompanyContext } from "../application/active-company"
 import { InvalidCompanyInputError, type Company } from "../domain/company"
 import type { SessionActor } from "../types/session-actor"
 import type { CompanyRepository } from "../domain/repositories/company-repository"
-import type { CoreAccessRepository } from "../domain/repositories/core-access-repository"
+import type { CompleteCoreAccessRepository } from "../domain/repositories/core-access-repository"
 import {
   toCompanyChoiceViewModel,
   toOnboardingViewModel,
@@ -34,7 +34,7 @@ import {
 import type { SeumeiSessionResolution } from "../auth/server-session"
 
 export interface CompanyHttpServices {
-  readonly core: CoreAccessRepository
+  readonly core: CompleteCoreAccessRepository
   readonly companies: CompanyRepository
   readonly ids: IdGenerator
   readonly events?: { companySelected(company: Company): void }
