@@ -1,28 +1,48 @@
 # Seumei migration ledger
 
-## Permanent ownership
+## Permanent ownership and current proof
 
-- `apps/seumeiapp`: login, tenant session, company, onboarding, catalog, stock, storefront, publishing, orders and customers.
-- `prisma/schemas/seumei.prisma`: Seumei persistence source of truth.
-- `apps/matriz-admin`: cross-product administration; no direct ownership of Seumei persistence.
+- `apps/seumeiapp` owns company, onboarding, workspace and every future Seumei business capability.
+- `prisma/schemas/core.prisma` owns global user, tenant, app registration and membership.
+- `prisma/schemas/seumei.prisma` owns company and onboarding persistence.
+- `apps/matriz-admin` remains an external observer through public contracts; it does not own or query Seumei data directly.
+- The first assimilated slice creates a real tenant/company/OWNER membership, resumes persisted onboarding and enters a membership-authorized workspace. The browser never supplies tenant authority.
 
-## Current proof
+The read-only reference is `apps/incoming/seumei-reference` in the main checkout. Paths below are evidence locations, not runtime dependencies.
 
-The new Seumei authenticates through Matriz Hub, derives the active tenant server-side and reads a real tenant-scoped establishment through `@matriz/platform-db/seumei`. Browser input cannot select a tenant ID.
+## Reference map
 
-## Reference source
+- Workspace and multi-company: `features/space/**`, `features/space-runtime/**` and `app/w/[slug]/**`.
+- Onboarding and settings: `features/space-onboarding/**` and `features/space-settings/**`.
+- Catalog and stock: `modules/product/**` and `modules/stock/**`.
+- Store and publication: `modules/store/**`, `features/store-runtime/**` and `app/loja/[slug]/**`.
+- Commerce: `modules/orders/**`, `modules/customers/**` and `modules/finance/**`.
+- Visual configuration: `features/design/**`, `modules/design/**` and `config/store-*.ts`.
+- Reference persistence is predominantly local/mock (`local-*-repository.ts`, `mock-*-repository.ts`, browser storage). Its rules are evidence; its persistence architecture is not preserved.
 
-The externally supplied Seumei source remains read-only in `apps/incoming/seumei-reference` of the main checkout. Nothing is copied wholesale. Migrate one vertical slice at a time, preserving behavior and tests.
+## Assimilation ledger
 
-## Slice order
+| Capacidade | Comportamento observado | Fonte de evidência | Dados e dependências | Classificação / prioridade | Destino arquitetural | Estratégia de teste | Estado |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Ciclo de empresa/space | Criar, listar, selecionar e abrir um workspace por slug | `features/space/application/space-service.ts`; `features/space/presentation/space-switcher.tsx` | Empresa; Core tenant; membership; Seumei app registration | **RECONSTRUIR / P0** — a jornada tem valor, mas a autoridade local/mock não | `src/application/provision-company.ts`, `company-access.ts`, repositories Core/Seumei | Idempotência, compensação, slug duplicado, lista autorizada e componentes | **ASSIMILADO** |
+| Tenant e OWNER inicial | O criador inicia com controle do workspace | `features/space-settings/presentation/space-members-settings-section.tsx` | Core `User`, `Tenant`, `Membership`, `AppRegistration` | **PRESERVAR CONTRATO / P0** — ownership é invariante de interoperabilidade | `src/infrastructure/core-access.repository.ts` | Transação Core e membership `OWNER` app-scoped | **ASSIMILADO** |
+| Seleção de empresa ativa | Slug/space ativo persiste no cliente/cookie e controla navegação | `features/space/infrastructure/space-storage.ts`; `server-space-resolver.ts` | Company ID como preferência; memberships persistidas como autoridade | **SUBSTITUIR / P0** — storage não pode conceder acesso | Cookie HTTP-only + `src/application/active-company.ts` | Cookie adulterado e ID conhecido de outro tenant retornam negação genérica | **ASSIMILADO** |
+| Evento público de seleção | Consumidores Matriz observam `seumei.establishment.selected` | Contrato canônico `packages/integration/events/src/index.ts`; consumo Hub/Contracts | Company validada mapeada para o payload legado após autorização | **PRESERVAR CONTRATO / P0** — interoperabilidade existente exige compatibilidade | Emissão server-side em `src/application/composition.ts`; nenhum dado vai ao browser | Handler prova emissão somente após seleção autorizada; smoke de manifests/eventos | **ASSIMILADO COM ADAPTER DE COMPATIBILIDADE** |
+| Onboarding retomável | Draft por etapas de identidade/configuração continua após navegação | `features/space-onboarding/domain/space-onboarding-draft.ts`; `local-space-onboarding-repository.ts` | `CompanyOnboarding`, versão otimista, preferência de moeda | **ADAPTAR / P0** — preservar jornada, trocar persistência | `src/application/company-onboarding.ts`; schema e repository Seumei | Retomada, versão obsoleta, campos obrigatórios, conclusão idempotente | **ASSIMILADO** |
+| Autorização tenant | Gate de rota associa usuário ao space, mas convive com fontes locais | `features/space-runtime/application/space-route-access.ts`; `space-route-gate.tsx` | Sessão Hub + Core user/membership + company tenant-scoped | **CORRIGIR / P0** — autoridade deve ser server-side por construção | `company-access.ts`, `server-page-context.ts`, handlers HTTP | Dois tenants com IDs conhecidos; repositories nunca têm lookup empresarial sem tenant | **ASSIMILADO** |
+| Estados honestos | Loading/not-found aparecem, mas mocks podem mascarar ausência | `app/w/[slug]/not-found.tsx`; `features/space/infrastructure/mock-space-catalog.ts` | Sessão e configuração de banco | **SUBSTITUIR / P0** — ausência não vira dado falso | `database-config.ts`, `SystemState.tsx`, `loading.tsx` | Signed-out vs indisponível; config ausente sem construir Prisma; UI vazia | **ASSIMILADO** |
+| Shell, membros e permissões | Settings de membros e gates de rota sugerem papéis por workspace | `space-members-settings-section.tsx`; `space-route-access.ts` | Convites, memberships, roles/capacidades | **ADAPTAR / P1** — próxima fundação necessária | Domínio app-local + adapter Core; sem package novo | Matriz de OWNER/ADMIN/MEMBER/VIEWER e convites cross-tenant negativos | **ADIADO — PRÓXIMA FATIA** |
+| Produtos, variantes e categorias | CRUD de produto/categoria e páginas workspace | `modules/product/domain/**`; `modules/product/application/product-service.ts` | Produto, categoria, variante, preço, company/tenant | **ADAPTAR / P1** — regras úteis, repositories mock/local não | Futuro domínio/repository/presenter em `apps/seumeiapp` | CRUD tenant-scoped, conflitos e presenter contract | **ADIADO** |
+| Estoque e movimentos | Saldo e histórico de movimentos ligados ao workspace | `modules/stock/domain/**`; `stock/application/stock-service.ts` | Item, quantidade, movimento, produto, tenant | **ADAPTAR / P1** — preservar movimentos, reconstruir persistência | Futura fatia Seumei após catálogo | Concorrência de saldo e tentativa cruzada tenant A/B | **ADIADO** |
+| Loja e publicação | Configuração de loja e páginas públicas por slug | `modules/store/**`; `features/store-runtime/**`; `app/loja/[slug]/**` | Store, publicação, routing, catálogo público | **RECONSTRUIR / P1** — routing público exige contrato próprio | Futuro domínio Seumei + rota pública versionada | Draft/publicado, isolamento e resolução segura de slug | **ADIADO** |
+| Pedidos | Lista/detalhe e automações orientadas ao workspace | `modules/orders/**`; `features/order-automation/**` | Pedido, itens, status, cliente, estoque | **ADAPTAR / P1** — domínio valioso, storage local incompatível | Futura fatia depois de catálogo/estoque/loja | Máquina de estados, idempotência e efeitos tenant-scoped | **ADIADO** |
+| Clientes | Cadastro e consolidação de cliente por workspace | `modules/customers/**` | Cliente, contatos, pedidos, tenant | **AVALIAR / P2** — consolidar identidade exige mais evidência | Futuro domínio Seumei, nunca Core user automaticamente | Duplicidade, privacidade e isolamento | **ADIADO** |
+| Financeiro essencial | Visões financeiras derivadas de operações locais | `modules/finance/**` | Lançamentos/totalizadores e pedidos | **AVALIAR / P2** — escopo fiscal/contábil não está claro | Futuro bounded context app-local | Reconciliação, precisão e autorização | **ADIADO** |
+| Identidade visual da loja | Editor, temas, presets e registry de blocos | `features/design/**`; `modules/design/**`; `config/store-theme-registry.ts` | Tema, tokens, layout e publicação | **ADAPTAR / P2** — usar MatrizLib pública onde neutro | Seumei para composição de loja; MatrizLib apenas exports já estáveis | Compatibilidade de tema, preview/publicação e acessibilidade | **ADIADO** |
+| Primitivos UI duplicados | A referência contém grande árvore `components/ui/**` | `components/ui/**` | Componentes visuais genéricos | **ELIMINAR DUPLICAÇÃO / P2** — MatrizLib já é canônica | Consumir `@matriz/design-ui` / `@matriz/design-system` | Component tests e acessibilidade no consumidor | **EM ANDAMENTO POR FATIA** |
+| Repositories local/mock | Dados de produto, estoque, loja, pedido e finanças no browser | `modules/**/infrastructure/local-*`; `mock-*` | `localStorage`, mocks e fallback | **SUBSTITUIR / P0–P2** — não é persistência de produto | Prisma/repositories server-side somente quando a fatia existir | Refresh, reinício e negação cross-tenant | **EMPRESA SUBSTITUÍDA; DEMAIS ADIADOS** |
+| Analytics/demo/layout experimental | Dashboards, telemetria de demo e variantes amplas sem fluxo estável | `modules/analytics/**`; `features/commerce-telemetry/**`; `features/layout-variants/**` | Dados demonstrativos e preferências locais | **NÃO ASSIMILAR / P3** — não sustenta a jornada prioritária | Nenhum destino atual | Reavaliar apenas com caso de uso e dados reais | **REJEITADO NESTA MIGRAÇÃO** |
 
-1. Company creation and onboarding.
-2. Shell, membership and permissions.
-3. Products and catalog.
-4. Stock.
-5. Storefront and publishing.
-6. Orders.
-7. Customers and finance.
-8. Store design and layout.
+## Próxima fatia recomendada
 
-Each slice must derive tenant context on the server, add contract tests, pass scoped gates and leave the reference source untouched.
+Construir o shell persistente da empresa com gestão de memberships, convites e capacidades por papel. Ela deve reutilizar o contexto autorizado já assimilado, manter Core como autoridade de membership e provar que MEMBER/VIEWER não executam ações administrativas. Só depois iniciar produtos e catálogo.
