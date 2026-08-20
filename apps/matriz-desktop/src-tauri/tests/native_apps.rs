@@ -30,5 +30,5 @@ fn running_never_masks_a_missing_install() {
 
 #[test]
 fn installed_executable_matches_the_tauri_binary() {
-    assert_eq!(native_executable_name(), "seumei-desktop.exe");
+    assert_eq!(native_executable_name(), "matriz-admin-desktop.exe");
 }
