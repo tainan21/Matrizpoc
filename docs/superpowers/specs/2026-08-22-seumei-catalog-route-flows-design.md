@@ -1,7 +1,7 @@
 # Seumei Catalog and Route Flows Laboratory Design
 
 **Date:** 2026-08-22  
-**Status:** Implemented; final gates pending  
+**Status:** Implemented and verified on 2026-08-22
 **Scope:** `apps/seumeiapp`, additive Seumei schema/migration, and Seumei documentation
 
 ## Goal
@@ -79,3 +79,11 @@ The slice is complete when categories and products with variants persist across 
 - A real category and configurable product with two priced SKUs persisted in disposable PostgreSQL and survived refresh/new browser session.
 - Empty catalog, product creation, edit resumption and desktop/390 × 844 mobile layouts were inspected.
 - Console errors before authentication were expected 401 responses from the Hub session/appearance endpoints plus a missing development favicon; no catalog request failed.
+
+## Final gate record
+
+- Seumei: 35 test files and 169 tests passed; scoped lint, typecheck and production build passed.
+- Monorepo: 23 smoke files and 154 tests passed; global lint (37 tasks), typecheck (37 tasks) and build (10 tasks) passed.
+- Prisma: all six schemas validated with their explicit disposable URLs.
+- Migration: `202608220001_catalog/migration.sql` applied with `ON_ERROR_STOP` to an empty disposable PostgreSQL database and produced the three expected catalog tables.
+- Repository/application tests prove tenant predicates for listing, known foreign product IDs and optimistic updates; browser persistence was verified across refresh and a fresh login session.
