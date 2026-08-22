@@ -6,8 +6,11 @@ export interface CatalogEditorProductViewModel {
   readonly variants: readonly { readonly name: string; readonly sku: string; readonly price: string }[]
 }
 export function toCatalogViewModel(input: { canManage: boolean; categories: readonly ProductCategory[]; products: readonly Product[] }) {
+  const productWord = input.products.length === 1 ? "produto" : "produtos"
+  const categoryWord = input.categories.length === 1 ? "categoria" : "categorias"
   return {
     canManage: input.canManage, isEmpty: input.products.length === 0,
+    summaryLabel: `${input.products.length} ${productWord} · ${input.categories.length} ${categoryWord}`,
     categories: input.categories.map((item) => ({ id: item.id, name: item.name, slug: item.slug, isActive: item.isActive })),
     products: input.products.map((item) => ({ id: item.id, name: item.name, slug: item.slug, status: item.status, type: item.type, variantCount: item.variants.length, priceLabel: item.variants.length ? money.format(Math.min(...item.variants.map((variant) => variant.priceCents)) / 100) : "Sem preço" })),
   }

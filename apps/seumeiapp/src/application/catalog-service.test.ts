@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { CatalogCapabilityDeniedError, createCatalogProduct, readCatalog } from "./catalog-service"
+import { CatalogCapabilityDeniedError, CatalogRecordNotFoundError, createCatalogProduct, readCatalog, updateCatalogProduct } from "./catalog-service"
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
 
 const company = { id: "company_a", tenantId: "tenant_a", name: "A", slug: "a", createdByUserId: "u", status: "ACTIVE" as const, operationType: "SERVICE" as const, city: "X", country: "BR" }
@@ -21,5 +21,11 @@ describe("catalog application authorization", () => {
     const repo = repository()
     await expect(createCatalogProduct(context("MEMBER"), { name: "Café", type: "SIMPLE", status: "DRAFT", variants: [{ name: "Padrão", price: "9,00" }] }, repo)).rejects.toBeInstanceOf(CatalogCapabilityDeniedError)
     expect(repo.createProduct).not.toHaveBeenCalled()
+  })
+  it("cannot update a known product ID outside the active tenant", async () => {
+    const repo = repository()
+    repo.updateProduct = vi.fn(async () => null)
+    await expect(updateCatalogProduct(context("OWNER"), "product_tenant_b", 1, { name: "Café", type: "SIMPLE", status: "DRAFT", variants: [{ name: "Padrão", price: "9,00" }] }, repo)).rejects.toBeInstanceOf(CatalogRecordNotFoundError)
+    expect(repo.updateProduct).toHaveBeenCalledWith("tenant_a", "product_tenant_b", 1, expect.anything())
   })
 })
