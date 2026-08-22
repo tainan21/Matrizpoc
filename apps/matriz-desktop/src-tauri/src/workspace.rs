@@ -8,9 +8,7 @@ use std::{
 use serde::Serialize;
 
 use crate::catalog::{app_definition, apps, quick_target, QuickTarget};
-use crate::listener_pid_for_app;
 use crate::ports::enumerate_listeners;
-use crate::processes::{ProcessTerminator, WindowsProcessTerminator};
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -106,9 +104,9 @@ impl OperationsState {
                 .map_err(|error| format!("Unable to stop {app_id}: {error}"))?;
             let _ = child.wait();
         } else {
-            let listeners = enumerate_listeners()?;
-            let pid = listener_pid_for_app(app_id, &listeners)?;
-            WindowsProcessTerminator.terminate(pid)?;
+            return Err(format!(
+                "{app_id} was not started by Matriz Control and cannot be stopped here"
+            ));
         }
         Ok(())
     }
@@ -196,5 +194,14 @@ mod tests {
             state.root().expect("restored root"),
             directory.path().canonicalize().expect("canonical fixture")
         );
+    }
+
+    #[test]
+    fn refuses_to_stop_a_process_it_does_not_own() {
+        let state = OperationsState::default();
+
+        let error = state.stop_app("contracts").expect_err("unowned process");
+
+        assert!(error.contains("was not started by Matriz Control"));
     }
 }

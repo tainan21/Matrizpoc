@@ -80,7 +80,7 @@ describe("Matriz Control native shell", () => {
 
   it("reports the real workspace, toolchain, and Git pulse", async () => {
     await $("nav[aria-label='Modos'] button[aria-label='Doctor']").click()
-    await browser.waitUntil(async () => (await $$(".check-list > div").length) === 4)
+    await browser.waitUntil(async () => (await $$(".check-list > div").length) === 4, { timeout: 20_000 })
     const checks = await browser.execute(() =>
       Array.from(document.querySelectorAll(".check-list > div")).map((element) => ({
         text: element.textContent ?? "",
@@ -88,7 +88,9 @@ describe("Matriz Control native shell", () => {
       })),
     )
     expect(checks).toHaveLength(4)
-    expect(checks.every((check) => check.ready)).toBe(true)
+    if (!checks.every((check) => check.ready)) {
+      throw new Error(`Doctor degraded: ${JSON.stringify(checks)}`)
+    }
     expect(checks.map((check) => check.text).join(" ")).not.toMatch(/failed|timed out/i)
 
     await $("nav[aria-label='Modos'] button[aria-label='Ações']").click()

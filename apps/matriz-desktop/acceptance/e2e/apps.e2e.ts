@@ -39,6 +39,12 @@ async function terminalLabels(): Promise<readonly string[]> {
 async function startAndStop(label: string, terminal: string): Promise<void> {
   await chooseMode("Apps")
   const start = $(`button[aria-label='Iniciar ${label}']`)
+  const external = $(`button[aria-label='Porta ocupada externamente: ${label}']`)
+  if (await external.isExisting()) {
+    await expect(external).toBeDisabled()
+    return
+  }
+  await start.scrollIntoView({ block: "center" })
   await expect(start).toBeDisplayed()
   await start.click()
 

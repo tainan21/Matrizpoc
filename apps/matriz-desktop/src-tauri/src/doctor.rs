@@ -6,7 +6,7 @@ use std::{
 
 use serde::Serialize;
 
-use crate::workspace::OperationsState;
+use crate::{terminal::corepack_pnpm_command, workspace::OperationsState};
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -31,7 +31,7 @@ pub struct WorkspacePulse {
 
 fn fixed_output(
     program: &str,
-    args: &[&str],
+    args: &[String],
     cwd: Option<&std::path::Path>,
 ) -> Result<String, String> {
     let mut command = Command::new(program);
@@ -42,15 +42,13 @@ fn fixed_output(
     #[cfg(windows)]
     command.creation_flags(CREATE_NO_WINDOW);
     let mut child = command.spawn().map_err(|error| error.to_string())?;
-    let deadline = Instant::now() + Duration::from_secs(5);
+    let deadline = Instant::now() + Duration::from_secs(15);
     loop {
         if let Some(status) = child.try_wait().map_err(|error| error.to_string())? {
-            return Ok(if status.success() {
-                "available"
-            } else {
-                "failed"
-            }
-            .into());
+            return status
+                .success()
+                .then(|| "available".to_owned())
+                .ok_or_else(|| "failed".to_owned());
         }
         if Instant::now() >= deadline {
             let _ = child.kill();
@@ -70,22 +68,34 @@ pub fn run_doctor(state: &OperationsState) -> Vec<DoctorCheck> {
             .map(|path| path.display().to_string())
             .unwrap_or_else(|error| error.clone()),
     }];
-    for (id, program, args) in [
-        ("node", "node.exe", ["--version"].as_slice()),
-        ("pnpm", "pnpm.cmd", ["--version"].as_slice()),
-        ("git", "git.exe", ["--version"].as_slice()),
-    ] {
-        let result = fixed_output(
-            program,
-            args,
-            workspace.as_ref().ok().map(std::path::PathBuf::as_path),
-        );
-        checks.push(DoctorCheck {
-            id,
-            ok: result.is_ok(),
-            value: result.unwrap_or_else(|error| error),
-        });
-    }
+    let cwd = workspace.as_ref().ok().cloned();
+    let pnpm = corepack_pnpm_command(&["--version".to_owned()]);
+    let handles = [
+        Ok(("node", "node.exe".to_owned(), vec!["--version".to_owned()])),
+        pnpm.map(|(program, args)| ("pnpm", program, args)),
+        Ok(("git", "git.exe".to_owned(), vec!["--version".to_owned()])),
+    ]
+    .into_iter()
+    .map(|command| {
+        let cwd = cwd.clone();
+        thread::spawn(move || {
+            let (id, result) = match command {
+                Ok((id, program, args)) => (id, fixed_output(&program, &args, cwd.as_deref())),
+                Err(error) => ("pnpm", Err(error)),
+            };
+            DoctorCheck {
+                id,
+                ok: result.is_ok(),
+                value: result.unwrap_or_else(|error| error),
+            }
+        })
+    })
+    .collect::<Vec<_>>();
+    checks.extend(
+        handles
+            .into_iter()
+            .map(|handle| handle.join().expect("doctor worker panicked")),
+    );
     checks
 }
 
@@ -115,4 +125,39 @@ pub fn workspace_pulse(state: &OperationsState) -> Result<WorkspacePulse, String
         changed_files,
         clean: changed_files == 0,
     })
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use super::{corepack_pnpm_command, fixed_output};
+
+    #[test]
+    fn doctor_requires_a_successful_tool_exit_code() {
+        assert_eq!(
+            fixed_output(
+                "cmd.exe",
+                &["/D".into(), "/C".into(), "exit 0".into()],
+                None
+            ),
+            Ok("available".into())
+        );
+        assert_eq!(
+            fixed_output(
+                "cmd.exe",
+                &["/D".into(), "/C".into(), "exit 7".into()],
+                None
+            ),
+            Err("failed".into())
+        );
+    }
+
+    #[test]
+    fn doctor_pnpm_uses_the_safe_corepack_runtime() {
+        let (program, args) =
+            corepack_pnpm_command(&["--version".to_owned()]).expect("corepack runtime");
+
+        assert!(std::path::Path::new(&program).is_absolute());
+        assert!(std::path::Path::new(&args[0]).is_file());
+        assert_eq!(&args[1..], ["pnpm", "--version"]);
+    }
 }

@@ -3,8 +3,9 @@ import { fileURLToPath } from "node:url"
 
 import { expect } from "@wdio/globals"
 
+const runId = process.env.MATRIZ_ACCEPTANCE_RUN_ID ?? "current"
 const outputRoot = fileURLToPath(
-  new URL("../../../../output/matriz-control-acceptance/current", import.meta.url),
+  new URL(`../../../../output/matriz-control-acceptance/${runId}`, import.meta.url),
 )
 
 const viewports = [

@@ -91,6 +91,26 @@ describe("Matriz Control", () => {
     }
   })
 
+  it("serializes rapid preference writes without reverting an earlier patch", async () => {
+    const desktop = gateway()
+    const resolvers: Array<() => void> = []
+    vi.mocked(desktop.writeSettings).mockImplementation((settings) => new Promise((resolve) => {
+      resolvers.push(() => resolve(settings))
+    }))
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+    fireEvent.click(screen.getByRole("button", { name: "Ajustes" }))
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Sons" }))
+    fireEvent.change(screen.getByRole("slider", { name: "Volume" }), { target: { value: "0.65" } })
+
+    await waitFor(() => expect(desktop.writeSettings).toHaveBeenCalledTimes(1))
+    expect(desktop.writeSettings).toHaveBeenNthCalledWith(1, expect.objectContaining({ soundsEnabled: true, volume: 0.45 }))
+    resolvers.shift()?.()
+    await waitFor(() => expect(desktop.writeSettings).toHaveBeenCalledTimes(2))
+    expect(desktop.writeSettings).toHaveBeenNthCalledWith(2, expect.objectContaining({ soundsEnabled: true, volume: 0.65 }))
+  })
+
   it("starts Seumei Web in an observable terminal and keeps activity in the rail", async () => {
     const desktop = gateway()
     render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
@@ -128,6 +148,24 @@ describe("Matriz Control", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Parar Seumei" }))
 
     await waitFor(() => expect(desktop.closeTerminal).toHaveBeenCalledWith("managed-seumei"))
+    expect(desktop.stopApp).not.toHaveBeenCalled()
+  })
+
+  it("protects an externally occupied app port from Control actions", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.appStatuses).mockResolvedValue([
+      { id: "contracts", port: 3003, status: "ready", pid: 9660 },
+    ])
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    const protectedAction = await screen.findByRole("button", {
+      name: "Porta ocupada externamente: Contracts",
+    })
+
+    expect(protectedAction).toBeDisabled()
+    expect(screen.getByText(":3003 EXTERNO")).toBeVisible()
     expect(desktop.stopApp).not.toHaveBeenCalled()
   })
 

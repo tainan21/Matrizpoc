@@ -1,6 +1,6 @@
 import { fileURLToPath } from "node:url"
 
-const application = fileURLToPath(
+const application = process.env.MATRIZ_CONTROL_BINARY ?? fileURLToPath(
   new URL("./src-tauri/target/release/matriz-control.exe", import.meta.url),
 )
 

@@ -1,5 +1,5 @@
 import { Badge, Button, Input } from "@matriz/design-ui/primitives"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import { GATES, MATRIZ_DESKTOP_APPS, QUICK_TARGETS } from "../application/catalog"
 import type { DeckCommand } from "../application/command-deck"
@@ -51,6 +51,8 @@ const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = 
 export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; feedback: Feedback }) {
   const desktop = useDesktop(gateway)
   const terminal = useTerminalRuntime(gateway)
+  const settingsSnapshot = useRef<DesktopSettings | undefined>(undefined)
+  const settingsWrites = useRef<Promise<void>>(Promise.resolve())
   const [view, setView] = useState<View>("ports")
   const [query, setQuery] = useState("")
   const [confirmAll, setConfirmAll] = useState(false)
@@ -76,6 +78,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 
   useEffect(() => {
     if (!desktop.settings) return
+    settingsSnapshot.current = desktop.settings
     setWorkspacePath(desktop.settings.workspacePath ?? "")
     feedback.configure?.(desktop.settings)
     feedback.initialize?.()
@@ -143,15 +146,27 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 
   const saveSettings = async (patch: Partial<DesktopSettings>) => {
     if (!desktop.settings) return
-    const next = { ...desktop.settings, ...patch }
+    const previous = settingsSnapshot.current ?? desktop.settings
+    const next = { ...previous, ...patch }
+    settingsSnapshot.current = next
     desktop.setSettings(next)
-    try {
+    const write = settingsWrites.current.then(async () => {
       const saved = await gateway.writeSettings(next)
-      desktop.setSettings(saved)
-      feedback.configure?.(saved)
+      if (settingsSnapshot.current === next) {
+        settingsSnapshot.current = saved
+        desktop.setSettings(saved)
+        feedback.configure?.(saved)
+      }
+    })
+    settingsWrites.current = write.catch(() => undefined)
+    try {
+      await write
       void feedback.play("interaction")
     } catch {
-      desktop.setSettings(desktop.settings)
+      if (settingsSnapshot.current === next) {
+        settingsSnapshot.current = previous
+        desktop.setSettings(previous)
+      }
       void feedback.play("error")
     }
   }
@@ -253,7 +268,7 @@ function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, refresh, f
     } catch { void feedback.play("error") }
   }
   const nativeAction = nativeApp.state === "not-built" ? "Gerar" : nativeApp.state === "built" ? "Instalar" : nativeApp.state === "installed" ? "Abrir" : "Fechar"
-  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 09</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const native = app.id === "matriz-admin" && adminMode === "native"; const nativeRunning = native && nativeApp.state === "running"; return <article className={`app-tile${app.id === "matriz-admin" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${nativeRunning || (!native && ready) ? "ready" : "stopped"}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : `:${app.port}`}</small></div>{app.id === "matriz-admin" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Matriz Admin"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Matriz Admin nativo` : `${ready ? "Parar" : "Iniciar"} ${app.label}`} onClick={() => void act(app.id, ready)}>{nativeRunning || (!native && ready) ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
+  return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 09</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const operationId = `app.${app.id}.web` as ManagedOperationId; const managed = sessions.some((session) => session.operationId === operationId); const external = ready && !managed; const native = app.id === "matriz-admin" && adminMode === "native"; const nativeRunning = native && nativeApp.state === "running"; const actionLabel = external ? `Porta ocupada externamente: ${app.label}` : `${ready ? "Parar" : "Iniciar"} ${app.label}`; return <article className={`app-tile${app.id === "matriz-admin" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${external ? "degraded" : nativeRunning || (!native && ready) ? "ready" : "stopped"}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : external ? `:${app.port} EXTERNO` : `:${app.port}`}</small></div>{app.id === "matriz-admin" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Matriz Admin"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Matriz Admin nativo` : actionLabel} disabled={!native && external} onClick={() => void act(app.id, ready)}>{nativeRunning || (!native && ready) ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
 }
 
 function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback, startOperation }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {

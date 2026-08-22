@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from "node:child_process"
 import { once } from "node:events"
-import { statSync } from "node:fs"
+import { existsSync, readFileSync, statSync } from "node:fs"
 import { createConnection } from "node:net"
 import path from "node:path"
 import { createInterface } from "node:readline"
@@ -26,7 +26,14 @@ function runAcceptance(args: readonly string[]) {
 }
 
 describe.runIf(process.platform === "win32")("Windows acceptance script", () => {
-  it("inspects the existing installation without modifying its executable", () => {
+  it("persists the installed lifecycle object before printing its verdict", () => {
+    const source = readFileSync(scriptPath, "utf8")
+
+    expect(source).toContain("$lifecycle = [PSCustomObject]@{")
+    expect(source).toContain("$lifecycle | ConvertTo-Json -Depth 4 | Set-Content")
+  })
+
+  it.runIf(existsSync(installedExecutable))("inspects the existing installation without modifying its executable", () => {
     const before = statSync(installedExecutable)
     const result = runAcceptance([
       "-Mode",
@@ -144,20 +151,20 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
     })
   })
 
-  it("refuses package mutation until the installed lifecycle test enables it", () => {
+  it("refuses installed lifecycle mutation outside the product acceptance roots", () => {
     const result = runAcceptance([
       "-Mode",
-      "Package",
+      "Installed",
       "-OutputRoot",
       outputRoot,
       "-InstalledRoot",
-      installedRoot,
+      workspaceRoot,
       "-RunId",
-      "package-disabled",
+      "unsafe-install",
     ])
 
     expect(result.status).not.toBe(0)
-    expect(result.stderr).toContain("Package execution is disabled until installed lifecycle acceptance")
+    expect(result.stderr).toContain("Unsafe Matriz Control installation path")
   })
 
   it("refuses to measure a PID that is not the exact Matriz Control executable", () => {

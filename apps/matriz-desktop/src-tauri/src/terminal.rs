@@ -394,7 +394,7 @@ fn windows_powershell_fallback() -> String {
         .unwrap_or_else(|| "powershell.exe".to_owned())
 }
 
-fn corepack_pnpm_command(args: &[String]) -> Result<(String, Vec<String>), String> {
+pub(crate) fn corepack_pnpm_command(args: &[String]) -> Result<(String, Vec<String>), String> {
     let node = resolve_executable("node.exe")
         .ok_or_else(|| "Node.js executable was not found".to_owned())?;
     let corepack = Path::new(&node)
