@@ -2,6 +2,9 @@ import { NextResponse, type NextRequest } from "next/server"
 import { createCompanyServices } from "../application/composition"
 import { resolveSeumeiSession } from "../auth/server-session"
 import { withAuthenticatedSession, type CompanyHttpServices, type HttpResult } from "./company-handlers"
+import type { CatalogRepository } from "../domain/repositories/catalog-repository"
+
+export type SeumeiHttpServices = CompanyHttpServices & { readonly catalog: CatalogRepository }
 
 export function jsonResult(result: HttpResult): NextResponse {
   return NextResponse.json(result.body, { status: result.status })
@@ -9,7 +12,7 @@ export function jsonResult(result: HttpResult): NextResponse {
 
 export async function executeCompanyRequest(
   request: NextRequest,
-  action: (services: CompanyHttpServices, actor: Parameters<Parameters<typeof withAuthenticatedSession>[1]>[0]) => Promise<HttpResult>,
+  action: (services: SeumeiHttpServices, actor: Parameters<Parameters<typeof withAuthenticatedSession>[1]>[0]) => Promise<HttpResult>,
 ): Promise<NextResponse> {
   const session = await resolveSeumeiSession(request.headers.get("cookie") ?? "")
   const result = await withAuthenticatedSession(session, async (actor) => {
