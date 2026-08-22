@@ -196,3 +196,75 @@ enum CompanyOnboardingStep {
   REVIEW
   COMPLETED
 }
+
+// ---------------------------------------------------------------------------
+// Catalog — tenant-scoped categories, products and sellable variants.
+// ---------------------------------------------------------------------------
+model ProductCategory {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  slug        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, isActive])
+  @@map("product_categories")
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  tenantId    String
+  categoryId  String?
+  name        String
+  slug        String
+  description String?
+  type        ProductType   @default(SIMPLE)
+  status      ProductStatus @default(DRAFT)
+  version     Int           @default(1)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  category ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  variants ProductVariant[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, status])
+  @@index([tenantId, categoryId])
+  @@map("products")
+}
+
+model ProductVariant {
+  id         String   @id @default(cuid())
+  tenantId   String
+  productId  String
+  name       String
+  sku        String?
+  priceCents Int
+  position   Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, productId, position])
+  @@map("product_variants")
+}
+
+enum ProductType {
+  SIMPLE
+  CONFIGURABLE
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
