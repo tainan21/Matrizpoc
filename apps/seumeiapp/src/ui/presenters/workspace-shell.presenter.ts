@@ -22,6 +22,7 @@ export function toWorkspaceShellViewModel(
   role: CompanyRole,
 ): WorkspaceShellViewModel {
   const navigation = [{ label: "Visão geral", href: "/workspace" }]
+  navigation.push({ label: "Produtos", href: "/workspace/products" })
   if (can(role, "members.read")) {
     navigation.push({ label: "Membros", href: "/workspace/members" })
   }

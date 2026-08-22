@@ -17,11 +17,13 @@ describe("workspace shell presenter", () => {
   it("shows member administration only to owners and administrators", () => {
     expect(toWorkspaceShellViewModel(company, "OWNER").navigation).toEqual([
       { label: "Visão geral", href: "/workspace" },
+      { label: "Produtos", href: "/workspace/products" },
       { label: "Membros", href: "/workspace/members" },
       { label: "Route flows · temporário", href: "/docs" },
     ])
     expect(toWorkspaceShellViewModel(company, "MEMBER").navigation).toEqual([
       { label: "Visão geral", href: "/workspace" },
+      { label: "Produtos", href: "/workspace/products" },
       { label: "Route flows · temporário", href: "/docs" },
     ])
   })
