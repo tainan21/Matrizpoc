@@ -18,9 +18,11 @@ describe("workspace shell presenter", () => {
     expect(toWorkspaceShellViewModel(company, "OWNER").navigation).toEqual([
       { label: "Visão geral", href: "/workspace" },
       { label: "Membros", href: "/workspace/members" },
+      { label: "Route flows · temporário", href: "/docs" },
     ])
     expect(toWorkspaceShellViewModel(company, "MEMBER").navigation).toEqual([
       { label: "Visão geral", href: "/workspace" },
+      { label: "Route flows · temporário", href: "/docs" },
     ])
   })
 

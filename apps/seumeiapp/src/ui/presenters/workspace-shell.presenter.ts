@@ -25,5 +25,6 @@ export function toWorkspaceShellViewModel(
   if (can(role, "members.read")) {
     navigation.push({ label: "Membros", href: "/workspace/members" })
   }
+  navigation.push({ label: "Route flows · temporário", href: "/docs" })
   return { companyName: company.name, roleLabel: ROLE_LABELS[role], navigation }
 }
