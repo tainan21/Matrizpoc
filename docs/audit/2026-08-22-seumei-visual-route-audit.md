@@ -1,6 +1,6 @@
 # Auditoria visual e de rotas - Seumei
 
-Data: 2026-08-22  
+Data: 2026-08-22
 Escopo: primeira assimilação, memberships/permissões, catálogo e laboratório temporário de route flows.
 
 ## Veredito
@@ -73,4 +73,3 @@ As capturas são de viewport, porque o navegador integrado não ofereceu captura
 ## Próximo passo
 
 Executar `docs/superpowers/plans/2026-08-22-seumei-stock-movements.md`. O roadmap das sete fatias está em `docs/seumei-next-cycles-roadmap.md`. Os dois defeitos de alta prioridade desta auditoria devem ser corrigidos antes ou no início desse ciclo, com testes de regressão focados.
-

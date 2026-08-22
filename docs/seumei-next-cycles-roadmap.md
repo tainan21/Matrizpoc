@@ -83,4 +83,3 @@ Estas perguntas não bloqueiam Estoque. A recomendação entre parênteses reduz
 8. Documento fiscal, imposto e escrituração estão explicitamente fora ou entram no primeiro financeiro? (Recomendado: fora até requisito jurídico e provedor definidos.)
 9. A identidade visual usa presets Matriz ou um construtor livre de layout? (Recomendado: presets/tokens limitados e acessíveis, sem page builder.)
 10. Qual integração vem primeiro e há sandbox/credenciais: e-mail, pagamentos, frete, domínio ou analytics? (Recomendado: e-mail transacional; depois pagamentos e frete conforme o canal público.)
-

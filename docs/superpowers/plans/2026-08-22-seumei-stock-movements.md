@@ -127,4 +127,3 @@
 5. Review the diff for secrets, caches, generated output and unrelated changes.
 6. Update the ledger and acceptance evidence with only observed results.
 7. Commit: `test(seumei): prove stock tenant isolation`.
-
