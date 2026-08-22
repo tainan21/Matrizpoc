@@ -36,7 +36,7 @@ O candidato é o NSIS produzido pelo commit atual, instalado, exercitado dentro 
 
 1. Portas e processos — inventário, PID, refresh, kill e kill-all autorizados por snapshot.
 2. Terminal — PowerShell/ConPTY real, seis abas, Unicode, Ctrl+C e encerramento limpo.
-3. Apps — iniciar, aguardar readiness, parar e reiniciar os nove produtos do catálogo.
+3. Apps — catálogo de nove produtos; oito ciclos completos e proteção do Contracts como processo externo na porta 3003 neste ambiente.
 4. Ações — gates tipados de types, lint, smoke e Prisma com saída observável.
 5. Doctor — workspace, Node, pnpm e Git verificados localmente.
 6. Git pulse — branch e estado do worktree sem transformar o app em cliente Git genérico.
