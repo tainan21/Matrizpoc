@@ -1,6 +1,21 @@
 export type ProductType = "SIMPLE" | "CONFIGURABLE"
 export type ProductStatus = "DRAFT" | "ACTIVE" | "ARCHIVED"
 
+export interface ProductCategory {
+  readonly id: string; readonly tenantId: string; readonly name: string
+  readonly slug: string; readonly description: string | null; readonly isActive: boolean
+}
+export interface ProductVariant {
+  readonly id: string; readonly name: string; readonly sku: string | null
+  readonly priceCents: number; readonly position: number; readonly isActive: boolean
+}
+export interface Product {
+  readonly id: string; readonly tenantId: string; readonly categoryId: string | null
+  readonly name: string; readonly slug: string; readonly description: string | null
+  readonly type: ProductType; readonly status: ProductStatus; readonly version: number
+  readonly variants: readonly ProductVariant[]
+}
+
 export interface ProductVariantInput {
   readonly name: string
   readonly sku?: string | null
