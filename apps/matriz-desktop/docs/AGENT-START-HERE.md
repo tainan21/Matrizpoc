@@ -12,3 +12,8 @@ bounded ConPTY session; automated actions still accept catalog IDs only.
 modes; Seumei is an independent Web app on port 3008.
 There are no web routes. Keep new capabilities behind `DesktopGateway`, add
 Rust authorization tests first, and never accept raw shell arguments from React.
+
+Before changing lifecycle behavior, read `docs/ACCEPTANCE.md`. A ready catalog
+port without a matching managed terminal session is external: the UI must mark
+it as protected and Rust must refuse `stop_app`. Never weaken this ownership
+rule to make an acceptance run pass.

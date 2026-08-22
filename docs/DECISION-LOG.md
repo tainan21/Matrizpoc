@@ -122,3 +122,10 @@ próximos do app responsável.
 - **Motivo:** administração de todos os clientes e operação do produto Seumei possuem responsabilidades, ritmos e superfícies de dados diferentes.
 - **Impacto:** Admin usa porta 3002 e possui instalador Tauri; Seumei usa porta 3008, autenticação Hub e é dona do schema Seumei. Matriz Control opera ambas e associa o ciclo nativo ao Admin.
 - **Revisar quando:** a primeira API administrativa cross-product estiver estável ou a migração dos oito slices terminar.
+
+## 2026-08-22 — Aceitação instalada e ownership estrito no Matriz Control
+
+- **Decisão:** certificar o NSIS em dois ciclos instalados consecutivos com o mesmo SHA-256 e impedir que ações de app encerrem processos que não nasceram em uma sessão gerenciada pelo Control.
+- **Motivo:** testes do binário de build não cobrem instalação, WebView2, encerramento e desinstalação reais; uma porta do catálogo também pode pertencer a outro workspace legítimo.
+- **Impacto:** portas externas aparecem como `EXTERNO`, sem ação de parada. Kill explícito continua disponível apenas na superfície de Portas, protegido por snapshot. A automação diária publica instaladores e evidências separadamente.
+- **Revisar quando:** houver assinatura de código, canal de atualização confiável ou um modelo explícito de adoção de processos externos.

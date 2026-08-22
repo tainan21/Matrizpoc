@@ -45,6 +45,7 @@ pnpm --filter @matriz/app-matriz-desktop dev
 pnpm --filter @matriz/app-matriz-desktop test
 pnpm --filter @matriz/app-matriz-desktop build:native
 pnpm --filter @matriz/app-matriz-desktop package
+pnpm --filter @matriz/app-matriz-desktop acceptance:installed
 ```
 
 The installer is written to
@@ -64,7 +65,8 @@ bootstrapper only when the runtime is absent.
 - Windows x64 is the only packaged target in 0.1.
 - Node, pnpm and Git remain host prerequisites for repository operations.
 - Apps started by Control are tracked locally; stopping an inherited process is
-  done through its observed listener row.
+  forbidden. An occupied catalog port is marked `EXTERNO` and remains protected;
+  use the Ports view only when an explicit, snapshot-authorized kill is intended.
 - Wallpaper is deliberately deferred. It should become a separate native
   capability only when a concrete product behavior exists.
 - Updater signing/distribution is reserved for the first trusted release
@@ -72,3 +74,11 @@ bootstrapper only when the runtime is absent.
 - Matriz Admin can be generated, installed and opened from Apps → `NATIVO`. A future
   Matriz Hub download must consume the signed CI release artifact; build output
   is never copied into the web app or committed as public content.
+
+## Acceptance
+
+The Windows release gate installs the NSIS candidate, drives the real WebView2,
+exercises the nine product capabilities, records the visual matrix and idle
+performance, exits through the product command, and uninstalls. Two consecutive
+runs must pass against the same SHA-256. See [docs/ACCEPTANCE.md](docs/ACCEPTANCE.md)
+and the canonical audit in `docs/audit/2026-08-20-matriz-control-acceptance.md`.
