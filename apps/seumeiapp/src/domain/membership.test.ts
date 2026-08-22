@@ -10,6 +10,12 @@ import {
 import type { CompanyRole } from "./company"
 
 describe("Seumei membership capability policy", () => {
+  it.each([
+    ["OWNER", true], ["ADMIN", true], ["MEMBER", false], ["VIEWER", false],
+  ] as const)("maps %s catalog management to %s", (role, allowed) => {
+    expect(can(role, "catalog.manage")).toBe(allowed)
+  })
+
   it.each<readonly [CompanyRole, MembershipCapability, boolean]>([
     ["OWNER", "workspace.read", true],
     ["OWNER", "members.invite.admin", true],

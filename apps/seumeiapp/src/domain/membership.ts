@@ -2,6 +2,7 @@ import type { CompanyRole } from "./company"
 
 export type MembershipCapability =
   | "workspace.read"
+  | "catalog.manage"
   | "members.read"
   | "members.invite.admin"
   | "members.invite.standard"
@@ -29,6 +30,7 @@ export interface CompanyInvitation {
 
 const OWNER_CAPABILITIES: readonly MembershipCapability[] = [
   "workspace.read",
+  "catalog.manage",
   "members.read",
   "members.invite.admin",
   "members.invite.standard",
@@ -40,6 +42,7 @@ const OWNER_CAPABILITIES: readonly MembershipCapability[] = [
 
 const ADMIN_CAPABILITIES: readonly MembershipCapability[] = [
   "workspace.read",
+  "catalog.manage",
   "members.read",
   "members.invite.standard",
   "members.role.manage.standard",
