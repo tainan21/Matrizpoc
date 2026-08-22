@@ -2,13 +2,15 @@ import { describe, expect, it } from "vitest"
 import { manifest } from "./manifest"
 
 describe("Seumei manifest", () => {
-  it("publishes only the implemented company and membership surfaces", () => {
+  it("publishes only implemented company, membership and catalog surfaces", () => {
     expect(manifest).toMatchObject({ appId: "seumei", name: "Seumei", primaryRoute: "/" })
     expect(manifest.routes.map(({ path }) => path)).toEqual([
       "/",
       "/onboarding",
       "/workspace",
       "/workspace/members",
+      "/workspace/products",
+      "/docs",
       "/invite/[token]",
       "/login",
     ])
@@ -22,8 +24,10 @@ describe("Seumei manifest", () => {
       "seumei.members.invite",
       "seumei.members.manage",
       "seumei.invitation.accept",
+      "seumei.catalog.read",
+      "seumei.catalog.manage",
     ])
-    expect(manifest.routes.map(({ path }) => path).join(" ")).not.toMatch(/product|stock|orders/i)
-    expect(manifest.capabilities.map(({ id }) => id).join(" ")).not.toMatch(/product|stock|orders/i)
+    expect(manifest.routes.map(({ path }) => path).join(" ")).not.toMatch(/stock|orders/i)
+    expect(manifest.capabilities.map(({ id }) => id).join(" ")).not.toMatch(/stock|orders/i)
   })
 })

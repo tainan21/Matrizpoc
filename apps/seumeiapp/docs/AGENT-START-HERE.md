@@ -4,7 +4,7 @@
 
 ## Current route flow
 
-`/login` → `/` company selection/creation → `/onboarding` → `/workspace` → `/workspace/members`.
+`/login` → `/` company selection/creation → `/onboarding` → `/workspace` → `/workspace/products` or `/workspace/members`.
 
 An invited identity follows `/invite/[token]` → `/login?returnTo=...` when signed out → authenticated acceptance → `/workspace`.
 
@@ -13,12 +13,14 @@ An invited identity follows `/invite/[token]` → `/login?returnTo=...` when sig
 - `/workspace` requires both membership and completed onboarding.
 - `/workspace/members` exposes only actions allowed by the server-side OWNER/ADMIN/MEMBER/VIEWER capability policy.
 - `/invite/[token]` binds acceptance to the authenticated e-mail; the Core transaction claims the invitation before upserting membership.
+- `/workspace/products` reads tenant-scoped categories/products; `/new` and `/[productId]` author relational variants with optimistic versioning.
+- `/docs` documents canonical route flows and offers a temporary local scratchpad. Remove it before launch without a schema migration.
 - The `seumei_active_company` HTTP-only cookie is a preference, never authority.
 
 ## Ownership and layers
 
 - Core owns user, tenant, app registration, membership and invitation persistence. Read access uses `CoreAccessRepository`; team mutations use the segregated `CoreMembershipRepository` through `@matriz/platform-db/core`.
-- `prisma/schemas/seumei.prisma` owns company, onboarding and Seumei preferences. Access it through `CompanyRepository` and `@matriz/platform-db/seumei`.
+- `prisma/schemas/seumei.prisma` owns company, onboarding, Seumei preferences and catalog. Access it through `CompanyRepository`/`CatalogRepository` and `@matriz/platform-db/seumei`.
 - Domain and application rules stay under `src/domain` and `src/application`.
 - Prisma implementations stay under `src/infrastructure`; never add an unscoped company lookup.
 - Routes and server pages derive the actor from the Hub session, resolve the persistent Core user, then validate membership.
@@ -38,4 +40,4 @@ Do not import other apps' internals, create a second Prisma client/config system
 
 ## Next recommended slice
 
-Products, categories and variants as the first business-data slice. Keep product ownership in the Seumei schema, derive tenant authority from the active Core membership and begin with a minimal catalog journey rather than placeholder pages.
+Stock items and append-only movements connected to persisted product variants. Preserve tenant authority, add concurrency-safe balance rules and do not introduce store/publication placeholders.

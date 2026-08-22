@@ -3,7 +3,7 @@ import type { AppManifestDTO } from "@matriz/integration-api-contracts"
 export const manifest: AppManifestDTO = {
   appId: "seumei",
   name: "Seumei",
-  description: "Empresas, onboarding e equipes multitenant com autoridade server-side.",
+  description: "Empresas, equipes e catálogo multitenant com autoridade server-side.",
   version: "0.1.0",
   contractVersion: "v1",
   primaryRoute: "/",
@@ -12,8 +12,10 @@ export const manifest: AppManifestDTO = {
     { label: "Configuração", path: "/onboarding", order: 1 },
     { label: "Workspace", path: "/workspace", order: 2 },
     { label: "Equipe", path: "/workspace/members", order: 3 },
-    { label: "Aceitar convite", path: "/invite/[token]", order: 4 },
-    { label: "Entrar", path: "/login", order: 5 },
+    { label: "Produtos", path: "/workspace/products", order: 4 },
+    { label: "Route flows", path: "/docs", order: 5 },
+    { label: "Aceitar convite", path: "/invite/[token]", order: 6 },
+    { label: "Entrar", path: "/login", order: 7 },
   ],
   capabilities: [
     { id: "seumei.company.read", name: "Listar empresas", description: "Lista empresas autorizadas pela membership persistida." },
@@ -25,13 +27,15 @@ export const manifest: AppManifestDTO = {
     { id: "seumei.members.invite", name: "Convidar membros", description: "Cria convites app-scoped com token opaco e expiração." },
     { id: "seumei.members.manage", name: "Gerenciar equipe", description: "Altera papéis e remove memberships conforme capacidade." },
     { id: "seumei.invitation.accept", name: "Aceitar convite", description: "Aceita convite somente para a identidade autenticada correspondente." },
+    { id: "seumei.catalog.read", name: "Consultar catálogo", description: "Lista categorias, produtos e variantes apenas do tenant autorizado." },
+    { id: "seumei.catalog.manage", name: "Gerenciar catálogo", description: "Cria e altera categorias, produtos e variantes com preço em centavos." },
   ],
   eventsProduced: ["seumei.establishment.selected"],
   eventsConsumed: [],
   integrations: [],
   onboardingSupport: { participates: true, hasSpecificStep: true, specificStepTitle: "Configurar empresa" },
   navigationEntry: { label: "Seumei", path: "/", order: 3 },
-  ownership: { domainSummary: "Empresa, onboarding, política de capacidades e workspace multitenant; Core persiste memberships.", maintainers: ["matriz-seumei"] },
+  ownership: { domainSummary: "Empresa, onboarding, capacidades e catálogo multitenant; Core persiste memberships.", maintainers: ["matriz-seumei"] },
   widgets: [],
 }
 

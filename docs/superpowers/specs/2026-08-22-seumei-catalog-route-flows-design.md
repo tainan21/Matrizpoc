@@ -1,7 +1,7 @@
 # Seumei Catalog and Route Flows Laboratory Design
 
 **Date:** 2026-08-22  
-**Status:** Approved for implementation  
+**Status:** Implemented; final gates pending  
 **Scope:** `apps/seumeiapp`, additive Seumei schema/migration, and Seumei documentation
 
 ## Goal
@@ -72,3 +72,10 @@ Playwright CLI is used throughout implementation: after each UI milestone, open 
 ## Success criteria
 
 The slice is complete when categories and products with variants persist across refresh/session, only authorized companies are visible, cross-tenant known IDs fail, owner/admin mutations work, member/viewer mutations fail, conflicts are honest, `/docs` renders canonical flows and sketches valid flows, all required gates pass consecutively, browser evidence is recorded, the ledger is truthful and coherent commits leave a clean worktree.
+
+## Browser verification record
+
+- Headed browser completed `/login` → `/` → `/onboarding` → `/workspace`, then `/docs` and `/workspace/products`.
+- A real category and configurable product with two priced SKUs persisted in disposable PostgreSQL and survived refresh/new browser session.
+- Empty catalog, product creation, edit resumption and desktop/390 × 844 mobile layouts were inspected.
+- Console errors before authentication were expected 401 responses from the Hub session/appearance endpoints plus a missing development favicon; no catalog request failed.
