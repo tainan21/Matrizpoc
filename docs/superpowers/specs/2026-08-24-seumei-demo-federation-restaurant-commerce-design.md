@@ -1,7 +1,7 @@
 # Seumei Demo Federation and Restaurant Commerce Design
 
 Date: 2026-08-24
-Status: approved in chat; written review pending
+Status: approved; implementation plans published
 
 ## Purpose
 
@@ -239,10 +239,10 @@ pnpm --filter @matriz/app-seumei test
 pnpm --filter @matriz/app-seumei lint
 pnpm --filter @matriz/app-seumei typecheck
 pnpm --filter @matriz/app-seumei build
-pnpm --filter @matriz/app-hub test
-pnpm --filter @matriz/app-hub lint
-pnpm --filter @matriz/app-hub typecheck
-pnpm --filter @matriz/app-hub build
+pnpm --filter @matriz/app-matriz-hub test
+pnpm --filter @matriz/app-matriz-hub lint
+pnpm --filter @matriz/app-matriz-hub typecheck
+pnpm --filter @matriz/app-matriz-hub build
 pnpm run test:smoke
 pnpm run prisma:validate
 ```

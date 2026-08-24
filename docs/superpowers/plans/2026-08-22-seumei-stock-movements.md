@@ -1,5 +1,7 @@
 # Seumei Stock Movements Implementation Plan
 
+> **Status:** Superseded on 2026-08-24 by `2026-08-24-seumei-ingredients-recipes-stock.md`. Restaurant availability is ingredient/recipe-based, so variant-level stock would encode the wrong aggregate.
+
 > **For agentic workers:** Use `superpowers:test-driven-development` task by task and `superpowers:verification-before-completion` before claiming the slice complete.
 
 **Goal:** Deliver real, tenant-scoped stock per product variant with append-only movements, resumable browser flows and concurrency-safe balances.
