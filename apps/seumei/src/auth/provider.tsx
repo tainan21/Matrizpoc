@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
+import { AuthGate, AuthProvider } from "@matriz/platform-auth/client"
 import { TenantProvider } from "@matriz/access-tenants/client"
 import { seumeiAuthConfig } from "./config"
 import { AppShell } from "../ui/components/AppShell"
@@ -33,49 +33,6 @@ function BootingFallback() {
   )
 }
 
-function SeumeiSessionBar() {
-  const { session, signOut } = useAuth()
-  if (!session) return null
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        gap: "0.75rem",
-        padding: "0.5rem 1.5rem",
-        borderBottom: "1px solid var(--color-border)",
-        background: "var(--color-surface)",
-        fontSize: "0.75rem",
-        color: "var(--color-muted-foreground)",
-      }}
-    >
-      <span>
-        <strong style={{ color: "var(--color-foreground)" }}>
-          {session.identity.user.name}
-        </strong>
-        {" · "}
-        {session.identity.user.email}
-      </span>
-      <button
-        type="button"
-        onClick={signOut}
-        style={{
-          border: "1px solid var(--color-border)",
-          background: "transparent",
-          color: "var(--color-foreground)",
-          padding: "0.25rem 0.5rem",
-          borderRadius: "0.375rem",
-          fontSize: "0.75rem",
-          cursor: "pointer",
-        }}
-      >
-        Sair
-      </button>
-    </div>
-  )
-}
-
 function SeumeiAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLoginRoute = (pathname ?? "").startsWith("/login")
@@ -85,7 +42,6 @@ function SeumeiAuthShell({ children }: { children: React.ReactNode }) {
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>
       <SeumeiTenantProvider>
-        <SeumeiSessionBar />
         <AppShell>{children}</AppShell>
       </SeumeiTenantProvider>
     </AuthGate>
