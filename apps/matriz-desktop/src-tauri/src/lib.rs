@@ -599,66 +599,134 @@ fn save_environment(
 }
 
 #[tauri::command]
-fn list_directory(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<DirectoryListing, String> {
+fn list_directory(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+) -> Result<DirectoryListing, String> {
     ExplorerService::new(state.root()?)?.list(&app_id, &relative_path)
 }
 
 #[tauri::command]
-fn preview_file(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<FilePreview, String> {
+fn preview_file(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+) -> Result<FilePreview, String> {
     ExplorerService::new(state.root()?)?.preview(&app_id, &relative_path)
 }
 
 #[tauri::command]
-fn open_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+fn open_resource(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+) -> Result<(), String> {
     ExplorerService::new(state.root()?)?.open(&app_id, &relative_path)
 }
 
 #[tauri::command]
-fn reveal_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+fn reveal_resource(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+) -> Result<(), String> {
     ExplorerService::new(state.root()?)?.reveal(&app_id, &relative_path)
 }
 
 #[tauri::command]
-fn open_resource_in_editor(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+fn open_resource_in_editor(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+) -> Result<(), String> {
     ExplorerService::new(state.root()?)?.open_in_editor(&app_id, &relative_path)
 }
 
 #[tauri::command]
-fn rename_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String, new_name: String) -> Result<(), String> {
+fn rename_resource(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+    new_name: String,
+) -> Result<(), String> {
     ExplorerService::new(state.root()?)?.rename(&app_id, &relative_path, &new_name)
 }
 
 #[tauri::command]
-fn duplicate_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String, new_name: String) -> Result<(), String> {
+fn duplicate_resource(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+    new_name: String,
+) -> Result<(), String> {
     ExplorerService::new(state.root()?)?.duplicate(&app_id, &relative_path, &new_name)
 }
 
 #[tauri::command]
-fn recycle_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+fn recycle_resource(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    relative_path: String,
+) -> Result<(), String> {
     ExplorerService::new(state.root()?)?.recycle(&app_id, &relative_path)
 }
 
 #[tauri::command]
-fn get_commerce_snapshot(commerce: tauri::State<'_, CommerceStore>) -> Result<CommerceSnapshot, String> { commerce.snapshot() }
+fn get_commerce_snapshot(
+    commerce: tauri::State<'_, CommerceStore>,
+) -> Result<CommerceSnapshot, String> {
+    commerce.snapshot()
+}
 
 #[tauri::command(rename_all = "camelCase")]
-fn acquire_package(commerce: tauri::State<'_, CommerceStore>, activity: tauri::State<'_, ActivityHub>, package_id: String) -> Result<CommerceSnapshot, String> {
+fn acquire_package(
+    commerce: tauri::State<'_, CommerceStore>,
+    activity: tauri::State<'_, ActivityHub>,
+    package_id: String,
+) -> Result<CommerceSnapshot, String> {
     let snapshot = commerce.acquire(&package_id)?;
-    activity.publish("store.package.acquired", "success", "Pacote adquirido", Some(&package_id), None);
+    activity.publish(
+        "store.package.acquired",
+        "success",
+        "Pacote adquirido",
+        Some(&package_id),
+        None,
+    );
     Ok(snapshot)
 }
 
 #[tauri::command(rename_all = "camelCase")]
-fn install_package(commerce: tauri::State<'_, CommerceStore>, activity: tauri::State<'_, ActivityHub>, package_id: String) -> Result<CommerceSnapshot, String> {
+fn install_package(
+    commerce: tauri::State<'_, CommerceStore>,
+    activity: tauri::State<'_, ActivityHub>,
+    package_id: String,
+) -> Result<CommerceSnapshot, String> {
     let snapshot = commerce.install(&package_id)?;
-    activity.publish("store.package.installed", "success", "Pacote instalado", Some(&package_id), None);
+    activity.publish(
+        "store.package.installed",
+        "success",
+        "Pacote instalado",
+        Some(&package_id),
+        None,
+    );
     Ok(snapshot)
 }
 
 #[tauri::command(rename_all = "camelCase")]
-fn uninstall_package(commerce: tauri::State<'_, CommerceStore>, activity: tauri::State<'_, ActivityHub>, package_id: String) -> Result<CommerceSnapshot, String> {
+fn uninstall_package(
+    commerce: tauri::State<'_, CommerceStore>,
+    activity: tauri::State<'_, ActivityHub>,
+    package_id: String,
+) -> Result<CommerceSnapshot, String> {
     let snapshot = commerce.uninstall(&package_id)?;
-    activity.publish("store.package.uninstalled", "info", "Pacote removido", Some(&package_id), None);
+    activity.publish(
+        "store.package.uninstalled",
+        "info",
+        "Pacote removido",
+        Some(&package_id),
+        None,
+    );
     Ok(snapshot)
 }
 
@@ -733,7 +801,9 @@ pub fn run() {
             app.state::<OperationsState>()
                 .restore_workspace(saved.workspace_path.as_deref());
             app.manage(settings);
-            app.manage(CommerceStore::new(app.path().app_config_dir()?.join("commerce.json")));
+            app.manage(CommerceStore::new(
+                app.path().app_config_dir()?.join("commerce.json"),
+            ));
             shell::install_tray(app.handle())?;
             Ok(())
         })

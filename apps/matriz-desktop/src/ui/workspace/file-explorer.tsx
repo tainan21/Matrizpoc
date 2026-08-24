@@ -28,8 +28,6 @@ export function FileExplorer({ gateway, runtimes, signal }: {
     setConfirmRecycle(false)
     setError("")
     void refresh()
-    // gateway is a stable application boundary; path and appId are the navigation state.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appId, path, gateway])
 
   const choose = async (entry: ExplorerEntry) => {

@@ -136,3 +136,10 @@ próximos do app responsável.
 - **Motivo:** Apps, Terminal, Preview, Logs e agente precisam compartilhar ownership, endpoint, rota e lifecycle sem espalhar `spawn`, URL ou autoridade nativa pela UI.
 - **Impacto:** os nove manifests públicos alimentam rotas; listeners externos continuam protegidos; atividade operacional fica em memória, limitada a 200 resumos; fechar Preview destrói a web surface. MatrizLib permanece app e catálogo, enquanto seus packages públicos continuam sendo a biblioteca compartilhada real.
 - **Revisar quando:** medições reais justificarem cache de mais de um preview, ou um segundo cliente precisar do protocolo local de runtime/activity.
+
+## 2026-08-24 — Recursos e comércio permanecem autoridades nativas no Matriz Control
+
+- **Decisão:** resolver `.env` e Explorer por caminhos relativos a apps do catálogo, com leitura sensível explícita; manter Store, ownership, instalação e Wallet em um ledger nativo app-local, inicialmente limitado a pacotes Matriz embarcados.
+- **Motivo:** Workspace, runtime e distribuição precisam interoperar sem entregar filesystem, segredos, saldo ou execução arbitrária ao renderer e sem criar packages compartilhados prematuros.
+- **Impacto:** segredos ficam mascarados e fora da atividade; Explorer bloqueia escape e protege arquivos operacionais; exclusões usam a Lixeira; aquisição difere de instalação; pacotes não possuem hooks ou código remoto. Estado comercial é persistido atomicamente no diretório de configuração do Control.
+- **Revisar quando:** catálogo remoto, assinatura de pacotes, publisher externo ou um segundo consumidor justificar protocolo/formato público estável.
