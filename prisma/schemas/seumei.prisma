@@ -232,8 +232,10 @@ model Product {
 
   category ProductCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   variants ProductVariant[]
+  images   ProductImage[]
 
   @@unique([tenantId, slug])
+  @@unique([tenantId, id])
   @@index([tenantId, status])
   @@index([tenantId, categoryId])
   @@map("products")
@@ -252,8 +254,10 @@ model ProductVariant {
   updatedAt  DateTime @updatedAt
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  recipe  Recipe?
 
   @@unique([tenantId, sku])
+  @@unique([tenantId, id])
   @@index([tenantId, productId, position])
   @@map("product_variants")
 }
@@ -267,4 +271,135 @@ enum ProductStatus {
   DRAFT
   ACTIVE
   ARCHIVED
+}
+
+// ---------------------------------------------------------------------------
+// Restaurant composition — imagery, reusable ingredients, recipes and stock.
+// Compound tenant relations prevent cross-tenant recipe connections.
+// ---------------------------------------------------------------------------
+model ProductImage {
+  id        String   @id @default(cuid())
+  tenantId  String
+  productId String
+  url       String
+  altText   String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, productId, position])
+  @@index([tenantId, productId])
+  @@map("product_images")
+}
+
+model Ingredient {
+  id        String         @id @default(cuid())
+  tenantId  String
+  name      String
+  slug      String
+  sku       String?
+  unit      IngredientUnit
+  isActive  Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  recipeLines RecipeIngredient[]
+  inventory   IngredientInventory?
+  movements   IngredientStockMovement[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, slug])
+  @@unique([tenantId, sku])
+  @@index([tenantId, isActive])
+  @@map("ingredients")
+}
+
+enum IngredientUnit {
+  UNIT
+  GRAM
+  MILLILITER
+}
+
+model Recipe {
+  id            String   @id @default(cuid())
+  tenantId      String
+  variantId     String   @unique
+  yieldQuantity Int      @default(1)
+  version       Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  variant ProductVariant    @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
+  lines   RecipeIngredient[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, variantId])
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id           String   @id @default(cuid())
+  tenantId     String
+  recipeId     String
+  ingredientId String
+  quantity     Int
+  position     Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  recipe     Recipe     @relation(fields: [tenantId, recipeId], references: [tenantId, id], onDelete: Cascade)
+  ingredient Ingredient @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, recipeId, ingredientId])
+  @@index([tenantId, recipeId, position])
+  @@index([tenantId, ingredientId])
+  @@map("recipe_ingredients")
+}
+
+model IngredientInventory {
+  id                String   @id @default(cuid())
+  tenantId          String
+  ingredientId      String   @unique
+  balance           Int      @default(0)
+  lowStockThreshold Int      @default(0)
+  version           Int      @default(1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  ingredient Ingredient @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Cascade)
+
+  @@unique([tenantId, ingredientId])
+  @@index([tenantId, balance])
+  @@map("ingredient_inventory")
+}
+
+model IngredientStockMovement {
+  id             String                      @id @default(cuid())
+  tenantId       String
+  ingredientId   String
+  type           IngredientStockMovementType
+  signedQuantity Int
+  balanceBefore  Int
+  balanceAfter   Int
+  reason         String
+  notes          String?
+  actorUserId    String
+  idempotencyKey String
+  commandHash    String
+  createdAt      DateTime                    @default(now())
+
+  ingredient Ingredient @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, ingredientId, createdAt])
+  @@map("ingredient_stock_movements")
+}
+
+enum IngredientStockMovementType {
+  ENTRY
+  EXIT
+  RECONCILIATION
+  ORDER_CONSUMPTION
 }
