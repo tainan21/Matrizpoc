@@ -142,9 +142,11 @@ model Company {
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
 
-  onboarding CompanyOnboarding?
+  onboarding       CompanyOnboarding?
+  storePublication StorePublication?
 
   @@unique([createdByUserId, idempotencyKey])
+  @@unique([tenantId, id])
   @@index([createdByUserId, status])
   @@map("companies")
 }
@@ -255,6 +257,7 @@ model ProductVariant {
 
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   recipe  Recipe?
+  orderItems OrderItem[]
 
   @@unique([tenantId, sku])
   @@unique([tenantId, id])
@@ -308,6 +311,7 @@ model Ingredient {
   recipeLines RecipeIngredient[]
   inventory   IngredientInventory?
   movements   IngredientStockMovement[]
+  orderConsumptions OrderStockConsumption[]
 
   @@unique([tenantId, id])
   @@unique([tenantId, slug])
@@ -391,7 +395,9 @@ model IngredientStockMovement {
   createdAt      DateTime                    @default(now())
 
   ingredient Ingredient @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  orderConsumption OrderStockConsumption?
 
+  @@unique([tenantId, id])
   @@unique([tenantId, idempotencyKey])
   @@index([tenantId, ingredientId, createdAt])
   @@map("ingredient_stock_movements")
@@ -402,4 +408,157 @@ enum IngredientStockMovementType {
   EXIT
   RECONCILIATION
   ORDER_CONSUMPTION
+}
+
+// ---------------------------------------------------------------------------
+// Demo commerce — published stores, tenant-local customers and immutable
+// order snapshots. Checkout derives tenant from storeSlug on the server.
+// ---------------------------------------------------------------------------
+model StorePublication {
+  id          String   @id @default(cuid())
+  tenantId    String   @unique
+  companyId   String   @unique
+  storeSlug   String   @unique
+  displayName String
+  description String?
+  isPublished Boolean  @default(false)
+  version     Int      @default(1)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([storeSlug, isPublished])
+  @@unique([tenantId, companyId])
+  @@map("store_publications")
+}
+
+model Customer {
+  id              String   @id @default(cuid())
+  tenantId        String
+  name            String
+  normalizedEmail String?
+  normalizedPhone String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  orders CommerceOrder[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, normalizedEmail])
+  @@unique([tenantId, normalizedPhone])
+  @@index([tenantId, name])
+  @@map("customers")
+}
+
+model CommerceOrder {
+  id              String              @id @default(cuid())
+  tenantId        String
+  customerId      String
+  orderNumber     Int
+  status          CommerceOrderStatus @default(PLACED)
+  paymentStatus   DemoPaymentStatus   @default(SIMULATED_APPROVED)
+  channel         CommerceOrderChannel @default(DEMO_STOREFRONT)
+  fulfillmentType FulfillmentType     @default(PICKUP)
+  subtotalCents   Int
+  totalCents      Int
+  currency        String              @default("BRL")
+  idempotencyKey  String
+  commandHash     String
+  version         Int                 @default(1)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  customer Customer             @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+  items    OrderItem[]
+  timeline OrderTimelineEvent[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, orderNumber])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, createdAt])
+  @@index([tenantId, customerId, createdAt])
+  @@map("commerce_orders")
+}
+
+enum CommerceOrderStatus {
+  PLACED
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum DemoPaymentStatus {
+  SIMULATED_APPROVED
+  SIMULATED_REFUNDED
+}
+
+enum CommerceOrderChannel {
+  DEMO_STOREFRONT
+  MANUAL
+}
+
+enum FulfillmentType {
+  PICKUP
+}
+
+model OrderItem {
+  id                   String   @id @default(cuid())
+  tenantId             String
+  orderId              String
+  variantId            String
+  productNameSnapshot  String
+  variantNameSnapshot  String
+  unitPriceCents       Int
+  quantity             Int
+  totalCents           Int
+  recipeVersionSnapshot Int
+  createdAt            DateTime @default(now())
+
+  order        CommerceOrder          @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+  variant      ProductVariant         @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
+  consumptions OrderStockConsumption[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId, orderId])
+  @@index([tenantId, variantId])
+  @@map("order_items")
+}
+
+model OrderTimelineEvent {
+  id        String              @id @default(cuid())
+  tenantId  String
+  orderId   String
+  status    CommerceOrderStatus
+  actorType String
+  actorId   String?
+  note      String?
+  createdAt DateTime            @default(now())
+
+  order CommerceOrder @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+
+  @@index([tenantId, orderId, createdAt])
+  @@map("order_timeline_events")
+}
+
+model OrderStockConsumption {
+  id             String   @id @default(cuid())
+  tenantId       String
+  orderItemId    String
+  ingredientId   String
+  movementId     String   @unique
+  quantity       Int
+  createdAt      DateTime @default(now())
+
+  orderItem  OrderItem              @relation(fields: [tenantId, orderItemId], references: [tenantId, id], onDelete: Restrict)
+  ingredient Ingredient             @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  movement   IngredientStockMovement @relation(fields: [tenantId, movementId], references: [tenantId, id], onDelete: Restrict)
+
+  @@unique([tenantId, orderItemId, ingredientId])
+  @@unique([tenantId, movementId])
+  @@index([tenantId, ingredientId, createdAt])
+  @@map("order_stock_consumptions")
 }
