@@ -48,6 +48,7 @@ function coreAccess(
     hasSeumeiMembership: async (userId, tenantId) =>
       userId === "user_a" && memberships.some((item) => item.tenantId === tenantId),
     provisionOwner: async () => undefined,
+    provisionMembership: async () => undefined,
     removeProvisionedTenant: async () => undefined,
   }
 }

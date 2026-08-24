@@ -45,6 +45,11 @@ export interface CoreAccessRepository {
     tenantSlug: string
     userId: string
   }): Promise<void>
+  provisionMembership(input: {
+    tenantId: string
+    userId: string
+    role: Exclude<CompanyRole, "OWNER">
+  }): Promise<void>
   removeProvisionedTenant(input: {
     tenantId: string
     userId: string

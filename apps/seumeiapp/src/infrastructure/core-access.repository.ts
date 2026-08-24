@@ -359,6 +359,32 @@ export function createCoreAccessRepository(
       })
     },
 
+    async provisionMembership(input) {
+      await db.$transaction(async (tx) => {
+        const registration = await tx.appRegistration.findUnique({
+          where: { tenantId_appId: { tenantId: input.tenantId, appId: "seumei" } },
+          select: { enabled: true },
+        })
+        if (!registration?.enabled) throw new Error("SEUMEI_REGISTRATION_DISABLED")
+        await tx.membership.upsert({
+          where: {
+            tenantId_userId_appId: {
+              tenantId: input.tenantId,
+              userId: input.userId,
+              appId: "seumei",
+            },
+          },
+          create: {
+            tenantId: input.tenantId,
+            userId: input.userId,
+            appId: "seumei",
+            role: input.role,
+          },
+          update: { role: input.role, lastActiveAt: new Date() },
+        })
+      })
+    },
+
     async removeProvisionedTenant(input) {
       await db.$transaction(async (tx) => {
         const [membershipCount, owner] = await Promise.all([

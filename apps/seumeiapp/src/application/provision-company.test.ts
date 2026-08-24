@@ -51,6 +51,7 @@ function harness(options: {
       calls.push(`core.provision:${input.tenantId}:${input.userId}`)
       if (options.provisionError) throw options.provisionError
     },
+    async provisionMembership() {},
     async removeProvisionedTenant(input) {
       calls.push(`core.remove:${input.tenantId}:${input.userId}`)
       if (options.removeTenantError) throw options.removeTenantError

@@ -215,6 +215,41 @@ describe("createCoreAccessRepository", () => {
     })
   })
 
+  it("provisions a non-owner only inside an enabled Seumei tenant registration", async () => {
+    const { db, calls } = coreClient()
+    const repository = createCoreAccessRepository(db)
+
+    await repository.provisionMembership({ tenantId: "tenant_a", userId: "core_user_b", role: "MEMBER" })
+
+    expect(calls.map(({ method }) => method)).toEqual([
+      "$transaction",
+      "appRegistration.findUnique.tx",
+      "membership.upsert",
+    ])
+    expect(calls.at(-1)).toMatchObject({
+      args: {
+        where: {
+          tenantId_userId_appId: {
+            tenantId: "tenant_a",
+            userId: "core_user_b",
+            appId: "seumei",
+          },
+        },
+        create: { role: "MEMBER" },
+        update: { role: "MEMBER" },
+      },
+    })
+  })
+
+  it("does not provision a membership when the Seumei registration is disabled", async () => {
+    const { db, calls } = coreClient({ appEnabled: false })
+    const repository = createCoreAccessRepository(db)
+
+    await expect(repository.provisionMembership({ tenantId: "tenant_a", userId: "core_user_b", role: "VIEWER" }))
+      .rejects.toThrowError("SEUMEI_REGISTRATION_DISABLED")
+    expect(calls.some(({ method }) => method === "membership.upsert")).toBe(false)
+  })
+
   it("removes a just-provisioned tenant only after owner and membership-count checks", async () => {
     const { db, calls } = coreClient()
     const repository = createCoreAccessRepository(db)
