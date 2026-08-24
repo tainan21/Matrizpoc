@@ -20,6 +20,8 @@ describe("workspace shell presenter", () => {
       { label: "Produtos", href: "/workspace/products" },
       { label: "Ingredientes", href: "/workspace/ingredients" },
       { label: "Estoque", href: "/workspace/stock" },
+      { label: "Pedidos", href: "/workspace/orders" },
+      { label: "Clientes", href: "/workspace/customers" },
       { label: "Membros", href: "/workspace/members" },
       { label: "Route flows · temporário", href: "/docs" },
     ])
@@ -28,6 +30,8 @@ describe("workspace shell presenter", () => {
       { label: "Produtos", href: "/workspace/products" },
       { label: "Ingredientes", href: "/workspace/ingredients" },
       { label: "Estoque", href: "/workspace/stock" },
+      { label: "Pedidos", href: "/workspace/orders" },
+      { label: "Clientes", href: "/workspace/customers" },
       { label: "Route flows · temporário", href: "/docs" },
     ])
   })

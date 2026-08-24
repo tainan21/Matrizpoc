@@ -1,0 +1,8 @@
+import Link from "next/link"
+import { redirect } from "next/navigation"
+import { resolveActiveCompanyContext } from "../../../src/application/active-company"
+import { readOrders } from "../../../src/application/commerce-service"
+import { resolveCompanyPageFoundation } from "../../../src/auth/server-page-context"
+import { SystemState } from "../../../src/ui/SystemState"
+import { toOrderViewModel } from "../../../src/ui/presenters/commerce.presenter"
+export default async function OrdersPage() { const foundation = await resolveCompanyPageFoundation(); if (foundation.kind === "unavailable") return <SystemState kind="unavailable" />; if (!foundation.preferredCompanyId) redirect("/"); try { const context = await resolveActiveCompanyContext(foundation.actor, foundation.preferredCompanyId, foundation.services.core, foundation.services.companies); const orders = (await readOrders(context, foundation.services.commerce)).map(toOrderViewModel); return <main className="restaurant-page orders-page"><header><div><span className="eyebrow">OPERAÇÃO AO VIVO</span><h1>Pedidos</h1><p>Pedidos reais da demonstração, isolados por empresa.</p></div></header>{orders.length ? <section className="order-list">{orders.map((order) => <Link href={`/workspace/orders/${order.id}`} key={order.id}><strong>{order.numberLabel}</strong><span>{order.customer.name}</span><span>{order.statusLabel}</span><span>{order.total}</span><time>{order.createdLabel}</time></Link>)}</section> : <section className="restaurant-empty"><h2>Nenhum pedido</h2><p>Publique a loja e faça uma compra simulada.</p></section>}</main> } catch { return <SystemState kind="forbidden" /> } }

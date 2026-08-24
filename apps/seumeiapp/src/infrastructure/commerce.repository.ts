@@ -34,6 +34,10 @@ export function createCommerceRepository(db: SeumeiPrismaClient): CommerceReposi
     async publishStore(tenantId, companyId, input) {
       const company = await db.company.findFirst({ where: { id: companyId, tenantId, status: "ACTIVE" } })
       if (!company) throw new StoreUnavailableError()
+      const existing = await db.storePublication.findUnique({ where: { tenantId } })
+      if (existing?.isPublished && existing.companyId === companyId && existing.storeSlug === input.storeSlug && existing.displayName === input.displayName && existing.description === input.description) {
+        const current = await readStore(input.storeSlug); if (!current) throw new StoreUnavailableError(); return current
+      }
       await db.storePublication.upsert({ where: { tenantId }, create: { tenantId, companyId, ...input, isPublished: true, publishedAt: new Date() }, update: { ...input, isPublished: true, publishedAt: new Date(), version: { increment: 1 } } })
       const result = await readStore(input.storeSlug)
       if (!result) throw new StoreUnavailableError()

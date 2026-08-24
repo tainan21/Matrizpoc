@@ -1,0 +1,6 @@
+import type { CustomerRecord, OrderRecord, PublishedStoreRecord } from "../../domain/repositories/commerce-repository"
+export const money = (cents: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(cents / 100)
+const STATUS = { PLACED: "Recebido", CONFIRMED: "Confirmado", PREPARING: "Em preparo", READY: "Pronto", COMPLETED: "Concluído", CANCELLED: "Cancelado" } as const
+export function toStoreViewModel(store: PublishedStoreRecord) { return { ...store, products: store.products.map((product) => ({ ...product, price: money(product.priceCents), availabilityLabel: product.availableQuantity > 0 ? `${product.availableQuantity} disponíveis` : "Esgotado" })) } }
+export function toOrderViewModel(order: OrderRecord) { return { ...order, numberLabel: `#${String(order.orderNumber).padStart(4, "0")}`, statusLabel: STATUS[order.status], total: money(order.totalCents), createdLabel: new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(order.createdAt)) } }
+export function toCustomerViewModel(customer: CustomerRecord) { return { ...customer, totalSpent: money(customer.totalSpentCents), lastOrderLabel: customer.lastOrderAt ? new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(customer.lastOrderAt)) : "Sem pedidos" } }
