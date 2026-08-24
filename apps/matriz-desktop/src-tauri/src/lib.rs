@@ -6,6 +6,7 @@ mod native_apps;
 mod ports;
 mod preview;
 mod processes;
+pub mod resources;
 pub mod runtime;
 mod settings;
 mod shell;
