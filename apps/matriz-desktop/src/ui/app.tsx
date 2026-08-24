@@ -22,7 +22,7 @@ import { TerminalPane } from "./terminal/terminal-pane"
 import { TerminalView } from "./terminal/terminal-view"
 import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
 import { RuntimeWorkspace } from "./runtime/runtime-workspace"
-import { EnvironmentManager } from "./workspace/environment-manager"
+import { WorkspaceView } from "./workspace/workspace-view"
 
 type View = "ports" | "apps" | "workspace" | "terminal" | "actions" | "doctor" | "settings"
 type SoundId =
@@ -228,7 +228,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         ) : null}
 
         {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} /> : null}
-        {view === "workspace" ? <EnvironmentManager gateway={gateway} runtimes={runtimes} restart={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
+        {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}

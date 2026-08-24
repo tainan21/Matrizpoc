@@ -171,3 +171,26 @@ export interface EnvironmentSaveRequest {
   readonly revision: string
   readonly variables: readonly { readonly key: string; readonly value?: string }[]
 }
+
+export interface ExplorerEntry {
+  readonly name: string
+  readonly relativePath: string
+  readonly isDirectory: boolean
+  readonly size: number
+  readonly modifiedAt: number
+  readonly extension?: string
+}
+
+export interface DirectoryListing {
+  readonly appId: DesktopAppId
+  readonly relativePath: string
+  readonly entries: readonly ExplorerEntry[]
+}
+
+export interface FilePreview {
+  readonly appId: DesktopAppId
+  readonly relativePath: string
+  readonly name: string
+  readonly size: number
+  readonly content: { readonly kind: "text" | "image" | "unsupported"; readonly value?: string }
+}

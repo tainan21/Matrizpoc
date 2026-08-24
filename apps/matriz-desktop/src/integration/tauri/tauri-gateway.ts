@@ -90,5 +90,13 @@ export function createTauriGateway(
     readEnvironment: (appId, fileName) => invoke(commands.readEnvironment, { appId, fileName }),
     revealEnvironmentValue: (appId, fileName, key) => invoke(commands.revealEnvironmentValue, { appId, fileName, key }),
     saveEnvironment: (request) => invoke(commands.saveEnvironment, { request }),
+    listDirectory: (appId, relativePath) => invoke(commands.listDirectory, { appId, relativePath }),
+    previewFile: (appId, relativePath) => invoke(commands.previewFile, { appId, relativePath }),
+    openResource: (appId, relativePath) => invoke(commands.openResource, { appId, relativePath }),
+    revealResource: (appId, relativePath) => invoke(commands.revealResource, { appId, relativePath }),
+    openResourceInEditor: (appId, relativePath) => invoke(commands.openResourceInEditor, { appId, relativePath }),
+    renameResource: (appId, relativePath, newName) => invoke(commands.renameResource, { appId, relativePath, newName }),
+    duplicateResource: (appId, relativePath, newName) => invoke(commands.duplicateResource, { appId, relativePath, newName }),
+    recycleResource: (appId, relativePath) => invoke(commands.recycleResource, { appId, relativePath }),
   }
 }

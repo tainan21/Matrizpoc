@@ -50,6 +50,14 @@ describe("Tauri command contract", () => {
       readEnvironment: "read_environment",
       revealEnvironmentValue: "reveal_environment_value",
       saveEnvironment: "save_environment",
+      listDirectory: "list_directory",
+      previewFile: "preview_file",
+      openResource: "open_resource",
+      revealResource: "reveal_resource",
+      openResourceInEditor: "open_resource_in_editor",
+      renameResource: "rename_resource",
+      duplicateResource: "duplicate_resource",
+      recycleResource: "recycle_resource",
     })
     expect(Object.isFrozen(TAURI_COMMAND_CONTRACT)).toBe(true)
   })
@@ -114,6 +122,14 @@ describe("Tauri command contract", () => {
     await gateway.revealEnvironmentValue("matriz-admin", ".env.local", "JWT_SECRET")
     const environmentRequest = { appId: "matriz-admin" as const, fileName: ".env.local", revision: "rev-1", variables: [{ key: "PORT", value: "3002" }] }
     await gateway.saveEnvironment(environmentRequest)
+    await gateway.listDirectory("matriz-admin", "src")
+    await gateway.previewFile("matriz-admin", "src/index.ts")
+    await gateway.openResource("matriz-admin", "src/index.ts")
+    await gateway.revealResource("matriz-admin", "src/index.ts")
+    await gateway.openResourceInEditor("matriz-admin", "src/index.ts")
+    await gateway.renameResource("matriz-admin", "src/index.ts", "main.ts")
+    await gateway.duplicateResource("matriz-admin", "src/main.ts", "main.copy.ts")
+    await gateway.recycleResource("matriz-admin", "src/main.copy.ts")
 
     expect(calls).toEqual([
       { command: "get_snapshot", args: undefined },
@@ -166,6 +182,14 @@ describe("Tauri command contract", () => {
       { command: "read_environment", args: { appId: "matriz-admin", fileName: ".env.local" } },
       { command: "reveal_environment_value", args: { appId: "matriz-admin", fileName: ".env.local", key: "JWT_SECRET" } },
       { command: "save_environment", args: { request: environmentRequest } },
+      { command: "list_directory", args: { appId: "matriz-admin", relativePath: "src" } },
+      { command: "preview_file", args: { appId: "matriz-admin", relativePath: "src/index.ts" } },
+      { command: "open_resource", args: { appId: "matriz-admin", relativePath: "src/index.ts" } },
+      { command: "reveal_resource", args: { appId: "matriz-admin", relativePath: "src/index.ts" } },
+      { command: "open_resource_in_editor", args: { appId: "matriz-admin", relativePath: "src/index.ts" } },
+      { command: "rename_resource", args: { appId: "matriz-admin", relativePath: "src/index.ts", newName: "main.ts" } },
+      { command: "duplicate_resource", args: { appId: "matriz-admin", relativePath: "src/main.ts", newName: "main.copy.ts" } },
+      { command: "recycle_resource", args: { appId: "matriz-admin", relativePath: "src/main.copy.ts" } },
     ])
   })
 })

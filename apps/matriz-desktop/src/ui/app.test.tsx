@@ -111,6 +111,14 @@ function gateway(): DesktopGateway {
         source: request.fileName,
       })),
     })),
+    listDirectory: vi.fn().mockResolvedValue({ appId: "matriz-admin", relativePath: "", entries: [] }),
+    previewFile: vi.fn().mockResolvedValue({ appId: "matriz-admin", relativePath: "README.md", name: "README.md", size: 0, content: { kind: "text", value: "" } }),
+    openResource: vi.fn().mockResolvedValue(undefined),
+    revealResource: vi.fn().mockResolvedValue(undefined),
+    openResourceInEditor: vi.fn().mockResolvedValue(undefined),
+    renameResource: vi.fn().mockResolvedValue(undefined),
+    duplicateResource: vi.fn().mockResolvedValue(undefined),
+    recycleResource: vi.fn().mockResolvedValue(undefined),
   }
 }
 

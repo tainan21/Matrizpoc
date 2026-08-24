@@ -43,4 +43,12 @@ pub const COMMAND_NAMES: &[&str] = &[
     "read_environment",
     "reveal_environment_value",
     "save_environment",
+    "list_directory",
+    "preview_file",
+    "open_resource",
+    "reveal_resource",
+    "open_resource_in_editor",
+    "rename_resource",
+    "duplicate_resource",
+    "recycle_resource",
 ];

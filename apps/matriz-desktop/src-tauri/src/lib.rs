@@ -3,6 +3,7 @@ mod catalog;
 pub mod command_contract;
 mod doctor;
 pub mod environment;
+pub mod explorer;
 mod native_apps;
 mod ports;
 mod preview;
@@ -22,6 +23,7 @@ use activity::{ActivityEnvelope, ActivityHub};
 use environment::{
     EnvironmentDocument, EnvironmentFile, EnvironmentSaveRequest, EnvironmentService,
 };
+use explorer::{DirectoryListing, ExplorerService, FilePreview};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
@@ -594,6 +596,46 @@ fn save_environment(
     Ok(document)
 }
 
+#[tauri::command]
+fn list_directory(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<DirectoryListing, String> {
+    ExplorerService::new(state.root()?)?.list(&app_id, &relative_path)
+}
+
+#[tauri::command]
+fn preview_file(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<FilePreview, String> {
+    ExplorerService::new(state.root()?)?.preview(&app_id, &relative_path)
+}
+
+#[tauri::command]
+fn open_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+    ExplorerService::new(state.root()?)?.open(&app_id, &relative_path)
+}
+
+#[tauri::command]
+fn reveal_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+    ExplorerService::new(state.root()?)?.reveal(&app_id, &relative_path)
+}
+
+#[tauri::command]
+fn open_resource_in_editor(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+    ExplorerService::new(state.root()?)?.open_in_editor(&app_id, &relative_path)
+}
+
+#[tauri::command]
+fn rename_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String, new_name: String) -> Result<(), String> {
+    ExplorerService::new(state.root()?)?.rename(&app_id, &relative_path, &new_name)
+}
+
+#[tauri::command]
+fn duplicate_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String, new_name: String) -> Result<(), String> {
+    ExplorerService::new(state.root()?)?.duplicate(&app_id, &relative_path, &new_name)
+}
+
+#[tauri::command]
+fn recycle_resource(state: tauri::State<'_, OperationsState>, app_id: String, relative_path: String) -> Result<(), String> {
+    ExplorerService::new(state.root()?)?.recycle(&app_id, &relative_path)
+}
+
 #[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
@@ -732,7 +774,15 @@ pub fn run() {
             list_environments,
             read_environment,
             reveal_environment_value,
-            save_environment
+            save_environment,
+            list_directory,
+            preview_file,
+            open_resource,
+            reveal_resource,
+            open_resource_in_editor,
+            rename_resource,
+            duplicate_resource,
+            recycle_resource
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");

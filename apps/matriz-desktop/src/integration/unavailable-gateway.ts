@@ -87,4 +87,19 @@ export const unavailableGateway: DesktopGateway = {
   ] }),
   revealEnvironmentValue: async () => "••••••••",
   saveEnvironment: async (request) => ({ ...request, missingRequired: [], variables: request.variables.map((item) => ({ ...item, sensitive: /SECRET|TOKEN|PASSWORD|DATABASE_URL/.test(item.key), source: request.fileName })) }),
+  listDirectory: async (appId, relativePath) => ({ appId, relativePath, entries: relativePath ? [
+    { name: "dashboard.tsx", relativePath: `${relativePath}/dashboard.tsx`, isDirectory: false, size: 12400, modifiedAt: now - 60_000, extension: "tsx" },
+    { name: "preview.png", relativePath: `${relativePath}/preview.png`, isDirectory: false, size: 245000, modifiedAt: now - 120_000, extension: "png" },
+  ] : [
+    { name: "src", relativePath: "src", isDirectory: true, size: 0, modifiedAt: now - 60_000 },
+    { name: "public", relativePath: "public", isDirectory: true, size: 0, modifiedAt: now - 90_000 },
+    { name: "package.json", relativePath: "package.json", isDirectory: false, size: 1240, modifiedAt: now - 120_000, extension: "json" },
+  ] }),
+  previewFile: async (appId, relativePath) => ({ appId, relativePath, name: relativePath.split("/").pop() ?? relativePath, size: 12400, content: { kind: "text", value: "export function Dashboard() {\n  return <main>Matriz Admin</main>\n}\n" } }),
+  openResource: async () => unavailable(),
+  revealResource: async () => unavailable(),
+  openResourceInEditor: async () => unavailable(),
+  renameResource: async () => unavailable(),
+  duplicateResource: async () => unavailable(),
+  recycleResource: async () => unavailable(),
 }

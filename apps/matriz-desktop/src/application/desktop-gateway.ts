@@ -22,6 +22,8 @@ import type {
   EnvironmentFile,
   EnvironmentDocument,
   EnvironmentSaveRequest,
+  DirectoryListing,
+  FilePreview,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -69,4 +71,12 @@ export interface DesktopGateway {
   readEnvironment(appId: DesktopAppId, fileName: string): Promise<EnvironmentDocument>
   revealEnvironmentValue(appId: DesktopAppId, fileName: string, key: string): Promise<string>
   saveEnvironment(request: EnvironmentSaveRequest): Promise<EnvironmentDocument>
+  listDirectory(appId: DesktopAppId, relativePath: string): Promise<DirectoryListing>
+  previewFile(appId: DesktopAppId, relativePath: string): Promise<FilePreview>
+  openResource(appId: DesktopAppId, relativePath: string): Promise<void>
+  revealResource(appId: DesktopAppId, relativePath: string): Promise<void>
+  openResourceInEditor(appId: DesktopAppId, relativePath: string): Promise<void>
+  renameResource(appId: DesktopAppId, relativePath: string, newName: string): Promise<void>
+  duplicateResource(appId: DesktopAppId, relativePath: string, newName: string): Promise<void>
+  recycleResource(appId: DesktopAppId, relativePath: string): Promise<void>
 }
