@@ -6,6 +6,7 @@ const productRow = {
   id: "product_a", tenantId: "tenant_a", categoryId: null, name: "Café", slug: "cafe",
   description: null, type: "SIMPLE", status: "DRAFT", version: 1,
   variants: [{ id: "variant_a", name: "Padrão", sku: "CAFE", priceCents: 900, position: 0, isActive: true }],
+  images: [],
 }
 
 function client() {
@@ -26,6 +27,10 @@ function client() {
       deleteMany: async (args: any) => { calls.push({ method: "variant.deleteMany", args }); return { count: 1 } },
       createMany: async (args: any) => { calls.push({ method: "variant.createMany", args }); return { count: 1 } },
     },
+    productImage: {
+      deleteMany: async (args: any) => { calls.push({ method: "image.deleteMany", args }); return { count: 0 } },
+      createMany: async (args: any) => { calls.push({ method: "image.createMany", args }); return { count: 0 } },
+    },
   }
   db.$transaction = async (callback: any) => { calls.push({ method: "$transaction", args: null }); return callback(db) }
   return { db: db as SeumeiPrismaClient, calls }
@@ -35,6 +40,7 @@ const input = {
   categoryId: null, name: "Café", slug: "cafe", description: null,
   type: "SIMPLE" as const, status: "DRAFT" as const,
   variants: [{ name: "Padrão", sku: "CAFE", priceCents: 900, position: 0 }],
+  images: [],
 }
 
 describe("catalog repository tenant boundaries", () => {

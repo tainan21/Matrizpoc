@@ -7,6 +7,7 @@ describe("catalog presenter", () => {
       id: "p", tenantId: "tenant_secret", categoryId: null, name: "Café", slug: "cafe", description: null,
       type: "SIMPLE", status: "ACTIVE", version: 1,
       variants: [{ id: "v", name: "Padrão", sku: null, priceCents: 1990, position: 0, isActive: true }],
+      images: [{ id: "i", url: "/demo/cafe.webp", altText: "Café servido", position: 0 }],
     }] })
     expect(view.products[0].priceLabel).toMatch(/19,90/)
     expect(view.summaryLabel).toBe("1 produto · 0 categorias")

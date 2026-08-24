@@ -1,8 +1,8 @@
 import type { SeumeiPrismaClient } from "@matriz/platform-db/seumei"
-import type { Product, ProductCategory, ProductVariant } from "../domain/catalog"
+import type { Product, ProductCategory, ProductImage, ProductVariant } from "../domain/catalog"
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
 
-type ProductRow = Omit<Product, "variants"> & { variants: readonly ProductVariant[] }
+type ProductRow = Omit<Product, "variants" | "images"> & { variants: readonly ProductVariant[]; images: readonly ProductImage[] }
 
 function category(row: any): ProductCategory {
   return { id: row.id, tenantId: row.tenantId, name: row.name, slug: row.slug, description: row.description, isActive: row.isActive }
@@ -17,6 +17,7 @@ function product(row: ProductRow): Product {
       id: variant.id, name: variant.name, sku: variant.sku,
       priceCents: variant.priceCents, position: variant.position, isActive: variant.isActive,
     })),
+    images: row.images.map((image) => ({ id: image.id, url: image.url, altText: image.altText, position: image.position })),
   }
 }
 
@@ -31,13 +32,13 @@ export function createCatalogRepository(db: SeumeiPrismaClient): CatalogReposito
     },
     async listProducts(tenantId) {
       const rows = await db.product.findMany({
-        where: { tenantId }, include: { variants: { orderBy: { position: "asc" } } }, orderBy: { name: "asc" },
+        where: { tenantId }, include: { variants: { orderBy: { position: "asc" } }, images: { orderBy: { position: "asc" } } }, orderBy: { name: "asc" },
       })
       return rows.map((row) => product(row as unknown as ProductRow))
     },
     async findProduct(tenantId, productId) {
       const row = await db.product.findFirst({
-        where: { id: productId, tenantId }, include: { variants: { orderBy: { position: "asc" } } },
+        where: { id: productId, tenantId }, include: { variants: { orderBy: { position: "asc" } }, images: { orderBy: { position: "asc" } } },
       })
       return row ? product(row as unknown as ProductRow) : null
     },
@@ -52,8 +53,9 @@ export function createCatalogRepository(db: SeumeiPrismaClient): CatalogReposito
             tenantId, categoryId: input.categoryId, name: input.name, slug: input.slug,
             description: input.description, type: input.type, status: input.status,
             variants: { create: input.variants.map((variant) => ({ tenantId, ...variant })) },
+            images: { create: input.images.map((image) => ({ tenantId, ...image })) },
           },
-          include: { variants: { orderBy: { position: "asc" } } },
+          include: { variants: { orderBy: { position: "asc" } }, images: { orderBy: { position: "asc" } } },
         })
         return product(row as unknown as ProductRow)
       })
@@ -77,8 +79,10 @@ export function createCatalogRepository(db: SeumeiPrismaClient): CatalogReposito
         await tx.productVariant.createMany({
           data: input.variants.map((variant) => ({ tenantId, productId, ...variant })),
         })
+        await tx.productImage.deleteMany({ where: { productId, tenantId } })
+        if (input.images.length) await tx.productImage.createMany({ data: input.images.map((image) => ({ tenantId, productId, ...image })) })
         const row = await tx.product.findFirst({
-          where: { id: productId, tenantId }, include: { variants: { orderBy: { position: "asc" } } },
+          where: { id: productId, tenantId }, include: { variants: { orderBy: { position: "asc" } }, images: { orderBy: { position: "asc" } } },
         })
         return row ? product(row as unknown as ProductRow) : null
       })

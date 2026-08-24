@@ -1,6 +1,6 @@
 import type { AuthorizedCompanyContext } from "./company-onboarding"
 import { can } from "../domain/membership"
-import { normalizeCategoryInput, normalizeProductInput, type ProductVariantInput, type ProductStatus, type ProductType } from "../domain/catalog"
+import { normalizeCategoryInput, normalizeProductInput, type ProductImageInput, type ProductVariantInput, type ProductStatus, type ProductType } from "../domain/catalog"
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
 
 export class CatalogCapabilityDeniedError extends Error {
@@ -29,6 +29,7 @@ export async function createCatalogCategory(context: AuthorizedCompanyContext, i
 export async function createCatalogProduct(context: AuthorizedCompanyContext, input: {
   name: string; slug?: string; description?: string | null; categoryId?: string | null
   type: ProductType; status: ProductStatus; variants: readonly ProductVariantInput[]
+  images?: readonly ProductImageInput[]
 }, repository: CatalogRepository) {
   requireManage(context)
   return repository.createProduct(context.company.tenantId, normalizeProductInput(input))

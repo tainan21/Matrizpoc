@@ -28,11 +28,21 @@ describe("catalog domain", () => {
     const product = normalizeProductInput({
       name: "  Café coado ", type: "SIMPLE", status: "DRAFT",
       variants: [{ name: "ignorado", sku: " cafe-01 ", price: "9,50" }],
+      images: [{ url: " /demo/galaxia-burger/galaxia-smash.webp ", altText: " Galaxia Smash com queijo ", }],
     })
     expect(product.slug).toBe("cafe-coado")
     expect(product.variants).toEqual([
       { name: "Padrão", sku: "CAFE-01", priceCents: 950, position: 0 },
     ])
+    expect(product.images).toEqual([{ url: "/demo/galaxia-burger/galaxia-smash.webp", altText: "Galaxia Smash com queijo", position: 0 }])
+  })
+
+  it.each([
+    { url: "javascript:alert(1)", altText: "Produto" },
+    { url: "/demo/produto.webp", altText: "" },
+    { url: "/demo/produto.webp", altText: "a".repeat(181) },
+  ])("rejects an invalid product image %#", (image) => {
+    expect(() => normalizeProductInput({ name: "Produto", type: "SIMPLE", status: "ACTIVE", variants: [{ name: "Padrão", price: "10,00" }], images: [image] })).toThrow(InvalidCatalogInputError)
   })
 
   it("requires distinct named variants for a configurable product", () => {

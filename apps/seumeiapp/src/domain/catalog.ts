@@ -9,11 +9,15 @@ export interface ProductVariant {
   readonly id: string; readonly name: string; readonly sku: string | null
   readonly priceCents: number; readonly position: number; readonly isActive: boolean
 }
+export interface ProductImage {
+  readonly id: string; readonly url: string; readonly altText: string; readonly position: number
+}
 export interface Product {
   readonly id: string; readonly tenantId: string; readonly categoryId: string | null
   readonly name: string; readonly slug: string; readonly description: string | null
   readonly type: ProductType; readonly status: ProductStatus; readonly version: number
   readonly variants: readonly ProductVariant[]
+  readonly images: readonly ProductImage[]
 }
 
 export interface ProductVariantInput {
@@ -21,6 +25,7 @@ export interface ProductVariantInput {
   readonly sku?: string | null
   readonly price: string
 }
+export interface ProductImageInput { readonly url: string; readonly altText: string }
 
 export class InvalidCatalogInputError extends Error {
   constructor(message: string) {
@@ -86,6 +91,7 @@ export function normalizeProductInput(input: {
   type: ProductType
   status: ProductStatus
   variants: readonly ProductVariantInput[]
+  images?: readonly ProductImageInput[]
 }) {
   const name = cleanText(input.name)
   const slug = catalogSlug(input.slug || name)
@@ -116,6 +122,15 @@ export function normalizeProductInput(input: {
   if (new Set(skus).size !== skus.length) {
     throw new InvalidCatalogInputError("Cada SKU precisa ser único")
   }
+  const images = (input.images ?? []).map((image, position) => {
+    const url = image.url.trim()
+    const altText = cleanText(image.altText)
+    if ((!/^\/(?!\/)/.test(url) && !/^https:\/\//.test(url)) || altText.length < 2 || altText.length > 180) {
+      throw new InvalidCatalogInputError("Cada imagem precisa de uma URL segura e texto alternativo")
+    }
+    return { url, altText, position }
+  })
+  if (images.length > 8) throw new InvalidCatalogInputError("Adicione no máximo oito imagens")
 
   return {
     name,
@@ -125,5 +140,6 @@ export function normalizeProductInput(input: {
     type: input.type,
     status: input.status,
     variants: normalizedVariants,
+    images,
   }
 }

@@ -7,7 +7,7 @@ function context(role: "OWNER" | "ADMIN" | "MEMBER" | "VIEWER") { return { userI
 function repository(): CatalogRepository {
   return {
     listCategories: vi.fn(async () => []), listProducts: vi.fn(async () => []), findProduct: vi.fn(async () => null),
-    createCategory: vi.fn(), createProduct: vi.fn(async () => ({ id: "p", tenantId: "tenant_a", categoryId: null, name: "Café", slug: "cafe", description: null, type: "SIMPLE" as const, status: "DRAFT" as const, version: 1, variants: [] })), updateProduct: vi.fn(),
+    createCategory: vi.fn(), createProduct: vi.fn(async () => ({ id: "p", tenantId: "tenant_a", categoryId: null, name: "Café", slug: "cafe", description: null, type: "SIMPLE" as const, status: "DRAFT" as const, version: 1, variants: [], images: [] })), updateProduct: vi.fn(),
   }
 }
 
