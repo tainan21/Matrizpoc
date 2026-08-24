@@ -42,9 +42,10 @@ export async function provisionDemoFederation(
   env: Readonly<Record<string, string | undefined>>,
   core: CoreAccessRepository,
   companies: CompanyRepository,
-): Promise<{ readonly companies: readonly Company[] }> {
+): Promise<{ readonly companies: readonly Company[]; readonly ownerUserId: string }> {
   requireDemoProvisioning(env)
   const globalActor = actor(DEMO_FEDERATION.global.email, DEMO_FEDERATION.global.displayName)
+  const owner = await core.resolveUser(globalActor)
   const provisioned: Company[] = []
 
   for (const definition of DEMO_FEDERATION.companies) {
@@ -64,5 +65,5 @@ export async function provisionDemoFederation(
   if (!galaxia) throw new Error("DEMO_GALAXIA_NOT_FOUND")
   await core.provisionMembership({ tenantId: galaxia.tenantId, userId: operator.id, role: "MEMBER" })
 
-  return { companies: provisioned }
+  return { companies: provisioned, ownerUserId: owner.id }
 }
