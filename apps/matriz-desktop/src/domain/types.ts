@@ -194,3 +194,32 @@ export interface FilePreview {
   readonly size: number
   readonly content: { readonly kind: "text" | "image" | "unsupported"; readonly value?: string }
 }
+
+export interface WalletTransaction {
+  readonly id: string
+  readonly occurredAt: number
+  readonly amount: number
+  readonly kind: string
+  readonly title: string
+  readonly packageId?: string
+}
+
+export interface StorePackage {
+  readonly id: string
+  readonly name: string
+  readonly description: string
+  readonly developer: string
+  readonly version: string
+  readonly category: string
+  readonly appId: DesktopAppId
+  readonly price: number
+  readonly permissions: readonly string[]
+  readonly compatibility: string
+  readonly owned: boolean
+  readonly installed: boolean
+}
+
+export interface CommerceSnapshot {
+  readonly wallet: { readonly balance: number; readonly currency: "M"; readonly transactions: readonly WalletTransaction[] }
+  readonly packages: readonly StorePackage[]
+}

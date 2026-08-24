@@ -18,6 +18,9 @@ export const Icons = {
   workspace: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><path d="M3.5 7.5h6l2-2h9v13h-17v-11Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M4 9.5h16" stroke="currentColor" strokeWidth="1.5"/></Icon>
   ),
+  store: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><path d="M5 9h14l-1 11H6L5 9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></Icon>
+  ),
   terminal: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><path d="m5 7 4 4-4 4m7 1h7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" strokeWidth="1.5"/></Icon>
   ),

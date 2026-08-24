@@ -119,6 +119,10 @@ function gateway(): DesktopGateway {
     renameResource: vi.fn().mockResolvedValue(undefined),
     duplicateResource: vi.fn().mockResolvedValue(undefined),
     recycleResource: vi.fn().mockResolvedValue(undefined),
+    commerceSnapshot: vi.fn().mockResolvedValue({ wallet: { balance: 1250, currency: "M", transactions: [] }, packages: [] }),
+    acquirePackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
+    installPackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
+    uninstallPackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
   }
 }
 

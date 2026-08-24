@@ -98,5 +98,9 @@ export function createTauriGateway(
     renameResource: (appId, relativePath, newName) => invoke(commands.renameResource, { appId, relativePath, newName }),
     duplicateResource: (appId, relativePath, newName) => invoke(commands.duplicateResource, { appId, relativePath, newName }),
     recycleResource: (appId, relativePath) => invoke(commands.recycleResource, { appId, relativePath }),
+    commerceSnapshot: () => invoke(commands.commerceSnapshot),
+    acquirePackage: (packageId) => invoke(commands.acquirePackage, { packageId }),
+    installPackage: (packageId) => invoke(commands.installPackage, { packageId }),
+    uninstallPackage: (packageId) => invoke(commands.uninstallPackage, { packageId }),
   }
 }

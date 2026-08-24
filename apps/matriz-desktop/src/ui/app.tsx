@@ -23,8 +23,9 @@ import { TerminalView } from "./terminal/terminal-view"
 import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
 import { RuntimeWorkspace } from "./runtime/runtime-workspace"
 import { WorkspaceView } from "./workspace/workspace-view"
+import { StoreView } from "./store/store-view"
 
-type View = "ports" | "apps" | "workspace" | "terminal" | "actions" | "doctor" | "settings"
+type View = "ports" | "apps" | "workspace" | "terminal" | "actions" | "store" | "doctor" | "settings"
 type SoundId =
   | "system.start"
   | "system.end"
@@ -47,6 +48,7 @@ const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = 
   { id: "workspace", label: "Workspace", icon: "workspace" },
   { id: "terminal", label: "Terminal", icon: "terminal" },
   { id: "actions", label: "Ações", icon: "actions" },
+  { id: "store", label: "Store", icon: "store" },
   { id: "doctor", label: "Doctor", icon: "doctor" },
   { id: "settings", label: "Ajustes", icon: "settings" },
 ]
@@ -231,6 +233,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
+        {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
         {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>

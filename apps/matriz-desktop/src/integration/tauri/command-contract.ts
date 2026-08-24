@@ -53,4 +53,8 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   renameResource: "rename_resource",
   duplicateResource: "duplicate_resource",
   recycleResource: "recycle_resource",
+  commerceSnapshot: "get_commerce_snapshot",
+  acquirePackage: "acquire_package",
+  installPackage: "install_package",
+  uninstallPackage: "uninstall_package",
 } as const satisfies Readonly<Record<keyof DesktopGateway, string>>)

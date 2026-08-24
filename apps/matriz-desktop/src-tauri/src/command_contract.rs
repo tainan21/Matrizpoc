@@ -51,4 +51,8 @@ pub const COMMAND_NAMES: &[&str] = &[
     "rename_resource",
     "duplicate_resource",
     "recycle_resource",
+    "get_commerce_snapshot",
+    "acquire_package",
+    "install_package",
+    "uninstall_package",
 ];

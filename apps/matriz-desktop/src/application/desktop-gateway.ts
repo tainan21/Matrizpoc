@@ -24,6 +24,7 @@ import type {
   EnvironmentSaveRequest,
   DirectoryListing,
   FilePreview,
+  CommerceSnapshot,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -79,4 +80,8 @@ export interface DesktopGateway {
   renameResource(appId: DesktopAppId, relativePath: string, newName: string): Promise<void>
   duplicateResource(appId: DesktopAppId, relativePath: string, newName: string): Promise<void>
   recycleResource(appId: DesktopAppId, relativePath: string): Promise<void>
+  commerceSnapshot(): Promise<CommerceSnapshot>
+  acquirePackage(packageId: string): Promise<CommerceSnapshot>
+  installPackage(packageId: string): Promise<CommerceSnapshot>
+  uninstallPackage(packageId: string): Promise<CommerceSnapshot>
 }

@@ -58,6 +58,10 @@ describe("Tauri command contract", () => {
       renameResource: "rename_resource",
       duplicateResource: "duplicate_resource",
       recycleResource: "recycle_resource",
+      commerceSnapshot: "get_commerce_snapshot",
+      acquirePackage: "acquire_package",
+      installPackage: "install_package",
+      uninstallPackage: "uninstall_package",
     })
     expect(Object.isFrozen(TAURI_COMMAND_CONTRACT)).toBe(true)
   })
@@ -130,6 +134,10 @@ describe("Tauri command contract", () => {
     await gateway.renameResource("matriz-admin", "src/index.ts", "main.ts")
     await gateway.duplicateResource("matriz-admin", "src/main.ts", "main.copy.ts")
     await gateway.recycleResource("matriz-admin", "src/main.copy.ts")
+    await gateway.commerceSnapshot()
+    await gateway.acquirePackage("matriz.analytics")
+    await gateway.installPackage("matriz.analytics")
+    await gateway.uninstallPackage("matriz.analytics")
 
     expect(calls).toEqual([
       { command: "get_snapshot", args: undefined },
@@ -190,6 +198,10 @@ describe("Tauri command contract", () => {
       { command: "rename_resource", args: { appId: "matriz-admin", relativePath: "src/index.ts", newName: "main.ts" } },
       { command: "duplicate_resource", args: { appId: "matriz-admin", relativePath: "src/main.ts", newName: "main.copy.ts" } },
       { command: "recycle_resource", args: { appId: "matriz-admin", relativePath: "src/main.copy.ts" } },
+      { command: "get_commerce_snapshot", args: undefined },
+      { command: "acquire_package", args: { packageId: "matriz.analytics" } },
+      { command: "install_package", args: { packageId: "matriz.analytics" } },
+      { command: "uninstall_package", args: { packageId: "matriz.analytics" } },
     ])
   })
 })

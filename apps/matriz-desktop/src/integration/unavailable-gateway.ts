@@ -1,5 +1,5 @@
 import type { DesktopGateway } from "../application/desktop-gateway"
-import type { ActivityEnvelope, DesktopSettings, RuntimeInstance } from "../domain/types"
+import type { ActivityEnvelope, CommerceSnapshot, DesktopSettings, RuntimeInstance } from "../domain/types"
 
 const DEMO_RUNTIMES: readonly RuntimeInstance[] = [
   ["matriz-hub", "Matriz Hub", 3000], ["spot", "Spot", 3001],
@@ -31,6 +31,24 @@ const DEFAULT_SETTINGS: DesktopSettings = Object.freeze({
 
 function unavailable(): never {
   throw new Error("O shell nativo do Matriz Control não está disponível.")
+}
+
+function demoCommerce(activeId?: string, installed = false): CommerceSnapshot {
+  const definitions = [
+    ["matriz.analytics", "Matriz Analytics", "Dashboards e análise operacional do ecossistema.", "Analytics", "willdash", 220],
+    ["matriz.agent-pack", "AI Agent Pack", "Capacidades assistivas para workflows controlados.", "Agents", "matriz-workbench", 200],
+    ["matriz.components", "Matriz Components", "Catálogo visual, tokens e playground do MatrizLib.", "Components", "matrizlib", 0],
+    ["matriz.admin-tools", "Admin Tools", "Ferramentas operacionais para Matriz Admin.", "Developer Tools", "matriz-admin", 250],
+  ] as const
+  const active = definitions.find(([id]) => id === activeId)
+  const price = active?.[5] ?? 0
+  return {
+    wallet: { balance: 1_250 - price, currency: "M", transactions: [
+      ...(active ? [{ id: "demo-acquire", occurredAt: now, amount: -price, kind: "acquisition", title: active[1], packageId: active[0] }] : []),
+      { id: "demo-grant", occurredAt: now - 86_400_000, amount: 1_250, kind: "grant", title: "Créditos iniciais" },
+    ] },
+    packages: definitions.map(([id, name, description, category, appId, packagePrice]) => ({ id, name, description, developer: "Matriz Team", version: "1.0.0", category, appId, price: packagePrice, permissions: ["runtime:observe"], compatibility: "Matriz Control 0.1+ · Windows 10/11", owned: id === activeId, installed: id === activeId && installed })),
+  }
 }
 
 export const unavailableGateway: DesktopGateway = {
@@ -102,4 +120,8 @@ export const unavailableGateway: DesktopGateway = {
   renameResource: async () => unavailable(),
   duplicateResource: async () => unavailable(),
   recycleResource: async () => unavailable(),
+  commerceSnapshot: async () => demoCommerce(),
+  acquirePackage: async (packageId) => demoCommerce(packageId),
+  installPackage: async (packageId) => demoCommerce(packageId, true),
+  uninstallPackage: async (packageId) => demoCommerce(packageId, false),
 }

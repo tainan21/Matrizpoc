@@ -1,6 +1,7 @@
 pub mod activity;
 mod catalog;
 pub mod command_contract;
+pub mod commerce;
 mod doctor;
 pub mod environment;
 pub mod explorer;
@@ -20,6 +21,7 @@ mod workspace;
 use std::fmt;
 
 use activity::{ActivityEnvelope, ActivityHub};
+use commerce::{CommerceSnapshot, CommerceStore};
 use environment::{
     EnvironmentDocument, EnvironmentFile, EnvironmentSaveRequest, EnvironmentService,
 };
@@ -636,6 +638,30 @@ fn recycle_resource(state: tauri::State<'_, OperationsState>, app_id: String, re
     ExplorerService::new(state.root()?)?.recycle(&app_id, &relative_path)
 }
 
+#[tauri::command]
+fn get_commerce_snapshot(commerce: tauri::State<'_, CommerceStore>) -> Result<CommerceSnapshot, String> { commerce.snapshot() }
+
+#[tauri::command(rename_all = "camelCase")]
+fn acquire_package(commerce: tauri::State<'_, CommerceStore>, activity: tauri::State<'_, ActivityHub>, package_id: String) -> Result<CommerceSnapshot, String> {
+    let snapshot = commerce.acquire(&package_id)?;
+    activity.publish("store.package.acquired", "success", "Pacote adquirido", Some(&package_id), None);
+    Ok(snapshot)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn install_package(commerce: tauri::State<'_, CommerceStore>, activity: tauri::State<'_, ActivityHub>, package_id: String) -> Result<CommerceSnapshot, String> {
+    let snapshot = commerce.install(&package_id)?;
+    activity.publish("store.package.installed", "success", "Pacote instalado", Some(&package_id), None);
+    Ok(snapshot)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn uninstall_package(commerce: tauri::State<'_, CommerceStore>, activity: tauri::State<'_, ActivityHub>, package_id: String) -> Result<CommerceSnapshot, String> {
+    let snapshot = commerce.uninstall(&package_id)?;
+    activity.publish("store.package.uninstalled", "info", "Pacote removido", Some(&package_id), None);
+    Ok(snapshot)
+}
+
 #[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
@@ -707,6 +733,7 @@ pub fn run() {
             app.state::<OperationsState>()
                 .restore_workspace(saved.workspace_path.as_deref());
             app.manage(settings);
+            app.manage(CommerceStore::new(app.path().app_config_dir()?.join("commerce.json")));
             shell::install_tray(app.handle())?;
             Ok(())
         })
@@ -782,7 +809,11 @@ pub fn run() {
             open_resource_in_editor,
             rename_resource,
             duplicate_resource,
-            recycle_resource
+            recycle_resource,
+            get_commerce_snapshot,
+            acquire_package,
+            install_package,
+            uninstall_package
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");
