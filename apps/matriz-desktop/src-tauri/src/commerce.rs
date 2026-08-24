@@ -1,5 +1,5 @@
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, HashSet},
     fs,
     path::PathBuf,
     sync::{Arc, Mutex},
@@ -143,7 +143,7 @@ impl CommerceStore {
         if state.owned.iter().any(|id| id == package_id) {
             return Err("Package is already owned".into());
         }
-        let balance: i64 = state.transactions.iter().map(|item| item.amount).sum();
+        let balance = validate_state(&state)?;
         if balance < package.price {
             return Err("Insufficient Matriz Credits".into());
         }
@@ -201,9 +201,11 @@ impl CommerceStore {
         if state.version != VERSION {
             return Err("Commerce state version is unsupported".into());
         }
+        validate_state(&state)?;
         Ok(state)
     }
     fn write(&self, state: &State) -> Result<(), String> {
+        validate_state(state)?;
         let parent = self.path.parent().ok_or("Commerce path has no parent")?;
         fs::create_dir_all(parent)
             .map_err(|error| format!("Could not create commerce directory: {error}"))?;
@@ -245,6 +247,65 @@ fn catalog(id: &str) -> Result<CatalogPackage, String> {
         .copied()
         .find(|package| package.id == id)
         .ok_or_else(|| "Package is not in the trusted Matriz catalog".into())
+}
+fn validate_state(state: &State) -> Result<i64, String> {
+    let mut transaction_ids = HashSet::new();
+    let mut acquired = HashSet::new();
+    let mut grants = 0;
+    let mut balance = 0_i64;
+    for item in &state.transactions {
+        if !transaction_ids.insert(item.id.as_str()) {
+            return Err("Commerce ledger contains duplicate transaction IDs".into());
+        }
+        balance = balance
+            .checked_add(item.amount)
+            .ok_or("Commerce ledger balance overflow")?;
+        match item.kind.as_str() {
+            "grant" => {
+                grants += 1;
+                if item.amount != 1_250 || item.package_id.is_some() {
+                    return Err("Commerce opening grant is invalid".into());
+                }
+            }
+            "acquisition" | "free-acquisition" => {
+                let package_id = item
+                    .package_id
+                    .as_deref()
+                    .ok_or("Acquisition is missing package ID")?;
+                let package = catalog(package_id)?;
+                let expected_kind = if package.price == 0 {
+                    "free-acquisition"
+                } else {
+                    "acquisition"
+                };
+                if item.kind != expected_kind || item.amount != -package.price {
+                    return Err("Acquisition does not match the trusted catalog".into());
+                }
+                if !acquired.insert(package_id) {
+                    return Err("Package was acquired more than once".into());
+                }
+            }
+            _ => return Err("Commerce ledger contains an unsupported transaction".into()),
+        }
+    }
+    if grants != 1 || balance < 0 {
+        return Err("Commerce ledger invariants failed".into());
+    }
+    let owned = state
+        .owned
+        .iter()
+        .map(String::as_str)
+        .collect::<HashSet<_>>();
+    if owned.len() != state.owned.len() || owned != acquired {
+        return Err("Commerce ownership does not match acquisitions".into());
+    }
+    for (package_id, version) in &state.installed {
+        let package = catalog(package_id)?;
+        if !owned.contains(package_id.as_str()) || version != package.version {
+            return Err("Installed package does not match ownership or catalog version".into());
+        }
+    }
+    Ok(balance)
 }
 fn snapshot_from(state: State) -> CommerceSnapshot {
     let balance = state.transactions.iter().map(|item| item.amount).sum();

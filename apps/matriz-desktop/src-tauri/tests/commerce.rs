@@ -1,4 +1,5 @@
 use matriz_desktop_native::commerce::CommerceStore;
+use std::fs;
 
 #[test]
 fn wallet_ledger_is_native_authority_and_acquisition_is_idempotently_rejected() {
@@ -54,4 +55,35 @@ fn free_packages_can_be_acquired_without_changing_balance() {
         .packages
         .iter()
         .any(|package| package.id == "matriz.components" && package.owned));
+}
+
+#[test]
+fn rejects_tampered_ledgers_and_installations_without_ownership() {
+    let temp = tempfile::tempdir().expect("temp commerce");
+    let path = temp.path().join("commerce.json");
+    fs::write(&path, r#"{
+      "version": 1,
+      "transactions": [
+        {"id":"grant-1","occurredAt":1,"amount":1250,"kind":"grant","title":"Créditos iniciais","packageId":null},
+        {"id":"grant-2","occurredAt":2,"amount":5000,"kind":"grant","title":"tampered","packageId":null}
+      ],
+      "owned": ["matriz.analytics"],
+      "installed": {"matriz.analytics":"1.2.0"}
+    }"#).expect("tampered state");
+    assert!(CommerceStore::new(path).snapshot().is_err());
+}
+
+#[test]
+fn rejects_owned_or_installed_packages_without_a_matching_acquisition() {
+    let temp = tempfile::tempdir().expect("temp commerce");
+    let path = temp.path().join("commerce.json");
+    fs::write(&path, r#"{
+      "version": 1,
+      "transactions": [
+        {"id":"grant-1","occurredAt":1,"amount":1250,"kind":"grant","title":"Créditos iniciais","packageId":null}
+      ],
+      "owned": ["matriz.analytics"],
+      "installed": {"matriz.analytics":"1.2.0"}
+    }"#).expect("invalid ownership");
+    assert!(CommerceStore::new(path).snapshot().is_err());
 }

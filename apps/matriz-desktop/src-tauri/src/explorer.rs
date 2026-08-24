@@ -1,4 +1,10 @@
-use std::{fs, path::Path, process::Command, time::UNIX_EPOCH};
+use std::{
+    fs::{self, OpenOptions},
+    io,
+    path::Path,
+    process::Command,
+    time::UNIX_EPOCH,
+};
 
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use serde::Serialize;
@@ -126,10 +132,14 @@ impl ExplorerService {
     pub fn rename(&self, app_id: &str, relative_path: &str, new_name: &str) -> Result<(), String> {
         guard_mutation(relative_path)?;
         let source = self.resources.existing_path(app_id, relative_path)?;
+        if !source.is_file() {
+            return Err("Only files can be renamed in Control".into());
+        }
         let parent = Path::new(relative_path)
             .parent()
             .and_then(Path::to_str)
             .unwrap_or("");
+        guard_mutation(&child_relative(parent, new_name))?;
         let target = self.resources.new_child_path(app_id, parent, new_name)?;
         if target.exists() {
             return Err("A resource with this name already exists".into());
@@ -152,15 +162,29 @@ impl ExplorerService {
             .parent()
             .and_then(Path::to_str)
             .unwrap_or("");
+        guard_mutation(&child_relative(parent, new_name))?;
         let target = self.resources.new_child_path(app_id, parent, new_name)?;
-        fs::copy(source, target)
-            .map(|_| ())
-            .map_err(|error| format!("Could not duplicate file: {error}"))
+        let mut input = fs::File::open(source)
+            .map_err(|error| format!("Could not read source file: {error}"))?;
+        let mut output = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&target)
+            .map_err(|error| format!("Could not create duplicate: {error}"))?;
+        if let Err(error) = io::copy(&mut input, &mut output) {
+            drop(output);
+            let _ = fs::remove_file(&target);
+            return Err(format!("Could not duplicate file: {error}"));
+        }
+        Ok(())
     }
 
     pub fn recycle(&self, app_id: &str, relative_path: &str) -> Result<(), String> {
         guard_mutation(relative_path)?;
         let path = self.resources.existing_path(app_id, relative_path)?;
+        if !path.is_file() {
+            return Err("Only files can be moved to Recycle Bin from Control".into());
+        }
         trash::delete(path)
             .map_err(|error| format!("Could not move resource to Recycle Bin: {error}"))
     }
@@ -186,12 +210,20 @@ impl ExplorerService {
 
     pub fn open_in_editor(&self, app_id: &str, relative_path: &str) -> Result<(), String> {
         let path = self.resolve(app_id, relative_path)?;
-        Command::new("code.cmd")
+        if Command::new("code.cmd")
             .arg("--reuse-window")
-            .arg(path)
+            .arg(&path)
+            .spawn()
+            .is_ok()
+        {
+            return Ok(());
+        }
+        let argument = format!("/select,{}", path.display());
+        Command::new("explorer.exe")
+            .arg(argument)
             .spawn()
             .map(|_| ())
-            .map_err(|error| format!("VS Code is unavailable: {error}"))
+            .map_err(|error| format!("Editor and Explorer are unavailable: {error}"))
     }
 
     fn resolve(&self, app_id: &str, relative_path: &str) -> Result<std::path::PathBuf, String> {
@@ -241,6 +273,13 @@ fn extension(path: &Path) -> String {
 }
 fn normalize(path: &str) -> String {
     path.replace('\\', "/")
+}
+fn child_relative(parent: &str, name: &str) -> String {
+    if parent.is_empty() {
+        name.into()
+    } else {
+        format!("{parent}/{name}")
+    }
 }
 fn image_mime(extension: &str) -> Option<&'static str> {
     match extension {

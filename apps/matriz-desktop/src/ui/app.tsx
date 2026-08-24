@@ -230,7 +230,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         ) : null}
 
         {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} /> : null}
-        {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
+        {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} /> : null}

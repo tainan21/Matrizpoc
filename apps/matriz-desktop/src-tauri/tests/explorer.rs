@@ -64,3 +64,31 @@ fn protects_runtime_configuration_from_mutation() {
         .rename("matriz-admin", "src/index.ts", "main.ts")
         .is_ok());
 }
+
+#[test]
+fn duplicate_never_overwrites_and_directories_are_not_recycled() {
+    let (temp, service) = fixture();
+    let app = temp.path().join("apps/matriz-admin");
+    fs::write(app.join("src/existing.ts"), "keep me").expect("existing target");
+    assert!(service
+        .duplicate("matriz-admin", "src/index.ts", "existing.ts")
+        .is_err());
+    assert_eq!(
+        fs::read_to_string(app.join("src/existing.ts")).expect("preserved target"),
+        "keep me"
+    );
+    assert!(service.recycle("matriz-admin", "src").is_err());
+    assert!(service
+        .duplicate("matriz-admin", "src/index.ts", ".env.local")
+        .is_err());
+}
+
+#[test]
+fn preview_limits_large_text_and_images() {
+    let (temp, service) = fixture();
+    let app = temp.path().join("apps/matriz-admin/src");
+    fs::write(app.join("large.ts"), vec![b'x'; 256 * 1024 + 1]).expect("large text");
+    fs::write(app.join("large.png"), vec![0_u8; 8 * 1024 * 1024 + 1]).expect("large image");
+    assert!(service.preview("matriz-admin", "src/large.ts").is_err());
+    assert!(service.preview("matriz-admin", "src/large.png").is_err());
+}

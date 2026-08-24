@@ -45,6 +45,14 @@ export function FileExplorer({ gateway, runtimes, signal }: {
     try { await action(); await refresh(); setSelected(undefined); setPreview(undefined); setConfirmRecycle(false); signal("success") }
     catch (cause) { setError(String(cause)); signal("error") }
   }
+  const nativeAction = async (action: () => Promise<void>) => {
+    try { await action(); setError(""); signal("success") }
+    catch (cause) { setError(String(cause)); signal("error") }
+  }
+  const copyPath = async (relativePath: string) => {
+    if (!navigator.clipboard) { setError("Clipboard não está disponível neste ambiente."); signal("error"); return }
+    await nativeAction(() => navigator.clipboard.writeText(relativePath))
+  }
 
   const crumbs = path ? path.split("/") : []
   const parent = crumbs.slice(0, -1).join("/")
@@ -71,11 +79,12 @@ export function FileExplorer({ gateway, runtimes, signal }: {
             <div className="preview-stage">{preview?.content.kind === "image" ? <img src={preview.content.value} alt={`Preview de ${selected.name}`} /> : null}{preview?.content.kind === "text" ? <pre>{preview.content.value}</pre> : null}{preview?.content.kind === "unsupported" ? <div><b>SEM PREVIEW</b><small>Abra no aplicativo padrão.</small></div> : null}</div>
             <div className="inspector-meta"><span>CAMINHO</span><code>{selected.relativePath}</code></div>
             <div className="inspector-actions">
-              <Button variant="secondary" onClick={() => void gateway.openResourceInEditor(appId, selected.relativePath)}>ABRIR NO EDITOR</Button>
-              <Button variant="secondary" onClick={() => void gateway.revealResource(appId, selected.relativePath)}>MOSTRAR NA PASTA</Button>
-              <Button variant="secondary" onClick={() => void navigator.clipboard?.writeText(selected.relativePath)}>COPIAR CAMINHO</Button>
-              <Button variant="secondary" onClick={() => { const name = window.prompt("Novo nome", selected.name); if (name) void mutate(() => gateway.renameResource(appId, selected.relativePath, name)) }}>RENOMEAR</Button>
-              <Button variant="secondary" onClick={() => { const name = window.prompt("Nome da cópia", `copy-${selected.name}`); if (name) void mutate(() => gateway.duplicateResource(appId, selected.relativePath, name)) }}>DUPLICAR</Button>
+              <Button variant="secondary" aria-label={`Abrir ${selected.name} no aplicativo padrão`} onClick={() => void nativeAction(() => gateway.openResource(appId, selected.relativePath))}>ABRIR</Button>
+              <Button variant="secondary" aria-label={`Abrir ${selected.name} no editor`} onClick={() => void nativeAction(() => gateway.openResourceInEditor(appId, selected.relativePath))}>EDITOR</Button>
+              <Button variant="secondary" aria-label={`Mostrar ${selected.name} na pasta`} onClick={() => void nativeAction(() => gateway.revealResource(appId, selected.relativePath))}>PASTA</Button>
+              <Button variant="secondary" aria-label={`Copiar caminho de ${selected.name}`} onClick={() => void copyPath(selected.relativePath)}>COPIAR</Button>
+              <Button variant="secondary" aria-label={`Renomear ${selected.name}`} onClick={() => { const name = window.prompt("Novo nome", selected.name); if (name) void mutate(() => gateway.renameResource(appId, selected.relativePath, name)) }}>RENOMEAR</Button>
+              <Button variant="secondary" aria-label={`Duplicar ${selected.name}`} onClick={() => { const name = window.prompt("Nome da cópia", `copy-${selected.name}`); if (name) void mutate(() => gateway.duplicateResource(appId, selected.relativePath, name)) }}>DUPLICAR</Button>
               <Button className="danger-button" aria-label={`${confirmRecycle ? "Confirmar mover" : "Mover"} ${selected.name} para a Lixeira`} onClick={() => confirmRecycle ? void mutate(() => gateway.recycleResource(appId, selected.relativePath)) : setConfirmRecycle(true)}>{confirmRecycle ? "CONFIRMAR LIXEIRA" : "MOVER À LIXEIRA"}</Button>
             </div>
           </> : <div className="inspector-empty"><span>◇</span><strong>SELECIONE UM ARQUIVO</strong><small>Imagens, SVG e código leve aparecem aqui.</small></div>}

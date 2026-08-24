@@ -7,7 +7,7 @@ import type { DesktopGateway } from "../../application/desktop-gateway"
 import type { RuntimeInstance } from "../../domain/types"
 import { EnvironmentManager } from "./environment-manager"
 
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 const runtime: RuntimeInstance = {
   id: "matriz-admin",
@@ -23,7 +23,7 @@ const runtime: RuntimeInstance = {
 
 function gateway() {
   return {
-    listEnvironments: vi.fn().mockResolvedValue([{ fileName: ".env.local", size: 42, modifiedAt: 1 }]),
+    listEnvironments: vi.fn().mockResolvedValue([{ fileName: ".env.local", size: 42, modifiedAt: 1 }, { fileName: ".env.example", size: 20, modifiedAt: 1 }]),
     readEnvironment: vi.fn().mockResolvedValue({
       appId: "matriz-admin",
       fileName: ".env.local",
@@ -69,6 +69,18 @@ describe("EnvironmentManager", () => {
     fireEvent.click(screen.getByRole("button", { name: "Aplicar e reiniciar Matriz Admin" }))
 
     await waitFor(() => expect(desktop.saveEnvironment).toHaveBeenCalledWith(expect.objectContaining({ revision: "rev-1" })))
-    expect(restart).toHaveBeenCalledWith("app.matriz-admin.web")
+    expect(restart).toHaveBeenCalledWith("matriz-admin")
+  })
+
+  it("does not discard a dirty draft without confirmation", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(false)
+    const desktop = gateway()
+    render(<EnvironmentManager gateway={desktop} runtimes={[runtime]} restart={vi.fn()} signal={vi.fn()} />)
+    const port = await screen.findByLabelText("Valor PORT")
+    fireEvent.change(port, { target: { value: "3999" } })
+    expect(document.querySelector(".env-footer span")).toHaveTextContent("1 alterações não salvas · segredos permanecem fora do histórico")
+    fireEvent.change(screen.getByLabelText("Arquivo de ambiente"), { target: { value: ".env.example" } })
+    expect(screen.getByLabelText("Arquivo de ambiente")).toHaveValue(".env.local")
+    expect(window.confirm).toHaveBeenCalledOnce()
   })
 })

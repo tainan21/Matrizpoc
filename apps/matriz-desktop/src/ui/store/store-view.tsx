@@ -23,6 +23,16 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
     catch (cause) { setError(String(cause)); signal("error") }
     finally { setBusy("") }
   }
+  const openPackage = async (item: StorePackage) => {
+    setBusy(item.id); setError("")
+    try {
+      const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === item.appId)
+      if (runtime?.status !== "ready") await gateway.restartRuntime(item.appId)
+      await gateway.openRuntimeTarget({ appId: item.appId, routePath: "/" })
+      signal("success")
+    } catch (cause) { setError(String(cause)); signal("error") }
+    finally { setBusy("") }
+  }
 
   return <section className="store-view" aria-labelledby="store-title">
     <div className="store-header">
@@ -33,7 +43,7 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
     {error ? <div className="env-error" role="alert">{error}</div> : null}
     <div className="store-layout">
       <div className="store-catalog">
-        {packages.map((item) => <PackageCard key={item.id} item={item} busy={busy === item.id} selected={selectedId === item.id} inspect={() => setSelectedId(item.id)} acquire={() => void transition(item.id, () => gateway.acquirePackage(item.id))} install={() => void transition(item.id, () => gateway.installPackage(item.id))} open={() => void gateway.openRuntimeTarget({ appId: item.appId, routePath: "/" })} uninstall={() => void transition(item.id, () => gateway.uninstallPackage(item.id))} />)}
+        {packages.map((item) => <PackageCard key={item.id} item={item} busy={busy === item.id} selected={selectedId === item.id} inspect={() => setSelectedId(item.id)} acquire={() => void transition(item.id, () => gateway.acquirePackage(item.id))} install={() => void transition(item.id, () => gateway.installPackage(item.id))} open={() => void openPackage(item)} uninstall={() => void transition(item.id, () => gateway.uninstallPackage(item.id))} />)}
         {!packages.length ? <div className="store-empty">Nenhuma capacidade encontrada.</div> : null}
       </div>
       <aside className="store-side">
@@ -45,8 +55,8 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
 }
 
 function PackageCard({ item, busy, selected, inspect, acquire, install, open, uninstall }: { item: StorePackage; busy: boolean; selected: boolean; inspect(): void; acquire(): void; install(): void; open(): void; uninstall(): void }) {
-  return <article className={`package-card${selected ? " is-selected" : ""}`} onClick={inspect}>
-    <div className="package-icon">{monogram(item.name)}</div><div className="package-copy"><span>{item.category} · v{item.version}</span><h2>{item.name}</h2><p>{item.description}</p></div>
+  return <article className={`package-card${selected ? " is-selected" : ""}`}>
+    <div className="package-icon">{monogram(item.name)}</div><div className="package-copy"><span>{item.category} · v{item.version}</span><h2><button aria-label={`Inspecionar ${item.name}`} onClick={inspect}>{item.name}</button></h2><p>{item.description}</p></div>
     <div className="package-state">{item.installed ? <Badge tone="success">INSTALADO</Badge> : item.owned ? <Badge tone="neutral">ADQUIRIDO</Badge> : <strong>{item.price ? `${item.price} M` : "GRÁTIS"}</strong>}</div>
     <div className="package-actions" onClick={(event) => event.stopPropagation()}>
       {!item.owned ? <Button disabled={busy} aria-label={item.price ? `Adquirir ${item.name} por ${item.price} M` : `Adquirir ${item.name} grátis`} onClick={acquire}>ADQUIRIR</Button> : null}

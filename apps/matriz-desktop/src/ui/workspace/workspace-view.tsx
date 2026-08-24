@@ -1,14 +1,14 @@
 import { useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { ManagedOperationId, RuntimeInstance } from "../../domain/types"
+import type { DesktopAppId, RuntimeInstance } from "../../domain/types"
 import { EnvironmentManager } from "./environment-manager"
 import { FileExplorer } from "./file-explorer"
 
 export function WorkspaceView({ gateway, runtimes, restart, signal }: {
   gateway: DesktopGateway
   runtimes: readonly RuntimeInstance[]
-  restart(id: ManagedOperationId): Promise<unknown>
+  restart(appId: DesktopAppId): Promise<unknown>
   signal(kind: "success" | "error"): void
 }) {
   const [surface, setSurface] = useState<"environment" | "files">("environment")

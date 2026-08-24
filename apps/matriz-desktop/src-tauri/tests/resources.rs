@@ -34,4 +34,12 @@ fn new_children_require_a_safe_single_name_and_existing_parent() {
     assert!(service
         .new_child_path("matriz-admin", "missing", "copy.ts")
         .is_err());
+    for unsafe_name in ["CON", "nul.txt", "file.ts:secret", "bad?.ts", "trail. "] {
+        assert!(
+            service
+                .new_child_path("matriz-admin", "src", unsafe_name)
+                .is_err(),
+            "{unsafe_name} must be rejected on Windows"
+        );
+    }
 }

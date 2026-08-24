@@ -2,7 +2,7 @@ import { Badge, Button } from "@matriz/design-ui/primitives"
 import { useEffect, useMemo, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { DesktopAppId, EnvironmentDocument, ManagedOperationId, RuntimeInstance } from "../../domain/types"
+import type { DesktopAppId, EnvironmentDocument, RuntimeInstance } from "../../domain/types"
 
 interface DraftVariable {
   key: string
@@ -10,12 +10,13 @@ interface DraftVariable {
   sensitive: boolean
   revealed: boolean
   source: string
+  originalValue?: string
 }
 
 export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   gateway: DesktopGateway
   runtimes: readonly RuntimeInstance[]
-  restart(id: ManagedOperationId): Promise<unknown>
+  restart(appId: DesktopAppId): Promise<unknown>
   signal(kind: "success" | "error"): void
 }) {
   const [appId, setAppId] = useState<DesktopAppId>(runtimes[0]?.id ?? "matriz-admin")
@@ -30,6 +31,17 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   const runtime = runtimes.find((item) => item.id === appId)
   const selectedLabel = runtime?.label ?? appId
   const filtered = useMemo(() => draft.filter(({ key }) => key.toLowerCase().includes(query.toLowerCase())), [draft, query])
+  const dirtyCount = useMemo(() => {
+    if (!document) return 0
+    const original = document.variables
+    let changes = Math.abs(draft.length - original.length)
+    for (let index = 0; index < Math.min(draft.length, original.length); index += 1) {
+      const current = draft[index]
+      const baseline = original[index]
+      if (current.key !== baseline.key || (!current.sensitive && current.value !== baseline.value) || (current.sensitive && current.revealed && current.value !== current.originalValue)) changes += 1
+    }
+    return changes
+  }, [document, draft])
 
   useEffect(() => {
     let current = true
@@ -50,7 +62,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
     gateway.readEnvironment(appId, fileName).then((next) => {
       if (!current) return
       setDocument(next)
-      setDraft(next.variables.map((variable) => ({ ...variable, revealed: !variable.sensitive })))
+      setDraft(next.variables.map((variable) => ({ ...variable, revealed: !variable.sensitive, originalValue: variable.value })))
     }).catch((cause: unknown) => current && setError(String(cause)))
     return () => { current = false }
   }, [appId, fileName, gateway])
@@ -58,7 +70,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   const reveal = async (key: string) => {
     try {
       const value = await gateway.revealEnvironmentValue(appId, fileName, key)
-      setDraft((items) => items.map((item) => item.key === key ? { ...item, value, revealed: true } : item))
+      setDraft((items) => items.map((item) => item.key === key ? { ...item, value, originalValue: value, revealed: true } : item))
     } catch (cause) {
       setError(String(cause))
       signal("error")
@@ -77,8 +89,8 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
         variables: draft.map(({ key, value, revealed }) => ({ key, value: revealed ? value : undefined })),
       })
       setDocument(next)
-      setDraft(next.variables.map((variable) => ({ ...variable, revealed: !variable.sensitive })))
-      if (andRestart && runtime?.ownership === "managed") await restart(`app.${appId}.web` as ManagedOperationId)
+      setDraft(next.variables.map((variable) => ({ ...variable, revealed: !variable.sensitive, originalValue: variable.value })))
+      if (andRestart && runtime?.ownership === "managed") await restart(appId)
       signal("success")
     } catch (cause) {
       setError(String(cause))
@@ -89,6 +101,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   }
 
   const update = (key: string, patch: Partial<DraftVariable>) => setDraft((items) => items.map((item) => item.key === key ? { ...item, ...patch } : item))
+  const canLeaveDraft = () => !dirtyCount || window.confirm("Descartar alterações não salvas deste ambiente?")
 
   return (
     <section className="env-manager" aria-labelledby="env-title">
@@ -98,10 +111,10 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
       </div>
 
       <div className="workspace-selector-bar">
-        <label>APLICAÇÃO<select aria-label="Aplicação" value={appId} onChange={(event) => setAppId(event.target.value as DesktopAppId)}>{runtimes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-        <label>AMBIENTE<select aria-label="Arquivo de ambiente" value={fileName} onChange={(event) => setFileName(event.target.value)}>{files.map((file) => <option key={file.fileName} value={file.fileName}>{file.fileName}</option>)}</select></label>
+        <label>APLICAÇÃO<select aria-label="Aplicação" value={appId} onChange={(event) => { if (canLeaveDraft()) setAppId(event.target.value as DesktopAppId) }}>{runtimes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+        <label>AMBIENTE<select aria-label="Arquivo de ambiente" value={fileName} onChange={(event) => { if (canLeaveDraft()) setFileName(event.target.value) }}>{files.map((file) => <option key={file.fileName} value={file.fileName}>{file.fileName}</option>)}</select></label>
         <label className="env-search">BUSCAR<input aria-label="Buscar variável" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="chave..." /></label>
-        <Button variant="secondary" onClick={() => setDraft((items) => [...items, { key: `NEW_VARIABLE_${items.length + 1}`, value: "", sensitive: false, revealed: true, source: fileName }])}>NOVA VARIÁVEL</Button>
+        <Button variant="secondary" onClick={() => setDraft((items) => [...items, { key: `NEW_VARIABLE_${items.length + 1}`, value: "", originalValue: undefined, sensitive: false, revealed: true, source: fileName }])}>NOVA VARIÁVEL</Button>
       </div>
 
       {document?.missingRequired.length ? <div className="env-warning"><strong>VARIÁVEIS OBRIGATÓRIAS AUSENTES</strong>{document.missingRequired.map((key) => <span key={key}>{key}</span>)}</div> : null}
@@ -119,7 +132,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
       </div>
 
       <div className="env-footer">
-        <span><b>{draft.length}</b> variáveis · segredos permanecem fora do histórico</span>
+        <span><b>{dirtyCount}</b> alterações não salvas · segredos permanecem fora do histórico</span>
         <div><Button variant="secondary" disabled={busy || !document} onClick={() => void save(false)}>SALVAR</Button><Button disabled={busy || runtime?.ownership !== "managed"} aria-label={`Aplicar e reiniciar ${selectedLabel}`} onClick={() => void save(true)}>APLICAR & REINICIAR</Button></div>
       </div>
     </section>

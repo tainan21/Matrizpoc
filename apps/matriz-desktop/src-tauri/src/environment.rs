@@ -2,6 +2,7 @@ use std::{
     collections::{HashMap, HashSet},
     fs,
     path::Path,
+    sync::Mutex,
 };
 
 use serde::{Deserialize, Serialize};
@@ -19,6 +20,7 @@ const ENV_FILES: [&str; 6] = [
 ];
 const MAX_ENV_BYTES: usize = 256 * 1024;
 const MAX_VARIABLES: usize = 256;
+static ENVIRONMENT_SAVE_LOCK: Mutex<()> = Mutex::new(());
 
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -159,6 +161,9 @@ impl EnvironmentService {
     }
 
     pub fn save(&self, request: EnvironmentSaveRequest) -> Result<EnvironmentDocument, String> {
+        let _save_guard = ENVIRONMENT_SAVE_LOCK
+            .lock()
+            .map_err(|_| "Environment save lock poisoned")?;
         validate_env_file(&request.file_name)?;
         if request.variables.len() > MAX_VARIABLES {
             return Err("Environment has more than 256 variables".into());
@@ -314,7 +319,14 @@ fn revision(contents: &str) -> String {
 }
 
 fn atomic_write(path: &Path, bytes: &[u8]) -> Result<(), String> {
-    let temporary = path.with_extension("env.tmp");
+    let file_name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .ok_or("Environment path has no filename")?;
+    let temporary = path.with_file_name(format!(".{file_name}.{}.tmp", uuid::Uuid::new_v4()));
     fs::write(&temporary, bytes).map_err(|error| error.to_string())?;
-    fs::rename(&temporary, path).map_err(|error| error.to_string())
+    fs::rename(&temporary, path).map_err(|error| {
+        let _ = fs::remove_file(&temporary);
+        error.to_string()
+    })
 }

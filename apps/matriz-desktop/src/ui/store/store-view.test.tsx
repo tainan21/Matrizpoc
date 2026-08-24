@@ -30,4 +30,17 @@ describe("StoreView", () => {
     await waitFor(() => expect(gateway.installPackage).toHaveBeenCalledWith("matriz.analytics"))
     expect(await screen.findByText("INSTALADO")).toBeVisible()
   })
+
+  it("starts an installed package runtime before opening it", async () => {
+    const gateway = {
+      commerceSnapshot: vi.fn().mockResolvedValue(snapshot(true, true)),
+      runtimeSnapshot: vi.fn().mockResolvedValue([{ id: "willdash", status: "stopped" }]),
+      restartRuntime: vi.fn().mockResolvedValue(undefined),
+      openRuntimeTarget: vi.fn().mockResolvedValue(undefined),
+    } as unknown as DesktopGateway
+    render(<StoreView gateway={gateway} signal={vi.fn()} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Abrir Matriz Analytics" }))
+    await waitFor(() => expect(gateway.restartRuntime).toHaveBeenCalledWith("willdash"))
+    expect(gateway.openRuntimeTarget).toHaveBeenCalledWith({ appId: "willdash", routePath: "/" })
+  })
 })

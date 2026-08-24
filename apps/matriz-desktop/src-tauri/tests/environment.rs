@@ -1,4 +1,8 @@
-use std::fs;
+use std::{
+    fs,
+    sync::{Arc, Barrier},
+    thread,
+};
 
 use matriz_desktop_native::{
     environment::{EnvironmentSaveRequest, EnvironmentService, EnvironmentVariableInput},
@@ -85,4 +89,37 @@ fn refuses_stale_revisions_invalid_keys_and_unsupported_files() {
     };
     assert!(service.save(request).is_err());
     assert!(service.read("matriz-admin", ".env.secret").is_err());
+}
+
+#[test]
+fn concurrent_saves_never_both_commit_the_same_revision() {
+    let (root, service) = fixture("PUBLIC_URL=old\n");
+    let revision = service.read("matriz-admin", ".env.local").unwrap().revision;
+    let barrier = Arc::new(Barrier::new(2));
+    let mut handles = Vec::new();
+    for value in ["first", "second"] {
+        let root_path = root.path().to_path_buf();
+        let revision = revision.clone();
+        let barrier = barrier.clone();
+        handles.push(thread::spawn(move || {
+            let resources = WorkspaceResourceService::new(root_path).unwrap();
+            let service = EnvironmentService::new(resources);
+            barrier.wait();
+            service.save(EnvironmentSaveRequest {
+                app_id: "matriz-admin".into(),
+                file_name: ".env.local".into(),
+                revision,
+                variables: vec![EnvironmentVariableInput {
+                    key: "PUBLIC_URL".into(),
+                    value: Some(value.into()),
+                }],
+            })
+        }));
+    }
+    let results = handles
+        .into_iter()
+        .map(|handle| handle.join().unwrap())
+        .collect::<Vec<_>>();
+    assert_eq!(results.iter().filter(|result| result.is_ok()).count(), 1);
+    assert_eq!(results.iter().filter(|result| result.is_err()).count(), 1);
 }

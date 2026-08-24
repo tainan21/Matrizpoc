@@ -69,10 +69,24 @@ fn validate_relative(value: &str) -> Result<(), String> {
 
 fn validate_file_name(value: &str) -> Result<(), String> {
     let mut components = Path::new(value).components();
+    let upper_stem = value
+        .split('.')
+        .next()
+        .unwrap_or_default()
+        .to_ascii_uppercase();
+    let reserved = matches!(upper_stem.as_str(), "CON" | "PRN" | "AUX" | "NUL")
+        || (upper_stem.len() == 4
+            && (upper_stem.starts_with("COM") || upper_stem.starts_with("LPT"))
+            && upper_stem.as_bytes()[3].is_ascii_digit()
+            && upper_stem.as_bytes()[3] != b'0');
     if value.is_empty()
         || !matches!(components.next(), Some(Component::Normal(_)))
         || components.next().is_some()
         || value.ends_with(['.', ' '])
+        || value
+            .chars()
+            .any(|character| character.is_control() || r#"<>:"/\|?*"#.contains(character))
+        || reserved
     {
         return Err("Resource name must be a safe single filename".into());
     }

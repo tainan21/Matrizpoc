@@ -583,7 +583,6 @@ fn save_environment(
 ) -> Result<EnvironmentDocument, String> {
     let app_id = request.app_id.clone();
     let file_name = request.file_name.clone();
-    let variable_count = request.variables.len();
     let document = EnvironmentService::new(resources::WorkspaceResourceService::new(
         operations.root()?,
     )?)
@@ -592,7 +591,7 @@ fn save_environment(
         "environment.saved",
         "success",
         "Ambiente salvo",
-        Some(&format!("{file_name} · {variable_count} variáveis")),
+        Some(&file_name),
         Some(&app_id),
     );
     Ok(document)
@@ -646,30 +645,57 @@ fn open_resource_in_editor(
 #[tauri::command]
 fn rename_resource(
     state: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
     app_id: String,
     relative_path: String,
     new_name: String,
 ) -> Result<(), String> {
-    ExplorerService::new(state.root()?)?.rename(&app_id, &relative_path, &new_name)
+    ExplorerService::new(state.root()?)?.rename(&app_id, &relative_path, &new_name)?;
+    activity.publish(
+        "repository.resource.renamed",
+        "info",
+        "Arquivo renomeado",
+        Some(&relative_path),
+        Some(&app_id),
+    );
+    Ok(())
 }
 
 #[tauri::command]
 fn duplicate_resource(
     state: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
     app_id: String,
     relative_path: String,
     new_name: String,
 ) -> Result<(), String> {
-    ExplorerService::new(state.root()?)?.duplicate(&app_id, &relative_path, &new_name)
+    ExplorerService::new(state.root()?)?.duplicate(&app_id, &relative_path, &new_name)?;
+    activity.publish(
+        "repository.resource.duplicated",
+        "info",
+        "Arquivo duplicado",
+        Some(&relative_path),
+        Some(&app_id),
+    );
+    Ok(())
 }
 
 #[tauri::command]
 fn recycle_resource(
     state: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
     app_id: String,
     relative_path: String,
 ) -> Result<(), String> {
-    ExplorerService::new(state.root()?)?.recycle(&app_id, &relative_path)
+    ExplorerService::new(state.root()?)?.recycle(&app_id, &relative_path)?;
+    activity.publish(
+        "repository.resource.recycled",
+        "warning",
+        "Arquivo movido para a Lixeira",
+        Some(&relative_path),
+        Some(&app_id),
+    );
+    Ok(())
 }
 
 #[tauri::command]
