@@ -129,3 +129,10 @@ próximos do app responsável.
 - **Motivo:** testes do binário de build não cobrem instalação, WebView2, encerramento e desinstalação reais; uma porta do catálogo também pode pertencer a outro workspace legítimo.
 - **Impacto:** portas externas aparecem como `EXTERNO`, sem ação de parada. Kill explícito continua disponível apenas na superfície de Portas, protegido por snapshot. A automação diária publica instaladores e evidências separadamente.
 - **Revisar quando:** houver assinatura de código, canal de atualização confiável ou um modelo explícito de adoção de processos externos.
+
+## 2026-08-24 — Runtime operacional e preview único no Matriz Control
+
+- **Decisão:** separar definição durável de projeto do runtime efêmero; resolver ações contextuais no frontend e autorizá-las por comandos exatos no Rust; hospedar no máximo um child WebView2, limitado ao `localhost` e à porta do app selecionado.
+- **Motivo:** Apps, Terminal, Preview, Logs e agente precisam compartilhar ownership, endpoint, rota e lifecycle sem espalhar `spawn`, URL ou autoridade nativa pela UI.
+- **Impacto:** os nove manifests públicos alimentam rotas; listeners externos continuam protegidos; atividade operacional fica em memória, limitada a 200 resumos; fechar Preview destrói a web surface. MatrizLib permanece app e catálogo, enquanto seus packages públicos continuam sendo a biblioteca compartilhada real.
+- **Revisar quando:** medições reais justificarem cache de mais de um preview, ou um segundo cliente precisar do protocolo local de runtime/activity.

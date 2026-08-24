@@ -1,9 +1,12 @@
+pub mod activity;
 mod catalog;
 pub mod command_contract;
 mod doctor;
 mod native_apps;
 mod ports;
+mod preview;
 mod processes;
+pub mod runtime;
 mod settings;
 mod shell;
 mod state;
@@ -13,6 +16,8 @@ mod workspace;
 
 use std::fmt;
 
+use activity::{ActivityEnvelope, ActivityHub};
+use preview::{PreviewBounds, PreviewManager, PreviewState};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
 use tauri::Manager;
@@ -24,6 +29,10 @@ pub use catalog::{
     app_definition, gate_definition, managed_operation, quick_target, ManagedOperationKind,
 };
 pub use native_apps::{classify_native_app, native_executable_name, NativeAppState};
+pub use runtime::{
+    ensure_preview_ready, preview_navigation_allowed, runtime_url, snapshot as runtime_snapshot,
+    validate_route_path, RuntimeInstance,
+};
 pub use settings::{DesktopSettings, SettingsStore};
 pub use workspace::validate_workspace;
 
@@ -183,6 +192,187 @@ fn get_snapshot(state: tauri::State<'_, NativeState>) -> Result<DesktopSnapshot,
 }
 
 #[tauri::command]
+fn get_runtime_snapshot(
+    terminals: tauri::State<'_, TerminalManager>,
+) -> Result<Vec<RuntimeInstance>, String> {
+    let listeners = ports::enumerate_listeners()?;
+    Ok(runtime_snapshot(&listeners, &terminals.list()?))
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn open_runtime_target(
+    activity: tauri::State<'_, ActivityHub>,
+    app_id: String,
+    route_path: String,
+) -> Result<(), String> {
+    let url = runtime_url(&app_id, &route_path)?;
+    std::process::Command::new("explorer.exe")
+        .arg(&url)
+        .spawn()
+        .map_err(|error| format!("Unable to open runtime target: {error}"))?;
+    activity.publish(
+        "runtime.target.opened",
+        "info",
+        "App aberto no navegador",
+        Some(&route_path),
+        Some(&app_id),
+    );
+    Ok(())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn restart_runtime(
+    terminals: tauri::State<'_, TerminalManager>,
+    operations: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
+    app_id: String,
+) -> Result<TerminalSession, String> {
+    let operation_id = format!("app.{app_id}.web");
+    let operation = managed_operation(&operation_id)?;
+    if !terminals.close_operation(&operation_id)? {
+        return Err(format!(
+            "{app_id} is not owned by Matriz Control and cannot be restarted"
+        ));
+    }
+    let port = app_definition(&app_id)?.port;
+    let mut released = false;
+    for _ in 0..40 {
+        if !ports::enumerate_listeners()?
+            .iter()
+            .any(|listener| listener.port == port)
+        {
+            released = true;
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
+    if !released {
+        return Err(format!(
+            "Port {port} is still occupied; runtime restart was cancelled"
+        ));
+    }
+    let session = terminals.start_managed(&operations.root()?, &operation)?;
+    activity.publish(
+        "runtime.restarted",
+        "success",
+        "Runtime reiniciado",
+        None,
+        Some(&app_id),
+    );
+    Ok(session)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn stop_runtime(
+    terminals: tauri::State<'_, TerminalManager>,
+    activity: tauri::State<'_, ActivityHub>,
+    app_id: String,
+) -> Result<(), String> {
+    app_definition(&app_id)?;
+    let operation_id = format!("app.{app_id}.web");
+    if !terminals.close_operation(&operation_id)? {
+        return Err(format!(
+            "{app_id} is not owned by Matriz Control and cannot be stopped"
+        ));
+    }
+    activity.publish(
+        "runtime.stopped",
+        "info",
+        "Runtime parado",
+        None,
+        Some(&app_id),
+    );
+    Ok(())
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn open_preview(
+    app: tauri::AppHandle,
+    preview: tauri::State<'_, PreviewManager>,
+    activity: tauri::State<'_, ActivityHub>,
+    app_id: String,
+    route_path: String,
+    bounds: PreviewBounds,
+) -> Result<PreviewState, String> {
+    ensure_preview_ready(&app_id, &ports::enumerate_listeners()?)?;
+    let state = preview.open(&app, &app_id, &route_path, bounds)?;
+    activity.publish(
+        "app.preview.opened",
+        "success",
+        "Preview pronto",
+        Some(&route_path),
+        Some(&app_id),
+    );
+    Ok(state)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn set_preview_bounds(
+    preview: tauri::State<'_, PreviewManager>,
+    bounds: PreviewBounds,
+) -> Result<(), String> {
+    preview.bounds(bounds)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn navigate_preview(
+    preview: tauri::State<'_, PreviewManager>,
+    app_id: String,
+    route_path: String,
+) -> Result<PreviewState, String> {
+    preview.navigate(&app_id, &route_path)
+}
+
+#[tauri::command]
+async fn preview_back(preview: tauri::State<'_, PreviewManager>) -> Result<(), String> {
+    preview.eval("history.back()")
+}
+
+#[tauri::command]
+async fn preview_forward(preview: tauri::State<'_, PreviewManager>) -> Result<(), String> {
+    preview.eval("history.forward()")
+}
+
+#[tauri::command]
+async fn reload_preview(preview: tauri::State<'_, PreviewManager>) -> Result<(), String> {
+    preview.reload()
+}
+
+#[tauri::command]
+async fn close_preview(
+    preview: tauri::State<'_, PreviewManager>,
+    activity: tauri::State<'_, ActivityHub>,
+) -> Result<(), String> {
+    let active = preview.active_state()?;
+    preview.close()?;
+    if let Some(state) = active {
+        activity.publish(
+            "app.preview.closed",
+            "info",
+            "Preview fechado",
+            Some(&state.route_path),
+            Some(&state.app_id),
+        );
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn get_activity_history(
+    activity: tauri::State<'_, ActivityHub>,
+) -> Result<Vec<ActivityEnvelope>, String> {
+    activity.history()
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn subscribe_activity(
+    activity: tauri::State<'_, ActivityHub>,
+    on_event: tauri::ipc::Channel<ActivityEnvelope>,
+) -> Result<(), String> {
+    activity.subscribe(on_event)
+}
+
+#[tauri::command]
 fn terminate_process(
     state: tauri::State<'_, NativeState>,
     request: TerminationRequest,
@@ -281,7 +471,8 @@ fn write_settings(
 }
 
 #[tauri::command]
-fn hide_window(app: tauri::AppHandle) {
+fn hide_window(app: tauri::AppHandle, preview: tauri::State<'_, PreviewManager>) {
+    let _ = preview.close();
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.hide();
     }
@@ -390,6 +581,8 @@ fn subscribe_terminal(
 }
 
 pub fn run() {
+    let activity = ActivityHub::default();
+    let terminals = TerminalManager::with_activity(activity.clone());
     tauri::Builder::default()
         .plugin(shell::shortcut_plugin())
         .plugin(tauri_plugin_autostart::init(
@@ -398,7 +591,9 @@ pub fn run() {
         ))
         .manage(NativeState::new())
         .manage(OperationsState::discover())
-        .manage(TerminalManager::default())
+        .manage(terminals)
+        .manage(PreviewManager::default())
+        .manage(activity)
         .setup(|app| {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
             let settings = SettingsStore::at(settings_path);
@@ -410,7 +605,13 @@ pub fn run() {
             Ok(())
         })
         .on_window_event(|window, event| {
+            if matches!(event, tauri::WindowEvent::Resized(_))
+                && window.is_minimized().unwrap_or(false)
+            {
+                let _ = window.app_handle().state::<PreviewManager>().close();
+            }
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let _ = window.app_handle().state::<PreviewManager>().close();
                 let close_to_tray = window
                     .app_handle()
                     .state::<SettingsStore>()
@@ -425,6 +626,19 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             get_snapshot,
+            get_runtime_snapshot,
+            open_runtime_target,
+            restart_runtime,
+            stop_runtime,
+            open_preview,
+            set_preview_bounds,
+            navigate_preview,
+            preview_back,
+            preview_forward,
+            reload_preview,
+            close_preview,
+            get_activity_history,
+            subscribe_activity,
             terminate_process,
             terminate_processes,
             select_workspace,

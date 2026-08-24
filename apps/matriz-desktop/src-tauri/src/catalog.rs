@@ -1,6 +1,7 @@
 #[derive(Clone, Copy, Debug)]
 pub struct AppDefinition {
     pub id: &'static str,
+    pub label: &'static str,
     pub package_name: &'static str,
     pub port: u16,
 }
@@ -37,46 +38,55 @@ pub struct ManagedOperationDefinition {
 const APPS: [AppDefinition; 9] = [
     AppDefinition {
         id: "matriz-hub",
+        label: "Matriz Hub",
         package_name: "@matriz/app-matriz-hub",
         port: 3000,
     },
     AppDefinition {
         id: "spot",
+        label: "Spot",
         package_name: "@matriz/app-spot",
         port: 3001,
     },
     AppDefinition {
         id: "matriz-admin",
+        label: "Matriz Admin",
         package_name: "@matriz/app-matriz-admin",
         port: 3002,
     },
     AppDefinition {
         id: "contracts",
+        label: "Contracts",
         package_name: "@matriz/app-contracts",
         port: 3003,
     },
     AppDefinition {
         id: "willdash",
+        label: "Willdash",
         package_name: "@matriz/app-willdash",
         port: 3004,
     },
     AppDefinition {
         id: "matriz-workbench",
+        label: "Workbench",
         package_name: "@matriz/app-matriz-workbench",
         port: 3005,
     },
     AppDefinition {
         id: "sites",
+        label: "Sites",
         package_name: "@matriz/app-sites",
         port: 3006,
     },
     AppDefinition {
         id: "matrizlib",
+        label: "MatrizLib",
         package_name: "@matriz/app-matrizlib",
         port: 3007,
     },
     AppDefinition {
         id: "seumei",
+        label: "Seumei",
         package_name: "@matriz/app-seumei",
         port: 3008,
     },

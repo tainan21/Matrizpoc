@@ -7,6 +7,19 @@ describe("Tauri command contract", () => {
   it("defines exactly one native command for every DesktopGateway method", () => {
     expect(TAURI_COMMAND_CONTRACT).toEqual({
       snapshot: "get_snapshot",
+      runtimeSnapshot: "get_runtime_snapshot",
+      openRuntimeTarget: "open_runtime_target",
+      restartRuntime: "restart_runtime",
+      stopRuntime: "stop_runtime",
+      openPreview: "open_preview",
+      setPreviewBounds: "set_preview_bounds",
+      navigatePreview: "navigate_preview",
+      previewBack: "preview_back",
+      previewForward: "preview_forward",
+      reloadPreview: "reload_preview",
+      closePreview: "close_preview",
+      activityHistory: "get_activity_history",
+      subscribeActivity: "subscribe_activity",
       kill: "terminate_process",
       killMany: "terminate_processes",
       startApp: "start_app",
@@ -43,7 +56,7 @@ describe("Tauri command contract", () => {
       calls.push({ command, args })
       return undefined as never
     })
-    const gateway = createTauriGateway(invoke, () => "acceptance-channel")
+    const gateway = createTauriGateway(invoke, () => "acceptance-channel", () => "activity-channel")
     const settings = {
       closeToTray: true,
       soundsEnabled: false,
@@ -52,6 +65,20 @@ describe("Tauri command contract", () => {
     }
 
     await gateway.snapshot()
+    await gateway.runtimeSnapshot()
+    await gateway.openRuntimeTarget({ appId: "matriz-admin", routePath: "/settings" })
+    await gateway.restartRuntime("matriz-admin")
+    await gateway.stopRuntime("matriz-admin")
+    const bounds = { x: 10, y: 20, width: 800, height: 500 }
+    await gateway.openPreview({ appId: "matriz-admin", routePath: "/" }, bounds)
+    await gateway.setPreviewBounds(bounds)
+    await gateway.navigatePreview({ appId: "matriz-admin", routePath: "/settings" })
+    await gateway.previewBack()
+    await gateway.previewForward()
+    await gateway.reloadPreview()
+    await gateway.closePreview()
+    await gateway.activityHistory()
+    await gateway.subscribeActivity(() => undefined)
     await gateway.kill({ pid: 321, snapshotId: "snapshot-1" })
     await gateway.killMany({ pids: [321, 654], snapshotId: "snapshot-1" })
     await gateway.startApp("matriz-hub")
@@ -81,6 +108,19 @@ describe("Tauri command contract", () => {
 
     expect(calls).toEqual([
       { command: "get_snapshot", args: undefined },
+      { command: "get_runtime_snapshot", args: undefined },
+      { command: "open_runtime_target", args: { appId: "matriz-admin", routePath: "/settings" } },
+      { command: "restart_runtime", args: { appId: "matriz-admin" } },
+      { command: "stop_runtime", args: { appId: "matriz-admin" } },
+      { command: "open_preview", args: { appId: "matriz-admin", routePath: "/", bounds } },
+      { command: "set_preview_bounds", args: { bounds } },
+      { command: "navigate_preview", args: { appId: "matriz-admin", routePath: "/settings" } },
+      { command: "preview_back", args: undefined },
+      { command: "preview_forward", args: undefined },
+      { command: "reload_preview", args: undefined },
+      { command: "close_preview", args: undefined },
+      { command: "get_activity_history", args: undefined },
+      { command: "subscribe_activity", args: { onEvent: "activity-channel" } },
       { command: "terminate_process", args: { request: { pid: 321, snapshotId: "snapshot-1" } } },
       {
         command: "terminate_processes",

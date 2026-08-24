@@ -12,6 +12,7 @@ use serde::Serialize;
 use tauri::ipc::Channel;
 use uuid::Uuid;
 
+use crate::activity::ActivityHub;
 use crate::catalog::{ManagedOperationDefinition, ManagedOperationKind};
 use crate::processes::{ProcessTerminator, WindowsProcessTerminator};
 
@@ -81,9 +82,17 @@ type Subscriber = Arc<Mutex<Option<Channel<TerminalEvent>>>>;
 pub struct TerminalManager {
     sessions: Mutex<HashMap<String, SharedSession>>,
     subscriber: Subscriber,
+    activity: ActivityHub,
 }
 
 impl TerminalManager {
+    pub fn with_activity(activity: ActivityHub) -> Self {
+        Self {
+            activity,
+            ..Self::default()
+        }
+    }
+
     pub fn create_shell(&self, root: &Path) -> Result<TerminalSession, String> {
         let shell = preferred_shell();
         self.spawn(root, shell_label(&shell), "shell", None, &shell, &[])
@@ -223,6 +232,7 @@ impl TerminalManager {
 
         let exit_record = Arc::clone(&record);
         let exit_subscriber = Arc::clone(&self.subscriber);
+        let exit_activity = self.activity.clone();
         thread::spawn(move || {
             let status = child.wait();
             let metadata = {
@@ -243,10 +253,36 @@ impl TerminalManager {
                 }
                 session.metadata.clone()
             };
-            send_event(&exit_subscriber, TerminalEvent::State(metadata));
+            send_event(&exit_subscriber, TerminalEvent::State(metadata.clone()));
+            let (kind, severity) = if metadata.status == "succeeded" {
+                ("terminal.command.completed", "success")
+            } else {
+                ("terminal.command.failed", "error")
+            };
+            exit_activity.publish(
+                kind,
+                severity,
+                &metadata.title,
+                metadata
+                    .exit_code
+                    .map(|code| format!("Exit code {code}"))
+                    .as_deref(),
+                operation_app_id(metadata.operation_id.as_deref()),
+            );
         });
 
         send_event(&self.subscriber, TerminalEvent::State(metadata.clone()));
+        self.activity.publish(
+            if kind == "managed" {
+                "terminal.command.started"
+            } else {
+                "terminal.started"
+            },
+            "info",
+            title,
+            operation_id,
+            operation_app_id(operation_id),
+        );
         Ok(metadata)
     }
 
@@ -261,6 +297,25 @@ impl TerminalManager {
                     .map_err(|_| "Terminal session lock poisoned".to_owned())
             })
             .collect()
+    }
+
+    pub fn session_id_for_operation(&self, operation_id: &str) -> Result<Option<String>, String> {
+        Ok(self
+            .list()?
+            .into_iter()
+            .find(|session| {
+                session.operation_id.as_deref() == Some(operation_id)
+                    && matches!(session.status, "running" | "starting")
+            })
+            .map(|session| session.id))
+    }
+
+    pub fn close_operation(&self, operation_id: &str) -> Result<bool, String> {
+        let Some(session_id) = self.session_id_for_operation(operation_id)? else {
+            return Ok(false);
+        };
+        self.close(&session_id)?;
+        Ok(true)
     }
 
     pub fn write(&self, session_id: &str, data: &str) -> Result<(), String> {
@@ -360,6 +415,12 @@ impl TerminalManager {
             .cloned()
             .ok_or_else(|| "Unknown terminal session".to_owned())
     }
+}
+
+fn operation_app_id(operation_id: Option<&str>) -> Option<&str> {
+    operation_id
+        .and_then(|id| id.strip_prefix("app."))
+        .and_then(|id| id.strip_suffix(".web"))
 }
 
 fn preferred_shell() -> String {

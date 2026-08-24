@@ -1,5 +1,5 @@
 import { Badge, Button, Input } from "@matriz/design-ui/primitives"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { GATES, MATRIZ_DESKTOP_APPS, QUICK_TARGETS } from "../application/catalog"
 import type { DeckCommand } from "../application/command-deck"
@@ -21,6 +21,7 @@ import { useDesktop } from "./use-desktop"
 import { TerminalPane } from "./terminal/terminal-pane"
 import { TerminalView } from "./terminal/terminal-view"
 import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
+import { RuntimeWorkspace } from "./runtime/runtime-workspace"
 
 type View = "ports" | "apps" | "terminal" | "actions" | "doctor" | "settings"
 type SoundId =
@@ -56,8 +57,8 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   const [view, setView] = useState<View>("ports")
   const [query, setQuery] = useState("")
   const [confirmAll, setConfirmAll] = useState(false)
-  const [apps, setApps] = useState<readonly AppRuntime[]>([])
-  const [nativeApp, setNativeApp] = useState<NativeAppRuntime>({ appId: "matriz-admin", state: "not-built" })
+  const [runtimes, setRuntimes] = useState<readonly import("../domain/types").RuntimeInstance[]>([])
+  const apps = useMemo<readonly AppRuntime[]>(() => runtimes.map(({ id, port, status, pid }) => ({ id, port, status, pid })), [runtimes])
   const [checks, setChecks] = useState<readonly DoctorCheck[]>([])
   const [pulse, setPulse] = useState<WorkspacePulse>()
   const [activeGate, setActiveGate] = useState<GateId>()
@@ -86,9 +87,8 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 
   useEffect(() => {
     if (view === "apps") {
-      const refreshApps = () => void gateway.appStatuses().then(setApps).catch(() => setApps([]))
+      const refreshApps = () => void gateway.runtimeSnapshot().then(setRuntimes).catch(() => setRuntimes([]))
       refreshApps()
-      void gateway.getNativeAppRuntime().then(setNativeApp).catch(() => setNativeApp({ appId: "matriz-admin", state: "not-built" }))
       const interval = window.setInterval(refreshApps, 1_000)
       return () => window.clearInterval(interval)
     }
@@ -100,6 +100,9 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
     setView(next)
     void feedback.play("navigation")
   }
+
+  const openRuntimeTerminal = useCallback(() => setView("terminal"), [])
+  const runtimeSignal = useCallback((kind: "navigation" | "success" | "error") => { void feedback.play(kind) }, [feedback])
 
   const createTerminal = async () => {
     try {
@@ -222,7 +225,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
           </section>
         ) : null}
 
-        {view === "apps" ? <AppsView apps={apps} sessions={terminal.state.sessions} nativeApp={nativeApp} setNativeApp={setNativeApp} gateway={gateway} refresh={() => gateway.appStatuses().then(setApps)} feedback={feedback} executeAction={desktop.execute} startOperation={terminal.startOperation} closeOperation={terminal.close} /> : null}
+        {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
@@ -245,7 +248,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   )
 }
 
-function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, refresh, feedback, executeAction, startOperation, closeOperation }: { apps: readonly AppRuntime[]; sessions: readonly TerminalSession[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; executeAction: ExecuteAction; startOperation(id: ManagedOperationId): Promise<unknown>; closeOperation(id: string): Promise<unknown> }) {
+export function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, refresh, feedback, executeAction, startOperation, closeOperation }: { apps: readonly AppRuntime[]; sessions: readonly TerminalSession[]; nativeApp: NativeAppRuntime; setNativeApp(value: NativeAppRuntime): void; gateway: DesktopGateway; refresh(): Promise<unknown>; feedback: Feedback; executeAction: ExecuteAction; startOperation(id: ManagedOperationId): Promise<unknown>; closeOperation(id: string): Promise<unknown> }) {
   const [adminMode, setAdminMode] = useState<"web" | "native">("web")
   const states = new Map(apps.map((app) => [app.id, app]))
   const act = async (id: (typeof MATRIZ_DESKTOP_APPS)[number]["id"], ready: boolean) => {

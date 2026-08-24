@@ -1,5 +1,6 @@
 import type {
   AppRuntime,
+  ActivityEnvelope,
   DesktopAppId,
   DesktopSettings,
   DesktopSnapshot,
@@ -10,7 +11,11 @@ import type {
   KillRequest,
   ManagedOperationId,
   NativeAppRuntime,
+  RuntimeInstance,
+  RuntimeTarget,
   QuickTargetId,
+  PreviewBounds,
+  PreviewState,
   TerminalEvent,
   TerminalSession,
   WorkspacePulse,
@@ -18,6 +23,19 @@ import type {
 
 export interface DesktopGateway {
   snapshot(): Promise<DesktopSnapshot>
+  runtimeSnapshot(): Promise<readonly RuntimeInstance[]>
+  openRuntimeTarget(target: RuntimeTarget): Promise<void>
+  restartRuntime(appId: DesktopAppId): Promise<TerminalSession>
+  stopRuntime(appId: DesktopAppId): Promise<void>
+  openPreview(target: RuntimeTarget, bounds: PreviewBounds): Promise<PreviewState>
+  setPreviewBounds(bounds: PreviewBounds): Promise<void>
+  navigatePreview(target: RuntimeTarget): Promise<PreviewState>
+  previewBack(): Promise<void>
+  previewForward(): Promise<void>
+  reloadPreview(): Promise<void>
+  closePreview(): Promise<void>
+  activityHistory(): Promise<readonly ActivityEnvelope[]>
+  subscribeActivity(listener: (event: ActivityEnvelope) => void): Promise<void>
   kill(request: KillRequest): Promise<DesktopSnapshot>
   killMany(request: KillManyRequest): Promise<DesktopSnapshot>
   startApp(appId: DesktopAppId): Promise<void>

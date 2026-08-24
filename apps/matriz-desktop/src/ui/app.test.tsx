@@ -7,7 +7,10 @@ import type { DesktopGateway } from "../application/desktop-gateway"
 import { ControlApp } from "./app"
 
 afterEach(cleanup)
-beforeAll(() => vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null))
+beforeAll(() => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null)
+  vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} })
+})
 
 function gateway(): DesktopGateway {
   return {
@@ -15,6 +18,24 @@ function gateway(): DesktopGateway {
       snapshotId: "observed",
       ports: [{ port: 3000, pid: 3210, processName: "next.exe", state: "ready" }],
     }),
+    runtimeSnapshot: vi.fn().mockResolvedValue(([
+      ["matriz-hub", "Matriz Hub", 3000], ["spot", "Spot", 3001],
+      ["matriz-admin", "Matriz Admin", 3002], ["contracts", "Contracts", 3003],
+      ["willdash", "Willdash", 3004], ["matriz-workbench", "Workbench", 3005],
+      ["sites", "Sites", 3006], ["matrizlib", "MatrizLib", 3007], ["seumei", "Seumei", 3008],
+    ] as const).map(([id, label, port]) => ({ id, label, port, status: "stopped" as const, ownership: "none" as const, endpoint: `http://localhost:${port}/`, health: "offline" as const }))),
+    openRuntimeTarget: vi.fn().mockResolvedValue(undefined),
+    restartRuntime: vi.fn().mockResolvedValue(undefined),
+    stopRuntime: vi.fn().mockResolvedValue(undefined),
+    openPreview: vi.fn().mockResolvedValue(undefined),
+    setPreviewBounds: vi.fn().mockResolvedValue(undefined),
+    navigatePreview: vi.fn().mockResolvedValue(undefined),
+    previewBack: vi.fn().mockResolvedValue(undefined),
+    previewForward: vi.fn().mockResolvedValue(undefined),
+    reloadPreview: vi.fn().mockResolvedValue(undefined),
+    closePreview: vi.fn().mockResolvedValue(undefined),
+    activityHistory: vi.fn().mockResolvedValue([]),
+    subscribeActivity: vi.fn().mockResolvedValue(undefined),
     kill: vi.fn().mockResolvedValue({ snapshotId: "next", ports: [] }),
     killMany: vi.fn().mockResolvedValue({ snapshotId: "next", ports: [] }),
     startApp: vi.fn().mockResolvedValue(undefined),
@@ -117,6 +138,7 @@ describe("Matriz Control", () => {
     await screen.findByText("3000")
 
     fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    fireEvent.click(await screen.findByRole("button", { name: /Seumei.*3008/ }))
     fireEvent.click(await screen.findByRole("button", { name: "Iniciar Seumei" }))
 
     await waitFor(() =>
@@ -130,6 +152,10 @@ describe("Matriz Control", () => {
     vi.mocked(desktop.appStatuses).mockResolvedValue([
       { id: "seumei", port: 3008, status: "ready", pid: 4321 },
     ])
+    vi.mocked(desktop.runtimeSnapshot).mockResolvedValue([{
+      id: "seumei", label: "Seumei", port: 3008, status: "ready", ownership: "managed",
+      pid: 4321, sessionId: "managed-seumei", endpoint: "http://localhost:3008/", health: "healthy",
+    }])
     vi.mocked(desktop.listTerminals).mockResolvedValue([
       {
         id: "managed-seumei",
@@ -147,7 +173,7 @@ describe("Matriz Control", () => {
     fireEvent.click(screen.getByRole("button", { name: "Apps" }))
     fireEvent.click(await screen.findByRole("button", { name: "Parar Seumei" }))
 
-    await waitFor(() => expect(desktop.closeTerminal).toHaveBeenCalledWith("managed-seumei"))
+    await waitFor(() => expect(desktop.stopRuntime).toHaveBeenCalledWith("seumei"))
     expect(desktop.stopApp).not.toHaveBeenCalled()
   })
 
@@ -156,16 +182,17 @@ describe("Matriz Control", () => {
     vi.mocked(desktop.appStatuses).mockResolvedValue([
       { id: "contracts", port: 3003, status: "ready", pid: 9660 },
     ])
+    vi.mocked(desktop.runtimeSnapshot).mockResolvedValue([{
+      id: "contracts", label: "Contracts", port: 3003, status: "ready", ownership: "external",
+      pid: 9660, endpoint: "http://localhost:3003/", health: "healthy",
+    }])
     render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
     await screen.findByText("3000")
 
     fireEvent.click(screen.getByRole("button", { name: "Apps" }))
-    const protectedAction = await screen.findByRole("button", {
-      name: "Porta ocupada externamente: Contracts",
-    })
-
-    expect(protectedAction).toBeDisabled()
-    expect(screen.getByText(":3003 EXTERNO")).toBeVisible()
+    await screen.findByText(":3003 · EXTERNO")
+    expect(screen.queryByRole("button", { name: "Parar Contracts" })).not.toBeInTheDocument()
+    expect(screen.getByText(":3003 · EXTERNO")).toBeVisible()
     expect(desktop.stopApp).not.toHaveBeenCalled()
   })
 
@@ -226,5 +253,26 @@ describe("Matriz Control", () => {
     fireEvent.click(screen.getByRole("button", { name: "Instalar Matriz Admin nativo" }))
 
     expect(await screen.findByRole("status")).toHaveTextContent("Installer sem hash confiável")
+  })
+
+  it("opens a declared route in the single native preview surface", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.runtimeSnapshot).mockResolvedValue([{
+      id: "matriz-admin", label: "Matriz Admin", port: 3002, status: "ready",
+      ownership: "managed", pid: 30020, sessionId: "admin-web",
+      endpoint: "http://localhost:3002/", health: "healthy",
+    }])
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Abrir rota… Matriz Admin" }))
+    fireEvent.click(screen.getByRole("button", { name: /\/establishments.*Estabelecimentos/ }))
+    fireEvent.click(screen.getByRole("button", { name: "Preview Matriz Admin" }))
+
+    await waitFor(() => expect(desktop.openPreview).toHaveBeenCalledWith(
+      { appId: "matriz-admin", routePath: "/establishments" },
+      expect.objectContaining({ width: expect.any(Number), height: expect.any(Number) }),
+    ))
   })
 })

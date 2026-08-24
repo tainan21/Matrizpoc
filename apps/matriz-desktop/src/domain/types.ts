@@ -58,6 +58,46 @@ export interface AppRuntime {
   readonly pid?: number
 }
 
+export interface RuntimeInstance {
+  readonly id: DesktopAppId
+  readonly label: string
+  readonly port: number
+  readonly status: "stopped" | "starting" | "ready" | "degraded"
+  readonly ownership: "none" | "managed" | "external"
+  readonly pid?: number
+  readonly sessionId?: string
+  readonly endpoint: string
+  readonly health: "offline" | "pending" | "healthy" | "unhealthy"
+}
+
+export interface RuntimeTarget {
+  readonly appId: DesktopAppId
+  readonly routePath: string
+}
+
+export interface PreviewBounds {
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+}
+
+export interface PreviewState extends RuntimeTarget {
+  readonly url: string
+  readonly status: "loading" | "ready" | "error"
+}
+
+export interface ActivityEnvelope {
+  readonly id: string
+  readonly sequence: number
+  readonly occurredAt: number
+  readonly kind: string
+  readonly severity: "info" | "success" | "warning" | "error"
+  readonly title: string
+  readonly detail?: string
+  readonly appId?: DesktopAppId
+}
+
 export interface GateResult {
   readonly gateId: GateId
   readonly success: boolean

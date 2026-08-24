@@ -32,6 +32,19 @@ and currently observed PIDs; destructive actions require a second explicit
 confirmation. This is the only UI shortcut layer and never accepts executable
 paths or generated arguments.
 
+Apps now consumes one operational runtime snapshot: status, ownership, PID,
+managed terminal session, loopback endpoint and health. A contextual Action
+Registry supplies the compact actions used by the runtime surface. Routes come
+only from each app's `public-contract.ts` manifest, with a manually typed local
+path revalidated by Rust before navigation.
+
+Preview is a single native child WebView2, not a generic browser. It accepts only
+the selected app's `http://localhost:<catalog-port>` origin, rejects popups and
+downloads, follows its host rectangle, and is closed when the surface unmounts.
+Terminal lifecycle, runtime actions and preview openings publish short activity
+envelopes into an in-memory history capped at 200 entries. Agent Presence shows
+the latest five entries and deliberately has no prompt box.
+
 The webview cannot submit executable names, arguments, URLs or arbitrary
 process targets for automation. Rust resolves typed catalog IDs, validates
 workspaces and rejects protected, stale or unobserved PIDs. The visible terminal
@@ -69,6 +82,12 @@ bootstrapper only when the runtime is absent.
   use the Ports view only when an explicit, snapshot-authorized kill is intended.
 - Wallpaper is deliberately deferred. It should become a separate native
   capability only when a concrete product behavior exists.
+- Codex is not scraped. A future bridge must use the supported Codex app-server
+  JSONL protocol over stdio and translate only structured task/turn/item events.
+- Inter-app sockets, `.env` editing, file explorer, Store, multi-window overlays
+  and Rooms 3D remain deferred until the runtime/action/activity primitives have
+  a second concrete consumer. A future web-app bridge should use authenticated
+  loopback transport; native-only peers may justify named pipes.
 - Updater signing/distribution is reserved for the first trusted release
   channel; the NSIS artifact is currently unsigned.
 - Matriz Admin can be generated, installed and opened from Apps → `NATIVO`. A future
