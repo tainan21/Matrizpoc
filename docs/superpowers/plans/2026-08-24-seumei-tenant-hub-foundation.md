@@ -175,7 +175,7 @@ git commit -m "feat(seumei): define tenant foundation models"
 - Consumes: models from Task 2 and authenticated `UserId`.
 - Produces: repository contracts, `createBusinessOsRepositories()`, and `resolveTenantContext(input)` returning a typed result.
 
-- [ ] **Step 1: Write cross-tenant isolation tests**
+- [x] **Step 1: Write cross-tenant isolation tests**
 
 ```ts
 it("never returns Matriz Labs apps in a Galáxia Burger context", async () => {
@@ -196,13 +196,13 @@ it("rejects a company with no membership", async () => {
 })
 ```
 
-- [ ] **Step 2: Run focused tests and confirm failure**
+- [x] **Step 2: Run focused tests and confirm failure**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test -- src/mock/business-os.repositories.test.ts src/domains/memberships/application/resolve-tenant-context.test.ts
 ```
 
-- [ ] **Step 3: Implement fixture-backed repositories with private global collections**
+- [x] **Step 3: Implement fixture-backed repositories with private global collections**
 
 Repository contracts must expose only scoped methods:
 
@@ -220,7 +220,7 @@ export interface InstalledAppRepository {
 
 Galáxia Burger and Matriz Labs must have distinct ids, branding objects, membership ids, and installed-app rows.
 
-- [ ] **Step 4: Implement fail-closed tenant resolution**
+- [x] **Step 4: Implement fail-closed tenant resolution**
 
 ```ts
 export type TenantResolution =
@@ -230,14 +230,14 @@ export type TenantResolution =
 
 The resolver loads membership by authenticated user plus requested company, then constructs the context through Task 2 invariants.
 
-- [ ] **Step 5: Run isolation tests, full tests, and typecheck**
+- [x] **Step 5: Run isolation tests, full tests, and typecheck**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
 pnpm --filter @matriz/app-seumei typecheck
 ```
 
-- [ ] **Step 6: Commit repositories and fixtures**
+- [x] **Step 6: Commit repositories and fixtures**
 
 ```powershell
 git add apps/seumei/src/fixtures apps/seumei/src/mock apps/seumei/src/domains
