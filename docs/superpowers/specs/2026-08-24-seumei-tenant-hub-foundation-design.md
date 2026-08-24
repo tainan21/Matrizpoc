@@ -22,6 +22,7 @@ This slice includes:
 - tenant-bound repositories and application services;
 - a high-fidelity authenticated Hub and shared shell foundation;
 - company switching that changes operational scope without changing user appearance;
+- a one-click Seumei demo account for deterministic tests and daily product use;
 - isolation, authorization, shell interaction, and responsive tests;
 - correction of the scoped React type mismatch blocking Seumei typecheck.
 
@@ -164,6 +165,19 @@ repository-private helpers can access it. Application services and UI receive
 tenant-filtered results.
 
 ## Fixture Model
+
+### Demo Account
+
+Seumei exposes `demo@seumei.local` as its canonical local demo account. The
+login shortcut still creates a normal authenticated session through the shared
+auth broker. Seumei then resolves that authenticated user to explicit fixture
+memberships; the shortcut never bypasses authentication or tenant resolution.
+
+Only the canonical demo account receives the demo fixture memberships. Other
+authenticated accounts start with no Seumei companies until memberships are
+created for them. Tests inject the authenticated demo user id into the same
+fixture factory used by runtime, so test convenience cannot broaden repository
+access.
 
 ### Galáxia Burger
 
@@ -321,8 +335,9 @@ and mobile widths against the supplied Hub and shell references.
 6. Add the internal Seumei application registry and authorization tests.
 7. Add Hub and shell presenters/view models.
 8. Implement authenticated routes and company switching.
-9. Implement the intelligent shell interactions and responsive behavior.
-10. Run scoped checks, run the app, inspect references, and correct visible deviations.
+9. Add the one-click demo login adapter without changing shared auth contracts.
+10. Implement the intelligent shell interactions and responsive behavior.
+11. Run scoped checks, run the app, inspect references, and correct visible deviations.
 
 ## Architectural Risks and Controls
 
@@ -344,6 +359,8 @@ and mobile widths against the supplied Hub and shell references.
 This slice is complete only when:
 
 - Tai can enter a Hub containing Galáxia Burger and Matriz Labs;
+- `demo@seumei.local` can enter through one explicit demo action and receives
+  only its fixture-backed memberships;
 - each company shows only its installed and authorized capabilities;
 - direct navigation to an unauthorized company or app fails closed;
 - switching company changes all company-scoped Hub and shell data;

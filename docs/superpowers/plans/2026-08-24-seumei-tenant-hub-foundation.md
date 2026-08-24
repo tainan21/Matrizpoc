@@ -26,44 +26,38 @@
 
 ---
 
-### Task 1: Restore a trustworthy scoped validation baseline
+### Task 1: Establish a trustworthy isolated validation baseline
 
 **Files:**
-- Modify: `apps/seumei/package.json`
-- Modify: `pnpm-lock.yaml`
+- Update checkpoint: `docs/superpowers/plans/2026-08-24-seumei-tenant-hub-foundation.md`
 
 **Interfaces:**
 - Consumes: workspace React 19.2 type contracts.
-- Produces: a Seumei typecheck using one compatible React type surface.
+- Produces: evidence that the canonical workspace runtime validates Seumei.
 
-- [ ] **Step 1: Reproduce and capture the current failure**
+- [x] **Step 1: Reproduce and capture the current failure**
 
 ```powershell
 pnpm --filter @matriz/app-seumei typecheck
 ```
 
-Expected: failure mentioning incompatible `ReactNode` identities and `TenantProvider` not being a valid JSX component.
+Observed outside the worktree: `pnpm 11` ignored workspace overrides and produced incompatible React type identities.
 
-- [ ] **Step 2: Align the Seumei React type packages with the canonical workspace types**
-
-Update only the Seumei dev dependencies:
-
-```json
-{
-  "@types/react": "19.2.14",
-  "@types/react-dom": "19.2.3"
-}
-```
-
-- [ ] **Step 3: Refresh the lockfile without changing unrelated dependency declarations**
+- [x] **Step 2: Select the package-manager version declared by the repository**
 
 ```powershell
-pnpm install --lockfile-only
+corepack pnpm --version
 ```
 
-Inspect `git diff -- apps/seumei/package.json pnpm-lock.yaml` and reject unrelated manifest changes.
+Observed: `9.12.0`.
 
-- [ ] **Step 4: Verify the scoped baseline**
+- [x] **Step 3: Install the isolated worktree without changing the lockfile**
+
+```powershell
+corepack pnpm install --frozen-lockfile
+```
+
+- [x] **Step 4: Verify the scoped baseline**
 
 ```powershell
 pnpm --filter @matriz/app-seumei typecheck
@@ -71,14 +65,12 @@ pnpm --filter @matriz/app-seumei test
 pnpm --filter @matriz/app-seumei lint
 ```
 
-Expected: all pass before feature code begins.
+Observed: 3 tests passed; typecheck and lint exited successfully.
 
-- [ ] **Step 5: Commit the baseline repair**
+- [x] **Step 5: Record the environmental root cause without changing dependencies**
 
-```powershell
-git add apps/seumei/package.json pnpm-lock.yaml
-git commit -m "fix(seumei): align React type contracts"
-```
+No package or lockfile repair is needed. All subsequent commands use
+`corepack pnpm` so the repository selects `pnpm 9.12.0`.
 
 ### Task 2: Define bounded company, membership, application, and preference models
 
@@ -363,6 +355,8 @@ git commit -m "feat(seumei): compose tenant-aware hub service"
 **Files:**
 - Create: `apps/seumei/src/domains/memberships/presentation/SeumeiTenantProvider.tsx`
 - Create: `apps/seumei/src/domains/memberships/presentation/use-seumei-tenant.ts`
+- Create: `apps/seumei/src/domains/login/presentation/SeumeiDemoAccess.tsx`
+- Create: `apps/seumei/src/domains/login/presentation/SeumeiDemoAccess.test.tsx`
 - Create: `apps/seumei/src/domains/hub/presentation/HubScreen.tsx`
 - Create: `apps/seumei/app/hub/page.tsx`
 - Create: `apps/seumei/app/c/[companySlug]/page.tsx`
@@ -397,11 +391,33 @@ pnpm --filter @matriz/app-seumei test -- src/domains/memberships/presentation/Se
 
 The selected company is restored from an app-local storage key scoped by user id, revalidated against memberships at startup, and replaced only after successful resolution. Appearance uses a separate user-scoped key.
 
-- [ ] **Step 4: Implement authorized routes and Hub screen**
+- [ ] **Step 4: Write and verify the failing demo-access test**
+
+```tsx
+it("authenticates the canonical demo account through the broker", async () => {
+  renderDemoAccess()
+  await user.click(screen.getByRole("button", { name: /entrar no modo demo/i }))
+  expect(broker.signInWithEmail).toHaveBeenCalledWith("demo@seumei.local")
+  expect(acceptSession).toHaveBeenCalledTimes(1)
+})
+```
+
+Run it before implementation:
+
+```powershell
+corepack pnpm --filter @matriz/app-seumei test -- src/domains/login/presentation/SeumeiDemoAccess.test.tsx
+```
+
+Implement `SeumeiDemoAccess` as a Seumei-local `panelSupplement` for the
+accepted shared login flow. It calls the normal broker, accepts the returned
+session, records the Seumei app open, and contains no membership or repository
+bypass.
+
+- [ ] **Step 5: Implement authorized routes and Hub screen**
 
 `/` redirects to `/hub`. Dynamic company/app routes resolve slug and app id through the application service; unknown or unauthorized values render a safe unavailable state without fixture details.
 
-- [ ] **Step 5: Run tests, typecheck, and lint**
+- [ ] **Step 6: Run tests, typecheck, and lint**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
@@ -409,7 +425,7 @@ pnpm --filter @matriz/app-seumei typecheck
 pnpm --filter @matriz/app-seumei lint
 ```
 
-- [ ] **Step 6: Commit tenant navigation**
+- [ ] **Step 7: Commit tenant navigation and demo access**
 
 ```powershell
 git add apps/seumei/app apps/seumei/src/auth apps/seumei/src/domains
