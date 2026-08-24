@@ -302,7 +302,7 @@ git commit -m "feat(seumei): add authorized capability registry"
 - Consumes: repositories, tenant resolver, app registry, and access policy.
 - Produces: `BusinessOsService.listCompanies(userId)`, `BusinessOsService.openCompany(userId, companyId)`, and `HubViewModel`.
 
-- [ ] **Step 1: Write the failing coherent Hub view-model test**
+- [x] **Step 1: Write the failing coherent Hub view-model test**
 
 ```ts
 it("presents each company with only its authorized installed apps", async () => {
@@ -315,17 +315,17 @@ it("presents each company with only its authorized installed apps", async () => 
 })
 ```
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test -- src/domains/hub/presentation/hub.presenter.test.ts
 ```
 
-- [ ] **Step 3: Implement service orchestration and presenter-only UI models**
+- [x] **Step 3: Implement service orchestration and presenter-only UI models**
 
 `HubViewModel` contains formatted names, role labels, status labels, branding asset paths, app cards, primary hrefs, and recent-state labels. It contains no domain entities.
 
-- [ ] **Step 4: Extend the app-local container without removing legacy use cases**
+- [x] **Step 4: Extend the app-local container without removing legacy use cases**
 
 ```ts
 export interface SeumeiContainer {
@@ -335,7 +335,7 @@ export interface SeumeiContainer {
 }
 ```
 
-- [ ] **Step 5: Run tests, typecheck, and lint**
+- [x] **Step 5: Run tests, typecheck, and lint**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
@@ -343,7 +343,7 @@ pnpm --filter @matriz/app-seumei typecheck
 pnpm --filter @matriz/app-seumei lint
 ```
 
-- [ ] **Step 6: Commit the application layer**
+- [x] **Step 6: Commit the application layer**
 
 ```powershell
 git add apps/seumei/src/domains/hub apps/seumei/src/lib/container.ts
