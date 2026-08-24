@@ -2,7 +2,13 @@ import type { CompanyRole } from "./company"
 
 export type MembershipCapability =
   | "workspace.read"
+  | "portfolio.read"
+  | "catalog.read"
   | "catalog.manage"
+  | "recipes.read"
+  | "recipes.manage"
+  | "stock.read"
+  | "stock.manage"
   | "members.read"
   | "members.invite.admin"
   | "members.invite.standard"
@@ -30,7 +36,13 @@ export interface CompanyInvitation {
 
 const OWNER_CAPABILITIES: readonly MembershipCapability[] = [
   "workspace.read",
+  "portfolio.read",
+  "catalog.read",
   "catalog.manage",
+  "recipes.read",
+  "recipes.manage",
+  "stock.read",
+  "stock.manage",
   "members.read",
   "members.invite.admin",
   "members.invite.standard",
@@ -42,7 +54,13 @@ const OWNER_CAPABILITIES: readonly MembershipCapability[] = [
 
 const ADMIN_CAPABILITIES: readonly MembershipCapability[] = [
   "workspace.read",
+  "portfolio.read",
+  "catalog.read",
   "catalog.manage",
+  "recipes.read",
+  "recipes.manage",
+  "stock.read",
+  "stock.manage",
   "members.read",
   "members.invite.standard",
   "members.role.manage.standard",
@@ -54,8 +72,8 @@ const ROLE_CAPABILITIES: Readonly<
 > = {
   OWNER: OWNER_CAPABILITIES,
   ADMIN: ADMIN_CAPABILITIES,
-  MEMBER: ["workspace.read"],
-  VIEWER: ["workspace.read"],
+  MEMBER: ["workspace.read", "portfolio.read", "catalog.read", "recipes.read", "stock.read"],
+  VIEWER: ["workspace.read", "portfolio.read", "catalog.read", "recipes.read", "stock.read"],
 }
 
 export function can(

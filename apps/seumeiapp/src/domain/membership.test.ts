@@ -25,6 +25,11 @@ describe("Seumei membership capability policy", () => {
     ["MEMBER", "workspace.read", true],
     ["VIEWER", "members.read", false],
     ["VIEWER", "workspace.read", true],
+    ["OWNER", "recipes.manage", true],
+    ["ADMIN", "stock.manage", true],
+    ["MEMBER", "recipes.read", true],
+    ["MEMBER", "stock.manage", false],
+    ["VIEWER", "stock.read", true],
   ])("maps %s and %s to %s", (role, capability, allowed) => {
     expect(can(role, capability)).toBe(allowed)
   })
