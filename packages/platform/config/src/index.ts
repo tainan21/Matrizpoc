@@ -35,8 +35,9 @@ export const monorepoConfig: MonorepoConfig = {
       : "development"),
   baseUrls: {
     "matriz-hub": "http://localhost:3000",
-    "matriz-workbench": "http://127.0.0.1:3005",
-    sites: "http://127.0.0.1:3006",
+    matrizlib: "http://localhost:3007",
+    "matriz-workbench": "http://localhost:3005",
+    sites: "http://localhost:3006",
     spot: "http://localhost:3001",
     seumei: "http://localhost:3002",
     contracts: "http://localhost:3003",

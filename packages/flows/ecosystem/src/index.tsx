@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { EcosystemBar, ThemeToggle } from "@matriz/design-ui"
+import { CapabilityThemeController, EcosystemBar, ThemeToggle } from "@matriz/design-ui"
 import { monorepoConfig } from "@matriz/platform-config"
 import { createSharedCacheClient, type SharedCacheEntry } from "@matriz/platform-storage"
 import type { MatrizAppId } from "@matriz/foundation-constants"
@@ -9,7 +9,7 @@ import type { MatrizAppId } from "@matriz/foundation-constants"
 const labels: Record<MatrizAppId, string> = {
   "matriz-hub": "Hub · 3000", spot: "Spot · 3001", seumei: "Seumei · 3002",
   contracts: "Contracts · 3003", willdash: "WillDash · 3004",
-  "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006",
+  "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006", matrizlib: "MatrizLib · 3007",
 }
 
 function CacheProof({ appId }: { appId: MatrizAppId }) {
@@ -47,7 +47,25 @@ function CacheProof({ appId }: { appId: MatrizAppId }) {
   </div>
 }
 
+function OrganizationThemeSuggestion({ appId }: { appId: MatrizAppId }) {
+  const [suggestion, setSuggestion] = useState<string>()
+  const [dismissed, setDismissed] = useState(false)
+  useEffect(() => {
+    void fetch(`${monorepoConfig.baseUrls["matriz-hub"]}/api/v1/capabilities/appearance?appId=${appId}`, { credentials: "include", cache: "no-store" })
+      .then((response) => response.ok ? response.json() as Promise<{ appearance?: { suggestedThemeKey?: string } }> : undefined)
+      .then((payload) => setSuggestion(payload?.appearance?.suggestedThemeKey))
+      .catch(() => undefined)
+  }, [appId])
+  if (!suggestion || dismissed) return null
+  const label = suggestion.split("-").map((word) => `${word.charAt(0).toUpperCase()}${word.slice(1)}`).join(" ")
+  return <aside aria-label="Sugestão de aparência" style={{ position: "fixed", right: 16, bottom: 16, zIndex: 50, width: "min(320px, calc(100vw - 32px))", padding: 14, display: "grid", gap: 8, background: "var(--surface, #fff)", color: "var(--text, #111)", border: "1px solid var(--line, #ddd)", boxShadow: "0 18px 50px #0003" }}>
+    <strong style={{ fontSize: 13 }}>Sua organização recomenda {label}.</strong>
+    <span style={{ fontSize: 12, opacity: .72 }}>Experimente sem alterar sua preferência atual.</span>
+    <div style={{ display: "flex", gap: 10 }}><a href={`${monorepoConfig.baseUrls["matriz-hub"]}/settings/appearance`} style={{ color: "inherit", fontSize: 12 }}>Experimentar</a><button type="button" onClick={() => setDismissed(true)} style={{ border: 0, padding: 0, background: "transparent", color: "inherit", opacity: .65, cursor: "pointer", fontSize: 12 }}>Agora não</button></div>
+  </aside>
+}
+
 export function EcosystemAccess({ appId, ownThemeControl = false }: { appId: MatrizAppId; ownThemeControl?: boolean }) {
   const apps = Object.entries(monorepoConfig.baseUrls).map(([id, href]) => ({ id, href, label: labels[id as MatrizAppId] }))
-  return <EcosystemBar currentAppId={appId} apps={apps} themeControl={ownThemeControl ? undefined : <ThemeToggle appId={appId} />} cacheControl={<CacheProof appId={appId} />} />
+  return <><CapabilityThemeController appId={appId} hubBaseUrl={monorepoConfig.baseUrls["matriz-hub"]} /><EcosystemBar currentAppId={appId} apps={apps} themeControl={ownThemeControl ? undefined : <ThemeToggle appId={appId} />} cacheControl={<CacheProof appId={appId} />} /><OrganizationThemeSuggestion appId={appId} /></>
 }

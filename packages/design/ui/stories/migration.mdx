@@ -1,0 +1,62 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="MatrizLib/Migration" />
+
+<div className="catalog-doc">
+  <div className="catalog-doc__masthead">
+    <div>
+      <span className="catalog-kicker">Migration</span>
+      <h1>Migre por superfície, sem reescrever o produto.</h1>
+    </div>
+    <p>
+      Comece pelo contêiner visual mais local. Preserve regras de negócio, presenters e contratos
+      do app enquanto substitui apenas a camada de apresentação.
+    </p>
+  </div>
+
+  <h2>Sequência segura</h2>
+  <ol className="catalog-migration-list">
+    <li>
+      <strong>01 · Instale estilos</strong>
+      <p>
+        Importe <code>@matriz/design-system/css</code> e depois
+        <code> @matriz/design-ui/styles.css</code> uma vez na raiz do app.
+      </p>
+    </li>
+    <li>
+      <strong>02 · Delimite a raiz</strong>
+      <p>
+        Aplique <code>data-matrizlib</code> e um <code>data-theme</code> explícito no limite visual.
+      </p>
+    </li>
+    <li>
+      <strong>03 · Troque primitivas</strong>
+      <p>
+        Migre layout, tipografia, ações, campos e feedback em pequenos lotes revisáveis.
+      </p>
+    </li>
+    <li>
+      <strong>04 · Verifique estados</strong>
+      <p>
+        Cubra teclado, foco, erro, carregamento, conteúdo longo, tema escuro e viewport móvel.
+      </p>
+    </li>
+  </ol>
+
+  <h2>Mapa de substituição</h2>
+  <ul className="catalog-index">
+    <li><code>div + gap manual</code><p><code>Stack</code> ou <code>Inline</code></p></li>
+    <li><code>max-width local</code><p><code>Container</code></p></li>
+    <li><code>panel/card genérico</code><p><code>Surface</code>, apenas quando houver agrupamento real</p></li>
+    <li><code>label + erro avulsos</code><p><code>FormField</code> + <code>Input</code></p></li>
+    <li><code>toast textual local</code><p><code>Alert</code> quando o feedback pertence à página</p></li>
+  </ul>
+
+  <div className="catalog-callout">
+    <h3>Limite arquitetural</h3>
+    <p>
+      A MatrizLib recebe conteúdo e view models. Entidades, autorização, persistência e regras de
+      produto continuam dentro do app consumidor.
+    </p>
+  </div>
+</div>

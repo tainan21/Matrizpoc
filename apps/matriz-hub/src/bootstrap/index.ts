@@ -10,6 +10,7 @@
  * arquivo de manifest-only (L3). Nenhum src interno de outro app e acessado.
  */
 import { manifest as hubManifest } from "../manifest/manifest"
+import { manifest as matrizlibManifest } from "@apps/matrizlib/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
@@ -52,6 +53,7 @@ export function bootstrapMatrizHub(): HubBootstrapResult {
   if (!isBootstrapped) {
     const manifests: AppManifestDTO[] = [
       hubManifest,
+      matrizlibManifest,
       workbenchManifest,
       sitesManifest,
       spotManifest,

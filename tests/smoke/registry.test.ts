@@ -1,7 +1,7 @@
 /**
  * Smoke test — registry (L8).
  *
- * Valida que o Registry ingere os 5 manifests reais e expoe os lookups usados
+ * Valida que o Registry ingere os 8 manifests reais e expoe os lookups usados
  * pelo Hub (findByCapability, findByEventProduced, findByEventConsumed,
  * findByIntegrationTarget, findWithOnboardingSupport, toNavigation).
  */
@@ -9,15 +9,18 @@ import { describe, it, expect, beforeEach } from "vitest"
 import { createRegistry, type Registry } from "@matriz/integration-registry-core"
 import { monorepoConfig } from "@matriz/platform-config"
 import { manifest as hubManifest } from "@apps/matriz-hub/public-contract"
+import { manifest as matrizlibManifest } from "@apps/matrizlib/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
+import { bootstrapMatrizHub } from "../../apps/matriz-hub/src/bootstrap/index"
 
 const allManifests = [
   hubManifest,
+  matrizlibManifest,
   workbenchManifest,
   sitesManifest,
   spotManifest,
@@ -44,11 +47,11 @@ describe("registry", () => {
     registry = buildRegistry()
   })
 
-  it("registra todos os 7 apps", () => {
+  it("registra todos os 8 apps", () => {
     const ids = registry.listEnabled().map((e) => e.manifest.appId)
-    expect(ids).toHaveLength(7)
+    expect(ids).toHaveLength(8)
     expect(new Set(ids)).toEqual(
-      new Set(["matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"]),
+      new Set(["matriz-hub", "matrizlib", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"]),
     )
   })
 
@@ -75,20 +78,31 @@ describe("registry", () => {
     expect(ids).toContain("seumei")
   })
 
-  it("findWithOnboardingSupport retorna todos os 7 apps", () => {
+  it("findWithOnboardingSupport retorna todos os 8 apps", () => {
     const supporting = registry.findWithOnboardingSupport()
     expect(supporting.map((e) => e.appId).sort()).toEqual(
-      ["contracts", "matriz-hub", "matriz-workbench", "seumei", "sites", "spot", "willdash"],
+      ["contracts", "matriz-hub", "matriz-workbench", "matrizlib", "seumei", "sites", "spot", "willdash"],
     )
   })
 
   it("toNavigation produz SharedAppNavigationDTO valido", () => {
     const nav = registry.toNavigation()
-    expect(nav).toHaveLength(7)
+    expect(nav).toHaveLength(8)
     for (const item of nav) {
       expect(item.routes.length).toBeGreaterThan(0)
       expect(item.primaryRoute).toMatch(/^\//)
       expect(item.baseUrl).toMatch(/^http/)
     }
+  })
+
+  it("registra matrizlib com a baseUrl oficial", () => {
+    expect(registry.get("matrizlib")?.baseUrl).toBe("http://localhost:3007")
+  })
+
+  it("bootstrap real do Hub registra matrizlib com a baseUrl oficial", () => {
+    const result = bootstrapMatrizHub()
+    expect(result.registeredApps).toContain("matrizlib")
+    expect(result.registeredApps).toHaveLength(8)
+    expect(monorepoConfig.baseUrls.matrizlib).toBe("http://localhost:3007")
   })
 })

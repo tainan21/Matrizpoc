@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_66ab5fa0-e368-4876-bb9e-bd5200dee0d4",
+  "projectId": "matriz-hub",
+  "title": "Evoluir o catalogo Praticies com registry e dry-run",
+  "description": "Definir metadados obrigatorios para novas praticidades, historico local e preview seguro antes de executar automacoes mutaveis.",
+  "status": "idea",
+  "priority": "medium",
+  "tags": [
+    "praticies",
+    "architecture",
+    "safety"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_395d004a-f92b-4db4-81c1-6f7bfc34bc24",
+      "text": "Contrato inclui owner, risco, executor e outputs",
+      "completed": false
+    },
+    {
+      "id": "ac_f7515cc1-a331-4df4-8e15-c101f8082abc",
+      "text": "Automacoes mutaveis exigem preview ou dry-run",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [],
+  "references": [
+    "apps/matriz-hub/docs/PRACTICIES.md"
+  ],
+  "createdAt": "2026-08-12T01:45:00.000Z",
+  "updatedAt": "2026-08-12T01:45:00.000Z",
+  "revision": "6590baed7c1f2384"
+}

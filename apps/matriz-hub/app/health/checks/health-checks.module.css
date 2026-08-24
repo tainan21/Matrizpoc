@@ -1,0 +1,33 @@
+.workspace { display: grid; gap: 18px; }
+.toolbar { align-items: end; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; padding: 4px 0 16px; }
+.toolbar label { display: grid; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.toolbar select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--foreground); min-width: 220px; padding: 10px 36px 10px 12px; }
+.toolbar p { color: var(--muted-fg); font-size: 13px; margin: 0; }
+.feedback, .warning { border-left: 3px solid var(--color-primary); color: var(--foreground); margin: 0; padding: 9px 12px; }
+.warning { border-left-color: var(--color-warning, #b7791f); color: var(--muted-fg); }
+.checks { display: grid; gap: 28px; }
+.check { display: grid; gap: 16px; }
+.check + .check { border-top: 1px solid var(--border); padding-top: 28px; }
+.checkHeader { align-items: end; display: flex; justify-content: space-between; gap: 24px; }
+.checkHeader p, .checkHeader h2, .checkHeader small { margin: 0; }
+.checkHeader p { color: var(--muted-fg); font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.checkHeader h2 { font-size: clamp(22px, 3vw, 34px); letter-spacing: -.035em; margin-top: 4px; }
+.checkHeader small { color: var(--muted-fg); display: block; margin-top: 6px; }
+.checkHeader button { background: var(--color-primary); border: 0; border-radius: 8px; color: var(--color-primary-foreground, white); cursor: pointer; font: inherit; font-weight: 750; min-width: 148px; padding: 11px 16px; transition: opacity 140ms ease, transform 140ms ease; }
+.checkHeader button:hover:not(:disabled) { transform: translateY(-1px); }
+.checkHeader button:disabled { cursor: wait; opacity: .58; }
+.resultMeta { align-items: center; display: flex; justify-content: space-between; color: var(--muted-fg); font-size: 13px; }
+.failures { display: grid; gap: 0; }
+.failures h3 { font-size: 15px; margin: 4px 0 10px; }
+.failures article { align-items: center; border-top: 1px solid var(--border); display: grid; gap: 14px; grid-template-columns: minmax(180px, 1.2fr) minmax(150px, .8fr) minmax(240px, 1.5fr) auto; padding: 14px 0; }
+.failures article > div { display: grid; gap: 3px; }
+.failures code { color: var(--muted-fg); font-size: 12px; overflow-wrap: anywhere; }
+.failures p { color: var(--muted-fg); font-size: 13px; margin: 0; overflow-wrap: anywhere; }
+.failures a { color: var(--color-primary); font-size: 13px; font-weight: 700; white-space: nowrap; }
+
+@media (max-width: 760px) {
+  .toolbar, .checkHeader, .resultMeta { align-items: stretch; flex-direction: column; }
+  .toolbar { gap: 12px; }
+  .toolbar select, .checkHeader button { width: 100%; }
+  .failures article { align-items: start; grid-template-columns: 1fr; }
+}

@@ -1,66 +1,47 @@
-import { Stack, Card, Heading, Text, Badge } from "@matriz/design-ui"
 import { mockTenants } from "@matriz/access-tenants"
-import { listFlagsForTenant, type FeatureFlagRow } from "@matriz/platform-config"
-import type { MatrizAppId } from "@matriz/foundation-constants"
 import { MATRIZ_APP_IDS } from "@matriz/foundation-constants"
-
-function groupFlagsByApp(
-  flags: readonly FeatureFlagRow[],
-): Record<MatrizAppId, FeatureFlagRow[]> {
-  const byApp = {} as Record<MatrizAppId, FeatureFlagRow[]>
-  for (const app of MATRIZ_APP_IDS) byApp[app] = []
-  for (const row of flags) byApp[row.appId].push(row)
-  return byApp
-}
+import { listFlagsForTenant } from "@matriz/platform-config"
+import { HubIcon } from "../../src/ui/environment/icons"
+import { StatusLabel, StatusMark } from "../../src/ui/environment/status"
+import { SurfaceState } from "../../src/ui/environment/SurfaceState"
+import { MetricStrip, OperationalPageHeader } from "../../src/ui/structure/OperationalPage"
+import { presentFeatureFlag } from "../../src/ui/operations/operations-presenter"
 
 export default function FeatureFlagsPage() {
-  return (
-    <Stack gap={6}>
-      <div>
-        <Heading level={1}>Feature flags</Heading>
-        <Text tone="muted">
-          Feature flags mock por tenant e app. Helper isFeatureEnabled vive em
-          packages/platform/config (L10).
-        </Text>
-      </div>
+  const tenants = mockTenants.map((tenant) => ({ tenant, flags: listFlagsForTenant(tenant.id) }))
+  const allFlags = tenants.flatMap((item) => item.flags)
+  const enabled = allFlags.filter((flag) => flag.enabled).length
 
-      {mockTenants.map((tenant) => {
-        const byApp = groupFlagsByApp(listFlagsForTenant(tenant.id))
-        return (
-          <Card key={tenant.id}>
-            <Heading level={3}>{tenant.name}</Heading>
-            <Text tone="muted" size="sm">{`Tenant ${tenant.id}`}</Text>
-            <div className="mt-3 flex flex-col gap-3">
-              {MATRIZ_APP_IDS.map((appId) => {
-                const flags = byApp[appId] ?? []
-                return (
-                  <div key={appId}>
-                    <Text>
-                      <strong>{appId}</strong>
-                    </Text>
-                    <div className="mt-1 flex flex-wrap gap-2">
-                      {flags.length === 0 ? (
-                        <Text tone="muted" size="sm">
-                          (sem flags)
-                        </Text>
-                      ) : (
-                        flags.map((row) => (
-                          <Badge
-                            key={`${row.flag}-${row.tenantId}`}
-                            tone={row.enabled ? "success" : "neutral"}
-                          >
-                            {`${row.flag}: ${row.enabled ? "on" : "off"}`}
-                          </Badge>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </Card>
-        )
-      })}
-    </Stack>
+  return (
+    <div className="hub-page">
+      <OperationalPageHeader
+        description="Disponibilidade demonstrativa de capacidades por organização e app. Chaves técnicas permanecem visíveis; o seed mock é declarado como origem."
+        eyebrow="Operação / disponibilidade"
+        status={allFlags.length ? "available" : "waiting"}
+        statusLabel={allFlags.length ? `${enabled} capacidades disponíveis` : "Sem flags no seed"}
+        title="Controles de capacidade"
+      />
+      <MetricStrip items={[
+        { label: "Flags", value: allFlags.length, detail: "linhas do seed", status: "available", icon: "flag" },
+        { label: "Disponíveis", value: enabled, detail: "enabled=true", status: enabled ? "complete" : "waiting", icon: "check" },
+        { label: "Desativadas", value: allFlags.length - enabled, detail: "enabled=false", status: "archived", icon: "close" },
+        { label: "Origem", value: "Mock", detail: "platform/config seed", status: "temporary", icon: "database" },
+      ]} />
+      <section className="hub-flags-grid">{tenants.map(({ tenant, flags }) => (
+        <article className="hub-flags-tenant" key={tenant.id}>
+          <header><span><HubIcon name="flag" size={20} /></span><div><p className="hub-eyebrow">{tenant.id}</p><h2>{tenant.name}</h2></div><StatusLabel compact status="temporary">Seed mock</StatusLabel></header>
+          {flags.length === 0 ? <SurfaceState compact kind="empty" title="Sem flags" description="Nenhuma capacidade condicional foi declarada para esta organização." /> : (
+            <div>{MATRIZ_APP_IDS.map((appId) => {
+              const appFlags = flags.filter((flag) => flag.appId === appId)
+              if (!appFlags.length) return null
+              return <section key={appId}><header><strong>{appId}</strong><small>{appFlags.length} controles</small></header>{appFlags.map((flag) => {
+                const vm = presentFeatureFlag(flag)
+                return <div className="hub-flag-row" key={`${flag.tenantId}:${flag.appId}:${flag.flag}`}><StatusMark status={vm.status} /><span><strong>{vm.label}</strong><small>{vm.technicalLabel}</small></span><StatusLabel compact status={vm.status}>{vm.statusLabel}</StatusLabel></div>
+              })}</section>
+            })}</div>
+          )}
+        </article>
+      ))}</section>
+    </div>
   )
 }

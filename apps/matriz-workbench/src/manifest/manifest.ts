@@ -14,6 +14,7 @@ export const manifest: AppManifestDTO = {
     { label: "Trabalho", path: "/work/inbox", order: 2 },
     { label: "Projetos", path: "/projects", order: 3 },
     { label: "Configurações", path: "/settings", order: 4 },
+    { label: "Praticies", path: "/praticies", order: 5 },
   ],
   capabilities: [
     {
@@ -30,6 +31,11 @@ export const manifest: AppManifestDTO = {
       id: "workbench.agents.coordinate",
       name: "Coordenar agentes",
       description: "Entrega contexto compacto e registra execução por MCP local.",
+    },
+    {
+      id: "workbench.praticies.use",
+      name: "Usar praticidades locais",
+      description: "Instala e acessa automações, snippets, atalhos e gadgets locais.",
     },
   ],
   eventsProduced: [],

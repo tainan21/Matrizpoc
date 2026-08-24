@@ -25,6 +25,7 @@ node_modules
 .pnpm-store/
 .codex/
 .superpowers/
+.worktrees/
 output/
 *.log
 *.pid

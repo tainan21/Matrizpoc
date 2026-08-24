@@ -1,3 +1,5 @@
+@import "@matriz/design-system/css";
+
 :root {
   color-scheme: light;
   --bg: #f7f7f8;

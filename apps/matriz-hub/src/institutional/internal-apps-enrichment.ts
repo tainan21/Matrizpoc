@@ -42,7 +42,7 @@ const DECORATIONS: Record<string, Decoration> = {
     healthBaseline: { readinessScore: 100, status: "healthy" },
     metrics: {
       customMetrics: [
-        { key: "apps_registered", label: "Apps registrados", value: 5, unit: "count" },
+        { key: "apps_registered", label: "Apps registrados", value: 8, unit: "count" },
         { key: "uptime", label: "Uptime", value: 99, unit: "percent" },
       ],
       lastActivityAt: new Date().toISOString(),

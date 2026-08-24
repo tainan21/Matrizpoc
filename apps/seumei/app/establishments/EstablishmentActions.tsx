@@ -42,12 +42,22 @@ export function EstablishmentActions({
 
   return (
     <Stack gap={2}>
-      <Button variant="primary" size="sm" onClick={handleRequestContract} disabled={busy}>
+      <Button
+        aria-describedby={message ? "contract-request-status" : undefined}
+        variant="primary"
+        size="sm"
+        onClick={handleRequestContract}
+        disabled={busy}
+      >
         {busy ? "Enviando..." : "Solicitar contrato de prestacao"}
       </Button>
       {message ? (
-        <Alert tone={message.tone === "success" ? "success" : message.tone === "danger" ? "danger" : "info"}>
-          {message.text}
+        <Alert
+          id="contract-request-status"
+          tone={message.tone === "success" ? "success" : message.tone === "danger" ? "danger" : "info"}
+        >
+          <span aria-hidden="true">{message.tone === "success" ? "✓" : "!"}</span>{" "}
+          <span>{message.text}</span>
         </Alert>
       ) : null}
     </Stack>

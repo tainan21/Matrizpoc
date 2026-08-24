@@ -30,11 +30,13 @@ app/                        # Next.js routes
   onboarding-status/        # /onboarding-status
   feature-flags/            # /feature-flags
   telemetry/                # /telemetry
+  praticies/                # /praticies — automacoes e utilidades locais
   api/                      # route handlers (JSON read-only)
 src/
   manifest/manifest.ts      # L2 — source of truth
-  bootstrap/index.ts        # L11 — registra 5 manifests + TelemetryClient
+  bootstrap/index.ts        # L11 — registra 8 manifests + TelemetryClient
   ui/components/HubShell.tsx
+  domains/praticies/        # domain -> application -> integration -> presentation
   ui/presenters/            # L6 — manifests -> ViewModels
 public-contract.ts          # L2 — apenas manifest + tipos publicos
 ```
@@ -56,6 +58,12 @@ public-contract.ts          # L2 — apenas manifest + tipos publicos
 - **NAO PODE** importar `apps/<app>/src/**` ou `apps/<app>/app/**`.
 - UI passa por presenters em `src/ui/presenters/` (L6).
 - Toda rota Next.js chama `bootstrapMatrizHub()` no topo (idempotente).
+
+## Praticies
+
+`/praticies` e uma superficie imersiva autenticada para automacoes pequenas do
+workspace. A primeira capability gera mapas estruturais em `.patterns/` sem ler
+arquivos. Consulte `docs/PRACTICIES.md` antes de adicionar uma nova praticidade.
 
 ## Como rodar
 

@@ -1,103 +1,60 @@
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  Heading,
-  Text,
-  Stack,
-  Badge,
-  EmptyState,
-} from "@matriz/design-ui"
+import Link from "next/link"
 import { collectAllTelemetry, getAllTelemetryClients } from "@matriz/platform-telemetry"
 import { bootstrapMatrizHub } from "../../src/bootstrap"
+import { StatusLabel, StatusMark } from "../../src/ui/environment/status"
+import { SurfaceState } from "../../src/ui/environment/SurfaceState"
+import { MetricStrip, OperationalPageHeader } from "../../src/ui/structure/OperationalPage"
+import { presentActivity } from "../../src/ui/operations/operations-presenter"
 
 export const dynamic = "force-dynamic"
 
-interface SearchParams {
-  app?: string
-  type?: string
-}
-
-export default async function TelemetryPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>
-}) {
+export default async function TelemetryPage({ searchParams }: { readonly searchParams: Promise<{ app?: string; type?: string }> }) {
   bootstrapMatrizHub()
-  const sp = await searchParams
-
+  const filters = await searchParams
   const clients = getAllTelemetryClients()
   const all = collectAllTelemetry()
-  const filtered = all.filter((e) => {
-    if (sp.app && e.appId !== sp.app) return false
-    if (sp.type && !e.type.includes(sp.type)) return false
-    return true
-  })
-
-  const countsByApp = new Map<string, number>()
-  for (const e of all) countsByApp.set(e.appId, (countsByApp.get(e.appId) ?? 0) + 1)
-
-  const apps = clients.map((c) => c.appId)
+  const filtered = all.filter((event) => (!filters.app || event.appId === filters.app) && (!filters.type || event.type.includes(filters.type)))
+  const vm = presentActivity([], filtered.map((event) => ({ id: event.id, type: event.type, source: event.appId, occurredAt: event.occurredAt, category: event.category })))
+  const hasFilters = Boolean(filters.app || filters.type)
 
   return (
-    <Stack gap={6}>
-      <div>
-        <Heading level={1}>Telemetria</Heading>
-        <Text tone="muted">
-          Envelopes de telemetria consolidados de todos os apps registrados via TelemetryClient.
-          Eventos sao produzidos por cada bootstrap (L11) e agregados pelo platform/telemetry.
-        </Text>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Apps enviando telemetria</CardTitle>
-          <CardDescription>Clique para filtrar por app.</CardDescription>
-          <Stack direction="row" gap={2} className="flex-wrap">
-            <a href="/telemetry" style={{ textDecoration: "none" }}>
-              <Badge tone={!sp.app ? "brand" : "neutral"}>Todos ({all.length})</Badge>
-            </a>
-            {apps.map((appId) => (
-              <a key={appId} href={`/telemetry?app=${appId}`} style={{ textDecoration: "none" }}>
-                <Badge tone={sp.app === appId ? "brand" : "neutral"}>
-                  {appId} ({countsByApp.get(appId) ?? 0})
-                </Badge>
-              </a>
-            ))}
-          </Stack>
-        </CardHeader>
-      </Card>
-
-      {filtered.length === 0 ? (
-        <EmptyState
-          title="Sem telemetria"
-          description="Ainda nao ha envelopes registrados. Emita eventos navegando pelos apps ou acionando os casos de uso."
-        />
-      ) : (
-        <Stack gap={3}>
-          {filtered.map((e) => (
-            <Card key={e.id}>
-              <CardHeader>
-                <Stack direction="row" gap={3} align="center" className="justify-between">
-                  <div>
-                    <CardTitle>{e.type}</CardTitle>
-                    <Text size="sm" tone="muted">
-                      app={e.appId} · tenant={e.tenantId} · {e.occurredAt}
-                    </Text>
-                  </div>
-                  <Badge tone="brand">{e.appId}</Badge>
-                </Stack>
-                <Text size="sm">
-                  <code style={{ fontFamily: "var(--font-mono)" }}>
-                    {JSON.stringify(e.properties, null, 0)}
-                  </code>
-                </Text>
-              </CardHeader>
-            </Card>
-          ))}
-        </Stack>
-      )}
-    </Stack>
+    <div className="hub-page">
+      <OperationalPageHeader
+        description="Envelopes emitidos pelos clientes de telemetria registrados neste processo, com app e categoria visíveis."
+        eyebrow="Operação / observabilidade"
+        status={all.length ? "running" : "waiting"}
+        statusLabel={all.length ? `${all.length} envelopes na sessão` : "Aguardando sinais"}
+        title="Telemetria da instância"
+      />
+      <MetricStrip items={[
+        { label: "Envelopes", value: all.length, detail: hasFilters ? `${filtered.length} após filtros` : "sessão atual", status: all.length ? "running" : "waiting", icon: "telemetry" },
+        { label: "Clientes", value: clients.length, detail: "registrados no processo", status: clients.length ? "available" : "waiting", icon: "agent" },
+        { label: "Fontes ativas", value: new Set(all.map((event) => event.appId)).size, detail: "apps com envelopes", status: "available", icon: "ecosystem" },
+        { label: "Persistência", value: "Sessão", detail: "agregador em memória", status: "temporary", icon: "database" },
+      ]} />
+      <nav className="hub-filter-rail" aria-label="Filtrar telemetria por app">
+        <Link aria-current={!filters.app ? "page" : undefined} href="/telemetry">Todos <small>{all.length}</small></Link>
+        {clients.map((client) => {
+          const count = all.filter((event) => event.appId === client.appId).length
+          return <Link aria-current={filters.app === client.appId ? "page" : undefined} href={`/telemetry?app=${client.appId}`} key={client.appId}>{client.appId}<small>{count}</small></Link>
+        })}
+      </nav>
+      <section className="hub-structure-main">
+        <header className="hub-structure-toolbar"><div><h2>Sinais observados</h2><small>{hasFilters ? "Filtros aplicados pela URL" : "Todos os envelopes da sessão"}</small></div>{hasFilters ? <Link className="hub-context-link" href="/telemetry">Limpar filtros</Link> : null}</header>
+        {vm.items.length === 0 ? (
+          <SurfaceState compact kind={hasFilters ? "filtered" : "empty"} title={hasFilters ? "Nenhum sinal corresponde ao filtro" : "Nenhuma telemetria nesta instância"} description={hasFilters ? "Remova os filtros ou selecione outra fonte." : "Os clientes estão registrados, mas ainda não emitiram envelopes. Nenhum sinal foi falsificado."} />
+        ) : (
+          <ol className="hub-operations-stream">{vm.items.map((item) => (
+            <li key={item.id}>
+              <span className="hub-operations-stream__rail"><StatusMark status="running" /></span>
+              <time dateTime={item.occurredAt}>{new Date(item.occurredAt).toLocaleString("pt-BR")}</time>
+              <span className="hub-operations-stream__identity"><strong>{item.label}</strong><small>{item.technicalLabel}</small></span>
+              <span className="hub-operations-stream__source">{item.source}</span>
+              <StatusLabel compact status="running">{item.category ?? "Sem categoria"}</StatusLabel>
+            </li>
+          ))}</ol>
+        )}
+      </section>
+    </div>
   )
 }

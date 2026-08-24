@@ -65,6 +65,17 @@ describe("workbench appearance", () => {
     }
   })
 
+  it("maps public MatrizLib color aliases to the active local palette", () => {
+    for (const preset of WORKBENCH_THEME_PRESETS) {
+      const variables = getAppearanceVariables("dark", preset.id) as Record<string, string>
+      expect(variables["--matriz-color-canvas"], preset.id).toBe(preset.tokens.canvas)
+      expect(variables["--matriz-color-surface"], preset.id).toBe(preset.tokens.surface1)
+      expect(variables["--matriz-color-text"], preset.id).toBe(preset.tokens.text)
+      expect(variables["--matriz-color-action"], preset.id).toBe(preset.tokens.accent)
+      expect(variables["--matriz-color-focus"], preset.id).toBe(preset.tokens.focus)
+    }
+  })
+
   it("uses the same light palette regardless of the stored dark system", () => {
     expect(getAppearanceVariables("light", "aurora")).toEqual(getAppearanceVariables("light", "pulse"))
   })

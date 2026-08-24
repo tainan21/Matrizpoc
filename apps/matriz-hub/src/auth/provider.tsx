@@ -1,6 +1,6 @@
 /**
- * Matriz Hub — Auth adoption component. Same structural pattern as the
- * other apps, different visual skin and strategy (magic link).
+ * Matriz Hub — auth adoption boundary.
+ * Public, audit and immersive surfaces intentionally keep their own shells.
  */
 "use client"
 
@@ -35,64 +35,31 @@ function BootingFallback() {
   )
 }
 
-function HubSessionBar() {
-  const { session, signOut } = useAuth()
-  if (!session) return null
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        gap: "0.75rem",
-        padding: "0.5rem 1rem",
-        fontSize: "0.75rem",
-        borderBottom: "1px solid var(--border)",
-        background: "var(--muted)",
-        color: "var(--muted-fg)",
-      }}
-    >
-      <span>
-        <strong style={{ color: "var(--surface-fg)" }}>{session.identity.user.name}</strong>
-        {" · "}
-        {session.identity.user.email}
-      </span>
-      <button
-        type="button"
-        onClick={signOut}
-        style={{
-          background: "transparent",
-          border: "1px solid var(--border)",
-          borderRadius: "0.375rem",
-          padding: "0.25rem 0.5rem",
-          color: "var(--surface-fg)",
-          cursor: "pointer",
-          fontSize: "0.75rem",
-        }}
-      >
-        Sair
-      </button>
-    </div>
-  )
-}
-
 function HubAuthShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const isLoginRoute = (pathname ?? "").startsWith("/login")
-  const isPublicRoute = (pathname ?? "").startsWith("/public")
-  const isAuditRoute = (pathname ?? "").startsWith("/audit")
-  if (isLoginRoute) {
-    return <>{children}</>
-  }
-  if (isPublicRoute) {
-    // V1.2: superficie publica institucional nao requer autenticacao
-    // nem adota HubShell. Renderiza o page.tsx diretamente.
-    return <>{children}</>
-  }
+  const pathname = usePathname() ?? ""
+  const { session, signOut } = useAuth()
+  const isLoginRoute = pathname.startsWith("/login")
+  const isPublicRoute = pathname.startsWith("/public")
+  const isAuditRoute = pathname.startsWith("/audit")
+  const isImmersiveRoute = pathname.startsWith("/praticies")
+
+  if (isLoginRoute || isPublicRoute) return <>{children}</>
+
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>
-      <HubSessionBar />
-      {isAuditRoute ? children : <HubShell>{children}</HubShell>}
+      {isImmersiveRoute || isAuditRoute || !session ? (
+        children
+      ) : (
+        <HubShell
+          onSignOut={signOut}
+          session={{
+            userName: session.identity.user.name,
+            email: session.identity.user.email,
+          }}
+        >
+          {children}
+        </HubShell>
+      )}
     </AuthGate>
   )
 }

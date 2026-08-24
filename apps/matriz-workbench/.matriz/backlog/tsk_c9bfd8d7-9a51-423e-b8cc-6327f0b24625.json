@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "tsk_c9bfd8d7-9a51-423e-b8cc-6327f0b24625",
+  "projectId": "matriz-workbench",
+  "title": "Adotar launcher compartilhado de Praticies",
+  "description": "Expor instalados, recentes e catálogo no shell do Workbench sem executar código ou importar internals do Hub.",
+  "status": "review",
+  "priority": "medium",
+  "tags": ["praticies", "launcher", "shared-flow"],
+  "acceptanceCriteria": [
+    { "id": "ac_37d56014-a573-447e-a82b-9351b5bc03ce", "text": "Rota e navegação do launcher estão disponíveis", "completed": true },
+    { "id": "ac_e33d570e-a6dc-4129-bbb6-2be54837a2a1", "text": "Instalação e recentes usam o flow compartilhado", "completed": true },
+    { "id": "ac_426723ea-d3de-4fe9-8847-1a2dc2029811", "text": "Nenhum internal do Hub é importado", "completed": true }
+  ],
+  "dependencyIds": [],
+  "references": ["apps/matriz-workbench/docs/PRACTICIES.md", "packages/flows/praticies/README.md"],
+  "createdAt": "2026-08-12T05:10:00.000Z",
+  "updatedAt": "2026-08-12T05:10:00.000Z",
+  "revision": "8edcfabca630bc80"
+}

@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { matrizTokenContract, matrizTokenMetadata } from "@matriz/design-system"
 import {
   DEFAULT_DESIGN_SYSTEM,
   normalizeDesignSystem,
@@ -11,6 +12,17 @@ import {
 } from "../theme"
 import { applyAppearanceToDocument, getThemePreset, WORKBENCH_THEME_PRESETS } from "../theme-presets"
 import styles from "./theme-system-picker.module.css"
+
+const MATRIZLIB_TOKEN_ALIASES = [
+  ["--matriz-color-canvas", "--wb-canvas"],
+  ["--matriz-color-surface", "--wb-surface-1"],
+  ["--matriz-color-action", "--wb-accent"],
+  ["--matriz-color-focus", "--wb-focus"],
+] as const
+
+const MATRIZLIB_SEMANTIC_TOKEN_COUNT = matrizTokenMetadata.filter(
+  (token) => token.layer === "semantic",
+).length
 
 function currentAppearance(): { mode: WorkbenchColorMode; system: WorkbenchDesignSystemId } {
   return {
@@ -58,6 +70,18 @@ export function ThemeSystemPicker({ variant = "compact" }: { variant?: "compact"
         <div><p className="eyebrow">Experimento app-local</p><h2 id="appearance-heading">Sistema visual</h2></div>
         <span>{mode === "light" ? "Escolha salva para o modo escuro" : "Aplicado imediatamente"}</span>
       </header>
+      <div className={styles.compatibility} aria-label="Compatibilidade MatrizLib">
+        <i aria-hidden="true" />
+        <div>
+          <strong>MatrizLib compativel</strong>
+          <small>Contrato publico v{matrizTokenContract.version} com {MATRIZLIB_SEMANTIC_TOKEN_COUNT} tokens semanticos.</small>
+        </div>
+        <p>
+          Aliases locais: {MATRIZLIB_TOKEN_ALIASES.map(([publicToken, localToken]) => (
+            <code key={publicToken}>{publicToken} to {localToken}</code>
+          ))}
+        </p>
+      </div>
       <div className={styles.grid}>
         {WORKBENCH_THEME_PRESETS.map((preset) => (
           <button aria-pressed={system === preset.id} className={system === preset.id ? styles.selected : undefined} key={preset.id} onClick={() => choose(preset.id)} type="button">

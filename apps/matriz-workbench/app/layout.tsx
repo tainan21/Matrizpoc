@@ -35,6 +35,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html
       lang="pt-BR"
       className={`${sans.variable} ${mono.variable}`}
+      data-matrizlib="0.1.0"
       data-theme={appearance.mode}
       data-system={appearance.system}
       style={getAppearanceVariables(appearance.mode, appearance.system)}

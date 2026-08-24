@@ -3,6 +3,25 @@
   "projectId": "matriz-workbench",
   "phases": [
     {
+      "id": "phase_capability_platform_v1",
+      "title": "Capability Platform compartilhada",
+      "outcome": "Temas, Praticies e preferências adotáveis por todos os apps com autoridade persistente no Hub.",
+      "status": "active",
+      "initiatives": [
+        {
+          "id": "ini_capability_platform_foundation",
+          "title": "Fundação CSS-first e persistência de capabilities",
+          "outcome": "Registry e contratos compartilhados funcionais; repository Postgres e prova multi-tenant concluídos.",
+          "status": "active",
+          "domain": "Plataforma / Capabilities",
+          "responsible": "Produto + Codex",
+          "startDate": "2026-08-13",
+          "targetDate": "2026-09-30",
+          "backlogIds": ["wi_capability_platform_v1"]
+        }
+      ]
+    },
+    {
       "id": "phase_4dbb62c8-46b8-42a5-b0f5-c6501ec72f9d",
       "title": "Fundação local-first",
       "outcome": "Projetos descobertos automaticamente e trabalho persistido com segurança no Git.",
