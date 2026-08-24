@@ -1,6 +1,12 @@
 # Seumei - roadmap dos próximos ciclos
 
-Data: 2026-08-22
+Data: 2026-08-24
+
+## Estado após o ciclo restaurante
+
+- **Concluído:** ingredientes, receitas, estoque/movimentos, publicação demo, compra simulada, pedidos e clientes.
+- **Parcial deliberado:** publicação possui contrato e versão persistentes, mas editor de draft/preview avançado permanece no ciclo de identidade visual.
+- **Próximo:** financeiro essencial. Pagamento real, fiscal, frete, domínio e analytics continuam fora até integração justificada.
 
 Este roadmap organiza as próximas capacidades como fatias verticais independentes. Nenhuma rota deve nascer como página vazia: cada ciclo termina com UI, regra, autorização, persistência, estados honestos, navegação, isolamento tenant A/B e validação em browser real.
 
@@ -8,11 +14,11 @@ Este roadmap organiza as próximas capacidades como fatias verticais independent
 
 | Ciclo | Resultado de usuário | Route flow principal | Dependências | Prioridade |
 | --- | --- | --- | --- | --- |
-| 1. Estoque e movimentos | Operar saldo auditável por variante | `/workspace/products` -> `/workspace/stock` -> `/workspace/stock/[variantId]` | Catálogo assimilado | P1 - próximo |
-| 2. Loja e publicação | Preparar uma loja e controlar draft/publicado | `/workspace/store` -> `/workspace/store/publish` -> `/loja/[slug]` | Catálogo; decisão de routing | P1 |
-| 3. Pedidos | Criar/receber e acompanhar pedidos com estados válidos | `/workspace/orders` -> `/workspace/orders/[orderId]` | Estoque; loja para canal público | P1 |
-| 4. Clientes | Consolidar contatos e histórico comercial por empresa | `/workspace/customers` -> `/workspace/customers/[customerId]` | Pedidos para evidência de identidade | P2 |
-| 5. Financeiro essencial | Enxergar recebimentos, despesas e resultado operacional básico | `/workspace/finance` -> `/workspace/finance/entries/[entryId]` | Pedidos; decisão de escopo financeiro | P2 |
+| 1. Estoque e movimentos | Operar saldo auditável por ingrediente/receita | `/workspace/products/[productId]/recipe` -> `/workspace/stock` -> `/workspace/stock/[ingredientId]` | Catálogo assimilado | **Concluído** |
+| 2. Loja e publicação | Publicar catálogo demo resolvido por slug | `/store/[storeSlug]` -> `/store/[storeSlug]/checkout` | Catálogo e receitas | **Concluído para demo; editor P2** |
+| 3. Pedidos | Criar/receber e acompanhar pedidos com estados válidos | `/workspace/orders` -> `/workspace/orders/[orderId]` | Estoque; loja para canal público | **Concluído para compra simulada** |
+| 4. Clientes | Consolidar contatos e histórico comercial por empresa | `/workspace/customers` -> `/workspace/customers/[customerId]` | Pedidos para evidência de identidade | **Concluído no escopo e-mail/telefone** |
+| 5. Financeiro essencial | Enxergar recebimentos, despesas e resultado operacional básico | `/workspace/finance` -> `/workspace/finance/entries/[entryId]` | Pedidos; decisão de escopo financeiro | **P1 — próximo** |
 | 6. Identidade visual/publicação | Personalizar e revisar a experiência pública com acessibilidade | `/workspace/store/design` -> `/workspace/store/preview` -> `/loja/[slug]` | Loja/publicação estável | P2 |
 | 7. Integrações justificadas | Conectar somente serviços necessários a fluxos reais | `/workspace/settings/integrations` -> provedor -> retorno | Contrato estável do domínio consumidor | P2/P3 |
 

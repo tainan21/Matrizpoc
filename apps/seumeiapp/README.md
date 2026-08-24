@@ -1,6 +1,6 @@
 # Seumei
 
-Aplicação web multitenant da Seumei no ecossistema Matriz. O fluxo funcional cria ou seleciona uma empresa autorizada, persiste tenant e membership OWNER, retoma o onboarding, abre o workspace real, administra a equipe e mantém um catálogo real de categorias, produtos e variantes.
+Aplicação web multitenant da Seumei no ecossistema Matriz. O fluxo funcional cria ou seleciona uma empresa autorizada, persiste tenant e membership, retoma onboarding e opera catálogo, receitas, ingredientes, estoque, loja pública simulada, pedidos e clientes reais.
 
 ## Desenvolvimento
 
@@ -19,7 +19,7 @@ Configure `CORE_DATABASE_URL` e `SEUMEI_DATABASE_URL`, ou uma `DATABASE_URL` com
 ## Persistência e autoridade
 
 - `prisma/schemas/core.prisma`: usuário, tenant, registro do app, membership e convites app-scoped.
-- `prisma/schemas/seumei.prisma`: empresa, onboarding, preferências e catálogo Seumei.
+- `prisma/schemas/seumei.prisma`: empresa, onboarding, catálogo, receitas, estoque, publicação, clientes e pedidos Seumei.
 - A criação coordena as duas persistências com idempotência e compensação; não presume transação ACID cross-schema.
 - O navegador envia `companyId` apenas para seleção. Toda leitura/mutação deriva o tenant depois de validar membership no servidor.
 - O progresso nunca usa `localStorage` como banco e continua após refresh ou nova sessão.
@@ -34,8 +34,11 @@ Configure `CORE_DATABASE_URL` e `SEUMEI_DATABASE_URL`, ou uma `DATABASE_URL` com
 - `/workspace`: empresa ativa após conclusão.
 - `/workspace/members`: diretório, convites e gestão autorizada de papéis.
 - `/workspace/products`: lista real; `/new` e `/[productId]` criam e retomam produtos com variantes.
+- `/workspace/products/[productId]/recipe`, `/workspace/ingredients` e `/workspace/stock/**`: composição culinária e movimentos persistentes.
+- `/store/[storeSlug]` e `/checkout`: loja pública e compra explicitamente simulada com efeitos atômicos.
+- `/workspace/orders/**` e `/workspace/customers/**`: operação e relacionamento autorizados.
 - `/docs`: laboratório temporário autenticado para visualizar e desenhar route flows; não é persistência empresarial.
 - `/invite/[token]`: inspeção e aceitação segura do convite, preservando retorno pelo login.
-- `/api/companies`, `/api/company-selection`, `/api/onboarding`, `/api/members`, `/api/invitations/accept` e `/api/catalog/**`: fronteiras HTTP app-local.
+- `/api/companies`, `/api/company-selection`, `/api/onboarding`, `/api/members`, `/api/catalog/**`, `/api/recipes/**`, `/api/stock/**`, `/api/orders/**`, `/api/customers/**` e `/api/public/v1/stores/**`: fronteiras HTTP app-local.
 
 Consulte `docs/AGENT-START-HERE.md` para continuar e `../../docs/seumei-migration-ledger.md` para o mapa de assimilação.

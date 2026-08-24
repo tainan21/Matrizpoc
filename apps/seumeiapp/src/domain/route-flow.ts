@@ -31,6 +31,15 @@ export const CANONICAL_ROUTE_FLOWS: readonly RouteFlowDefinition[] = [
   ] },
   { id: "catalog-authoring", title: "Catálogo", description: "Categoria, produto e variantes sem acoplamento prematuro ao estoque.", steps: [
     { route: "/workspace/products", outcome: "consultar o catálogo autorizado" }, { route: "/workspace/products/new", outcome: "cadastrar produto e variantes" },
-    { route: "/workspace/products/[productId]", outcome: "retomar e editar o cadastro real" },
+    { route: "/workspace/products/[productId]", outcome: "retomar e editar o cadastro real" }, { route: "/workspace/products/[productId]/recipe", outcome: "compor receita com ingredientes e disponibilidade real" },
+  ] },
+  { id: "stock-operation", title: "Estoque por ingrediente", description: "Saldos e movimentos append-only com versão e idempotência.", steps: [
+    { route: "/workspace/ingredients", outcome: "cadastrar ingredientes reutilizáveis" }, { route: "/workspace/stock", outcome: "ver saúde e saldo tenant-scoped" },
+    { route: "/workspace/stock/[ingredientId]", outcome: "registrar movimento auditável sem saldo negativo" },
+  ] },
+  { id: "demo-commerce", title: "Compra simulada até a operação", description: "Checkout público cria cliente, pedido e consumo de estoque em uma transação.", steps: [
+    { route: "/store/[storeSlug]", outcome: "resolver publicação e catálogo pelo slug no servidor" }, { route: "/store/[storeSlug]/checkout", outcome: "enviar somente item, quantidade e contato" },
+    { route: "/store/[storeSlug]/checkout/success", outcome: "confirmar o pedido persistido sem cobrança real" }, { route: "/workspace/orders", outcome: "operar o pedido autorizado" },
+    { route: "/workspace/customers", outcome: "consultar o cliente tenant-local e seu histórico" },
   ] },
 ]
