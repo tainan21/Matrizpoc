@@ -86,7 +86,7 @@ No package or lockfile repair is needed. All subsequent commands use
 - Consumes: `UserId` and `TenantId` from `@matriz/foundation-types`.
 - Produces: `Company`, `Membership`, `SeumeiTenantContext`, `SeumeiAppDefinition`, `InstalledApp`, and `UserAppearancePreference`.
 
-- [ ] **Step 1: Write the failing tenant-context invariant tests**
+- [x] **Step 1: Write the failing tenant-context invariant tests**
 
 ```ts
 import { describe, expect, it } from "vitest"
@@ -110,7 +110,7 @@ describe("createTenantContext", () => {
 })
 ```
 
-- [ ] **Step 2: Run the focused test and confirm failure**
+- [x] **Step 2: Run the focused test and confirm failure**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test -- src/domains/memberships/domain/tenant-context.test.ts
@@ -118,7 +118,7 @@ pnpm --filter @matriz/app-seumei test -- src/domains/memberships/domain/tenant-c
 
 Expected: failure because the module does not exist.
 
-- [ ] **Step 3: Implement focused domain contracts and invariants**
+- [x] **Step 3: Implement focused domain contracts and invariants**
 
 Core signatures:
 
@@ -142,14 +142,14 @@ export interface SeumeiTenantContext {
 
 `createTenantContext` must reject inactive, user-mismatched, or company-mismatched memberships.
 
-- [ ] **Step 4: Run the model tests and typecheck**
+- [x] **Step 4: Run the model tests and typecheck**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test -- src/domains/memberships/domain/tenant-context.test.ts
 pnpm --filter @matriz/app-seumei typecheck
 ```
 
-- [ ] **Step 5: Commit the domain foundation**
+- [x] **Step 5: Commit the domain foundation**
 
 ```powershell
 git add apps/seumei/src/domains
