@@ -255,7 +255,7 @@ git commit -m "feat(seumei): isolate company fixture repositories"
 - Consumes: `SeumeiAppDefinition`, `InstalledApp`, `SeumeiTenantContext`.
 - Produces: `SEUMEI_APP_REGISTRY`, `findAppDefinition`, and `authorizeAppAccess`.
 
-- [ ] **Step 1: Write failing install-plus-permission policy tests**
+- [x] **Step 1: Write failing install-plus-permission policy tests**
 
 ```ts
 it("requires an app to be installed and permitted", () => {
@@ -266,24 +266,24 @@ it("requires an app to be installed and permitted", () => {
 })
 ```
 
-- [ ] **Step 2: Run the test and confirm failure**
+- [x] **Step 2: Run the test and confirm failure**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test -- src/domains/apps/application/app-access.policy.test.ts
 ```
 
-- [ ] **Step 3: Implement the typed registry and policy**
+- [x] **Step 3: Implement the typed registry and policy**
 
 Registry entries define id, label, description, icon key, route segment, required permission, navigation, and optional commands. The policy checks installation status before permission and never reads roles directly.
 
-- [ ] **Step 4: Run tests and typecheck**
+- [x] **Step 4: Run tests and typecheck**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
 pnpm --filter @matriz/app-seumei typecheck
 ```
 
-- [ ] **Step 5: Commit the registry**
+- [x] **Step 5: Commit the registry**
 
 ```powershell
 git add apps/seumei/src/domains/apps
