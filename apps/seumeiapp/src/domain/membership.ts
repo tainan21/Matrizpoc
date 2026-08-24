@@ -9,6 +9,9 @@ export type MembershipCapability =
   | "recipes.manage"
   | "stock.read"
   | "stock.manage"
+  | "orders.read"
+  | "orders.manage"
+  | "customers.read"
   | "members.read"
   | "members.invite.admin"
   | "members.invite.standard"
@@ -43,6 +46,9 @@ const OWNER_CAPABILITIES: readonly MembershipCapability[] = [
   "recipes.manage",
   "stock.read",
   "stock.manage",
+  "orders.read",
+  "orders.manage",
+  "customers.read",
   "members.read",
   "members.invite.admin",
   "members.invite.standard",
@@ -61,6 +67,9 @@ const ADMIN_CAPABILITIES: readonly MembershipCapability[] = [
   "recipes.manage",
   "stock.read",
   "stock.manage",
+  "orders.read",
+  "orders.manage",
+  "customers.read",
   "members.read",
   "members.invite.standard",
   "members.role.manage.standard",
@@ -72,8 +81,8 @@ const ROLE_CAPABILITIES: Readonly<
 > = {
   OWNER: OWNER_CAPABILITIES,
   ADMIN: ADMIN_CAPABILITIES,
-  MEMBER: ["workspace.read", "portfolio.read", "catalog.read", "recipes.read", "stock.read"],
-  VIEWER: ["workspace.read", "portfolio.read", "catalog.read", "recipes.read", "stock.read"],
+  MEMBER: ["workspace.read", "portfolio.read", "catalog.read", "recipes.read", "stock.read", "orders.read", "orders.manage", "customers.read"],
+  VIEWER: ["workspace.read", "portfolio.read", "catalog.read", "recipes.read", "stock.read", "orders.read", "customers.read"],
 }
 
 export function can(
