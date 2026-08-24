@@ -78,8 +78,8 @@ export const DEMO_RESTAURANTS = {
       { name: "Vinagrete", slug: "vinagrete", unit: "GRAM", openingBalance: 4_000, lowStockThreshold: 600 },
     ] as readonly DemoIngredient[],
     products: [
-      { name: "Costela na Brasa", slug: "costela-na-brasa", sku: "BRASA-COSTELA", price: "39,90", description: "Costela bovina, queijo coalho e vinagrete no pão artesanal.", image: "/demo/galaxia-burger/galaxia-calabresa.webp", imageAlt: "Sanduíche de costela preparado na brasa", recipe: [{ ingredient: "pao-artesanal", quantity: 1 }, { ingredient: "carne-de-costela", quantity: 220 }, { ingredient: "queijo-coalho", quantity: 45 }, { ingredient: "vinagrete", quantity: 40 }] },
-      { name: "Queijo da Brasa", slug: "queijo-da-brasa", sku: "BRASA-QUEIJO", price: "24,90", description: "Queijo coalho dourado e vinagrete no pão artesanal.", image: "/demo/galaxia-burger/galaxia-smash.webp", imageAlt: "Sanduíche de queijo coalho dourado", recipe: [{ ingredient: "pao-artesanal", quantity: 1 }, { ingredient: "queijo-coalho", quantity: 100 }, { ingredient: "vinagrete", quantity: 35 }] },
+      { name: "Costela na Brasa", slug: "costela-na-brasa", sku: "BRASA-COSTELA", price: "39,90", description: "Costela bovina, queijo coalho e vinagrete no pão artesanal.", image: "/demo/sabor-e-brasa/costela-na-brasa.webp", imageAlt: "Sanduíche de costela desfiada e queijo coalho na brasa", recipe: [{ ingredient: "pao-artesanal", quantity: 1 }, { ingredient: "carne-de-costela", quantity: 220 }, { ingredient: "queijo-coalho", quantity: 45 }, { ingredient: "vinagrete", quantity: 40 }] },
+      { name: "Queijo da Brasa", slug: "queijo-da-brasa", sku: "BRASA-QUEIJO", price: "24,90", description: "Queijo coalho dourado e vinagrete no pão artesanal.", image: "/demo/sabor-e-brasa/queijo-da-brasa.webp", imageAlt: "Sanduíche vegetariano de queijo coalho dourado e vinagrete", recipe: [{ ingredient: "pao-artesanal", quantity: 1 }, { ingredient: "queijo-coalho", quantity: 100 }, { ingredient: "vinagrete", quantity: 35 }] },
     ] as readonly DemoProduct[],
   },
 } as const
@@ -125,6 +125,9 @@ export async function provisionDemoRestaurantData(
         images: [{ url: item.image, altText: item.imageAlt }],
       }, catalog)
       knownProducts.push(product)
+    }
+    if (product.images[0]?.url !== item.image && catalog.replaceProductImages) {
+      await catalog.replaceProductImages(context.company.tenantId, product.id, [{ url: item.image, altText: item.imageAlt, position: 0 }])
     }
     const detail = await restaurant.findProductRecipe(context.company.tenantId, product.id)
     if (detail && !detail.recipe) {

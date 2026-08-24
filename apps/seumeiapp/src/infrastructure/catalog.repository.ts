@@ -53,7 +53,7 @@ export function createCatalogRepository(db: SeumeiPrismaClient): CatalogReposito
             tenantId, categoryId: input.categoryId, name: input.name, slug: input.slug,
             description: input.description, type: input.type, status: input.status,
             variants: { create: input.variants.map((variant) => ({ tenantId, ...variant })) },
-            images: { create: input.images.map((image) => ({ tenantId, ...image })) },
+            images: { create: input.images.map((image) => ({ ...image })) },
           },
           include: { variants: { orderBy: { position: "asc" } }, images: { orderBy: { position: "asc" } } },
         })
@@ -85,6 +85,14 @@ export function createCatalogRepository(db: SeumeiPrismaClient): CatalogReposito
           where: { id: productId, tenantId }, include: { variants: { orderBy: { position: "asc" } }, images: { orderBy: { position: "asc" } } },
         })
         return row ? product(row as unknown as ProductRow) : null
+      })
+    },
+    async replaceProductImages(tenantId, productId, images) {
+      await db.$transaction(async (tx) => {
+        const owned = await tx.product.findFirst({ where: { id: productId, tenantId }, select: { id: true } })
+        if (!owned) return
+        await tx.productImage.deleteMany({ where: { productId, tenantId } })
+        if (images.length) await tx.productImage.createMany({ data: images.map((image) => ({ tenantId, productId, ...image })) })
       })
     },
   }

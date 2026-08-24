@@ -13,4 +13,5 @@ export interface CatalogRepository {
     variants: readonly { name: string; sku: string | null; priceCents: number; position: number }[]
     images: readonly { url: string; altText: string; position: number }[]
   }): Promise<Product | null>
+  replaceProductImages?(tenantId: string, productId: string, images: readonly { url: string; altText: string; position: number }[]): Promise<void>
 }
