@@ -3,8 +3,12 @@ import { createCompanyServices } from "../application/composition"
 import { resolveSeumeiSession } from "../auth/server-session"
 import { withAuthenticatedSession, type CompanyHttpServices, type HttpResult } from "./company-handlers"
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
+import type { PortfolioRepository } from "../domain/repositories/portfolio-repository"
 
-export type SeumeiHttpServices = CompanyHttpServices & { readonly catalog: CatalogRepository }
+export type SeumeiHttpServices = CompanyHttpServices & {
+  readonly catalog: CatalogRepository
+  readonly portfolio: PortfolioRepository
+}
 
 export function jsonResult(result: HttpResult): NextResponse {
   return NextResponse.json(result.body, { status: result.status })
