@@ -34,13 +34,17 @@ describe("StoreView", () => {
   it("starts an installed package runtime before opening it", async () => {
     const gateway = {
       commerceSnapshot: vi.fn().mockResolvedValue(snapshot(true, true)),
-      runtimeSnapshot: vi.fn().mockResolvedValue([{ id: "willdash", status: "stopped" }]),
+      runtimeSnapshot: vi.fn()
+        .mockResolvedValueOnce([{ id: "willdash", status: "stopped", ownership: "none" }])
+        .mockResolvedValueOnce([{ id: "willdash", status: "ready", ownership: "managed" }]),
+      startManagedOperation: vi.fn().mockResolvedValue(undefined),
       restartRuntime: vi.fn().mockResolvedValue(undefined),
       openRuntimeTarget: vi.fn().mockResolvedValue(undefined),
     } as unknown as DesktopGateway
     render(<StoreView gateway={gateway} signal={vi.fn()} />)
     fireEvent.click(await screen.findByRole("button", { name: "Abrir Matriz Analytics" }))
-    await waitFor(() => expect(gateway.restartRuntime).toHaveBeenCalledWith("willdash"))
-    expect(gateway.openRuntimeTarget).toHaveBeenCalledWith({ appId: "willdash", routePath: "/" })
+    await waitFor(() => expect(gateway.startManagedOperation).toHaveBeenCalledWith("app.willdash.web"))
+    expect(gateway.restartRuntime).not.toHaveBeenCalled()
+    await waitFor(() => expect(gateway.openRuntimeTarget).toHaveBeenCalledWith({ appId: "willdash", routePath: "/" }))
   })
 })

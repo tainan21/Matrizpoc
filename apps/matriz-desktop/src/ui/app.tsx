@@ -24,6 +24,7 @@ import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
 import { RuntimeWorkspace } from "./runtime/runtime-workspace"
 import { WorkspaceView } from "./workspace/workspace-view"
 import { StoreView } from "./store/store-view"
+import { requestWorkspaceNavigation } from "./workspace/navigation-guard"
 
 type View = "ports" | "apps" | "workspace" | "terminal" | "actions" | "store" | "doctor" | "settings"
 type SoundId =
@@ -101,6 +102,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   }, [gateway, view])
 
   const chooseView = (next: View) => {
+    if (next === view || !requestWorkspaceNavigation()) return
     setView(next)
     void feedback.play("navigation")
   }

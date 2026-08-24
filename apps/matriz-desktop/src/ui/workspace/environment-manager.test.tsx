@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import type { DesktopGateway } from "../../application/desktop-gateway"
 import type { RuntimeInstance } from "../../domain/types"
 import { EnvironmentManager } from "./environment-manager"
+import { requestWorkspaceNavigation } from "./navigation-guard"
 
 afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
@@ -82,5 +83,40 @@ describe("EnvironmentManager", () => {
     fireEvent.change(screen.getByLabelText("Arquivo de ambiente"), { target: { value: ".env.example" } })
     expect(screen.getByLabelText("Arquivo de ambiente")).toHaveValue(".env.local")
     expect(window.confirm).toHaveBeenCalledOnce()
+  })
+
+  it("does not expose a late secret response in another environment", async () => {
+    let resolveReveal: (value: string) => void = () => undefined
+    const reveal = new Promise<string>((resolve) => { resolveReveal = resolve })
+    const desktop = gateway()
+    vi.mocked(desktop.revealEnvironmentValue).mockReturnValue(reveal)
+    vi.mocked(desktop.readEnvironment)
+      .mockResolvedValueOnce({ appId: "matriz-admin", fileName: ".env.local", revision: "local", missingRequired: [], variables: [{ key: "DATABASE_URL", sensitive: true, source: ".env.local" }] })
+      .mockResolvedValueOnce({ appId: "matriz-admin", fileName: ".env.example", revision: "example", missingRequired: [], variables: [{ key: "PORT", value: "3002", sensitive: false, source: ".env.example" }] })
+    render(<EnvironmentManager gateway={desktop} runtimes={[runtime]} restart={vi.fn()} signal={vi.fn()} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Revelar DATABASE_URL" }))
+    fireEvent.change(screen.getByLabelText("Arquivo de ambiente"), { target: { value: ".env.example" } })
+    expect(await screen.findByLabelText("Valor PORT")).toHaveValue("3002")
+    resolveReveal("postgres://must-not-cross-boundaries")
+
+    await waitFor(() => expect(screen.queryByDisplayValue("postgres://must-not-cross-boundaries")).not.toBeInTheDocument())
+  })
+
+  it("keeps a changed secret dirty when it is hidden and blocks workspace navigation", async () => {
+    vi.spyOn(window, "confirm").mockReturnValue(false)
+    const desktop = gateway()
+    render(<EnvironmentManager gateway={desktop} runtimes={[runtime]} restart={vi.fn()} signal={vi.fn()} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Revelar DATABASE_URL" }))
+    fireEvent.change(await screen.findByLabelText("Valor DATABASE_URL"), { target: { value: "postgres://changed" } })
+    fireEvent.click(screen.getByRole("button", { name: "Ocultar DATABASE_URL" }))
+
+    expect(document.querySelector(".env-footer span")).toHaveTextContent("1 alterações não salvas")
+    expect(requestWorkspaceNavigation()).toBe(false)
+    fireEvent.click(screen.getByRole("button", { name: /salvar/i }))
+    await waitFor(() => expect(desktop.saveEnvironment).toHaveBeenCalledWith(expect.objectContaining({
+      variables: expect.arrayContaining([expect.objectContaining({ key: "DATABASE_URL", value: "postgres://changed" })]),
+    })))
   })
 })

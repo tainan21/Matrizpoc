@@ -147,6 +147,30 @@ describe("Matriz Control", () => {
     }
   })
 
+  it("blocks workspace and primary navigation while an environment draft is dirty", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.readEnvironment).mockResolvedValue({
+      appId: "matriz-admin",
+      fileName: ".env.local",
+      revision: "rev",
+      missingRequired: [],
+      variables: [{ key: "PORT", value: "3002", sensitive: false, source: ".env.local" }],
+    })
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false)
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Workspace" }))
+    fireEvent.change(await screen.findByLabelText("Valor PORT"), { target: { value: "3999" } })
+    fireEvent.click(screen.getByRole("button", { name: "ARQUIVOS & ATIVOS" }))
+    expect(screen.getByRole("heading", { name: ".ENV MANAGER" })).toBeVisible()
+    fireEvent.click(screen.getByRole("button", { name: "Apps" }))
+
+    expect(screen.getByRole("heading", { name: ".ENV MANAGER" })).toBeVisible()
+    expect(confirm).toHaveBeenCalledTimes(2)
+    confirm.mockRestore()
+  })
+
   it("serializes rapid preference writes without reverting an earlier patch", async () => {
     const desktop = gateway()
     const resolvers: Array<() => void> = []

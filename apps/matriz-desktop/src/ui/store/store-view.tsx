@@ -2,7 +2,7 @@ import { Badge, Button } from "@matriz/design-ui/primitives"
 import { useEffect, useMemo, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { CommerceSnapshot, StorePackage } from "../../domain/types"
+import type { CommerceSnapshot, ManagedOperationId, StorePackage } from "../../domain/types"
 
 export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal(kind: "success" | "error"): void }) {
   const [snapshot, setSnapshot] = useState<CommerceSnapshot>()
@@ -27,7 +27,14 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
     setBusy(item.id); setError("")
     try {
       const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === item.appId)
-      if (runtime?.status !== "ready") await gateway.restartRuntime(item.appId)
+      if (!runtime || runtime.ownership === "none" || runtime.status === "stopped") {
+        await gateway.startManagedOperation(`app.${item.appId}.web` as ManagedOperationId)
+      } else if (runtime.ownership === "managed" && runtime.status !== "ready") {
+        await gateway.restartRuntime(item.appId)
+      } else if (runtime.ownership === "external" && runtime.status !== "ready") {
+        throw new Error(`${item.name} está sob controle externo e ainda não está disponível.`)
+      }
+      await waitForRuntime(gateway, item)
       await gateway.openRuntimeTarget({ appId: item.appId, routePath: "/" })
       signal("success")
     } catch (cause) { setError(String(cause)); signal("error") }
@@ -53,6 +60,18 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
     </div>
   </section>
 }
+
+async function waitForRuntime(gateway: DesktopGateway, item: StorePackage) {
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === item.appId)
+    if (runtime?.status === "ready") return runtime
+    if (runtime?.ownership === "external" && runtime.status === "degraded") throw new Error(`${item.name} não respondeu na porta externa.`)
+    await delay(250)
+  }
+  throw new Error(`${item.name} não ficou pronto dentro do tempo esperado.`)
+}
+
+function delay(milliseconds: number) { return new Promise((resolve) => window.setTimeout(resolve, milliseconds)) }
 
 function PackageCard({ item, busy, selected, inspect, acquire, install, open, uninstall }: { item: StorePackage; busy: boolean; selected: boolean; inspect(): void; acquire(): void; install(): void; open(): void; uninstall(): void }) {
   return <article className={`package-card${selected ? " is-selected" : ""}`}>
