@@ -7,16 +7,27 @@ export const manifest: AppManifestDTO = {
   appId: "seumei",
   name: "Seumei",
   description:
-    "Gestao de estabelecimentos e operacao. Permite selecionar estabelecimento e gerar contrato via Contracts.",
-  version: "0.1.0",
+    "Business OS multiempresa com Hub, contexto operacional isolado e aplicativos instalados por empresa.",
+  version: "0.2.0",
   contractVersion: "v1",
-  primaryRoute: "/",
+  primaryRoute: "/hub",
   routes: [
-    { label: "Dashboard", path: "/", order: 0 },
-    { label: "Estabelecimentos", path: "/establishments", order: 1 },
-    { label: "Onboarding", path: "/onboarding", order: 2 },
+    { label: "Hub", path: "/hub", order: 0 },
+    { label: "Empresas", path: "/hub", order: 1 },
+    { label: "Estabelecimentos", path: "/establishments", order: 2 },
+    { label: "Onboarding", path: "/onboarding", order: 3 },
   ],
   capabilities: [
+    {
+      id: "seumei.company.read",
+      name: "Ler empresas",
+      description: "Lista somente empresas ligadas à membership autenticada.",
+    },
+    {
+      id: "seumei.apps.access",
+      name: "Acessar aplicativos instalados",
+      description: "Resolve instalação e permissão dentro do contexto da empresa.",
+    },
     {
       id: "seumei.establishment.read",
       name: "Ler estabelecimentos",
@@ -52,9 +63,9 @@ export const manifest: AppManifestDTO = {
     hasSpecificStep: true,
     specificStepTitle: "Perfil de estabelecimento",
   },
-  navigationEntry: { label: "Seumei", path: "/", order: 2 },
+  navigationEntry: { label: "Seumei", path: "/hub", order: 2 },
   ownership: {
-    domainSummary: "Dominio de estabelecimentos e operacao.",
+    domainSummary: "Hub multiempresa, memberships, aplicativos instalados e operação isolada por tenant.",
     maintainers: ["matriz-seumei"],
   },
   widgets: [

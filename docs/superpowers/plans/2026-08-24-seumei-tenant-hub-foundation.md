@@ -451,7 +451,7 @@ git commit -m "feat(seumei): add safe company hub navigation"
 - Consumes: shell view models and MatrizLib public primitives.
 - Produces: one reusable shell accepting `company`, `activeApp`, `navigation`, `apps`, `contextActions`, and `children`.
 
-- [ ] **Step 1: Write failing keyboard and explicit-toggle interaction tests**
+- [x] **Step 1: Write failing keyboard and explicit-toggle interaction tests**
 
 ```tsx
 it("reveals contextual navigation without hover", async () => {
@@ -469,32 +469,32 @@ it("keeps app switching available to keyboard users", async () => {
 })
 ```
 
-- [ ] **Step 2: Run the focused shell test and confirm failure**
+- [x] **Step 2: Run the focused shell test and confirm failure**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test -- src/ui/shell/SeumeiShell.test.tsx
 ```
 
-- [ ] **Step 3: Implement shell contracts and interaction state**
+- [x] **Step 3: Implement shell contracts and interaction state**
 
 Use explicit buttons as the authoritative control. Pointer proximity and
 `focus-within` enhance reveal. Escape closes transient panels and focus returns
 to their triggers. No domain repository is imported into shell components.
 
-- [ ] **Step 4: Implement Seumei visual tokens and responsive geometry**
+- [x] **Step 4: Implement Seumei visual tokens and responsive geometry**
 
 Use dark graphite surfaces, precise one-pixel borders, compact type, purple
 accent, 52–60px topbar geometry, compact/expanded sidebar states, dense cards,
 and reference-matched spacing. Add media queries for smaller desktop, tablet,
 and mobile, plus `@media (prefers-reduced-motion: reduce)` overrides.
 
-- [ ] **Step 5: Replace the legacy static AppShell with the shared shell adapter**
+- [x] **Step 5: Replace the legacy static AppShell with the shared shell adapter**
 
 Keep the public `AppShell({ children })` compatibility while routing new Hub
 surfaces through `SeumeiShell`. Remove the extra static session bar because
 account access belongs inside the topbar.
 
-- [ ] **Step 6: Run component and scoped validations**
+- [x] **Step 6: Run component and scoped validations**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
@@ -502,7 +502,7 @@ pnpm --filter @matriz/app-seumei typecheck
 pnpm --filter @matriz/app-seumei lint
 ```
 
-- [ ] **Step 7: Commit the shell**
+- [x] **Step 7: Commit the shell**
 
 ```powershell
 git add apps/seumei/app apps/seumei/src/ui apps/seumei/src/auth/provider.tsx
@@ -524,7 +524,7 @@ git commit -m "feat(seumei): build intelligent authenticated shell"
 - Consumes: completed Tasks 1–7.
 - Produces: verified authenticated Hub and tenant-safe shell.
 
-- [ ] **Step 1: Run the complete scoped automated suite**
+- [x] **Step 1: Run the complete scoped automated suite**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
@@ -534,7 +534,7 @@ pnpm --filter @matriz/app-seumei lint
 
 Expected: all commands exit successfully with no ignored failures.
 
-- [ ] **Step 2: Start Hub authentication and Seumei**
+- [x] **Step 2: Start Hub authentication and Seumei**
 
 ```powershell
 pnpm --filter @matriz/app-matriz-hub dev
@@ -543,13 +543,13 @@ pnpm --filter @matriz/app-seumei dev
 
 Authenticate through the accepted login, then open `/hub`.
 
-- [ ] **Step 3: Verify the functional scenario**
+- [x] **Step 3: Verify the functional scenario**
 
 Confirm that Tai sees Galáxia Burger and Matriz Labs; Galáxia includes Store;
 Matriz Labs does not; company switching updates branding and app lists; direct
 unauthorized app navigation fails closed; appearance selection survives switching.
 
-- [ ] **Step 4: Inspect the reference geometry at four widths**
+- [x] **Step 4: Inspect the reference geometry at four widths**
 
 Capture and compare:
 
@@ -563,7 +563,7 @@ Capture and compare:
 Review topbar height, sidebar proportions, company cards, app tiles, type scale,
 spacing, borders, contrast, focus states, overflow, and explicit navigation controls.
 
-- [ ] **Step 5: Apply the visual correction checklist**
+- [x] **Step 5: Apply the visual correction checklist**
 
 Set the desktop topbar to 56px, compact sidebar to 72px, expanded sidebar to
 232px, content gutter to 24px, card border to one semantic pixel, and Hub content
@@ -573,7 +573,7 @@ least 2px visible contrast, and transient controls remain open while focused.
 Add a focused interaction assertion to `SeumeiShell.test.tsx` for any behavioral
 defect found, run that test, and then repeat the four screenshots.
 
-- [ ] **Step 6: Run final validation after corrections**
+- [x] **Step 6: Run final validation after corrections**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
@@ -582,7 +582,7 @@ pnpm --filter @matriz/app-seumei lint
 git diff --check
 ```
 
-- [ ] **Step 7: Commit the verified slice**
+- [x] **Step 7: Commit the verified slice**
 
 ```powershell
 git add apps/seumei docs/superpowers/plans/2026-08-24-seumei-tenant-hub-foundation.md pnpm-lock.yaml
@@ -597,3 +597,15 @@ git commit -m "feat(seumei): complete tenant-safe business os hub"
 - Fixture independence is exercised by repository, service, and UI tests.
 - The legacy establishment flow remains available and unmodified until the shell adapter step.
 - Automated validation and real visual inspection are both required before completion.
+
+## Completion Evidence — 2026-08-24
+
+- Canonical demo account: `demo@seumei.local`; one click enters `/hub` through the normal authentication broker.
+- Scoped app suite: 20/20 tests passed; typecheck and lint passed with zero ignored failures.
+- Monorepo smoke suite: 148/148 tests passed after generating the expected isolated-worktree Prisma clients.
+- Browser scenario: Galáxia Burger exposes seven installed apps; Matriz Labs exposes four and does not expose Orders, Inventory, Finance, or Store.
+- Direct access to `/c/matriz-labs/apps/orders` fails closed with the safe unavailable state.
+- Responsive checks passed at 390×844, 768×1024, 1180×820, and 1440×900 with no horizontal overflow.
+- Shell checks: 56px topbar, 72px compact desktop sidebar, 232px revealed sidebar, touch menu, keyboard app switcher, Escape close, focus restoration, and reduced-motion rules.
+- Generated company covers remain fixture-owned assets; no feature code branches on Galáxia Burger or Matriz Labs.
+- Environment note: only regenerable pnpm metadata and app-local `.next` caches were cleaned after the disk reached capacity during visual validation.

@@ -13,11 +13,11 @@ export function AppShell({ children }: { readonly children: React.ReactNode }) {
   const activeApp = apps.find((app) => pathname.includes(`/apps/${app.id}`)) ?? null
   const navigation = activeApp
     ? [
-        { id: activeApp.id, label: activeApp.name, href: activeApp.href },
+        { id: activeApp.id, label: activeApp.name, href: activeApp.href, icon: activeApp.icon },
         { id: "overview", label: "Visão geral", href: activeApp.href },
         { id: "activity", label: "Atividade", href: `${activeApp.href}#activity` },
       ]
-    : apps.map((app) => ({ id: app.id, label: app.name, href: app.href }))
+    : apps.map((app) => ({ id: app.id, label: app.name, href: app.href, icon: app.icon }))
 
   return (
     <SeumeiShell

@@ -9,6 +9,9 @@ import {
 } from "@matriz/platform-auth/client"
 import { SeumeiDemoAccess } from "./SeumeiDemoAccess"
 
+const { push } = vi.hoisted(() => ({ push: vi.fn() }))
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }))
+
 describe("SeumeiDemoAccess", () => {
   it("authenticates the canonical demo account through the broker", async () => {
     const demoSession: AuthSession = {
@@ -63,6 +66,7 @@ describe("SeumeiDemoAccess", () => {
       expect(signInWithEmail).toHaveBeenCalledWith("demo@seumei.local")
       expect(acceptSession).toHaveBeenCalledWith(demoSession)
       expect(recordAppOpen).toHaveBeenCalledWith("seumei")
+      expect(push).toHaveBeenCalledWith("/hub")
     })
   })
 })

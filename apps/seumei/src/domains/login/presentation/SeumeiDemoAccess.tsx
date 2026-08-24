@@ -1,10 +1,12 @@
 "use client"
 
 import * as React from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@matriz/platform-auth/client"
 import { SEUMEI_DEMO_EMAIL } from "../application/demo-account"
 
 export function SeumeiDemoAccess() {
+  const router = useRouter()
   const { broker, acceptSession } = useAuth()
   const [busy, setBusy] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
@@ -17,6 +19,7 @@ export function SeumeiDemoAccess() {
       const session = await broker.signInWithEmail(SEUMEI_DEMO_EMAIL)
       acceptSession(session)
       await broker.recordAppOpen("seumei")
+      router.push("/hub")
     } catch (cause) {
       setError(
         cause instanceof Error
