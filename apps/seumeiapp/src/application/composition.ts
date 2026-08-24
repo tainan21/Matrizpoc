@@ -8,14 +8,16 @@ import { createCoreAccessRepository } from "../infrastructure/core-access.reposi
 import { createCatalogRepository } from "../infrastructure/catalog.repository"
 import { createPortfolioRepository } from "../infrastructure/portfolio.repository"
 import { createRestaurantRepository } from "../infrastructure/restaurant.repository"
+import { createCommerceRepository } from "../infrastructure/commerce.repository"
 import { resolveDatabaseAvailability } from "../infrastructure/database-config"
 import type { CompanyHttpServices } from "../http/company-handlers"
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
 import type { PortfolioRepository } from "../domain/repositories/portfolio-repository"
 import type { RestaurantRepository } from "../domain/repositories/restaurant-repository"
+import type { CommerceRepository } from "../domain/repositories/commerce-repository"
 
 export type CompanyServicesResolution =
-  | { readonly kind: "ready"; readonly services: CompanyHttpServices & { readonly catalog: CatalogRepository; readonly portfolio: PortfolioRepository; readonly restaurant: RestaurantRepository } }
+  | { readonly kind: "ready"; readonly services: CompanyHttpServices & { readonly catalog: CatalogRepository; readonly portfolio: PortfolioRepository; readonly restaurant: RestaurantRepository; readonly commerce: CommerceRepository } }
   | { readonly kind: "unavailable" }
 
 export function createCompanyServices(
@@ -32,6 +34,7 @@ export function createCompanyServices(
       catalog: createCatalogRepository(getSeumeiDb()),
       portfolio: createPortfolioRepository(getSeumeiDb()),
       restaurant: createRestaurantRepository(getSeumeiDb()),
+      commerce: createCommerceRepository(getSeumeiDb()),
       ids: { tenantId: randomUUID },
       events: {
         companySelected(company) {

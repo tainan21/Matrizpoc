@@ -5,11 +5,13 @@ import { withAuthenticatedSession, type CompanyHttpServices, type HttpResult } f
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
 import type { PortfolioRepository } from "../domain/repositories/portfolio-repository"
 import type { RestaurantRepository } from "../domain/repositories/restaurant-repository"
+import type { CommerceRepository } from "../domain/repositories/commerce-repository"
 
 export type SeumeiHttpServices = CompanyHttpServices & {
   readonly catalog: CatalogRepository
   readonly portfolio: PortfolioRepository
   readonly restaurant: RestaurantRepository
+  readonly commerce: CommerceRepository
 }
 
 export function jsonResult(result: HttpResult): NextResponse {
