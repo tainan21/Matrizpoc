@@ -6,6 +6,7 @@ import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { TenantProvider } from "@matriz/access-tenants/client"
 import { seumeiAuthConfig } from "./config"
 import { AppShell } from "../ui/components/AppShell"
+import { SeumeiTenantProvider } from "../domains/memberships/presentation/SeumeiTenantProvider"
 
 function RedirectToLogin(): null {
   const router = useRouter()
@@ -83,8 +84,10 @@ function SeumeiAuthShell({ children }: { children: React.ReactNode }) {
   }
   return (
     <AuthGate fallback={<RedirectToLogin />} loadingFallback={<BootingFallback />}>
-      <SeumeiSessionBar />
-      <AppShell>{children}</AppShell>
+      <SeumeiTenantProvider>
+        <SeumeiSessionBar />
+        <AppShell>{children}</AppShell>
+      </SeumeiTenantProvider>
     </AuthGate>
   )
 }

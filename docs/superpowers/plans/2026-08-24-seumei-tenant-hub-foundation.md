@@ -369,7 +369,7 @@ git commit -m "feat(seumei): compose tenant-aware hub service"
 - Consumes: authenticated `AuthSession`, `BusinessOsService`, and `HubViewModel`.
 - Produces: `SeumeiTenantState` with `current`, `companies`, `switchCompany`, and typed error state.
 
-- [ ] **Step 1: Write failing safe-switch tests**
+- [x] **Step 1: Write failing safe-switch tests**
 
 ```tsx
 it("keeps the valid company when an invalid switch is requested", async () => {
@@ -381,17 +381,17 @@ it("keeps the valid company when an invalid switch is requested", async () => {
 })
 ```
 
-- [ ] **Step 2: Run the focused test and confirm failure**
+- [x] **Step 2: Run the focused test and confirm failure**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test -- src/domains/memberships/presentation/SeumeiTenantProvider.test.tsx
 ```
 
-- [ ] **Step 3: Implement the provider using authenticated user id as authority**
+- [x] **Step 3: Implement the provider using authenticated user id as authority**
 
 The selected company is restored from an app-local storage key scoped by user id, revalidated against memberships at startup, and replaced only after successful resolution. Appearance uses a separate user-scoped key.
 
-- [ ] **Step 4: Write and verify the failing demo-access test**
+- [x] **Step 4: Write and verify the failing demo-access test**
 
 ```tsx
 it("authenticates the canonical demo account through the broker", async () => {
@@ -413,11 +413,11 @@ accepted shared login flow. It calls the normal broker, accepts the returned
 session, records the Seumei app open, and contains no membership or repository
 bypass.
 
-- [ ] **Step 5: Implement authorized routes and Hub screen**
+- [x] **Step 5: Implement authorized routes and Hub screen**
 
 `/` redirects to `/hub`. Dynamic company/app routes resolve slug and app id through the application service; unknown or unauthorized values render a safe unavailable state without fixture details.
 
-- [ ] **Step 6: Run tests, typecheck, and lint**
+- [x] **Step 6: Run tests, typecheck, and lint**
 
 ```powershell
 pnpm --filter @matriz/app-seumei test
@@ -425,7 +425,7 @@ pnpm --filter @matriz/app-seumei typecheck
 pnpm --filter @matriz/app-seumei lint
 ```
 
-- [ ] **Step 7: Commit tenant navigation and demo access**
+- [x] **Step 7: Commit tenant navigation and demo access**
 
 ```powershell
 git add apps/seumei/app apps/seumei/src/auth apps/seumei/src/domains
