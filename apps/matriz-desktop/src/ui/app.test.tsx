@@ -167,7 +167,14 @@ describe("Matriz Control", () => {
     fireEvent.click(screen.getByRole("button", { name: "Apps" }))
 
     expect(screen.getByRole("heading", { name: ".ENV MANAGER" })).toBeVisible()
-    expect(confirm).toHaveBeenCalledTimes(2)
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true })
+    const deck = screen.getByRole("combobox", { name: "Buscar ações" })
+    fireEvent.change(deck, { target: { value: "Nova sessão PowerShell" } })
+    fireEvent.keyDown(deck, { key: "Enter" })
+
+    expect(desktop.createTerminal).not.toHaveBeenCalled()
+    expect(screen.getByRole("heading", { name: ".ENV MANAGER" })).toBeVisible()
+    expect(confirm).toHaveBeenCalledTimes(3)
     confirm.mockRestore()
   })
 

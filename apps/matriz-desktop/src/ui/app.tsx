@@ -182,6 +182,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 
   const executeDeck = async (id: string) => {
     if (id === "terminal:new") {
+      if (!requestWorkspaceNavigation()) return
       await createTerminal()
       setView("terminal")
     } else {
