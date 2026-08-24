@@ -2,6 +2,7 @@ pub mod activity;
 mod catalog;
 pub mod command_contract;
 mod doctor;
+pub mod environment;
 mod native_apps;
 mod ports;
 mod preview;
