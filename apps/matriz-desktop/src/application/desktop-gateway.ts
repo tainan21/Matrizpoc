@@ -19,6 +19,9 @@ import type {
   TerminalEvent,
   TerminalSession,
   WorkspacePulse,
+  EnvironmentFile,
+  EnvironmentDocument,
+  EnvironmentSaveRequest,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -62,4 +65,8 @@ export interface DesktopGateway {
   installNativeApp(): Promise<NativeAppRuntime>
   startNativeApp(): Promise<NativeAppRuntime>
   stopNativeApp(): Promise<NativeAppRuntime>
+  listEnvironments(appId: DesktopAppId): Promise<readonly EnvironmentFile[]>
+  readEnvironment(appId: DesktopAppId, fileName: string): Promise<EnvironmentDocument>
+  revealEnvironmentValue(appId: DesktopAppId, fileName: string, key: string): Promise<string>
+  saveEnvironment(request: EnvironmentSaveRequest): Promise<EnvironmentDocument>
 }

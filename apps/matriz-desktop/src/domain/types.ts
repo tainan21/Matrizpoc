@@ -143,3 +143,31 @@ export interface NativeAppRuntime {
   readonly state: "not-built" | "built" | "installed" | "running"
   readonly version?: string
 }
+
+export interface EnvironmentFile {
+  readonly fileName: string
+  readonly size: number
+  readonly modifiedAt: number
+}
+
+export interface EnvironmentVariable {
+  readonly key: string
+  readonly value?: string
+  readonly sensitive: boolean
+  readonly source: string
+}
+
+export interface EnvironmentDocument {
+  readonly appId: DesktopAppId
+  readonly fileName: string
+  readonly revision: string
+  readonly variables: readonly EnvironmentVariable[]
+  readonly missingRequired: readonly string[]
+}
+
+export interface EnvironmentSaveRequest {
+  readonly appId: DesktopAppId
+  readonly fileName: string
+  readonly revision: string
+  readonly variables: readonly { readonly key: string; readonly value?: string }[]
+}

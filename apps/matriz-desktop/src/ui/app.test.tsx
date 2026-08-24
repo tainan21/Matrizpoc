@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
 import type { DesktopGateway } from "../application/desktop-gateway"
+import type { EnvironmentVariable } from "../domain/types"
 import { ControlApp } from "./app"
 
 afterEach(cleanup)
@@ -88,6 +89,28 @@ function gateway(): DesktopGateway {
     installNativeApp: vi.fn().mockResolvedValue({ appId: "matriz-admin", state: "installed", version: "0.1.0" }),
     startNativeApp: vi.fn().mockResolvedValue({ appId: "matriz-admin", state: "running", version: "0.1.0" }),
     stopNativeApp: vi.fn().mockResolvedValue({ appId: "matriz-admin", state: "installed", version: "0.1.0" }),
+    listEnvironments: vi.fn().mockResolvedValue([
+      { fileName: ".env.local", size: 20, modifiedAt: Date.now() },
+    ]),
+    readEnvironment: vi.fn().mockResolvedValue({
+      appId: "matriz-admin",
+      fileName: ".env.local",
+      revision: "rev",
+      missingRequired: [],
+      variables: [],
+    }),
+    revealEnvironmentValue: vi.fn().mockResolvedValue("secret"),
+    saveEnvironment: vi.fn().mockImplementation(async (request) => ({
+      appId: request.appId,
+      fileName: request.fileName,
+      revision: "next-rev",
+      missingRequired: [],
+      variables: request.variables.map((variable: EnvironmentVariable) => ({
+        ...variable,
+        sensitive: false,
+        source: request.fileName,
+      })),
+    })),
   }
 }
 

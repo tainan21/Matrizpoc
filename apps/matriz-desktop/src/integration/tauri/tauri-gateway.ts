@@ -86,5 +86,9 @@ export function createTauriGateway(
     installNativeApp: () => invoke(commands.installNativeApp),
     startNativeApp: () => invoke(commands.startNativeApp),
     stopNativeApp: () => invoke(commands.stopNativeApp),
+    listEnvironments: (appId) => invoke(commands.listEnvironments, { appId }),
+    readEnvironment: (appId, fileName) => invoke(commands.readEnvironment, { appId, fileName }),
+    revealEnvironmentValue: (appId, fileName, key) => invoke(commands.revealEnvironmentValue, { appId, fileName, key }),
+    saveEnvironment: (request) => invoke(commands.saveEnvironment, { request }),
   }
 }

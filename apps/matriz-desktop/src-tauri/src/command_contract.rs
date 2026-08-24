@@ -39,4 +39,8 @@ pub const COMMAND_NAMES: &[&str] = &[
     "install_native_app",
     "start_native_app",
     "stop_native_app",
+    "list_environments",
+    "read_environment",
+    "reveal_environment_value",
+    "save_environment",
 ];

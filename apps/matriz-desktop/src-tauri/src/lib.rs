@@ -19,6 +19,9 @@ mod workspace;
 use std::fmt;
 
 use activity::{ActivityEnvelope, ActivityHub};
+use environment::{
+    EnvironmentDocument, EnvironmentFile, EnvironmentSaveRequest, EnvironmentService,
+};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
@@ -533,6 +536,65 @@ fn stop_native_app(
 }
 
 #[tauri::command(rename_all = "camelCase")]
+fn list_environments(
+    operations: tauri::State<'_, OperationsState>,
+    app_id: String,
+) -> Result<Vec<EnvironmentFile>, String> {
+    EnvironmentService::new(resources::WorkspaceResourceService::new(
+        operations.root()?,
+    )?)
+    .list(&app_id)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn read_environment(
+    operations: tauri::State<'_, OperationsState>,
+    app_id: String,
+    file_name: String,
+) -> Result<EnvironmentDocument, String> {
+    EnvironmentService::new(resources::WorkspaceResourceService::new(
+        operations.root()?,
+    )?)
+    .read(&app_id, &file_name)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn reveal_environment_value(
+    operations: tauri::State<'_, OperationsState>,
+    app_id: String,
+    file_name: String,
+    key: String,
+) -> Result<String, String> {
+    EnvironmentService::new(resources::WorkspaceResourceService::new(
+        operations.root()?,
+    )?)
+    .reveal(&app_id, &file_name, &key)
+}
+
+#[tauri::command]
+fn save_environment(
+    operations: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
+    request: EnvironmentSaveRequest,
+) -> Result<EnvironmentDocument, String> {
+    let app_id = request.app_id.clone();
+    let file_name = request.file_name.clone();
+    let variable_count = request.variables.len();
+    let document = EnvironmentService::new(resources::WorkspaceResourceService::new(
+        operations.root()?,
+    )?)
+    .save(request)?;
+    activity.publish(
+        "environment.saved",
+        "success",
+        "Ambiente salvo",
+        Some(&format!("{file_name} · {variable_count} variáveis")),
+        Some(&app_id),
+    );
+    Ok(document)
+}
+
+#[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
     session_id: String,
@@ -666,7 +728,11 @@ pub fn run() {
             get_native_app_runtime,
             install_native_app,
             start_native_app,
-            stop_native_app
+            stop_native_app,
+            list_environments,
+            read_environment,
+            reveal_environment_value,
+            save_environment
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");

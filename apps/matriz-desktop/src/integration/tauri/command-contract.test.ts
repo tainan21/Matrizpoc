@@ -46,6 +46,10 @@ describe("Tauri command contract", () => {
       installNativeApp: "install_native_app",
       startNativeApp: "start_native_app",
       stopNativeApp: "stop_native_app",
+      listEnvironments: "list_environments",
+      readEnvironment: "read_environment",
+      revealEnvironmentValue: "reveal_environment_value",
+      saveEnvironment: "save_environment",
     })
     expect(Object.isFrozen(TAURI_COMMAND_CONTRACT)).toBe(true)
   })
@@ -105,6 +109,11 @@ describe("Tauri command contract", () => {
     await gateway.installNativeApp()
     await gateway.startNativeApp()
     await gateway.stopNativeApp()
+    await gateway.listEnvironments("matriz-admin")
+    await gateway.readEnvironment("matriz-admin", ".env.local")
+    await gateway.revealEnvironmentValue("matriz-admin", ".env.local", "JWT_SECRET")
+    const environmentRequest = { appId: "matriz-admin" as const, fileName: ".env.local", revision: "rev-1", variables: [{ key: "PORT", value: "3002" }] }
+    await gateway.saveEnvironment(environmentRequest)
 
     expect(calls).toEqual([
       { command: "get_snapshot", args: undefined },
@@ -153,6 +162,10 @@ describe("Tauri command contract", () => {
       { command: "install_native_app", args: undefined },
       { command: "start_native_app", args: undefined },
       { command: "stop_native_app", args: undefined },
+      { command: "list_environments", args: { appId: "matriz-admin" } },
+      { command: "read_environment", args: { appId: "matriz-admin", fileName: ".env.local" } },
+      { command: "reveal_environment_value", args: { appId: "matriz-admin", fileName: ".env.local", key: "JWT_SECRET" } },
+      { command: "save_environment", args: { request: environmentRequest } },
     ])
   })
 })

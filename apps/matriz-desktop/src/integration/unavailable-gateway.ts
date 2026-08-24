@@ -74,4 +74,17 @@ export const unavailableGateway: DesktopGateway = {
   installNativeApp: async () => unavailable(),
   startNativeApp: async () => unavailable(),
   stopNativeApp: async () => unavailable(),
+  listEnvironments: async () => [
+    { fileName: ".env.local", size: 312, modifiedAt: now - 60_000 },
+    { fileName: ".env.example", size: 148, modifiedAt: now - 86_400_000 },
+  ],
+  readEnvironment: async (appId, fileName) => ({ appId, fileName, revision: "demo-env", missingRequired: ["EMAIL_FROM"], variables: [
+    { key: "NODE_ENV", value: "development", sensitive: false, source: fileName },
+    { key: "PORT", value: "3002", sensitive: false, source: fileName },
+    { key: "DATABASE_URL", sensitive: true, source: fileName },
+    { key: "JWT_SECRET", sensitive: true, source: fileName },
+    { key: "NEXT_PUBLIC_API_URL", value: "http://localhost:3000/api", sensitive: false, source: fileName },
+  ] }),
+  revealEnvironmentValue: async () => "••••••••",
+  saveEnvironment: async (request) => ({ ...request, missingRequired: [], variables: request.variables.map((item) => ({ ...item, sensitive: /SECRET|TOKEN|PASSWORD|DATABASE_URL/.test(item.key), source: request.fileName })) }),
 }

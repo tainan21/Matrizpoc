@@ -41,4 +41,8 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   installNativeApp: "install_native_app",
   startNativeApp: "start_native_app",
   stopNativeApp: "stop_native_app",
+  listEnvironments: "list_environments",
+  readEnvironment: "read_environment",
+  revealEnvironmentValue: "reveal_environment_value",
+  saveEnvironment: "save_environment",
 } as const satisfies Readonly<Record<keyof DesktopGateway, string>>)
