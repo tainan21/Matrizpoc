@@ -62,7 +62,15 @@ Capturas: `docs/audit/assets/2026-08-24-seumei/`.
 
 ## Gates
 
-O fechamento registra os resultados finais consecutivos na seção de evidências do commit final. O banco usado no browser foi um PostgreSQL 17 descartável isolado na porta `55432`, criado sem tocar no serviço PostgreSQL principal da máquina.
+Duas rodadas consecutivas, sobre o commit de aceitação `e3ad20e`, foram aprovadas:
+
+- Seumei: 53 arquivos / 253 testes, lint, typecheck e build com 43 rotas;
+- Matriz Hub: 18 arquivos / 64 testes, lint, typecheck e build;
+- smoke global: 24 arquivos / 158 testes;
+- seis schemas Prisma válidos;
+- lint, typecheck e build globais aprovados (37/37, 37/37 e 10/10 tarefas).
+
+O banco usado no browser foi um PostgreSQL 17 descartável isolado na porta `55432`, criado sem tocar no serviço PostgreSQL principal da máquina. Os avisos observados são de tooling preexistente (faixa suportada do TypeScript, raiz inferida do Next e API CJS do Vite), sem falha de gate ou erro de aplicação.
 
 ## Limites reais
 
