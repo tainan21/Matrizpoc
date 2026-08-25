@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events"
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import { resolveSpawnSpec, terminalEnvironment, TerminalSupervisor, type ProcessHandle, type ProcessRuntime } from "./terminal-supervisor"
 
 class FakeRuntime implements ProcessRuntime {
@@ -33,6 +33,39 @@ describe("TerminalSupervisor", () => {
     const session = await supervisor.start("demo", "dev")
     runtime.handle.emit("exit", 7)
     expect(supervisor.get(session.id)).toMatchObject({ status: "exited", exitCode: 7 })
+  })
+
+  it("delivers one eligible failure without blocking terminal state", async () => {
+    const runtime = new FakeRuntime()
+    const delivered: string[] = []
+    const supervisor = new TerminalSupervisor({
+      rootDir: "C:/repo",
+      runtime,
+      onEligibleFailure: async (diagnostic) => { delivered.push(diagnostic.fingerprint) },
+      resolveAction: async () => ({ projectId: "demo", projectName: "Demo", actionId: "test", label: "Test", command: "pnpm", args: ["test"], cwd: "C:/repo/apps/demo" }),
+    })
+    const session = await supervisor.start("demo", "test")
+    runtime.handle.emit("output", "FAIL expected true\n")
+    runtime.handle.emit("exit", 1)
+
+    expect(supervisor.get(session.id)).toMatchObject({ status: "exited", exitCode: 1 })
+    await vi.waitFor(() => expect(delivered).toHaveLength(1))
+  })
+
+  it("keeps terminal state stable when diagnostic delivery fails", async () => {
+    const runtime = new FakeRuntime()
+    const supervisor = new TerminalSupervisor({
+      rootDir: "C:/repo",
+      runtime,
+      onEligibleFailure: async () => { throw new Error("Workbench offline") },
+      resolveAction: async () => ({ projectId: "demo", projectName: "Demo", actionId: "lint", label: "Lint", command: "pnpm", args: ["lint"], cwd: "C:/repo/apps/demo" }),
+    })
+    const session = await supervisor.start("demo", "lint")
+    runtime.handle.emit("output", "lint failed\n")
+    runtime.handle.emit("exit", 1)
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(supervisor.get(session.id)).toMatchObject({ status: "exited", exitCode: 1, error: null })
   })
 
   it("removes terminal control sequences from browser output", async () => {

@@ -3,7 +3,9 @@ import { spawn } from "node:child_process"
 import { randomUUID } from "node:crypto"
 import { resolve } from "node:path"
 import type { ResolvedTerminalAction, TerminalSession } from "../domain/terminal"
+import type { WorkbenchDiagnosticInput } from "../integration/workbench/workbench-client"
 import { resolveTerminalAction, terminalRoute } from "../integration/projects/project-catalog"
+import { toControlDiagnostic } from "./control-diagnostic-mapper"
 
 export interface ProcessHandle extends EventEmitter { pid: number | null; write(input: string): void; stop(): Promise<void> }
 export interface ProcessRuntime { start(action: ResolvedTerminalAction): ProcessHandle }
@@ -42,7 +44,7 @@ class NodeProcessRuntime implements ProcessRuntime {
   }
 }
 
-interface SupervisorOptions { rootDir: string; runtime?: ProcessRuntime; maxLines?: number; resolveAction?: (rootDir: string, projectId: string, actionId: string) => Promise<ResolvedTerminalAction> }
+interface SupervisorOptions { rootDir: string; runtime?: ProcessRuntime; maxLines?: number; resolveAction?: (rootDir: string, projectId: string, actionId: string) => Promise<ResolvedTerminalAction>; onEligibleFailure?: (diagnostic: WorkbenchDiagnosticInput) => Promise<void> }
 interface ManagedSession { snapshot: TerminalSession; handle: ProcessHandle; partial: string; currentDirectory: string }
 const redact = (line: string) => line
   .replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "")
@@ -69,8 +71,8 @@ export class TerminalSupervisor {
     this.sessions.set(id, managed)
     handle.on("running", () => { managed.snapshot.status = "running" })
     handle.on("output", (chunk: string) => this.append(managed, chunk))
-    handle.on("exit", (code: number) => { managed.snapshot.status = "exited"; managed.snapshot.exitCode = code; if (managed.partial) this.append(managed, "\n") })
-    handle.on("error", (error: Error) => { managed.snapshot.status = "failed"; managed.snapshot.error = error.message })
+    handle.on("exit", (code: number) => { managed.snapshot.status = "exited"; managed.snapshot.exitCode = code; if (managed.partial) this.append(managed, "\n"); this.deliverFailure(managed.snapshot) })
+    handle.on("error", (error: Error) => { managed.snapshot.status = "failed"; managed.snapshot.error = error.message; this.deliverFailure(managed.snapshot) })
     queueMicrotask(() => { if (managed.snapshot.status === "starting") managed.snapshot.status = "running" })
     return structuredClone(managed.snapshot)
   }
@@ -80,6 +82,12 @@ export class TerminalSupervisor {
     managed.partial = parts.pop() ?? ""
     managed.snapshot.lines.push(...parts.map(redact))
     if (managed.snapshot.lines.length > this.maxLines) managed.snapshot.lines.splice(0, managed.snapshot.lines.length - this.maxLines)
+  }
+
+  private deliverFailure(session: TerminalSession) {
+    const diagnostic = toControlDiagnostic(session)
+    if (!diagnostic || !this.options.onEligibleFailure) return
+    void this.options.onEligibleFailure(diagnostic).catch(() => undefined)
   }
 
   write(id: string, input: string) { const item = this.sessions.get(id); if (!item) throw new Error("Unknown session"); if (input.length > 4096) throw new Error("Input too large"); if (input.trim().toLowerCase() === "cd mih") { item.currentDirectory = this.options.rootDir; item.snapshot.route = terminalRoute(this.options.rootDir, item.currentDirectory); return } item.handle.write(input) }
