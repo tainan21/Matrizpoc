@@ -1,7 +1,7 @@
 /**
  * Seumei DI container.
  */
-import { createInMemoryStore } from "@matriz/platform-storage"
+import { createInMemoryStore, type KeyValueStore } from "@matriz/platform-storage"
 import { createSeumeiRepositories } from "../mock/repositories"
 import { createSeumeiUseCases, type SeumeiUseCases } from "../application/use-cases"
 import {
@@ -19,6 +19,13 @@ import {
   type CatalogService,
 } from "../domains/catalog/application/catalog.service"
 import { createFixtureCatalogRepository } from "../mock/catalog.repository"
+import { createFixtureStoreRepository } from "../mock/store.repository"
+import { createFixtureOrderRepository } from "../mock/order.repository"
+import {
+  createStorefrontService,
+  type StorefrontService,
+} from "../domains/store/application/storefront.service"
+import type { OrderRepository } from "../domains/orders/domain/order.repository"
 
 export interface SeumeiContainer {
   useCases: SeumeiUseCases
@@ -44,14 +51,34 @@ export function createDemoBusinessOs(userId: UserId): BusinessOsService {
 export interface DemoSeumeiRuntime {
   readonly businessOs: BusinessOsService
   readonly catalog: CatalogService
+  readonly storefront: StorefrontService
+  readonly orders: OrderRepository
 }
 
-export function createDemoSeumeiRuntime(userId: UserId): DemoSeumeiRuntime {
+export function createDemoSeumeiRuntime(
+  userId: UserId,
+  domainStorage: KeyValueStore = createInMemoryStore(),
+): DemoSeumeiRuntime {
   const repositories = createBusinessOsRepositories({ demoUserId: userId })
+  const catalogRepository = createFixtureCatalogRepository({
+    memberships: repositories.memberships,
+    storage: domainStorage,
+  })
+  const storeRepository = createFixtureStoreRepository({
+    memberships: repositories.memberships,
+  })
+  const orderRepository = createFixtureOrderRepository({
+    memberships: repositories.memberships,
+    storage: domainStorage,
+  })
   return {
     businessOs: createBusinessOsService(repositories),
-    catalog: createCatalogService(
-      createFixtureCatalogRepository({ memberships: repositories.memberships }),
-    ),
+    catalog: createCatalogService(catalogRepository),
+    storefront: createStorefrontService({
+      stores: storeRepository,
+      catalog: catalogRepository,
+      orders: orderRepository,
+    }),
+    orders: orderRepository,
   }
 }

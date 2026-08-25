@@ -36,7 +36,8 @@ function BootingFallback() {
 function SeumeiAuthShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const isLoginRoute = (pathname ?? "").startsWith("/login")
-  if (isLoginRoute) {
+  const isPublicStoreRoute = (pathname ?? "").startsWith("/loja/")
+  if (isLoginRoute || isPublicStoreRoute) {
     return <>{children}</>
   }
   return (

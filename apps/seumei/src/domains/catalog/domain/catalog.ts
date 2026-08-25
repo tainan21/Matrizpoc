@@ -32,6 +32,7 @@ export interface ProductModifier {
   readonly id: ProductModifierId
   readonly companyId: CompanyId
   readonly name: string
+  readonly imageUrl: string
   readonly priceDeltaCents: number
   readonly available: boolean
 }

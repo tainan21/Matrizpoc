@@ -1,9 +1,11 @@
 import type { MembershipRepository } from "../domains/memberships/domain/membership.repository"
+import type { KeyValueStore } from "@matriz/platform-storage"
 import type {
   CatalogRepository,
   TenantCatalogRepository,
 } from "../domains/catalog/domain/catalog.repository"
 import type { Product } from "../domains/catalog/domain/catalog"
+import type { CompanyId } from "../domains/companies/domain/company"
 import {
   FIXTURE_PRODUCT_CATEGORIES,
   FIXTURE_PRODUCT_MODIFIERS,
@@ -12,14 +14,52 @@ import {
 
 export function createFixtureCatalogRepository(input: {
   readonly memberships: MembershipRepository
+  readonly storage?: KeyValueStore
 }): CatalogRepository {
-  let products: Product[] = FIXTURE_PRODUCTS.map((product) => ({
+  const storageKey = "catalog-products:v1"
+  const seedProducts = () => FIXTURE_PRODUCTS.map((product) => ({
     ...product,
     modifierIds: [...product.modifierIds],
   }))
+  let products: Product[] = input.storage?.get<Product[]>(storageKey) ?? seedProducts()
+  if (input.storage && !input.storage.get<Product[]>(storageKey)) {
+    input.storage.set(storageKey, products)
+  }
   let copySequence = 0
 
+  function persist() {
+    input.storage?.set(storageKey, products)
+  }
+
+  function publishedReader(companyId: CompanyId) {
+    return {
+      async listProducts() {
+        return products.filter((product) => product.companyId === companyId)
+      },
+      async listCategories() {
+        return FIXTURE_PRODUCT_CATEGORIES.filter(
+          (category) => category.companyId === companyId,
+        ).sort((left, right) => left.sortOrder - right.sortOrder)
+      },
+      async listModifiers() {
+        return FIXTURE_PRODUCT_MODIFIERS.filter(
+          (modifier) => modifier.companyId === companyId,
+        )
+      },
+      async findProduct(productId: Parameters<TenantCatalogRepository["findProduct"]>[0]) {
+        return (
+          products.find(
+            (product) => product.companyId === companyId && product.id === productId,
+          ) ?? null
+        )
+      },
+    }
+  }
+
   return {
+    async bindPublished(companyId) {
+      return publishedReader(companyId)
+    },
     async bind(context) {
       const membership = await input.memberships.find(
         context.userId,
@@ -40,30 +80,7 @@ export function createFixtureCatalogRepository(input: {
       )
 
       const bound: TenantCatalogRepository = {
-        async listProducts() {
-          return products.filter(
-            (product) => product.companyId === context.companyId,
-          )
-        },
-        async listCategories() {
-          return FIXTURE_PRODUCT_CATEGORIES.filter(
-            (category) => category.companyId === context.companyId,
-          ).sort((left, right) => left.sortOrder - right.sortOrder)
-        },
-        async listModifiers() {
-          return FIXTURE_PRODUCT_MODIFIERS.filter(
-            (modifier) => modifier.companyId === context.companyId,
-          )
-        },
-        async findProduct(productId) {
-          return (
-            products.find(
-              (product) =>
-                product.companyId === context.companyId &&
-                product.id === productId,
-            ) ?? null
-          )
-        },
+        ...publishedReader(context.companyId),
         async saveProduct(product) {
           if (
             product.companyId !== context.companyId ||
@@ -87,6 +104,7 @@ export function createFixtureCatalogRepository(input: {
           } else {
             products = [...products, product]
           }
+          persist()
           return product
         },
         async duplicateProduct(productId) {
@@ -108,6 +126,7 @@ export function createFixtureCatalogRepository(input: {
             updatedAt: now,
           }
           products = [...products, copy]
+          persist()
           return copy
         },
       }
