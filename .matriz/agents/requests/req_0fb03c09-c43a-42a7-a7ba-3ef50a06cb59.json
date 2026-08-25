@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "req_0fb03c09-c43a-42a7-a7ba-3ef50a06cb59",
+  "projectId": "matriz-infra-hub",
+  "backlogItemId": "wi_50e69a55-1e8b-45bd-8698-451bbd13e488",
+  "title": "Produzir threat model e inventário de endpoints",
+  "instructions": "Reconcile documented Wave 1 delivery and record verification evidence.",
+  "status": "completed",
+  "claimedBy": "codex-wave1-reconciliation",
+  "resultSummary": "Verified completed Wave 1 delivery for matriz-program-v1-07.",
+  "changedFiles": [
+    "docs/security/THREAT-MODEL.md",
+    "docs/security/ENDPOINT-INVENTORY.md",
+    "tests/smoke/security-endpoint-inventory.test.ts"
+  ],
+  "checks": [
+    "pnpm exec vitest run --config vitest.config.ts tests/smoke/security-endpoint-inventory.test.ts",
+    "pnpm verify:boundaries"
+  ],
+  "review": {
+    "status": "approved",
+    "reviewedBy": "human-coordinator",
+    "reviewedAt": "2026-08-12T04:22:03.458Z",
+    "note": "Observed evidence and recorded checks approved.",
+    "runRevision": "9052834f"
+  },
+  "createdAt": "2026-08-12T04:22:03.444Z",
+  "updatedAt": "2026-08-12T04:22:03.458Z",
+  "revision": "5b34cfda7bd2c302"
+}

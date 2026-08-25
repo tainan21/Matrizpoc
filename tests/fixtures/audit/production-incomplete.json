@@ -1,0 +1,6 @@
+{
+  "error": {
+    "code": "EAUDIT",
+    "summary": "registry response was incomplete"
+  }
+}

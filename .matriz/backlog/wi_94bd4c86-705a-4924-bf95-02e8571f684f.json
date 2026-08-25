@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_94bd4c86-705a-4924-bf95-02e8571f684f",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Provisionar topologia Neon central",
+  "description": "Provisionar a topologia central de dados do ecossistema.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "neon"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_8af5f959-2510-4e01-8a46-1f9c8397e910",
+      "text": "Schemas core/hub/spot/seumei/contracts/willdash, branch CI e credenciais migration/runtime.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_99490eb7-0446-4e4e-8620-4d99499830f8",
+    "wi_9ed3c652-0ac2-4e03-8d42-2e5070b7d3f7"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.076Z",
+  "updatedAt": "2026-08-05T18:33:29.178Z",
+  "revision": "d5afc3c59b0c9649"
+}

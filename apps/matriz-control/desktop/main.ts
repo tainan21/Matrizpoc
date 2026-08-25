@@ -52,8 +52,8 @@ async function createWindow() {
   runtime = new BrowserRuntime({ repository })
   window = new BrowserWindow({ width: 1440, height: 900, minWidth: 980, minHeight: 700, backgroundColor: "#08060e", webPreferences: { preload: join(__dirname, "preload.js"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true } })
   window.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
-  await window.webContents.session.cookies.set({ url: "http://127.0.0.1:3008", name: CONTROL_SESSION_COOKIE, value: createSessionValue(localToken), path: "/", httpOnly: true, sameSite: "strict", secure: false, expirationDate: Math.floor(Date.now() / 1000) + 60 * 60 * 12 })
-  await window.loadURL(process.env.MATRIZ_CONTROL_DESKTOP_URL ?? "http://127.0.0.1:3008/browser")
+  await window.webContents.session.cookies.set({ url: "http://127.0.0.1:3009", name: CONTROL_SESSION_COOKIE, value: createSessionValue(localToken), path: "/", httpOnly: true, sameSite: "strict", secure: false, expirationDate: Math.floor(Date.now() / 1000) + 60 * 60 * 12 })
+  await window.loadURL(process.env.MATRIZ_CONTROL_DESKTOP_URL ?? "http://127.0.0.1:3009/browser")
   window.on("close", (event) => {
     if (windowCloseAuthorized || !vault || !vaultRoot) return
     event.preventDefault()
@@ -73,12 +73,12 @@ async function ensureRendererServer() {
   const server = join(process.resourcesPath, "next", "apps", "matriz-control", "server.js")
   rendererServer = spawn(process.execPath, [server], {
     cwd: join(process.resourcesPath, "next", "apps", "matriz-control"),
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", HOSTNAME: "127.0.0.1", PORT: "3008" },
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", HOSTNAME: "127.0.0.1", PORT: "3009" },
     stdio: "ignore",
     windowsHide: true,
   })
   for (let attempt = 0; attempt < 100; attempt += 1) {
-    try { const response = await fetch("http://127.0.0.1:3008/browser"); if (response.ok) return } catch { /* renderer is still starting */ }
+    try { const response = await fetch("http://127.0.0.1:3009/browser"); if (response.ok) return } catch { /* renderer is still starting */ }
     await new Promise((resolve) => setTimeout(resolve, 100))
   }
   throw new Error("The local Matriz Control renderer did not start")
@@ -87,7 +87,7 @@ async function ensureRendererServer() {
 function assertTrusted(event: IpcMainInvokeEvent) {
   if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) throw new Error("Untrusted desktop bridge sender")
   const origin = new URL(event.senderFrame.url).origin
-  if (origin !== "http://127.0.0.1:3008" && origin !== "http://localhost:3008") throw new Error("Untrusted desktop bridge origin")
+  if (origin !== "http://127.0.0.1:3009" && origin !== "http://localhost:3009") throw new Error("Untrusted desktop bridge origin")
 }
 
 async function ensureView(tab: BrowserTab) {
@@ -336,7 +336,7 @@ async function auditAgent(action: string, capsuleId: string | null, origin: stri
 }
 
 ipcMain.handle("matriz:browser:invoke", async (event, value: unknown) => { assertTrusted(event); return dispatch(parseDesktopCommand(value)) })
-ipcMain.on("matriz:browser:viewport", (event, value: typeof viewport) => { if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) return; const origin = new URL(event.senderFrame.url).origin; if (origin !== "http://127.0.0.1:3008" && origin !== "http://localhost:3008") return; if (!value || ![value.x, value.y, value.width, value.height].every(Number.isFinite)) return; viewport = { ...value, visible: Boolean(value.visible) }; layoutActiveView() })
+ipcMain.on("matriz:browser:viewport", (event, value: typeof viewport) => { if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) return; const origin = new URL(event.senderFrame.url).origin; if (origin !== "http://127.0.0.1:3009" && origin !== "http://localhost:3009") return; if (!value || ![value.x, value.y, value.width, value.height].every(Number.isFinite)) return; viewport = { ...value, visible: Boolean(value.visible) }; layoutActiveView() })
 
 app.whenReady().then(createWindow).catch((error) => { console.error(error instanceof Error ? error.message : "Desktop startup failed"); app.quit() })
 let quitLockComplete = false

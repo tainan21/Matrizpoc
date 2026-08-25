@@ -59,6 +59,14 @@ Uma delegação precisa informar:
 O agente principal continua responsável por integrar, verificar conflitos e
 entregar uma única conclusão.
 
+## Ownership, lease e handoff
+
+Ownership é um lease sobre arquivos e superfícies, não propriedade permanente.
+Cada agente declara escopo antes de editar; o Workbench rejeita claims ativos que
+se sobrepõem. Handoff exige checkpoint factual, arquivos realmente tocados,
+checks observados, riscos e nova geração do lease. Heartbeats sem mudança material
+não entram no activity log.
+
 ## Registro
 
 Não crie um `AgentRequest` para toda operação interna do modelo. Use-o quando a

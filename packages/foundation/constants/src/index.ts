@@ -10,12 +10,15 @@
 // ---------------------------------------------------------------------------
 
 export const MATRIZ_APP_IDS = [
+  "matriz-identity",
   "matriz-hub",
+  "matriz-desktop",
   "matrizlib",
   "matriz-workbench",
   "matriz-control",
   "sites",
   "spot",
+  "matriz-admin",
   "seumei",
   "contracts",
   "willdash",
@@ -25,12 +28,15 @@ export type MatrizAppId = (typeof MATRIZ_APP_IDS)[number]
 
 /** Human-facing names (used by UI/catalog; remains domain-free). */
 export const MATRIZ_APP_NAMES: Readonly<Record<MatrizAppId, string>> = {
+  "matriz-identity": "Matriz Identity",
   "matriz-hub": "Matriz Hub",
+  "matriz-desktop": "Matriz Control",
   matrizlib: "MatrizLib",
   "matriz-workbench": "Matriz Workbench",
   "matriz-control": "Matriz Control",
   sites: "Matriz Sites",
   spot: "Spot",
+  "matriz-admin": "Matriz Admin",
   seumei: "Seu Mei",
   contracts: "Contracts",
   willdash: "WillDash",

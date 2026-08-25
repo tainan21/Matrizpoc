@@ -1,5 +1,8 @@
 # MCP local
 
+O contrato institucional das operações de agentes está em
+[`ENGINEERING-OPERATIONS.md`](ENGINEERING-OPERATIONS.md).
+
 The project-scoped `.codex/config.toml` starts the server over STDIO. No HTTP
 port is opened.
 
@@ -113,3 +116,21 @@ contratual, não a execução dos checks.
 Completion of an agent request records execution facts only. Product state,
 human review, validation and sprint outcome decisions remain separate and are
 changed by a person in the Workbench.
+
+## Engineering Operations workflows
+
+Read-only:
+
+- `workbench_get_engineering_operations_context` returns the request, a compact run without diff/output/detail payloads, active claims and last recorded reconciliation;
+- `workbench_check_ownership_conflicts` observes Git and compares intended files/surfaces with live claims;
+- `workbench_reconcile_agent_request` compares request, run, Git and, when available, thread state without writing.
+
+Approved writes:
+
+- `workbench_claim_agent_request` records owner, execution mode, intended scope, planned checks, observed Git baseline and lease;
+- `workbench_checkpoint_execution_attempt` records only a material checkpoint and renews the current lease generation;
+- `workbench_interrupt_execution_attempt` records interruption without presenting it as completion or product failure;
+- `workbench_complete_agent_request` records a factual result. Plan-only requires empty changed-files and check lists;
+- `workbench_record_reconciliation_snapshot` observes again and persists the resulting report with optimistic revision.
+
+`AgentRequest.id` is the canonical V1 correlation. Thread, turn, attempt and commit IDs are references. Commits may use the `Matriz-Request: req_<uuid>` trailer. The MCP never accepts a caller-supplied Git baseline and never exposes a generic Git, shell or filesystem tool.

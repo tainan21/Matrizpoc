@@ -27,6 +27,46 @@ describe("Workbench schemas", () => {
       revision: "revision-1",
     })
     expect(parsed.review).toBeUndefined()
+    expect(parsed.executionClaim).toBeUndefined()
+  })
+
+  it("parses an additive execution claim without changing schema version", () => {
+    const parsed = agentRequestSchema.parse({
+      schemaVersion: 1,
+      id: "req_00000000-0000-4000-8000-000000000001",
+      projectId: "sample",
+      backlogItemId: "wi_00000000-0000-4000-8000-000000000001",
+      title: "Scoped request",
+      instructions: "",
+      status: "claimed",
+      claimedBy: "codex:thread-a",
+      changedFiles: [],
+      checks: [],
+      executionClaim: {
+        requestId: "req_00000000-0000-4000-8000-000000000001",
+        claimedBy: "codex:thread-a",
+        executionMode: "change",
+        intendedFiles: ["apps/matriz-workbench/src/domain/schemas.ts"],
+        intendedSurfaces: ["workbench-agent-lifecycle"],
+        plannedChecks: ["pnpm --filter @matriz/app-matriz-workbench test"],
+        baseGit: {
+          commit: "a".repeat(40),
+          dirtyPaths: ["AGENTS.md"],
+          observedAt: "2026-08-04T15:00:00.000Z",
+        },
+        lease: {
+          acquiredAt: "2026-08-04T15:00:00.000Z",
+          renewedAt: "2026-08-04T15:00:00.000Z",
+          expiresAt: "2026-08-04T15:30:00.000Z",
+          generation: 1,
+        },
+      },
+      createdAt: "2026-08-04T15:00:00.000Z",
+      updatedAt: "2026-08-04T15:00:00.000Z",
+      revision: "revision-1",
+    })
+
+    expect(parsed.executionClaim?.baseGit.dirtyPaths).toEqual(["AGENTS.md"])
   })
 
   it("rejects unsupported backlog state", () => {

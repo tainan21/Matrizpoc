@@ -13,7 +13,7 @@
 import { spawnSync } from "node:child_process"
 import { resolve } from "node:path"
 
-const KNOWN_APPS = ["matriz-hub", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash"] as const
+const KNOWN_APPS = ["matriz-hub", "matriz-workbench", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash"] as const
 type AppId = (typeof KNOWN_APPS)[number]
 
 function fail(msg: string): never {
@@ -37,6 +37,7 @@ function main(): void {
   const { app, skipBoundaries } = parseArgs()
   const root = resolve(__dirname, "..", "..")
 
+  const appDirectory = app === "seumei" ? "seumeiapp" : app
   console.log(`[build-app] target = @matriz/app-${app}`)
 
   if (!skipBoundaries) {
@@ -47,7 +48,7 @@ function main(): void {
   console.log("[build-app] step 2/2: turbo build")
   run("pnpm", ["turbo", "run", "build", `--filter=@matriz/app-${app}...`], root)
 
-  console.log(`[build-app] done — artifact at apps/${app}/.next`)
+  console.log(`[build-app] done — artifact at apps/${appDirectory}/.next`)
 }
 
 main()

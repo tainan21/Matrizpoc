@@ -23,6 +23,7 @@ Leia nesta ordem:
 
 Depois, leia somente a referência técnica necessária:
 
+- `../ENGINEERING-OPERATIONS.md` para ownership, leases e reconciliação;
 - `../FILE-PROTOCOL.md` para persistência;
 - `../MCP.md` para ferramentas MCP;
 - `../CODEX-APP-SERVER.md` para execução integrada;

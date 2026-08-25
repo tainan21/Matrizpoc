@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "@wdio/globals/types",
+      "@wdio/mocha-framework"
+    ]
+  },
+  "include": [
+    "acceptance/e2e/**/*.ts",
+    "wdio.conf.ts"
+  ]
+}

@@ -10,7 +10,7 @@ await mkdir(staticTarget, { recursive: true })
 await cp(resolve(appRoot, ".next", "static"), staticTarget, { recursive: true, force: true })
 const child = spawn(process.execPath, [server], {
   cwd: dirname(server),
-  env: { ...process.env, HOSTNAME: "127.0.0.1", PORT: process.env.PORT ?? "3008" },
+  env: { ...process.env, HOSTNAME: "127.0.0.1", PORT: process.env.PORT ?? "3009" },
   stdio: "inherit",
 })
 

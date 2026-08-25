@@ -6,7 +6,7 @@ final result: passed
 
 - Source visual truth: user-provided conversation attachment showing the Matriz / Control Apps cockpit, 1919 × 1079 px.
 - Implementation screenshot: `implementation-final-1919x1079.png` (local QA artifact; intentionally not committed).
-- Route and state: `http://localhost:3008/apps`, dark theme, Contracts selected, global bottom terminal open with no active sessions.
+- Route and state: `http://localhost:3009/apps`, dark theme, Contracts selected, global bottom terminal open with no active sessions.
 - Viewport: 1919 × 1079 CSS px.
 - Source pixels: 1919 × 1079 at the supplied density.
 - Implementation pixels: 1919 × 1079, CSS 1919 × 1079, `devicePixelRatio: 1`.
@@ -43,7 +43,7 @@ Focused region comparison was not required: the target contains no imagery and t
 ### Iteration 1
 
 - P2: project ports were inferred from list order instead of package metadata.
-- Fix: parse validated `dev` script ports, including `-p 3003` and `--port=3008`, and use them for labels and URLs.
+- Fix: parse validated `dev` script ports, including `-p 3003` and `--port=3009`, and use them for labels and URLs.
 - Post-fix evidence: final capture shows Contracts on `:3003` and `http://localhost:3003/`.
 
 ### Iteration 2

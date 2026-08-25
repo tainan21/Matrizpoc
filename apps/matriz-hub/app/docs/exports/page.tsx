@@ -1,5 +1,5 @@
 import { Button, Card, CardHeader, CardTitle, Stack, Text, Badge } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable, DocumentGrid, ContextGrid } from "../../../src/domains/docs/presentation/components"
 
@@ -7,11 +7,12 @@ export const dynamic = "force-dynamic"
 
 export default async function ExportsPage() {
   try {
+    const actor = await getDocsPageActorContext()
     const repo = makeDocsRepository()
     const [exports, docs, contexts] = await Promise.all([
-      repo.listExports(defaultDocsActorContext),
-      repo.listDocuments(defaultDocsActorContext),
-      repo.listContextPackages(defaultDocsActorContext),
+      repo.listExports(actor),
+      repo.listDocuments(actor),
+      repo.listContextPackages(actor),
     ])
     return (
       <Stack gap={6}>

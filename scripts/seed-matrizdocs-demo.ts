@@ -2,7 +2,7 @@
  * MatrizDocs V1 demo seed.
  *
  * Prereqs:
- *   pnpm exec prisma db push --schema prisma/schemas/hub.prisma
+ *   pnpm prisma:migrate:deploy
  *
  * Run:
  *   pnpm demo:docs

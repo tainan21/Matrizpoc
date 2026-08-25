@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_a140ae04-2e1f-4bf9-8a99-6c030003200a",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Completar lifecycle de Contracts",
+  "description": "Completar estados, aprovações e auditoria de Contracts.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "contract-lifecycle"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_675d1808-491c-4669-9e46-05368a005978",
+      "text": "Draft/review/approval/external signature/active/expired/cancelled and immutable audit.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_65236fc2-f7ee-4f27-af9e-90d9b637e42f",
+    "wi_8978eae3-1a40-4630-8306-77825d726fa3"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.362Z",
+  "updatedAt": "2026-08-05T18:33:31.250Z",
+  "revision": "ec6f7377bc3a041d"
+}

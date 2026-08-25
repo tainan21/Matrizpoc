@@ -68,12 +68,15 @@ export type WilldashOnboardingPayload = z.infer<typeof willdashOnboardingPayload
 
 /** Map app -> payload schema para extensoes especificas. */
 export const appOnboardingPayloadSchemas = {
+  "matriz-identity": z.object({}),
   "matriz-hub": z.object({}),
+  "matriz-desktop": z.object({}),
   matrizlib: z.object({}),
   "matriz-workbench": z.object({}),
   "matriz-control": z.object({}),
   sites: z.object({}),
   spot: spotOnboardingPayloadSchema,
+  "matriz-admin": z.object({}),
   seumei: seumeiOnboardingPayloadSchema,
   contracts: contractsOnboardingPayloadSchema,
   willdash: willdashOnboardingPayloadSchema,

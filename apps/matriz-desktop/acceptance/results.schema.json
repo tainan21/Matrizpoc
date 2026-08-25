@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://matriz.local/schemas/matriz-control-acceptance-result-v1.json",
+  "title": "Matriz Control Acceptance Result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "runId",
+    "id",
+    "target",
+    "status",
+    "startedAt",
+    "durationMs",
+    "summary",
+    "evidence"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "v1" },
+    "runId": { "type": "string", "minLength": 1 },
+    "id": { "type": "string", "pattern": "^[A-Z]+(?:-[A-Z0-9]+)*-[0-9A-Z]+$" },
+    "target": {
+      "enum": ["installed-baseline", "source-runtime", "packaged-candidate"]
+    },
+    "status": { "enum": ["pass", "fail", "blocked", "not-applicable"] },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "commit": { "type": "string", "minLength": 1 },
+    "artifactSha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" },
+    "summary": { "type": "string", "minLength": 1 },
+    "evidence": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

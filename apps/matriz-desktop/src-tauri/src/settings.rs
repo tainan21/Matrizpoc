@@ -1,0 +1,116 @@
+use std::{fs, path::PathBuf};
+
+use serde::{Deserialize, Serialize};
+
+#[cfg(windows)]
+use std::os::windows::ffi::OsStrExt;
+#[cfg(windows)]
+use windows_sys::Win32::Storage::FileSystem::{
+    MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
+};
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DesktopSettings {
+    pub close_to_tray: bool,
+    pub sounds_enabled: bool,
+    pub volume: f64,
+    pub start_with_windows: bool,
+    #[serde(default)]
+    pub workspace_path: Option<String>,
+}
+
+impl Default for DesktopSettings {
+    fn default() -> Self {
+        Self {
+            close_to_tray: true,
+            sounds_enabled: true,
+            volume: 0.45,
+            start_with_windows: false,
+            workspace_path: None,
+        }
+    }
+}
+
+impl DesktopSettings {
+    pub fn normalized(mut self) -> Self {
+        self.volume = if self.volume.is_finite() {
+            self.volume.clamp(0.0, 1.0)
+        } else {
+            Self::default().volume
+        };
+        self
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+struct SettingsDocument {
+    version: u8,
+    settings: DesktopSettings,
+}
+
+pub struct SettingsStore {
+    path: PathBuf,
+}
+
+impl SettingsStore {
+    pub fn at(path: PathBuf) -> Self {
+        Self { path }
+    }
+
+    pub fn read(&self) -> Result<DesktopSettings, String> {
+        if !self.path.exists() {
+            return Ok(DesktopSettings::default());
+        }
+        let contents = fs::read_to_string(&self.path).map_err(|error| error.to_string())?;
+        let document: SettingsDocument = match serde_json::from_str(&contents) {
+            Ok(document) => document,
+            Err(_) => return Ok(DesktopSettings::default()),
+        };
+        if document.version != 1 {
+            return Ok(DesktopSettings::default());
+        }
+        Ok(document.settings.normalized())
+    }
+
+    pub fn write(&self, settings: &DesktopSettings) -> Result<(), String> {
+        let settings = settings.clone().normalized();
+        if let Some(parent) = self.path.parent() {
+            fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+        }
+        let temporary = self.path.with_extension("json.tmp");
+        let document = SettingsDocument {
+            version: 1,
+            settings,
+        };
+        let bytes = serde_json::to_vec_pretty(&document).map_err(|error| error.to_string())?;
+        fs::write(&temporary, bytes).map_err(|error| error.to_string())?;
+        replace_file(&temporary, &self.path)
+    }
+}
+
+#[cfg(windows)]
+fn replace_file(source: &std::path::Path, destination: &std::path::Path) -> Result<(), String> {
+    let source: Vec<u16> = source.as_os_str().encode_wide().chain(Some(0)).collect();
+    let destination: Vec<u16> = destination
+        .as_os_str()
+        .encode_wide()
+        .chain(Some(0))
+        .collect();
+    let result = unsafe {
+        MoveFileExW(
+            source.as_ptr(),
+            destination.as_ptr(),
+            MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH,
+        )
+    };
+    if result == 0 {
+        return Err(std::io::Error::last_os_error().to_string());
+    }
+    Ok(())
+}
+
+#[cfg(not(windows))]
+fn replace_file(source: &std::path::Path, destination: &std::path::Path) -> Result<(), String> {
+    fs::rename(source, destination).map_err(|error| error.to_string())
+}

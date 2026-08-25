@@ -47,16 +47,19 @@ environment.
 ## Lifecycle
 
 1. A human creates an `AgentRequest`.
-2. `CodexRunManager` claims it and moves it to `in_progress`.
+2. Um workflow de claim declara owner, escopo, checks, baseline Git e lease ativa.
+   O `CodexRunManager` recusa iniciar sem esse contrato e então move o request para
+   `in_progress`.
 3. The manager builds the compact context bundle.
 4. App-server starts or resumes a thread with the selected app as `cwd`.
 5. A turn streams plan, messages, commands, file changes and unified diff.
 6. Coarse run state is persisted in
    `apps/<app>/.matriz/agents/runs/<request-id>.json`.
-7. A successful turn requires at least one command with exit code zero.
+7. Uma execução `change` exige ao menos um check planejado com resultado observado;
+   `plan_only` conclui sem inventar arquivos ou checks.
 8. The request is completed and becomes available for human review. The linked
    work item's product state is not changed automatically.
-9. A failed turn becomes `blocked`; a user interruption becomes `cancelled`.
+9. A failed turn becomes `blocked`; an unexpected interruption becomes `interrupted`; an explicit user cancellation becomes `cancelled`.
 
 Run files are snapshots, not a second source of task truth. Backlog and agent
 request files remain canonical.
@@ -65,6 +68,10 @@ An execution may provide checks, changed files, a diff and a result summary.
 Those artifacts support review but do not mean that validation, documentation
 or product completion was approved. Only a human can update those governance
 states in the operational board.
+
+Each new turn is also recorded as an additive execution attempt. Attempts preserve thread, turn, start, finish and the distinct terminal outcome. Only commands matching planned checks become structured check evidence; an arbitrary successful command is not promoted to validation evidence. Legacy runs retain their string projection for leitura V1, mas requests legados precisam receber um claim estruturado antes de uma nova execução.
+
+Git reconciliation is read-only. The Workbench compares the claim baseline, declared files, current diff paths and commit trailers. External Codex thread observation is reported as unavailable when the host does not expose a portable read API; the Workbench never infers availability from a stored ID.
 
 The request detail and the linked work-item detail expose an explicit human
 review. Approving or requesting changes records a decision on the

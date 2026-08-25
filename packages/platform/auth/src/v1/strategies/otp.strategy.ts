@@ -41,7 +41,7 @@ export function createOtpStrategy(options: OtpStrategyOptions = {}): OtpStrategy
   const ttlMs = options.ttlMs ?? DEFAULT_TTL_MS
   const defaultEnabledApps: readonly AppId[] =
     options.enabledAppsPerTenant ??
-    (["matriz-hub", "spot", "seumei", "contracts", "willdash"] as const).map((a) =>
+    (["matriz-hub", "spot", "matriz-admin", "seumei", "contracts", "willdash"] as const).map((a) =>
       asAppId(a),
     )
 

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_f8da65b4-fd34-49d5-9669-6d242be80a11",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Adicionar constraints multi-tenant compostas",
+  "description": "Impor integridade multi-tenant diretamente no modelo relacional.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "constraints"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_88f52b6d-c2ae-4924-a091-bf7798d4fffe",
+      "text": "[tenantId,id], FKs [tenantId,parentId] e índices tenant-first.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_fd808651-c1ff-4965-ab56-6424c7bc3f5d",
+    "wi_7b0e32d0-c79a-458d-a55b-ac4c3023b094"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.771Z",
+  "updatedAt": "2026-08-05T18:33:29.390Z",
+  "revision": "19c711363557cccd"
+}

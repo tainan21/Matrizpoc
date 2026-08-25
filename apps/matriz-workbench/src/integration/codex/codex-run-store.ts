@@ -92,9 +92,11 @@ export class CodexRunStore {
   }
 
   async write(
-    input: Omit<CodexRunRecord, "revision" | "updatedAt"> & {
+    input: Omit<CodexRunRecord, "revision" | "updatedAt" | "attempts" | "checkExecutions"> & {
       revision?: string
       updatedAt?: string
+      attempts?: CodexRunRecord["attempts"]
+      checkExecutions?: CodexRunRecord["checkExecutions"]
     },
   ): Promise<CodexRunRecord> {
     const root = await this.runsRoot(input.projectId, true)

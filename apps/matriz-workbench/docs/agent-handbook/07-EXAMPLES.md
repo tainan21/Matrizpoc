@@ -70,6 +70,25 @@ Divida por responsabilidades independentes, dê escopo bounded e reúna uma úni
 síntese. Não permita que múltiplos agentes alterem os mesmos arquivos sem uma
 estratégia explícita.
 
+## Planejamento sem implementação
+
+Uma rodada `plan_only` cria claim e rastreabilidade, mas termina com zero arquivos
+alterados e zero checks executados. Leitura e diagnóstico não devem ser apresentados
+como implementação ou aceitação de produto.
+
+## Working tree sujo e conflito
+
+Antes de editar, capture os caminhos já modificados. Se outro claim ativo cobre o
+mesmo arquivo ou uma superfície ancestral, interrompa a edição e registre conflito.
+Se a mudança preexistente não pertence à execução, preserve-a e exclua-a da
+atribuição de arquivos observados.
+
+## Execução interrompida
+
+Uma task que sofre timeout ou termina inesperadamente fecha apenas a tentativa como
+`interrupted`. A solicitação permanece retomável; arquivos e checks parciais ficam
+registrados, e a retomada cria nova tentativa sem reescrever a evidência anterior.
+
 ## Prompt recomendado para uma rodada
 
 ```text

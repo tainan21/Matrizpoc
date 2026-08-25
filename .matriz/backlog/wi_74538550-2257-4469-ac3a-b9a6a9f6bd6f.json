@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_74538550-2257-4469-ac3a-b9a6a9f6bd6f",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Implementar APIs reais de Contracts",
+  "description": "Substituir caminhos simulados por APIs transacionais de Contracts.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:3",
+    "contracts-api"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_f55fe294-509d-455c-9fff-5e7e0fdebcce",
+      "text": "from-gig/from-establishment, Zod, idempotência, capability e transação local.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_db450605-ecfa-4749-9f56-efc2069cd21a",
+    "wi_7881dbac-e3a6-498a-ac19-2b4fa728ca73"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.099Z",
+  "updatedAt": "2026-08-05T18:33:29.737Z",
+  "revision": "def6e292a5eebb98"
+}

@@ -9,28 +9,34 @@ import { describe, it, expect } from "vitest"
 import { appManifestSchema } from "@matriz/integration-api-contracts"
 import { manifest as hubManifest } from "@apps/matriz-hub/public-contract"
 import { manifest as matrizlibManifest } from "@apps/matrizlib/public-contract"
+import { manifest as desktopManifest } from "@apps/matriz-desktop/public-contract"
+import { manifest as identityManifest } from "@apps/matriz-identity/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as controlManifest } from "@apps/matriz-control/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
+import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
 
 const allManifests = [
+  { appId: "matriz-identity", manifest: identityManifest },
   { appId: "matriz-hub", manifest: hubManifest },
   { appId: "matrizlib", manifest: matrizlibManifest },
+  { appId: "matriz-desktop", manifest: desktopManifest },
   { appId: "matriz-workbench", manifest: workbenchManifest },
   { appId: "matriz-control", manifest: controlManifest },
   { appId: "sites", manifest: sitesManifest },
   { appId: "spot", manifest: spotManifest },
+  { appId: "matriz-admin", manifest: matrizAdminManifest },
   { appId: "seumei", manifest: seumeiManifest },
   { appId: "contracts", manifest: contractsManifest },
   { appId: "willdash", manifest: willdashManifest },
 ] as const
 
 describe("manifests", () => {
-  it("todos os 9 manifests satisfazem AppManifestDTO (Zod)", () => {
+  it("todos os 12 manifests satisfazem AppManifestDTO (Zod)", () => {
     for (const { appId, manifest } of allManifests) {
       const result = appManifestSchema.safeParse(manifest)
       if (!result.success) {

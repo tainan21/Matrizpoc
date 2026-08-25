@@ -14,11 +14,12 @@ import {
   makeHealthSnapshotRepo,
   makeProjectRepo,
   makePublicMetricsRepo,
-} from "@matriz/platform-db/hub/repositories"
+} from "../integration/prisma/repositories"
 import {
   listDocsMcpResources,
   readDocsMcpResource,
 } from "../domains/docs/mcp/resources"
+import type { McpPrincipal } from "./handler"
 
 export type McpResourceDescriptor = {
   uri: string
@@ -37,7 +38,7 @@ export type McpResourceContent = {
  * Resource templates published by the Hub. MCP clients discover these via
  * `resources/list` and then call `resources/read` with a concrete URI.
  */
-export async function listResources(): Promise<McpResourceDescriptor[]> {
+export async function listResources(principal: McpPrincipal): Promise<McpResourceDescriptor[]> {
   const projects = makeProjectRepo(getHubDb())
   const rows = await projects.listAll()
   const projectResources = rows.map((row) => ({
@@ -46,7 +47,7 @@ export async function listResources(): Promise<McpResourceDescriptor[]> {
     description: `Institutional profile of ${row.projectId} (manifest + health + metrics).`,
     mimeType: "application/json",
   }))
-  const docsResources = await listDocsMcpResources()
+  const docsResources = await listDocsMcpResources(principal.docsActor)
   return [...projectResources, ...docsResources]
 }
 
@@ -57,8 +58,9 @@ export async function listResources(): Promise<McpResourceDescriptor[]> {
  */
 export async function readResource(
   uri: string,
+  principal: McpPrincipal,
 ): Promise<McpResourceContent | null> {
-  const docsContent = await readDocsMcpResource(uri)
+  const docsContent = await readDocsMcpResource(uri, principal.docsActor)
   if (docsContent) return docsContent
 
   const match = /^matriz:\/\/projects\/([^/]+)$/.exec(uri)

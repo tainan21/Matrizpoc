@@ -16,9 +16,17 @@ export interface AppThemeTokens {
 }
 
 export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
+  "matriz-identity": {
+    appId: "matriz-identity", label: "Matriz Identity", brandAccent: "#4f46e5", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#111827", muted: "#eef2ff", mutedFg: "#4b5563", border: "#c7d2fe",
+  },
   "matriz-hub": {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#0f172a", brandAccentFg: "#f8fafc",
     surface: "#ffffff", surfaceFg: "#0f172a", muted: "#f1f5f9", mutedFg: "#475569", border: "#e2e8f0",
+  },
+  "matriz-desktop": {
+    appId: "matriz-desktop", label: "Matriz Control", brandAccent: "#7c3aed", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#17131d", muted: "#f5f3f8", mutedFg: "#61586d", border: "#e1d9e8",
   },
   matrizlib: {
     appId: "matrizlib", label: "MatrizLib", brandAccent: "#7c3aed", brandAccentFg: "#ffffff",
@@ -28,10 +36,6 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#5b5bd6", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17171c", muted: "#f5f5f7", mutedFg: "#666671", border: "#dfdfe5",
   },
-  "matriz-control": {
-    appId: "matriz-control", label: "Matriz Control", brandAccent: "#7143a0", brandAccentFg: "#ffffff",
-    surface: "#ffffff", surfaceFg: "#28202f", muted: "#f6f2f8", mutedFg: "#72677c", border: "#d8cfdd",
-  },
   sites: {
     appId: "sites", label: "Matriz Sites", brandAccent: "#4d7c0f", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#151a12", muted: "#f3f6ed", mutedFg: "#626b5b", border: "#dfe5d7",
@@ -39,6 +43,14 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   spot: {
     appId: "spot", label: "Spot", brandAccent: "#f59e0b", brandAccentFg: "#0f172a",
     surface: "#ffffff", surfaceFg: "#1c1917", muted: "#fef3c7", mutedFg: "#78350f", border: "#fde68a",
+  },
+  "matriz-control": {
+    appId: "matriz-control", label: "Matriz Control Web", brandAccent: "#7143a0", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#28202f", muted: "#f6f2f8", mutedFg: "#72677c", border: "#d8cfdd",
+  },
+  "matriz-admin": {
+    appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#6d4aff", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#17131d", muted: "#f4f1fb", mutedFg: "#625a70", border: "#ddd5e8",
   },
   seumei: {
     appId: "seumei", label: "Seu Mei", brandAccent: "#059669", brandAccentFg: "#ffffff",
@@ -55,9 +67,17 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
 }
 
 export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
+  "matriz-identity": {
+    appId: "matriz-identity", label: "Matriz Identity", brandAccent: "#818cf8", brandAccentFg: "#090b1a",
+    surface: "#0b1020", surfaceFg: "#f5f7ff", muted: "#11182b", mutedFg: "#aeb8d4", border: "#293455",
+  },
   "matriz-hub": {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
     surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246",
+  },
+  "matriz-desktop": {
+    appId: "matriz-desktop", label: "Matriz Control", brandAccent: "#9a66ff", brandAccentFg: "#0b0712",
+    surface: "#0f0c16", surfaceFg: "#f5f1fb", muted: "#08070d", mutedFg: "#8e879d", border: "#332741",
   },
   matrizlib: {
     appId: "matrizlib", label: "MatrizLib", brandAccent: "#a78bfa", brandAccentFg: "#160b2e",
@@ -67,10 +87,6 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
     surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246",
   },
-  "matriz-control": {
-    appId: "matriz-control", label: "Matriz Control", brandAccent: "#9a55ff", brandAccentFg: "#ffffff",
-    surface: "#08060e", surfaceFg: "#f4effb", muted: "#130c20", mutedFg: "#82778f", border: "#2a1c3d",
-  },
   sites: {
     appId: "sites", label: "Matriz Sites", brandAccent: "#c8ff66", brandAccentFg: "#10131a",
     surface: "#171b24", surfaceFg: "#f5f7ef", muted: "#10131a", mutedFg: "#9da49a", border: "#30362f",
@@ -78,6 +94,14 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   spot: {
     appId: "spot", label: "Spot", brandAccent: "#f6b83f", brandAccentFg: "#17110a",
     surface: "#12100c", surfaceFg: "#fff7e8", muted: "#1d1810", mutedFg: "#cbbd9f", border: "#3d3220",
+  },
+  "matriz-control": {
+    appId: "matriz-control", label: "Matriz Control Web", brandAccent: "#9a55ff", brandAccentFg: "#ffffff",
+    surface: "#08060e", surfaceFg: "#f4effb", muted: "#130c20", mutedFg: "#82778f", border: "#2a1c3d",
+  },
+  "matriz-admin": {
+    appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#a98cff", brandAccentFg: "#0b0712",
+    surface: "#0f0c16", surfaceFg: "#f5f1fb", muted: "#18121f", mutedFg: "#aaa0b7", border: "#362a42",
   },
   seumei: {
     appId: "seumei", label: "Seu Mei", brandAccent: "#43d39e", brandAccentFg: "#04130d",
@@ -166,7 +190,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-hub", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "seumei", "contracts", "willdash",
+  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash",
 ]
 
 export const themeRegistry = [
@@ -176,7 +200,7 @@ export const themeRegistry = [
   },
   {
     key: "midnight-graphite", version: 1, label: "Midnight Graphite",
-    description: "Grafite profundo, violeta frio e contraste editorial.", compatibleApps: ["matriz-hub", "matriz-workbench", "sites"],
+    description: "Grafite profundo, violeta frio e contraste editorial.", compatibleApps: ["matriz-hub", "matriz-desktop", "matriz-workbench", "sites"],
     overrides: { brandAccent: "#8b5cf6", brandAccentFg: "#070b13", surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246" },
   },
   {
@@ -204,7 +228,7 @@ export function listCompatibleThemes(appId: MatrizAppId): readonly ThemeDefiniti
 export function themeDefinitionToCssVars(
   themeKey: string,
   appId: MatrizAppId,
-  mode: MatrizColorMode = appId === "matriz-hub" || appId === "matriz-workbench" || appId === "matriz-control" ? "dark" : "light",
+  mode: MatrizColorMode = appId === "matriz-hub" || appId === "matriz-desktop" || appId === "matriz-workbench" || appId === "matriz-control" ? "dark" : "light",
 ): Record<string, string> {
   const definition = getThemeDefinition(themeKey)
   const compatible = definition?.compatibleApps.includes(appId) ?? false

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { configuredToken, CONTROL_SESSION_COOKIE, verifySessionValue } from "./src/auth/local-access"
 
-const loopbackHosts = new Set(["localhost:3008", "127.0.0.1:3008", "[::1]:3008"])
+const loopbackHosts = new Set(["localhost:3009", "127.0.0.1:3009", "[::1]:3009"])
 
 export function proxy(request: NextRequest) {
   if (!loopbackHosts.has(request.headers.get("host") ?? "")) return new NextResponse("Matriz Control accepts loopback requests only.", { status: 403 })

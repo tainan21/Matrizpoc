@@ -1,8 +1,7 @@
-import { defaultDocsActorContext } from "../application/access"
 import type { DocsActorContext } from "../domain/types"
 import { makeDocsRepository } from "../integration/prisma/docs-repository"
 
-export async function listDocsMcpResources(actor: DocsActorContext = defaultDocsActorContext) {
+export async function listDocsMcpResources(actor: DocsActorContext) {
   const repo = makeDocsRepository()
   const [docs, contexts, timeline, suggestions] = await Promise.all([
     repo.listDocuments(actor),
@@ -53,7 +52,7 @@ export async function listDocsMcpResources(actor: DocsActorContext = defaultDocs
   ]
 }
 
-export async function readDocsMcpResource(uri: string, actor: DocsActorContext = defaultDocsActorContext) {
+export async function readDocsMcpResource(uri: string, actor: DocsActorContext) {
   const repo = makeDocsRepository()
   if (uri === "matriz://docs") {
     return { uri, mimeType: "application/json", text: JSON.stringify({ documents: await repo.listDocuments(actor) }, null, 2) }

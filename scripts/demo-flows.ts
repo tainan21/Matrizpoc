@@ -3,10 +3,7 @@
  *
  * Prereqs (only needed when running against a real DB):
  *   1. Postgres running and DATABASE_URL configured in .env
- *   2. Schemas applied: `pnpm exec prisma db push --schema prisma/schemas/core.prisma`
- *                       `pnpm exec prisma db push --schema prisma/schemas/hub.prisma`
- *                       `pnpm exec prisma db push --schema prisma/schemas/seumei.prisma`
- *                       `pnpm exec prisma db push --schema prisma/schemas/contracts.prisma`
+ *   2. Schemas applied: `pnpm prisma:migrate:deploy`
  *
  * Run: `pnpm tsx scripts/demo-flows.ts`
  *
@@ -23,7 +20,7 @@ import { getSeumeiDb } from "../packages/platform/db/src/seumei"
 import { getContractsDb } from "../packages/platform/db/src/contracts"
 import {
   makeExternalLinkRepo,
-  makeMembershipRepo,
+  makeTenantAccessRepo,
   makeTelemetryRepo,
   makeUserRepo,
 } from "../packages/platform/db/src/repositories/core"
@@ -79,10 +76,27 @@ async function flowA_firstLogin(tenantId: string) {
 
   // 4. Ensure membership (otherwise identity has no tenants/apps)
   const core = getCoreDb()
-  const memberships = makeMembershipRepo(core)
+  const access = makeTenantAccessRepo(core)
   const userId = identity.user.id as unknown as string
-  await memberships.ensure({ tenantId, userId, appId: "matriz-hub", role: "OWNER" })
-  await memberships.ensure({ tenantId, userId, appId: "seumei", role: "ADMIN" })
+  const membership = await access.ensureMembership({
+    tenantId,
+    userId,
+    tenantRoles: ["OWNER"],
+  })
+  await access.ensureGrant({
+    membershipId: membership.id,
+    appId: "matriz-hub",
+    appRoles: ["OWNER"],
+    actorUserId: userId,
+    expectedTenantId: tenantId,
+  })
+  await access.ensureGrant({
+    membershipId: membership.id,
+    appId: "seumei",
+    appRoles: ["ADMIN"],
+    actorUserId: userId,
+    expectedTenantId: tenantId,
+  })
 
   // 5. Issue a persistent session for the Hub app
   const refreshed = await resolveIdentityByEmail({ email, provider: "OTP" })

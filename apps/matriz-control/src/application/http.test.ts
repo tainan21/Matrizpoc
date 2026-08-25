@@ -13,6 +13,6 @@ describe("terminal http validation", () => {
   })
 
   it("rejects cross-origin mutations", () => {
-    expect(() => assertSameOrigin(new Request("http://localhost:3008/api", { headers: { origin: "http://evil.test" } }))).toThrow("Forbidden origin")
+    expect(() => assertSameOrigin(new Request("http://localhost:3009/api", { headers: { origin: "http://evil.test" } }))).toThrow("Forbidden origin")
   })
 })

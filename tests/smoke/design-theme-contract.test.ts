@@ -2,8 +2,17 @@ import * as React from "../../apps/matriz-workbench/node_modules/react/index.js"
 import { renderToStaticMarkup } from "../../apps/matriz-workbench/node_modules/react-dom/server.node.js"
 import { describe, expect, it, vi } from "vitest"
 import * as ecosystemBarModule from "../../packages/design/ui/src/ecosystem-bar"
+import { appThemes, darkAppThemes } from "../../packages/design/system/src/themes"
 
 describe("shared design theme contract", () => {
+  it("gives Matriz Admin an explicit product theme", () => {
+    expect(appThemes["matriz-admin"]).toMatchObject({
+      appId: "matriz-admin",
+      label: "Matriz Admin",
+    })
+    expect(darkAppThemes["matriz-admin"].appId).toBe("matriz-admin")
+  })
+
   it("defines a panel foreground fallback matching legacy surfaces", () => {
     const panelStyle = (
       ecosystemBarModule as typeof ecosystemBarModule & {

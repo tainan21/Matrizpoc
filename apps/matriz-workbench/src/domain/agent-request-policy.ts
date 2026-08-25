@@ -1,13 +1,15 @@
 import type { AgentRequest } from "./schemas"
 import { WorkspaceError } from "./errors"
+import { assertExecutionResult } from "./engineering-operation"
 
 const ALLOWED_TRANSITIONS: Readonly<
   Record<AgentRequest["status"], readonly AgentRequest["status"][]>
 > = {
   queued: ["claimed", "cancelled"],
-  claimed: ["in_progress", "blocked", "completed", "cancelled"],
-  in_progress: ["blocked", "completed", "cancelled"],
-  blocked: ["in_progress", "cancelled"],
+  claimed: ["in_progress", "blocked", "interrupted", "completed", "cancelled"],
+  in_progress: ["blocked", "interrupted", "completed", "cancelled"],
+  blocked: ["claimed", "in_progress", "cancelled"],
+  interrupted: ["claimed", "cancelled"],
   completed: [],
   cancelled: [],
 }
@@ -39,15 +41,12 @@ export function assertAgentRequestCompletion(
       "INVALID_DATA",
     )
   }
-  if (!input.resultSummary?.trim()) {
-    throw new WorkspaceError("A conclusão exige um resumo.", "INVALID_DATA")
-  }
-  if (!input.checks?.length) {
-    throw new WorkspaceError(
-      "A conclusão exige ao menos uma verificação executada.",
-      "INVALID_DATA",
-    )
-  }
+  assertExecutionResult({
+    executionMode: current.executionClaim?.executionMode ?? "change",
+    resultSummary: input.resultSummary ?? "",
+    changedFiles: input.changedFiles ?? [],
+    executedChecks: input.checks ?? [],
+  })
   for (const file of input.changedFiles ?? []) {
     if (
       !file.trim() ||

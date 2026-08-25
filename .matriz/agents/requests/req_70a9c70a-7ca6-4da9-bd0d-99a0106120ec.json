@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "req_70a9c70a-7ca6-4da9-bd0d-99a0106120ec",
+  "projectId": "matriz-infra-hub",
+  "backlogItemId": "wi_1f396d29-2e4a-4901-8abb-078f0d799f2e",
+  "title": "Fechar bypasses do Hub, MatrizDocs e MCP",
+  "instructions": "Implementar e validar a contenção de segurança do Hub, MatrizDocs e MCP.",
+  "status": "completed",
+  "claimedBy": "codex-wave1",
+  "resultSummary": "Contenção implementada, corrigida em três rodadas e aprovada por revisão independente.",
+  "changedFiles": [
+    "apps/matriz-hub/src/auth/hub-session.ts",
+    "apps/matriz-hub/src/http/bounded-body.ts",
+    "tests/smoke/hub-security-containment.test.ts",
+    "docs/security/THREAT-MODEL.md"
+  ],
+  "checks": [
+    "12/12 testes focados de contenção",
+    "162/162 smoke tests globais",
+    "Hub lint, typecheck e build",
+    "Inventário 5/5 e fronteiras dos sete apps",
+    "Revisão independente aprovada"
+  ],
+  "review": {
+    "status": "approved",
+    "reviewedBy": "human-coordinator",
+    "reviewedAt": "2026-08-12T04:11:26.230Z",
+    "note": "Evidências e revisão independente aprovadas.",
+    "runRevision": "9052834f"
+  },
+  "createdAt": "2026-08-12T04:11:13.569Z",
+  "updatedAt": "2026-08-12T04:28:08.283Z",
+  "revision": "72b679bcf14da29d"
+}

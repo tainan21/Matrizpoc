@@ -15,8 +15,10 @@ next.user-config.*
 # Common ignores
 node_modules
 .next/
+apps/*/next-env.d.ts
 .turbo/
 .runtime/
+migration-staging/
 *.tsbuildinfo
 .codex-*.log
 .DS_Store

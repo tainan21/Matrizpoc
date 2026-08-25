@@ -6,6 +6,7 @@
  */
 import type {
   HealthStatus,
+  ObservationMeta,
   ProjectManifest,
   SourceClassification,
   TrustLevel,
@@ -45,6 +46,7 @@ export interface ProjectDetailVM extends ProjectListItemVM {
   checks: ReadonlyArray<{ name: string; status: string; detail?: string; tone: BadgeTone }>
   uptimeWindow?: string
   uptimePercent?: number
+  healthObservation?: ObservationVM
   capabilities: {
     produces: ReadonlyArray<{ kind: string; name: string; version?: string }>
     consumes: ReadonlyArray<{ kind: string; name: string; version?: string }>
@@ -59,6 +61,12 @@ export interface ProjectDetailVM extends ProjectListItemVM {
     customMetrics: ReadonlyArray<{ key: string; label: string; value: number; unit?: string }>
   }
   ingestedAt: string
+}
+
+export interface ObservationVM extends ObservationMeta {
+  natureLabel: string
+  freshnessLabel: string
+  confidenceLabel: string
 }
 
 export interface HealthOverviewVM {
@@ -156,6 +164,37 @@ const CHECK_TONES: Record<string, BadgeTone> = {
   fail: "danger",
 }
 
+const NATURE_LABELS: Record<ObservationMeta["nature"], string> = {
+  observed: "Observado",
+  derived: "Derivado",
+  declared: "Declarativo",
+  simulated: "Simulado",
+}
+
+const FRESHNESS_LABELS: Record<ObservationMeta["freshness"], string> = {
+  fresh: "Atual",
+  stale: "Desatualizado",
+  expired: "Expirado",
+  unknown: "Frescor desconhecido",
+}
+
+const CONFIDENCE_LABELS: Record<ObservationMeta["confidence"], string> = {
+  verified: "Verificado",
+  trusted: "Confiavel",
+  unverified: "Nao verificado",
+  unknown: "Confianca desconhecida",
+}
+
+function toObservationVM(observation?: ObservationMeta): ObservationVM | undefined {
+  if (!observation) return undefined
+  return {
+    ...observation,
+    natureLabel: NATURE_LABELS[observation.nature],
+    freshnessLabel: FRESHNESS_LABELS[observation.freshness],
+    confidenceLabel: CONFIDENCE_LABELS[observation.confidence],
+  }
+}
+
 function isProjectPublic(p: ProjectManifest): boolean {
   if (p.trustLevel === "core" || p.trustLevel === "trusted") return true
   if (p.trustLevel === "external") return p.institutionalTags.includes("public")
@@ -214,6 +253,7 @@ export function toProjectDetailVM(p: ProjectManifest): ProjectDetailVM {
     })),
     uptimeWindow: p.health.uptimeWindow,
     uptimePercent: p.health.uptimePercent,
+    healthObservation: toObservationVM(p.health.observation),
     capabilities: {
       produces: p.capabilities.produces,
       consumes: p.capabilities.consumes,

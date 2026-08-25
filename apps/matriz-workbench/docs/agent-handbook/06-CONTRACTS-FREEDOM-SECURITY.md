@@ -40,6 +40,18 @@ O agente não tem liberdade para:
 - secrets não entram em Git, activity, prompts ou subprocessos;
 - paths, symlinks, tamanhos e revisions são validados.
 
+## Evidência e reconciliação
+
+Evidência de execução guarda comando exato, resultado, exit code, hash da saída e
+origem. Ela não equivale a validação de produto nem a aprovação humana. Checks
+podem estar planejados, executando, aprovados, falhos, cancelados ou expirados;
+mudança do commit observado expira a validade técnica do check.
+
+O reconciliador de Git é read-only e nunca corrige registros automaticamente.
+Ele aponta divergências entre claim, run, arquivos, commit e revisão para decisão
+humana. Threads externas indisponíveis são marcadas como indisponíveis, nunca
+inferidas como ausentes ou concluídas.
+
 ## Caso de referência: “use token 1234 para teste”
 
 Implementar `1234` diretamente seria uma leitura literal ruim porque:

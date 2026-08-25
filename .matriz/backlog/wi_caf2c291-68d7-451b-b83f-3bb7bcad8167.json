@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_caf2c291-68d7-451b-b83f-3bb7bcad8167",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Persistir ExternalLinks atrás do Core",
+  "description": "Persistir vínculos entre apps sem acoplamento entre schemas.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:3",
+    "external-links"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_d899e98f-4dbb-411a-b0c1-2cd639f74b69",
+      "text": "Tenant-aware, vínculo idempotente/único, queries scoped, sem FK cross-schema.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_74538550-2257-4469-ac3a-b9a6a9f6bd6f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.230Z",
+  "updatedAt": "2026-08-05T18:33:29.942Z",
+  "revision": "14eeaf39dbf9385f"
+}

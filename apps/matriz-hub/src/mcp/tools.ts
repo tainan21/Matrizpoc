@@ -3,7 +3,7 @@
  *
  * V1.3 exposes ONE real tool:
  *   refresh_project_ingestion — triggers a pipeline run, persists the result
- *   via @matriz/platform-db/hub, and returns a summary.
+ *   via the Hub-owned Prisma repositories, and returns a summary.
  *
  * This proves: Hub acts as a real MCP control plane with actions that mutate
  * institutional state, not just read snapshots.
@@ -11,6 +11,7 @@
 import { persistIngestionRun } from "../institutional/persistence"
 import { runInstitutionalIngestion } from "../institutional/bootstrap"
 import { DOCS_MCP_TOOLS, callDocsTool } from "../domains/docs/mcp/tools"
+import type { McpPrincipal } from "./handler"
 
 export type McpToolDescriptor = {
   name: string
@@ -48,8 +49,9 @@ export const MCP_TOOLS: readonly McpToolDescriptor[] = [
 export async function callTool(
   name: string,
   args: Record<string, unknown>,
+  principal: McpPrincipal,
 ): Promise<McpToolResult> {
-  const docsResult = await callDocsTool(name, args)
+  const docsResult = await callDocsTool(name, args, principal.docsActor)
   if (docsResult) return docsResult
 
   switch (name) {
@@ -100,11 +102,10 @@ async function refreshProjectIngestion(
         { type: "text", text: JSON.stringify(summary, null, 2) },
       ],
     }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
+  } catch {
     return {
       isError: true,
-      content: [{ type: "text", text: `refresh_project_ingestion failed: ${message}` }],
+      content: [{ type: "text", text: "refresh_project_ingestion could not be completed." }],
     }
   }
 }

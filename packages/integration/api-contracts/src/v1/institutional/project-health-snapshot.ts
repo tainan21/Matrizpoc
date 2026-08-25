@@ -4,6 +4,7 @@
  * Saude operacional no momento da ingestao. Domain-free.
  */
 import { z } from "zod"
+import { observationMetaSchema } from "./observation-meta"
 
 export const HEALTH_STATUS_VALUES = [
   "healthy",
@@ -37,5 +38,6 @@ export const projectHealthSnapshotSchema = z.object({
   checks: z.array(healthCheckSchema).default([]),
   uptimeWindow: uptimeWindowSchema.optional(),
   uptimePercent: z.number().min(0).max(100).optional(),
+  observation: observationMetaSchema.optional(),
 })
 export type ProjectHealthSnapshot = z.infer<typeof projectHealthSnapshotSchema>

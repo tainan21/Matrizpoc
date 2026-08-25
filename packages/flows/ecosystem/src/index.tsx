@@ -7,10 +7,12 @@ import { createSharedCacheClient, type SharedCacheEntry } from "@matriz/platform
 import type { MatrizAppId } from "@matriz/foundation-constants"
 
 const labels: Record<MatrizAppId, string> = {
-  "matriz-hub": "Hub · 3000", spot: "Spot · 3001", seumei: "Seumei · 3002",
+  "matriz-identity": "Matriz Identity · auth",
+  "matriz-hub": "Hub · 3000", "matriz-desktop": "Matriz Control · native", spot: "Spot · 3001",
+  "matriz-control": "Matriz Control · 3009",
+  "matriz-admin": "Matriz Admin · 3002", seumei: "Seumei · 3008",
   contracts: "Contracts · 3003", willdash: "WillDash · 3004",
   "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006", matrizlib: "MatrizLib · 3007",
-  "matriz-control": "Control · 3008",
 }
 
 function CacheProof({ appId }: { appId: MatrizAppId }) {

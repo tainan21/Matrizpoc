@@ -37,6 +37,33 @@ export const codexPlanStepSchema = z.object({
   status: z.enum(["pending", "in_progress", "completed"]),
 })
 
+export const executionAttemptSchema = z.object({
+  id: z.string().regex(/^attempt_[0-9a-f-]{36}$/),
+  requestId,
+  hostId: z.string().trim().min(1).max(200).optional(),
+  threadId: z.string().trim().min(1).max(200),
+  turnId: z.string().trim().min(1).max(200),
+  status: z.enum(["running", "completed", "failed", "interrupted", "cancelled"]),
+  startedAt: isoDate,
+  finishedAt: isoDate.optional(),
+  error: z.string().trim().min(1).max(4_000).optional(),
+})
+
+export const checkExecutionSchema = z.object({
+  id: z.string().regex(/^check_[0-9a-f-]{36}$/),
+  name: z.string().trim().min(1).max(200),
+  command: z.string().trim().min(1).max(2_000),
+  state: z.enum(["planned", "running", "passed", "failed", "cancelled", "expired"]),
+  source: z.enum(["app_server", "codex_report", "ci", "human"]),
+  baseCommit: z.string().regex(/^[0-9a-f]{40}$/),
+  headCommit: z.string().regex(/^[0-9a-f]{40}$/).optional(),
+  startedAt: isoDate.optional(),
+  finishedAt: isoDate.optional(),
+  exitCode: z.number().int().optional(),
+  outputDigest: z.string().regex(/^[0-9a-f]{64}$/).optional(),
+  outputExcerpt: z.string().max(4_000).optional(),
+})
+
 export const codexRunRecordSchema = z.object({
   schemaVersion: z.literal(1),
   projectId: z.string().regex(/^[a-z0-9][a-z0-9-]*$/),
@@ -50,6 +77,8 @@ export const codexRunRecordSchema = z.object({
   commands: z.array(codexCommandSchema).max(50).default([]),
   changedFiles: z.array(z.string().trim().min(1).max(500)).max(100).default([]),
   checks: z.array(z.string().trim().min(1).max(500)).max(100).default([]),
+  attempts: z.array(executionAttemptSchema).max(50).default([]),
+  checkExecutions: z.array(checkExecutionSchema).max(100).default([]),
   approvals: z.array(codexApprovalSchema).max(50).default([]),
   diff: z.string().max(120_000).default(""),
   error: z.string().max(4_000).optional(),

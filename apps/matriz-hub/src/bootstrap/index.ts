@@ -11,10 +11,12 @@
  */
 import { manifest as hubManifest } from "../manifest/manifest"
 import { manifest as matrizlibManifest } from "@apps/matrizlib/public-contract"
+import { manifest as desktopManifest } from "@apps/matriz-desktop/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as controlManifest } from "@apps/matriz-control/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
+import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
@@ -54,11 +56,13 @@ export function bootstrapMatrizHub(): HubBootstrapResult {
   if (!isBootstrapped) {
     const manifests: AppManifestDTO[] = [
       hubManifest,
+      desktopManifest,
       matrizlibManifest,
       workbenchManifest,
       controlManifest,
       sitesManifest,
       spotManifest,
+      matrizAdminManifest,
       seumeiManifest,
       contractsManifest,
       willdashManifest,
