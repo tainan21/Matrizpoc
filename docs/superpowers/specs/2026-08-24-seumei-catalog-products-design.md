@@ -66,7 +66,7 @@ interface TenantCatalogRepository {
   listCategories(): Promise<readonly ProductCategory[]>
   listModifiers(): Promise<readonly ProductModifier[]>
   findProduct(productId: ProductId): Promise<Product | null>
-  saveProduct(product: Product): Promise<Product>
+  saveProduct(product: Product): Promise<Product | null>
   duplicateProduct(productId: ProductId): Promise<Product | null>
 }
 ```

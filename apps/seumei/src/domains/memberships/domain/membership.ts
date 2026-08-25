@@ -18,6 +18,7 @@ export type SeumeiPermission =
   | "dashboard.view"
   | "crm.view"
   | "products.view"
+  | "products.manage"
   | "orders.view"
   | "inventory.view"
   | "finance.view"
