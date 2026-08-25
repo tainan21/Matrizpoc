@@ -3,6 +3,7 @@ pub const COMMAND_NAMES: &[&str] = &[
     "get_runtime_snapshot",
     "open_runtime_target",
     "restart_runtime",
+    "recover_runtime",
     "stop_runtime",
     "open_preview",
     "set_preview_bounds",

@@ -24,6 +24,7 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
   const [activities, setActivities] = useState<readonly ActivityEnvelope[]>([])
   const [adminMode, setAdminMode] = useState<"web" | "native">("web")
   const [nativeApp, setNativeApp] = useState<NativeAppRuntime>({ appId: "matriz-admin", state: "not-built" })
+  const [recovering, setRecovering] = useState(false)
   const previewHost = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -99,6 +100,19 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
       signal("success")
     } catch { signal("error") }
   }
+  const recover = async () => {
+    if (!selected) return
+    setRecovering(true)
+    try {
+      await executeAction(() => gateway.recoverRuntime(selected.id), `${selected.label} recuperado`)
+      signal("success")
+      await refresh()
+    } catch {
+      signal("error")
+    } finally {
+      setRecovering(false)
+    }
+  }
 
   return <section className="runtime-workspace" aria-labelledby="apps-title">
     <div className="runtime-catalog">
@@ -121,7 +135,10 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
           <label>ABRIR ROTA<input autoFocus placeholder="/rota" value={manualRoute} onChange={(event) => setManualRoute(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && validManual) chooseRoute(manualRoute) }} /></label>
           <div>{manifest.routes.map((item) => <button key={item.path} disabled={!item.openable} onClick={() => chooseRoute(item.path)}><span>{item.path}</span><small>{item.label}</small></button>)}</div>
         </div> : null}
-        <div className="quick-actions" aria-label="Ações rápidas"><span>AÇÕES RÁPIDAS</span><div>{adminMode === "native" && selected.id === "matriz-admin" ? <button aria-label={`${nativeAction} Matriz Admin nativo`} onClick={() => void runNative()}>{nativeAction} nativo</button> : actions.map((action) => <button key={action.id} aria-label={`${action.label} ${selected.label}`} className={action.risk === "destructive" ? "is-danger" : ""} onClick={() => void execute(action.id)}>{action.label}</button>)}</div></div>
+        <div className="quick-actions" aria-label="Ações rápidas">
+          {selected.status === "degraded" ? <div className={`runtime-recovery runtime-recovery--${selected.ownership}`}><span><strong>{selected.ownership === "external" ? "RUNTIME EXTERNO" : "RECUPERAÇÃO DISPONÍVEL"}</strong><small>{selected.ownership === "external" ? "A porta pertence a outro processo e será preservada." : "O último processo encerrou antes da porta ficar pronta."}</small></span>{selected.ownership === "managed" ? <button aria-label={`Recuperar ${selected.label}`} disabled={recovering} onClick={() => void recover()}>{recovering ? "RECUPERANDO…" : "RECUPERAR"}</button> : null}</div> : null}
+          <span>AÇÕES RÁPIDAS</span><div>{adminMode === "native" && selected.id === "matriz-admin" ? <button aria-label={`${nativeAction} Matriz Admin nativo`} onClick={() => void runNative()}>{nativeAction} nativo</button> : actions.map((action) => <button key={action.id} aria-label={`${action.label} ${selected.label}`} className={action.risk === "destructive" ? "is-danger" : ""} onClick={() => void execute(action.id)}>{action.label}</button>)}</div>
+        </div>
         <div className="surface-body">
           {surface === "preview" ? <div className="preview-shell"><div className="preview-controls"><button onClick={() => void gateway.previewBack()}>←</button><button onClick={() => void gateway.previewForward()}>→</button><button onClick={() => void gateway.reloadPreview()}>↻</button><span>WEBVIEW2 · {route}</span></div><div ref={previewHost} className="preview-host" aria-label={`Preview de ${selected.label}`} /></div> : null}
           {surface === "terminal" ? <button className="surface-terminal" onClick={openTerminal}><span>›_</span><strong>{selected.sessionId ? "Terminal do runtime ativo" : "Abrir terminal integrado"}</strong><small>{selected.sessionId ?? "Nova sessão segura no workspace"}</small></button> : null}

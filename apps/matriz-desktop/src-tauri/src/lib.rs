@@ -9,6 +9,7 @@ mod native_apps;
 mod ports;
 mod preview;
 mod processes;
+pub mod recovery;
 pub mod resources;
 pub mod runtime;
 mod settings;
@@ -28,6 +29,7 @@ use environment::{
 };
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
+use recovery::{recovery_action, RecoveryAction, RecoveryResult};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
 use tauri::Manager;
@@ -270,6 +272,66 @@ async fn restart_runtime(
         Some(&app_id),
     );
     Ok(session)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn recover_runtime(
+    terminals: tauri::State<'_, TerminalManager>,
+    operations: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
+    app_id: String,
+) -> Result<RecoveryResult, String> {
+    let listeners = ports::enumerate_listeners()?;
+    let current = runtime_snapshot(&listeners, &terminals.list()?)
+        .into_iter()
+        .find(|runtime| runtime.id == app_id)
+        .ok_or_else(|| "Runtime is not registered".to_string())?;
+    let action = recovery_action(current.status, current.ownership);
+    if action == RecoveryAction::DiagnoseOnly {
+        activity.publish(
+            "runtime.recovery.diagnosed",
+            "warning",
+            "Runtime externo preservado",
+            Some("A porta pertence a outro processo; nenhuma ação foi executada"),
+            Some(&app_id),
+        );
+        return Ok(RecoveryResult { app_id, status: "diagnoseOnly", session_id: None });
+    }
+
+    let operation_id = format!("app.{app_id}.web");
+    let operation = managed_operation(&operation_id)?;
+    if action == RecoveryAction::Restart {
+        let _ = terminals.close_operation(&operation_id)?;
+        for _ in 0..40 {
+            if !ports::enumerate_listeners()?.iter().any(|listener| listener.port == current.port) {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+        if ports::enumerate_listeners()?.iter().any(|listener| listener.port == current.port) {
+            return Err(format!("Port {} is still occupied; recovery was cancelled", current.port));
+        }
+    }
+    let session = terminals.start_managed(&operations.root()?, &operation)?;
+    let mut ready = false;
+    for _ in 0..100 {
+        if ports::enumerate_listeners()?.iter().any(|listener| listener.port == current.port) {
+            ready = true;
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(100));
+    }
+    if !ready {
+        return Err(format!("{} did not become ready after recovery", current.label));
+    }
+    activity.publish(
+        "runtime.recovered",
+        "success",
+        "Runtime recuperado",
+        Some(&format!("Porta {} pronta", current.port)),
+        Some(&app_id),
+    );
+    Ok(RecoveryResult { app_id, status: "ready", session_id: Some(session.id) })
 }
 
 #[tauri::command(rename_all = "camelCase")]
@@ -904,6 +966,7 @@ pub fn run() {
             get_runtime_snapshot,
             open_runtime_target,
             restart_runtime,
+            recover_runtime,
             stop_runtime,
             open_preview,
             set_preview_bounds,

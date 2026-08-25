@@ -332,6 +332,13 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .quick-actions button { flex: 0 0 auto; min-height: 30px; padding: 0 10px; border: 1px solid var(--line); border-radius: 6px; background: rgba(255,255,255,.02); color: #aaa0b7; font-size: 8px; cursor: pointer; }
 .quick-actions button:hover { border-color: rgba(154,102,255,.4); color: white; background: rgba(154,102,255,.08); }
 .quick-actions button.is-danger { color: #df8695; }
+.runtime-recovery { display:flex !important; align-items:center; justify-content:space-between; gap:12px; margin:-1px -2px 8px; padding:8px 10px; border:1px solid rgba(255,174,78,.2); border-radius:7px; background:rgba(255,149,54,.055); }
+.runtime-recovery > span { display:flex; flex-direction:column; gap:3px; }
+.runtime-recovery strong { color:#e7ad68; font:800 7px var(--matriz-font-mono); letter-spacing:.1em; }
+.runtime-recovery small { color:#a18c7c; font-size:8px; }
+.runtime-recovery > button { border-color:rgba(255,174,78,.28); color:#e6ad68; }
+.runtime-recovery--external { border-color:rgba(182,154,232,.16); background:rgba(255,255,255,.018); }
+.runtime-recovery--external strong { color:#9a90a5; }
 .surface-body { min-height: 0; padding: 8px; overflow: hidden; }
 .preview-shell { height: 100%; display: grid; grid-template-rows: 30px minmax(0,1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #08070d; }
 .preview-controls { display: flex; align-items: center; border-bottom: 1px solid var(--line); }
