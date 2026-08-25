@@ -414,24 +414,65 @@ enum IngredientStockMovementType {
 // Demo commerce — published stores, tenant-local customers and immutable
 // order snapshots. Checkout derives tenant from storeSlug on the server.
 // ---------------------------------------------------------------------------
+enum StoreIdentityPreset {
+  COSMIC_DINER
+  BRAZILIAN_WARMTH
+  MARKET_FRESH
+}
+
 model StorePublication {
-  id          String   @id @default(cuid())
-  tenantId    String   @unique
-  companyId   String   @unique
-  storeSlug   String   @unique
-  displayName String
-  description String?
-  isPublished Boolean  @default(false)
-  version     Int      @default(1)
-  publishedAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                   String              @id @default(cuid())
+  tenantId             String              @unique
+  companyId            String              @unique
+  storeSlug            String              @unique
+  displayName          String
+  description          String?
+  isPublished          Boolean             @default(false)
+  version              Int                 @default(1)
+  publishedAt          DateTime?
+  draftPreset          StoreIdentityPreset @default(MARKET_FRESH)
+  draftHeadline        String              @default("")
+  draftAnnouncement    String              @default("")
+  draftDescription     String              @default("")
+  draftHeroImageUrl    String?
+  draftVersion         Int                 @default(1)
+  publishedVersionId   String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  versions StorePublicationVersion[] @relation("StorePublicationVersions")
+  publishedVersion StorePublicationVersion? @relation("CurrentStorePublicationVersion", fields: [tenantId, publishedVersionId], references: [tenantId, id], onDelete: Restrict)
 
   @@index([storeSlug, isPublished])
+  @@unique([tenantId, id])
   @@unique([tenantId, companyId])
+  @@unique([tenantId, publishedVersionId])
   @@map("store_publications")
+}
+
+model StorePublicationVersion {
+  id                String              @id @default(cuid())
+  tenantId          String
+  publicationId     String
+  version           Int
+  storeSlug         String
+  displayName       String
+  preset            StoreIdentityPreset
+  headline          String
+  announcement      String
+  description       String
+  heroImageUrl      String?
+  publishedByUserId String
+  publishedAt       DateTime            @default(now())
+
+  publication StorePublication @relation("StorePublicationVersions", fields: [tenantId, publicationId], references: [tenantId, id], onDelete: Cascade)
+  currentFor StorePublication? @relation("CurrentStorePublicationVersion")
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, publicationId, version])
+  @@index([tenantId, publishedAt])
+  @@map("store_publication_versions")
 }
 
 model Customer {
