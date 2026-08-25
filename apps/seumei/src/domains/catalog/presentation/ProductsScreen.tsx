@@ -6,6 +6,7 @@ import {
   Archive,
   Copy,
   Cube,
+  FolderOpen,
   MagnifyingGlass,
   Package,
   PencilSimple,
@@ -31,6 +32,8 @@ export function ProductsScreen({
   const [view, setView] = React.useState<CatalogViewModel | null>(null)
   const [query, setQuery] = React.useState("")
   const [category, setCategory] = React.useState<CategoryFilter>("all")
+  const [statusFilter, setStatusFilter] = React.useState<"all" | "active" | "inactive">("all")
+  const [stockFilter, setStockFilter] = React.useState<"all" | "healthy" | "low" | "out">("all")
   const [busyId, setBusyId] = React.useState<ProductId | "editor" | null>(null)
   const [editor, setEditor] = React.useState<CatalogProductRow | "new" | null>(null)
   const [error, setError] = React.useState<string | null>(null)
@@ -51,10 +54,14 @@ export function ProductsScreen({
     const normalized = query.trim().toLocaleLowerCase("pt-BR")
     return view.rows.filter((row) => {
       const categoryMatches = category === "all" || row.categoryId === category
+      const statusMatches =
+        statusFilter === "all" ||
+        (statusFilter === "active" ? row.available : !row.available)
+      const stockMatches = stockFilter === "all" || row.stockTone === stockFilter
       const queryMatches = !normalized || `${row.name} ${row.description}`.toLocaleLowerCase("pt-BR").includes(normalized)
-      return categoryMatches && queryMatches
+      return categoryMatches && statusMatches && stockMatches && queryMatches
     })
-  }, [view, category, query])
+  }, [view, category, statusFilter, stockFilter, query])
 
   async function execute(
     productId: ProductId | "editor",
@@ -102,6 +109,12 @@ export function ProductsScreen({
 
       <div className="seumei-product-filters">
         <label><MagnifyingGlass size={17} /><Input type="search" aria-label="Buscar produto" placeholder="Buscar produto…" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+        <div className="seumei-product-filter-controls">
+          <select aria-label="Categoria" value={category} onChange={(event) => setCategory(event.target.value)}><option value="all">Todas categorias</option>{view.categories.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select>
+          <select aria-label="Status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as typeof statusFilter)}><option value="all">Status: todos</option><option value="active">Ativos</option><option value="inactive">Inativos</option></select>
+          <select aria-label="Estoque" value={stockFilter} onChange={(event) => setStockFilter(event.target.value as typeof stockFilter)}><option value="all">Estoque: todos</option><option value="healthy">Em estoque</option><option value="low">Estoque baixo</option><option value="out">Fora de estoque</option></select>
+          <button type="button" className="seumei-manage-categories"><FolderOpen size={16} /> Gerenciar categorias</button>
+        </div>
         <span>{filteredRows.length} de {view.metrics.total} produtos</span>
       </div>
 

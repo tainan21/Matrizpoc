@@ -1,10 +1,12 @@
 import "@testing-library/jest-dom/vitest"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { describe, expect, it } from "vitest"
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { afterEach, describe, expect, it } from "vitest"
 import { asUserId } from "@matriz/foundation-types"
 import { asCompanyId } from "../../companies/domain/company"
 import { createDemoSeumeiRuntime } from "../../../lib/container"
 import { ProductsScreen } from "./ProductsScreen"
+
+afterEach(cleanup)
 
 async function setup() {
   const userId = asUserId("user-demo-seumei")
@@ -55,5 +57,21 @@ describe("ProductsScreen", () => {
     fireEvent.click(duplicate)
 
     expect(await screen.findByText("X-Galáxia (Cópia)")).toBeVisible()
+  })
+
+  it("combines status and stock filters", async () => {
+    const props = await setup()
+    render(<ProductsScreen {...props} />)
+
+    await screen.findByText("X-Galáxia")
+    fireEvent.change(screen.getByRole("combobox", { name: "Status" }), {
+      target: { value: "inactive" },
+    })
+    fireEvent.change(screen.getByRole("combobox", { name: "Estoque" }), {
+      target: { value: "out" },
+    })
+
+    expect(screen.getByText("Milk Shake Oreo")).toBeVisible()
+    expect(screen.queryByText("X-Galáxia")).not.toBeInTheDocument()
   })
 })
