@@ -115,6 +115,12 @@ As imagens são configuração da fixture. A arquitetura não contém condiciona
 
 ## Products Admin
 
+### Direção visual
+
+- **Tese visual:** uma bancada operacional noturna, compacta e precisa, com superfícies azul‑preto, linhas discretas e roxo reservado à ação e ao estado ativo.
+- **Plano de conteúdo:** título e ação primária; cinco sinais operacionais; categorias e filtros; tabela densa como superfície dominante; editor contextual somente quando solicitado.
+- **Tese de interação:** entrada curta e escalonada dos sinais/tabela; toggles com transição determinística; editor com presença rápida, foco inicial e retorno de foco, sempre respeitando `prefers-reduced-motion`.
+
 `ProductsScreen` substitui a tela genérica quando `appId === "products"`.
 
 Capacidades funcionais:

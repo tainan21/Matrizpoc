@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import type { CompanyId } from "../../companies/domain/company"
 import { useSeumeiTenant } from "../../memberships/presentation/use-seumei-tenant"
+import { ProductsScreen } from "../../catalog/presentation/ProductsScreen"
 
 export function CompanyWorkspaceScreen({ companySlug, appId }: { readonly companySlug: string; readonly appId?: string }) {
   const tenant = useSeumeiTenant()
@@ -21,6 +22,10 @@ export function CompanyWorkspaceScreen({ companySlug, appId }: { readonly compan
 
   const activeApp = appId ? tenant.current.company.apps.find((app) => app.id === appId) : null
   if (appId && !activeApp) return <UnavailableState message="Aplicativo não instalado ou sem permissão." />
+
+  if (activeApp?.id === "products" && tenant.catalog) {
+    return <ProductsScreen catalog={tenant.catalog} context={tenant.current.context} />
+  }
 
   return (
     <div className="seumei-workspace-overview">
