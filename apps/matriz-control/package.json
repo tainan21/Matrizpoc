@@ -2,27 +2,58 @@
   "name": "@matriz/app-matriz-control",
   "version": "0.1.0",
   "private": true,
+  "main": "dist-desktop/desktop/main.js",
   "scripts": {
     "dev": "next dev -p 3008",
+    "dev:web": "next dev -p 3008",
+    "desktop:compile": "tsc -p tsconfig.desktop.json",
+    "desktop:dev": "pnpm run desktop:compile && node desktop/launch.mjs",
+    "desktop:build": "pnpm run build && pnpm run desktop:compile && electron-builder --win nsis",
+    "mcp:start": "node dist-desktop/mcp/server.js",
     "build": "next build",
-    "start": "next start -p 3008",
+    "start": "node desktop/start-standalone.mjs",
     "test": "vitest run --config vitest.config.ts",
     "lint": "eslint . --max-warnings 0",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.desktop.json --noEmit"
+  },
+  "build": {
+    "appId": "com.matriz.control",
+    "productName": "Matriz Control",
+    "asar": true,
+    "files": ["dist-desktop/**/*", "package.json"],
+    "extraResources": [
+      { "from": ".next/standalone", "to": "next" },
+      { "from": ".next/static", "to": "next/apps/matriz-control/.next/static" },
+      { "from": "desktop/vault-helper.ps1", "to": "vault-helper.ps1" }
+    ],
+    "win": { "target": ["nsis"] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
   },
   "dependencies": {
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.12",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lang-markdown": "^6.5.2",
     "@matriz/design-system": "workspace:^",
+    "@matriz/design-ui": "workspace:^",
     "@matriz/integration-api-contracts": "workspace:*",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@uiw/react-codemirror": "4.25.4",
     "next": "16.2.4",
-    "react": "19.2.5",
-    "react-dom": "19.2.5"
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@types/node": "22.7.5",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "electron": "44.0.0",
+    "electron-builder": "26.15.3",
+    "tsx": "4.19.1",
     "typescript": "5.6.3",
     "vitest": "2.1.2"
   }

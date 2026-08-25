@@ -18,3 +18,23 @@ corepack pnpm --filter @matriz/app-matriz-control dev
 ```
 
 Open `http://localhost:3008/apps`. The terminal process supervisor is memory-only and intended for loopback development.
+
+## Navegador desktop local
+
+O cockpit web permanece disponível em `http://localhost:3008/browser`. Para anexar o Chromium nativo com cápsulas isoladas, WebGL2, áudio, downloads e o editor seguro:
+
+```powershell
+$env:MATRIZ_CONTROL_LOCAL_TOKEN = "choose-a-long-local-secret"
+$env:MATRIZ_WORKSPACE_ROOT = (Get-Location).Path
+corepack pnpm --filter @matriz/app-matriz-control desktop:dev
+```
+
+O cofre VHDX/BitLocker é configurado pelo painel **Agente** da rota `/browser`. A criação e montagem do volume podem exigir que o Matriz Control seja iniciado como administrador; a chave de recuperação é protegida pelo Windows `safeStorage` e não deve ser colocada em `.env` ou argumentos.
+
+Para gerar o instalador Windows local:
+
+```powershell
+corepack pnpm --filter @matriz/app-matriz-control desktop:build
+```
+
+O servidor MCP STDIO é iniciado pelo executável compilado com `corepack pnpm --filter @matriz/app-matriz-control mcp:start`. Ele somente conecta ao desktop já aberto por named pipe autenticado; as ferramentas não expõem shell, cookies, tokens, variáveis de ambiente ou caminhos absolutos.

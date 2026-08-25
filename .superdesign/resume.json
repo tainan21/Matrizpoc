@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "/browser": {
+      "targetKind": "new-target",
+      "projectId": "086c1566-2f35-4a11-9894-f32b234a2fa5",
+      "activeDraftId": "a752e684-4144-4d69-a480-10255fe2282e",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "apps/matriz-control/app/globals.css",
+        "apps/matriz-control/src/ui/control-shell.tsx",
+        "apps/matriz-control/src/ui/apps-console.tsx",
+        "apps/matriz-control/src/ui/terminal/terminal-dock.tsx"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "6BF43577768583C0EDD28F2B907FF08E55E832BEBB7D680DF6F10B7A75BBC6EB",
+        "apps/matriz-control/app/globals.css": "0027C7E37C6751BC7F9C0DA4402B1B2AB82CB890F7F2B2E0BE70E22CACB639DE",
+        "apps/matriz-control/src/ui/control-shell.tsx": "A4EF213435970946928D1E14274AFB08AAF23A28FB060840562F7335285D114F",
+        "apps/matriz-control/src/ui/apps-console.tsx": "E5C9BE3FF2FD1F8EB444A5D6AC9187518DBB1A1FD3EF8514F3E38156586886B2",
+        "apps/matriz-control/src/ui/terminal/terminal-dock.tsx": "1A9F0836EA783E6EC86ED0B2E05E4AA68099789123DE7D921D5A90545DB7830A"
+      },
+      "drafts": {
+        "1d7a4343-9abd-4868-9241-7acb502ffacf": {
+          "title": "Matriz Control Browser — Base",
+          "visualDirection": "balanced browser cockpit",
+          "currentVersion": 1
+        },
+        "a752e684-4144-4d69-a480-10255fe2282e": {
+          "title": "Matriz Control Browser — Focused Workspace",
+          "visualDirection": "calm daily browsing with progressive disclosure",
+          "parentDraftId": "1d7a4343-9abd-4868-9241-7acb502ffacf",
+          "currentVersion": 1
+        },
+        "04dc9dbd-e580-44f6-98e4-882a7c4db6e4": {
+          "title": "Matriz Control Browser — Operational Cockpit",
+          "visualDirection": "dense multi-account operational telemetry",
+          "parentDraftId": "1d7a4343-9abd-4868-9241-7acb502ffacf",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-08-25T10:00:00-03:00"
+    }
+  }
+}

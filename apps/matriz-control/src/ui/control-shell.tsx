@@ -6,7 +6,7 @@ import type { ReactNode } from "react"
 import { TerminalDock } from "./terminal/terminal-dock"
 import { TerminalProvider, useTerminal } from "./terminal/terminal-context"
 
-const links = [["/apps", "Apps"], ["/workspace", "Workspace"], ["/terminal", "Terminal"], ["/actions", "Ações"], ["/store", "Store"], ["/doctor", "Doctor"], ["/settings", "Ajustes"]] as const
+const links = [["/apps", "Apps"], ["/workspace", "Workspace"], ["/terminal", "Terminal"], ["/browser", "Navegador"], ["/actions", "Ações"], ["/store", "Store"], ["/doctor", "Doctor"], ["/settings", "Ajustes"]] as const
 
 function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
