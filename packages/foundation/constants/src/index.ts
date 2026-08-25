@@ -22,6 +22,7 @@ export const MATRIZ_APP_IDS = [
   "seumei",
   "contracts",
   "willdash",
+  "health",
 ] as const
 
 export type MatrizAppId = (typeof MATRIZ_APP_IDS)[number]
@@ -40,6 +41,7 @@ export const MATRIZ_APP_NAMES: Readonly<Record<MatrizAppId, string>> = {
   seumei: "Seu Mei",
   contracts: "Contracts",
   willdash: "WillDash",
+  health: "Health",
 }
 
 // ---------------------------------------------------------------------------

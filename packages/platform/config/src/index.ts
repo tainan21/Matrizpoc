@@ -48,6 +48,7 @@ export const localAppRuntimes: readonly LocalAppRuntimeConfig[] = [
   { slug: "matrizlib", appId: "matrizlib", directory: "apps/matrizlib", preferredPort: 3007, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
   { slug: "seumei", appId: "seumei", directory: "apps/seumeiapp", preferredPort: 3008, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
   { slug: "control", appId: "matriz-control", directory: "apps/matriz-control", preferredPort: 3009, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "experimental", runtimeAdapter: "next" },
+  { slug: "health", appId: "health", directory: "apps/health", preferredPort: 3010, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "experimental", runtimeAdapter: "next" },
 ] as const
 
 const preferredBaseUrls = Object.fromEntries(

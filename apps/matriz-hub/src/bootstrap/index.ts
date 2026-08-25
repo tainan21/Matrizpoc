@@ -20,6 +20,7 @@ import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contr
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
+import { manifest as healthManifest } from "@apps/health/public-contract"
 import { getGlobalRegistry } from "@matriz/integration-registry-core"
 import { getGlobalEventBus } from "@matriz/integration-events"
 import { monorepoConfig } from "@matriz/platform-config"
@@ -66,6 +67,7 @@ export function bootstrapMatrizHub(): HubBootstrapResult {
       seumeiManifest,
       contractsManifest,
       willdashManifest,
+      healthManifest,
     ]
 
     for (const m of manifests) {

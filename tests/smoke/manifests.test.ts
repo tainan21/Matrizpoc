@@ -19,6 +19,7 @@ import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contr
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
+import { manifest as healthManifest } from "@apps/health/public-contract"
 
 const allManifests = [
   { appId: "matriz-identity", manifest: identityManifest },
@@ -33,10 +34,11 @@ const allManifests = [
   { appId: "seumei", manifest: seumeiManifest },
   { appId: "contracts", manifest: contractsManifest },
   { appId: "willdash", manifest: willdashManifest },
+  { appId: "health", manifest: healthManifest },
 ] as const
 
 describe("manifests", () => {
-  it("todos os 12 manifests satisfazem AppManifestDTO (Zod)", () => {
+  it("todos os 13 manifests satisfazem AppManifestDTO (Zod)", () => {
     for (const { appId, manifest } of allManifests) {
       const result = appManifestSchema.safeParse(manifest)
       if (!result.success) {

@@ -76,7 +76,8 @@
       "@apps/matriz-admin/public-contract": ["./apps/matriz-admin/public-contract.ts"],
       "@apps/seumei/public-contract": ["./apps/seumeiapp/public-contract.ts"],
       "@apps/contracts/public-contract": ["./apps/contracts/public-contract.ts"],
-      "@apps/willdash/public-contract": ["./apps/willdash/public-contract.ts"]
+      "@apps/willdash/public-contract": ["./apps/willdash/public-contract.ts"],
+      "@apps/health/public-contract": ["./apps/health/public-contract.ts"]
     }
   },
   "exclude": ["node_modules", "dist", ".next", ".turbo"]

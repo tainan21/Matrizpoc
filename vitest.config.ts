@@ -59,6 +59,7 @@ export default defineConfig({
       "@apps/seumei/public-contract": resolve(__dirname, "./apps/seumeiapp/public-contract.ts"),
       "@apps/contracts/public-contract": resolve(__dirname, "./apps/contracts/public-contract.ts"),
       "@apps/willdash/public-contract": resolve(__dirname, "./apps/willdash/public-contract.ts"),
+      "@apps/health/public-contract": resolve(__dirname, "./apps/health/public-contract.ts"),
     },
   },
 })
