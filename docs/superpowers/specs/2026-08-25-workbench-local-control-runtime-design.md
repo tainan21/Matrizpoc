@@ -76,9 +76,13 @@ Workbench exposes a narrow Control integration surface:
 
 - `GET /api/control/health`: runtime version, compatibility version, mode, and readiness;
 - `POST /api/control/diagnostics`: one sanitized process diagnostic;
-- `POST /api/control/diagnostics/:id/repair`: explicitly retry an eligible blocked diagnostic.
+- `POST /api/control/diagnostics/:id/repair`: explicitly retry an eligible blocked diagnostic;
+- `GET /api/control/repairs/next`: the oldest declared-action rerun requested by a completed repair turn, or `204` when none is pending;
+- `POST /api/control/repairs/:id/result`: the sanitized exit result of that exact declared action.
 
 The health endpoint reveals no paths, environment values, tokens, cookies, or workspace contents. Diagnostic mutations reject requests that are not from loopback, lack the capability token, exceed the body limit, or fail schema validation.
+
+Control polls the pending-repair endpoint only while Workbench is healthy and at most once per second. A lease in the response prevents two Control loops from claiming the same rerun. Control resolves the original project and action ID through its validated catalog, executes no command supplied by Workbench, and posts the bounded result back. Workbench resolves a diagnostic only from a successful result for the matching diagnostic, action, attempt, and lease.
 
 Control never sends raw environment maps or arbitrary commands. A diagnostic contains only:
 
