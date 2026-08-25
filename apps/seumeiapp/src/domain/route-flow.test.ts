@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parseRouteFlow, routeFlowToMarkdown } from "./route-flow"
+import { CANONICAL_ROUTE_FLOWS, parseRouteFlow, routeFlowToMarkdown } from "./route-flow"
 
 describe("route flow scratchpad", () => {
   it("parses ordered relative routes and outcomes", () => {
@@ -24,5 +24,13 @@ describe("route flow scratchpad", () => {
     const parsed = parseRouteFlow("/login — entrar\n/workspace — operar")
     if (parsed.kind !== "valid") throw new Error("expected valid flow")
     expect(routeFlowToMarkdown("Acesso", parsed.steps)).toContain("`/login` → entrar")
+  })
+
+  it("documents finance from overview to an auditable entry", () => {
+    const finance = CANONICAL_ROUTE_FLOWS.find((flow) => flow.id === "essential-finance")
+    expect(finance?.steps).toEqual([
+      { route: "/workspace/finance", outcome: "acompanhar caixa, competência, vencimentos e criar lançamento manual" },
+      { route: "/workspace/finance/entries/[entryId]", outcome: "consultar eventos e liquidar ou cancelar um lançamento manual aberto" },
+    ])
   })
 })

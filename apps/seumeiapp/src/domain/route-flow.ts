@@ -42,4 +42,8 @@ export const CANONICAL_ROUTE_FLOWS: readonly RouteFlowDefinition[] = [
     { route: "/store/[storeSlug]/checkout/success", outcome: "confirmar o pedido persistido sem cobrança real" }, { route: "/workspace/orders", outcome: "operar o pedido autorizado" },
     { route: "/workspace/customers", outcome: "consultar o cliente tenant-local e seu histórico" },
   ] },
+  { id: "essential-finance", title: "Financeiro essencial", description: "Receitas de pedidos e lançamentos manuais formam um livro tenant-scoped auditável.", steps: [
+    { route: "/workspace/finance", outcome: "acompanhar caixa, competência, vencimentos e criar lançamento manual" },
+    { route: "/workspace/finance/entries/[entryId]", outcome: "consultar eventos e liquidar ou cancelar um lançamento manual aberto" },
+  ] },
 ]

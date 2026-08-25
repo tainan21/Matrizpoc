@@ -22,6 +22,7 @@ describe("workspace shell presenter", () => {
       { label: "Estoque", href: "/workspace/stock" },
       { label: "Pedidos", href: "/workspace/orders" },
       { label: "Clientes", href: "/workspace/customers" },
+      { label: "Financeiro", href: "/workspace/finance" },
       { label: "Membros", href: "/workspace/members" },
       { label: "Route flows · temporário", href: "/docs" },
     ])
@@ -34,6 +35,8 @@ describe("workspace shell presenter", () => {
       { label: "Clientes", href: "/workspace/customers" },
       { label: "Route flows · temporário", href: "/docs" },
     ])
+    expect(toWorkspaceShellViewModel(company, "ADMIN").navigation).toContainEqual({ label: "Financeiro", href: "/workspace/finance" })
+    expect(toWorkspaceShellViewModel(company, "VIEWER").navigation).not.toContainEqual({ label: "Financeiro", href: "/workspace/finance" })
   })
 
   it("does not serialize tenant authority", () => {
