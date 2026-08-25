@@ -90,6 +90,9 @@ export function createTauriGateway(
     readEnvironment: (appId, fileName) => invoke(commands.readEnvironment, { appId, fileName }),
     revealEnvironmentValue: (appId, fileName, key) => invoke(commands.revealEnvironmentValue, { appId, fileName, key }),
     saveEnvironment: (request) => invoke(commands.saveEnvironment, { request }),
+    compareEnvironments: (appId, sourceFile, targetFile) => invoke(commands.compareEnvironments, { appId, sourceFile, targetFile }),
+    promoteEnvironment: (request) => invoke(commands.promoteEnvironment, { request }),
+    findEnvironmentReferences: (appId, key) => invoke(commands.findEnvironmentReferences, { appId, key }),
     listDirectory: (appId, relativePath) => invoke(commands.listDirectory, { appId, relativePath }),
     previewFile: (appId, relativePath) => invoke(commands.previewFile, { appId, relativePath }),
     openResource: (appId, relativePath) => invoke(commands.openResource, { appId, relativePath }),
@@ -100,7 +103,11 @@ export function createTauriGateway(
     recycleResource: (appId, relativePath) => invoke(commands.recycleResource, { appId, relativePath }),
     commerceSnapshot: () => invoke(commands.commerceSnapshot),
     acquirePackage: (packageId) => invoke(commands.acquirePackage, { packageId }),
-    installPackage: (packageId) => invoke(commands.installPackage, { packageId }),
+    installPackage: (packageId, grantedPermissions) => invoke(commands.installPackage, { packageId, grantedPermissions }),
     uninstallPackage: (packageId) => invoke(commands.uninstallPackage, { packageId }),
+    repairPackage: (packageId) => invoke(commands.repairPackage, { packageId }),
+    recoverRuntime: (appId) => invoke(commands.recoverRuntime, { appId }),
+    runbookCatalog: () => invoke(commands.runbookCatalog),
+    runRunbook: (runbookId, appId) => invoke(commands.runRunbook, { runbookId, appId }),
   }
 }

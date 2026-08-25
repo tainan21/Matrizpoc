@@ -50,7 +50,7 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
     {error ? <div className="env-error" role="alert">{error}</div> : null}
     <div className="store-layout">
       <div className="store-catalog">
-        {packages.map((item) => <PackageCard key={item.id} item={item} busy={busy === item.id} selected={selectedId === item.id} inspect={() => setSelectedId(item.id)} acquire={() => void transition(item.id, () => gateway.acquirePackage(item.id))} install={() => void transition(item.id, () => gateway.installPackage(item.id))} open={() => void openPackage(item)} uninstall={() => void transition(item.id, () => gateway.uninstallPackage(item.id))} />)}
+        {packages.map((item) => <PackageCard key={item.id} item={item} busy={busy === item.id} selected={selectedId === item.id} inspect={() => setSelectedId(item.id)} acquire={() => void transition(item.id, () => gateway.acquirePackage(item.id))} install={() => void transition(item.id, () => gateway.installPackage(item.id, item.permissions))} open={() => void openPackage(item)} uninstall={() => void transition(item.id, () => gateway.uninstallPackage(item.id))} />)}
         {!packages.length ? <div className="store-empty">Nenhuma capacidade encontrada.</div> : null}
       </div>
       <aside className="store-side">

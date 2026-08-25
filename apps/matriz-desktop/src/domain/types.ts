@@ -172,6 +172,44 @@ export interface EnvironmentSaveRequest {
   readonly variables: readonly { readonly key: string; readonly value?: string }[]
 }
 
+export interface EnvironmentComparisonEntry {
+  readonly key: string
+  readonly sensitive: boolean
+  readonly status: "equal" | "different" | "missingSource" | "missingTarget"
+  readonly sourceValue?: string
+  readonly targetValue?: string
+}
+
+export interface EnvironmentComparison {
+  readonly appId: DesktopAppId
+  readonly sourceFile: string
+  readonly targetFile: string
+  readonly targetRevision: string
+  readonly entries: readonly EnvironmentComparisonEntry[]
+}
+
+export interface EnvironmentPromotionRequest {
+  readonly appId: DesktopAppId
+  readonly sourceFile: string
+  readonly targetFile: string
+  readonly targetRevision: string
+  readonly keys: readonly string[]
+}
+
+export interface EnvironmentReferenceMatch {
+  readonly relativePath: string
+  readonly line: number
+  readonly excerpt: string
+}
+
+export interface EnvironmentReferenceResult {
+  readonly appId: DesktopAppId
+  readonly key: string
+  readonly scannedFiles: number
+  readonly truncated: boolean
+  readonly matches: readonly EnvironmentReferenceMatch[]
+}
+
 export interface ExplorerEntry {
   readonly name: string
   readonly relativePath: string
@@ -217,9 +255,46 @@ export interface StorePackage {
   readonly compatibility: string
   readonly owned: boolean
   readonly installed: boolean
+  readonly trustStatus?: "verified" | "changed" | "missing"
+  readonly receipt?: PackageReceipt
+}
+
+export interface PackageReceipt {
+  readonly packageId: string
+  readonly version: string
+  readonly manifestDigest: string
+  readonly grantedPermissions: readonly string[]
+  readonly installedAt: number
 }
 
 export interface CommerceSnapshot {
   readonly wallet: { readonly balance: number; readonly currency: "M"; readonly transactions: readonly WalletTransaction[] }
   readonly packages: readonly StorePackage[]
+}
+
+export interface RecoveryResult {
+  readonly appId: DesktopAppId
+  readonly status: "ready" | "diagnoseOnly"
+  readonly sessionId?: string
+}
+
+export interface RunbookDefinition {
+  readonly id: "validate-environment" | "recover-open" | "apply-visualize"
+  readonly label: string
+  readonly description: string
+  readonly steps: readonly string[]
+}
+
+export interface RunbookStepResult {
+  readonly stepId: string
+  readonly status: "completed" | "failed" | "available"
+  readonly detail: string
+}
+
+export interface RunbookExecution {
+  readonly runbookId: RunbookDefinition["id"]
+  readonly appId: DesktopAppId
+  readonly status: "completed" | "failed"
+  readonly steps: readonly RunbookStepResult[]
+  readonly target?: RuntimeTarget
 }

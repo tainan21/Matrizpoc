@@ -111,6 +111,9 @@ function gateway(): DesktopGateway {
         source: request.fileName,
       })),
     })),
+    compareEnvironments: vi.fn().mockResolvedValue({ appId: "matriz-admin", sourceFile: ".env.local", targetFile: ".env.example", targetRevision: "target", entries: [] }),
+    promoteEnvironment: vi.fn().mockResolvedValue({ appId: "matriz-admin", fileName: ".env.example", revision: "next", missingRequired: [], variables: [] }),
+    findEnvironmentReferences: vi.fn().mockResolvedValue({ appId: "matriz-admin", key: "PORT", scannedFiles: 0, truncated: false, matches: [] }),
     listDirectory: vi.fn().mockResolvedValue({ appId: "matriz-admin", relativePath: "", entries: [] }),
     previewFile: vi.fn().mockResolvedValue({ appId: "matriz-admin", relativePath: "README.md", name: "README.md", size: 0, content: { kind: "text", value: "" } }),
     openResource: vi.fn().mockResolvedValue(undefined),
@@ -123,6 +126,10 @@ function gateway(): DesktopGateway {
     acquirePackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
     installPackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
     uninstallPackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
+    repairPackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
+    recoverRuntime: vi.fn().mockResolvedValue({ appId: "matriz-admin", status: "ready" }),
+    runbookCatalog: vi.fn().mockResolvedValue([]),
+    runRunbook: vi.fn().mockResolvedValue({ runbookId: "validate-environment", appId: "matriz-admin", status: "completed", steps: [] }),
   }
 }
 

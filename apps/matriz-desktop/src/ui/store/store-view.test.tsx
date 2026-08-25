@@ -27,7 +27,7 @@ describe("StoreView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Adquirir Matriz Analytics por 220 M" }))
     await waitFor(() => expect(gateway.acquirePackage).toHaveBeenCalledWith("matriz.analytics"))
     fireEvent.click(await screen.findByRole("button", { name: "Instalar Matriz Analytics" }))
-    await waitFor(() => expect(gateway.installPackage).toHaveBeenCalledWith("matriz.analytics"))
+    await waitFor(() => expect(gateway.installPackage).toHaveBeenCalledWith("matriz.analytics", ["runtime:observe"]))
     expect(await screen.findByText("INSTALADO")).toBeVisible()
   })
 

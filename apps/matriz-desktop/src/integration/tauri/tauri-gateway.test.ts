@@ -67,4 +67,21 @@ describe("Tauri desktop gateway", () => {
       ["stop_native_app"],
     ])
   })
+
+  it("passes only bounded operational intelligence inputs", async () => {
+    const invoke = vi.fn().mockResolvedValue(undefined)
+    const gateway = createTauriGateway(invoke)
+
+    await gateway.compareEnvironments("matriz-admin", ".env.local", ".env.staging")
+    await gateway.findEnvironmentReferences("matriz-admin", "DATABASE_URL")
+    await gateway.recoverRuntime("matriz-admin")
+    await gateway.runRunbook("recover-open", "matriz-admin")
+
+    expect(invoke.mock.calls).toEqual([
+      ["compare_environments", { appId: "matriz-admin", sourceFile: ".env.local", targetFile: ".env.staging" }],
+      ["find_environment_references", { appId: "matriz-admin", key: "DATABASE_URL" }],
+      ["recover_runtime", { appId: "matriz-admin" }],
+      ["run_runbook", { runbookId: "recover-open", appId: "matriz-admin" }],
+    ])
+  })
 })

@@ -105,6 +105,16 @@ export const unavailableGateway: DesktopGateway = {
   ] }),
   revealEnvironmentValue: async () => "••••••••",
   saveEnvironment: async (request) => ({ ...request, missingRequired: [], variables: request.variables.map((item) => ({ ...item, sensitive: /SECRET|TOKEN|PASSWORD|DATABASE_URL/.test(item.key), source: request.fileName })) }),
+  compareEnvironments: async (appId, sourceFile, targetFile) => ({ appId, sourceFile, targetFile, targetRevision: "demo-target", entries: [
+    { key: "DATABASE_URL", sensitive: true, status: "different" },
+    { key: "PORT", sensitive: false, status: "equal", sourceValue: "3002", targetValue: "3002" },
+    { key: "EMAIL_FROM", sensitive: false, status: "missingSource", targetValue: "ops@matriz.local" },
+  ] }),
+  promoteEnvironment: async (request) => ({ appId: request.appId, fileName: request.targetFile, revision: "demo-promoted", missingRequired: [], variables: [] }),
+  findEnvironmentReferences: async (appId, key) => ({ appId, key, scannedFiles: 42, truncated: false, matches: [
+    { relativePath: "src/config/database.ts", line: 12, excerpt: "const database = env.DATABASE_URL" },
+    { relativePath: "src/bootstrap/index.ts", line: 8, excerpt: "requireEnv(\"DATABASE_URL\")" },
+  ] }),
   listDirectory: async (appId, relativePath) => ({ appId, relativePath, entries: relativePath ? [
     { name: "dashboard.tsx", relativePath: `${relativePath}/dashboard.tsx`, isDirectory: false, size: 12400, modifiedAt: now - 60_000, extension: "tsx" },
     { name: "preview.png", relativePath: `${relativePath}/preview.png`, isDirectory: false, size: 245000, modifiedAt: now - 120_000, extension: "png" },
@@ -124,4 +134,12 @@ export const unavailableGateway: DesktopGateway = {
   acquirePackage: async (packageId) => demoCommerce(packageId),
   installPackage: async (packageId) => demoCommerce(packageId, true),
   uninstallPackage: async (packageId) => demoCommerce(packageId, false),
+  repairPackage: async (packageId) => demoCommerce(packageId, true),
+  recoverRuntime: async (appId) => ({ appId, status: "ready", sessionId: `demo-${appId}` }),
+  runbookCatalog: async () => [
+    { id: "validate-environment", label: "Validar ambiente", description: "ENV e Doctor em uma passagem.", steps: ["environment.validate", "doctor.run"] },
+    { id: "recover-open", label: "Recuperar e abrir", description: "Recupera o runtime e abre sua rota principal.", steps: ["runtime.recover", "runtime.open"] },
+    { id: "apply-visualize", label: "Aplicar e visualizar", description: "Valida, recupera e oferece Preview.", steps: ["environment.validate", "runtime.recover", "preview.offer"] },
+  ],
+  runRunbook: async (runbookId, appId) => ({ runbookId, appId, status: "completed", steps: [], target: { appId, routePath: "/" } }),
 }

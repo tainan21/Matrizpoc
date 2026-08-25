@@ -45,6 +45,9 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   readEnvironment: "read_environment",
   revealEnvironmentValue: "reveal_environment_value",
   saveEnvironment: "save_environment",
+  compareEnvironments: "compare_environments",
+  promoteEnvironment: "promote_environment",
+  findEnvironmentReferences: "find_environment_references",
   listDirectory: "list_directory",
   previewFile: "preview_file",
   openResource: "open_resource",
@@ -57,4 +60,8 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   acquirePackage: "acquire_package",
   installPackage: "install_package",
   uninstallPackage: "uninstall_package",
+  repairPackage: "repair_package",
+  recoverRuntime: "recover_runtime",
+  runbookCatalog: "get_runbook_catalog",
+  runRunbook: "run_runbook",
 } as const satisfies Readonly<Record<keyof DesktopGateway, string>>)

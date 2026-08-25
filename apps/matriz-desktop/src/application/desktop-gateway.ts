@@ -25,6 +25,12 @@ import type {
   DirectoryListing,
   FilePreview,
   CommerceSnapshot,
+  EnvironmentComparison,
+  EnvironmentPromotionRequest,
+  EnvironmentReferenceResult,
+  RecoveryResult,
+  RunbookDefinition,
+  RunbookExecution,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -72,6 +78,9 @@ export interface DesktopGateway {
   readEnvironment(appId: DesktopAppId, fileName: string): Promise<EnvironmentDocument>
   revealEnvironmentValue(appId: DesktopAppId, fileName: string, key: string): Promise<string>
   saveEnvironment(request: EnvironmentSaveRequest): Promise<EnvironmentDocument>
+  compareEnvironments(appId: DesktopAppId, sourceFile: string, targetFile: string): Promise<EnvironmentComparison>
+  promoteEnvironment(request: EnvironmentPromotionRequest): Promise<EnvironmentDocument>
+  findEnvironmentReferences(appId: DesktopAppId, key: string): Promise<EnvironmentReferenceResult>
   listDirectory(appId: DesktopAppId, relativePath: string): Promise<DirectoryListing>
   previewFile(appId: DesktopAppId, relativePath: string): Promise<FilePreview>
   openResource(appId: DesktopAppId, relativePath: string): Promise<void>
@@ -82,6 +91,10 @@ export interface DesktopGateway {
   recycleResource(appId: DesktopAppId, relativePath: string): Promise<void>
   commerceSnapshot(): Promise<CommerceSnapshot>
   acquirePackage(packageId: string): Promise<CommerceSnapshot>
-  installPackage(packageId: string): Promise<CommerceSnapshot>
+  installPackage(packageId: string, grantedPermissions: readonly string[]): Promise<CommerceSnapshot>
   uninstallPackage(packageId: string): Promise<CommerceSnapshot>
+  repairPackage(packageId: string): Promise<CommerceSnapshot>
+  recoverRuntime(appId: DesktopAppId): Promise<RecoveryResult>
+  runbookCatalog(): Promise<readonly RunbookDefinition[]>
+  runRunbook(runbookId: RunbookDefinition["id"], appId: DesktopAppId): Promise<RunbookExecution>
 }

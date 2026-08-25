@@ -50,6 +50,9 @@ describe("Tauri command contract", () => {
       readEnvironment: "read_environment",
       revealEnvironmentValue: "reveal_environment_value",
       saveEnvironment: "save_environment",
+      compareEnvironments: "compare_environments",
+      promoteEnvironment: "promote_environment",
+      findEnvironmentReferences: "find_environment_references",
       listDirectory: "list_directory",
       previewFile: "preview_file",
       openResource: "open_resource",
@@ -62,6 +65,10 @@ describe("Tauri command contract", () => {
       acquirePackage: "acquire_package",
       installPackage: "install_package",
       uninstallPackage: "uninstall_package",
+      repairPackage: "repair_package",
+      recoverRuntime: "recover_runtime",
+      runbookCatalog: "get_runbook_catalog",
+      runRunbook: "run_runbook",
     })
     expect(Object.isFrozen(TAURI_COMMAND_CONTRACT)).toBe(true)
   })
@@ -126,6 +133,10 @@ describe("Tauri command contract", () => {
     await gateway.revealEnvironmentValue("matriz-admin", ".env.local", "JWT_SECRET")
     const environmentRequest = { appId: "matriz-admin" as const, fileName: ".env.local", revision: "rev-1", variables: [{ key: "PORT", value: "3002" }] }
     await gateway.saveEnvironment(environmentRequest)
+    await gateway.compareEnvironments("matriz-admin", ".env.local", ".env.staging")
+    const promotionRequest = { appId: "matriz-admin" as const, sourceFile: ".env.local", targetFile: ".env.staging", targetRevision: "rev-2", keys: ["DATABASE_URL"] }
+    await gateway.promoteEnvironment(promotionRequest)
+    await gateway.findEnvironmentReferences("matriz-admin", "DATABASE_URL")
     await gateway.listDirectory("matriz-admin", "src")
     await gateway.previewFile("matriz-admin", "src/index.ts")
     await gateway.openResource("matriz-admin", "src/index.ts")
@@ -136,8 +147,12 @@ describe("Tauri command contract", () => {
     await gateway.recycleResource("matriz-admin", "src/main.copy.ts")
     await gateway.commerceSnapshot()
     await gateway.acquirePackage("matriz.analytics")
-    await gateway.installPackage("matriz.analytics")
+    await gateway.installPackage("matriz.analytics", ["runtime:observe", "activity:read"])
     await gateway.uninstallPackage("matriz.analytics")
+    await gateway.repairPackage("matriz.analytics")
+    await gateway.recoverRuntime("matriz-admin")
+    await gateway.runbookCatalog()
+    await gateway.runRunbook("validate-environment", "matriz-admin")
 
     expect(calls).toEqual([
       { command: "get_snapshot", args: undefined },
@@ -190,6 +205,9 @@ describe("Tauri command contract", () => {
       { command: "read_environment", args: { appId: "matriz-admin", fileName: ".env.local" } },
       { command: "reveal_environment_value", args: { appId: "matriz-admin", fileName: ".env.local", key: "JWT_SECRET" } },
       { command: "save_environment", args: { request: environmentRequest } },
+      { command: "compare_environments", args: { appId: "matriz-admin", sourceFile: ".env.local", targetFile: ".env.staging" } },
+      { command: "promote_environment", args: { request: promotionRequest } },
+      { command: "find_environment_references", args: { appId: "matriz-admin", key: "DATABASE_URL" } },
       { command: "list_directory", args: { appId: "matriz-admin", relativePath: "src" } },
       { command: "preview_file", args: { appId: "matriz-admin", relativePath: "src/index.ts" } },
       { command: "open_resource", args: { appId: "matriz-admin", relativePath: "src/index.ts" } },
@@ -200,8 +218,12 @@ describe("Tauri command contract", () => {
       { command: "recycle_resource", args: { appId: "matriz-admin", relativePath: "src/main.copy.ts" } },
       { command: "get_commerce_snapshot", args: undefined },
       { command: "acquire_package", args: { packageId: "matriz.analytics" } },
-      { command: "install_package", args: { packageId: "matriz.analytics" } },
+      { command: "install_package", args: { packageId: "matriz.analytics", grantedPermissions: ["runtime:observe", "activity:read"] } },
       { command: "uninstall_package", args: { packageId: "matriz.analytics" } },
+      { command: "repair_package", args: { packageId: "matriz.analytics" } },
+      { command: "recover_runtime", args: { appId: "matriz-admin" } },
+      { command: "get_runbook_catalog", args: undefined },
+      { command: "run_runbook", args: { runbookId: "validate-environment", appId: "matriz-admin" } },
     ])
   })
 })
