@@ -100,3 +100,19 @@ Date: 2026-08-25
 final result: pass with tooling note
 
 The Store and Product Detail slice is functionally complete for the current vertical flow and visually validated through Playwright. A future in-app-browser run can add an additional comparison artifact when local connectivity is available.
+
+---
+
+# Seumei visual QA — Orders Operations
+
+Date: 2026-08-25
+
+- Route: `/c/galaxia-burger/apps/orders`
+- Evidence: `docs/seumei/assets/seumei-orders-desktop.png` and `docs/seumei/assets/seumei-orders-mobile.png`
+- Desktop: compact shared shell, four operational metrics, dense order table, explicit status actions and queue summary.
+- Mobile: metrics become a 2 × 2 grid and each order becomes a complete touch-operable card; no action is hidden behind horizontal overflow.
+- Functional pass: order `#1254` advanced from `placed` to `preparing`; metrics and row action updated without navigation.
+- Isolation pass: Matriz Labs cannot access Orders because its membership/app permissions do not include `orders.view`.
+- Data pass: demo orders are seeded once into the same persistence repository used by Store checkout.
+
+final result: pass

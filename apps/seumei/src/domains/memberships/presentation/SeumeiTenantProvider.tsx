@@ -7,6 +7,7 @@ import { useAuth } from "@matriz/platform-auth/client"
 import type { CompanyId } from "../../companies/domain/company"
 import type { CompanyWorkspace } from "../../hub/application/hub.service"
 import type { CatalogService } from "../../catalog/application/catalog.service"
+import type { OrdersService } from "../../orders/application/orders.service"
 import type { HubViewModel } from "../../hub/presentation/hub.presenter"
 import { isSeumeiDemoAccount } from "../../login/application/demo-account"
 import {
@@ -23,6 +24,7 @@ export interface SeumeiTenantState {
   readonly hub: HubViewModel | null
   readonly current: CompanyWorkspace | null
   readonly catalog: CatalogService | null
+  readonly orders: OrdersService | null
   readonly error: string | null
   switchCompany(companyId: CompanyId): Promise<boolean>
 }
@@ -139,6 +141,7 @@ export function SeumeiTenantProvider({
       hub,
       current,
       catalog: runtime?.catalog ?? null,
+      orders: runtime?.ordersOperations ?? null,
       error,
       switchCompany,
     }),

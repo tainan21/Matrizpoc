@@ -26,6 +26,8 @@ import {
   type StorefrontService,
 } from "../domains/store/application/storefront.service"
 import type { OrderRepository } from "../domains/orders/domain/order.repository"
+import { createOrdersService, type OrdersService } from "../domains/orders/application/orders.service"
+import { FIXTURE_ORDERS } from "../fixtures/orders"
 
 export interface SeumeiContainer {
   useCases: SeumeiUseCases
@@ -53,6 +55,7 @@ export interface DemoSeumeiRuntime {
   readonly catalog: CatalogService
   readonly storefront: StorefrontService
   readonly orders: OrderRepository
+  readonly ordersOperations: OrdersService
 }
 
 export function createDemoSeumeiRuntime(
@@ -70,6 +73,7 @@ export function createDemoSeumeiRuntime(
   const orderRepository = createFixtureOrderRepository({
     memberships: repositories.memberships,
     storage: domainStorage,
+    initialOrders: FIXTURE_ORDERS,
   })
   return {
     businessOs: createBusinessOsService(repositories),
@@ -80,5 +84,6 @@ export function createDemoSeumeiRuntime(
       orders: orderRepository,
     }),
     orders: orderRepository,
+    ordersOperations: createOrdersService(orderRepository),
   }
 }

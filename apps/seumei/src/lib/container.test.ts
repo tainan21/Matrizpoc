@@ -70,4 +70,19 @@ describe("demo Seumei runtime", () => {
       "X-Galáxia",
     )
   })
+
+  it("exposes coherent demo orders only to the authorized company workspace", async () => {
+    const userId = asUserId("user-demo-seumei")
+    const runtime = createDemoSeumeiRuntime(userId)
+    const galaxia = await runtime.businessOs.openCompany(userId, asCompanyId("company-galaxia"))
+    const matriz = await runtime.businessOs.openCompany(userId, asCompanyId("company-matriz-labs"))
+    if (!galaxia.ok || !matriz.ok) throw new Error("Fixture tenant unavailable")
+
+    const galaxiaOrders = await runtime.ordersOperations.getOrders(galaxia.workspace.context)
+    const matrizOrders = await runtime.ordersOperations.getOrders(matriz.workspace.context)
+
+    expect(galaxiaOrders.ok).toBe(true)
+    if (galaxiaOrders.ok) expect(galaxiaOrders.orders.map((order) => order.customerName)).toContain("Lucas Ferreira")
+    expect(matrizOrders).toEqual({ ok: false, error: "forbidden" })
+  })
 })
