@@ -473,6 +473,7 @@ model CommerceOrder {
   customer Customer             @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
   items    OrderItem[]
   timeline OrderTimelineEvent[]
+  financeEntry FinancialEntry?
 
   @@unique([tenantId, id])
   @@unique([tenantId, orderNumber])
@@ -561,4 +562,88 @@ model OrderStockConsumption {
   @@unique([tenantId, movementId])
   @@index([tenantId, ingredientId, createdAt])
   @@map("order_stock_consumptions")
+}
+
+// ---------------------------------------------------------------------------
+// Essential finance — tenant-scoped operational entries. Order receipts are
+// persisted inside checkout; manual entries use auditable state transitions.
+// ---------------------------------------------------------------------------
+enum FinancialEntryKind {
+  INCOME
+  EXPENSE
+}
+
+enum FinancialEntryOrigin {
+  ORDER
+  MANUAL
+}
+
+enum FinancialEntryStatus {
+  OPEN
+  PAID
+  CANCELLED
+}
+
+enum FinancialEntryCategory {
+  SALES
+  OPERATIONS
+  MARKETING
+  PEOPLE
+  TAXES
+  OTHER
+}
+
+enum FinancialEntryEventType {
+  CREATED
+  PAID
+  CANCELLED
+}
+
+model FinancialEntry {
+  id              String                 @id @default(cuid())
+  tenantId        String
+  entryNumber     Int
+  kind            FinancialEntryKind
+  origin          FinancialEntryOrigin
+  status          FinancialEntryStatus   @default(OPEN)
+  category        FinancialEntryCategory
+  title           String
+  description     String?
+  amountCents     Int
+  currency        String                 @default("BRL")
+  competenceDate DateTime               @db.Date
+  dueDate         DateTime               @db.Date
+  paidAt          DateTime?
+  orderId         String?
+  idempotencyKey  String
+  version         Int                    @default(1)
+  createdByUserId String
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  order  CommerceOrder?        @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
+  events FinancialEntryEvent[]
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, entryNumber])
+  @@unique([tenantId, orderId])
+  @@unique([tenantId, idempotencyKey])
+  @@index([tenantId, status, dueDate])
+  @@index([tenantId, competenceDate])
+  @@map("financial_entries")
+}
+
+model FinancialEntryEvent {
+  id          String                  @id @default(cuid())
+  tenantId    String
+  entryId     String
+  type        FinancialEntryEventType
+  actorUserId String
+  note        String?
+  createdAt   DateTime                @default(now())
+
+  entry FinancialEntry @relation(fields: [tenantId, entryId], references: [tenantId, id], onDelete: Restrict)
+
+  @@index([tenantId, entryId, createdAt])
+  @@map("financial_entry_events")
 }
