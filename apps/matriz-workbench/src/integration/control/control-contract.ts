@@ -1,6 +1,16 @@
 import { z } from "zod"
+import type { WorkbenchRuntimeMode } from "../../auth/runtime-mode"
 
 export const CONTROL_CONTRACT_VERSION = "workbench-control-v1" as const
+
+export function buildControlHealth(mode: WorkbenchRuntimeMode) {
+  return {
+    status: "ok" as const,
+    appId: "matriz-workbench" as const,
+    contractVersion: CONTROL_CONTRACT_VERSION,
+    mode,
+  }
+}
 
 const idSchema = z.string().regex(/^[a-z0-9][a-z0-9_-]{0,127}$/)
 const evidenceLineSchema = z.string().max(500)

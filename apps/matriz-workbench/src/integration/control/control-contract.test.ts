@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { controlDiagnosticSchema } from "./control-contract"
+import { buildControlHealth, controlDiagnosticSchema } from "./control-contract"
 
 const valid = {
   projectId: "matriz-control",
@@ -13,6 +13,15 @@ const valid = {
 }
 
 describe("Control diagnostic contract", () => {
+  it("publishes a bounded compatible health response", () => {
+    expect(buildControlHealth("control-desktop")).toEqual({
+      status: "ok",
+      appId: "matriz-workbench",
+      contractVersion: "workbench-control-v1",
+      mode: "control-desktop",
+    })
+  })
+
   it("accepts bounded evidence for a declared action", () => {
     expect(controlDiagnosticSchema.parse(valid)).toEqual(valid)
   })

@@ -54,6 +54,13 @@ describe("endpoint security contract", () => {
           expect(method, `${relativeFile} must remain read-only`).toBe("GET")
           continue
         }
+        if (relativeFile.startsWith("api/control/")) {
+          expect(
+            body,
+            `${relativeFile} ${method} must authenticate the Control capability`,
+          ).toContain("authorizeControlRequest(request")
+          continue
+        }
         expect(
           body,
           `${relativeFile} ${method} must authorize the request`,
