@@ -1,0 +1,19 @@
+@import "@matriz/design-system/css";
+@import "@matriz/design-ui/styles.css";
+@import "../src/ui/styles/seumei-shell.css";
+@import "../src/ui/styles/seumei-hub.css";
+@import "../src/ui/styles/seumei-products.css";
+@import "../src/ui/styles/seumei-storefront.css";
+@import "../src/ui/styles/seumei-orders.css";
+
+:root {
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #070914;
+  color: #f7f7fb;
+}
+* { box-sizing: border-box; }
+a { color: inherit; }

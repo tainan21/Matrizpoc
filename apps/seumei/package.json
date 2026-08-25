@@ -1,0 +1,50 @@
+{
+  "name": "@matriz/app-seumei",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "test": "vitest run --config vitest.config.ts",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@matriz/access-tenants": "workspace:*",
+    "@matriz/design-system": "workspace:*",
+    "@matriz/design-ui": "workspace:*",
+    "@matriz/flows-ecosystem": "workspace:^",
+    "@matriz/flows-auth": "workspace:^",
+    "@matriz/flows-onboarding": "workspace:*",
+    "@matriz/foundation-constants": "workspace:*",
+    "@matriz/foundation-schemas": "workspace:*",
+    "@matriz/foundation-types": "workspace:*",
+    "@matriz/foundation-utils": "workspace:*",
+    "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-events": "workspace:*",
+    "@matriz/integration-external-links": "workspace:*",
+    "@matriz/integration-manifests": "workspace:*",
+    "@matriz/integration-registry-core": "workspace:*",
+    "@matriz/platform-auth": "workspace:*",
+    "@matriz/platform-config": "workspace:*",
+    "@matriz/platform-storage": "workspace:*",
+    "@matriz/platform-telemetry": "workspace:*",
+    "@phosphor-icons/react": "2.1.10",
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "zod": "3.23.8",
+    "zustand": "5.0.0-rc.2"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "22.7.5",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "typescript": "5.6.3",
+    "vitest": "2.1.2",
+    "jsdom": "30.0.1"
+  }
+}
