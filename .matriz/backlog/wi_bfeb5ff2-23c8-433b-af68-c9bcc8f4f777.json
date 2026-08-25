@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_bfeb5ff2-23c8-433b-af68-c9bcc8f4f777",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Implementar outbox transacional app-local",
+  "description": "Persistir eventos junto aos agregados nos apps produtores.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:3",
+    "outbox"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_44fb6211-646a-4481-8d19-b4d4b3bfd24b",
+      "text": "Evento na transação do agregado, estado, tentativas, disponibilidade e retenção.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_db450605-ecfa-4749-9f56-efc2069cd21a",
+    "wi_74538550-2257-4469-ac3a-b9a6a9f6bd6f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.266Z",
+  "updatedAt": "2026-08-05T18:33:29.994Z",
+  "revision": "e9fd746dd43a6246"
+}

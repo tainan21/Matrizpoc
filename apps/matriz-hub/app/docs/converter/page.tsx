@@ -1,5 +1,5 @@
 import { Button, Card, CardHeader, CardTitle, Stack, Text } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable, DocumentGrid } from "../../../src/domains/docs/presentation/components"
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 
 export default async function ConverterPage() {
   try {
-    const docs = await makeDocsRepository().listDocuments(defaultDocsActorContext)
+    const docs = await makeDocsRepository().listDocuments(await getDocsPageActorContext())
     return (
       <Stack gap={6}>
         <DocsHeader title="Conversor" description="Oficina de conversao, reprocessamento e indexacao preparada para busca semantica." />

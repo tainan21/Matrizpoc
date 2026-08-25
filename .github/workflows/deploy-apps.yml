@@ -30,23 +30,55 @@ on:
       - "packages/**"
       - "pnpm-lock.yaml"
 
+permissions:
+  contents: read
+
 jobs:
   gate:
     name: pre-deploy gate
     runs-on: ubuntu-latest
+    env:
+      CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core
+      HUB_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=hub
+      SPOT_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=spot
+      SEUMEI_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=seumei
+      CONTRACTS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=contracts
+      WILLDASH_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=willdash
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: "20"
+          version: 9.12.0
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
           cache: "pnpm"
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm prisma:generate
-      - run: pnpm -r typecheck
-      - run: pnpm lint
-      - run: pnpm test:smoke
-      - run: pnpm tsx tooling/scripts/verify-app-boundaries.ts
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit production dependencies
+        run: pnpm audit:prod
+      - name: Validate Prisma schemas
+        run: pnpm prisma:validate
+      - name: Generate all Prisma clients
+        run: pnpm prisma:generate
+      - name: Generate Next.js types
+        run: pnpm next:typegen
+      - name: Run app-local tests
+        run: pnpm test:apps
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Lint
+        run: pnpm lint
+      - name: Smoke
+        run: pnpm test:smoke
+      - name: Verify app boundaries
+        run: pnpm verify:boundaries
+      - name: Build all applications
+        run: pnpm build
+      - name: Confirm validation did not change tracked files
+        run: pnpm check:clean
 
   deploy:
     name: deploy ${{ matrix.app }}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_3f848da3-e35c-41a5-b800-b995afb51b03",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Fechar Workbench e release institucional",
+  "description": "Fechar os gates operacionais e institucionais do programa Matriz.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "release"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_f792e776-e22b-4a0a-840b-16ac2178dc13",
+      "text": "Critical E2E, observed coworking week, real notifications, Linux green, AA/perf/LGPD audit, DR and release checklist.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_bbb0da6a-214f-47bc-a088-bf313519fe7e",
+    "wi_e7838924-c1eb-4f21-9962-703ef84a8bda",
+    "wi_1fcf6045-decf-40c9-94be-226f93b8d35e",
+    "wi_751c3867-878a-43fe-8023-fd502ad58315",
+    "wi_8978eae3-1a40-4630-8306-77825d726fa3",
+    "wi_a140ae04-2e1f-4bf9-8a99-6c030003200a",
+    "wi_a3c4e329-f798-4f01-83b8-774fc3ea8ca2",
+    "wi_8efea2e8-06be-4053-b0d2-d5c056cd338e",
+    "wi_cf07452b-6a31-4e94-b713-a917cc47f2ce",
+    "wi_957aebae-26c0-4da1-8055-8271d9e0884a"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.528Z",
+  "updatedAt": "2026-08-05T18:33:31.551Z",
+  "revision": "ce47c0ae2729f11f"
+}

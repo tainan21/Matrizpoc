@@ -11,6 +11,7 @@ import { monorepoConfig } from "@matriz/platform-config"
 import { manifest as hubManifest } from "@apps/matriz-hub/public-contract"
 import { manifest as matrizlibManifest } from "@apps/matrizlib/public-contract"
 import { manifest as desktopManifest } from "@apps/matriz-desktop/public-contract"
+import { manifest as identityManifest } from "@apps/matriz-identity/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as controlManifest } from "@apps/matriz-control/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
@@ -22,6 +23,7 @@ import { manifest as willdashManifest } from "@apps/willdash/public-contract"
 import { bootstrapMatrizHub } from "../../apps/matriz-hub/src/bootstrap/index"
 
 const allManifests = [
+  identityManifest,
   hubManifest,
   matrizlibManifest,
   desktopManifest,
@@ -53,11 +55,11 @@ describe("registry", () => {
     registry = buildRegistry()
   })
 
-  it("registra todos os 11 apps", () => {
+  it("registra todos os 12 apps", () => {
     const ids = registry.listEnabled().map((e) => e.manifest.appId)
-    expect(ids).toHaveLength(11)
+    expect(ids).toHaveLength(12)
     expect(new Set(ids)).toEqual(
-      new Set(["matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash"]),
+      new Set(["matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash"]),
     )
   })
 
@@ -93,7 +95,7 @@ describe("registry", () => {
 
   it("toNavigation produz SharedAppNavigationDTO valido", () => {
     const nav = registry.toNavigation()
-    expect(nav).toHaveLength(11)
+    expect(nav).toHaveLength(12)
     for (const item of nav) {
       expect(item.routes.length).toBeGreaterThan(0)
       expect(item.primaryRoute).toMatch(/^\//)

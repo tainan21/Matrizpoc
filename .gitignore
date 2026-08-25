@@ -15,6 +15,7 @@ next.user-config.*
 # Common ignores
 node_modules
 .next/
+apps/*/next-env.d.ts
 .turbo/
 .runtime/
 *.tsbuildinfo

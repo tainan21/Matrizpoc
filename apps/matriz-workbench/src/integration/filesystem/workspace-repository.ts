@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto"
+import { createServer, type Server } from "node:net"
 import {
   appendFile,
   mkdir,
@@ -84,6 +85,50 @@ const REPOSITORY_REFERENCE_EXCLUDED_SEGMENTS = new Set([
 ])
 const documentFolder = (kind: WorkbenchDocument["kind"]) =>
   kind === "decision" ? "decisions" : kind
+
+async function replaceFile(temp: string, target: string): Promise<void> {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      await rename(temp, target)
+      return
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code
+      if (!(["EACCES", "EBUSY", "EPERM"].includes(code ?? "")) || attempt === 7) throw error
+      await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+  }
+}
+
+function batchLockEndpoint(repositoryRoot: string, key: string): string | number {
+  const digest = createHash("sha256").update(`${repositoryRoot}\0${key}`).digest("hex")
+  if (process.platform === "win32") return `\\\\.\\pipe\\matriz-workbench-batch-${digest}`
+  if (process.platform === "linux") return `\0matriz-workbench-batch-${digest}`
+  return 20_000 + (Number.parseInt(digest.slice(0, 8), 16) % 10_000)
+}
+
+async function tryAcquireBatchLock(endpoint: string | number): Promise<Server | undefined> {
+  return new Promise((resolve, reject) => {
+    const server = createServer((socket) => socket.destroy())
+    server.once("error", (error: NodeJS.ErrnoException) => {
+      if (error.code === "EADDRINUSE") resolve(undefined)
+      else reject(error)
+    })
+    const acquired = () => {
+      resolve(server)
+    }
+    if (typeof endpoint === "number") {
+      server.listen({ host: "127.0.0.1", port: endpoint, exclusive: true }, acquired)
+    } else {
+      server.listen(endpoint, acquired)
+    }
+  })
+}
+
+async function releaseBatchLock(server: Server): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => error ? reject(error) : resolve())
+  })
+}
 
 export interface DiscoveredProject {
   id: string
@@ -173,13 +218,18 @@ export class WorkspaceRepository {
   private constructor(
     readonly repositoryRoot: string,
     readonly appsRoot: string,
+    private readonly coordinationRootKey: string,
   ) {}
 
   static async create(repositoryRoot?: string): Promise<WorkspaceRepository> {
     const root = repositoryRoot ? path.resolve(repositoryRoot) : await findRepositoryRoot()
     const appsRoot = path.join(root, "apps")
     const appsReal = await realpath(appsRoot)
-    return new WorkspaceRepository(root, appsReal)
+    const physicalRoot = await realpath(root)
+    const coordinationRootKey = process.platform === "win32"
+      ? physicalRoot.toLocaleLowerCase("en-US")
+      : physicalRoot
+    return new WorkspaceRepository(root, appsReal, coordinationRootKey)
   }
 
   private async projectRoot(projectId: string): Promise<string> {
@@ -290,7 +340,12 @@ export class WorkspaceRepository {
     } finally {
       await handle.close()
     }
-    await rename(temp, target)
+    try {
+      await replaceFile(temp, target)
+    } catch (error) {
+      await unlink(temp).catch(() => undefined)
+      throw error
+    }
   }
 
   private async withWorkItemLock<T>(
@@ -355,7 +410,7 @@ export class WorkspaceRepository {
     }
   }
 
-  private async withCoordinatorLock<T>(key: string, operation: () => Promise<T>): Promise<T> {
+  private async withCoordinatorLock<T>(key: string, operation: () => Promise<T>, maxAttempts = 40): Promise<T> {
     if (!/^[a-z0-9_-]+$/.test(key)) {
       throw new WorkspaceError("Identificador de coordenação inválido.", "INVALID_PATH")
     }
@@ -363,18 +418,23 @@ export class WorkspaceRepository {
     await mkdir(folder, { recursive: true })
     const target = path.join(folder, `coordinator--${key}.lock`)
     let handle: Awaited<ReturnType<typeof open>> | undefined
-    for (let attempt = 0; attempt < 40; attempt += 1) {
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
       try {
         handle = await open(target, "wx", 0o600)
         break
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
+        const lease = await readFile(target, "utf8").then((value) => JSON.parse(value) as { expiresAt?: number }).catch(() => undefined)
+        if (lease?.expiresAt && lease.expiresAt < Date.now()) {
+          await unlink(target).catch(() => undefined)
+          continue
+        }
         await new Promise((resolve) => setTimeout(resolve, 25))
       }
     }
     if (!handle) throw new WorkspaceError("O planejamento está sendo atualizado em outra operação.", "CONFLICT")
     try {
-      await handle.writeFile(`${process.pid}\n`, "utf8")
+      await handle.writeFile(JSON.stringify({ pid: process.pid, expiresAt: Date.now() + 60_000 }), "utf8")
       return await operation()
     } finally {
       await handle.close()
@@ -1193,6 +1253,89 @@ export class WorkspaceRepository {
     return this.readJson(projectId, ["context.json"], contextPolicySchema)
   }
 
+  async readImportReceipt<T>(
+    projectId: string,
+    batchId: string,
+    parser: { parse(value: unknown): T },
+  ): Promise<T | undefined> {
+    if (!/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
+      throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
+    }
+    try {
+      return await this.readJson(projectId, ["imports", `${batchId}.json`], parser)
+    } catch (error) {
+      if (error instanceof WorkspaceError && error.code === "NOT_FOUND") return undefined
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined
+      throw error
+    }
+  }
+
+  async writeImportReceipt(projectId: string, batchId: string, receipt: unknown): Promise<void> {
+    if (!/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
+      throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
+    }
+    await this.atomicWrite(projectId, ["imports", `${batchId}.json`], receipt)
+  }
+
+  async withBacklogBatchLock<T>(
+    projectId: string,
+    batchId: string,
+    operation: () => Promise<T>,
+    maxAttempts = 1200,
+  ): Promise<T> {
+    if (!APP_ID.test(projectId) || !/^[a-z0-9][a-z0-9-]{0,119}$/.test(batchId)) {
+      throw new WorkspaceError("Identificador de lote inv\u00e1lido.", "INVALID_PATH")
+    }
+    const endpoint = batchLockEndpoint(this.coordinationRootKey, `batch-project-${projectId}`)
+    let server: Server | undefined
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      server = await tryAcquireBatchLock(endpoint)
+      if (server) break
+      await new Promise((resolve) => setTimeout(resolve, 25))
+    }
+    if (!server) throw new WorkspaceError("O planejamento está sendo atualizado em outra operação.", "CONFLICT")
+    try {
+      return await operation()
+    } finally {
+      await releaseBatchLock(server)
+    }
+  }
+
+  async validateWorkItemReferences(
+    projectId: string,
+    references: WorkItem["references"],
+  ): Promise<void> {
+    await this.getWorkspace(projectId)
+    for (const reference of references) {
+      if (reference.kind === "repository_file") {
+        const segments = reference.path.split(/[\\/]/)
+        const basename = segments.at(-1)?.toLowerCase() ?? ""
+        if (
+          path.isAbsolute(reference.path) ||
+          segments.includes("..") ||
+          segments.some((segment) => REPOSITORY_REFERENCE_EXCLUDED_SEGMENTS.has(segment)) ||
+          basename === ".env" ||
+          basename.startsWith(".env.") ||
+          basename.endsWith(".log")
+        ) {
+          throw new WorkspaceError("Refer\u00eancia de arquivo fora do reposit\u00f3rio.", "INVALID_PATH")
+        }
+        const target = await realpath(path.resolve(this.repositoryRoot, reference.path)).catch(() => {
+          throw new WorkspaceError("Arquivo referenciado n\u00e3o existe.", "NOT_FOUND")
+        })
+        if (!isInside(this.repositoryRoot, target)) {
+          throw new WorkspaceError("Refer\u00eancia de arquivo fora do reposit\u00f3rio.", "INVALID_PATH")
+        }
+      }
+      if (reference.kind === "workbench_document") {
+        const documents = await this.listDocuments(projectId)
+        if (!documents.some((document) => document.id === reference.documentId)) {
+          throw new WorkspaceError("Documento referenciado n\u00e3o existe.", "NOT_FOUND")
+        }
+      }
+    }
+  }
+
   async listBacklog(projectId: string): Promise<BacklogItem[]> {
     return (await this.listWorkItems(projectId)).map(toLegacyBacklogItem)
   }
@@ -1587,8 +1730,16 @@ export class WorkspaceRepository {
   }
 
   async listAgentRequests(projectId: string): Promise<AgentRequest[]> {
-    const folder = await this.safeMatrixPath(projectId, ["agents", "requests"])
-    const files = (await readdir(folder)).filter((name) => /^req_[0-9a-f-]{36}\.json$/.test(name))
+    const folder = await this.safeMatrixPath(projectId, ["agents", "requests"]).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return undefined
+      throw error
+    })
+    if (!folder) return []
+    const entries = await readdir(folder).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return []
+      throw error
+    })
+    const files = entries.filter((name) => /^req_[0-9a-f-]{36}\.json$/.test(name))
     const requests = await Promise.all(
       files.map((name) =>
         this.readJson(projectId, ["agents", "requests", name], agentRequestSchema),

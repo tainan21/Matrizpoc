@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_8efea2e8-06be-4053-b0d2-d5c056cd338e",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Transformar Hub em control plane operacional",
+  "description": "Expor saúde operacional agregada sem vazar dados sensíveis.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "hub"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_866e5b71-0588-490b-ab84-f95a01162c7b",
+      "text": "Real app/db/Identity/queue/sync health and global catalog with tenant overlays, no sensitive leak.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_1ee463aa-ce97-4f46-88fe-5589c5b71344",
+    "wi_65236fc2-f7ee-4f27-af9e-90d9b637e42f",
+    "wi_bbb0da6a-214f-47bc-a088-bf313519fe7e"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.427Z",
+  "updatedAt": "2026-08-05T18:33:31.359Z",
+  "revision": "550cadf74bb636e7"
+}

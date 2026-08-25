@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "req_9f5c2060-ba35-4214-a65b-e373f163f90a",
+  "projectId": "matriz-infra-hub",
+  "backlogItemId": "wi_9ed3c652-0ac2-4e03-8d42-2e5070b7d3f7",
+  "title": "Fortalecer CI e matriz de testes",
+  "instructions": "Reconcile documented Wave 1 delivery and record verification evidence.",
+  "status": "completed",
+  "claimedBy": "codex-wave1-reconciliation",
+  "resultSummary": "Verified completed Wave 1 delivery for matriz-program-v1-06.",
+  "changedFiles": [
+    "tooling/scripts/audit-production.ts",
+    ".github/workflows/ci.yml",
+    "tests/smoke/ci-validation-matrix.test.ts"
+  ],
+  "checks": [
+    "pnpm test:apps",
+    "pnpm verify:boundaries",
+    "pnpm test:smoke"
+  ],
+  "review": {
+    "status": "approved",
+    "reviewedBy": "human-coordinator",
+    "reviewedAt": "2026-08-12T04:22:03.388Z",
+    "note": "Observed evidence and recorded checks approved.",
+    "runRevision": "9052834f"
+  },
+  "createdAt": "2026-08-12T04:22:03.373Z",
+  "updatedAt": "2026-08-12T04:22:03.388Z",
+  "revision": "ac196c4121158554"
+}

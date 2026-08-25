@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button, Card, CardHeader, CardTitle, Heading, Stack, Text } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../src/domains/docs/integration/prisma/docs-repository"
 import {
   ContextGrid,
@@ -17,7 +17,8 @@ export const dynamic = "force-dynamic"
 
 export default async function DocsHomePage() {
   try {
-    const dashboard = await makeDocsRepository().getDashboard(defaultDocsActorContext)
+    const actor = await getDocsPageActorContext()
+    const dashboard = await makeDocsRepository().getDashboard(actor)
     return (
       <Stack gap={6}>
         <DocsHeader

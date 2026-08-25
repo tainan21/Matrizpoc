@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_db450605-ecfa-4749-9f56-efc2069cd21a",
+  "projectId": "matriz-infra-hub",
+  "kind": "task",
+  "title": "Restaurar ownership app-local dos repositories",
+  "description": "Devolver repositories de produto aos respectivos apps.",
+  "productStatus": "discovery",
+  "validationStatus": "not_required",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "repositories"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_aa705f3b-8cdf-4bf6-a058-e920d624c2cd",
+      "text": "Repos Hub/Seumei/Contracts nos apps; platform-db só técnico.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_63c366c9-dc56-476b-b5a8-d444e49c22dd",
+    "wi_f8da65b4-fd34-49d5-9669-6d242be80a11"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.896Z",
+  "updatedAt": "2026-08-05T18:33:29.502Z",
+  "revision": "3a70e00441d90388"
+}

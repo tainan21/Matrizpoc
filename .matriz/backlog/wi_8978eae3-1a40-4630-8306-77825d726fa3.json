@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_8978eae3-1a40-4630-8306-77825d726fa3",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Implementar templates versionados e PDF real em Contracts",
+  "description": "Criar templates imutáveis e geração determinística de PDF.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "contracts"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_5bf13266-afc0-49ab-913c-e236fcb47f5c",
+      "text": "Validated editor/variables, immutable versions, deterministic PDF and private storage.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_74538550-2257-4469-ac3a-b9a6a9f6bd6f",
+    "wi_bbb0da6a-214f-47bc-a088-bf313519fe7e"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.332Z",
+  "updatedAt": "2026-08-05T18:33:31.100Z",
+  "revision": "9a9d764f6b2baa38"
+}

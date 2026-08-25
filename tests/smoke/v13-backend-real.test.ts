@@ -95,7 +95,7 @@ describe("V1.3 — core repositories compose with expected methods", () => {
 describe("V1.3 — hub repositories compose with expected methods", () => {
   it("projects repo supports upsertFromManifest and search", async () => {
     const { makeProjectRepo } = await import(
-      "../../packages/platform/db/src/repositories/hub/projects.repo"
+      "../../apps/matriz-hub/src/integration/prisma/repositories/projects-repository"
     )
     const repo = makeProjectRepo({} as never)
     expect(Object.keys(repo).sort()).toEqual(
@@ -105,7 +105,7 @@ describe("V1.3 — hub repositories compose with expected methods", () => {
 
   it("ingestion-runs repo supports record", async () => {
     const { makeIngestionRunRepo } = await import(
-      "../../packages/platform/db/src/repositories/hub/ingestion-runs.repo"
+      "../../apps/matriz-hub/src/integration/prisma/repositories/ingestion-runs-repository"
     )
     const repo = makeIngestionRunRepo({} as never)
     expect(Object.keys(repo).sort()).toEqual(["latest", "listBySource", "record"].sort())

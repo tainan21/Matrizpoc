@@ -1,30 +1,11 @@
 import { NextResponse } from "next/server"
 import { createMockAuthState, type AuthResult, type AuthSession } from "@matriz/platform-auth"
 import { getMockAuthCorsHeaders, isAllowedMockAuthOrigin } from "./mock-auth-cors"
+import { HUB_SESSION_COOKIE, hubSessionStore, sessionCookieOptions } from "./hub-session"
 
-const globalState = globalThis as typeof globalThis & {
-  __matrizMockAuth?: ReturnType<typeof createMockAuthState>
-  __matrizMockRequestSessions?: Map<string, AuthSession>
-}
+const globalState = globalThis as typeof globalThis & { __matrizMockAuth?: ReturnType<typeof createMockAuthState> }
 export const mockAuthState = globalState.__matrizMockAuth ??= createMockAuthState()
-export const MOCK_SESSION_COOKIE = "matriz_mock_session"
-const requestSessions = globalState.__matrizMockRequestSessions ??= new Map<string, AuthSession>()
-
-function readSessionToken(request: Request): string | undefined {
-  const pair = request.headers.get("cookie")?.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${MOCK_SESSION_COOKIE}=`))
-  return pair?.slice(MOCK_SESSION_COOKIE.length + 1)
-}
-
-export function getRequestMockSession(request: Request): AuthSession | null {
-  const token = readSessionToken(request)
-  if (!token) return null
-  const session = requestSessions.get(token)
-  if (!session || Date.now() >= new Date(session.expiresAt).getTime()) {
-    requestSessions.delete(token)
-    return null
-  }
-  return session
-}
+export const MOCK_SESSION_COOKIE = HUB_SESSION_COOKIE
 
 export function preflight(request: Request) {
   const origin = request.headers.get("origin")
@@ -33,7 +14,7 @@ export function preflight(request: Request) {
     : NextResponse.json({ error: { message: "Origem nao permitida." } }, { status: 403 })
 }
 
-export function resultResponse<T>(request: Request, result: AuthResult<T>) {
+export function resultResponse<T>(request: Request, result: AuthResult<T>, setSession = false) {
   const origin = request.headers.get("origin")
   if (!isAllowedMockAuthOrigin(origin)) return NextResponse.json({ error: { message: "Origem nao permitida." } }, { status: 403 })
   const headers = getMockAuthCorsHeaders(origin)
@@ -41,24 +22,22 @@ export function resultResponse<T>(request: Request, result: AuthResult<T>) {
     const status = result.error.code === "session-expired" ? 410 : result.error.code === "invalid-input" ? 400 : 401
     return NextResponse.json({ error: result.error }, { status, headers })
   }
-  return NextResponse.json(result.value, { headers })
-}
-
-export function sessionResponse(request: Request, session: AuthSession) {
-  const origin = request.headers.get("origin")
-  if (!isAllowedMockAuthOrigin(origin)) return NextResponse.json({ error: { message: "Origem nao permitida." } }, { status: 403 })
-  const token = crypto.randomUUID()
-  requestSessions.set(token, session)
-  const response = NextResponse.json(session, { headers: getMockAuthCorsHeaders(origin) })
-  response.cookies.set(MOCK_SESSION_COOKIE, token, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 24 * 60 * 60 })
+  const response = NextResponse.json(result.value, { headers })
+  if (setSession && isAuthSession(result.value)) response.cookies.set(MOCK_SESSION_COOKIE, hubSessionStore.create(result.value), sessionCookieOptions())
   return response
 }
 
-export function hasSessionCookie(request: Request): boolean {
-  return getRequestMockSession(request) !== null
+export function sessionResponse(request: Request, session: AuthSession) {
+  return resultResponse(request, { ok: true, value: session }, true)
 }
 
-export function clearRequestMockSession(request: Request): void {
-  const token = readSessionToken(request)
-  if (token) requestSessions.delete(token)
+export function authRateLimitedResponse(request: Request) {
+  const origin = request.headers.get("origin")
+  return NextResponse.json({ error: { message: "Too many authentication attempts." } }, { status: 429, headers: { ...getMockAuthCorsHeaders(origin), "cache-control": "no-store" } })
 }
+
+export function mockAuthOriginRejected(request: Request) {
+  return NextResponse.json({ error: { message: "Origem nao permitida." } }, { status: 403, headers: getMockAuthCorsHeaders(request.headers.get("origin")) })
+}
+
+function isAuthSession(value: unknown): value is AuthSession { return typeof value === "object" && value !== null && "identity" in value && "expiresAt" in value }

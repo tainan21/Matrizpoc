@@ -34,6 +34,7 @@ export const monorepoConfig: MonorepoConfig = {
       ? "production"
       : "development"),
   baseUrls: {
+    "matriz-identity": "http://127.0.0.1:8080",
     "matriz-hub": "http://localhost:3000",
     "matriz-desktop": "matriz://control",
     matrizlib: "http://localhost:3007",

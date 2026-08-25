@@ -87,6 +87,16 @@ describe("WorkspaceRepository", () => {
     expect(JSON.parse(await readFile(path.join(root, "apps", "sample", ".matriz", "project.json"), "utf8"))).toMatchObject({ projectId: "sample" })
   })
 
+  it("treats a missing agent requests subdirectory as an empty collection", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    const agents = path.join(root, "apps", "sample", ".matriz", "agents")
+    await rm(path.join(agents, "requests"), { recursive: true, force: true })
+
+    await expect(readdir(agents)).resolves.toEqual([])
+    await expect(repository.listAgentRequests("sample")).resolves.toEqual([])
+  })
+
   it("rejects stale revisions", async () => {
     const { repository } = await fixture()
     await repository.initializeProject("sample")

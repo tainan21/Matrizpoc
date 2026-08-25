@@ -1,0 +1,131 @@
+// ============================================================================
+// Matriz — WillDash Prisma Schema
+// ----------------------------------------------------------------------------
+// Authority: WillDash is the lightweight goals/rewards/activity tracking
+// app. Its role in the POC is to prove ecosystem expansion — a new app
+// can join with minimal friction, share onboarding, publish telemetry and
+// read the registry, without forcing other apps to adapt (L1, L12).
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/willdash"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("WILLDASH_DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Goal — a trackable goal owned by a tenant/user.
+// ---------------------------------------------------------------------------
+model Goal {
+  id          String     @id @default(cuid())
+  tenantId    String
+  ownerId     String
+  title       String
+  description String?
+  metric      GoalMetric
+  target      Float
+  unit        String?
+  progress    Float      @default(0)
+  status      GoalStatus @default(ACTIVE)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  rewards   RewardRule[]
+  activity  ActivityRecord[]
+
+  @@index([tenantId])
+  @@unique([tenantId, id])
+  @@index([tenantId, status])
+  @@map("goals")
+}
+
+enum GoalMetric {
+  COUNT
+  CURRENCY
+  PERCENT
+  DURATION
+}
+
+enum GoalStatus {
+  ACTIVE
+  ACHIEVED
+  MISSED
+  ARCHIVED
+}
+
+// ---------------------------------------------------------------------------
+// RewardRule — condition→reward rule tied to goals.
+// ---------------------------------------------------------------------------
+model RewardRule {
+  id         String        @id @default(cuid())
+  tenantId   String
+  goalId     String
+  condition  String
+  rewardType RewardType
+  rewardValue Float
+  enabled    Boolean       @default(true)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  goal Goal @relation(fields: [tenantId, goalId], references: [tenantId, id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, goalId])
+  @@map("reward_rules")
+}
+
+enum RewardType {
+  POINTS
+  BADGE
+  DISCOUNT
+  CUSTOM
+}
+
+// ---------------------------------------------------------------------------
+// ActivityRecord — records of activity that may move goal progress.
+// ---------------------------------------------------------------------------
+model ActivityRecord {
+  id         String   @id @default(cuid())
+  tenantId   String
+  goalId     String?
+  ownerId    String
+  kind       String
+  amount     Float
+  note       String?
+  occurredAt DateTime @default(now())
+
+  goal Goal? @relation(fields: [tenantId, goalId], references: [tenantId, id], onDelete: NoAction)
+
+  @@index([tenantId])
+  @@index([tenantId, ownerId])
+  @@index([tenantId, goalId])
+  @@index([tenantId, occurredAt])
+  @@map("activity_records")
+}
+
+// ---------------------------------------------------------------------------
+// WilldashPreference — tenant-scoped preferences for WillDash.
+// ---------------------------------------------------------------------------
+model WilldashPreference {
+  id               String   @id @default(cuid())
+  tenantId         String   @unique
+  preferredCadence String   @default("WEEKLY")
+  enableRewards    Boolean  @default(true)
+  dailyDigest      Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("willdash_preferences")
+}
+model MatrizSchemaRelease {
+  id        String   @id @default(cuid())
+  version   String   @unique
+  appliedAt DateTime @default(now())
+
+  @@map("__matriz_schema_releases")
+}

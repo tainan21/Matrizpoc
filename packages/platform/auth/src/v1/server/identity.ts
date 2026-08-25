@@ -12,7 +12,7 @@ import { getCoreDb } from "@matriz/platform-db/core"
 import type { AuthProvider } from "@matriz/platform-db/core"
 import {
   makeAuthAccountRepo,
-  makeMembershipRepo,
+  makeTenantAccessRepo,
   makeUserRepo,
   normalizeEmail,
 } from "@matriz/platform-db/core/repositories"
@@ -49,7 +49,7 @@ export async function resolveIdentityByEmail(input: {
   const db = getCoreDb()
   const users = makeUserRepo(db)
   const accounts = makeAuthAccountRepo(db)
-  const memberships = makeMembershipRepo(db)
+  const access = makeTenantAccessRepo(db)
 
   const email = normalizeEmail(input.email)
 
@@ -70,7 +70,7 @@ export async function resolveIdentityByEmail(input: {
   })
 
   // 3. Load memberships → hydrate the cross-app AuthIdentity DTO.
-  const rows = await memberships.listForUser(user.id)
+  const rows = await access.listForUser(user.id)
 
   // Group memberships by tenant to compute enabledApps[].
   const byTenant = new Map<
@@ -85,8 +85,8 @@ export async function resolveIdentityByEmail(input: {
       roles: new Set<string>(),
       apps: new Set<string>(),
     }
-    entry.roles.add(row.role.toLowerCase())
-    entry.apps.add(row.appId)
+    row.tenantRoles.forEach((role) => entry.roles.add(role.toLowerCase()))
+    row.appGrants.forEach((grant) => entry.apps.add(grant.appId))
     byTenant.set(key, entry)
   }
 

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_7881dbac-e3a6-498a-ac19-2b4fa728ca73",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Integrar apps, MFA, recuperação e troca de tenant",
+  "description": "Integrar clientes reais e fluxos de segurança de identidade.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "authentication"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_e4c76d0f-3176-4570-92e7-9d7f345ee433",
+      "text": "Cinco clientes OIDC, sessão HTTP-only, MFA/recovery auditáveis e switch validado.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_57078d61-ee20-410c-a6c3-9ab3594c66f6"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.013Z",
+  "updatedAt": "2026-08-05T18:33:29.675Z",
+  "revision": "3adea74e68120b40"
+}

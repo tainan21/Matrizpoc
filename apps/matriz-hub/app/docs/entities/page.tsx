@@ -1,5 +1,5 @@
 import { Button, Card, CardHeader, CardTitle, Stack } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable, EntityGrid } from "../../../src/domains/docs/presentation/components"
 
@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic"
 
 export default async function EntitiesPage() {
   try {
-    const entities = await makeDocsRepository().listKnowledgeNodes(defaultDocsActorContext)
+    const entities = await makeDocsRepository().listKnowledgeNodes(await getDocsPageActorContext())
     return (
       <Stack gap={6}>
         <DocsHeader title="Entidades" description="Catalogo institucional de conceitos, modulos, pessoas-papel e recursos da Matriz." />

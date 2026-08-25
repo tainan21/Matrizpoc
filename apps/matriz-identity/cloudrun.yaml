@@ -1,0 +1,50 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: matriz-identity
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+    spec:
+      containerConcurrency: 4
+      timeoutSeconds: 30
+      serviceAccountName: matriz-identity-runtime
+      containers:
+        - image: IMAGE_DIGEST_REQUIRED
+          ports:
+            - containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /healthz
+          env:
+            - name: IDENTITY_TRUST_PROXY
+              value: "true"
+            - name: IDENTITY_TRUSTED_PROXY_HOPS
+              value: "1"
+            - name: IDENTITY_AUTHENTICATOR_MODULE
+              value: file:///workspace/apps/matriz-identity/src/credential-authenticator.ts
+            - name: IDENTITY_ISSUER
+              value: https://identity.example.invalid
+            - name: CORE_RUNTIME_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: matriz-core-runtime-database-url
+                  key: latest
+            - name: IDENTITY_SIGNING_JWKS
+              valueFrom:
+                secretKeyRef:
+                  name: matriz-identity-signing-jwks
+                  key: latest
+            - name: IDENTITY_CSRF_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: matriz-identity-csrf-secret
+                  key: latest
+            - name: IDENTITY_COOKIE_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: matriz-identity-cookie-keys
+                  key: latest
