@@ -4,7 +4,7 @@
 
 ## Current route flow
 
-`/login` → MyHub Federação → `/enter/[companyId]` → `/workspace` → catálogo/receitas/estoque/pedidos/clientes.
+`/login` → MyHub Federação → `/enter/[companyId]` → `/workspace` → catálogo/receitas/estoque/pedidos/clientes/financeiro.
 
 An invited identity follows `/invite/[token]` → `/login?returnTo=...` when signed out → authenticated acceptance → `/workspace`.
 
@@ -17,13 +17,14 @@ An invited identity follows `/invite/[token]` → `/login?returnTo=...` when sig
 - `/workspace/products/[productId]/recipe` composes reusable ingredients; `/workspace/stock/**` persists append-only movements and versioned balances.
 - `/store/[storeSlug]` resolves the tenant from a published slug. Checkout recalculates price/recipe/stock server-side and atomically creates customer, order, timeline and consumption.
 - `/workspace/orders/**` and `/workspace/customers/**` are membership-authorized operational reads; MEMBER can advance orders and VIEWER remains read-only.
+- `/workspace/finance/**` is OWNER/ADMIN-only. Order receipts are persisted atomically and immutable; manual entries use cents, optimistic versioning and append-only events.
 - `/docs` documents canonical route flows and offers a temporary local scratchpad. Remove it before launch without a schema migration.
 - The `seumei_active_company` HTTP-only cookie is a preference, never authority.
 
 ## Ownership and layers
 
 - Core owns user, tenant, app registration, membership and invitation persistence. Read access uses `CoreAccessRepository`; team mutations use the segregated `CoreMembershipRepository` through `@matriz/platform-db/core`.
-- `prisma/schemas/seumei.prisma` owns company, onboarding, catalog, ingredients, recipes, stock, store publication, customers and commerce. Access it through app-local repositories and `@matriz/platform-db/seumei`.
+- `prisma/schemas/seumei.prisma` owns company, onboarding, catalog, ingredients, recipes, stock, store publication, customers, commerce and essential finance. Access it through app-local repositories and `@matriz/platform-db/seumei`.
 - Domain and application rules stay under `src/domain` and `src/application`.
 - Prisma implementations stay under `src/infrastructure`; never add an unscoped company lookup.
 - Routes and server pages derive the actor from the Hub session, resolve the persistent Core user, then validate membership.
@@ -43,4 +44,4 @@ Do not import other apps' internals, create a second Prisma client/config system
 
 ## Next recommended slice
 
-Financeiro essencial app-local: visão derivada de pedidos mais lançamentos manuais em centavos, com origem, competência, pagamento e idempotência. Não iniciar fiscal/contábil nem integrações externas sem requisito e sandbox.
+Identidade visual/publicação app-local: draft versionado, presets/tokens limitados e acessíveis, preview privado e publicação explícita. Não iniciar page builder, domínio customizado ou integrações externas sem evidência e sandbox.

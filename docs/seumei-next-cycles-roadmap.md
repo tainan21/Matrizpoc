@@ -2,11 +2,11 @@
 
 Data: 2026-08-24
 
-## Estado após o ciclo restaurante
+## Estado após o ciclo financeiro essencial
 
-- **Concluído:** ingredientes, receitas, estoque/movimentos, publicação demo, compra simulada, pedidos e clientes.
+- **Concluído:** ingredientes, receitas, estoque/movimentos, publicação demo, compra simulada, pedidos, clientes e financeiro essencial.
 - **Parcial deliberado:** publicação possui contrato e versão persistentes, mas editor de draft/preview avançado permanece no ciclo de identidade visual.
-- **Próximo:** financeiro essencial. Pagamento real, fiscal, frete, domínio e analytics continuam fora até integração justificada.
+- **Próximo:** identidade visual e publicação versionada. Pagamento real, fiscal, frete, domínio e analytics continuam fora até integração justificada.
 
 Este roadmap organiza as próximas capacidades como fatias verticais independentes. Nenhuma rota deve nascer como página vazia: cada ciclo termina com UI, regra, autorização, persistência, estados honestos, navegação, isolamento tenant A/B e validação em browser real.
 
@@ -18,7 +18,7 @@ Este roadmap organiza as próximas capacidades como fatias verticais independent
 | 2. Loja e publicação | Publicar catálogo demo resolvido por slug | `/store/[storeSlug]` -> `/store/[storeSlug]/checkout` | Catálogo e receitas | **Concluído para demo; editor P2** |
 | 3. Pedidos | Criar/receber e acompanhar pedidos com estados válidos | `/workspace/orders` -> `/workspace/orders/[orderId]` | Estoque; loja para canal público | **Concluído para compra simulada** |
 | 4. Clientes | Consolidar contatos e histórico comercial por empresa | `/workspace/customers` -> `/workspace/customers/[customerId]` | Pedidos para evidência de identidade | **Concluído no escopo e-mail/telefone** |
-| 5. Financeiro essencial | Enxergar recebimentos, despesas e resultado operacional básico | `/workspace/finance` -> `/workspace/finance/entries/[entryId]` | Pedidos; decisão de escopo financeiro | **P1 — próximo** |
+| 5. Financeiro essencial | Enxergar recebimentos, despesas e resultado operacional básico | `/workspace/finance` -> `/workspace/finance/entries/[entryId]` | Pedidos; decisão de escopo financeiro | **Concluído no escopo operacional** |
 | 6. Identidade visual/publicação | Personalizar e revisar a experiência pública com acessibilidade | `/workspace/store/design` -> `/workspace/store/preview` -> `/loja/[slug]` | Loja/publicação estável | P2 |
 | 7. Integrações justificadas | Conectar somente serviços necessários a fluxos reais | `/workspace/settings/integrations` -> provedor -> retorno | Contrato estável do domínio consumidor | P2/P3 |
 
