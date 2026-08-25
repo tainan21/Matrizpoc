@@ -1,4 +1,5 @@
 import type { SeumeiTenantContext } from "../../memberships/domain/tenant-context"
+import type { CompanyId } from "../../companies/domain/company"
 import type {
   Product,
   ProductCategory,
@@ -17,4 +18,10 @@ export interface TenantCatalogRepository {
 
 export interface CatalogRepository {
   bind(context: SeumeiTenantContext): Promise<TenantCatalogRepository | null>
+  bindPublished(companyId: CompanyId): Promise<PublishedCatalogRepository>
 }
+
+export type PublishedCatalogRepository = Pick<
+  TenantCatalogRepository,
+  "listProducts" | "listCategories" | "listModifiers" | "findProduct"
+>

@@ -52,4 +52,51 @@ The comparison images place the 1586 × 992 source on the left and the implement
 
 final result: blocked
 
-The Products slice is functionally ready and responsive, but the strict visual gate remains blocked until distinct product imagery is supplied/generated and the same comparison can be repeated in the Codex in-app browser.
+The Products slice is functionally ready and responsive. The distinct product-imagery blocker was resolved in the Store/Commerce slice with tenant fixture assets. The strict in-app-browser comparison remains blocked by local connectivity; Playwright evidence remains the verified fallback.
+
+---
+
+# Seumei visual QA — Published Store and Product Detail
+
+Date: 2026-08-25
+
+## Source and test state
+
+- Desktop sources: `Imagem do Codex 24 de ago. de 2026, 15_01_00.png`, `15_01_14.png` and `15_01_40.png`
+- Mobile sources: `Imagem do Codex 24 de ago. de 2026, 15_02_02.png` and `15_02_09.png`
+- Routes: `/loja/galaxia-burger` and `/loja/galaxia-burger/produto/product-x-galaxia`
+- Public tenant resolution: published store slug, never a company id supplied by the view
+- Desktop viewport: 1586 × 992 CSS px
+- Mobile viewport: 430 × 932 CSS px
+
+## Evidence
+
+- Desktop storefront: `docs/seumei/assets/seumei-store-desktop.png`
+- Mobile storefront: `docs/seumei/assets/seumei-store-mobile.png`
+- Mobile product detail: `docs/seumei/assets/seumei-product-detail-mobile.png`
+- Mobile cart: `docs/seumei/assets/seumei-cart-mobile.png`
+
+## Interaction and isolation validation
+
+- Published slug resolves Galáxia Burger while the Matriz Labs draft store remains unavailable publicly.
+- Public catalog only lists available products owned by the resolved company; Milk Shake Oreo is absent.
+- Product detail uses catalog pricing for modifiers and quantity. A two-item Onion Rings selection recalculated to R$ 93,60.
+- Cart persists through the platform storage port and displays unit and order totals independently.
+- Checkout creates a tenant-owned Order and clears the cart after confirmation.
+- Store, Catalog and Orders repository tests reject cross-company reads and mutations.
+- The Matriz ecosystem control is intentionally absent from the customer-facing store, while the operational product keeps it.
+- Mobile product detail removes the global storefront header, preserves explicit back/share/favorite controls and keeps the bottom navigation touch-operable.
+- Reduced-motion rules remain supported.
+
+## Visual corrections
+
+- Replaced repeated placeholder covers with generated, product-specific Galáxia Burger fixture imagery.
+- Preserved the hero image on mobile while applying a legibility gradient instead of replacing the asset.
+- Removed the sticky total panel overlap that obscured mobile modifiers.
+- Kept dense dark surfaces, restrained purple accent, compact borders, responsive product cards and reference-led navigation geometry.
+
+## Result
+
+final result: pass with tooling note
+
+The Store and Product Detail slice is functionally complete for the current vertical flow and visually validated through Playwright. A future in-app-browser run can add an additional comparison artifact when local connectivity is available.

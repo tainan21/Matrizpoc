@@ -22,10 +22,10 @@ export const FIXTURE_PRODUCT_CATEGORIES: readonly ProductCategory[] = [
 ]
 
 export const FIXTURE_PRODUCT_MODIFIERS: readonly ProductModifier[] = [
-  { id: asProductModifierId("modifier-batata-suprema"), companyId: galaxiaId, name: "Batata Suprema", priceDeltaCents: 1290, available: true },
-  { id: asProductModifierId("modifier-onion-rings"), companyId: galaxiaId, name: "Onion Rings", priceDeltaCents: 1190, available: true },
-  { id: asProductModifierId("modifier-refrigerante"), companyId: galaxiaId, name: "Refrigerante Lata", priceDeltaCents: 690, available: true },
-  { id: asProductModifierId("modifier-milk-shake"), companyId: galaxiaId, name: "Milk Shake Oreo", priceDeltaCents: 1090, available: false },
+  { id: asProductModifierId("modifier-batata-suprema"), companyId: galaxiaId, name: "Batata Suprema", imageUrl: "/seumei/fixtures/modifiers/batata-suprema.jpg", priceDeltaCents: 1290, available: true },
+  { id: asProductModifierId("modifier-onion-rings"), companyId: galaxiaId, name: "Onion Rings", imageUrl: "/seumei/fixtures/modifiers/onion-rings.jpg", priceDeltaCents: 1190, available: true },
+  { id: asProductModifierId("modifier-refrigerante"), companyId: galaxiaId, name: "Refrigerante Lata", imageUrl: "/seumei/fixtures/products/coca-cola-lata.jpg", priceDeltaCents: 690, available: true },
+  { id: asProductModifierId("modifier-milk-shake"), companyId: galaxiaId, name: "Milk Shake Oreo", imageUrl: "/seumei/fixtures/products/milk-shake-oreo.jpg", priceDeltaCents: 1090, available: false },
 ]
 
 export const FIXTURE_PRODUCTS: readonly Product[] = [
@@ -33,7 +33,7 @@ export const FIXTURE_PRODUCTS: readonly Product[] = [
     id: asProductId("product-x-galaxia"), companyId: galaxiaId,
     categoryId: asProductCategoryId("category-galaxia-burgers"), name: "X-Galáxia",
     description: "Pão brioche, 180g, cheddar duplo, bacon e molho especial.", priceCents: 3490,
-    imageUrl: "/seumei/fixtures/galaxia-cover.png", stockQuantity: 23, available: true, featured: true,
+    imageUrl: "/seumei/fixtures/products/x-galaxia.jpg", stockQuantity: 23, available: true, featured: true,
     modifierIds: [asProductModifierId("modifier-batata-suprema"), asProductModifierId("modifier-onion-rings"), asProductModifierId("modifier-refrigerante")],
     createdAt: fixtureDate, updatedAt: fixtureDate,
   },
@@ -41,7 +41,7 @@ export const FIXTURE_PRODUCTS: readonly Product[] = [
     id: asProductId("product-galaxia-bacon"), companyId: galaxiaId,
     categoryId: asProductCategoryId("category-galaxia-burgers"), name: "Galáxia Bacon",
     description: "Pão brioche, 180g, queijo, bacon crocante e molho especial.", priceCents: 3690,
-    imageUrl: "/seumei/fixtures/galaxia-cover.png", stockQuantity: 8, available: true, featured: true,
+    imageUrl: "/seumei/fixtures/products/galaxia-bacon.jpg", stockQuantity: 8, available: true, featured: true,
     modifierIds: [asProductModifierId("modifier-batata-suprema"), asProductModifierId("modifier-onion-rings")],
     createdAt: fixtureDate, updatedAt: fixtureDate,
   },
@@ -49,7 +49,7 @@ export const FIXTURE_PRODUCTS: readonly Product[] = [
     id: asProductId("product-combo-galactico"), companyId: galaxiaId,
     categoryId: asProductCategoryId("category-galaxia-combos"), name: "Combo Galáctico",
     description: "X-Galáxia, Batata Suprema e Refrigerante 350ml.", priceCents: 4990,
-    imageUrl: "/seumei/fixtures/galaxia-cover.png", stockQuantity: 15, available: true, featured: true,
+    imageUrl: "/seumei/fixtures/products/combo-galactico.jpg", stockQuantity: 15, available: true, featured: true,
     modifierIds: [asProductModifierId("modifier-refrigerante"), asProductModifierId("modifier-milk-shake")],
     createdAt: fixtureDate, updatedAt: fixtureDate,
   },
@@ -57,28 +57,28 @@ export const FIXTURE_PRODUCTS: readonly Product[] = [
     id: asProductId("product-milk-shake-oreo"), companyId: galaxiaId,
     categoryId: asProductCategoryId("category-galaxia-drinks"), name: "Milk Shake Oreo",
     description: "Milk shake de baunilha com Oreo e chantilly.", priceCents: 1890,
-    imageUrl: "/seumei/fixtures/galaxia-cover.png", stockQuantity: 0, available: false, featured: false,
+    imageUrl: "/seumei/fixtures/products/milk-shake-oreo.jpg", stockQuantity: 0, available: false, featured: false,
     modifierIds: [], createdAt: fixtureDate, updatedAt: fixtureDate,
   },
   {
     id: asProductId("product-coca-cola-lata"), companyId: galaxiaId,
     categoryId: asProductCategoryId("category-galaxia-drinks"), name: "Coca-Cola Lata",
     description: "Refrigerante Coca-Cola 350ml.", priceCents: 690,
-    imageUrl: "/seumei/fixtures/galaxia-cover.png", stockQuantity: 42, available: true, featured: false,
+    imageUrl: "/seumei/fixtures/products/coca-cola-lata.jpg", stockQuantity: 42, available: true, featured: false,
     modifierIds: [], createdAt: fixtureDate, updatedAt: fixtureDate,
   },
   {
     id: asProductId("product-brownie-sorvete"), companyId: galaxiaId,
     categoryId: asProductCategoryId("category-galaxia-desserts"), name: "Brownie com Sorvete",
     description: "Brownie quente com sorvete e calda de chocolate.", priceCents: 2290,
-    imageUrl: "/seumei/fixtures/galaxia-cover.png", stockQuantity: 5, available: true, featured: true,
+    imageUrl: "/seumei/fixtures/products/brownie-com-sorvete.jpg", stockQuantity: 5, available: true, featured: true,
     modifierIds: [], createdAt: fixtureDate, updatedAt: fixtureDate,
   },
   {
     id: asProductId("product-sundae-galaxia"), companyId: galaxiaId,
     categoryId: asProductCategoryId("category-galaxia-desserts"), name: "Sundae Galáxia",
     description: "Sorvete de baunilha com calda e confeitos.", priceCents: 1690,
-    imageUrl: "/seumei/fixtures/galaxia-cover.png", stockQuantity: 18, available: true, featured: false,
+    imageUrl: "/seumei/fixtures/products/sundae-galaxia.jpg", stockQuantity: 18, available: true, featured: false,
     modifierIds: [], createdAt: fixtureDate, updatedAt: fixtureDate,
   },
   {

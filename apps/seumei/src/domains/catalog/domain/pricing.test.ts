@@ -32,6 +32,7 @@ const fries: ProductModifier = {
   id: asProductModifierId("modifier-fries"),
   companyId: galaxiaId,
   name: "Batata Suprema",
+  imageUrl: "/batata-suprema.jpg",
   priceDeltaCents: 1290,
   available: true,
 }

@@ -5,7 +5,7 @@ import { themeToCssVars, darkAppThemes } from "@matriz/design-system"
 import { ThemeController } from "@matriz/design-ui"
 import { BootstrapGuard } from "../src/ui/components/BootstrapGuard"
 import { SeumeiAuthAdoption } from "../src/auth/provider"
-import { EcosystemAccess } from "@matriz/flows-ecosystem"
+import { SeumeiEcosystemAccess } from "../src/ui/components/SeumeiEcosystemAccess"
 
 export const metadata: Metadata = {
   title: "Seumei — Matriz",
@@ -25,7 +25,7 @@ export default function SeumeiRootLayout({ children }: { children: ReactNode }) 
       </head>
       <body style={{ margin: 0, background: "var(--color-background)", color: "var(--color-foreground)" }}>
         <ThemeController appId="seumei" />
-        <EcosystemAccess appId="seumei" />
+        <SeumeiEcosystemAccess />
         <BootstrapGuard>
           <SeumeiAuthAdoption>{children}</SeumeiAuthAdoption>
         </BootstrapGuard>

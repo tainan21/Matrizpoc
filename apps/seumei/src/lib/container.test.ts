@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { asUserId } from "@matriz/foundation-types"
+import { createInMemoryStore } from "@matriz/platform-storage"
 import { asCompanyId } from "../domains/companies/domain/company"
 import { asProductId } from "../domains/catalog/domain/catalog"
 import { createDemoSeumeiRuntime } from "./container"
@@ -43,5 +44,30 @@ describe("demo Seumei runtime", () => {
       "Orbit Workspace",
       "Matriz Care",
     ])
+  })
+
+  it("shares tenant catalog changes with the public storefront through the persistence port", async () => {
+    const userId = asUserId("user-demo-seumei")
+    const storage = createInMemoryStore()
+    const adminRuntime = createDemoSeumeiRuntime(userId, storage)
+    const opened = await adminRuntime.businessOs.openCompany(
+      userId,
+      asCompanyId("company-galaxia"),
+    )
+    if (!opened.ok) throw new Error("Fixture tenant unavailable")
+
+    await adminRuntime.catalog.setProductAvailability(
+      opened.workspace.context,
+      asProductId("product-x-galaxia"),
+      false,
+    )
+    const publicRuntime = createDemoSeumeiRuntime(userId, storage)
+    const storefront = await publicRuntime.storefront.getHome("galaxia-burger")
+
+    expect(storefront.ok).toBe(true)
+    if (!storefront.ok) return
+    expect(storefront.store.products.map((product) => product.name)).not.toContain(
+      "X-Galáxia",
+    )
   })
 })

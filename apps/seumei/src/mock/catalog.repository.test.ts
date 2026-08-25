@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { asUserId } from "@matriz/foundation-types"
+import { createInMemoryStore } from "@matriz/platform-storage"
 import { asCompanyId } from "../domains/companies/domain/company"
 import { asProductId } from "../domains/catalog/domain/catalog"
 import { resolveTenantContext } from "../domains/memberships/application/resolve-tenant-context"
@@ -97,5 +98,26 @@ describe("fixture catalog repository", () => {
     expect(
       (await catalog!.findProduct(asProductId("product-milk-shake-oreo")))?.available,
     ).toBe(true)
+  })
+
+  it("shares mutations only when repositories use the same persistence port", async () => {
+    const galaxia = await contextFor("company-galaxia")
+    const storage = createInMemoryStore()
+    const first = createFixtureCatalogRepository({
+      memberships: galaxia.memberships,
+      storage,
+    })
+    const firstCatalog = await first.bind(galaxia.context)
+    const productId = asProductId("product-milk-shake-oreo")
+    const product = await firstCatalog!.findProduct(productId)
+    await firstCatalog!.saveProduct({ ...product!, available: true })
+
+    const second = createFixtureCatalogRepository({
+      memberships: galaxia.memberships,
+      storage,
+    })
+    const secondCatalog = await second.bind(galaxia.context)
+
+    expect((await secondCatalog!.findProduct(productId))?.available).toBe(true)
   })
 })

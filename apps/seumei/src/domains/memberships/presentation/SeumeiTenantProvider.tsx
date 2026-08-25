@@ -33,9 +33,11 @@ SeumeiTenantContext.displayName = "SeumeiTenantContext"
 function runtimeForSession(
   userId: Parameters<typeof createDemoSeumeiRuntime>[0],
   email: string,
+  domainStorage: KeyValueStore,
 ): DemoSeumeiRuntime {
   return createDemoSeumeiRuntime(
     isSeumeiDemoAccount(email) ? userId : UNASSIGNED_DEMO_FIXTURE_USER,
+    domainStorage,
   )
 }
 
@@ -46,21 +48,31 @@ function selectedCompanyKey(userId: string) {
 export function SeumeiTenantProvider({
   children,
   storage,
+  domainStorage,
 }: {
   readonly children: React.ReactNode
   readonly storage?: KeyValueStore
+  readonly domainStorage?: KeyValueStore
 }) {
   const { session } = useAuth()
   const store = React.useMemo(
     () => storage ?? createDefaultStore("seumei:tenant-selection:v1"),
     [storage],
   )
+  const persistentDomainStore = React.useMemo(
+    () => domainStorage ?? createDefaultStore("seumei:demo-domain:v2"),
+    [domainStorage],
+  )
   const runtime = React.useMemo(
     () =>
       session
-        ? runtimeForSession(session.identity.user.id, session.identity.user.email)
+        ? runtimeForSession(
+            session.identity.user.id,
+            session.identity.user.email,
+            persistentDomainStore,
+          )
         : null,
-    [session],
+    [session, persistentDomainStore],
   )
   const [status, setStatus] = React.useState<SeumeiTenantStatus>("loading")
   const [hub, setHub] = React.useState<HubViewModel | null>(null)
