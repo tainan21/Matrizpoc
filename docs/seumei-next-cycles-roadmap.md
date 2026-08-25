@@ -2,11 +2,11 @@
 
 Data: 2026-08-24
 
-## Estado após o ciclo financeiro essencial
+## Estado após o ciclo de identidade e publicação
 
-- **Concluído:** ingredientes, receitas, estoque/movimentos, publicação demo, compra simulada, pedidos, clientes e financeiro essencial.
-- **Parcial deliberado:** publicação possui contrato e versão persistentes, mas editor de draft/preview avançado permanece no ciclo de identidade visual.
-- **Próximo:** identidade visual e publicação versionada. Pagamento real, fiscal, frete, domínio e analytics continuam fora até integração justificada.
+- **Concluído:** ingredientes, receitas, estoque/movimentos, loja, compra simulada, pedidos, clientes, financeiro essencial e identidade/publicação versionada.
+- **Parcial deliberado:** imagens usam assets seguros conhecidos; upload/CDN e domínio customizado dependem de integração real.
+- **Próximo:** fechar integrações futuras como contratos justificados, sem páginas vazias ou sucesso externo simulado. Pagamento real, fiscal, frete, domínio e analytics continuam fora até credenciais e requisitos próprios.
 
 Este roadmap organiza as próximas capacidades como fatias verticais independentes. Nenhuma rota deve nascer como página vazia: cada ciclo termina com UI, regra, autorização, persistência, estados honestos, navegação, isolamento tenant A/B e validação em browser real.
 
@@ -19,7 +19,7 @@ Este roadmap organiza as próximas capacidades como fatias verticais independent
 | 3. Pedidos | Criar/receber e acompanhar pedidos com estados válidos | `/workspace/orders` -> `/workspace/orders/[orderId]` | Estoque; loja para canal público | **Concluído para compra simulada** |
 | 4. Clientes | Consolidar contatos e histórico comercial por empresa | `/workspace/customers` -> `/workspace/customers/[customerId]` | Pedidos para evidência de identidade | **Concluído no escopo e-mail/telefone** |
 | 5. Financeiro essencial | Enxergar recebimentos, despesas e resultado operacional básico | `/workspace/finance` -> `/workspace/finance/entries/[entryId]` | Pedidos; decisão de escopo financeiro | **Concluído no escopo operacional** |
-| 6. Identidade visual/publicação | Personalizar e revisar a experiência pública com acessibilidade | `/workspace/store/design` -> `/workspace/store/preview` -> `/loja/[slug]` | Loja/publicação estável | P2 |
+| 6. Identidade visual/publicação | Personalizar e revisar a experiência pública com acessibilidade | `/workspace/store/design` -> `/workspace/store/preview` -> `/store/[storeSlug]` | Loja/publicação estável | **Concluído com presets e snapshots imutáveis** |
 | 7. Integrações justificadas | Conectar somente serviços necessários a fluxos reais | `/workspace/settings/integrations` -> provedor -> retorno | Contrato estável do domínio consumidor | P2/P3 |
 
 ## Ciclo 1 - Estoque e movimentos
@@ -56,7 +56,7 @@ Fiscal, contabilidade formal, conciliação bancária e emissão de documento fi
 
 ## Ciclo 6 - Identidade visual e publicação
 
-Adicionar presets e tokens limitados sobre a loja estável, consumindo MatrizLib apenas em superfícies públicas neutras. Preview e publicado são versões distintas; o editor deve manter contraste, foco, responsividade e recuperação de configuração inválida.
+Concluído com presets e tokens limitados sobre a loja estável. Preview e publicado são versões distintas; o editor mantém contraste, foco, responsividade, versão otimista e recuperação por draft persistente.
 
 Não criar um construtor livre de páginas inicialmente. Blocos adicionais dependem de dois ou mais casos reais e contrato estável.
 
@@ -75,7 +75,7 @@ Ordem recomendada quando os fluxos exigirem: e-mail transacional, pagamentos, fr
 - Ledger, decisões e guia do próximo agente atualizados no estado commitado.
 - Sem segredo, cache, output de build, mock de persistência ou página futura vazia.
 
-## Dez decisões para os ciclos futuros
+## Decisões registradas para os ciclos futuros
 
 Estas perguntas não bloqueiam Estoque. A recomendação entre parênteses reduz o espaço de decisão quando o ciclo correspondente começar.
 
@@ -87,5 +87,5 @@ Estas perguntas não bloqueiam Estoque. A recomendação entre parênteses reduz
 6. A unicidade de cliente por empresa usa e-mail, telefone ou composição; como funciona merge? (Recomendado: nenhum identificador universal isolado; sugestões de duplicidade e merge auditado.)
 7. “Financeiro essencial” significa caixa, contas a receber/pagar, despesas ou somente visão derivada de pedidos? (Recomendado: caixa simples mais recebíveis/despesas; sem contabilidade formal.)
 8. Documento fiscal, imposto e escrituração estão explicitamente fora ou entram no primeiro financeiro? (Recomendado: fora até requisito jurídico e provedor definidos.)
-9. A identidade visual usa presets Matriz ou um construtor livre de layout? (Recomendado: presets/tokens limitados e acessíveis, sem page builder.)
+9. A identidade visual usa presets Matriz ou um construtor livre de layout? **Decidido e entregue:** presets/tokens limitados e acessíveis, sem page builder.
 10. Qual integração vem primeiro e há sandbox/credenciais: e-mail, pagamentos, frete, domínio ou analytics? (Recomendado: e-mail transacional; depois pagamentos e frete conforme o canal público.)

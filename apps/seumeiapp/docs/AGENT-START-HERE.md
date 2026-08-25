@@ -4,7 +4,7 @@
 
 ## Current route flow
 
-`/login` → MyHub Federação → `/enter/[companyId]` → `/workspace` → catálogo/receitas/estoque/pedidos/clientes/financeiro.
+`/login` → MyHub Federação → `/enter/[companyId]` → `/workspace` → catálogo/receitas/estoque/pedidos/clientes/financeiro/loja.
 
 An invited identity follows `/invite/[token]` → `/login?returnTo=...` when signed out → authenticated acceptance → `/workspace`.
 
@@ -18,6 +18,7 @@ An invited identity follows `/invite/[token]` → `/login?returnTo=...` when sig
 - `/store/[storeSlug]` resolves the tenant from a published slug. Checkout recalculates price/recipe/stock server-side and atomically creates customer, order, timeline and consumption.
 - `/workspace/orders/**` and `/workspace/customers/**` are membership-authorized operational reads; MEMBER can advance orders and VIEWER remains read-only.
 - `/workspace/finance/**` is OWNER/ADMIN-only. Order receipts are persisted atomically and immutable; manual entries use cents, optimistic versioning and append-only events.
+- `/workspace/store/design` and `/workspace/store/preview` are OWNER/ADMIN-only. Drafts are tenant-scoped and versioned; `/store/[storeSlug]` reads only the immutable published snapshot.
 - `/docs` documents canonical route flows and offers a temporary local scratchpad. Remove it before launch without a schema migration.
 - The `seumei_active_company` HTTP-only cookie is a preference, never authority.
 
@@ -44,4 +45,4 @@ Do not import other apps' internals, create a second Prisma client/config system
 
 ## Next recommended slice
 
-Identidade visual/publicação app-local: draft versionado, presets/tokens limitados e acessíveis, preview privado e publicação explícita. Não iniciar page builder, domínio customizado ou integrações externas sem evidência e sandbox.
+Integrações justificadas pelo domínio consumidor. Priorize um contrato transacional de convite por e-mail somente quando houver provedor/sandbox; preserve o link manual verdadeiro enquanto isso. Não iniciar pagamento, frete, domínio customizado ou analytics sem requisito, credencial e teste de callback/idempotência.
