@@ -286,14 +286,20 @@ impl EnvironmentService {
             match line {
                 EnvLine::Raw(raw) => output.push(raw),
                 EnvLine::Variable { key, .. } => {
-                    output.push(format!("{key}={}", values.get(&key).cloned().unwrap_or_default()));
+                    output.push(format!(
+                        "{key}={}",
+                        values.get(&key).cloned().unwrap_or_default()
+                    ));
                     written.insert(key);
                 }
             }
         }
         for key in selected {
             if !written.contains(&key) {
-                output.push(format!("{key}={}", values.get(&key).cloned().unwrap_or_default()));
+                output.push(format!(
+                    "{key}={}",
+                    values.get(&key).cloned().unwrap_or_default()
+                ));
             }
         }
         let mut contents = output.join("\n");
@@ -428,18 +434,12 @@ fn validate_key(key: &str) -> Result<(), String> {
 
 fn is_sensitive(key: &str) -> bool {
     let upper = key.to_ascii_uppercase();
-    [
-        "SECRET",
-        "TOKEN",
-        "PASSWORD",
-        "PRIVATE",
-        "API_KEY",
-        "DATABASE_URL",
-        "DSN",
-        "CREDENTIAL",
-    ]
-    .iter()
-    .any(|fragment| upper.contains(fragment))
+    !matches!(
+        upper.as_str(),
+        "PORT" | "NODE_ENV" | "APP_ENV" | "ENVIRONMENT" | "HOST" | "LOG_LEVEL"
+    ) && !upper.starts_with("NEXT_PUBLIC_")
+        && !upper.starts_with("VITE_")
+        && !upper.starts_with("PUBLIC_")
 }
 
 fn parse(contents: &str) -> Result<Vec<EnvLine>, String> {

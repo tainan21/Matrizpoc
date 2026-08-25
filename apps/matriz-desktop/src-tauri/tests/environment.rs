@@ -5,7 +5,10 @@ use std::{
 };
 
 use matriz_desktop_native::{
-    environment::{EnvironmentPromotionRequest, EnvironmentSaveRequest, EnvironmentService, EnvironmentVariableInput},
+    environment::{
+        EnvironmentPromotionRequest, EnvironmentSaveRequest, EnvironmentService,
+        EnvironmentVariableInput,
+    },
     resources::WorkspaceResourceService,
 };
 
@@ -17,7 +20,11 @@ fn fixture(contents: &str) -> (tempfile::TempDir, EnvironmentService) {
     fs::write(root.path().join("pnpm-workspace.yaml"), "packages: []").unwrap();
     fs::write(app.join(".env.local"), contents).unwrap();
     fs::write(app.join(".env.example"), "PUBLIC_URL=\nREQUIRED_KEY=\n").unwrap();
-    fs::write(app.join(".env.staging"), "PUBLIC_URL=https://staging.matriz.local\nJWT_SECRET=staging-secret\n").unwrap();
+    fs::write(
+        app.join(".env.staging"),
+        "PUBLIC_URL=https://staging.matriz.local\nJWT_SECRET=staging-secret\n",
+    )
+    .unwrap();
     let resources = WorkspaceResourceService::new(root.path().to_path_buf()).unwrap();
     (root, EnvironmentService::new(resources))
 }
@@ -57,12 +64,57 @@ fn compares_and_promotes_secrets_without_exposing_their_values() {
 }
 
 #[test]
+fn treats_values_as_private_unless_the_key_is_explicitly_public() {
+    let (_root, service) = fixture(
+        "NEXT_PUBLIC_API_URL=http://localhost:3002/api\nREDIS_URL=redis://private\nSUPABASE_SERVICE_ROLE_KEY=private-role\nPORT=3002\n",
+    );
+    let document = service.read("matriz-admin", ".env.local").unwrap();
+    let value = |key: &str| {
+        document
+            .variables
+            .iter()
+            .find(|item| item.key == key)
+            .unwrap()
+    };
+
+    assert_eq!(
+        value("NEXT_PUBLIC_API_URL").value.as_deref(),
+        Some("http://localhost:3002/api")
+    );
+    assert!(!value("NEXT_PUBLIC_API_URL").sensitive);
+    assert_eq!(value("PORT").value.as_deref(), Some("3002"));
+    assert_eq!(value("REDIS_URL").value, None);
+    assert_eq!(value("SUPABASE_SERVICE_ROLE_KEY").value, None);
+}
+
+#[test]
 fn promotion_rejects_stale_same_file_and_unknown_keys() {
     let (_root, service) = fixture("PUBLIC_URL=http://localhost:3002\n");
     for request in [
-        EnvironmentPromotionRequest { app_id: "matriz-admin".into(), source_file: ".env.local".into(), target_file: ".env.staging".into(), target_revision: "stale".into(), keys: vec!["PUBLIC_URL".into()] },
-        EnvironmentPromotionRequest { app_id: "matriz-admin".into(), source_file: ".env.local".into(), target_file: ".env.local".into(), target_revision: service.read("matriz-admin", ".env.local").unwrap().revision, keys: vec!["PUBLIC_URL".into()] },
-        EnvironmentPromotionRequest { app_id: "matriz-admin".into(), source_file: ".env.local".into(), target_file: ".env.staging".into(), target_revision: service.read("matriz-admin", ".env.staging").unwrap().revision, keys: vec!["UNKNOWN_KEY".into()] },
+        EnvironmentPromotionRequest {
+            app_id: "matriz-admin".into(),
+            source_file: ".env.local".into(),
+            target_file: ".env.staging".into(),
+            target_revision: "stale".into(),
+            keys: vec!["PUBLIC_URL".into()],
+        },
+        EnvironmentPromotionRequest {
+            app_id: "matriz-admin".into(),
+            source_file: ".env.local".into(),
+            target_file: ".env.local".into(),
+            target_revision: service.read("matriz-admin", ".env.local").unwrap().revision,
+            keys: vec!["PUBLIC_URL".into()],
+        },
+        EnvironmentPromotionRequest {
+            app_id: "matriz-admin".into(),
+            source_file: ".env.local".into(),
+            target_file: ".env.staging".into(),
+            target_revision: service
+                .read("matriz-admin", ".env.staging")
+                .unwrap()
+                .revision,
+            keys: vec!["UNKNOWN_KEY".into()],
+        },
     ] {
         assert!(service.promote(request).is_err());
     }

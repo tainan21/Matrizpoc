@@ -10,8 +10,8 @@ mod ports;
 mod preview;
 mod processes;
 pub mod recovery;
-pub mod runbooks;
 pub mod resources;
+pub mod runbooks;
 pub mod runtime;
 mod settings;
 mod shell;
@@ -283,7 +283,17 @@ async fn recover_runtime(
     activity: tauri::State<'_, ActivityHub>,
     app_id: String,
 ) -> Result<RecoveryResult, String> {
-    recover_runtime_inner(&terminals, &operations, &activity, app_id)
+    let result = recover_runtime_inner(&terminals, &operations, &activity, app_id.clone());
+    if result.is_err() {
+        activity.publish(
+            "runtime.recovery.failed",
+            "error",
+            "Recuperação não concluída",
+            None,
+            Some(&app_id),
+        );
+    }
+    result
 }
 
 fn recover_runtime_inner(
@@ -306,7 +316,11 @@ fn recover_runtime_inner(
             Some("A porta pertence a outro processo; nenhuma ação foi executada"),
             Some(&app_id),
         );
-        return Ok(RecoveryResult { app_id, status: "diagnoseOnly", session_id: None });
+        return Ok(RecoveryResult {
+            app_id,
+            status: "diagnoseOnly",
+            session_id: None,
+        });
     }
 
     let operation_id = format!("app.{app_id}.web");
@@ -314,26 +328,43 @@ fn recover_runtime_inner(
     if action == RecoveryAction::Restart {
         let _ = terminals.close_operation(&operation_id)?;
         for _ in 0..40 {
-            if !ports::enumerate_listeners()?.iter().any(|listener| listener.port == current.port) {
+            if !ports::enumerate_listeners()?
+                .iter()
+                .any(|listener| listener.port == current.port)
+            {
                 break;
             }
             std::thread::sleep(std::time::Duration::from_millis(50));
         }
-        if ports::enumerate_listeners()?.iter().any(|listener| listener.port == current.port) {
-            return Err(format!("Port {} is still occupied; recovery was cancelled", current.port));
+        if ports::enumerate_listeners()?
+            .iter()
+            .any(|listener| listener.port == current.port)
+        {
+            return Err(format!(
+                "Port {} is still occupied; recovery was cancelled",
+                current.port
+            ));
         }
     }
     let session = terminals.start_managed(&operations.root()?, &operation)?;
     let mut ready = false;
     for _ in 0..100 {
-        if ports::enumerate_listeners()?.iter().any(|listener| listener.port == current.port) {
+        if ports::enumerate_listeners()?.iter().any(|listener| {
+            listener.port == current.port
+                && session
+                    .process_id
+                    .is_some_and(|root| runtime::process_belongs_to(root, listener.pid))
+        }) {
             ready = true;
             break;
         }
         std::thread::sleep(std::time::Duration::from_millis(100));
     }
     if !ready {
-        return Err(format!("{} did not become ready after recovery", current.label));
+        return Err(format!(
+            "{} did not become ready after recovery",
+            current.label
+        ));
     }
     activity.publish(
         "runtime.recovered",
@@ -342,7 +373,11 @@ fn recover_runtime_inner(
         Some(&format!("Porta {} pronta", current.port)),
         Some(&app_id),
     );
-    Ok(RecoveryResult { app_id, status: "ready", session_id: Some(session.id) })
+    Ok(RecoveryResult {
+        app_id,
+        status: "ready",
+        session_id: Some(session.id),
+    })
 }
 
 #[tauri::command(rename_all = "camelCase")]
@@ -525,6 +560,7 @@ fn run_runbook(
     app_id: String,
 ) -> Result<RunbookExecution, String> {
     app_definition(&app_id)?;
+    let _runbook_guard = runbooks::begin(&app_id)?;
     let definition = runbooks::definition(&runbook_id)?;
     let mut execution = RunbookExecution {
         runbook_id: definition.id,
@@ -533,51 +569,106 @@ fn run_runbook(
         steps: Vec::new(),
         target: None,
     };
-    activity.publish("runbook.started", "info", "Runbook iniciado", Some(definition.label), Some(&app_id));
+    activity.publish(
+        "runbook.started",
+        "info",
+        "Runbook iniciado",
+        Some(definition.label),
+        Some(&app_id),
+    );
 
     for &step in definition.steps {
-        let result = match step {
+        let result: Result<String, String> = (|| match step {
             "environment.validate" => {
-                let service = EnvironmentService::new(resources::WorkspaceResourceService::new(operations.root()?)?);
+                let service = EnvironmentService::new(resources::WorkspaceResourceService::new(
+                    operations.root()?,
+                )?);
                 let files = service.list(&app_id)?;
-                let selected = files.iter().find(|item| item.file_name == ".env.local").or_else(|| files.first());
-                match selected.map(|item| service.read(&app_id, &item.file_name)).transpose()? {
-                    Some(document) if document.missing_required.is_empty() => Ok("Ambiente válido".to_string()),
-                    Some(document) => Err(format!("{} variável(is) obrigatória(s) ausente(s)", document.missing_required.len())),
+                let selected = files
+                    .iter()
+                    .find(|item| item.file_name == ".env.local")
+                    .or_else(|| files.first());
+                match selected
+                    .map(|item| service.read(&app_id, &item.file_name))
+                    .transpose()?
+                {
+                    Some(document) if document.missing_required.is_empty() => {
+                        Ok("Ambiente válido".to_string())
+                    }
+                    Some(document) => Err(format!(
+                        "{} variável(is) obrigatória(s) ausente(s)",
+                        document.missing_required.len()
+                    )),
                     None => Err("Nenhum arquivo de ambiente encontrado".into()),
                 }
             }
             "doctor.run" => {
                 let checks = doctor::run_doctor(&operations);
-                if checks.iter().all(|check| check.ok) { Ok("Doctor aprovado".into()) } else { Err("Doctor encontrou dependências indisponíveis".into()) }
+                if checks.iter().all(|check| check.ok) {
+                    Ok("Doctor aprovado".into())
+                } else {
+                    Err("Doctor encontrou dependências indisponíveis".into())
+                }
             }
             "runtime.recover" => {
-                let result = recover_runtime_inner(&terminals, &operations, &activity, app_id.clone())?;
-                if result.status == "ready" { Ok("Runtime pronto".into()) } else { Err("Runtime externo preservado; recuperação automática indisponível".into()) }
+                let result =
+                    recover_runtime_inner(&terminals, &operations, &activity, app_id.clone())?;
+                if result.status == "ready" {
+                    Ok("Runtime pronto".into())
+                } else {
+                    Err("Runtime externo preservado; recuperação automática indisponível".into())
+                }
             }
             "runtime.open" => {
                 let url = runtime_url(&app_id, "/")?;
-                std::process::Command::new("explorer.exe").arg(url).spawn().map(|_| "Rota principal aberta".into()).map_err(|error| format!("Não foi possível abrir o runtime: {error}"))
+                std::process::Command::new("explorer.exe")
+                    .arg(url)
+                    .spawn()
+                    .map(|_| "Rota principal aberta".into())
+                    .map_err(|error| format!("Não foi possível abrir o runtime: {error}"))
             }
             "preview.offer" => {
-                execution.target = Some(RunbookTarget { app_id: app_id.clone(), route_path: "/" });
+                execution.target = Some(RunbookTarget {
+                    app_id: app_id.clone(),
+                    route_path: "/",
+                });
                 Ok("Aplicação pronta para visualização".into())
             }
             _ => Err("Runbook step is unsupported".into()),
-        };
+        })();
         match result {
-            Ok(detail) => execution.steps.push(RunbookStepResult { step_id: step, status: if step == "preview.offer" { "available" } else { "completed" }, detail }),
+            Ok(detail) => execution.steps.push(RunbookStepResult {
+                step_id: step,
+                status: if step == "preview.offer" {
+                    "available"
+                } else {
+                    "completed"
+                },
+                detail,
+            }),
             Err(detail) => {
                 execution.status = "failed";
-                execution.steps.push(RunbookStepResult { step_id: step, status: "failed", detail });
+                execution.steps.push(RunbookStepResult {
+                    step_id: step,
+                    status: "failed",
+                    detail,
+                });
                 break;
             }
         }
     }
     activity.publish(
         "runbook.completed",
-        if execution.status == "completed" { "success" } else { "error" },
-        if execution.status == "completed" { "Runbook concluído" } else { "Runbook interrompido" },
+        if execution.status == "completed" {
+            "success"
+        } else {
+            "error"
+        },
+        if execution.status == "completed" {
+            "Runbook concluído"
+        } else {
+            "Runbook interrompido"
+        },
         Some(definition.label),
         Some(&app_id),
     );
@@ -799,12 +890,17 @@ fn preview_file(
 }
 
 #[tauri::command(rename_all = "camelCase")]
-fn find_environment_references(
+async fn find_environment_references(
     state: tauri::State<'_, OperationsState>,
     app_id: String,
     key: String,
 ) -> Result<EnvironmentReferenceResult, String> {
-    ExplorerService::new(state.root()?)?.find_environment_references(&app_id, &key)
+    let root = state.root()?;
+    tauri::async_runtime::spawn_blocking(move || {
+        ExplorerService::new(root)?.find_environment_references(&app_id, &key)
+    })
+    .await
+    .map_err(|error| format!("Impact scan task failed: {error}"))?
 }
 
 #[tauri::command]
@@ -921,7 +1017,10 @@ fn install_package(
     package_id: String,
     granted_permissions: Vec<String>,
 ) -> Result<CommerceSnapshot, String> {
-    let permissions = granted_permissions.iter().map(String::as_str).collect::<Vec<_>>();
+    let permissions = granted_permissions
+        .iter()
+        .map(String::as_str)
+        .collect::<Vec<_>>();
     let snapshot = commerce.install(&package_id, &permissions)?;
     activity.publish(
         "store.package.installed",

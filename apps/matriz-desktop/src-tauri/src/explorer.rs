@@ -3,7 +3,7 @@ use std::{
     io,
     path::Path,
     process::Command,
-    time::UNIX_EPOCH,
+    time::{Duration, Instant, UNIX_EPOCH},
 };
 
 use base64::{engine::general_purpose::STANDARD, Engine as _};
@@ -14,6 +14,10 @@ use crate::resources::WorkspaceResourceService;
 const MAX_TEXT_BYTES: u64 = 256 * 1024;
 const MAX_IMAGE_BYTES: u64 = 8 * 1024 * 1024;
 const MAX_SEARCH_FILES: usize = 2_000;
+const MAX_SEARCH_ENTRIES: usize = 2_000;
+const MAX_SEARCH_DIRECTORIES: usize = 256;
+const MAX_SEARCH_BYTES: u64 = 32 * 1024 * 1024;
+const MAX_SEARCH_DURATION: Duration = Duration::from_millis(750);
 const MAX_REFERENCE_MATCHES: usize = 50;
 const IGNORED_DIRECTORIES: &[&str] = &[".git", ".next", ".turbo", "node_modules", "target"];
 
@@ -159,12 +163,30 @@ impl ExplorerService {
         let mut pending = vec![root.clone()];
         let mut matches = Vec::new();
         let mut scanned_files = 0;
+        let mut visited_entries = 0;
+        let mut visited_directories = 0;
+        let mut scanned_bytes = 0_u64;
         let mut truncated = false;
+        let started_at = Instant::now();
 
         while let Some(directory) = pending.pop() {
+            if visited_directories >= MAX_SEARCH_DIRECTORIES
+                || started_at.elapsed() >= MAX_SEARCH_DURATION
+            {
+                truncated = true;
+                break;
+            }
+            visited_directories += 1;
             let entries = fs::read_dir(directory)
                 .map_err(|error| format!("Could not scan project: {error}"))?;
             for entry in entries.filter_map(Result::ok) {
+                if visited_entries >= MAX_SEARCH_ENTRIES
+                    || started_at.elapsed() >= MAX_SEARCH_DURATION
+                {
+                    truncated = true;
+                    break;
+                }
+                visited_entries += 1;
                 let path = entry.path();
                 let metadata = fs::symlink_metadata(&path)
                     .map_err(|error| format!("Could not inspect project resource: {error}"))?;
@@ -172,12 +194,16 @@ impl ExplorerService {
                     continue;
                 }
                 if metadata.is_dir() {
-                    if !IGNORED_DIRECTORIES.contains(&entry.file_name().to_string_lossy().as_ref()) {
+                    if !IGNORED_DIRECTORIES.contains(&entry.file_name().to_string_lossy().as_ref())
+                    {
                         pending.push(path);
                     }
                     continue;
                 }
-                if scanned_files >= MAX_SEARCH_FILES || matches.len() >= MAX_REFERENCE_MATCHES {
+                if scanned_files >= MAX_SEARCH_FILES
+                    || matches.len() >= MAX_REFERENCE_MATCHES
+                    || scanned_bytes.saturating_add(metadata.len()) > MAX_SEARCH_BYTES
+                {
                     truncated = true;
                     break;
                 }
@@ -185,7 +211,10 @@ impl ExplorerService {
                     continue;
                 }
                 scanned_files += 1;
-                let Ok(content) = fs::read_to_string(&path) else { continue };
+                scanned_bytes += metadata.len();
+                let Ok(content) = fs::read_to_string(&path) else {
+                    continue;
+                };
                 for (index, line) in content.lines().enumerate() {
                     if line.contains(key) {
                         let relative_path = path
@@ -210,7 +239,9 @@ impl ExplorerService {
             }
         }
 
-        matches.sort_by(|left, right| (&left.relative_path, left.line).cmp(&(&right.relative_path, right.line)));
+        matches.sort_by(|left, right| {
+            (&left.relative_path, left.line).cmp(&(&right.relative_path, right.line))
+        });
         Ok(EnvironmentReferenceResult {
             app_id: app_id.into(),
             key: key.into(),
@@ -402,11 +433,16 @@ fn is_text(extension: &str) -> bool {
     )
 }
 fn is_reference_text(extension: &str) -> bool {
-    matches!(extension, "ts" | "tsx" | "js" | "jsx" | "json" | "md" | "rs" | "toml" | "yaml" | "yml")
+    matches!(
+        extension,
+        "ts" | "tsx" | "js" | "jsx" | "json" | "md" | "rs" | "toml" | "yaml" | "yml"
+    )
 }
 fn validate_environment_key(key: &str) -> Result<(), String> {
     let mut chars = key.chars();
-    let valid_start = chars.next().is_some_and(|value| value == '_' || value.is_ascii_alphabetic());
+    let valid_start = chars
+        .next()
+        .is_some_and(|value| value == '_' || value.is_ascii_alphabetic());
     if !valid_start || !chars.all(|value| value == '_' || value.is_ascii_alphanumeric()) {
         return Err("Environment variable key is invalid".into());
     }

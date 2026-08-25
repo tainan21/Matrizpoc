@@ -54,13 +54,16 @@ limited to six sessions and bounded input/output buffers.
 Workspace now includes a native `.env` manager and bounded project Explorer.
 Secrets stay masked until an explicit reveal, while saves use revision checks
 and atomic replacement. Compare and Promote copy selected values inside Rust,
-never through the renderer. Impact Radar scans at most 2,000 small source files,
-ignores generated/vendor directories and returns file/line references without
-source values.
+never through the renderer. Values are private by default; only explicit public
+prefixes and a small operational allowlist cross the IPC boundary. Impact Radar
+bounds total entries, directories, bytes, duration and matches, ignores
+generated/vendor directories and returns file/line references without values.
 
 Runtime Recovery restarts only managed processes and preserves external
-listeners. Operational Runbooks are a fixed native catalog: the renderer can
-choose a runbook and app, but cannot provide steps, programs or URLs.
+listeners, and readiness is correlated with the managed process tree.
+Operational Runbooks are serialized per app and use a fixed native catalog: the
+renderer can choose a runbook and app, but cannot provide steps, programs or
+URLs.
 
 Store and Wallet remain an atomic native ledger. Installation requires consent
 to the exact bundled permission set and creates a SHA-256 receipt from canonical

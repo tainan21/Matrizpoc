@@ -178,7 +178,11 @@ impl CommerceStore {
         Ok(snapshot_from(state))
     }
 
-    pub fn install(&self, package_id: &str, granted_permissions: &[&str]) -> Result<CommerceSnapshot, String> {
+    pub fn install(
+        &self,
+        package_id: &str,
+        granted_permissions: &[&str],
+    ) -> Result<CommerceSnapshot, String> {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
         let package = catalog(package_id)?;
         validate_permissions(package, granted_permissions)?;
@@ -189,7 +193,9 @@ impl CommerceStore {
         state
             .installed
             .insert(package_id.into(), package.version.into());
-        state.receipts.insert(package_id.into(), install_receipt(package));
+        state
+            .receipts
+            .insert(package_id.into(), install_receipt(package));
         self.write(&state)?;
         Ok(snapshot_from(state))
     }
@@ -198,11 +204,17 @@ impl CommerceStore {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
         let package = catalog(package_id)?;
         let mut state = self.read()?;
-        if !state.owned.iter().any(|id| id == package_id) || !state.installed.contains_key(package_id) {
+        if !state.owned.iter().any(|id| id == package_id)
+            || !state.installed.contains_key(package_id)
+        {
             return Err("Only an installed owned package can be repaired".into());
         }
-        state.installed.insert(package_id.into(), package.version.into());
-        state.receipts.insert(package_id.into(), install_receipt(package));
+        state
+            .installed
+            .insert(package_id.into(), package.version.into());
+        state
+            .receipts
+            .insert(package_id.into(), install_receipt(package));
         self.write(&state)?;
         Ok(snapshot_from(state))
     }
@@ -333,21 +345,15 @@ fn validate_state(state: &State) -> Result<i64, String> {
         return Err("Commerce ownership does not match acquisitions".into());
     }
     for (package_id, version) in &state.installed {
-        let package = catalog(package_id)?;
-        if !owned.contains(package_id.as_str()) || version != package.version {
-            return Err("Installed package does not match ownership or catalog version".into());
+        catalog(package_id)?;
+        if !owned.contains(package_id.as_str()) || version.is_empty() {
+            return Err("Installed package does not match ownership".into());
         }
     }
     for (package_id, receipt) in &state.receipts {
-        let package = catalog(package_id)?;
-        let mut expected = package.permissions.to_vec();
-        expected.sort_unstable();
-        if !state.installed.contains_key(package_id)
-            || receipt.package_id != *package_id
-            || receipt.version != package.version
-            || receipt.granted_permissions.iter().map(String::as_str).collect::<Vec<_>>() != expected
-        {
-            return Err("Package receipt does not match the trusted catalog".into());
+        catalog(package_id)?;
+        if !state.installed.contains_key(package_id) || receipt.package_id.is_empty() {
+            return Err("Package receipt is not attached to an installed package".into());
         }
     }
     Ok(balance)
@@ -358,9 +364,21 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
         .iter()
         .map(|package| {
             let receipt = state.receipts.get(package.id).cloned();
+            let mut expected_permissions = package.permissions.to_vec();
+            expected_permissions.sort_unstable();
             let trust_status = if !state.installed.contains_key(package.id) {
                 "missing"
-            } else if receipt.as_ref().is_some_and(|item| item.manifest_digest == manifest_digest(*package)) {
+            } else if receipt.as_ref().is_some_and(|item| {
+                item.package_id == package.id
+                    && item.version == package.version
+                    && item.manifest_digest == manifest_digest(*package)
+                    && item
+                        .granted_permissions
+                        .iter()
+                        .map(String::as_str)
+                        .collect::<Vec<_>>()
+                        == expected_permissions
+            }) {
                 "verified"
             } else if receipt.is_some() {
                 "changed"
@@ -368,21 +386,22 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
                 "missing"
             };
             PackageView {
-            id: package.id,
-            name: package.name,
-            description: package.description,
-            developer: "Matriz Team",
-            version: package.version,
-            category: package.category,
-            app_id: package.app_id,
-            price: package.price,
-            permissions: package.permissions,
-            compatibility: "Matriz Control 0.1+ · Windows 10/11",
-            owned: state.owned.iter().any(|id| id == package.id),
-            installed: state.installed.contains_key(package.id),
-            trust_status,
-            receipt,
-        }})
+                id: package.id,
+                name: package.name,
+                description: package.description,
+                developer: "Matriz Team",
+                version: package.version,
+                category: package.category,
+                app_id: package.app_id,
+                price: package.price,
+                permissions: package.permissions,
+                compatibility: "Matriz Control 0.1+ · Windows 10/11",
+                owned: state.owned.iter().any(|id| id == package.id),
+                installed: state.installed.contains_key(package.id),
+                trust_status,
+                receipt,
+            }
+        })
         .collect();
     CommerceSnapshot {
         wallet: WalletView {
@@ -409,18 +428,32 @@ fn validate_permissions(package: CatalogPackage, granted: &[&str]) -> Result<(),
 fn manifest_digest(package: CatalogPackage) -> String {
     let mut permissions = package.permissions.to_vec();
     permissions.sort_unstable();
-    let canonical = format!("{}\n{}\n{}\n{}\n{}", package.id, package.name, package.version, package.app_id, permissions.join("\n"));
+    let canonical = format!(
+        "{}\n{}\n{}\n{}\n{}",
+        package.id,
+        package.name,
+        package.version,
+        package.app_id,
+        permissions.join("\n")
+    );
     format!("{:x}", Sha256::digest(canonical.as_bytes()))
 }
 
 fn install_receipt(package: CatalogPackage) -> InstallReceipt {
-    let mut granted_permissions = package.permissions.iter().map(|value| (*value).to_string()).collect::<Vec<_>>();
+    let mut granted_permissions = package
+        .permissions
+        .iter()
+        .map(|value| (*value).to_string())
+        .collect::<Vec<_>>();
     granted_permissions.sort();
     InstallReceipt {
         package_id: package.id.into(),
         version: package.version.into(),
         manifest_digest: manifest_digest(package),
         granted_permissions,
-        installed_at: SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis(),
+        installed_at: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis(),
     }
 }

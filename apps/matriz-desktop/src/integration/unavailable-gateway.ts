@@ -139,7 +139,7 @@ export const unavailableGateway: DesktopGateway = {
   runbookCatalog: async () => [
     { id: "validate-environment", label: "Validar ambiente", description: "ENV e Doctor em uma passagem.", steps: ["environment.validate", "doctor.run"] },
     { id: "recover-open", label: "Recuperar e abrir", description: "Recupera o runtime e abre sua rota principal.", steps: ["runtime.recover", "runtime.open"] },
-    { id: "apply-visualize", label: "Aplicar e visualizar", description: "Valida, recupera e oferece Preview.", steps: ["environment.validate", "runtime.recover", "preview.offer"] },
+    { id: "apply-visualize", label: "Validar e visualizar", description: "Valida o ambiente salvo, recupera e oferece Preview.", steps: ["environment.validate", "runtime.recover", "preview.offer"] },
   ],
   runRunbook: async (runbookId, appId) => ({ runbookId, appId, status: "completed", steps: [], target: { appId, routePath: "/" } }),
 }

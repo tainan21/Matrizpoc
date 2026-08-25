@@ -23,7 +23,9 @@ fn ownership_and_installation_are_separate_persisted_states() {
     let path = temp.path().join("commerce.json");
     let store = CommerceStore::new(path.clone());
     store.acquire("matriz.analytics").expect("acquire package");
-    let installed = store.install("matriz.analytics", &["runtime:observe", "activity:read"]).expect("install package");
+    let installed = store
+        .install("matriz.analytics", &["runtime:observe", "activity:read"])
+        .expect("install package");
     assert!(installed
         .packages
         .iter()
@@ -53,17 +55,27 @@ fn installation_requires_explicit_exact_permissions_and_writes_a_receipt() {
 
     assert!(store.install("matriz.analytics", &[]).is_err());
     assert!(store
-        .install("matriz.analytics", &["runtime:observe", "activity:read", "workspace:write"])
+        .install(
+            "matriz.analytics",
+            &["runtime:observe", "activity:read", "workspace:write"]
+        )
         .is_err());
 
     let installed = store
         .install("matriz.analytics", &["activity:read", "runtime:observe"])
         .expect("consented install");
-    let package = installed.packages.iter().find(|item| item.id == "matriz.analytics").expect("package");
+    let package = installed
+        .packages
+        .iter()
+        .find(|item| item.id == "matriz.analytics")
+        .expect("package");
     assert_eq!(package.trust_status, "verified");
     let receipt = package.receipt.as_ref().expect("install receipt");
     assert_eq!(receipt.package_id, "matriz.analytics");
-    assert_eq!(receipt.granted_permissions, vec!["activity:read", "runtime:observe"]);
+    assert_eq!(
+        receipt.granted_permissions,
+        vec!["activity:read", "runtime:observe"]
+    );
     assert_eq!(receipt.manifest_digest.len(), 64);
 }
 
@@ -71,11 +83,19 @@ fn installation_requires_explicit_exact_permissions_and_writes_a_receipt() {
 fn repair_reissues_a_verified_receipt_without_changing_ownership() {
     let temp = tempfile::tempdir().expect("temp commerce");
     let store = CommerceStore::new(temp.path().join("commerce.json"));
-    store.acquire("matriz.components").expect("acquire free package");
-    store.install("matriz.components", &["runtime:start"]).expect("install package");
+    store
+        .acquire("matriz.components")
+        .expect("acquire free package");
+    store
+        .install("matriz.components", &["runtime:start"])
+        .expect("install package");
 
     let repaired = store.repair("matriz.components").expect("repair package");
-    let package = repaired.packages.iter().find(|item| item.id == "matriz.components").expect("package");
+    let package = repaired
+        .packages
+        .iter()
+        .find(|item| item.id == "matriz.components")
+        .expect("package");
     assert!(package.owned && package.installed);
     assert_eq!(package.trust_status, "verified");
 }
@@ -86,14 +106,69 @@ fn reports_a_changed_receipt_digest_without_trusting_it() {
     let path = temp.path().join("commerce.json");
     let store = CommerceStore::new(path.clone());
     store.acquire("matriz.components").expect("acquire package");
-    store.install("matriz.components", &["runtime:start"]).expect("install package");
-    let mut state: serde_json::Value = serde_json::from_slice(&fs::read(&path).expect("state bytes")).expect("state json");
-    state["receipts"]["matriz.components"]["manifestDigest"] = serde_json::Value::String("0".repeat(64));
-    fs::write(&path, serde_json::to_vec_pretty(&state).expect("changed state")).expect("write changed receipt");
+    store
+        .install("matriz.components", &["runtime:start"])
+        .expect("install package");
+    let mut state: serde_json::Value =
+        serde_json::from_slice(&fs::read(&path).expect("state bytes")).expect("state json");
+    state["receipts"]["matriz.components"]["manifestDigest"] =
+        serde_json::Value::String("0".repeat(64));
+    fs::write(
+        &path,
+        serde_json::to_vec_pretty(&state).expect("changed state"),
+    )
+    .expect("write changed receipt");
 
-    let changed = CommerceStore::new(path).snapshot().expect("changed snapshot");
-    let package = changed.packages.iter().find(|item| item.id == "matriz.components").expect("package");
+    let changed = CommerceStore::new(path)
+        .snapshot()
+        .expect("changed snapshot");
+    let package = changed
+        .packages
+        .iter()
+        .find(|item| item.id == "matriz.components")
+        .expect("package");
     assert_eq!(package.trust_status, "changed");
+}
+
+#[test]
+fn changed_receipt_metadata_remains_visible_and_repairable() {
+    let temp = tempfile::tempdir().expect("temp commerce");
+    let path = temp.path().join("commerce.json");
+    let store = CommerceStore::new(path.clone());
+    store.acquire("matriz.components").expect("acquire package");
+    store
+        .install("matriz.components", &["runtime:start"])
+        .expect("install package");
+    let mut state: serde_json::Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+    state["receipts"]["matriz.components"]["version"] = serde_json::Value::String("0.0.1".into());
+    state["receipts"]["matriz.components"]["grantedPermissions"] =
+        serde_json::json!(["workspace:write"]);
+    fs::write(&path, serde_json::to_vec_pretty(&state).unwrap()).unwrap();
+
+    let changed = CommerceStore::new(path.clone())
+        .snapshot()
+        .expect("changed snapshot");
+    assert_eq!(
+        changed
+            .packages
+            .iter()
+            .find(|item| item.id == "matriz.components")
+            .unwrap()
+            .trust_status,
+        "changed"
+    );
+    let repaired = CommerceStore::new(path)
+        .repair("matriz.components")
+        .expect("repair changed receipt");
+    assert_eq!(
+        repaired
+            .packages
+            .iter()
+            .find(|item| item.id == "matriz.components")
+            .unwrap()
+            .trust_status,
+        "verified"
+    );
 }
 
 #[test]

@@ -148,5 +148,5 @@ próximos do app responsável.
 
 - **Decisão:** promover ENV dentro do Rust; limitar busca de referências ao app; recuperar somente runtimes gerenciados; registrar instalações com recibos SHA-256; e aceitar apenas runbooks do catálogo embarcado.
 - **Motivo:** ENV, Explorer, Runtime, Store e Actions precisam compor fluxos úteis sem entregar segredos, filesystem, processos, permissões ou automação arbitrária ao renderer.
-- **Impacto:** a UI envia IDs e seleções tipadas. Segredos não atravessam Compare/Promote/Impact; processos externos são preservados; consentimento coincide com o manifesto; Runbooks não aceitam passos, comandos ou URLs do renderer.
+- **Impacto:** a UI envia IDs e seleções tipadas. Valores de ENV são privados por padrão e segredos não atravessam Compare/Promote/Impact; o radar limita entradas, diretórios, bytes, duração e resultados; recovery confirma a árvore do processo gerenciado; consentimento coincide com o manifesto; Runbooks são serializados por app e não aceitam passos, comandos ou URLs do renderer.
 - **Revisar quando:** existir distribuição remota assinada, permissões revogáveis, múltiplos ambientes ativos ou protocolo local autenticado para apps externos.

@@ -53,6 +53,7 @@ fn state_events_expose_the_session_directly_as_camel_case_data() {
         cwd: "C:\\workspace".into(),
         exit_code: None,
         tail: String::new(),
+        process_id: Some(42),
     });
 
     let json = serde_json::to_value(event).expect("serialized event");

@@ -74,6 +74,7 @@ fn managed(app_id: &str, status: &'static str) -> TerminalSession {
         cwd: "C:\\Apps\\matriz-infra-hub".into(),
         exit_code: None,
         tail: String::new(),
+        process_id: Some(if app_id == "matriz-hub" { 101 } else { 303 }),
     }
 }
 

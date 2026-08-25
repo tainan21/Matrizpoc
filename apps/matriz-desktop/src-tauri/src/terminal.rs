@@ -49,6 +49,8 @@ pub struct TerminalSession {
     pub cwd: String,
     pub exit_code: Option<u32>,
     pub tail: String,
+    #[serde(skip)]
+    pub process_id: Option<u32>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -190,6 +192,7 @@ impl TerminalManager {
             cwd: root.display().to_string(),
             exit_code: None,
             tail: String::new(),
+            process_id: Some(pid),
         };
         let record = Arc::new(Mutex::new(SessionRecord {
             metadata: metadata.clone(),

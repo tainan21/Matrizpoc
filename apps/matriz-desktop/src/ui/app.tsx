@@ -93,14 +93,15 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   }, [desktop.settings, feedback])
 
   useEffect(() => {
-    if (view === "apps" || view === "workspace") {
+    let refreshInterval: number | undefined
+    if (view === "apps" || view === "workspace" || view === "actions") {
       const refreshApps = () => void gateway.runtimeSnapshot().then(setRuntimes).catch(() => setRuntimes([]))
       refreshApps()
-      const interval = window.setInterval(refreshApps, 1_000)
-      return () => window.clearInterval(interval)
+      refreshInterval = window.setInterval(refreshApps, 1_000)
     }
     if (view === "doctor") void gateway.doctor().then(setChecks).catch(() => setChecks([]))
     if (view === "actions") void gateway.workspacePulse().then(setPulse).catch(() => setPulse(undefined))
+    return () => { if (refreshInterval !== undefined) window.clearInterval(refreshInterval) }
   }, [gateway, view])
 
   const chooseView = (next: View) => {

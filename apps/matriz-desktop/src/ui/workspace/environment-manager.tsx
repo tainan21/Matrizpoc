@@ -35,6 +35,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   const [selectedKeys, setSelectedKeys] = useState<readonly string[]>([])
   const [impact, setImpact] = useState<EnvironmentReferenceResult>()
   const selectionGeneration = useRef(0)
+  const impactGeneration = useRef(0)
   const newVariableId = useRef(0)
 
   const runtime = runtimes.find((item) => item.id === appId)
@@ -169,15 +170,19 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   }
 
   const inspectImpact = async (key: string) => {
+    const generation = ++impactGeneration.current
     setBusy(true)
     setError("")
+    setImpact(undefined)
     try {
-      setImpact(await gateway.findEnvironmentReferences(appId, key))
+      const next = await gateway.findEnvironmentReferences(appId, key)
+      if (generation === impactGeneration.current) setImpact(next)
     } catch (cause) {
+      if (generation !== impactGeneration.current) return
       setError(String(cause))
       signal("error")
     } finally {
-      setBusy(false)
+      if (generation === impactGeneration.current) setBusy(false)
     }
   }
 
@@ -224,7 +229,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
           <input aria-label={`Chave ${variable.key}`} value={variable.key} readOnly={variable.sensitive && !variable.revealed} onChange={(event) => update(variable.id, { key: event.target.value })} />
           <input aria-label={`Valor ${variable.key}`} value={variable.sensitive && !variable.revealed ? "••••••••" : (variable.value ?? "")} readOnly={variable.sensitive && !variable.revealed} onChange={(event) => update(variable.id, { value: event.target.value, valueChanged: true, revealed: true })} />
           <span><i className={variable.sensitive ? "is-secret" : ""}>{variable.sensitive ? "SENSÍVEL" : variable.source}</i></span>
-          <span className="env-actions"><button aria-label={`Ver impacto de ${variable.key}`} disabled={!variable.originalKey} onClick={() => void inspectImpact(variable.key)}>IMPACTO</button>{variable.sensitive ? <button aria-label={`${variable.revealed ? "Ocultar" : "Revelar"} ${variable.key}`} onClick={() => variable.revealed ? update(variable.id, { revealed: false }) : void reveal(variable.id, variable.key)}>{variable.revealed ? "OCULTAR" : "REVELAR"}</button> : null}<button aria-label={`Excluir ${variable.key}`} onClick={() => setDraft((items) => items.filter(({ id }) => id !== variable.id))}>×</button></span>
+          <span className="env-actions"><button aria-label={`Ver impacto de ${variable.key}`} disabled={busy || !variable.originalKey} onClick={() => void inspectImpact(variable.key)}>IMPACTO</button>{variable.sensitive ? <button aria-label={`${variable.revealed ? "Ocultar" : "Revelar"} ${variable.key}`} onClick={() => variable.revealed ? update(variable.id, { revealed: false }) : void reveal(variable.id, variable.key)}>{variable.revealed ? "OCULTAR" : "REVELAR"}</button> : null}<button aria-label={`Excluir ${variable.key}`} onClick={() => setDraft((items) => items.filter(({ id }) => id !== variable.id))}>×</button></span>
         </div>)}
         {!filtered.length ? <div className="env-empty">Nenhuma variável neste ambiente.</div> : null}
       </div>}

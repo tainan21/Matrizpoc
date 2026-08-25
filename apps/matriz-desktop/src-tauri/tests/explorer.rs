@@ -26,7 +26,8 @@ fn fixture() -> (tempfile::TempDir, ExplorerService) {
 fn finds_bounded_environment_references_without_exposing_values() {
     let (temp, service) = fixture();
     fs::write(
-        temp.path().join("apps/matriz-admin/node_modules/hidden/secret.ts"),
+        temp.path()
+            .join("apps/matriz-admin/node_modules/hidden/secret.ts"),
         "process.env.DATABASE_URL = 'must-not-leak'",
     )
     .expect("ignored secret fixture");
@@ -44,6 +45,21 @@ fn finds_bounded_environment_references_without_exposing_values() {
     assert!(service
         .find_environment_references("matriz-admin", "BAD KEY")
         .is_err());
+}
+
+#[test]
+fn reference_scan_bounds_total_entries_not_only_source_files() {
+    let (temp, service) = fixture();
+    let noise = temp.path().join("apps/matriz-admin/noise");
+    fs::create_dir_all(&noise).unwrap();
+    for index in 0..2_100 {
+        fs::write(noise.join(format!("asset-{index}.bin")), []).unwrap();
+    }
+
+    let result = service
+        .find_environment_references("matriz-admin", "PORT")
+        .unwrap();
+    assert!(result.truncated);
 }
 
 #[test]
