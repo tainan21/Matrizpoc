@@ -135,6 +135,22 @@ footer .error { color: #ff8296; }
 .env-impact-matches span, .env-impact-matches small { color:#807389; font:7px var(--matriz-font-mono); }
 .env-impact-matches small { grid-column:1 / -1; }
 .env-impact-matches > p { margin:auto; color:#6f6679; font-size:9px; }
+.package-trust { display:grid; gap:5px; margin:12px 0; padding:10px; border:1px solid rgba(255,174,78,.2); border-radius:7px; background:rgba(255,149,54,.05); }
+.package-trust > span { color:#887b91; font:800 7px var(--matriz-font-mono); letter-spacing:.12em; }
+.package-trust > strong { color:#e1a55f; font-size:9px; }
+.package-trust > small { color:#756b7d; font:7px var(--matriz-font-mono); }
+.package-trust--verified { border-color:rgba(72,222,158,.2); background:rgba(72,222,158,.04); }
+.package-trust--verified > strong { color:#62dca4; }
+.package-trust .matriz-button { margin-top:4px; font-size:8px; }
+.store-dialog-backdrop { position:fixed; inset:33px 0 27px; z-index:80; display:grid; place-items:center; background:rgba(3,2,6,.72); backdrop-filter:blur(7px); }
+.store-dialog { width:min(430px,calc(100vw - 40px)); padding:20px; border:1px solid rgba(154,102,255,.38); border-radius:12px; background:#0d0a14; box-shadow:0 24px 90px rgba(0,0,0,.55); }
+.store-dialog h2 { margin:7px 0 0; font-size:18px; }
+.store-dialog > p { margin:8px 0 15px; color:#84798d; font-size:9px; line-height:1.5; }
+.store-dialog > div { display:grid; gap:6px; }
+.store-dialog label { display:flex; align-items:center; gap:10px; min-height:39px; padding:0 10px; border:1px solid var(--line); border-radius:7px; background:rgba(255,255,255,.018); }
+.store-dialog input { accent-color:var(--violet); }
+.store-dialog code { color:#c5b8d1; font-size:9px; }
+.store-dialog footer { min-height:0; display:flex; justify-content:flex-end; gap:7px; margin-top:16px; padding:0; border:0; }
 @media (max-width: 900px) { .workspace-selector-bar { grid-template-columns:1fr 1fr; } .env-row { grid-template-columns:150px minmax(220px,1fr) 90px 110px; } }
 .file-explorer { min-width:720px; }
 .workspace-heading > select { min-width:180px; height:36px; padding:0 10px; border:1px solid var(--line); border-radius:7px; background:#0d0a13; color:#ded4ea; font-size:10px; }

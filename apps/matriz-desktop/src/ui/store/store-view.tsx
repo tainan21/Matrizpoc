@@ -11,11 +11,14 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
   const [category, setCategory] = useState("Todos")
   const [busy, setBusy] = useState("")
   const [error, setError] = useState("")
+  const [pendingInstall, setPendingInstall] = useState<string>()
+  const [grantedPermissions, setGrantedPermissions] = useState<readonly string[]>([])
 
   useEffect(() => { gateway.commerceSnapshot().then(setSnapshot).catch((cause: unknown) => setError(String(cause))) }, [gateway])
   const categories = useMemo(() => ["Todos", ...new Set(snapshot?.packages.map(({ category: value }) => value) ?? [])], [snapshot])
   const packages = useMemo(() => snapshot?.packages.filter((item) => (category === "Todos" || item.category === category) && `${item.name} ${item.description}`.toLowerCase().includes(query.toLowerCase())) ?? [], [category, query, snapshot])
   const selected = snapshot?.packages.find(({ id }) => id === selectedId)
+  const installTarget = snapshot?.packages.find(({ id }) => id === pendingInstall)
 
   const transition = async (id: string, action: () => Promise<CommerceSnapshot>) => {
     setBusy(id); setError("")
@@ -50,14 +53,15 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
     {error ? <div className="env-error" role="alert">{error}</div> : null}
     <div className="store-layout">
       <div className="store-catalog">
-        {packages.map((item) => <PackageCard key={item.id} item={item} busy={busy === item.id} selected={selectedId === item.id} inspect={() => setSelectedId(item.id)} acquire={() => void transition(item.id, () => gateway.acquirePackage(item.id))} install={() => void transition(item.id, () => gateway.installPackage(item.id, item.permissions))} open={() => void openPackage(item)} uninstall={() => void transition(item.id, () => gateway.uninstallPackage(item.id))} />)}
+        {packages.map((item) => <PackageCard key={item.id} item={item} busy={busy === item.id} selected={selectedId === item.id} inspect={() => setSelectedId(item.id)} acquire={() => void transition(item.id, () => gateway.acquirePackage(item.id))} install={() => { setSelectedId(item.id); setPendingInstall(item.id); setGrantedPermissions([]) }} open={() => void openPackage(item)} uninstall={() => void transition(item.id, () => gateway.uninstallPackage(item.id))} />)}
         {!packages.length ? <div className="store-empty">Nenhuma capacidade encontrada.</div> : null}
       </div>
       <aside className="store-side">
-        {selected ? <div className="package-detail"><div className="package-icon package-icon--large">{monogram(selected.name)}</div><span>{selected.category}</span><h2>{selected.name}</h2><p>{selected.description}</p><dl><div><dt>VERSÃO</dt><dd>{selected.version}</dd></div><div><dt>DEV</dt><dd>{selected.developer}</dd></div><div><dt>COMPATIBILIDADE</dt><dd>{selected.compatibility}</dd></div></dl><h3>PERMISSÕES</h3>{selected.permissions.map((permission) => <code key={permission}>{permission}</code>)}</div> : <div className="package-detail package-detail--empty"><span>SELECIONE UM PACOTE</span><p>Inspecione compatibilidade e permissões antes de adquirir.</p></div>}
+        {selected ? <div className="package-detail"><div className="package-icon package-icon--large">{monogram(selected.name)}</div><span>{selected.category}</span><h2>{selected.name}</h2><p>{selected.description}</p><dl><div><dt>VERSÃO</dt><dd>{selected.version}</dd></div><div><dt>DEV</dt><dd>{selected.developer}</dd></div><div><dt>COMPATIBILIDADE</dt><dd>{selected.compatibility}</dd></div></dl>{selected.installed ? <div className={`package-trust package-trust--${selected.trustStatus}`}><span>TRUST CENTER</span><strong>{selected.trustStatus === "verified" ? "VERIFICADO" : selected.trustStatus === "changed" ? "MANIFESTO ALTERADO" : "RECIBO AUSENTE"}</strong>{selected.receipt ? <small>SHA-256 · {selected.receipt.manifestDigest.slice(0, 12)}…</small> : null}{selected.trustStatus !== "verified" ? <Button variant="secondary" aria-label={`Reparar ${selected.name}`} disabled={busy === selected.id} onClick={() => void transition(selected.id, () => gateway.repairPackage(selected.id))}>REPARAR</Button> : null}</div> : null}<h3>PERMISSÕES</h3>{selected.permissions.map((permission) => <code key={permission}>{permission}</code>)}</div> : <div className="package-detail package-detail--empty"><span>SELECIONE UM PACOTE</span><p>Inspecione compatibilidade e permissões antes de adquirir.</p></div>}
         <div className="wallet-ledger"><div><span>HISTÓRICO DA WALLET</span><Badge tone="neutral">AUDITÁVEL</Badge></div>{snapshot?.wallet.transactions.slice(0, 6).map((transaction) => <div className="ledger-row" key={transaction.id}><i className={transaction.amount >= 0 ? "credit" : "debit"}>{transaction.amount >= 0 ? "+" : ""}{transaction.amount} M</i><strong>{transaction.title}</strong><small>{new Date(transaction.occurredAt).toLocaleDateString("pt-BR")}</small></div>)}</div>
       </aside>
     </div>
+    {installTarget ? <div className="store-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingInstall(undefined) }}><section className="store-dialog" role="dialog" aria-modal="true" aria-labelledby="store-permissions-title"><span className="eyebrow">INSTALAÇÃO CONTROLADA</span><h2 id="store-permissions-title">Permissões de {installTarget.name}</h2><p>O pacote só será instalado quando todas as permissões do manifesto forem aceitas.</p><div>{installTarget.permissions.map((permission) => <label key={permission}><input type="checkbox" aria-label={`Permitir ${permission}`} checked={grantedPermissions.includes(permission)} onChange={(event) => setGrantedPermissions((current) => event.target.checked ? [...current, permission] : current.filter((item) => item !== permission))} /><code>{permission}</code></label>)}</div><footer><Button variant="secondary" onClick={() => setPendingInstall(undefined)}>CANCELAR</Button><Button disabled={busy === installTarget.id || grantedPermissions.length !== installTarget.permissions.length} aria-label={`Confirmar instalação de ${installTarget.name}`} onClick={() => void transition(installTarget.id, () => gateway.installPackage(installTarget.id, grantedPermissions)).then(() => setPendingInstall(undefined))}>CONFIRMAR INSTALAÇÃO</Button></footer></section></div> : null}
   </section>
 }
 

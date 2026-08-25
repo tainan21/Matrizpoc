@@ -58,5 +58,6 @@ pub const COMMAND_NAMES: &[&str] = &[
     "get_commerce_snapshot",
     "acquire_package",
     "install_package",
+    "repair_package",
     "uninstall_package",
 ];

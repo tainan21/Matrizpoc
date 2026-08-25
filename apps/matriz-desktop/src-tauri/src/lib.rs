@@ -835,12 +835,31 @@ fn install_package(
     commerce: tauri::State<'_, CommerceStore>,
     activity: tauri::State<'_, ActivityHub>,
     package_id: String,
+    granted_permissions: Vec<String>,
 ) -> Result<CommerceSnapshot, String> {
-    let snapshot = commerce.install(&package_id)?;
+    let permissions = granted_permissions.iter().map(String::as_str).collect::<Vec<_>>();
+    let snapshot = commerce.install(&package_id, &permissions)?;
     activity.publish(
         "store.package.installed",
         "success",
         "Pacote instalado",
+        Some(&package_id),
+        None,
+    );
+    Ok(snapshot)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn repair_package(
+    commerce: tauri::State<'_, CommerceStore>,
+    activity: tauri::State<'_, ActivityHub>,
+    package_id: String,
+) -> Result<CommerceSnapshot, String> {
+    let snapshot = commerce.repair(&package_id)?;
+    activity.publish(
+        "store.package.repaired",
+        "success",
+        "Confiança do pacote restaurada",
         Some(&package_id),
         None,
     );
@@ -1021,6 +1040,7 @@ pub fn run() {
             get_commerce_snapshot,
             acquire_package,
             install_package,
+            repair_package,
             uninstall_package
         ])
         .run(tauri::generate_context!())

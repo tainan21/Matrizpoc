@@ -23,7 +23,7 @@ fn ownership_and_installation_are_separate_persisted_states() {
     let path = temp.path().join("commerce.json");
     let store = CommerceStore::new(path.clone());
     store.acquire("matriz.analytics").expect("acquire package");
-    let installed = store.install("matriz.analytics").expect("install package");
+    let installed = store.install("matriz.analytics", &["runtime:observe", "activity:read"]).expect("install package");
     assert!(installed
         .packages
         .iter()
@@ -43,6 +43,41 @@ fn ownership_and_installation_are_separate_persisted_states() {
         .packages
         .iter()
         .any(|package| package.id == "matriz.analytics" && package.owned && !package.installed));
+}
+
+#[test]
+fn installation_requires_explicit_exact_permissions_and_writes_a_receipt() {
+    let temp = tempfile::tempdir().expect("temp commerce");
+    let store = CommerceStore::new(temp.path().join("commerce.json"));
+    store.acquire("matriz.analytics").expect("acquire package");
+
+    assert!(store.install("matriz.analytics", &[]).is_err());
+    assert!(store
+        .install("matriz.analytics", &["runtime:observe", "activity:read", "workspace:write"])
+        .is_err());
+
+    let installed = store
+        .install("matriz.analytics", &["activity:read", "runtime:observe"])
+        .expect("consented install");
+    let package = installed.packages.iter().find(|item| item.id == "matriz.analytics").expect("package");
+    assert_eq!(package.trust_status, "verified");
+    let receipt = package.receipt.as_ref().expect("install receipt");
+    assert_eq!(receipt.package_id, "matriz.analytics");
+    assert_eq!(receipt.granted_permissions, vec!["activity:read", "runtime:observe"]);
+    assert_eq!(receipt.manifest_digest.len(), 64);
+}
+
+#[test]
+fn repair_reissues_a_verified_receipt_without_changing_ownership() {
+    let temp = tempfile::tempdir().expect("temp commerce");
+    let store = CommerceStore::new(temp.path().join("commerce.json"));
+    store.acquire("matriz.components").expect("acquire free package");
+    store.install("matriz.components", &["runtime:start"]).expect("install package");
+
+    let repaired = store.repair("matriz.components").expect("repair package");
+    let package = repaired.packages.iter().find(|item| item.id == "matriz.components").expect("package");
+    assert!(package.owned && package.installed);
+    assert_eq!(package.trust_status, "verified");
 }
 
 #[test]
