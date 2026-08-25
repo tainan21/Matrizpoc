@@ -12,6 +12,8 @@ export type MembershipCapability =
   | "orders.read"
   | "orders.manage"
   | "customers.read"
+  | "finance.read"
+  | "finance.manage"
   | "members.read"
   | "members.invite.admin"
   | "members.invite.standard"
@@ -49,6 +51,8 @@ const OWNER_CAPABILITIES: readonly MembershipCapability[] = [
   "orders.read",
   "orders.manage",
   "customers.read",
+  "finance.read",
+  "finance.manage",
   "members.read",
   "members.invite.admin",
   "members.invite.standard",
@@ -70,6 +74,8 @@ const ADMIN_CAPABILITIES: readonly MembershipCapability[] = [
   "orders.read",
   "orders.manage",
   "customers.read",
+  "finance.read",
+  "finance.manage",
   "members.read",
   "members.invite.standard",
   "members.role.manage.standard",

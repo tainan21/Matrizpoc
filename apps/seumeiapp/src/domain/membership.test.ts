@@ -34,6 +34,14 @@ describe("Seumei membership capability policy", () => {
     ["MEMBER", "orders.manage", true],
     ["MEMBER", "customers.read", true],
     ["VIEWER", "orders.manage", false],
+    ["OWNER", "finance.read", true],
+    ["OWNER", "finance.manage", true],
+    ["ADMIN", "finance.read", true],
+    ["ADMIN", "finance.manage", true],
+    ["MEMBER", "finance.read", false],
+    ["MEMBER", "finance.manage", false],
+    ["VIEWER", "finance.read", false],
+    ["VIEWER", "finance.manage", false],
   ])("maps %s and %s to %s", (role, capability, allowed) => {
     expect(can(role, capability)).toBe(allowed)
   })
