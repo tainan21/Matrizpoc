@@ -6,12 +6,14 @@ import type { CatalogRepository } from "../domain/repositories/catalog-repositor
 import type { PortfolioRepository } from "../domain/repositories/portfolio-repository"
 import type { RestaurantRepository } from "../domain/repositories/restaurant-repository"
 import type { CommerceRepository } from "../domain/repositories/commerce-repository"
+import type { FinanceRepository } from "../domain/repositories/finance-repository"
 
 export type SeumeiHttpServices = CompanyHttpServices & {
   readonly catalog: CatalogRepository
   readonly portfolio: PortfolioRepository
   readonly restaurant: RestaurantRepository
   readonly commerce: CommerceRepository
+  readonly finance: FinanceRepository
 }
 
 export function jsonResult(result: HttpResult): NextResponse {

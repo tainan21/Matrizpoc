@@ -9,15 +9,17 @@ import { createCatalogRepository } from "../infrastructure/catalog.repository"
 import { createPortfolioRepository } from "../infrastructure/portfolio.repository"
 import { createRestaurantRepository } from "../infrastructure/restaurant.repository"
 import { createCommerceRepository } from "../infrastructure/commerce.repository"
+import { createFinanceRepository } from "../infrastructure/finance.repository"
 import { resolveDatabaseAvailability } from "../infrastructure/database-config"
 import type { CompanyHttpServices } from "../http/company-handlers"
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
 import type { PortfolioRepository } from "../domain/repositories/portfolio-repository"
 import type { RestaurantRepository } from "../domain/repositories/restaurant-repository"
 import type { CommerceRepository } from "../domain/repositories/commerce-repository"
+import type { FinanceRepository } from "../domain/repositories/finance-repository"
 
 export type CompanyServicesResolution =
-  | { readonly kind: "ready"; readonly services: CompanyHttpServices & { readonly catalog: CatalogRepository; readonly portfolio: PortfolioRepository; readonly restaurant: RestaurantRepository; readonly commerce: CommerceRepository } }
+  | { readonly kind: "ready"; readonly services: CompanyHttpServices & { readonly catalog: CatalogRepository; readonly portfolio: PortfolioRepository; readonly restaurant: RestaurantRepository; readonly commerce: CommerceRepository; readonly finance: FinanceRepository } }
   | { readonly kind: "unavailable" }
 
 export function createCompanyServices(
@@ -35,6 +37,7 @@ export function createCompanyServices(
       portfolio: createPortfolioRepository(getSeumeiDb()),
       restaurant: createRestaurantRepository(getSeumeiDb()),
       commerce: createCommerceRepository(getSeumeiDb()),
+      finance: createFinanceRepository(getSeumeiDb()),
       ids: { tenantId: randomUUID },
       events: {
         companySelected(company) {
