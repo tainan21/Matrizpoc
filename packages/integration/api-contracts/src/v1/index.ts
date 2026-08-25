@@ -12,6 +12,7 @@ export * from "./contract-inputs"
 export * from "./onboarding"
 export * from "./docs"
 export * from "./capabilities"
+export * from "./seumei-portfolio"
 
 export const API_CONTRACTS_DEFAULT_VERSION = "v1" as const
 export type ApiContractsVersion = typeof API_CONTRACTS_DEFAULT_VERSION

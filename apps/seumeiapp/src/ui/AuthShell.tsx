@@ -2,14 +2,18 @@
 
 import { useEffect, type ReactNode } from "react"
 import { usePathname, useRouter } from "next/navigation"
-import { TenantProvider } from "@matriz/access-tenants/client"
 import { AuthGate, AuthProvider, useAuth } from "@matriz/platform-auth/client"
 import { bootstrapSeumei } from "../bootstrap"
 import { seumeiAuthConfig } from "../auth/config"
+import { safeReturnPath } from "../application/safe-return-path"
 
 function RedirectToLogin() {
   const router = useRouter()
-  useEffect(() => router.replace("/login"), [router])
+  const pathname = usePathname()
+  useEffect(() => {
+    const returnTo = safeReturnPath(pathname ?? "/")
+    router.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`)
+  }, [pathname, router])
   return null
 }
 
@@ -29,5 +33,5 @@ function Guard({ children }: { children: ReactNode }) {
 }
 
 export function SeumeiAuthShell({ children }: { children: ReactNode }) {
-  return <AuthProvider config={seumeiAuthConfig}><TenantProvider><Guard>{children}</Guard></TenantProvider></AuthProvider>
+  return <AuthProvider config={seumeiAuthConfig}><Guard>{children}</Guard></AuthProvider>
 }

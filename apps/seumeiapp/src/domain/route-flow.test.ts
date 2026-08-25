@@ -1,0 +1,41 @@
+import { describe, expect, it } from "vitest"
+import { CANONICAL_ROUTE_FLOWS, parseRouteFlow, routeFlowToMarkdown } from "./route-flow"
+
+describe("route flow scratchpad", () => {
+  it("parses ordered relative routes and outcomes", () => {
+    expect(parseRouteFlow("/login — autenticar\n/ — escolher empresa\n/workspace — trabalhar")).toEqual({
+      kind: "valid",
+      steps: [
+        { route: "/login", outcome: "autenticar" },
+        { route: "/", outcome: "escolher empresa" },
+        { route: "/workspace", outcome: "trabalhar" },
+      ],
+    })
+  })
+
+  it("reports the exact invalid line without accepting external URLs", () => {
+    expect(parseRouteFlow("/login — entrar\nhttps://evil.test — sair")).toEqual({
+      kind: "invalid", line: 2,
+      message: "Use uma rota relativa iniciada por /",
+    })
+  })
+
+  it("exports a readable markdown flow", () => {
+    const parsed = parseRouteFlow("/login — entrar\n/workspace — operar")
+    if (parsed.kind !== "valid") throw new Error("expected valid flow")
+    expect(routeFlowToMarkdown("Acesso", parsed.steps)).toContain("`/login` → entrar")
+  })
+
+  it("documents finance from overview to an auditable entry", () => {
+    const finance = CANONICAL_ROUTE_FLOWS.find((flow) => flow.id === "essential-finance")
+    expect(finance?.steps).toEqual([
+      { route: "/workspace/finance", outcome: "acompanhar caixa, competência, vencimentos e criar lançamento manual" },
+      { route: "/workspace/finance/entries/[entryId]", outcome: "consultar eventos e liquidar ou cancelar um lançamento manual aberto" },
+    ])
+  })
+
+  it("documents the private draft through immutable public store flow", () => {
+    const identity = CANONICAL_ROUTE_FLOWS.find((flow) => flow.id === "store-identity-publication")
+    expect(identity?.steps.map(({ route }) => route)).toEqual(["/workspace/store/design", "/workspace/store/preview", "/store/[storeSlug]"])
+  })
+})

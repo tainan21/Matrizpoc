@@ -1,0 +1,12 @@
+"use client"
+import { useState, type FormEvent } from "react"
+
+type IngredientItem = { readonly id: string; readonly name: string; readonly balance: string; readonly threshold: string; readonly healthLabel: string }
+export function IngredientManager({ initialItems, canManage }: { readonly initialItems: readonly IngredientItem[]; readonly canManage: boolean }) {
+  const [name, setName] = useState(""); const [unit, setUnit] = useState<"UNIT" | "GRAM" | "MILLILITER">("UNIT"); const [threshold, setThreshold] = useState("0"); const [pending, setPending] = useState(false); const [message, setMessage] = useState("")
+  async function submit(event: FormEvent) { event.preventDefault(); setPending(true); setMessage(""); const response = await fetch("/api/ingredients", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name, unit, lowStockThreshold: Number(threshold) }) }); const payload = await response.json(); setPending(false); if (!response.ok) return setMessage(payload.message ?? "Não foi possível criar o ingrediente"); window.location.reload() }
+  return <main className="restaurant-page"><header><div><span className="eyebrow">BASE CULINÁRIA</span><h1>Ingredientes</h1><p>Itens reutilizáveis, unidades inteiras e saldo real da empresa ativa.</p></div></header>
+    {canManage && <form className="ingredient-create" onSubmit={submit}><label>Nome<input required value={name} onChange={(event) => setName(event.target.value)} /></label><label>Unidade<select value={unit} onChange={(event) => setUnit(event.target.value as typeof unit)}><option value="UNIT">Unidade</option><option value="GRAM">Grama</option><option value="MILLILITER">Mililitro</option></select></label><label>Alerta de estoque<input min="0" step="1" type="number" value={threshold} onChange={(event) => setThreshold(event.target.value)} /></label><button disabled={pending}>{pending ? "Criando…" : "Criar ingrediente"}</button><p role="status">{message}</p></form>}
+    {initialItems.length === 0 ? <section className="restaurant-empty"><h2>Nenhum ingrediente cadastrado</h2><p>Cadastre o primeiro item para compor receitas e controlar estoque.</p></section> : <section className="ingredient-list">{initialItems.map((item) => <article key={item.id}><div><h2>{item.name}</h2><p>{item.healthLabel}</p></div><dl><div><dt>Saldo</dt><dd>{item.balance}</dd></div><div><dt>Alerta</dt><dd>{item.threshold}</dd></div></dl></article>)}</section>}
+  </main>
+}

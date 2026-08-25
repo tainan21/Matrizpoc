@@ -39,6 +39,7 @@ model Tenant {
   updatedAt   DateTime @updatedAt
 
   memberships         Membership[]
+  membershipInvitations MembershipInvitation[]
   appRegistrations    AppRegistration[]
   externalLinks       ExternalLink[]
   onboardingProgress  OnboardingProgress[]
@@ -63,6 +64,8 @@ model User {
   updatedAt   DateTime @updatedAt
 
   memberships      Membership[]
+  invitationsSent  MembershipInvitation[] @relation("MembershipInvitationsSent")
+  invitationsAccepted MembershipInvitation[] @relation("MembershipInvitationsAccepted")
   authAccounts     AuthAccount[]
   appSessions      AppSession[]
 
@@ -98,6 +101,43 @@ enum MembershipRole {
   ADMIN
   MEMBER
   VIEWER
+}
+
+// ---------------------------------------------------------------------------
+// MembershipInvitation — app-scoped, expiring intent to create a membership.
+// Plain bearer tokens never enter persistence; only their unique hash does.
+// ---------------------------------------------------------------------------
+model MembershipInvitation {
+  id               String                     @id @default(cuid())
+  tenantId         String
+  appId            String
+  email            String
+  role             MembershipRole
+  tokenHash        String                     @unique
+  status           MembershipInvitationStatus @default(PENDING)
+  invitedByUserId  String
+  acceptedByUserId String?
+  expiresAt        DateTime
+  acceptedAt       DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+
+  tenant     Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invitedBy  User   @relation("MembershipInvitationsSent", fields: [invitedByUserId], references: [id], onDelete: Restrict)
+  acceptedBy User?  @relation("MembershipInvitationsAccepted", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([tenantId, appId, email])
+  @@index([tenantId, appId, status])
+  @@index([invitedByUserId])
+  @@index([acceptedByUserId])
+  @@map("membership_invitations")
+}
+
+enum MembershipInvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
 }
 
 // ---------------------------------------------------------------------------

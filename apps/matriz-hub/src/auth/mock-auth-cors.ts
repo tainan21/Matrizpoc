@@ -1,6 +1,6 @@
 const AUTHENTICATED_ORIGINS = new Set([
-  ...Array.from({ length: 7 }, (_, index) => `http://localhost:${3000 + index}`),
-  ...Array.from({ length: 7 }, (_, index) => `http://127.0.0.1:${3000 + index}`),
+  ...Array.from({ length: 9 }, (_, index) => `http://localhost:${3000 + index}`),
+  ...Array.from({ length: 9 }, (_, index) => `http://127.0.0.1:${3000 + index}`),
 ])
 
 export function isAllowedMockAuthOrigin(origin: string | null): boolean {

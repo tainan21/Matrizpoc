@@ -1,0 +1,8 @@
+import { notFound, redirect } from "next/navigation"
+import { resolveActiveCompanyContext } from "../../../../src/application/active-company"
+import { readCatalog } from "../../../../src/application/catalog-service"
+import { resolveCompanyPageFoundation } from "../../../../src/auth/server-page-context"
+import { CatalogEditor } from "../../../../src/ui/CatalogEditor"
+import { SystemState } from "../../../../src/ui/SystemState"
+import { toCatalogEditorProductViewModel } from "../../../../src/ui/presenters/catalog.presenter"
+export default async function ProductPage({ params }: { params: Promise<{ productId: string }> }) { const foundation = await resolveCompanyPageFoundation(); if (foundation.kind === "unavailable") return <SystemState kind="unavailable" />; if (!foundation.preferredCompanyId) redirect("/"); try { const context = await resolveActiveCompanyContext(foundation.actor, foundation.preferredCompanyId, foundation.services.core, foundation.services.companies); const [{ productId }, catalog] = await Promise.all([params, readCatalog(context, foundation.services.catalog)]); const product = await foundation.services.catalog.findProduct(context.company.tenantId, productId); if (!product) notFound(); if (!catalog.canManage) return <main className="catalog-page"><header><div><span className="eyebrow">SOMENTE LEITURA</span><h1>{product.name}</h1><p>Sua função pode consultar este cadastro, mas não alterá-lo.</p></div></header></main>; return <CatalogEditor categories={catalog.categories.map(({ id, name }) => ({ id, name }))} product={toCatalogEditorProductViewModel(product)} /> } catch { return <SystemState kind="forbidden" /> } }

@@ -157,3 +157,10 @@ próximos do app responsável.
 - **Motivo:** ENV, Explorer, Runtime, Store e Actions precisam compor fluxos úteis sem entregar segredos, filesystem, processos, permissões ou automação arbitrária ao renderer.
 - **Impacto:** a UI envia IDs e seleções tipadas. Valores de ENV são privados por padrão e segredos não atravessam Compare/Promote/Impact; o radar limita entradas, diretórios, bytes, duração e resultados; recovery confirma a árvore do processo gerenciado; consentimento coincide com o manifesto; Runbooks são serializados por app e não aceitam passos, comandos ou URLs do renderer.
 - **Revisar quando:** existir distribuição remota assinada, permissões revogáveis, múltiplos ambientes ativos ou protocolo local autenticado para apps externos.
+
+## 2026-08-20 — Sessão mock cobre todas as portas web registradas
+
+- **Decisão:** permitir no CORS mock do Hub as portas loopback 3000–3008 e manter o registro de sessões HTTP mock no estado global do processo.
+- **Motivo:** a validação real da Seumei em 3008 provou que a allowlist terminava em 3006 e que handlers compilados separadamente não compartilhavam o `Map` local de sessões.
+- **Impacto:** MatrizLib 3007 e Seumei 3008 conseguem autenticar; origens externas e 3009+ continuam negadas. Apenas o broker de desenvolvimento muda.
+- **Revisar quando:** o broker mock for removido em favor da sessão persistente/implantada.

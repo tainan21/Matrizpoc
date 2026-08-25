@@ -1,8 +1,16 @@
-import Link from "next/link"
-import { HomeSummary } from "../src/ui/HomeSummary"
+import { listAuthorizedCompanies } from "../src/application/company-access"
+import { resolveCompanyPageFoundation } from "../src/auth/server-page-context"
+import { CompanyEntry } from "../src/ui/CompanyEntry"
+import { toCompanyChoiceViewModel } from "../src/ui/presenters/company.presenter"
 
-export default function HomePage() {
-  return <main className="shell"><header><div className="mark">S</div><strong>SEUMEI</strong><nav><Link href="http://localhost:3000">HUB ↗</Link></nav></header>
-    <div className="hero"><span>EMPRESA / AGORA</span><h1>SEU NEGÓCIO,<br />EM MOVIMENTO.</h1></div><HomeSummary />
-  </main>
+export default async function HomePage() {
+  const foundation = await resolveCompanyPageFoundation()
+  if (foundation.kind === "unavailable") return <CompanyEntry initialCompanies={[]} availability="unavailable" />
+  try {
+    const user = await foundation.services.core.resolveUser(foundation.actor)
+    const companies = await listAuthorizedCompanies(user.id, foundation.services.core, foundation.services.companies)
+    return <CompanyEntry initialCompanies={companies.map(toCompanyChoiceViewModel)} />
+  } catch {
+    return <CompanyEntry initialCompanies={[]} availability="unavailable" />
+  }
 }
