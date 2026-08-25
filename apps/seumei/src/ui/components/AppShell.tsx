@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { useAuth } from "@matriz/platform-auth/client"
 import { useSeumeiTenant } from "../../domains/memberships/presentation/use-seumei-tenant"
 import { SeumeiShell } from "../shell/SeumeiShell"
+import { buildAppNavigation } from "../../domains/apps/application/app-navigation"
 
 export function AppShell({ children }: { readonly children: React.ReactNode }) {
   const pathname = usePathname() ?? "/hub"
@@ -12,11 +13,7 @@ export function AppShell({ children }: { readonly children: React.ReactNode }) {
   const apps = tenant.current?.company.apps ?? []
   const activeApp = apps.find((app) => pathname.includes(`/apps/${app.id}`)) ?? null
   const navigation = activeApp
-    ? [
-        { id: activeApp.id, label: activeApp.name, href: activeApp.href, icon: activeApp.icon },
-        { id: "overview", label: "Visão geral", href: activeApp.href },
-        { id: "activity", label: "Atividade", href: `${activeApp.href}#activity` },
-      ]
+    ? buildAppNavigation(activeApp.id, activeApp.href)
     : apps.map((app) => ({ id: app.id, label: app.name, href: app.href, icon: app.icon }))
 
   return (

@@ -2,6 +2,7 @@
 @import "@matriz/design-ui/styles.css";
 @import "../src/ui/styles/seumei-shell.css";
 @import "../src/ui/styles/seumei-hub.css";
+@import "../src/ui/styles/seumei-products.css";
 
 :root {
   color-scheme: dark;

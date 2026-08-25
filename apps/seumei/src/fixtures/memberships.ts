@@ -14,6 +14,7 @@ const GALAXIA_OWNER_PERMISSIONS: readonly SeumeiPermission[] = [
   "dashboard.view",
   "crm.view",
   "products.view",
+  "products.manage",
   "orders.view",
   "inventory.view",
   "finance.view",
@@ -26,6 +27,7 @@ const MATRIZ_ADMIN_PERMISSIONS: readonly SeumeiPermission[] = [
   "dashboard.view",
   "crm.view",
   "products.view",
+  "products.manage",
   "reports.view",
 ]
 

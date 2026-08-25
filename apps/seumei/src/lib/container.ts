@@ -14,6 +14,11 @@ import {
   createBusinessOsService,
   type BusinessOsService,
 } from "../domains/hub/application/hub.service"
+import {
+  createCatalogService,
+  type CatalogService,
+} from "../domains/catalog/application/catalog.service"
+import { createFixtureCatalogRepository } from "../mock/catalog.repository"
 
 export interface SeumeiContainer {
   useCases: SeumeiUseCases
@@ -33,7 +38,20 @@ export function getSeumeiContainer(): SeumeiContainer {
 }
 
 export function createDemoBusinessOs(userId: UserId): BusinessOsService {
-  return createBusinessOsService(
-    createBusinessOsRepositories({ demoUserId: userId }),
-  )
+  return createDemoSeumeiRuntime(userId).businessOs
+}
+
+export interface DemoSeumeiRuntime {
+  readonly businessOs: BusinessOsService
+  readonly catalog: CatalogService
+}
+
+export function createDemoSeumeiRuntime(userId: UserId): DemoSeumeiRuntime {
+  const repositories = createBusinessOsRepositories({ demoUserId: userId })
+  return {
+    businessOs: createBusinessOsService(repositories),
+    catalog: createCatalogService(
+      createFixtureCatalogRepository({ memberships: repositories.memberships }),
+    ),
+  }
 }

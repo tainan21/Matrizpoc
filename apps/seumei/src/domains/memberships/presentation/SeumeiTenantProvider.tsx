@@ -5,13 +5,14 @@ import { asUserId } from "@matriz/foundation-types"
 import { createDefaultStore, type KeyValueStore } from "@matriz/platform-storage"
 import { useAuth } from "@matriz/platform-auth/client"
 import type { CompanyId } from "../../companies/domain/company"
-import type {
-  BusinessOsService,
-  CompanyWorkspace,
-} from "../../hub/application/hub.service"
+import type { CompanyWorkspace } from "../../hub/application/hub.service"
+import type { CatalogService } from "../../catalog/application/catalog.service"
 import type { HubViewModel } from "../../hub/presentation/hub.presenter"
 import { isSeumeiDemoAccount } from "../../login/application/demo-account"
-import { createDemoBusinessOs } from "../../../lib/container"
+import {
+  createDemoSeumeiRuntime,
+  type DemoSeumeiRuntime,
+} from "../../../lib/container"
 
 const UNASSIGNED_DEMO_FIXTURE_USER = asUserId("seumei-demo-fixture-owner")
 
@@ -21,6 +22,7 @@ export interface SeumeiTenantState {
   readonly status: SeumeiTenantStatus
   readonly hub: HubViewModel | null
   readonly current: CompanyWorkspace | null
+  readonly catalog: CatalogService | null
   readonly error: string | null
   switchCompany(companyId: CompanyId): Promise<boolean>
 }
@@ -28,11 +30,11 @@ export interface SeumeiTenantState {
 const SeumeiTenantContext = React.createContext<SeumeiTenantState | null>(null)
 SeumeiTenantContext.displayName = "SeumeiTenantContext"
 
-function serviceForSession(
-  userId: Parameters<typeof createDemoBusinessOs>[0],
+function runtimeForSession(
+  userId: Parameters<typeof createDemoSeumeiRuntime>[0],
   email: string,
-): BusinessOsService {
-  return createDemoBusinessOs(
+): DemoSeumeiRuntime {
+  return createDemoSeumeiRuntime(
     isSeumeiDemoAccount(email) ? userId : UNASSIGNED_DEMO_FIXTURE_USER,
   )
 }
@@ -53,10 +55,10 @@ export function SeumeiTenantProvider({
     () => storage ?? createDefaultStore("seumei:tenant-selection:v1"),
     [storage],
   )
-  const service = React.useMemo(
+  const runtime = React.useMemo(
     () =>
       session
-        ? serviceForSession(session.identity.user.id, session.identity.user.email)
+        ? runtimeForSession(session.identity.user.id, session.identity.user.email)
         : null,
     [session],
   )
@@ -67,9 +69,9 @@ export function SeumeiTenantProvider({
 
   React.useEffect(() => {
     let active = true
-    if (!session || !service) return
+    if (!session || !runtime) return
     setStatus("loading")
-    void service.getHub(session.identity.user.id).then(async (nextHub) => {
+    void runtime.businessOs.getHub(session.identity.user.id).then(async (nextHub) => {
       if (!active) return
       setHub(nextHub)
       if (nextHub.companies.length === 0) {
@@ -81,7 +83,7 @@ export function SeumeiTenantProvider({
       const selected =
         nextHub.companies.find((company) => company.id === storedId) ??
         nextHub.companies[0]!
-      const opened = await service.openCompany(
+      const opened = await runtime.businessOs.openCompany(
         session.identity.user.id,
         selected.id as CompanyId,
       )
@@ -97,12 +99,15 @@ export function SeumeiTenantProvider({
     return () => {
       active = false
     }
-  }, [service, session, store])
+  }, [runtime, session, store])
 
   const switchCompany = React.useCallback(
     async (companyId: CompanyId) => {
-      if (!session || !service) return false
-      const opened = await service.openCompany(session.identity.user.id, companyId)
+      if (!session || !runtime) return false
+      const opened = await runtime.businessOs.openCompany(
+        session.identity.user.id,
+        companyId,
+      )
       if (!opened.ok) {
         setError("Empresa não disponível para esta conta.")
         return false
@@ -113,12 +118,19 @@ export function SeumeiTenantProvider({
       store.set(selectedCompanyKey(session.identity.user.id), companyId)
       return true
     },
-    [service, session, store],
+    [runtime, session, store],
   )
 
   const value = React.useMemo<SeumeiTenantState>(
-    () => ({ status, hub, current, error, switchCompany }),
-    [status, hub, current, error, switchCompany],
+    () => ({
+      status,
+      hub,
+      current,
+      catalog: runtime?.catalog ?? null,
+      error,
+      switchCompany,
+    }),
+    [status, hub, current, runtime, error, switchCompany],
   )
 
   return (
