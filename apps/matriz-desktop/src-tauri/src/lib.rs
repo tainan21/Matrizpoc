@@ -23,7 +23,8 @@ use std::fmt;
 use activity::{ActivityEnvelope, ActivityHub};
 use commerce::{CommerceSnapshot, CommerceStore};
 use environment::{
-    EnvironmentDocument, EnvironmentFile, EnvironmentSaveRequest, EnvironmentService,
+    EnvironmentComparison, EnvironmentDocument, EnvironmentFile, EnvironmentPromotionRequest,
+    EnvironmentSaveRequest, EnvironmentService,
 };
 use explorer::{DirectoryListing, ExplorerService, FilePreview};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
@@ -597,6 +598,42 @@ fn save_environment(
     Ok(document)
 }
 
+#[tauri::command(rename_all = "camelCase")]
+fn compare_environments(
+    operations: tauri::State<'_, OperationsState>,
+    app_id: String,
+    source_file: String,
+    target_file: String,
+) -> Result<EnvironmentComparison, String> {
+    EnvironmentService::new(resources::WorkspaceResourceService::new(
+        operations.root()?,
+    )?)
+    .compare(&app_id, &source_file, &target_file)
+}
+
+#[tauri::command]
+fn promote_environment(
+    operations: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
+    request: EnvironmentPromotionRequest,
+) -> Result<EnvironmentDocument, String> {
+    let app_id = request.app_id.clone();
+    let target_file = request.target_file.clone();
+    let count = request.keys.len();
+    let document = EnvironmentService::new(resources::WorkspaceResourceService::new(
+        operations.root()?,
+    )?)
+    .promote(request)?;
+    activity.publish(
+        "environment.promoted",
+        "success",
+        "Variáveis promovidas",
+        Some(&format!("{target_file} · {count} chaves")),
+        Some(&app_id),
+    );
+    Ok(document)
+}
+
 #[tauri::command]
 fn list_directory(
     state: tauri::State<'_, OperationsState>,
@@ -898,6 +935,8 @@ pub fn run() {
             read_environment,
             reveal_environment_value,
             save_environment,
+            compare_environments,
+            promote_environment,
             list_directory,
             preview_file,
             open_resource,

@@ -5,7 +5,7 @@ use std::{
 };
 
 use matriz_desktop_native::{
-    environment::{EnvironmentSaveRequest, EnvironmentService, EnvironmentVariableInput},
+    environment::{EnvironmentPromotionRequest, EnvironmentSaveRequest, EnvironmentService, EnvironmentVariableInput},
     resources::WorkspaceResourceService,
 };
 
@@ -17,8 +17,55 @@ fn fixture(contents: &str) -> (tempfile::TempDir, EnvironmentService) {
     fs::write(root.path().join("pnpm-workspace.yaml"), "packages: []").unwrap();
     fs::write(app.join(".env.local"), contents).unwrap();
     fs::write(app.join(".env.example"), "PUBLIC_URL=\nREQUIRED_KEY=\n").unwrap();
+    fs::write(app.join(".env.staging"), "PUBLIC_URL=https://staging.matriz.local\nJWT_SECRET=staging-secret\n").unwrap();
     let resources = WorkspaceResourceService::new(root.path().to_path_buf()).unwrap();
     (root, EnvironmentService::new(resources))
+}
+
+#[test]
+fn compares_and_promotes_secrets_without_exposing_their_values() {
+    let (_root, service) = fixture("PUBLIC_URL=http://localhost:3002\nJWT_SECRET=source-secret\n");
+    let comparison = service
+        .compare("matriz-admin", ".env.local", ".env.staging")
+        .expect("compare environments");
+    let secret = comparison
+        .entries
+        .iter()
+        .find(|entry| entry.key == "JWT_SECRET")
+        .expect("secret entry");
+    assert_eq!(secret.status, "different");
+    assert!(secret.sensitive);
+    assert_eq!(secret.source_value, None);
+    assert_eq!(secret.target_value, None);
+
+    let promoted = service
+        .promote(EnvironmentPromotionRequest {
+            app_id: "matriz-admin".into(),
+            source_file: ".env.local".into(),
+            target_file: ".env.staging".into(),
+            target_revision: comparison.target_revision,
+            keys: vec!["JWT_SECRET".into()],
+        })
+        .expect("promote secret");
+    assert_eq!(promoted.file_name, ".env.staging");
+    assert_eq!(
+        service
+            .reveal("matriz-admin", ".env.staging", "JWT_SECRET")
+            .expect("reveal promoted secret"),
+        "source-secret"
+    );
+}
+
+#[test]
+fn promotion_rejects_stale_same_file_and_unknown_keys() {
+    let (_root, service) = fixture("PUBLIC_URL=http://localhost:3002\n");
+    for request in [
+        EnvironmentPromotionRequest { app_id: "matriz-admin".into(), source_file: ".env.local".into(), target_file: ".env.staging".into(), target_revision: "stale".into(), keys: vec!["PUBLIC_URL".into()] },
+        EnvironmentPromotionRequest { app_id: "matriz-admin".into(), source_file: ".env.local".into(), target_file: ".env.local".into(), target_revision: service.read("matriz-admin", ".env.local").unwrap().revision, keys: vec!["PUBLIC_URL".into()] },
+        EnvironmentPromotionRequest { app_id: "matriz-admin".into(), source_file: ".env.local".into(), target_file: ".env.staging".into(), target_revision: service.read("matriz-admin", ".env.staging").unwrap().revision, keys: vec!["UNKNOWN_KEY".into()] },
+    ] {
+        assert!(service.promote(request).is_err());
+    }
 }
 
 #[test]

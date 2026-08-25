@@ -46,6 +46,18 @@ function gateway() {
         source: request.fileName,
       })),
     })),
+    compareEnvironments: vi.fn().mockResolvedValue({
+      appId: "matriz-admin",
+      sourceFile: ".env.local",
+      targetFile: ".env.example",
+      targetRevision: "target-rev",
+      entries: [
+        { key: "DATABASE_URL", sensitive: true, status: "different" },
+        { key: "PORT", sensitive: false, status: "equal", sourceValue: "3002", targetValue: "3002" },
+      ],
+    }),
+    promoteEnvironment: vi.fn().mockResolvedValue({ appId: "matriz-admin", fileName: ".env.example", revision: "promoted", missingRequired: [], variables: [] }),
+    findEnvironmentReferences: vi.fn().mockResolvedValue({ appId: "matriz-admin", key: "PORT", scannedFiles: 0, truncated: false, matches: [] }),
   } as unknown as DesktopGateway
 }
 
@@ -118,5 +130,25 @@ describe("EnvironmentManager", () => {
     await waitFor(() => expect(desktop.saveEnvironment).toHaveBeenCalledWith(expect.objectContaining({
       variables: expect.arrayContaining([expect.objectContaining({ key: "DATABASE_URL", value: "postgres://changed" })]),
     })))
+  })
+
+  it("compares environments without exposing secrets and promotes selected keys", async () => {
+    const desktop = gateway()
+    render(<EnvironmentManager gateway={desktop} runtimes={[runtime]} restart={vi.fn()} signal={vi.fn()} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Comparar ambientes" }))
+    expect(await screen.findByRole("heading", { name: "Comparação de ambientes" })).toBeVisible()
+    expect(screen.getByText("VALOR PROTEGIDO")).toBeVisible()
+    expect(screen.queryByText("postgres://private")).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole("checkbox", { name: "Selecionar DATABASE_URL" }))
+    fireEvent.click(screen.getByRole("button", { name: "Promover 1 variável" }))
+
+    await waitFor(() => expect(desktop.promoteEnvironment).toHaveBeenCalledWith({
+      appId: "matriz-admin",
+      sourceFile: ".env.local",
+      targetFile: ".env.example",
+      targetRevision: "target-rev",
+      keys: ["DATABASE_URL"],
+    }))
   })
 })

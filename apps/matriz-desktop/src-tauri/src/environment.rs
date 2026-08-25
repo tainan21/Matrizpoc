@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{BTreeSet, HashMap, HashSet},
     fs,
     path::Path,
     sync::Mutex,
@@ -63,6 +63,36 @@ pub struct EnvironmentSaveRequest {
     pub file_name: String,
     pub revision: String,
     pub variables: Vec<EnvironmentVariableInput>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EnvironmentComparisonEntry {
+    pub key: String,
+    pub sensitive: bool,
+    pub status: &'static str,
+    pub source_value: Option<String>,
+    pub target_value: Option<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EnvironmentComparison {
+    pub app_id: String,
+    pub source_file: String,
+    pub target_file: String,
+    pub target_revision: String,
+    pub entries: Vec<EnvironmentComparisonEntry>,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EnvironmentPromotionRequest {
+    pub app_id: String,
+    pub source_file: String,
+    pub target_file: String,
+    pub target_revision: String,
+    pub keys: Vec<String>,
 }
 
 #[derive(Clone, Debug)]
@@ -160,6 +190,123 @@ impl EnvironmentService {
             .ok_or_else(|| "Environment variable was not found".into())
     }
 
+    pub fn compare(
+        &self,
+        app_id: &str,
+        source_file: &str,
+        target_file: &str,
+    ) -> Result<EnvironmentComparison, String> {
+        validate_env_file(source_file)?;
+        validate_env_file(target_file)?;
+        if source_file == target_file {
+            return Err("Choose two different environment files".into());
+        }
+        let source_contents = read_bounded(&self.resources.existing_path(app_id, source_file)?)?;
+        let target_contents = read_bounded(&self.resources.existing_path(app_id, target_file)?)?;
+        let source = variable_map(&parse(&source_contents)?);
+        let target = variable_map(&parse(&target_contents)?);
+        let keys = source
+            .keys()
+            .chain(target.keys())
+            .cloned()
+            .collect::<BTreeSet<_>>();
+        let entries = keys
+            .into_iter()
+            .map(|key| {
+                let source_value = source.get(&key);
+                let target_value = target.get(&key);
+                let sensitive = is_sensitive(&key);
+                EnvironmentComparisonEntry {
+                    key,
+                    sensitive,
+                    status: match (source_value, target_value) {
+                        (None, Some(_)) => "missingSource",
+                        (Some(_), None) => "missingTarget",
+                        (Some(left), Some(right)) if left == right => "equal",
+                        _ => "different",
+                    },
+                    source_value: (!sensitive).then(|| source_value.cloned()).flatten(),
+                    target_value: (!sensitive).then(|| target_value.cloned()).flatten(),
+                }
+            })
+            .collect();
+        Ok(EnvironmentComparison {
+            app_id: app_id.into(),
+            source_file: source_file.into(),
+            target_file: target_file.into(),
+            target_revision: revision(&target_contents),
+            entries,
+        })
+    }
+
+    pub fn promote(
+        &self,
+        request: EnvironmentPromotionRequest,
+    ) -> Result<EnvironmentDocument, String> {
+        let _save_guard = ENVIRONMENT_SAVE_LOCK
+            .lock()
+            .map_err(|_| "Environment save lock poisoned")?;
+        validate_env_file(&request.source_file)?;
+        validate_env_file(&request.target_file)?;
+        if request.source_file == request.target_file {
+            return Err("Source and target environments must be different".into());
+        }
+        if request.keys.is_empty() || request.keys.len() > MAX_VARIABLES {
+            return Err("Select between 1 and 256 environment keys".into());
+        }
+        let source_path = self
+            .resources
+            .existing_path(&request.app_id, &request.source_file)?;
+        let target_path = self
+            .resources
+            .existing_path(&request.app_id, &request.target_file)?;
+        let source_contents = read_bounded(&source_path)?;
+        let target_contents = read_bounded(&target_path)?;
+        if revision(&target_contents) != request.target_revision {
+            return Err("Target environment changed on disk; compare again".into());
+        }
+        let source = variable_map(&parse(&source_contents)?);
+        let target_lines = parse(&target_contents)?;
+        let mut values = variable_map(&target_lines);
+        let mut selected = HashSet::new();
+        for key in request.keys {
+            validate_key(&key)?;
+            if !selected.insert(key.clone()) {
+                return Err("Environment promotion keys must be unique".into());
+            }
+            let value = source
+                .get(&key)
+                .cloned()
+                .ok_or_else(|| format!("{key} does not exist in the source environment"))?;
+            values.insert(key, value);
+        }
+        let mut written = HashSet::new();
+        let mut output = Vec::new();
+        for line in target_lines {
+            match line {
+                EnvLine::Raw(raw) => output.push(raw),
+                EnvLine::Variable { key, .. } => {
+                    output.push(format!("{key}={}", values.get(&key).cloned().unwrap_or_default()));
+                    written.insert(key);
+                }
+            }
+        }
+        for key in selected {
+            if !written.contains(&key) {
+                output.push(format!("{key}={}", values.get(&key).cloned().unwrap_or_default()));
+            }
+        }
+        let mut contents = output.join("\n");
+        if target_contents.ends_with('\n') || !contents.is_empty() {
+            contents.push('\n');
+        }
+        if contents.len() > MAX_ENV_BYTES {
+            return Err("Environment exceeds 256 KiB".into());
+        }
+        atomic_write(&target_path, contents.as_bytes())?;
+        self.read(&request.app_id, &request.target_file)
+    }
+
     pub fn save(&self, request: EnvironmentSaveRequest) -> Result<EnvironmentDocument, String> {
         let _save_guard = ENVIRONMENT_SAVE_LOCK
             .lock()
@@ -247,6 +394,16 @@ impl EnvironmentService {
             })
             .collect())
     }
+}
+
+fn variable_map(lines: &[EnvLine]) -> HashMap<String, String> {
+    lines
+        .iter()
+        .filter_map(|line| match line {
+            EnvLine::Variable { key, value } => Some((key.clone(), value.clone())),
+            EnvLine::Raw(_) => None,
+        })
+        .collect()
 }
 
 fn validate_env_file(file_name: &str) -> Result<(), String> {
