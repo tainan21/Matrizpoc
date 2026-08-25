@@ -18,6 +18,7 @@ node_modules
 apps/*/next-env.d.ts
 .turbo/
 .runtime/
+migration-staging/
 *.tsbuildinfo
 .codex-*.log
 .DS_Store

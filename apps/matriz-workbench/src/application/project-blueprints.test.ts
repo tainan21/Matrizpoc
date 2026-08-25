@@ -55,6 +55,11 @@ describe("project blueprints", () => {
       "AGENTS.md",
       "README.md",
       "package.json",
+      "next-env.d.ts",
+      "tsconfig.json",
+      "app/layout.tsx",
+      "app/page.tsx",
+      "app/api/health/route.ts",
       "docs/AGENT-START-HERE.md",
       "public-contract.ts",
       "src/bootstrap/index.ts",
@@ -99,5 +104,22 @@ describe("project blueprints", () => {
     expect(result.request.status).toBe("queued")
     expect(result.request.instructions).toContain("não execute sem aprovação")
     expect(result.request.instructions).toContain(result.blueprint.id)
+  })
+
+  it("keeps library previews free of Next app files and gives sites a health route", async () => {
+    const { blueprints } = await fixture()
+    const library = await blueprints.create({
+      mode: "create", name: "Library", projectKind: "library", target: "apps/library",
+      platforms: [], ownedDomains: [], consumedCapabilities: [], sharedCandidates: [],
+      templateId: "library-typescript", validationCommands: ["pnpm typecheck"],
+    })
+    const sites = await blueprints.create({
+      mode: "create", name: "Sites", projectKind: "site_collection", target: "apps/site-sample",
+      platforms: ["web"], ownedDomains: [], consumedCapabilities: [], sharedCandidates: [],
+      templateId: "site-collection-next", validationCommands: ["pnpm typecheck"],
+    })
+
+    expect(library.preview.files).not.toContain("app/api/health/route.ts")
+    expect(sites.preview.files).toContain("app/api/health/route.ts")
   })
 })

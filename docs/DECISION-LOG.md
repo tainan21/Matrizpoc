@@ -86,6 +86,16 @@
   sessão em memória.
 - **Revisar quando:** autenticação real, multiusuário, persistência remota ou
   implantação em domínios diferentes entrarem no escopo.
+## 2026-08-04 — Project Factory declarativa
+
+- **Decisão:** declarar runtime local em `localAppRuntimes` e operar apps por
+  uma CLI única, mantendo manifest e package como fontes das próprias áreas.
+- **Motivo:** evitar scripts, portas, switcher e validações divergentes à medida
+  que novos apps entram no ecossistema.
+- **Impacto:** portas são estritas, health é uniforme, scaffolds exigem preview
+  e imports entram em staging ignorado e fora do workspace.
+- **Revisar quando:** auth, CORS e Workbench consumirem um protocolo aprovado
+  de URLs temporárias; somente então reconsiderar override/fallback de porta.
 
 Decisões curtas que alteram os limites do monorepo. ADRs detalhados permanecem
 próximos do app responsável.

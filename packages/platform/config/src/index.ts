@@ -26,6 +26,34 @@ export interface MonorepoConfig {
   readonly baseUrls: Readonly<Record<MatrizAppId, string>>
 }
 
+export interface LocalAppRuntimeConfig {
+  readonly slug: string
+  readonly appId: MatrizAppId
+  readonly directory: `apps/${string}`
+  readonly preferredPort: number
+  readonly host: "127.0.0.1"
+  readonly healthPath: `/${string}`
+  readonly lifecycle: "active" | "migrating" | "experimental" | "retired"
+  readonly runtimeAdapter: "next"
+}
+
+export const localAppRuntimes: readonly LocalAppRuntimeConfig[] = [
+  { slug: "hub", appId: "matriz-hub", directory: "apps/matriz-hub", preferredPort: 3000, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "spot", appId: "spot", directory: "apps/spot", preferredPort: 3001, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "admin", appId: "matriz-admin", directory: "apps/matriz-admin", preferredPort: 3002, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "contracts", appId: "contracts", directory: "apps/contracts", preferredPort: 3003, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "willdash", appId: "willdash", directory: "apps/willdash", preferredPort: 3004, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "workbench", appId: "matriz-workbench", directory: "apps/matriz-workbench", preferredPort: 3005, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "sites", appId: "sites", directory: "apps/sites", preferredPort: 3006, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "matrizlib", appId: "matrizlib", directory: "apps/matrizlib", preferredPort: 3007, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "seumei", appId: "seumei", directory: "apps/seumeiapp", preferredPort: 3008, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "control", appId: "matriz-control", directory: "apps/matriz-control", preferredPort: 3009, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "experimental", runtimeAdapter: "next" },
+] as const
+
+const preferredBaseUrls = Object.fromEntries(
+  localAppRuntimes.map((app) => [app.appId, `http://${app.host}:${app.preferredPort}`]),
+) as Record<MatrizAppId, string>
+
 export const monorepoConfig: MonorepoConfig = {
   version: "0.1.0",
   ecosystem: "matriz",
@@ -35,18 +63,9 @@ export const monorepoConfig: MonorepoConfig = {
       : "development"),
   baseUrls: {
     "matriz-identity": "http://127.0.0.1:8080",
-    "matriz-hub": "http://localhost:3000",
     "matriz-desktop": "matriz://control",
-    matrizlib: "http://localhost:3007",
-    "matriz-workbench": "http://localhost:3005",
-    "matriz-control": "http://localhost:3008",
-    sites: "http://localhost:3006",
-    spot: "http://localhost:3001",
-    "matriz-admin": "http://localhost:3002",
-    seumei: "http://localhost:3008",
-    contracts: "http://localhost:3003",
-    willdash: "http://localhost:3004",
-  },
+    ...preferredBaseUrls,
+  } as Readonly<Record<MatrizAppId, string>>,
 }
 
 // ---------------------------------------------------------------------------
