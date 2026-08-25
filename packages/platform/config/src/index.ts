@@ -52,7 +52,7 @@ export const localAppRuntimes: readonly LocalAppRuntimeConfig[] = [
 
 const preferredBaseUrls = Object.fromEntries(
   localAppRuntimes.map((app) => [app.appId, `http://${app.host}:${app.preferredPort}`]),
-) as Record<MatrizAppId, string>
+) as Partial<Record<MatrizAppId, string>>
 
 export const monorepoConfig: MonorepoConfig = {
   version: "0.1.0",

@@ -14,7 +14,7 @@ describe("repository ownership boundaries", () => {
 
   it.each([
     ["matriz-hub", "src/integration/prisma/repositories/index.ts"],
-    ["seumei", "src/integration/prisma/repositories/index.ts"],
+    ["seumeiapp", "src/infrastructure/core-access.repository.ts"],
     ["contracts", "src/integration/prisma/repositories/index.ts"],
   ])("keeps %s repositories app-local", (app, repositoryEntry) => {
     expect(existsSync(path.join(root, "apps", app, repositoryEntry))).toBe(true)
@@ -29,12 +29,10 @@ describe("repository ownership boundaries", () => {
     }
   })
 
-  it("composes the Seumei entrypoint with the tenant on its aggregate root", async () => {
-    const { makeEstablishmentRepo } = await import("../../apps/seumei/src/integration/prisma/repositories/index")
-    const create = vi.fn().mockResolvedValue({ id: "est-1" })
-    const repo = makeEstablishmentRepo({ establishment: { create } } as never)
-    await repo.create({ tenantId: "tenant-a", name: "Casa A", slug: "casa-a", type: "RESTAURANT" as never, city: "Sao Paulo", profile: { displayName: "Casa A" } })
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ tenantId: "tenant-a", profile: { create: expect.not.objectContaining({ tenantId: expect.anything() }) } }) }))
+  it("keeps Seumei tenant access on its app-local Core repository", () => {
+    const source = readFileSync(path.join(root, "apps/seumeiapp/src/infrastructure/core-access.repository.ts"), "utf8")
+    expect(source).toContain("tenantId_userId_appId")
+    expect(source).toContain('appId: "seumei"')
   })
 
   it("composes the Contracts entrypoint with the tenant on its aggregate root", async () => {

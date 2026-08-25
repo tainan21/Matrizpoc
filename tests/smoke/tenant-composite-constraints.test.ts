@@ -8,7 +8,7 @@ const expectedRelationCounts: Record<(typeof schemaNames)[number], number> = {
   core: 1,
   hub: 29,
   spot: 3,
-  seumei: 2,
+  seumei: 19,
   contracts: 4,
   willdash: 2,
 }
@@ -51,10 +51,6 @@ describe("tenant composite constraints", () => {
   it.each(schemaNames)("covers every composite relation in %s", (name) => {
     const models = parseModels(loadSchema(name))
     const relations = compositeRelations(models)
-    const migration = readFileSync(
-      join(root, "prisma", name, "migrations", "202608120004_tenant_composite_constraints", "migration.sql"),
-      "utf8",
-    )
     const history = migrationHistory(name)
 
     expect(relations).toHaveLength(expectedRelationCounts[name])
@@ -83,7 +79,7 @@ describe("tenant composite constraints", () => {
         `ADD CONSTRAINT "${escapeRegex(constraint)}" FOREIGN KEY \\("tenantId", "${escapeRegex(relation.field)}"\\) REFERENCES "${escapeRegex(parent!.table)}"\\("tenantId", "id"\\)`,
       )
       expect(
-        migration,
+        history,
         `${name}.${relation.child.name}.${relation.field}: migration composite FK ${constraint}`,
       ).toMatch(migrationForeignKey)
     }

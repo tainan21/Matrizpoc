@@ -3,11 +3,11 @@ import { getMockAuthCorsHeaders, isAllowedMockAuthOrigin } from "../../apps/matr
 
 describe("mock auth CORS", () => {
   it("allows credentialed requests only from the registered loopback web apps", () => {
-    for (let port = 3000; port <= 3008; port += 1) {
+    for (let port = 3000; port <= 3009; port += 1) {
       expect(isAllowedMockAuthOrigin(`http://localhost:${port}`)).toBe(true)
       expect(isAllowedMockAuthOrigin(`http://127.0.0.1:${port}`)).toBe(true)
     }
-    expect(isAllowedMockAuthOrigin("http://localhost:3009")).toBe(false)
+    expect(isAllowedMockAuthOrigin("http://localhost:3010")).toBe(false)
     expect(isAllowedMockAuthOrigin("https://example.com")).toBe(false)
   })
 

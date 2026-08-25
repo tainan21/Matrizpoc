@@ -104,21 +104,21 @@ describe("registry", () => {
   })
 
   it("registra matrizlib com a baseUrl oficial", () => {
-    expect(registry.get("matrizlib")?.baseUrl).toBe("http://localhost:3007")
+    expect(registry.get("matrizlib")?.baseUrl).toBe("http://127.0.0.1:3007")
   })
 
   it("registra o desktop com protocolo local oficial", () => {
     expect(registry.get("matriz-desktop")?.baseUrl).toBe("matriz://control")
   })
 
-  it("registra Matriz Control na porta 3008", () => {
-    expect(registry.get("matriz-control")?.baseUrl).toBe("http://localhost:3008")
+  it("registra Matriz Control na porta 3009", () => {
+    expect(registry.get("matriz-control")?.baseUrl).toBe("http://127.0.0.1:3009")
   })
 
   it("bootstrap real do Hub registra matrizlib com a baseUrl oficial", () => {
     const result = bootstrapMatrizHub()
     expect(result.registeredApps).toContain("matrizlib")
     expect(result.registeredApps).toHaveLength(11)
-    expect(monorepoConfig.baseUrls.matrizlib).toBe("http://localhost:3007")
+    expect(monorepoConfig.baseUrls.matrizlib).toBe("http://127.0.0.1:3007")
   })
 })

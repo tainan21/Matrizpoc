@@ -3,7 +3,7 @@ import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
 describe("Seumei restaurant persistence contract", () => {
-  const schema = readFileSync(resolve(process.cwd(), "../../prisma/schemas/seumei.prisma"), "utf8")
+  const schema = readFileSync(resolve(process.cwd(), "../../prisma/seumei/schema.prisma"), "utf8")
 
   it("models tenant-owned images, ingredients, recipes and inventory", () => {
     for (const model of ["ProductImage", "Ingredient", "Recipe", "RecipeIngredient", "IngredientInventory", "IngredientStockMovement"]) {

@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 
@@ -8,24 +8,37 @@ const expectedTenantTables: Record<(typeof schemas)[number], readonly string[]> 
   core: [
     "tenant_memberships", "app_grants", "identity_audit_events", "app_registrations",
     "external_links", "onboarding_progress", "app_sessions", "telemetry_records",
+    "memberships", "membership_invitations",
   ],
   hub: [
     "doc_documents", "doc_document_versions", "doc_blocks", "doc_chunks", "doc_source_artifacts",
     "doc_conversion_runs", "knowledge_nodes", "knowledge_edges", "doc_entity_mentions", "doc_suggestions",
     "doc_context_packages", "doc_context_package_items", "doc_timeline_events", "doc_mcp_resource_snapshots",
     "doc_export_artifacts", "doc_task_candidates", "doc_governance_candidates", "doc_actor_runs", "doc_access_policies",
+    "capability_accessibility_preferences", "capability_dashboard_layouts", "capability_events",
+    "capability_marketplace_demo_orders", "capability_practicy_installations", "capability_practicy_usage",
+    "capability_recent_items", "capability_tenant_theme_recommendations", "capability_theme_entitlements",
+    "capability_theme_preferences",
   ],
   spot: ["bands", "artist_profiles", "gigs", "gig_bookings", "spot_preferences"],
-  seumei: ["establishments", "establishment_profiles", "order_drafts", "seumei_preferences"],
+  seumei: [
+    "establishments", "establishment_profiles", "order_drafts", "seumei_preferences",
+    "commerce_orders", "companies", "company_onboarding", "customers", "financial_entries",
+    "financial_entry_events", "ingredient_inventory", "ingredient_stock_movements", "ingredients",
+    "order_items", "order_stock_consumptions", "order_timeline_events", "product_categories",
+    "product_images", "product_variants", "products", "recipe_ingredients", "recipes",
+    "store_publication_versions", "store_publications",
+  ],
   contracts: ["contracts", "contract_parties", "contract_versions", "contract_events", "contract_templates"],
   willdash: ["goals", "reward_rules", "activity_records", "willdash_preferences"],
 }
 
 function migration(name: string) {
-  return readFileSync(
-    join(process.cwd(), "prisma", name, "migrations", "202608120005_runtime_roles_rls", "migration.sql"),
-    "utf8",
-  )
+  const root = join(process.cwd(), "prisma", name, "migrations")
+  return readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => readFileSync(join(root, entry.name, "migration.sql"), "utf8"))
+    .join("\n")
 }
 
 const topologySource = readFileSync(join(process.cwd(), "infrastructure", "neon", "topology.ts"), "utf8")

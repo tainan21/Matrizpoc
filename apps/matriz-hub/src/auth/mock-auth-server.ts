@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server"
 import { createMockAuthState, type AuthResult, type AuthSession } from "@matriz/platform-auth"
 import { getMockAuthCorsHeaders, isAllowedMockAuthOrigin } from "./mock-auth-cors"
-import { HUB_SESSION_COOKIE, hubSessionStore, sessionCookieOptions } from "./hub-session"
+import { HUB_SESSION_COOKIE, hubSessionStore, sessionCookieOptions, sessionTokenFromRequest } from "./hub-session"
 
 const globalState = globalThis as typeof globalThis & { __matrizMockAuth?: ReturnType<typeof createMockAuthState> }
 export const mockAuthState = globalState.__matrizMockAuth ??= createMockAuthState()
 export const MOCK_SESSION_COOKIE = HUB_SESSION_COOKIE
+
+export function getRequestMockSession(request: Request): AuthSession | null {
+  return hubSessionStore.resolve(sessionTokenFromRequest(request))?.session ?? null
+}
 
 export function preflight(request: Request) {
   const origin = request.headers.get("origin")

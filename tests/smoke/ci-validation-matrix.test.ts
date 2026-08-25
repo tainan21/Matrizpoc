@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest"
 const ROOT = resolve(__dirname, "..", "..")
 
 function read(path: string): string {
-  return readFileSync(resolve(ROOT, path), "utf8")
+  return readFileSync(resolve(ROOT, path), "utf8").replace(/\r\n/g, "\n")
 }
 
 function rootScripts(): Record<string, string> {
@@ -41,7 +41,7 @@ describe("Linux CI validation matrix", () => {
     }).trim()
     expect(tracked).toBe("")
 
-    for (const app of ["contracts", "matriz-hub", "matriz-workbench", "seumei", "sites", "spot", "willdash"]) {
+    for (const app of ["contracts", "matriz-admin", "matriz-control", "matriz-hub", "matriz-workbench", "matrizlib", "seumeiapp", "sites", "spot", "willdash"]) {
       expect(read(`apps/${app}/tsconfig.json`)).toContain('"next-env.d.ts"')
     }
   })

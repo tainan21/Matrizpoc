@@ -58,8 +58,11 @@ describe("production dependency audit gate", () => {
     const apps = [
       "matriz-hub",
       "matriz-workbench",
+      "matriz-admin",
+      "matriz-control",
+      "matrizlib",
       "spot",
-      "seumei",
+      "seumeiapp",
       "contracts",
       "willdash",
       "sites",

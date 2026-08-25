@@ -34,8 +34,8 @@ model Establishment {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 
-  profile      EstablishmentProfile?
-  orderDrafts  OrderDraft[]
+  profile     EstablishmentProfile?
+  orderDrafts OrderDraft[]
 
   @@unique([tenantId, slug])
   @@unique([tenantId, id])
@@ -76,8 +76,8 @@ model EstablishmentProfile {
 
   establishment Establishment @relation(fields: [tenantId, establishmentId], references: [tenantId, id], onDelete: Cascade)
 
-  @@index([tenantId])
   @@unique([tenantId, establishmentId])
+  @@index([tenantId])
   @@map("establishment_profiles")
 }
 
@@ -86,16 +86,16 @@ model EstablishmentProfile {
 // establishment. Reserved for future real persistence.
 // ---------------------------------------------------------------------------
 model OrderDraft {
-  id               String           @id @default(cuid())
-  tenantId         String
-  establishmentId  String
-  reference        String
-  status           OrderDraftStatus @default(DRAFT)
-  totalCents       Int              @default(0)
-  currency         String           @default("BRL")
-  items            Json?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id              String           @id @default(cuid())
+  tenantId        String
+  establishmentId String
+  reference       String
+  status          OrderDraftStatus @default(DRAFT)
+  totalCents      Int              @default(0)
+  currency        String           @default("BRL")
+  items           Json?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 
   establishment Establishment @relation(fields: [tenantId, establishmentId], references: [tenantId, id], onDelete: Cascade)
 
@@ -131,18 +131,18 @@ model SeumeiPreference {
 // Company — customer business and the Seumei-side projection of one tenant.
 // ---------------------------------------------------------------------------
 model Company {
-  id                String               @id @default(cuid())
-  tenantId          String               @unique
-  name              String
-  slug              String               @unique
-  createdByUserId   String
-  idempotencyKey    String
-  status            CompanyStatus        @default(PROVISIONING)
-  operationType     CompanyOperationType?
-  city              String?
-  country           String               @default("BR")
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @updatedAt
+  id              String                @id @default(cuid())
+  tenantId        String                @unique
+  name            String
+  slug            String                @unique
+  createdByUserId String
+  idempotencyKey  String
+  status          CompanyStatus         @default(PROVISIONING)
+  operationType   CompanyOperationType?
+  city            String?
+  country         String                @default("BR")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
 
   onboarding       CompanyOnboarding?
   storePublication StorePublication?
@@ -171,21 +171,21 @@ enum CompanyOperationType {
 // CompanyOnboarding — resumable tenant-scoped setup for one company.
 // ---------------------------------------------------------------------------
 model CompanyOnboarding {
-  id                 String                   @id @default(cuid())
-  companyId          String                   @unique
-  tenantId           String                   @unique
-  currentStep        CompanyOnboardingStep    @default(IDENTITY)
-  version            Int                      @default(1)
+  id                 String                @id @default(cuid())
+  companyId          String                @unique
+  tenantId           String                @unique
+  currentStep        CompanyOnboardingStep @default(IDENTITY)
+  version            Int                   @default(1)
   draftName          String
   draftSlug          String
   draftOperationType CompanyOperationType?
   draftCity          String?
-  draftCountry       String                   @default("BR")
-  draftCurrency      String                   @default("BRL")
+  draftCountry       String                @default("BR")
+  draftCurrency      String                @default("BRL")
   completedSteps     String[]
-  startedAt          DateTime                 @default(now())
+  startedAt          DateTime              @default(now())
   completedAt        DateTime?
-  updatedAt          DateTime                 @updatedAt
+  updatedAt          DateTime              @updatedAt
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
@@ -257,8 +257,8 @@ model ProductVariant {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  recipe  Recipe?
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  recipe     Recipe?
   orderItems OrderItem[]
 
   @@unique([tenantId, sku])
@@ -310,9 +310,9 @@ model Ingredient {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
-  recipeLines RecipeIngredient[]
-  inventory   IngredientInventory?
-  movements   IngredientStockMovement[]
+  recipeLines       RecipeIngredient[]
+  inventory         IngredientInventory?
+  movements         IngredientStockMovement[]
   orderConsumptions OrderStockConsumption[]
 
   @@unique([tenantId, id])
@@ -337,7 +337,7 @@ model Recipe {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  variant ProductVariant    @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
+  variant ProductVariant     @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
   lines   RecipeIngredient[]
 
   @@unique([tenantId, id])
@@ -396,7 +396,7 @@ model IngredientStockMovement {
   commandHash    String
   createdAt      DateTime                    @default(now())
 
-  ingredient Ingredient @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  ingredient       Ingredient             @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
   orderConsumption OrderStockConsumption?
 
   @@unique([tenantId, id])
@@ -423,33 +423,33 @@ enum StoreIdentityPreset {
 }
 
 model StorePublication {
-  id                   String              @id @default(cuid())
-  tenantId             String              @unique
-  companyId            String              @unique
-  storeSlug            String              @unique
-  displayName          String
-  description          String?
-  isPublished          Boolean             @default(false)
-  version              Int                 @default(1)
-  publishedAt          DateTime?
-  draftPreset          StoreIdentityPreset @default(MARKET_FRESH)
-  draftHeadline        String              @default("")
-  draftAnnouncement    String              @default("")
-  draftDescription     String              @default("")
-  draftHeroImageUrl    String?
-  draftVersion         Int                 @default(1)
-  publishedVersionId   String?
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
+  id                 String              @id @default(cuid())
+  tenantId           String              @unique
+  companyId          String              @unique
+  storeSlug          String              @unique
+  displayName        String
+  description        String?
+  isPublished        Boolean             @default(false)
+  version            Int                 @default(1)
+  publishedAt        DateTime?
+  draftPreset        StoreIdentityPreset @default(MARKET_FRESH)
+  draftHeadline      String              @default("")
+  draftAnnouncement  String              @default("")
+  draftDescription   String              @default("")
+  draftHeroImageUrl  String?
+  draftVersion       Int                 @default(1)
+  publishedVersionId String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
 
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  versions StorePublicationVersion[] @relation("StorePublicationVersions")
-  publishedVersion StorePublicationVersion? @relation("CurrentStorePublicationVersion", fields: [tenantId, publishedVersionId], references: [tenantId, id], onDelete: Restrict)
+  company          Company                   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  versions         StorePublicationVersion[] @relation("StorePublicationVersions")
+  publishedVersion StorePublicationVersion?  @relation("CurrentStorePublicationVersion", fields: [tenantId, publishedVersionId], references: [tenantId, id], onDelete: Restrict)
 
-  @@index([storeSlug, isPublished])
   @@unique([tenantId, id])
   @@unique([tenantId, companyId])
   @@unique([tenantId, publishedVersionId])
+  @@index([storeSlug, isPublished])
   @@map("store_publications")
 }
 
@@ -468,8 +468,8 @@ model StorePublicationVersion {
   publishedByUserId String
   publishedAt       DateTime            @default(now())
 
-  publication StorePublication @relation("StorePublicationVersions", fields: [tenantId, publicationId], references: [tenantId, id], onDelete: Cascade)
-  currentFor StorePublication? @relation("CurrentStorePublicationVersion")
+  publication StorePublication  @relation("StorePublicationVersions", fields: [tenantId, publicationId], references: [tenantId, id], onDelete: Cascade)
+  currentFor  StorePublication? @relation("CurrentStorePublicationVersion")
 
   @@unique([tenantId, id])
   @@unique([tenantId, publicationId, version])
@@ -496,26 +496,26 @@ model Customer {
 }
 
 model CommerceOrder {
-  id              String              @id @default(cuid())
+  id              String               @id @default(cuid())
   tenantId        String
   customerId      String
   orderNumber     Int
-  status          CommerceOrderStatus @default(PLACED)
-  paymentStatus   DemoPaymentStatus   @default(SIMULATED_APPROVED)
+  status          CommerceOrderStatus  @default(PLACED)
+  paymentStatus   DemoPaymentStatus    @default(SIMULATED_APPROVED)
   channel         CommerceOrderChannel @default(DEMO_STOREFRONT)
-  fulfillmentType FulfillmentType     @default(PICKUP)
+  fulfillmentType FulfillmentType      @default(PICKUP)
   subtotalCents   Int
   totalCents      Int
-  currency        String              @default("BRL")
+  currency        String               @default("BRL")
   idempotencyKey  String
   commandHash     String
-  version         Int                 @default(1)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
+  version         Int                  @default(1)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
 
-  customer Customer             @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
-  items    OrderItem[]
-  timeline OrderTimelineEvent[]
+  customer     Customer             @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Restrict)
+  items        OrderItem[]
+  timeline     OrderTimelineEvent[]
   financeEntry FinancialEntry?
 
   @@unique([tenantId, id])
@@ -550,20 +550,20 @@ enum FulfillmentType {
 }
 
 model OrderItem {
-  id                   String   @id @default(cuid())
-  tenantId             String
-  orderId              String
-  variantId            String
-  productNameSnapshot  String
-  variantNameSnapshot  String
-  unitPriceCents       Int
-  quantity             Int
-  totalCents           Int
+  id                    String   @id @default(cuid())
+  tenantId              String
+  orderId               String
+  variantId             String
+  productNameSnapshot   String
+  variantNameSnapshot   String
+  unitPriceCents        Int
+  quantity              Int
+  totalCents            Int
   recipeVersionSnapshot Int
-  createdAt            DateTime @default(now())
+  createdAt             DateTime @default(now())
 
-  order        CommerceOrder          @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
-  variant      ProductVariant         @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
+  order        CommerceOrder           @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+  variant      ProductVariant          @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Restrict)
   consumptions OrderStockConsumption[]
 
   @@unique([tenantId, id])
@@ -589,16 +589,16 @@ model OrderTimelineEvent {
 }
 
 model OrderStockConsumption {
-  id             String   @id @default(cuid())
-  tenantId       String
-  orderItemId    String
-  ingredientId   String
-  movementId     String   @unique
-  quantity       Int
-  createdAt      DateTime @default(now())
+  id           String   @id @default(cuid())
+  tenantId     String
+  orderItemId  String
+  ingredientId String
+  movementId   String   @unique
+  quantity     Int
+  createdAt    DateTime @default(now())
 
-  orderItem  OrderItem              @relation(fields: [tenantId, orderItemId], references: [tenantId, id], onDelete: Restrict)
-  ingredient Ingredient             @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
+  orderItem  OrderItem               @relation(fields: [tenantId, orderItemId], references: [tenantId, id], onDelete: Restrict)
+  ingredient Ingredient              @relation(fields: [tenantId, ingredientId], references: [tenantId, id], onDelete: Restrict)
   movement   IngredientStockMovement @relation(fields: [tenantId, movementId], references: [tenantId, id], onDelete: Restrict)
 
   @@unique([tenantId, orderItemId, ingredientId])
@@ -654,7 +654,7 @@ model FinancialEntry {
   description     String?
   amountCents     Int
   currency        String                 @default("BRL")
-  competenceDate DateTime               @db.Date
+  competenceDate  DateTime               @db.Date
   dueDate         DateTime               @db.Date
   paidAt          DateTime?
   orderId         String?

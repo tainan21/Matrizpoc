@@ -16,6 +16,10 @@ export interface AppThemeTokens {
 }
 
 export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
+  "matriz-identity": {
+    appId: "matriz-identity", label: "Matriz Identity", brandAccent: "#4f46e5", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#111827", muted: "#eef2ff", mutedFg: "#4b5563", border: "#c7d2fe",
+  },
   "matriz-hub": {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#0f172a", brandAccentFg: "#f8fafc",
     surface: "#ffffff", surfaceFg: "#0f172a", muted: "#f1f5f9", mutedFg: "#475569", border: "#e2e8f0",
@@ -40,6 +44,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "spot", label: "Spot", brandAccent: "#f59e0b", brandAccentFg: "#0f172a",
     surface: "#ffffff", surfaceFg: "#1c1917", muted: "#fef3c7", mutedFg: "#78350f", border: "#fde68a",
   },
+  "matriz-control": {
+    appId: "matriz-control", label: "Matriz Control Web", brandAccent: "#7c3aed", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#17131d", muted: "#f5f3ff", mutedFg: "#625a70", border: "#ddd6fe",
+  },
   "matriz-admin": {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#6d4aff", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17131d", muted: "#f4f1fb", mutedFg: "#625a70", border: "#ddd5e8",
@@ -59,6 +67,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
 }
 
 export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
+  "matriz-identity": {
+    appId: "matriz-identity", label: "Matriz Identity", brandAccent: "#818cf8", brandAccentFg: "#090b1a",
+    surface: "#0b1020", surfaceFg: "#f5f7ff", muted: "#11182b", mutedFg: "#aeb8d4", border: "#293455",
+  },
   "matriz-hub": {
     appId: "matriz-hub", label: "Matriz Hub", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
     surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246",
@@ -82,6 +94,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   spot: {
     appId: "spot", label: "Spot", brandAccent: "#f6b83f", brandAccentFg: "#17110a",
     surface: "#12100c", surfaceFg: "#fff7e8", muted: "#1d1810", mutedFg: "#cbbd9f", border: "#3d3220",
+  },
+  "matriz-control": {
+    appId: "matriz-control", label: "Matriz Control Web", brandAccent: "#a78bfa", brandAccentFg: "#0b0712",
+    surface: "#0f0c16", surfaceFg: "#f5f1fb", muted: "#18121f", mutedFg: "#aaa0b7", border: "#362a42",
   },
   "matriz-admin": {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#a98cff", brandAccentFg: "#0b0712",

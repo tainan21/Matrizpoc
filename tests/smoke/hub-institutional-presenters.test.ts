@@ -58,10 +58,12 @@ describe("Hub institutional ingestion honesty", () => {
       (item) => item.sourceType === "internal_monorepo_app",
     )
 
-    expect(internalProjects).toHaveLength(7)
+    expect(internalProjects).toHaveLength(9)
     expect(internalProjects.map((item) => item.projectId).sort()).toEqual([
+      "matriz:admin",
       "matriz:contracts",
       "matriz:hub",
+      "matriz:matrizlib",
       "matriz:seumei",
       "matriz:sites",
       "matriz:spot",

@@ -3,8 +3,8 @@ import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
 const root = resolve(process.cwd(), "../..")
-const schema = readFileSync(resolve(root, "prisma/schemas/seumei.prisma"), "utf8")
-const migration = readFileSync(resolve(root, "prisma/migrations/seumei/202608240003_essential_finance/migration.sql"), "utf8")
+const schema = readFileSync(resolve(root, "prisma/seumei/schema.prisma"), "utf8")
+const migration = readFileSync(resolve(root, "prisma/seumei/migrations/202608250001_consolidated_models/migration.sql"), "utf8")
 
 describe("Seumei essential finance persistence contract", () => {
   it.each(["FinancialEntry", "FinancialEntryEvent"])("defines %s", (model) => {

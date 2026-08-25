@@ -38,7 +38,7 @@
     "@matriz/platform-telemetry": "workspace:*",
     "@react-three/drei": "10.7.8",
     "@react-three/fiber": "9.7.0",
-    "next": "16.2.4",
+    "next": "16.2.12",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "three": "0.185.1"

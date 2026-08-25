@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 
 describe("Core membership invitation persistence contract", () => {
   const schema = readFileSync(
-    resolve(process.cwd(), "../../prisma/schemas/core.prisma"),
+    resolve(process.cwd(), "../../prisma/core/schema.prisma"),
     "utf8",
   )
 

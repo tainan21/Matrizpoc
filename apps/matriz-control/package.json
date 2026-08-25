@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 3008",
+    "dev": "next dev -p 3009",
     "build": "next build",
-    "start": "next start -p 3008",
+    "start": "next start -p 3009",
     "test": "vitest run --config vitest.config.ts",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --noEmit"
@@ -15,7 +15,7 @@
     "@matriz/integration-api-contracts": "workspace:*",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",
-    "next": "16.2.4",
+    "next": "16.2.12",
     "react": "19.2.5",
     "react-dom": "19.2.5"
   },

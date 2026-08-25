@@ -23,6 +23,7 @@ const AGENT_REQUEST_STATUS_LABELS: Record<AgentRequest["status"], string> = {
   claimed: "Assumida",
   in_progress: "Em andamento",
   blocked: "Bloqueada",
+  interrupted: "Interrompida",
   completed: "Concluída",
   cancelled: "Cancelada",
 }

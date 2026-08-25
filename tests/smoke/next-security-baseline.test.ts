@@ -4,8 +4,8 @@ import { buildContentSecurityPolicy as buildHubPolicy } from "../../apps/matriz-
 import { trustedConnectOrigins as hubConnectOrigins } from "../../apps/matriz-hub/src/security/content-security-policy"
 import { buildContentSecurityPolicy as buildSpotPolicy } from "../../apps/spot/src/security/content-security-policy"
 import { trustedConnectOrigins as spotConnectOrigins } from "../../apps/spot/src/security/content-security-policy"
-import { buildContentSecurityPolicy as buildSeumeiPolicy } from "../../apps/seumei/src/security/content-security-policy"
-import { trustedConnectOrigins as seumeiConnectOrigins } from "../../apps/seumei/src/security/content-security-policy"
+import { buildContentSecurityPolicy as buildSeumeiPolicy } from "../../apps/seumeiapp/src/security/content-security-policy"
+import { trustedConnectOrigins as seumeiConnectOrigins } from "../../apps/seumeiapp/src/security/content-security-policy"
 import { buildContentSecurityPolicy as buildContractsPolicy } from "../../apps/contracts/src/security/content-security-policy"
 import { trustedConnectOrigins as contractsConnectOrigins } from "../../apps/contracts/src/security/content-security-policy"
 import { buildContentSecurityPolicy as buildWilldashPolicy } from "../../apps/willdash/src/security/content-security-policy"
@@ -14,7 +14,7 @@ import { buildContentSecurityPolicy as buildSitesPolicy } from "../../apps/sites
 import { trustedConnectOrigins as sitesConnectOrigins } from "../../apps/sites/src/security/content-security-policy"
 import { proxy as hubProxy, config as hubProxyConfig } from "../../apps/matriz-hub/proxy"
 import { proxy as spotProxy } from "../../apps/spot/proxy"
-import { proxy as seumeiProxy } from "../../apps/seumei/proxy"
+import { proxy as seumeiProxy } from "../../apps/seumeiapp/proxy"
 import { proxy as contractsProxy } from "../../apps/contracts/proxy"
 import { proxy as willdashProxy } from "../../apps/willdash/proxy"
 import { proxy as sitesProxy, config as sitesProxyConfig } from "../../apps/sites/proxy"
@@ -125,7 +125,7 @@ describe("Next security baseline", () => {
   it.each([
     ["matriz-hub", hubProxy, "http://localhost:3000/telemetry"],
     ["spot", spotProxy, "http://localhost:3001/gigs"],
-    ["seumei", seumeiProxy, "http://localhost:3002/establishments"],
+    ["seumei", seumeiProxy, "http://localhost:3008/"],
     ["contracts", contractsProxy, "http://localhost:3003/contracts"],
     ["willdash", willdashProxy, "http://localhost:3004/goals"],
   ] as const)("applies nonce CSP, explicit connect-src, and private cache for %s", (_app, proxy, url) => {

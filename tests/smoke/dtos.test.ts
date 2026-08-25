@@ -16,8 +16,8 @@ import { monorepoConfig } from "@matriz/platform-config"
 describe("smoke: dtos", () => {
   it("registers Matriz Admin and keeps Seumei on its dedicated port", () => {
     expect(appIdSchema.parse("matriz-admin")).toBe("matriz-admin")
-    expect(monorepoConfig.baseUrls["matriz-admin"]).toBe("http://localhost:3002")
-    expect(monorepoConfig.baseUrls.seumei).toBe("http://localhost:3008")
+    expect(monorepoConfig.baseUrls["matriz-admin"]).toBe("http://127.0.0.1:3002")
+    expect(monorepoConfig.baseUrls.seumei).toBe("http://127.0.0.1:3008")
   })
 
   it("CreateContractFromGigInput: valid sample parses", () => {

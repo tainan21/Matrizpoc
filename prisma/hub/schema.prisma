@@ -31,20 +31,20 @@ datasource db {
 // Mirrors `ProjectManifest` from api-contracts/institutional.
 // ---------------------------------------------------------------------------
 model InstitutionalProject {
-  id                 String   @id @default(cuid())
-  projectId          String   @unique  // e.g., "matriz:hub", "matriz:ventures-registry"
-  sourceType         String              // enum SourceClassification (string-backed)
-  trustLevel         String              // enum TrustLevel (string-backed)
-  ingestMode         String              // enum IngestMode (string-backed)
-  institutionalTags  String[]
-  manifestJson       Json                // Full ProjectManifest snapshot
-  lastSeenAt         DateTime
-  firstSeenAt        DateTime
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                String   @id @default(cuid())
+  projectId         String   @unique // e.g., "matriz:hub", "matriz:ventures-registry"
+  sourceType        String // enum SourceClassification (string-backed)
+  trustLevel        String // enum TrustLevel (string-backed)
+  ingestMode        String // enum IngestMode (string-backed)
+  institutionalTags String[]
+  manifestJson      Json // Full ProjectManifest snapshot
+  lastSeenAt        DateTime
+  firstSeenAt       DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  healthSnapshots          InstitutionalHealthSnapshot[]
-  publicMetricsSnapshots   InstitutionalPublicMetricsSnapshot[]
+  healthSnapshots        InstitutionalHealthSnapshot[]
+  publicMetricsSnapshots InstitutionalPublicMetricsSnapshot[]
 
   @@index([sourceType])
   @@index([trustLevel])
@@ -57,9 +57,9 @@ model InstitutionalProject {
 // ---------------------------------------------------------------------------
 model InstitutionalSource {
   id          String   @id @default(cuid())
-  sourceId    String   @unique  // e.g., "local:matriz-monorepo", "snapshot:ventures"
-  sourceType  String              // enum SourceClassification
-  ingestMode  String              // enum IngestMode
+  sourceId    String   @unique // e.g., "local:matriz-monorepo", "snapshot:ventures"
+  sourceType  String // enum SourceClassification
+  ingestMode  String // enum IngestMode
   displayName String
   metadata    Json?
   createdAt   DateTime @default(now())
@@ -77,14 +77,14 @@ model InstitutionalSource {
 // ---------------------------------------------------------------------------
 model InstitutionalIngestionRun {
   id         String   @id @default(cuid())
-  sourceId   String   // FK to InstitutionalSource
+  sourceId   String // FK to InstitutionalSource
   startedAt  DateTime
   finishedAt DateTime
   durationMs Int
   accepted   Int
   rejected   Int
-  errorsJson Json?               // Array of error summaries
-  reportJson Json                // Full IngestionPipelineRun snapshot
+  errorsJson Json? // Array of error summaries
+  reportJson Json // Full IngestionPipelineRun snapshot
   createdAt  DateTime @default(now())
 
   source InstitutionalSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
@@ -99,12 +99,12 @@ model InstitutionalIngestionRun {
 // ---------------------------------------------------------------------------
 model InstitutionalHealthSnapshot {
   id             String   @id @default(cuid())
-  projectId      String   // light reference, no FK (cross-schema forbidden)
+  projectId      String // light reference, no FK (cross-schema forbidden)
   capturedAt     DateTime
-  status         String   // "healthy" | "degraded" | "offline" | "unknown"
+  status         String // "healthy" | "degraded" | "offline" | "unknown"
   readinessScore Int
   uptimePercent  Float?
-  snapshotJson   Json     // Full health details (checks, dependencies, etc.)
+  snapshotJson   Json // Full health details (checks, dependencies, etc.)
 
   project InstitutionalProject @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
 
@@ -120,7 +120,7 @@ model InstitutionalPublicMetricsSnapshot {
   id          String   @id @default(cuid())
   projectId   String
   capturedAt  DateTime
-  metricsJson Json     // Full public metrics (counts, aggregates, KPIs)
+  metricsJson Json // Full public metrics (counts, aggregates, KPIs)
 
   project InstitutionalProject @relation(fields: [projectId], references: [projectId], onDelete: Cascade)
 
@@ -157,8 +157,8 @@ model DocDocument {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  currentVersion       DocDocumentVersion?     @relation("DocDocumentCurrentVersion", fields: [tenantId, currentVersionId], references: [tenantId, id], onDelete: NoAction)
-  versions             DocDocumentVersion[]    @relation("DocDocumentVersions")
+  currentVersion       DocDocumentVersion?      @relation("DocDocumentCurrentVersion", fields: [tenantId, currentVersionId], references: [tenantId, id], onDelete: NoAction)
+  versions             DocDocumentVersion[]     @relation("DocDocumentVersions")
   blocks               DocBlock[]
   chunks               DocChunk[]
   sourceArtifacts      DocSourceArtifact[]
@@ -181,25 +181,25 @@ model DocDocument {
 }
 
 model DocDocumentVersion {
-  id               String    @id @default(cuid())
-  tenantId         String
-  documentId       String
-  versionNumber    Int
-  status           String
-  titleSnapshot    String
-  contentHash      String
-  summary          String?
-  aiSummary        String?
-  changeReason     String?
-  createdByActorId String
+  id                 String    @id @default(cuid())
+  tenantId           String
+  documentId         String
+  versionNumber      Int
+  status             String
+  titleSnapshot      String
+  contentHash        String
+  summary            String?
+  aiSummary          String?
+  changeReason       String?
+  createdByActorId   String
   createdByActorType String
-  publishedAt      DateTime?
-  deprecatedAt     DateTime?
-  metadata         Json?
-  createdAt        DateTime  @default(now())
+  publishedAt        DateTime?
+  deprecatedAt       DateTime?
+  metadata           Json?
+  createdAt          DateTime  @default(now())
 
-  document            DocDocument          @relation("DocDocumentVersions", fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
-  currentForDocuments DocDocument[]        @relation("DocDocumentCurrentVersion")
+  document            DocDocument             @relation("DocDocumentVersions", fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  currentForDocuments DocDocument[]           @relation("DocDocumentCurrentVersion")
   blocks              DocBlock[]
   chunks              DocChunk[]
   sourceArtifacts     DocSourceArtifact[]
@@ -229,18 +229,18 @@ model DocBlock {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  document            DocDocument             @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
-  version             DocDocumentVersion      @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: Cascade)
-  parent              DocBlock?               @relation("DocBlockTree", fields: [tenantId, parentBlockId], references: [tenantId, id], onDelete: NoAction)
-  children            DocBlock[]              @relation("DocBlockTree")
-  chunks              DocChunk[]
-  entityMentions      DocEntityMention[]
-  contextPackageItems DocContextPackageItem[]
-  taskCandidates      DocTaskCandidate[]
+  document             DocDocument              @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  version              DocDocumentVersion       @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: Cascade)
+  parent               DocBlock?                @relation("DocBlockTree", fields: [tenantId, parentBlockId], references: [tenantId, id], onDelete: NoAction)
+  children             DocBlock[]               @relation("DocBlockTree")
+  chunks               DocChunk[]
+  entityMentions       DocEntityMention[]
+  contextPackageItems  DocContextPackageItem[]
+  taskCandidates       DocTaskCandidate[]
   governanceCandidates DocGovernanceCandidate[]
 
-  @@index([tenantId, documentId, versionId])
   @@unique([tenantId, id])
+  @@index([tenantId, documentId, versionId])
   @@index([tenantId, versionId])
   @@index([tenantId, parentBlockId])
   @@index([tenantId, type])
@@ -249,16 +249,16 @@ model DocBlock {
 }
 
 model DocChunk {
-  id          String   @id @default(cuid())
-  tenantId    String
-  documentId  String
-  versionId   String
-  blockId     String?
-  chunkText   String
-  embedding   Json?
-  tokenCount  Int
-  metadata    Json?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  tenantId   String
+  documentId String
+  versionId  String
+  blockId    String?
+  chunkText  String
+  embedding  Json?
+  tokenCount Int
+  metadata   Json?
+  createdAt  DateTime @default(now())
 
   document DocDocument        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
   version  DocDocumentVersion @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: Cascade)
@@ -285,15 +285,15 @@ model DocSourceArtifact {
   metadata         Json?
   createdAt        DateTime @default(now())
 
-  document DocDocument?        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: NoAction)
-  version  DocDocumentVersion? @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: NoAction)
+  document       DocDocument?        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: NoAction)
+  version        DocDocumentVersion? @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: NoAction)
   conversionRuns DocConversionRun[]
 
+  @@unique([tenantId, id])
   @@index([tenantId, artifactType])
   @@index([tenantId, sourceKind])
   @@index([tenantId, documentId])
   @@index([tenantId, versionId])
-  @@unique([tenantId, id])
   @@map("doc_source_artifacts")
 }
 
@@ -346,20 +346,20 @@ model KnowledgeNode {
 }
 
 model KnowledgeEdge {
-  id                String   @id @default(cuid())
-  tenantId          String
-  sourceNodeId      String
-  targetNodeId      String
-  relationType      String
-  status            String
-  confidence        Float?
-  evidence          Json
-  createdByActorId  String
+  id                 String   @id @default(cuid())
+  tenantId           String
+  sourceNodeId       String
+  targetNodeId       String
+  relationType       String
+  status             String
+  confidence         Float?
+  evidence           Json
+  createdByActorId   String
   createdByActorType String
-  approvedByActorId String?
-  metadata          Json?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  approvedByActorId  String?
+  metadata           Json?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   sourceNode KnowledgeNode @relation("KnowledgeEdgeSource", fields: [tenantId, sourceNodeId], references: [tenantId, id], onDelete: Cascade)
   targetNode KnowledgeNode @relation("KnowledgeEdgeTarget", fields: [tenantId, targetNodeId], references: [tenantId, id], onDelete: Cascade)
@@ -463,10 +463,10 @@ model DocContextPackageItem {
   metadata         Json?
   createdAt        DateTime @default(now())
 
-  contextPackage DocContextPackage  @relation(fields: [tenantId, contextPackageId], references: [tenantId, id], onDelete: Cascade)
-  document       DocDocument        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
+  contextPackage DocContextPackage   @relation(fields: [tenantId, contextPackageId], references: [tenantId, id], onDelete: Cascade)
+  document       DocDocument         @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
   version        DocDocumentVersion? @relation(fields: [tenantId, versionId], references: [tenantId, id], onDelete: NoAction)
-  block          DocBlock?          @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: NoAction)
+  block          DocBlock?           @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: NoAction)
 
   @@index([tenantId, contextPackageId])
   @@index([tenantId, documentId])
@@ -519,20 +519,20 @@ model DocMcpResourceSnapshot {
 }
 
 model DocExportArtifact {
-  id               String    @id @default(cuid())
-  tenantId         String
-  documentId       String?
-  contextPackageId String?
-  versionId        String?
-  exportType       String
-  storageKey       String?
-  contentHash      String
-  status           String
-  generatedByActorId String
+  id                   String   @id @default(cuid())
+  tenantId             String
+  documentId           String?
+  contextPackageId     String?
+  versionId            String?
+  exportType           String
+  storageKey           String?
+  contentHash          String
+  status               String
+  generatedByActorId   String
   generatedByActorType String
-  generatedAt      DateTime
-  metadata         Json?
-  createdAt        DateTime  @default(now())
+  generatedAt          DateTime
+  metadata             Json?
+  createdAt            DateTime @default(now())
 
   document       DocDocument?        @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: NoAction)
   contextPackage DocContextPackage?  @relation(fields: [tenantId, contextPackageId], references: [tenantId, id], onDelete: NoAction)
@@ -547,20 +547,20 @@ model DocExportArtifact {
 }
 
 model DocTaskCandidate {
-  id                String   @id @default(cuid())
-  tenantId          String
-  documentId        String
-  blockId           String?
-  title             String
-  description       String
-  status            String
-  evidence          Json
-  targetSprintRef   String?
-  externalLinkId    String?
-  createdByActorId  String
+  id                 String   @id @default(cuid())
+  tenantId           String
+  documentId         String
+  blockId            String?
+  title              String
+  description        String
+  status             String
+  evidence           Json
+  targetSprintRef    String?
+  externalLinkId     String?
+  createdByActorId   String
   createdByActorType String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   document DocDocument @relation(fields: [tenantId, documentId], references: [tenantId, id], onDelete: Cascade)
   block    DocBlock?   @relation(fields: [tenantId, blockId], references: [tenantId, id], onDelete: NoAction)
@@ -616,17 +616,17 @@ model DocActorRun {
 }
 
 model DocAccessPolicy {
-  id          String   @id @default(cuid())
-  tenantId    String
-  targetType  String
-  targetId    String
-  visibility  String
-  sensitivity String
-  rules       Json
-  createdByActorId String
+  id                 String   @id @default(cuid())
+  tenantId           String
+  targetType         String
+  targetId           String
+  visibility         String
+  sensitivity        String
+  rules              Json
+  createdByActorId   String
   createdByActorType String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   @@index([tenantId, targetType, targetId])
   @@index([tenantId, visibility])
@@ -639,29 +639,31 @@ model DocAccessPolicy {
 // ---------------------------------------------------------------------------
 
 model CapabilityPracticyCategory {
-  id        String   @id @default(cuid())
-  slug      String   @unique
+  id        String                          @id @default(cuid())
+  slug      String                          @unique
   label     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime                        @default(now())
+  updatedAt DateTime                        @updatedAt
   items     CapabilityPracticyCatalogItem[]
+
   @@map("capability_practicy_categories")
 }
 
 model CapabilityPracticyCatalogItem {
-  id          String   @id @default(cuid())
-  key         String   @unique
-  categoryId  String?
-  name        String
-  summary     String
-  kind        String
-  iconKey     String
+  id           String                      @id @default(cuid())
+  key          String                      @unique
+  categoryId   String?
+  name         String
+  summary      String
+  kind         String
+  iconKey      String
   availability String
-  metadata    Json?
-  version     Int      @default(1)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  category    CapabilityPracticyCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  metadata     Json?
+  version      Int                         @default(1)
+  createdAt    DateTime                    @default(now())
+  updatedAt    DateTime                    @updatedAt
+  category     CapabilityPracticyCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
   @@index([categoryId])
   @@index([availability])
   @@map("capability_practicy_catalog_items")
@@ -675,6 +677,7 @@ model CapabilityPracticyInstallation {
   favorite    Boolean  @default(false)
   installedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
   @@unique([tenantId, userId, practicyKey])
   @@index([tenantId, userId, installedAt])
   @@map("capability_practicy_installations")
@@ -688,6 +691,7 @@ model CapabilityPracticyUsage {
   event       String
   occurredAt  DateTime @default(now())
   metadata    Json?
+
   @@index([tenantId, userId, occurredAt])
   @@index([practicyKey, occurredAt])
   @@map("capability_practicy_usage")
@@ -701,6 +705,7 @@ model CapabilityRecentItem {
   resourceKey String
   openedAt    DateTime @default(now())
   metadata    Json?
+
   @@unique([tenantId, userId, kind, resourceKey])
   @@index([tenantId, userId, openedAt])
   @@map("capability_recent_items")
@@ -713,85 +718,92 @@ model CapabilityDashboardLayout {
   layout    Json
   revision  Int      @default(1)
   updatedAt DateTime @updatedAt
+
   @@unique([tenantId, userId])
   @@map("capability_dashboard_layouts")
 }
 
 model CapabilityThemePreference {
-  id        String   @id @default(cuid())
-  tenantId  String
-  userId    String
-  appId     String
-  themeKey  String?
-  themeVersion Int?
+  id                           String    @id @default(cuid())
+  tenantId                     String
+  userId                       String
+  appId                        String
+  themeKey                     String?
+  themeVersion                 Int?
   dismissedOrganizationThemeAt DateTime?
-  updatedAt DateTime @updatedAt
+  updatedAt                    DateTime  @updatedAt
+
   @@unique([tenantId, userId, appId])
   @@index([tenantId, userId])
   @@map("capability_theme_preferences")
 }
 
 model CapabilityTenantThemeRecommendation {
-  id        String   @id @default(cuid())
-  tenantId  String   @unique
-  themeKey  String
-  themeVersion Int
+  id              String   @id @default(cuid())
+  tenantId        String   @unique
+  themeKey        String
+  themeVersion    Int
   updatedByUserId String
-  updatedAt DateTime @updatedAt
+  updatedAt       DateTime @updatedAt
+
   @@map("capability_tenant_theme_recommendations")
 }
 
 model CapabilityAccessibilityPreference {
-  id              String   @id @default(cuid())
-  tenantId        String
-  userId          String
-  contrast        String   @default("default")
-  motion          String   @default("default")
-  fontScale       String   @default("default")
-  density         String   @default("default")
-  updatedAt       DateTime @updatedAt
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  contrast  String   @default("default")
+  motion    String   @default("default")
+  fontScale String   @default("default")
+  density   String   @default("default")
+  updatedAt DateTime @updatedAt
+
   @@unique([tenantId, userId])
   @@map("capability_accessibility_preferences")
 }
 
 model CapabilityThemeEntitlement {
-  id          String   @id @default(cuid())
-  tenantId    String
-  ownerType   String
-  ownerId     String
-  themeKey    String
+  id           String   @id @default(cuid())
+  tenantId     String
+  ownerType    String
+  ownerId      String
+  themeKey     String
   themeVersion Int
-  status      String   @default("active")
-  source      String
-  acquiredAt  DateTime @default(now())
+  status       String   @default("active")
+  source       String
+  acquiredAt   DateTime @default(now())
+
   @@unique([tenantId, ownerType, ownerId, themeKey])
   @@index([tenantId, ownerType, ownerId])
   @@map("capability_theme_entitlements")
 }
 
 model CapabilityMarketplaceDemoOrder {
-  id          String   @id @default(cuid())
-  tenantId    String
-  userId      String
-  ownerType   String
-  ownerId     String
-  status      String
-  currency    String
-  totalMinor  Int
-  createdAt   DateTime @default(now())
-  items       CapabilityMarketplaceDemoOrderItem[]
+  id         String                               @id @default(cuid())
+  tenantId   String
+  userId     String
+  ownerType  String
+  ownerId    String
+  status     String
+  currency   String
+  totalMinor Int
+  createdAt  DateTime                             @default(now())
+  items      CapabilityMarketplaceDemoOrderItem[]
+
   @@index([tenantId, userId, createdAt])
   @@map("capability_marketplace_demo_orders")
 }
 
 model CapabilityMarketplaceDemoOrderItem {
-  id          String   @id @default(cuid())
-  orderId     String
-  themeKey    String
+  id           String                         @id @default(cuid())
+  orderId      String
+  themeKey     String
   themeVersion Int
-  priceMinor  Int
-  metadata    Json?
-  order       CapabilityMarketplaceDemoOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  priceMinor   Int
+  metadata     Json?
+  order        CapabilityMarketplaceDemoOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
   @@index([orderId])
   @@map("capability_marketplace_demo_order_items")
 }
@@ -803,6 +815,7 @@ model CapabilityEvent {
   name       String
   metadata   Json?
   occurredAt DateTime @default(now())
+
   @@index([tenantId, occurredAt])
   @@index([tenantId, name, occurredAt])
   @@map("capability_events")

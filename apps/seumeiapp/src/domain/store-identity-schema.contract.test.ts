@@ -3,8 +3,8 @@ import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
 const root = resolve(process.cwd(), "../..")
-const schema = readFileSync(resolve(root, "prisma/schemas/seumei.prisma"), "utf8")
-const migration = readFileSync(resolve(root, "prisma/migrations/seumei/202608240004_store_identity_publication/migration.sql"), "utf8")
+const schema = readFileSync(resolve(root, "prisma/seumei/schema.prisma"), "utf8")
+const migration = readFileSync(resolve(root, "prisma/seumei/migrations/202608250001_consolidated_models/migration.sql"), "utf8")
 
 describe("Seumei store identity persistence contract", () => {
   it("adds validated draft state and immutable publication versions", () => {

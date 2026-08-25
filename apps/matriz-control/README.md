@@ -17,4 +17,4 @@ $env:MATRIZ_CONTROL_LOCAL_TOKEN = "choose-a-long-local-secret"
 corepack pnpm --filter @matriz/app-matriz-control dev
 ```
 
-Open `http://localhost:3008/apps`. The terminal process supervisor is memory-only and intended for loopback development.
+Open `http://localhost:3009/apps`. The terminal process supervisor is memory-only and intended for loopback development.

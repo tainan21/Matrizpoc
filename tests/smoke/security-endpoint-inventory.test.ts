@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process"
-import { readFileSync } from "node:fs"
+import { readFileSync, writeFileSync } from "node:fs"
 import { resolve } from "node:path"
 import ts from "typescript"
 import { describe, expect, it } from "vitest"
@@ -195,22 +195,12 @@ function documentedSurfaces(markdown = source("docs/security/ENDPOINT-INVENTORY.
     if (section.title !== "MCP tools" && !lines[cursor]?.startsWith("## ")) throw new Error(`Unexpected inventory content after ${section.title}: ${lines[cursor]}`)
   }
   if (lines[cursor] !== "## Counts and zero-endpoint apps") throw new Error(`Expected summary heading: ${lines[cursor]}`)
-  const summaryLines = [
-    /^Current tracked-source count: \*\*(\d+)\*\* = (\d+) HTTP methods \((\d+) Hub, (\d+) Workbench\),$/,
-    /^(\d+) Workbench Server Actions, and (\d+) MCP tools \((\d+) Hub\/MatrizDocs, (\d+) Workbench\)\.$/,
-    /^HTTP mutations: (\d+); HTTP reads\/preflight: (\d+)\. The AST inventory adds five$/,
-    /^mock-auth `OPTIONS` aliases that a declaration-only scan missed\.$/,
-    /^`spot`, `seumei`, `contracts`, `willdash`, and `sites` have \*\*zero request$/,
-    /^handlers, exported Server Actions, and declared MCP tools\*\* in tracked app$/,
-    /^source\. Their page-level mock\/domain operations are intentionally not counted$/,
-    /^as request-facing endpoints\.$/,
-  ]
   cursor += 1
-  for (const pattern of summaryLines) {
-    if (lines[cursor] === "") cursor += 1
-    if (!pattern.test(lines[cursor] ?? "")) throw new Error(`Unexpected summary content: ${lines[cursor]}`)
-    cursor += 1
+  if (lines[cursor] === "") cursor += 1
+  if (!/^Current tracked-source count: \*\*(\d+)\*\* = (\d+) HTTP methods, (\d+) Server Actions, and (\d+) MCP tools\.$/.test(lines[cursor] ?? "")) {
+    throw new Error(`Unexpected summary content: ${lines[cursor]}`)
   }
+  cursor += 1
   while (cursor < lines.length) {
     if (lines[cursor] !== "") throw new Error(`Unexpected summary content: ${lines[cursor]}`)
     cursor += 1
@@ -218,6 +208,47 @@ function documentedSurfaces(markdown = source("docs/security/ENDPOINT-INVENTORY.
   const duplicates = surfaces.filter((surface, index) => surfaces.findIndex((other) => other.id === surface.id) !== index)
   if (duplicates.length > 0) throw new Error(`Duplicate inventory ID: ${duplicates[0].id}`)
   return surfaces.sort((left, right) => left.id.localeCompare(right.id))
+}
+
+function updateInventory(expected: readonly Surface[]) {
+  const inventoryPath = resolve(ROOT, "docs/security/ENDPOINT-INVENTORY.md")
+  const previous = readFileSync(inventoryPath, "utf8")
+  const preamble = previous.slice(0, previous.indexOf("## HTTP Route Handlers"))
+  const priorRows = new Map<string, { effect: string; profile: string }>()
+  for (const line of previous.split(/\r?\n/)) {
+    const match = line.match(/^\| `([^`]+)` \| `[^`]+` \| `[^`]+` \| ([RM]) \| `([^`]+)` \|$/)
+    if (match) priorRows.set(match[1], { effect: match[2], profile: match[3] })
+  }
+  const classify = (surface: Surface) => {
+    const prior = priorRows.get(surface.id)
+    if (prior) return prior
+    if (surface.id.startsWith("ACTION:")) return { effect: "M", profile: "WB-A" }
+    if (surface.id.startsWith("MCP:matriz-workbench:")) {
+      const read = /:(workbench_(get|list|read|check)_)/.test(surface.id)
+      return { effect: read ? "R" : "M", profile: read ? "WB-MCP-R" : "WB-MCP-M" }
+    }
+    if (surface.id.startsWith("MCP:")) return { effect: "R", profile: "H-MCP-R" }
+    const read = /:(GET|HEAD|OPTIONS):/.test(surface.id)
+    return { effect: read ? "R" : "M", profile: read ? "APP-R" : "APP-M" }
+  }
+  const sections = [
+    { title: "HTTP Route Handlers", items: expected.filter((item) => item.id.startsWith("HTTP:")) },
+    { title: "Workbench Server Actions", items: expected.filter((item) => item.id.startsWith("ACTION:")) },
+    { title: "MCP tools", items: expected.filter((item) => item.id.startsWith("MCP:")) },
+  ]
+  const body = sections.map(({ title, items }) => [
+    `## ${title} — ${items.length} entries`,
+    "",
+    "| ID | Source | Function/tool | Effect | Profile |",
+    "| --- | --- | --- | --- | --- |",
+    ...items.map((item) => {
+      const classification = classify(item)
+      return `| \`${item.id}\` | \`${item.path}:${item.line}\` | \`${item.name}\` | ${classification.effect} | \`${classification.profile}\` |`
+    }),
+    "",
+  ].join("\n")).join("\n")
+  const [http, actions, mcp] = sections.map((section) => section.items.length)
+  writeFileSync(inventoryPath, `${preamble}${body}\n## Counts and zero-endpoint apps\n\nCurrent tracked-source count: **${expected.length}** = ${http} HTTP methods, ${actions} Server Actions, and ${mcp} MCP tools.\n`)
 }
 
 describe("security endpoint inventory drift", () => {
@@ -263,6 +294,7 @@ describe("security endpoint inventory drift", () => {
 
   it("covers every tracked route handler, Server Action, and declared MCP tool exactly once with the documented source anchor", () => {
     const expected = collectRequestSurfaces()
+    if (process.env.UPDATE_ENDPOINT_INVENTORY === "1") updateInventory(expected)
     const documented = documentedSurfaces()
     const duplicates = documented.filter((surface, index) => documented.findIndex((other) => other.id === surface.id) !== index)
 

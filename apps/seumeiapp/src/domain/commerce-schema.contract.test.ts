@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
 
-const schema = readFileSync(resolve(process.cwd(), "../../prisma/schemas/seumei.prisma"), "utf8")
+const schema = readFileSync(resolve(process.cwd(), "../../prisma/seumei/schema.prisma"), "utf8")
 
 describe("Seumei commerce persistence contract", () => {
   it.each(["StorePublication", "Customer", "CommerceOrder", "OrderItem", "OrderTimelineEvent", "OrderStockConsumption"])("defines %s", (model) => {

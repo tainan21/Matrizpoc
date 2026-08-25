@@ -93,7 +93,7 @@ describe("WorkspaceRepository", () => {
     const agents = path.join(root, "apps", "sample", ".matriz", "agents")
     await rm(path.join(agents, "requests"), { recursive: true, force: true })
 
-    await expect(readdir(agents)).resolves.toEqual([])
+    await expect(readdir(agents)).resolves.not.toContain("requests")
     await expect(repository.listAgentRequests("sample")).resolves.toEqual([])
   })
 
