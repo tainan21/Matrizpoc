@@ -16,7 +16,7 @@ export const manifest: AppManifestDTO = {
     { id: "desktop.native.launch", name: "Operar apps nativos", description: "Gera, instala e inicia entregas desktop allowlisted." },
     { id: "desktop.environment.manage", name: "Gerenciar ambientes", description: "Edita, compara, promove e valida ambientes sem expor segredos." },
     { id: "desktop.workspace.explore", name: "Explorar workspace", description: "Inspeciona recursos confinados aos apps do catálogo." },
-    { id: "desktop.store.install", name: "Instalar capacidades", description: "Instala pacotes Matriz confiáveis com consentimento e recibo local." },
+    { id: "desktop.store.install", name: "Instalar capacidades", description: "Instala e ativa pacotes Matriz confiáveis com consentimento, recibo local e alvo de runtime validado." },
     { id: "desktop.runbooks.execute", name: "Executar runbooks", description: "Executa sequências operacionais nativas fixas por app." },
   ],
   eventsProduced: [],

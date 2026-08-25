@@ -272,6 +272,11 @@ export interface CommerceSnapshot {
   readonly packages: readonly StorePackage[]
 }
 
+export interface PackageActivationTarget extends RuntimeTarget {
+  readonly packageId: string
+  readonly operationId: `app.${DesktopAppId}.web`
+}
+
 export interface RecoveryResult {
   readonly appId: DesktopAppId
   readonly status: "ready" | "diagnoseOnly"

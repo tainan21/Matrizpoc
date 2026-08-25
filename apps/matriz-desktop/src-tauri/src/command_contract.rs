@@ -62,4 +62,5 @@ pub const COMMAND_NAMES: &[&str] = &[
     "install_package",
     "repair_package",
     "uninstall_package",
+    "activate_package",
 ];

@@ -55,6 +55,7 @@ describe("StoreView", () => {
   it("starts an installed package runtime before opening it", async () => {
     const gateway = {
       commerceSnapshot: vi.fn().mockResolvedValue(snapshot(true, true)),
+      activatePackage: vi.fn().mockResolvedValue({ packageId: "matriz.analytics", appId: "willdash", operationId: "app.willdash.web", routePath: "/" }),
       runtimeSnapshot: vi.fn()
         .mockResolvedValueOnce([{ id: "willdash", status: "stopped", ownership: "none" }])
         .mockResolvedValueOnce([{ id: "willdash", status: "ready", ownership: "managed" }]),
@@ -64,8 +65,54 @@ describe("StoreView", () => {
     } as unknown as DesktopGateway
     render(<StoreView gateway={gateway} signal={vi.fn()} />)
     fireEvent.click(await screen.findByRole("button", { name: "Abrir Matriz Analytics" }))
+    await waitFor(() => expect(gateway.activatePackage).toHaveBeenCalledWith("matriz.analytics"))
     await waitFor(() => expect(gateway.startManagedOperation).toHaveBeenCalledWith("app.willdash.web"))
     expect(gateway.restartRuntime).not.toHaveBeenCalled()
     await waitFor(() => expect(gateway.openRuntimeTarget).toHaveBeenCalledWith({ appId: "willdash", routePath: "/" }))
+    expect(gateway.activatePackage).toHaveBeenCalledTimes(2)
+  })
+
+  it("serializes package actions while native activation is pending", async () => {
+    const target = { packageId: "matriz.analytics", appId: "willdash" as const, operationId: "app.willdash.web" as const, routePath: "/" }
+    let releaseActivation!: (value: typeof target) => void
+    const activation = new Promise<typeof target>((resolve) => { releaseActivation = resolve })
+    const gateway = {
+      commerceSnapshot: vi.fn().mockResolvedValue(snapshot(true, true)),
+      activatePackage: vi.fn().mockImplementationOnce(() => activation).mockResolvedValue(target),
+      runtimeSnapshot: vi.fn().mockResolvedValue([{ id: "willdash", status: "ready", ownership: "managed" }]),
+      startManagedOperation: vi.fn(),
+      restartRuntime: vi.fn(),
+      openRuntimeTarget: vi.fn().mockResolvedValue(undefined),
+      uninstallPackage: vi.fn().mockResolvedValue(snapshot(true, false)),
+    } as unknown as DesktopGateway
+    render(<StoreView gateway={gateway} signal={vi.fn()} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Abrir Matriz Analytics" }))
+    const remove = screen.getByRole("button", { name: "Desinstalar Matriz Analytics" })
+    await waitFor(() => expect(remove).toBeDisabled())
+    fireEvent.click(remove)
+    expect(gateway.uninstallPackage).not.toHaveBeenCalled()
+
+    releaseActivation(target)
+    await waitFor(() => expect(gateway.openRuntimeTarget).toHaveBeenCalled())
+    expect(gateway.activatePackage).toHaveBeenCalledTimes(2)
+  })
+
+  it("does not start a runtime when native package activation is rejected", async () => {
+    const gateway = {
+      commerceSnapshot: vi.fn().mockResolvedValue(snapshot(true, true)),
+      activatePackage: vi.fn().mockRejectedValue(new Error("Package trust must be repaired before activation")),
+      runtimeSnapshot: vi.fn(),
+      startManagedOperation: vi.fn(),
+      openRuntimeTarget: vi.fn(),
+    } as unknown as DesktopGateway
+    render(<StoreView gateway={gateway} signal={vi.fn()} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Abrir Matriz Analytics" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Package trust must be repaired before activation")
+    expect(gateway.runtimeSnapshot).not.toHaveBeenCalled()
+    expect(gateway.startManagedOperation).not.toHaveBeenCalled()
+    expect(gateway.openRuntimeTarget).not.toHaveBeenCalled()
   })
 })

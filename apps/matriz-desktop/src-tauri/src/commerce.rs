@@ -25,6 +25,15 @@ pub struct CommerceSnapshot {
     pub packages: Vec<PackageView>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PackageActivationTarget {
+    pub package_id: String,
+    pub app_id: String,
+    pub operation_id: String,
+    pub route_path: String,
+}
+
 #[derive(Clone, Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WalletView {
@@ -231,6 +240,26 @@ impl CommerceStore {
         Ok(snapshot_from(state))
     }
 
+    pub fn activate(&self, package_id: &str) -> Result<PackageActivationTarget, String> {
+        let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
+        let package = catalog(package_id)?;
+        let state = self.read()?;
+        if !state.installed.contains_key(package_id) {
+            return Err("Package must be installed before activation".into());
+        }
+        if !installation_is_verified(package, &state) {
+            return Err("Package trust must be repaired before activation".into());
+        }
+        let operation_id = format!("app.{}.web", package.app_id);
+        crate::catalog::managed_operation(&operation_id)?;
+        Ok(PackageActivationTarget {
+            package_id: package.id.into(),
+            app_id: package.app_id.into(),
+            operation_id,
+            route_path: "/".into(),
+        })
+    }
+
     fn snapshot_unlocked(&self) -> Result<CommerceSnapshot, String> {
         self.read().map(snapshot_from)
     }
@@ -364,21 +393,9 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
         .iter()
         .map(|package| {
             let receipt = state.receipts.get(package.id).cloned();
-            let mut expected_permissions = package.permissions.to_vec();
-            expected_permissions.sort_unstable();
             let trust_status = if !state.installed.contains_key(package.id) {
                 "missing"
-            } else if receipt.as_ref().is_some_and(|item| {
-                item.package_id == package.id
-                    && item.version == package.version
-                    && item.manifest_digest == manifest_digest(*package)
-                    && item
-                        .granted_permissions
-                        .iter()
-                        .map(String::as_str)
-                        .collect::<Vec<_>>()
-                        == expected_permissions
-            }) {
+            } else if installation_is_verified(*package, &state) {
                 "verified"
             } else if receipt.is_some() {
                 "changed"
@@ -411,6 +428,31 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
         },
         packages,
     }
+}
+
+fn receipt_is_verified(package: CatalogPackage, receipt: &InstallReceipt) -> bool {
+    let mut expected_permissions = package.permissions.to_vec();
+    expected_permissions.sort_unstable();
+    receipt.package_id == package.id
+        && receipt.version == package.version
+        && receipt.manifest_digest == manifest_digest(package)
+        && receipt
+            .granted_permissions
+            .iter()
+            .map(String::as_str)
+            .collect::<Vec<_>>()
+            == expected_permissions
+}
+
+fn installation_is_verified(package: CatalogPackage, state: &State) -> bool {
+    state
+        .installed
+        .get(package.id)
+        .is_some_and(|version| version == package.version)
+        && state
+            .receipts
+            .get(package.id)
+            .is_some_and(|receipt| receipt_is_verified(package, receipt))
 }
 
 fn validate_permissions(package: CatalogPackage, granted: &[&str]) -> Result<(), String> {

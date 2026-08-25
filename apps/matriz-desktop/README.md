@@ -68,7 +68,10 @@ URLs.
 Store and Wallet remain an atomic native ledger. Installation requires consent
 to the exact bundled permission set and creates a SHA-256 receipt from canonical
 catalog metadata. Trust Center reports verified, changed or missing receipts;
-Repair only restores owned, installed packages from the bundled catalog.
+Repair only restores owned, installed packages from the bundled catalog. Opening
+a package now asks Rust for a verified activation target; the renderer cannot
+invent its app, managed operation or initial route. Apps shows the verified Store
+capabilities associated with the selected runtime without hiding workspace apps.
 
 ## Commands
 

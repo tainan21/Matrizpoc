@@ -106,6 +106,7 @@ export function createTauriGateway(
     installPackage: (packageId, grantedPermissions) => invoke(commands.installPackage, { packageId, grantedPermissions }),
     uninstallPackage: (packageId) => invoke(commands.uninstallPackage, { packageId }),
     repairPackage: (packageId) => invoke(commands.repairPackage, { packageId }),
+    activatePackage: (packageId) => invoke(commands.activatePackage, { packageId }),
     recoverRuntime: (appId) => invoke(commands.recoverRuntime, { appId }),
     runbookCatalog: () => invoke(commands.runbookCatalog),
     runRunbook: (runbookId, appId) => invoke(commands.runRunbook, { runbookId, appId }),

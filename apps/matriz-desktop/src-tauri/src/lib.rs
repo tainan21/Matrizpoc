@@ -23,7 +23,7 @@ mod workspace;
 use std::fmt;
 
 use activity::{ActivityEnvelope, ActivityHub};
-use commerce::{CommerceSnapshot, CommerceStore};
+use commerce::{CommerceSnapshot, CommerceStore, PackageActivationTarget};
 use environment::{
     EnvironmentComparison, EnvironmentDocument, EnvironmentFile, EnvironmentPromotionRequest,
     EnvironmentSaveRequest, EnvironmentService,
@@ -1067,6 +1067,23 @@ fn uninstall_package(
 }
 
 #[tauri::command(rename_all = "camelCase")]
+fn activate_package(
+    commerce: tauri::State<'_, CommerceStore>,
+    activity: tauri::State<'_, ActivityHub>,
+    package_id: String,
+) -> Result<PackageActivationTarget, String> {
+    let target = commerce.activate(&package_id)?;
+    activity.publish(
+        "store.package.target.validated",
+        "info",
+        "Alvo do pacote validado",
+        Some(&package_id),
+        Some(&target.app_id),
+    );
+    Ok(target)
+}
+
+#[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
     session_id: String,
@@ -1226,7 +1243,8 @@ pub fn run() {
             acquire_package,
             install_package,
             repair_package,
-            uninstall_package
+            uninstall_package,
+            activate_package
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");

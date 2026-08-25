@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { executeRuntimeAction, getRuntimeActions, type ActionServices, type RuntimeActionId } from "../../application/action-registry"
 import { APP_MANIFESTS } from "../../application/app-manifests"
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { ActivityEnvelope, ManagedOperationId, NativeAppRuntime, RuntimeInstance } from "../../domain/types"
+import type { ActivityEnvelope, ManagedOperationId, NativeAppRuntime, RuntimeInstance, StorePackage } from "../../domain/types"
 
 type Surface = "terminal" | "preview" | "logs"
 
@@ -25,6 +25,7 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
   const [adminMode, setAdminMode] = useState<"web" | "native">("web")
   const [nativeApp, setNativeApp] = useState<NativeAppRuntime>({ appId: "matriz-admin", state: "not-built" })
   const [recovering, setRecovering] = useState(false)
+  const [capabilities, setCapabilities] = useState<readonly StorePackage[]>([])
   const previewHost = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -33,12 +34,15 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
       return [...merged.values()].sort((left, right) => left.sequence - right.sequence).slice(-200)
     }))
     void gateway.getNativeAppRuntime().then(setNativeApp)
+    void gateway.commerceSnapshot().then(({ packages }) => setCapabilities(packages.filter((item) => item.installed && item.trustStatus === "verified"))).catch(() => setCapabilities([]))
     void gateway.subscribeActivity((event) => setActivities((current) => [...current, event].slice(-200)))
   }, [gateway])
 
   const selected = runtimes.find(({ id }) => id === selectedId) ?? runtimes[0]
   const selectedAppId = selected?.id
   const manifest = selected ? APP_MANIFESTS[selected.id] : undefined
+  const selectedCapabilities = selected ? capabilities.filter(({ appId }) => appId === selected.id) : []
+  const capabilityNames = selectedCapabilities.map(({ name }) => name).join(" · ")
 
   useEffect(() => {
     if (!manifest) return
@@ -126,7 +130,7 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
 
     <div className="runtime-stage">
       {selected ? <>
-        <header className="runtime-context"><div><span className={`status-dot ${selected.status}`} /><strong>{selected.label}</strong><small>{adminMode === "native" && selected.id === "matriz-admin" ? nativeApp.state.toUpperCase() : selected.endpoint}</small></div>{selected.id === "matriz-admin" ? <div className="runtime-mode"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : <span className={`ownership ownership--${selected.ownership}`}>{selected.ownership}</span>}</header>
+        <header className="runtime-context"><div><span className={`status-dot ${selected.status}`} /><strong>{selected.label}</strong><small>{adminMode === "native" && selected.id === "matriz-admin" ? nativeApp.state.toUpperCase() : selected.endpoint}</small>{selectedCapabilities.length ? <span className="runtime-capabilities" aria-label={`${selectedCapabilities.length} ${selectedCapabilities.length === 1 ? "capacidade ativa" : "capacidades ativas"}: ${capabilityNames}`}><b>{selectedCapabilities.length} {selectedCapabilities.length === 1 ? "CAPACIDADE ATIVA" : "CAPACIDADES ATIVAS"}</b> · {capabilityNames}</span> : null}</div>{selected.id === "matriz-admin" ? <div className="runtime-mode"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : <span className={`ownership ownership--${selected.ownership}`}>{selected.ownership}</span>}</header>
         <div className="surface-tabs" role="tablist">
           {(["terminal", "preview", "logs"] as const).map((id) => <button key={id} role="tab" aria-selected={surface === id} onClick={() => setSurface(id)}>{id}</button>)}
         </div>

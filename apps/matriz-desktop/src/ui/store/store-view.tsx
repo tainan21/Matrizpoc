@@ -2,7 +2,7 @@ import { Badge, Button } from "@matriz/design-ui/primitives"
 import { useEffect, useMemo, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { CommerceSnapshot, ManagedOperationId, StorePackage } from "../../domain/types"
+import type { CommerceSnapshot, StorePackage } from "../../domain/types"
 
 export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal(kind: "success" | "error"): void }) {
   const [snapshot, setSnapshot] = useState<CommerceSnapshot>()
@@ -29,16 +29,18 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
   const openPackage = async (item: StorePackage) => {
     setBusy(item.id); setError("")
     try {
-      const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === item.appId)
+      const target = await gateway.activatePackage(item.id)
+      const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === target.appId)
       if (!runtime || runtime.ownership === "none" || runtime.status === "stopped") {
-        await gateway.startManagedOperation(`app.${item.appId}.web` as ManagedOperationId)
+        await gateway.startManagedOperation(target.operationId)
       } else if (runtime.ownership === "managed" && runtime.status !== "ready") {
-        await gateway.restartRuntime(item.appId)
+        await gateway.restartRuntime(target.appId)
       } else if (runtime.ownership === "external" && runtime.status !== "ready") {
         throw new Error(`${item.name} está sob controle externo e ainda não está disponível.`)
       }
-      await waitForRuntime(gateway, item)
-      await gateway.openRuntimeTarget({ appId: item.appId, routePath: "/" })
+      await waitForRuntime(gateway, target.appId, item.name)
+      const verifiedTarget = await gateway.activatePackage(item.id)
+      await gateway.openRuntimeTarget({ appId: verifiedTarget.appId, routePath: verifiedTarget.routePath })
       signal("success")
     } catch (cause) { setError(String(cause)); signal("error") }
     finally { setBusy("") }
@@ -65,14 +67,14 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
   </section>
 }
 
-async function waitForRuntime(gateway: DesktopGateway, item: StorePackage) {
+async function waitForRuntime(gateway: DesktopGateway, appId: StorePackage["appId"], packageName: string) {
   for (let attempt = 0; attempt < 40; attempt += 1) {
-    const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === item.appId)
+    const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === appId)
     if (runtime?.status === "ready") return runtime
-    if (runtime?.ownership === "external" && runtime.status === "degraded") throw new Error(`${item.name} não respondeu na porta externa.`)
+    if (runtime?.ownership === "external" && runtime.status === "degraded") throw new Error(`${packageName} não respondeu na porta externa.`)
     await delay(250)
   }
-  throw new Error(`${item.name} não ficou pronto dentro do tempo esperado.`)
+  throw new Error(`${packageName} não ficou pronto dentro do tempo esperado.`)
 }
 
 function delay(milliseconds: number) { return new Promise((resolve) => window.setTimeout(resolve, milliseconds)) }
@@ -84,7 +86,7 @@ function PackageCard({ item, busy, selected, inspect, acquire, install, open, un
     <div className="package-actions" onClick={(event) => event.stopPropagation()}>
       {!item.owned ? <Button disabled={busy} aria-label={item.price ? `Adquirir ${item.name} por ${item.price} M` : `Adquirir ${item.name} grátis`} onClick={acquire}>ADQUIRIR</Button> : null}
       {item.owned && !item.installed ? <Button disabled={busy} aria-label={`Instalar ${item.name}`} onClick={install}>INSTALAR</Button> : null}
-      {item.installed ? <><Button aria-label={`Abrir ${item.name}`} onClick={open}>ABRIR</Button><button className="package-remove" aria-label={`Desinstalar ${item.name}`} onClick={uninstall}>REMOVER</button></> : null}
+      {item.installed ? <><Button disabled={busy} aria-label={`Abrir ${item.name}`} onClick={open}>ABRIR</Button><button disabled={busy} className="package-remove" aria-label={`Desinstalar ${item.name}`} onClick={uninstall}>REMOVER</button></> : null}
     </div>
   </article>
 }

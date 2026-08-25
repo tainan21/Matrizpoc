@@ -135,6 +135,11 @@ export const unavailableGateway: DesktopGateway = {
   installPackage: async (packageId) => demoCommerce(packageId, true),
   uninstallPackage: async (packageId) => demoCommerce(packageId, false),
   repairPackage: async (packageId) => demoCommerce(packageId, true),
+  activatePackage: async (packageId) => {
+    const item = demoCommerce(packageId, true).packages.find(({ id }) => id === packageId)
+    if (!item) throw new Error("Package is not in the trusted Matriz catalog")
+    return { packageId, appId: item.appId, operationId: `app.${item.appId}.web`, routePath: "/" }
+  },
   recoverRuntime: async (appId) => ({ appId, status: "ready", sessionId: `demo-${appId}` }),
   runbookCatalog: async () => [
     { id: "validate-environment", label: "Validar ambiente", description: "ENV e Doctor em uma passagem.", steps: ["environment.validate", "doctor.run"] },

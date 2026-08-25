@@ -352,6 +352,8 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .runtime-context > div { min-width: 0; display: grid; grid-template-columns: 7px minmax(0,1fr); align-items: center; gap: 4px 9px; }
 .runtime-context strong { font-size: 12px; }
 .runtime-context small { grid-column: 2; overflow: hidden; color: #766e80; font: 8px var(--matriz-font-mono); text-overflow: ellipsis; white-space: nowrap; }
+.runtime-capabilities { grid-column: 2; overflow: hidden; color: #70667a; font: 700 7px var(--matriz-font-mono); letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
+.runtime-capabilities b { color: #67dba4; font: inherit; }
 .ownership { padding: 4px 7px; border: 1px solid var(--line); border-radius: 5px; color: #887e93; font: 700 7px var(--matriz-font-mono); letter-spacing: .1em; text-transform: uppercase; }
 .ownership--managed { border-color: rgba(154,102,255,.3); color: #bc98ff; }
 .ownership--external { border-color: rgba(255,166,93,.28); color: #e9a36c; }

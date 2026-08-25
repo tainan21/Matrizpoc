@@ -66,6 +66,7 @@ describe("Tauri command contract", () => {
       installPackage: "install_package",
       uninstallPackage: "uninstall_package",
       repairPackage: "repair_package",
+      activatePackage: "activate_package",
       recoverRuntime: "recover_runtime",
       runbookCatalog: "get_runbook_catalog",
       runRunbook: "run_runbook",
@@ -150,6 +151,7 @@ describe("Tauri command contract", () => {
     await gateway.installPackage("matriz.analytics", ["runtime:observe", "activity:read"])
     await gateway.uninstallPackage("matriz.analytics")
     await gateway.repairPackage("matriz.analytics")
+    await gateway.activatePackage("matriz.analytics")
     await gateway.recoverRuntime("matriz-admin")
     await gateway.runbookCatalog()
     await gateway.runRunbook("validate-environment", "matriz-admin")
@@ -221,6 +223,7 @@ describe("Tauri command contract", () => {
       { command: "install_package", args: { packageId: "matriz.analytics", grantedPermissions: ["runtime:observe", "activity:read"] } },
       { command: "uninstall_package", args: { packageId: "matriz.analytics" } },
       { command: "repair_package", args: { packageId: "matriz.analytics" } },
+      { command: "activate_package", args: { packageId: "matriz.analytics" } },
       { command: "recover_runtime", args: { appId: "matriz-admin" } },
       { command: "get_runbook_catalog", args: undefined },
       { command: "run_runbook", args: { runbookId: "validate-environment", appId: "matriz-admin" } },
