@@ -32,6 +32,10 @@ import { WorkspaceRepository } from "../integration/filesystem/workspace-reposit
 import { SiteCatalogBridge } from "../integration/sites/site-catalog-bridge"
 import { buildControlSnapshot } from "../application/control-service"
 import { buildScoreSummary } from "../application/control"
+import { EngineeringOperationService } from "../application/engineering-operation-service"
+import { ReconciliationService } from "../application/reconciliation-service"
+import { CodexRunStore } from "../integration/codex/codex-run-store"
+import { GitObservationProvider } from "../integration/git/git-observation-provider"
 
 async function main(): Promise<void> {
 const repository = await WorkspaceRepository.create()
@@ -40,6 +44,25 @@ const adoptionPolicies = await LibraryAdoptionPolicyRepository.create(
   repository.repositoryRoot,
 )
 const sites = await SiteCatalogBridge.create(repository.repositoryRoot).catch(() => undefined)
+const gitObservation = new GitObservationProvider(repository.repositoryRoot)
+const engineeringOperations = new EngineeringOperationService(repository, gitObservation)
+const codexRuns = new CodexRunStore(repository.repositoryRoot)
+const reconciliation = new ReconciliationService({
+  getRequest: (projectId, requestId) => repository.getAgentRequest(projectId, requestId),
+  getRun: async (projectId, requestId) => {
+    const run = await codexRuns.read(projectId, requestId)
+    return run ? {
+      status: run.status,
+      revision: run.revision,
+      threadId: run.threadId,
+      changedFiles: run.changedFiles,
+      checkExecutions: run.checkExecutions,
+    } : undefined
+  },
+  observeGit: (baseCommit) => gitObservation.observe(baseCommit),
+  observeThread: async () => ({ available: false, exists: false, status: "unknown" as const }),
+  now: () => new Date().toISOString(),
+})
 
 const tools = [
   {
@@ -196,6 +219,59 @@ const tools = [
       additionalProperties: false,
     },
     annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "workbench_get_engineering_operations_context",
+    description: "Lê request, run e ownership ativa sem alterar estado.",
+    inputSchema: {
+      type: "object",
+      properties: { projectId: { type: "string" }, requestId: { type: "string" } },
+      required: ["projectId", "requestId"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "workbench_check_ownership_conflicts",
+    description: "Compara um scope pretendido com claims ativas e com o baseline Git observado.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string" }, requestId: { type: "string" }, revision: { type: "string" },
+        claimedBy: { type: "string" }, executionMode: { type: "string", enum: ["plan_only", "change"] },
+        intendedFiles: { type: "array", items: { type: "string" }, maxItems: 100 },
+        intendedSurfaces: { type: "array", items: { type: "string" }, maxItems: 50 },
+        plannedChecks: { type: "array", items: { type: "string" }, maxItems: 100 },
+        leaseMinutes: { type: "integer", minimum: 5, maximum: 120 },
+      },
+      required: ["projectId", "requestId", "revision", "claimedBy", "executionMode", "intendedFiles", "intendedSurfaces", "plannedChecks"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "workbench_reconcile_agent_request",
+    description: "Compara request, run e Git; reporta divergências sem corrigir ou aprovar estado.",
+    inputSchema: {
+      type: "object",
+      properties: { projectId: { type: "string" }, requestId: { type: "string" } },
+      required: ["projectId", "requestId"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+  },
+  {
+    name: "workbench_record_reconciliation_snapshot",
+    description: "ESCRITA — observa novamente e persiste o snapshot factual; não corrige Git nem governança.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string" }, requestId: { type: "string" }, revision: { type: "string" },
+      },
+      required: ["projectId", "requestId"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },
   {
     name: "workbench_get_control_snapshot",
@@ -427,8 +503,43 @@ const tools = [
         requestId: { type: "string" },
         revision: { type: "string" },
         claimedBy: { type: "string" },
+        executionMode: { type: "string", enum: ["plan_only", "change"] },
+        intendedFiles: { type: "array", items: { type: "string" }, maxItems: 100 },
+        intendedSurfaces: { type: "array", items: { type: "string" }, maxItems: 50 },
+        plannedChecks: { type: "array", items: { type: "string" }, maxItems: 100 },
+        leaseMinutes: { type: "integer", minimum: 5, maximum: 120 },
       },
-      required: ["projectId", "requestId", "revision", "claimedBy"],
+      required: ["projectId", "requestId", "revision", "claimedBy", "executionMode", "intendedFiles", "intendedSurfaces", "plannedChecks"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+  {
+    name: "workbench_checkpoint_execution_attempt",
+    description: "ESCRITA — registra um checkpoint material e renova a lease por generation. Exige aprovação humana.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string" }, requestId: { type: "string" }, revision: { type: "string" },
+        leaseGeneration: { type: "integer", minimum: 1 }, summary: { type: "string" },
+        leaseMinutes: { type: "integer", minimum: 5, maximum: 120 },
+      },
+      required: ["projectId", "requestId", "revision", "leaseGeneration", "summary"],
+      additionalProperties: false,
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+  },
+  {
+    name: "workbench_interrupt_execution_attempt",
+    description: "ESCRITA — registra interrupção factual sem concluir produto ou validação. Exige aprovação humana.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        projectId: { type: "string" }, requestId: { type: "string" }, revision: { type: "string" },
+        summary: { type: "string" }, changedFiles: { type: "array", items: { type: "string" }, maxItems: 100 },
+        checks: { type: "array", items: { type: "string" }, maxItems: 100 },
+      },
+      required: ["projectId", "requestId", "revision", "summary", "changedFiles", "checks"],
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
@@ -444,7 +555,7 @@ const tools = [
         revision: { type: "string" },
         resultSummary: { type: "string" },
         changedFiles: { type: "array", items: { type: "string" }, maxItems: 100 },
-        checks: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 100 },
+        checks: { type: "array", items: { type: "string" }, maxItems: 100 },
       },
       required: ["projectId", "requestId", "revision", "resultSummary", "changedFiles", "checks"],
       additionalProperties: false,
@@ -589,6 +700,16 @@ server.setRequestHandler(ReadResourceRequestSchema, async ({ params }) => {
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: [...tools] }))
 
 const projectIdInput = z.object({ projectId: z.string() })
+const operationClaimInput = projectIdInput.extend({
+  requestId: z.string(),
+  revision: z.string(),
+  claimedBy: z.string().trim().min(1).max(200),
+  executionMode: z.enum(["plan_only", "change"]),
+  intendedFiles: z.array(z.string()).max(100),
+  intendedSurfaces: z.array(z.string()).max(50),
+  plannedChecks: z.array(z.string()).max(100),
+  leaseMinutes: z.number().int().min(5).max(120).optional(),
+})
 const packageAdoptionReadinessInput = z
   .object({
     sourceId: z.string(),
@@ -688,6 +809,53 @@ server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
         const parsed = projectIdInput.extend({ status: agentRequestStatusSchema.optional() }).parse(input)
         const requests = (await repository.listAgentRequests(parsed.projectId)).filter((request) => !parsed.status || request.status === parsed.status)
         return json(requests.map(({ id, backlogItemId, title, status, claimedBy, updatedAt, revision }) => ({ id, backlogItemId, title, status, claimedBy, updatedAt, revision })))
+      }
+      case "workbench_get_engineering_operations_context": {
+        const parsed = projectIdInput.extend({ requestId: z.string() }).parse(input)
+        const [request, run, claims, savedReconciliation] = await Promise.all([
+          repository.getAgentRequest(parsed.projectId, parsed.requestId),
+          codexRuns.read(parsed.projectId, parsed.requestId),
+          repository.listActiveExecutionClaims(),
+          repository.getReconciliationSnapshot(parsed.projectId, parsed.requestId),
+        ])
+        const runSummary = run ? {
+          schemaVersion: run.schemaVersion,
+          projectId: run.projectId,
+          requestId: run.requestId,
+          backlogItemId: run.backlogItemId,
+          status: run.status,
+          threadId: run.threadId,
+          turnId: run.turnId,
+          changedFiles: run.changedFiles,
+          checks: run.checks,
+          attempts: run.attempts,
+          checkExecutions: run.checkExecutions.map((check) => ({
+            ...check,
+            outputExcerpt: undefined,
+          })),
+          approvals: run.approvals.map((approval) => ({
+            ...approval,
+            detail: undefined,
+          })),
+          startedAt: run.startedAt,
+          updatedAt: run.updatedAt,
+          completedAt: run.completedAt,
+          revision: run.revision,
+        } : undefined
+        return json({ request, run: runSummary, activeClaims: claims, savedReconciliation })
+      }
+      case "workbench_check_ownership_conflicts": {
+        const parsed = operationClaimInput.parse(input)
+        return json(await engineeringOperations.checkConflicts(parsed))
+      }
+      case "workbench_reconcile_agent_request": {
+        const parsed = projectIdInput.extend({ requestId: z.string() }).parse(input)
+        return json(await reconciliation.reconcile(parsed.projectId, parsed.requestId))
+      }
+      case "workbench_record_reconciliation_snapshot": {
+        const parsed = projectIdInput.extend({ requestId: z.string(), revision: z.string().optional() }).parse(input)
+        const snapshot = await reconciliation.reconcile(parsed.projectId, parsed.requestId)
+        return json(await repository.writeReconciliationSnapshot(parsed.projectId, snapshot, parsed.revision))
       }
       case "workbench_get_control_snapshot": {
         const parsed = projectIdInput.parse(input)
@@ -836,13 +1004,26 @@ server.setRequestHandler(CallToolRequestSchema, async ({ params }) => {
         return json(await repository.appendActivity(projectId, event))
       }
       case "workbench_claim_agent_request": {
-        const parsed = projectIdInput.extend({ requestId: z.string(), revision: z.string(), claimedBy: z.string() }).parse(input)
-        return json(await repository.updateAgentRequest(parsed.projectId, parsed.requestId, { status: "claimed", claimedBy: parsed.claimedBy }, parsed.revision, "codex"))
+        const parsed = operationClaimInput.parse(input)
+        return json(await engineeringOperations.claim(parsed))
+      }
+      case "workbench_checkpoint_execution_attempt": {
+        const parsed = projectIdInput.extend({
+          requestId: z.string(), revision: z.string(), leaseGeneration: z.number().int().positive(),
+          summary: z.string().trim().min(1).max(1000), leaseMinutes: z.number().int().min(5).max(120).optional(),
+        }).parse(input)
+        return json(await engineeringOperations.checkpoint(parsed))
+      }
+      case "workbench_interrupt_execution_attempt": {
+        const parsed = projectIdInput.extend({
+          requestId: z.string(), revision: z.string(), summary: z.string().trim().min(1).max(8000),
+          changedFiles: z.array(z.string()).max(100), checks: z.array(z.string()).max(100),
+        }).parse(input)
+        return json(await engineeringOperations.interrupt(parsed))
       }
       case "workbench_complete_agent_request": {
-        const parsed = projectIdInput.extend({ requestId: z.string(), revision: z.string(), resultSummary: z.string().trim().min(1), changedFiles: z.array(z.string()).max(100), checks: z.array(z.string().trim().min(1)).min(1).max(100) }).parse(input)
-        const result = await repository.updateAgentRequest(parsed.projectId, parsed.requestId, { status: "completed", resultSummary: parsed.resultSummary, changedFiles: parsed.changedFiles, checks: parsed.checks }, parsed.revision, "codex")
-        return json(result)
+        const parsed = projectIdInput.extend({ requestId: z.string(), revision: z.string(), resultSummary: z.string().trim().min(1), changedFiles: z.array(z.string()).max(100), checks: z.array(z.string().trim().min(1)).max(100) }).parse(input)
+        return json(await engineeringOperations.recordResult(parsed))
       }
       case "workbench_write_document": {
         const parsed = projectIdInput.extend({ kind: z.enum(["product", "technical", "decision"]), slug: z.string(), title: z.string(), content: z.string(), tags: z.array(z.string()).default([]), revision: z.string().optional() }).parse(input)

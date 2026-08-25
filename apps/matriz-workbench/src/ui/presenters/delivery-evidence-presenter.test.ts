@@ -39,6 +39,8 @@ it("joins agent, run and external receipt without duplicating evidence", () => {
     commands: [],
     changedFiles: ["src/a.ts", "src/b.ts"],
     checks: ["pnpm test"],
+    attempts: [],
+    checkExecutions: [],
     approvals: [],
     diff: "",
     startedAt: timestamp,

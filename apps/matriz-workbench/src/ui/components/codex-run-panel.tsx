@@ -84,7 +84,7 @@ export function CodexRunPanel({
   const canResume =
     run &&
     ["failed", "interrupted"].includes(run.status) &&
-    ["blocked", "in_progress"].includes(requestStatus)
+    ["blocked", "in_progress", "interrupted"].includes(requestStatus)
   const canStart = runtime.available && !run?.connected && (canStartFresh || canResume)
   const staleApprovals =
     !run?.connected && Boolean(run?.approvals.some((approval) => approval.status === "pending"))

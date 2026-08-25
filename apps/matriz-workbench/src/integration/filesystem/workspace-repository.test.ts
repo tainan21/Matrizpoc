@@ -530,6 +530,137 @@ describe("WorkspaceRepository", () => {
     expect(done.status).toBe("done")
   })
 
+  it("claims a bounded scope atomically and rejects overlapping live ownership", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const task = await repository.createWorkItem("sample", {
+      kind: "task",
+      title: "Coordinate two agents",
+      description: "",
+      productStatus: "ready",
+      validationStatus: "pending",
+      humanReviewStatus: "pending",
+      documentationStatus: "pending",
+      priority: "high",
+    })
+    const first = await repository.createAgentRequest("sample", task.id, "First agent")
+    const second = await repository.createAgentRequest("sample", task.id, "Second agent")
+    const claimInput = {
+      claimedBy: "codex:thread-a",
+      executionMode: "change" as const,
+      intendedFiles: ["apps/sample/src/domain"],
+      intendedSurfaces: ["sample-domain"],
+      plannedChecks: ["pnpm --filter sample test"],
+      baseCommit: "a".repeat(40),
+      dirtyPaths: [],
+      acquiredAt: "2026-08-04T15:00:00.000Z",
+      expiresAt: "2026-08-04T15:30:00.000Z",
+    }
+
+    const claimed = await repository.claimAgentRequest(
+      "sample",
+      first.id,
+      claimInput,
+      first.revision,
+      "2026-08-04T15:05:00.000Z",
+    )
+    expect(claimed.executionClaim?.intendedFiles).toEqual(["apps/sample/src/domain"])
+
+    await expect(repository.claimAgentRequest(
+      "sample",
+      first.id,
+      { ...claimInput, claimedBy: "codex:thread-b" },
+      claimed.revision,
+      "2026-08-04T15:05:00.000Z",
+    )).rejects.toMatchObject({ code: "CONFLICT" })
+
+    const renewed = await repository.renewAgentRequestClaim(
+      "sample",
+      first.id,
+      claimed.revision,
+      1,
+      "2026-08-04T15:10:00.000Z",
+      "2026-08-04T15:40:00.000Z",
+      "Concluído o contrato de domínio.",
+    )
+    expect(renewed.executionClaim?.lease.generation).toBe(2)
+
+    await expect(repository.claimAgentRequest(
+      "sample",
+      second.id,
+      {
+        ...claimInput,
+        claimedBy: "codex:thread-b",
+        intendedFiles: ["apps/sample/src/domain/models.ts"],
+      },
+      second.revision,
+      "2026-08-04T15:05:00.000Z",
+    )).rejects.toMatchObject({ code: "CONFLICT" })
+  })
+
+  it("completes a claimed plan-only request without fake checks", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const task = await repository.createWorkItem("sample", {
+      kind: "task",
+      title: "Plan the protocol",
+      description: "",
+      productStatus: "ready",
+      validationStatus: "pending",
+      humanReviewStatus: "pending",
+      documentationStatus: "pending",
+      priority: "high",
+    })
+    const queued = await repository.createAgentRequest("sample", task.id, "Plan only")
+    const claimed = await repository.claimAgentRequest("sample", queued.id, {
+      claimedBy: "codex:planner",
+      executionMode: "plan_only",
+      intendedFiles: [],
+      intendedSurfaces: ["engineering-operations"],
+      plannedChecks: [],
+      baseCommit: "a".repeat(40),
+      dirtyPaths: ["AGENTS.md"],
+      acquiredAt: "2026-08-04T15:00:00.000Z",
+      expiresAt: "2026-08-04T15:30:00.000Z",
+    }, queued.revision, "2026-08-04T15:05:00.000Z")
+
+    const completed = await repository.updateAgentRequest("sample", queued.id, {
+      status: "completed",
+      resultSummary: "Plano entregue para revisão humana.",
+      changedFiles: [],
+      checks: [],
+    }, claimed.revision, "codex")
+
+    expect(completed.status).toBe("completed")
+    expect(completed.checks).toEqual([])
+  })
+
+  it("persists reconciliation snapshots with optimistic revision", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const snapshot = await repository.writeReconciliationSnapshot("sample", {
+      status: "divergent",
+      projectId: "sample",
+      requestId: "req_00000000-0000-4000-8000-000000000001",
+      requestRevision: "request-revision",
+      runRevision: "run-revision",
+      observedAt: "2026-08-04T15:20:00.000Z",
+      threadObservation: "unavailable",
+      findings: [{
+        code: "review_stale",
+        severity: "error",
+        summary: "A revisão está stale.",
+      }],
+    })
+
+    await expect(repository.getReconciliationSnapshot("sample", snapshot.requestId))
+      .resolves.toEqual(snapshot)
+    await expect(repository.writeReconciliationSnapshot("sample", {
+      ...snapshot,
+      observedAt: "2026-08-04T15:21:00.000Z",
+    }, "stale-revision")).rejects.toBeInstanceOf(RevisionConflictError)
+  })
+
   it("reviews a completed execution without moving the product and rejects stale review writes", async () => {
     const { repository } = await fixture()
     await repository.initializeProject("sample")

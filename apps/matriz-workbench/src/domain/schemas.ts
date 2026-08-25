@@ -63,6 +63,7 @@ export const agentRequestStatusSchema = z.enum([
   "claimed",
   "in_progress",
   "blocked",
+  "interrupted",
   "completed",
   "cancelled",
 ])
@@ -348,6 +349,26 @@ export const agentExecutionReviewSchema = z.object({
   runRevision: revision.optional(),
 })
 
+export const executionClaimSchema = z.object({
+  requestId: id("req"),
+  claimedBy: z.string().trim().min(1).max(200),
+  executionMode: z.enum(["plan_only", "change"]),
+  intendedFiles: z.array(z.string().trim().min(1).max(500)).max(100),
+  intendedSurfaces: z.array(z.string().trim().min(1).max(120)).max(50),
+  plannedChecks: z.array(z.string().trim().min(1).max(500)).max(100),
+  baseGit: z.object({
+    commit: z.string().regex(/^[0-9a-f]{40}$/),
+    dirtyPaths: z.array(z.string().trim().min(1).max(500)).max(200),
+    observedAt: isoDate,
+  }),
+  lease: z.object({
+    acquiredAt: isoDate,
+    renewedAt: isoDate,
+    expiresAt: isoDate,
+    generation: z.number().int().positive(),
+  }),
+})
+
 export const agentRequestSchema = z.object({
   schemaVersion: z.literal(1),
   id: id("req"),
@@ -360,6 +381,7 @@ export const agentRequestSchema = z.object({
   resultSummary: z.string().trim().max(8000).optional(),
   changedFiles: z.array(z.string().trim().min(1).max(500)).max(100).default([]),
   checks: z.array(z.string().trim().min(1).max(500)).max(100).default([]),
+  executionClaim: executionClaimSchema.optional(),
   review: agentExecutionReviewSchema.optional(),
   createdAt: isoDate,
   updatedAt: isoDate,
@@ -436,6 +458,7 @@ export type AcceptanceCriterion = z.infer<typeof acceptanceCriterionSchema>
 export type AttachmentReference = z.infer<typeof attachmentReferenceSchema>
 export type AgentRequest = z.infer<typeof agentRequestSchema>
 export type AgentExecutionReview = z.infer<typeof agentExecutionReviewSchema>
+export type PersistedExecutionClaim = z.infer<typeof executionClaimSchema>
 export type ActivityEvent = z.infer<typeof activityEventSchema>
 export type ContextPolicy = z.infer<typeof contextPolicySchema>
 export type WorkbenchDocument = z.infer<typeof workbenchDocumentSchema>

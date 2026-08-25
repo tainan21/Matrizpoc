@@ -32,6 +32,15 @@ function isErrorResult(result: unknown): boolean {
   )
 }
 
+function jsonResult<T>(label: string, result: unknown): T {
+  const text = textResult(result)
+  try {
+    return JSON.parse(text) as T
+  } catch {
+    throw new Error(`${label} não retornou JSON: ${text.slice(0, 120)}`)
+  }
+}
+
 async function main(): Promise<void> {
   const appRoot = process.cwd()
   const client = new Client({ name: "matriz-workbench-contract-check", version: "0.1.0" })
@@ -56,15 +65,15 @@ async function main(): Promise<void> {
       name: "workbench_list_projects",
       arguments: {},
     })
-    const projects = JSON.parse(textResult(projectsResult)) as Array<{ id: string }>
+    const projects = jsonResult<Array<{ id: string }>>("projects", projectsResult)
     const spotResult = await client.callTool({
       name: "workbench_get_project_inventory",
       arguments: { projectId: "spot" },
     })
-    const spot = JSON.parse(textResult(spotResult)) as {
+    const spot = jsonResult<{
       project: { id: string }
       git: { branch?: string }
-    }
+    }>("spot inventory", spotResult)
     const resource = await client.readResource({
       uri: "matriz://projects/seumei/inventory",
     })
@@ -77,21 +86,26 @@ async function main(): Promise<void> {
       name: "workbench_list_registered_sources",
       arguments: {},
     })
-    const sources = JSON.parse(textResult(sourcesResult)) as Array<{
+    const sources = jsonResult<Array<{
       id: string
       available: boolean
       absolutePath?: string
-    }>
-    const uiPackageResult = await client.callTool({
-      name: "workbench_get_registered_package_summary",
-      arguments: {
-        sourceId: "matriz-lib-ui",
-        packageName: "@matriz/blocks",
-      },
-    })
-    const uiPackage = JSON.parse(textResult(uiPackageResult)) as {
+    }>>("registered sources", sourcesResult)
+    const uiSourceAvailable = sources.some((source) => source.id === "matriz-lib-ui" && source.available)
+    const seumeiSourceAvailable = sources.some((source) => source.id === "seumei-reference" && source.available)
+    let uiPackage: {
       name: string
       exports: string[]
+    } | undefined
+    if (uiSourceAvailable) {
+      const uiPackageResult = await client.callTool({
+        name: "workbench_get_registered_package_summary",
+        arguments: {
+          sourceId: "matriz-lib-ui",
+          packageName: "@matriz/blocks",
+        },
+      })
+      uiPackage = jsonResult("registered package", uiPackageResult)
     }
     const readinessTool = tools.tools.find(
       (tool) => tool.name === "workbench_get_package_adoption_readiness",
@@ -113,18 +127,21 @@ async function main(): Promise<void> {
     ) {
       throw new Error("Contrato da tool de prontidao esta mais amplo que o permitido.")
     }
-    const readinessResult = await client.callTool({
-      name: "workbench_get_package_adoption_readiness",
-      arguments: {
-        sourceId: "matriz-lib-ui",
-        packageName: "@matriz/tokens",
-      },
-    })
-    const readiness = JSON.parse(textResult(readinessResult)) as {
+    let readiness: {
       status: string
       ready: boolean
       allowedSubpaths: string[]
       absolutePath?: string
+    } | undefined
+    if (uiSourceAvailable) {
+      const readinessResult = await client.callTool({
+        name: "workbench_get_package_adoption_readiness",
+        arguments: {
+          sourceId: "matriz-lib-ui",
+          packageName: "@matriz/tokens",
+        },
+      })
+      readiness = jsonResult("package readiness", readinessResult)
     }
     const invalidArgumentResult = await client.callTool({
       name: "workbench_get_package_adoption_readiness",
@@ -157,18 +174,19 @@ async function main(): Promise<void> {
     ) {
       throw new Error("Erro MCP expôs detalhes internos do repositório.")
     }
-    const seumeiDocumentsResult = await client.callTool({
-      name: "workbench_list_repository_documents",
-      arguments: { sourceId: "seumei-reference" },
-    })
-    const seumeiDocuments = JSON.parse(
-      textResult(seumeiDocumentsResult),
-    ) as Array<{ path: string; hash: string }>
+    let seumeiDocuments: Array<{ path: string; hash: string }> = []
+    if (seumeiSourceAvailable) {
+      const seumeiDocumentsResult = await client.callTool({
+        name: "workbench_list_repository_documents",
+        arguments: { sourceId: "seumei-reference" },
+      })
+      seumeiDocuments = jsonResult("seumei documents", seumeiDocumentsResult)
+    }
     const siteResult = await client.callTool({
       name: "workbench_get_site_summary",
       arguments: { siteId: "example" },
     })
-    const site = JSON.parse(textResult(siteResult)) as { id: string }
+    const site = jsonResult<{ id: string }>("site summary", siteResult)
 
     if (!tools.tools.some((tool) => tool.name === "workbench_get_project_inventory")) {
       throw new Error("Tool de inventário não publicada.")
@@ -181,6 +199,30 @@ async function main(): Promise<void> {
     }
     for (const name of ["workbench_get_control_snapshot", "workbench_get_score_summary", "workbench_list_score_evidence", "workbench_review_score_evidence"]) {
       if (!tools.tools.some((tool) => tool.name === name)) throw new Error(`Tool de Controle ausente: ${name}`)
+    }
+    for (const name of [
+      "workbench_get_engineering_operations_context",
+      "workbench_check_ownership_conflicts",
+      "workbench_reconcile_agent_request",
+      "workbench_record_reconciliation_snapshot",
+      "workbench_checkpoint_execution_attempt",
+      "workbench_interrupt_execution_attempt",
+    ]) {
+      const tool = tools.tools.find((entry) => entry.name === name)
+      if (!tool) throw new Error(`Tool de Engineering Operations ausente: ${name}`)
+      const isRead = name.startsWith("workbench_get_") || name.startsWith("workbench_check_") || name.startsWith("workbench_reconcile_")
+      if (
+        tool.annotations?.readOnlyHint !== isRead ||
+        tool.annotations?.destructiveHint !== false ||
+        tool.inputSchema.additionalProperties !== false
+      ) {
+        throw new Error(`Permissões incorretas na tool de Engineering Operations: ${name}`)
+      }
+    }
+    const claimTool = tools.tools.find((tool) => tool.name === "workbench_claim_agent_request")
+    const claimRequired = new Set(claimTool?.inputSchema.required ?? [])
+    for (const field of ["executionMode", "intendedFiles", "intendedSurfaces", "plannedChecks"]) {
+      if (!claimRequired.has(field)) throw new Error(`Claim sem campo obrigatório: ${field}`)
     }
     if (!projects.some((project) => project.id === "seumei")) {
       throw new Error("Seumei não foi encontrado pelo MCP.")
@@ -196,21 +238,21 @@ async function main(): Promise<void> {
     ) {
       throw new Error("Registro federado incompleto ou com caminho local exposto.")
     }
-    if (seumeiDocuments.length < 1 || site.id !== "example") {
+    if ((seumeiSourceAvailable && seumeiDocuments.length < 1) || site.id !== "example") {
       throw new Error("Catálogo federado ou projeção Sites indisponível.")
     }
-    if (
+    if (uiSourceAvailable && (!uiPackage ||
       uiPackage.name !== "@matriz/blocks" ||
       !uiPackage.exports.includes("./page-header")
-    ) {
+    )) {
       throw new Error("Contrato read-only da Matriz Lib UI indisponivel.")
     }
-    if (
+    if (uiSourceAvailable && (!readiness ||
       readiness.status !== "candidate" ||
       readiness.ready ||
       !readiness.allowedSubpaths.includes("./css") ||
       "absolutePath" in readiness
-    ) {
+    )) {
       throw new Error("Gate read-only de adocao da Matriz Lib UI indisponivel.")
     }
     const guideContent = guideResource.contents[0]

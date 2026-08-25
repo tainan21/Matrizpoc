@@ -159,3 +159,11 @@ The decision applies only to that execution. It never changes the work item's
 product, validation, human-review or documentation state, and never updates a
 roadmap marker, phase or score. Activity remains append-only under
 `agent_request.review_approved` or `agent_request.changes_requested`.
+
+## Engineering Operations and reconciliation
+
+Agent requests remain schema version 1 and may add an optional `executionClaim`. The claim records execution mode, owner, intended files/surfaces, planned checks, observed Git baseline and a generation-safe lease. Older requests remain readable without rewrite.
+
+Reconciliation snapshots live under `.matriz/agents/reconciliation/<request-id>.json`. They are reports, not task truth. Writes are atomic, request-scoped and revisioned. A snapshot may be `current`, `divergent` or `unavailable`; it never changes Git, product status, validation, documentation, human review, roadmap or score.
+
+Codex run snapshots may add `attempts` and `checkExecutions`. A check distinguishes `planned`, `running`, `passed`, `failed`, `cancelled` and `expired`, and carries source, timestamps, commit references and a redacted output digest/excerpt. Legacy `checks: string[]` remains readable as a compatibility projection.
