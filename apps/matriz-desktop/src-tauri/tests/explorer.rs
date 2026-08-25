@@ -9,12 +9,41 @@ fn fixture() -> (tempfile::TempDir, ExplorerService) {
     fs::create_dir_all(app.join("node_modules/hidden")).expect("ignored directory");
     fs::write(app.join("src/index.ts"), "export const value = 42\n").expect("text file");
     fs::write(
+        app.join("src/config.ts"),
+        "const port = process.env.PORT\nconst secret = process.env.DATABASE_URL\n",
+    )
+    .expect("environment references");
+    fs::write(
         app.join("src/assets/icon.svg"),
         "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>",
     )
     .expect("svg");
     let service = ExplorerService::new(temp.path().to_path_buf()).expect("service");
     (temp, service)
+}
+
+#[test]
+fn finds_bounded_environment_references_without_exposing_values() {
+    let (temp, service) = fixture();
+    fs::write(
+        temp.path().join("apps/matriz-admin/node_modules/hidden/secret.ts"),
+        "process.env.DATABASE_URL = 'must-not-leak'",
+    )
+    .expect("ignored secret fixture");
+
+    let result = service
+        .find_environment_references("matriz-admin", "DATABASE_URL")
+        .expect("reference scan");
+
+    assert_eq!(result.app_id, "matriz-admin");
+    assert_eq!(result.key, "DATABASE_URL");
+    assert_eq!(result.matches.len(), 1);
+    assert_eq!(result.matches[0].relative_path, "src/config.ts");
+    assert_eq!(result.matches[0].line, 2);
+    assert!(!result.matches[0].excerpt.contains("must-not-leak"));
+    assert!(service
+        .find_environment_references("matriz-admin", "BAD KEY")
+        .is_err());
 }
 
 #[test]

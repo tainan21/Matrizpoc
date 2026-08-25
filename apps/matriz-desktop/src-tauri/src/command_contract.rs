@@ -45,6 +45,7 @@ pub const COMMAND_NAMES: &[&str] = &[
     "save_environment",
     "compare_environments",
     "promote_environment",
+    "find_environment_references",
     "list_directory",
     "preview_file",
     "open_resource",

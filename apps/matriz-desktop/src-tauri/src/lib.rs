@@ -26,7 +26,7 @@ use environment::{
     EnvironmentComparison, EnvironmentDocument, EnvironmentFile, EnvironmentPromotionRequest,
     EnvironmentSaveRequest, EnvironmentService,
 };
-use explorer::{DirectoryListing, ExplorerService, FilePreview};
+use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
@@ -652,6 +652,15 @@ fn preview_file(
     ExplorerService::new(state.root()?)?.preview(&app_id, &relative_path)
 }
 
+#[tauri::command(rename_all = "camelCase")]
+fn find_environment_references(
+    state: tauri::State<'_, OperationsState>,
+    app_id: String,
+    key: String,
+) -> Result<EnvironmentReferenceResult, String> {
+    ExplorerService::new(state.root()?)?.find_environment_references(&app_id, &key)
+}
+
 #[tauri::command]
 fn open_resource(
     state: tauri::State<'_, OperationsState>,
@@ -937,6 +946,7 @@ pub fn run() {
             save_environment,
             compare_environments,
             promote_environment,
+            find_environment_references,
             list_directory,
             preview_file,
             open_resource,

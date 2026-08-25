@@ -13,6 +13,8 @@ use crate::resources::WorkspaceResourceService;
 
 const MAX_TEXT_BYTES: u64 = 256 * 1024;
 const MAX_IMAGE_BYTES: u64 = 8 * 1024 * 1024;
+const MAX_SEARCH_FILES: usize = 2_000;
+const MAX_REFERENCE_MATCHES: usize = 50;
 const IGNORED_DIRECTORIES: &[&str] = &[".git", ".next", ".turbo", "node_modules", "target"];
 
 #[derive(Clone, Debug)]
@@ -55,6 +57,24 @@ pub struct FilePreview {
     pub name: String,
     pub size: u64,
     pub content: PreviewContent,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EnvironmentReferenceMatch {
+    pub relative_path: String,
+    pub line: usize,
+    pub excerpt: String,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EnvironmentReferenceResult {
+    pub app_id: String,
+    pub key: String,
+    pub scanned_files: usize,
+    pub truncated: bool,
+    pub matches: Vec<EnvironmentReferenceMatch>,
 }
 
 impl ExplorerService {
@@ -126,6 +146,77 @@ impl ExplorerService {
             name,
             size: metadata.len(),
             content,
+        })
+    }
+
+    pub fn find_environment_references(
+        &self,
+        app_id: &str,
+        key: &str,
+    ) -> Result<EnvironmentReferenceResult, String> {
+        validate_environment_key(key)?;
+        let root = self.resources.app_root(app_id)?;
+        let mut pending = vec![root.clone()];
+        let mut matches = Vec::new();
+        let mut scanned_files = 0;
+        let mut truncated = false;
+
+        while let Some(directory) = pending.pop() {
+            let entries = fs::read_dir(directory)
+                .map_err(|error| format!("Could not scan project: {error}"))?;
+            for entry in entries.filter_map(Result::ok) {
+                let path = entry.path();
+                let metadata = fs::symlink_metadata(&path)
+                    .map_err(|error| format!("Could not inspect project resource: {error}"))?;
+                if metadata.file_type().is_symlink() {
+                    continue;
+                }
+                if metadata.is_dir() {
+                    if !IGNORED_DIRECTORIES.contains(&entry.file_name().to_string_lossy().as_ref()) {
+                        pending.push(path);
+                    }
+                    continue;
+                }
+                if scanned_files >= MAX_SEARCH_FILES || matches.len() >= MAX_REFERENCE_MATCHES {
+                    truncated = true;
+                    break;
+                }
+                if !is_reference_text(&extension(&path)) || metadata.len() > MAX_TEXT_BYTES {
+                    continue;
+                }
+                scanned_files += 1;
+                let Ok(content) = fs::read_to_string(&path) else { continue };
+                for (index, line) in content.lines().enumerate() {
+                    if line.contains(key) {
+                        let relative_path = path
+                            .strip_prefix(&root)
+                            .map_err(|error| error.to_string())?
+                            .to_string_lossy()
+                            .replace('\\', "/");
+                        matches.push(EnvironmentReferenceMatch {
+                            relative_path,
+                            line: index + 1,
+                            excerpt: format!("Referência a {key}"),
+                        });
+                        if matches.len() >= MAX_REFERENCE_MATCHES {
+                            truncated = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if truncated {
+                break;
+            }
+        }
+
+        matches.sort_by(|left, right| (&left.relative_path, left.line).cmp(&(&right.relative_path, right.line)));
+        Ok(EnvironmentReferenceResult {
+            app_id: app_id.into(),
+            key: key.into(),
+            scanned_files,
+            truncated,
+            matches,
         })
     }
 
@@ -309,6 +400,17 @@ fn is_text(extension: &str) -> bool {
             | "rs"
             | "env"
     )
+}
+fn is_reference_text(extension: &str) -> bool {
+    matches!(extension, "ts" | "tsx" | "js" | "jsx" | "json" | "md" | "rs" | "toml" | "yaml" | "yml")
+}
+fn validate_environment_key(key: &str) -> Result<(), String> {
+    let mut chars = key.chars();
+    let valid_start = chars.next().is_some_and(|value| value == '_' || value.is_ascii_alphabetic());
+    if !valid_start || !chars.all(|value| value == '_' || value.is_ascii_alphanumeric()) {
+        return Err("Environment variable key is invalid".into());
+    }
+    Ok(())
 }
 fn guard_mutation(relative_path: &str) -> Result<(), String> {
     let name = Path::new(relative_path)

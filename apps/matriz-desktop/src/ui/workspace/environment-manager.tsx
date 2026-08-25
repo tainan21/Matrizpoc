@@ -2,7 +2,7 @@ import { Badge, Button } from "@matriz/design-ui/primitives"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { DesktopAppId, EnvironmentComparison, EnvironmentDocument, RuntimeInstance } from "../../domain/types"
+import type { DesktopAppId, EnvironmentComparison, EnvironmentDocument, EnvironmentReferenceResult, RuntimeInstance } from "../../domain/types"
 import { useWorkspaceNavigationGuard } from "./navigation-guard"
 
 interface DraftVariable {
@@ -33,6 +33,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   const [error, setError] = useState("")
   const [comparison, setComparison] = useState<EnvironmentComparison>()
   const [selectedKeys, setSelectedKeys] = useState<readonly string[]>([])
+  const [impact, setImpact] = useState<EnvironmentReferenceResult>()
   const selectionGeneration = useRef(0)
   const newVariableId = useRef(0)
 
@@ -163,6 +164,19 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
     }
   }
 
+  const inspectImpact = async (key: string) => {
+    setBusy(true)
+    setError("")
+    try {
+      setImpact(await gateway.findEnvironmentReferences(appId, key))
+    } catch (cause) {
+      setError(String(cause))
+      signal("error")
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const update = (id: string, patch: Partial<DraftVariable>) => setDraft((items) => items.map((item) => item.id === id ? { ...item, ...patch } : item))
   const canLeaveDraft = () => !dirtyCount || window.confirm("Descartar alterações não salvas deste ambiente?")
   const leaveDraft = (change: () => void) => {
@@ -206,10 +220,15 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
           <input aria-label={`Chave ${variable.key}`} value={variable.key} readOnly={variable.sensitive && !variable.revealed} onChange={(event) => update(variable.id, { key: event.target.value })} />
           <input aria-label={`Valor ${variable.key}`} value={variable.sensitive && !variable.revealed ? "••••••••" : (variable.value ?? "")} readOnly={variable.sensitive && !variable.revealed} onChange={(event) => update(variable.id, { value: event.target.value, valueChanged: true, revealed: true })} />
           <span><i className={variable.sensitive ? "is-secret" : ""}>{variable.sensitive ? "SENSÍVEL" : variable.source}</i></span>
-          <span className="env-actions">{variable.sensitive ? <button aria-label={`${variable.revealed ? "Ocultar" : "Revelar"} ${variable.key}`} onClick={() => variable.revealed ? update(variable.id, { revealed: false }) : void reveal(variable.id, variable.key)}>{variable.revealed ? "OCULTAR" : "REVELAR"}</button> : null}<button aria-label={`Excluir ${variable.key}`} onClick={() => setDraft((items) => items.filter(({ id }) => id !== variable.id))}>×</button></span>
+          <span className="env-actions"><button aria-label={`Ver impacto de ${variable.key}`} disabled={!variable.originalKey} onClick={() => void inspectImpact(variable.key)}>IMPACTO</button>{variable.sensitive ? <button aria-label={`${variable.revealed ? "Ocultar" : "Revelar"} ${variable.key}`} onClick={() => variable.revealed ? update(variable.id, { revealed: false }) : void reveal(variable.id, variable.key)}>{variable.revealed ? "OCULTAR" : "REVELAR"}</button> : null}<button aria-label={`Excluir ${variable.key}`} onClick={() => setDraft((items) => items.filter(({ id }) => id !== variable.id))}>×</button></span>
         </div>)}
         {!filtered.length ? <div className="env-empty">Nenhuma variável neste ambiente.</div> : null}
       </div>}
+
+      {impact ? <aside className="env-impact" aria-labelledby="env-impact-title">
+        <div className="env-impact-heading"><div><span className="eyebrow">IMPACT RADAR</span><h2 id="env-impact-title">Impacto de {impact.key}</h2><p>{impact.matches.length} {impact.matches.length === 1 ? "referência" : "referências"} em {impact.scannedFiles} arquivos analisados{impact.truncated ? " · resultado limitado" : ""}</p></div><button aria-label="Fechar impacto" onClick={() => setImpact(undefined)}>×</button></div>
+        <div className="env-impact-matches">{impact.matches.map((match) => <button key={`${match.relativePath}:${match.line}`} aria-label={`Abrir ${match.relativePath} no editor`} onClick={() => void gateway.openResourceInEditor(appId, match.relativePath)}><strong>{match.relativePath}</strong><span>L{match.line}</span><small>{match.excerpt}</small></button>)}{!impact.matches.length ? <p>Nenhuma referência encontrada no escopo seguro do projeto.</p> : null}</div>
+      </aside> : null}
 
       <div className="env-footer">
         <span><b>{dirtyCount}</b> alterações não salvas · segredos permanecem fora do histórico</span>

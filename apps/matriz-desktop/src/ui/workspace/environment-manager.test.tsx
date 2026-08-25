@@ -58,6 +58,7 @@ function gateway() {
     }),
     promoteEnvironment: vi.fn().mockResolvedValue({ appId: "matriz-admin", fileName: ".env.example", revision: "promoted", missingRequired: [], variables: [] }),
     findEnvironmentReferences: vi.fn().mockResolvedValue({ appId: "matriz-admin", key: "PORT", scannedFiles: 0, truncated: false, matches: [] }),
+    openResourceInEditor: vi.fn().mockResolvedValue(undefined),
   } as unknown as DesktopGateway
 }
 
@@ -150,5 +151,24 @@ describe("EnvironmentManager", () => {
       targetRevision: "target-rev",
       keys: ["DATABASE_URL"],
     }))
+  })
+
+  it("shows bounded source impact and opens a match in the editor", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.findEnvironmentReferences).mockResolvedValue({
+      appId: "matriz-admin",
+      key: "PORT",
+      scannedFiles: 24,
+      truncated: false,
+      matches: [{ relativePath: "src/config.ts", line: 8, excerpt: "Referência a PORT" }],
+    })
+    render(<EnvironmentManager gateway={desktop} runtimes={[runtime]} restart={vi.fn()} signal={vi.fn()} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Ver impacto de PORT" }))
+    expect(await screen.findByRole("heading", { name: "Impacto de PORT" })).toBeVisible()
+    expect(screen.getByText("1 referência em 24 arquivos analisados")).toBeVisible()
+    fireEvent.click(screen.getByRole("button", { name: "Abrir src/config.ts no editor" }))
+
+    expect(desktop.openResourceInEditor).toHaveBeenCalledWith("matriz-admin", "src/config.ts")
   })
 })
