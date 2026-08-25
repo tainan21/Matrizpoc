@@ -20,7 +20,7 @@ Este roadmap organiza as próximas capacidades como fatias verticais independent
 | 4. Clientes | Consolidar contatos e histórico comercial por empresa | `/workspace/customers` -> `/workspace/customers/[customerId]` | Pedidos para evidência de identidade | **Concluído no escopo e-mail/telefone** |
 | 5. Financeiro essencial | Enxergar recebimentos, despesas e resultado operacional básico | `/workspace/finance` -> `/workspace/finance/entries/[entryId]` | Pedidos; decisão de escopo financeiro | **Concluído no escopo operacional** |
 | 6. Identidade visual/publicação | Personalizar e revisar a experiência pública com acessibilidade | `/workspace/store/design` -> `/workspace/store/preview` -> `/store/[storeSlug]` | Loja/publicação estável | **Concluído com presets e snapshots imutáveis** |
-| 7. Integrações justificadas | Conectar somente serviços necessários a fluxos reais | `/workspace/settings/integrations` -> provedor -> retorno | Contrato estável do domínio consumidor | P2/P3 |
+| 7. Integrações justificadas | Conectar somente serviços necessários a fluxos reais | O flow nasce na capacidade consumidora; não existe hub vazio de integrações | Contrato estável, sandbox, segredo e ownership | **Gate concluído; adapters aguardam pré-condições externas** |
 
 ## Ciclo 1 - Estoque e movimentos
 
@@ -65,6 +65,8 @@ Não criar um construtor livre de páginas inicialmente. Blocos adicionais depen
 Cada integração nasce do domínio consumidor e de um route flow concreto. Credenciais ficam server-side; callbacks validam assinatura, tenant e idempotência; indisponibilidade degrada honestamente sem inventar sucesso.
 
 Ordem recomendada quando os fluxos exigirem: e-mail transacional, pagamentos, frete, domínio/publicação e analytics consentido. Um adapter app-local precede qualquer extração compartilhada.
+
+Decisão final: `docs/superpowers/specs/2026-08-24-seumei-integration-readiness-design.md`. A referência não contém provider real; templates de e-mail e lifecycle de pagamento são mocks locais. Não foi criada `/workspace/settings/integrations`, pois seria uma página vazia. O ciclo reabre quando as pré-condições documentadas existirem.
 
 ## Gates comuns de cada ciclo
 
