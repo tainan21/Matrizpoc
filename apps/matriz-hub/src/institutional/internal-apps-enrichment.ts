@@ -214,9 +214,13 @@ const DECORATIONS: Record<string, Decoration> = {
  */
 export function decorationFor(manifest: AppManifestDTO): Decoration {
   const found = DECORATIONS[manifest.appId]
-  if (found) return found
+  if (found) {
+    const { metrics: _simulatedMetrics, telemetry: _simulatedTelemetry, ...declared } = found
+    return declared
+  }
+  const projectSlug = manifest.appId.replace(/^matriz-/, "").replace(/_/g, "-")
   return {
-    projectId: `matriz:${manifest.appId.replace(/_/g, "-")}` as `matriz:${string}`,
+    projectId: `matriz:${projectSlug}` as `matriz:${string}`,
     brand: {
       brandName: manifest.name,
       primaryColor: "#374151",
