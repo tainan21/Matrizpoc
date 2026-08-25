@@ -11,6 +11,8 @@ Operate known local processes without exposing a generic remote shell.
 - Never import another app's `src/**` or `app/**`.
 - Browser requests contain project/action identifiers, never raw commands, env maps, or arbitrary paths.
 - Do not persist terminal output or secrets.
+- Render workspace terminal routes with the lowercase `mih` alias; never expose or rename the physical `matriz-infra-hub` directory in terminal screens.
+- Resolve only the exact controlled `cd mih` route shortcut. Never generalize it into browser-supplied paths or arbitrary shell navigation.
 
 ## Validation
 

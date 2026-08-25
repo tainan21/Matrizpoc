@@ -2,7 +2,7 @@ import { mkdtemp, mkdir, realpath, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, expect, it } from "vitest"
-import { listTerminalProjects, resolveTerminalAction } from "./project-catalog"
+import { listTerminalProjects, resolveTerminalAction, terminalRoute } from "./project-catalog"
 
 async function workspace() {
   const root = await mkdtemp(join(tmpdir(), "matriz-control-"))
@@ -16,6 +16,10 @@ async function workspace() {
 }
 
 describe("project catalog", () => {
+  it("maps workspace paths to lowercase mih routes", () => {
+    expect(terminalRoute("C:/Apps/Matriz-Infra-Hub", "C:/Apps/Matriz-Infra-Hub/apps/Matriz-Control")).toBe("mih/apps/matriz-control")
+    expect(() => terminalRoute("C:/Apps/Matriz-Infra-Hub", "C:/outside")).toThrow("Path outside workspace")
+  })
   it("exposes only supported package scripts", async () => {
     const { root } = await workspace()
     const projects = await listTerminalProjects(root)

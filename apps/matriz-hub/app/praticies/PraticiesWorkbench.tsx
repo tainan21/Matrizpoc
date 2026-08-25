@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState, useEffect, useState } from "react"
+import { useActionState, useEffect, useRef, useState } from "react"
+import { playOperationalSound } from "../../src/ui/feedback/operational-sounds"
 import { useFormStatus } from "react-dom"
 import Link from "next/link"
 import { generatePatternsAction } from "./actions"
@@ -209,6 +210,7 @@ export function PraticiesWorkbench({
     generation: initialGeneration,
   }
   const [state, formAction] = useActionState(generatePatternsAction, initialState)
+  const previousStatus = useRef(state.status)
   const [selectedId, setSelectedId] = useState("patterns")
   const [copied, setCopied] = useState<string | null>(null)
   const generation = state.generation ?? initialGeneration
@@ -217,6 +219,14 @@ export function PraticiesWorkbench({
     const requested = window.location.hash.slice(1)
     if (practices.some((practice) => practice.id === requested)) setSelectedId(requested)
   }, [practices])
+
+  useEffect(() => {
+    if (state.status !== previousStatus.current) {
+      if (state.status === "success") void playOperationalSound("success")
+      if (state.status === "error") void playOperationalSound("failure")
+      previousStatus.current = state.status
+    }
+  }, [state.status])
 
   function copyCommand(value: string, key: string) {
     void navigator.clipboard.writeText(value).then(() => {
@@ -271,7 +281,7 @@ export function PraticiesWorkbench({
 
         <section className={styles.workspace}>
           {selectedId === "patterns" ? (
-            <form action={formAction} className={styles.actionScope}>
+            <form action={formAction} className={styles.actionScope} onSubmit={() => void playOperationalSound("execution")}>
               <PatternsWorkspace generation={generation} />
             </form>
           ) : null}

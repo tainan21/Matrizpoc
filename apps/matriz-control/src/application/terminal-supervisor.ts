@@ -3,7 +3,7 @@ import { spawn } from "node:child_process"
 import { randomUUID } from "node:crypto"
 import { resolve } from "node:path"
 import type { ResolvedTerminalAction, TerminalSession } from "../domain/terminal"
-import { resolveTerminalAction } from "../integration/projects/project-catalog"
+import { resolveTerminalAction, terminalRoute } from "../integration/projects/project-catalog"
 
 export interface ProcessHandle extends EventEmitter { pid: number | null; write(input: string): void; stop(): Promise<void> }
 export interface ProcessRuntime { start(action: ResolvedTerminalAction): ProcessHandle }
@@ -43,7 +43,7 @@ class NodeProcessRuntime implements ProcessRuntime {
 }
 
 interface SupervisorOptions { rootDir: string; runtime?: ProcessRuntime; maxLines?: number; resolveAction?: (rootDir: string, projectId: string, actionId: string) => Promise<ResolvedTerminalAction> }
-interface ManagedSession { snapshot: TerminalSession; handle: ProcessHandle; partial: string }
+interface ManagedSession { snapshot: TerminalSession; handle: ProcessHandle; partial: string; currentDirectory: string }
 const redact = (line: string) => line
   .replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "")
   .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)\S+/gi, "$1[redacted]")
@@ -65,7 +65,7 @@ export class TerminalSupervisor {
     const action = await this.resolver(this.options.rootDir, projectId, actionId)
     const id = `term_${randomUUID()}`
     const handle = this.runtime.start(action)
-    const managed: ManagedSession = { handle, partial: "", snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
+    const managed: ManagedSession = { handle, partial: "", currentDirectory: action.cwd, snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, route: terminalRoute(this.options.rootDir, action.cwd), status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
     this.sessions.set(id, managed)
     handle.on("running", () => { managed.snapshot.status = "running" })
     handle.on("output", (chunk: string) => this.append(managed, chunk))
@@ -82,7 +82,7 @@ export class TerminalSupervisor {
     if (managed.snapshot.lines.length > this.maxLines) managed.snapshot.lines.splice(0, managed.snapshot.lines.length - this.maxLines)
   }
 
-  write(id: string, input: string) { const item = this.sessions.get(id); if (!item) throw new Error("Unknown session"); if (input.length > 4096) throw new Error("Input too large"); item.handle.write(input) }
+  write(id: string, input: string) { const item = this.sessions.get(id); if (!item) throw new Error("Unknown session"); if (input.length > 4096) throw new Error("Input too large"); if (input.trim().toLowerCase() === "cd mih") { item.currentDirectory = this.options.rootDir; item.snapshot.route = terminalRoute(this.options.rootDir, item.currentDirectory); return } item.handle.write(input) }
   async stop(id: string) { const item = this.sessions.get(id); if (!item) throw new Error("Unknown session"); item.snapshot.status = "stopping"; await item.handle.stop() }
   async restart(id: string) { const item = this.sessions.get(id); if (!item) throw new Error("Unknown session"); if (["starting", "running", "stopping"].includes(item.snapshot.status)) await this.stop(id); this.sessions.delete(id); return this.start(item.snapshot.projectId, item.snapshot.actionId) }
   close(id: string) { const item = this.sessions.get(id); if (!item) return; if (["starting", "running", "stopping"].includes(item.snapshot.status)) throw new Error("Stop active session before closing"); this.sessions.delete(id) }

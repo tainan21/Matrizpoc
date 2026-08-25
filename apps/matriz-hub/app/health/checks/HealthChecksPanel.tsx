@@ -8,6 +8,7 @@ import type { HealthCheckKind } from "../../../src/domains/health-checks/domain"
 import type { HealthCheckRunVM } from "../../../src/domains/health-checks/presenter"
 import { runHealthCheckAction } from "./actions"
 import styles from "./health-checks.module.css"
+import { playOperationalSound } from "../../../src/ui/feedback/operational-sounds"
 
 type LatestResults = Readonly<Record<string, {
   readonly routes: HealthCheckRunVM | null
@@ -28,10 +29,12 @@ export function HealthChecksPanel({
   const [isPending, startTransition] = useTransition()
 
   function run(kind: HealthCheckKind) {
+    void playOperationalSound("execution")
     setRunningKind(kind)
     setMessage("")
     startTransition(async () => {
       const response = await runHealthCheckAction(kind, environment)
+      void playOperationalSound(!response.ok ? "failure" : response.result?.failureCount ? "attention" : "success")
       setMessage(response.message)
       if (response.result) {
         setResults((current) => ({

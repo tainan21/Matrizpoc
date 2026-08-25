@@ -28,6 +28,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#5b5bd6", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17171c", muted: "#f5f5f7", mutedFg: "#666671", border: "#dfdfe5",
   },
+  "matriz-control": {
+    appId: "matriz-control", label: "Matriz Control", brandAccent: "#7143a0", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#28202f", muted: "#f6f2f8", mutedFg: "#72677c", border: "#d8cfdd",
+  },
   sites: {
     appId: "sites", label: "Matriz Sites", brandAccent: "#4d7c0f", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#151a12", muted: "#f3f6ed", mutedFg: "#626b5b", border: "#dfe5d7",
@@ -62,6 +66,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   "matriz-workbench": {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
     surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246",
+  },
+  "matriz-control": {
+    appId: "matriz-control", label: "Matriz Control", brandAccent: "#9a55ff", brandAccentFg: "#ffffff",
+    surface: "#08060e", surfaceFg: "#f4effb", muted: "#130c20", mutedFg: "#82778f", border: "#2a1c3d",
   },
   sites: {
     appId: "sites", label: "Matriz Sites", brandAccent: "#c8ff66", brandAccentFg: "#10131a",
@@ -158,7 +166,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-hub", "matrizlib", "matriz-workbench", "sites", "spot", "seumei", "contracts", "willdash",
+  "matriz-hub", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "seumei", "contracts", "willdash",
 ]
 
 export const themeRegistry = [
@@ -196,7 +204,7 @@ export function listCompatibleThemes(appId: MatrizAppId): readonly ThemeDefiniti
 export function themeDefinitionToCssVars(
   themeKey: string,
   appId: MatrizAppId,
-  mode: MatrizColorMode = appId === "matriz-hub" || appId === "matriz-workbench" ? "dark" : "light",
+  mode: MatrizColorMode = appId === "matriz-hub" || appId === "matriz-workbench" || appId === "matriz-control" ? "dark" : "light",
 ): Record<string, string> {
   const definition = getThemeDefinition(themeKey)
   const compatible = definition?.compatibleApps.includes(appId) ?? false

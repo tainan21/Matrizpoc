@@ -28,6 +28,12 @@ node_modules
 .worktrees/
 output/
 *.log
+
+# External migration sources stay local until their app-first assimilation is complete.
+/apps/incoming/
+
+# Implementation screenshots are temporary evidence; final QA artifacts live under output/.
+/apps/*/implementation-*.png
 *.pid
 
 # Interrupted atomic Workbench writes

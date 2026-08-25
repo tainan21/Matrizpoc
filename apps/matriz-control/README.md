@@ -19,6 +19,8 @@ corepack pnpm --filter @matriz/app-matriz-control dev
 
 Open `http://localhost:3008/apps`. The terminal process supervisor is memory-only and intended for loopback development.
 
+Terminal screens abbreviate the existing workspace root as lowercase `mih` (for example, `mih/apps/matriz-control`). The controlled `cd mih` shortcut returns the displayed route to that root without renaming the physical `matriz-infra-hub` directory or enabling arbitrary path navigation.
+
 ## Navegador desktop local
 
 O cockpit web permanece disponível em `http://localhost:3008/browser`. Para anexar o Chromium nativo com cápsulas isoladas, WebGL2, áudio, downloads e o editor seguro:

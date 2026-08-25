@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest"
 import { resolveSpawnSpec, terminalEnvironment, TerminalSupervisor, type ProcessHandle, type ProcessRuntime } from "./terminal-supervisor"
 
 class FakeRuntime implements ProcessRuntime {
-  handle = Object.assign(new EventEmitter(), { pid: 42, write: (_input: string) => {}, stop: async () => {} }) as ProcessHandle
+  inputs: string[] = []
+  handle = Object.assign(new EventEmitter(), { pid: 42, write: (input: string) => { this.inputs.push(input) }, stop: async () => {} }) as ProcessHandle
   start(): ProcessHandle { return this.handle }
 }
 
@@ -40,5 +41,29 @@ describe("TerminalSupervisor", () => {
     const session = await supervisor.start("demo", "dev")
     runtime.handle.emit("output", "\u001b[31merror\u001b[0m\n")
     expect(supervisor.get(session.id)?.lines).toEqual(["error"])
+  })
+
+  it("shows a lowercase mih route and resolves only cd mih to the workspace root", async () => {
+    const runtime = new FakeRuntime()
+    const supervisor = new TerminalSupervisor({ rootDir: "C:/Apps/Matriz-Infra-Hub", runtime, resolveAction: async () => ({ projectId: "Demo", projectName: "Demo", actionId: "dev", label: "Run", command: "pnpm", args: ["dev"], cwd: "C:/Apps/Matriz-Infra-Hub/apps/Demo" }) })
+    const session = await supervisor.start("demo", "dev")
+
+    expect(supervisor.get(session.id)?.route).toBe("mih/apps/demo")
+
+    supervisor.write(session.id, "cd mih\n")
+
+    expect(supervisor.get(session.id)?.route).toBe("mih")
+    expect(runtime.inputs).toEqual([])
+  })
+
+  it("does not treat arbitrary cd input as a terminal route", async () => {
+    const runtime = new FakeRuntime()
+    const supervisor = new TerminalSupervisor({ rootDir: "C:/Apps/matriz-infra-hub", runtime, resolveAction: async () => ({ projectId: "demo", projectName: "Demo", actionId: "dev", label: "Run", command: "pnpm", args: ["dev"], cwd: "C:/Apps/matriz-infra-hub/apps/demo" }) })
+    const session = await supervisor.start("demo", "dev")
+
+    supervisor.write(session.id, "cd ..\n")
+
+    expect(supervisor.get(session.id)?.route).toBe("mih/apps/demo")
+    expect(runtime.inputs).toEqual(["cd ..\n"])
   })
 })

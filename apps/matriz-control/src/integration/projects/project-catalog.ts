@@ -20,6 +20,13 @@ function contained(parent: string, child: string) {
   return rel === "" || (!rel.startsWith(`..${sep}`) && rel !== ".." && !isAbsolute(rel))
 }
 
+export function terminalRoute(rootDir: string, path: string) {
+  const rel = relative(rootDir, path)
+  if (rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel)) throw new Error("Path outside workspace")
+  const suffix = rel.split(/[\\/]+/).filter(Boolean).join("/").toLowerCase()
+  return suffix ? `mih/${suffix}` : "mih"
+}
+
 export async function listTerminalProjects(rootDir: string): Promise<TerminalProject[]> {
   const root = await appsRoot(rootDir)
   const entries = await readdir(root, { withFileTypes: true })
