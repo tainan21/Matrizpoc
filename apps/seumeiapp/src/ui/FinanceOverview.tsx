@@ -6,8 +6,8 @@ import type { toFinanceOverviewViewModel } from "./presenters/finance.presenter"
 
 type View = ReturnType<typeof toFinanceOverviewViewModel>
 
-export function FinanceOverview({ view, month }: { readonly view: View; readonly month: string }) {
-  const firstDay = `${month}-01`
+export function FinanceOverview({ view, month, today }: { readonly view: View; readonly month: string; readonly today: string }) {
+  const defaultDate = today.startsWith(`${month}-`) ? today : `${month}-01`
   const [pending, setPending] = useState(false)
   const [message, setMessage] = useState("")
   const idempotencyKey = useRef("")
@@ -44,8 +44,8 @@ export function FinanceOverview({ view, month }: { readonly view: View; readonly
           <label>Tipo<select name="kind"><option value="EXPENSE">Saída</option><option value="INCOME">Entrada</option></select></label>
           <label>Categoria<select name="category"><option value="OPERATIONS">Operação</option><option value="MARKETING">Marketing</option><option value="PEOPLE">Pessoas</option><option value="TAXES">Impostos</option><option value="OTHER">Outros</option></select></label>
           <label>Valor<input name="amount" required inputMode="decimal" placeholder="0,00" /></label>
-          <label>Competência<input name="competenceDate" type="date" required defaultValue={firstDay} /></label>
-          <label>Vencimento<input name="dueDate" type="date" required defaultValue={firstDay} /></label>
+          <label>Competência<input name="competenceDate" type="date" required defaultValue={defaultDate} /></label>
+          <label>Vencimento<input name="dueDate" type="date" required defaultValue={defaultDate} /></label>
           <label className="wide">Descrição<textarea name="description" rows={2} placeholder="Contexto opcional para a equipe" /></label>
           <label className="finance-check"><input name="paid" type="checkbox" /> Já foi pago</label>
           <p className="form-message" role="status">{message}</p><button type="submit" disabled={pending}>{pending ? "Salvando…" : "Registrar lançamento"}</button>

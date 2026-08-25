@@ -16,6 +16,6 @@ export default async function FinancePage({ searchParams }: { readonly searchPar
   try {
     const context = await resolveActiveCompanyContext(foundation.actor, foundation.preferredCompanyId, foundation.services.core, foundation.services.companies)
     const result = await readFinanceOverview(context, month, now.toISOString().slice(0, 10), foundation.services.finance)
-    return <FinanceOverview month={month} view={toFinanceOverviewViewModel(result, now.toISOString().slice(0, 10))} />
+    return <FinanceOverview month={month} today={now.toISOString().slice(0, 10)} view={toFinanceOverviewViewModel(result, now.toISOString().slice(0, 10))} />
   } catch { return <SystemState kind="forbidden" /> }
 }
