@@ -81,6 +81,22 @@ fn repair_reissues_a_verified_receipt_without_changing_ownership() {
 }
 
 #[test]
+fn reports_a_changed_receipt_digest_without_trusting_it() {
+    let temp = tempfile::tempdir().expect("temp commerce");
+    let path = temp.path().join("commerce.json");
+    let store = CommerceStore::new(path.clone());
+    store.acquire("matriz.components").expect("acquire package");
+    store.install("matriz.components", &["runtime:start"]).expect("install package");
+    let mut state: serde_json::Value = serde_json::from_slice(&fs::read(&path).expect("state bytes")).expect("state json");
+    state["receipts"]["matriz.components"]["manifestDigest"] = serde_json::Value::String("0".repeat(64));
+    fs::write(&path, serde_json::to_vec_pretty(&state).expect("changed state")).expect("write changed receipt");
+
+    let changed = CommerceStore::new(path).snapshot().expect("changed snapshot");
+    let package = changed.packages.iter().find(|item| item.id == "matriz.components").expect("package");
+    assert_eq!(package.trust_status, "changed");
+}
+
+#[test]
 fn free_packages_can_be_acquired_without_changing_balance() {
     let temp = tempfile::tempdir().expect("temp commerce");
     let store = CommerceStore::new(temp.path().join("commerce.json"));

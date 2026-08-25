@@ -149,7 +149,9 @@ footer .error { color: #ff8296; }
 .store-dialog > div { display:grid; gap:6px; }
 .store-dialog label { display:flex; align-items:center; gap:10px; min-height:39px; padding:0 10px; border:1px solid var(--line); border-radius:7px; background:rgba(255,255,255,.018); }
 .store-dialog input { accent-color:var(--violet); }
+.store-dialog label > span { display:flex; flex-direction:column; gap:3px; }
 .store-dialog code { color:#c5b8d1; font-size:9px; }
+.store-dialog label small { color:#736a7c; font-size:8px; }
 .store-dialog footer { min-height:0; display:flex; justify-content:flex-end; gap:7px; margin-top:16px; padding:0; border:0; }
 .runbook-panel { margin-top:24px; overflow:hidden; border:1px solid var(--line); border-radius:11px; background:rgba(8,7,13,.42); }
 .runbook-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; padding:15px; border-bottom:1px solid var(--line); }

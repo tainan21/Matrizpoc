@@ -16,7 +16,11 @@ export function RunbookPanel({ gateway, runtimes, signal }: {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
 
-  useEffect(() => { gateway.runbookCatalog().then(setCatalog).catch((cause: unknown) => setError(String(cause))) }, [gateway])
+  useEffect(() => {
+    let current = true
+    gateway.runbookCatalog().then((items) => { if (current) setCatalog(items) }).catch((cause: unknown) => { if (current) setError(String(cause)) })
+    return () => { current = false }
+  }, [gateway])
   const selected = catalog.find(({ id }) => id === selectedId)
   const runtime = runtimes.find(({ id }) => id === appId)
 

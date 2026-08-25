@@ -22,8 +22,8 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
 
   const transition = async (id: string, action: () => Promise<CommerceSnapshot>) => {
     setBusy(id); setError("")
-    try { setSnapshot(await action()); signal("success") }
-    catch (cause) { setError(String(cause)); signal("error") }
+    try { setSnapshot(await action()); signal("success"); return true }
+    catch (cause) { setError(String(cause)); signal("error"); return false }
     finally { setBusy("") }
   }
   const openPackage = async (item: StorePackage) => {
@@ -61,7 +61,7 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
         <div className="wallet-ledger"><div><span>HISTÓRICO DA WALLET</span><Badge tone="neutral">AUDITÁVEL</Badge></div>{snapshot?.wallet.transactions.slice(0, 6).map((transaction) => <div className="ledger-row" key={transaction.id}><i className={transaction.amount >= 0 ? "credit" : "debit"}>{transaction.amount >= 0 ? "+" : ""}{transaction.amount} M</i><strong>{transaction.title}</strong><small>{new Date(transaction.occurredAt).toLocaleDateString("pt-BR")}</small></div>)}</div>
       </aside>
     </div>
-    {installTarget ? <div className="store-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingInstall(undefined) }}><section className="store-dialog" role="dialog" aria-modal="true" aria-labelledby="store-permissions-title"><span className="eyebrow">INSTALAÇÃO CONTROLADA</span><h2 id="store-permissions-title">Permissões de {installTarget.name}</h2><p>O pacote só será instalado quando todas as permissões do manifesto forem aceitas.</p><div>{installTarget.permissions.map((permission) => <label key={permission}><input type="checkbox" aria-label={`Permitir ${permission}`} checked={grantedPermissions.includes(permission)} onChange={(event) => setGrantedPermissions((current) => event.target.checked ? [...current, permission] : current.filter((item) => item !== permission))} /><code>{permission}</code></label>)}</div><footer><Button variant="secondary" onClick={() => setPendingInstall(undefined)}>CANCELAR</Button><Button disabled={busy === installTarget.id || grantedPermissions.length !== installTarget.permissions.length} aria-label={`Confirmar instalação de ${installTarget.name}`} onClick={() => void transition(installTarget.id, () => gateway.installPackage(installTarget.id, grantedPermissions)).then(() => setPendingInstall(undefined))}>CONFIRMAR INSTALAÇÃO</Button></footer></section></div> : null}
+    {installTarget ? <div className="store-dialog-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setPendingInstall(undefined) }}><section className="store-dialog" role="dialog" aria-modal="true" aria-labelledby="store-permissions-title"><span className="eyebrow">INSTALAÇÃO CONTROLADA</span><h2 id="store-permissions-title">Permissões de {installTarget.name}</h2><p>O pacote só será instalado quando todas as permissões do manifesto forem aceitas.</p><div>{installTarget.permissions.map((permission) => <label key={permission}><input type="checkbox" aria-label={`Permitir ${permission}`} checked={grantedPermissions.includes(permission)} onChange={(event) => setGrantedPermissions((current) => event.target.checked ? [...current, permission] : current.filter((item) => item !== permission))} /><span><code>{permission}</code><small>{permissionDescription(permission)}</small></span></label>)}</div><footer><Button variant="secondary" onClick={() => setPendingInstall(undefined)}>CANCELAR</Button><Button disabled={busy === installTarget.id || grantedPermissions.length !== installTarget.permissions.length} aria-label={`Confirmar instalação de ${installTarget.name}`} onClick={() => void transition(installTarget.id, () => gateway.installPackage(installTarget.id, grantedPermissions)).then((installed) => { if (installed) setPendingInstall(undefined) })}>CONFIRMAR INSTALAÇÃO</Button></footer></section></div> : null}
   </section>
 }
 
@@ -90,3 +90,13 @@ function PackageCard({ item, busy, selected, inspect, acquire, install, open, un
 }
 
 function monogram(name: string) { return name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase() }
+function permissionDescription(permission: string) {
+  const descriptions: Record<string, string> = {
+    "runtime:observe": "Ler estado e saúde dos runtimes.",
+    "activity:read": "Ler eventos operacionais não sensíveis.",
+    "actions:request": "Solicitar ações registradas com validação nativa.",
+    "runtime:start": "Iniciar o app Matriz associado.",
+    "workspace:read": "Ler recursos permitidos do workspace.",
+  }
+  return descriptions[permission] ?? "Capacidade declarada pelo catálogo confiável."
+}

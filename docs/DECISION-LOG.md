@@ -143,3 +143,10 @@ próximos do app responsável.
 - **Motivo:** Workspace, runtime e distribuição precisam interoperar sem entregar filesystem, segredos, saldo ou execução arbitrária ao renderer e sem criar packages compartilhados prematuros.
 - **Impacto:** segredos ficam mascarados e fora da atividade; Explorer bloqueia escape e protege arquivos operacionais; exclusões usam a Lixeira; aquisição difere de instalação; pacotes não possuem hooks ou código remoto. Estado comercial é persistido atomicamente no diretório de configuração do Control.
 - **Revisar quando:** catálogo remoto, assinatura de pacotes, publisher externo ou um segundo consumidor justificar protocolo/formato público estável.
+
+## 2026-08-24 — Inteligência operacional continua nativa e catalogada
+
+- **Decisão:** promover ENV dentro do Rust; limitar busca de referências ao app; recuperar somente runtimes gerenciados; registrar instalações com recibos SHA-256; e aceitar apenas runbooks do catálogo embarcado.
+- **Motivo:** ENV, Explorer, Runtime, Store e Actions precisam compor fluxos úteis sem entregar segredos, filesystem, processos, permissões ou automação arbitrária ao renderer.
+- **Impacto:** a UI envia IDs e seleções tipadas. Segredos não atravessam Compare/Promote/Impact; processos externos são preservados; consentimento coincide com o manifesto; Runbooks não aceitam passos, comandos ou URLs do renderer.
+- **Revisar quando:** existir distribuição remota assinada, permissões revogáveis, múltiplos ambientes ativos ou protocolo local autenticado para apps externos.

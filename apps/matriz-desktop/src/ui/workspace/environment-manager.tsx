@@ -56,6 +56,8 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
     let current = true
     setDocument(undefined)
     setDraft([])
+    setComparison(undefined)
+    setImpact(undefined)
     gateway.listEnvironments(appId).then((next) => {
       if (!current) return
       setFiles(next)
@@ -69,6 +71,8 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
     const generation = ++selectionGeneration.current
     let current = true
     setError("")
+    setComparison(undefined)
+    setImpact(undefined)
     gateway.readEnvironment(appId, fileName).then((next) => {
       if (!current || generation !== selectionGeneration.current) return
       setDocument(next)
@@ -227,7 +231,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
 
       {impact ? <aside className="env-impact" aria-labelledby="env-impact-title">
         <div className="env-impact-heading"><div><span className="eyebrow">IMPACT RADAR</span><h2 id="env-impact-title">Impacto de {impact.key}</h2><p>{impact.matches.length} {impact.matches.length === 1 ? "referência" : "referências"} em {impact.scannedFiles} arquivos analisados{impact.truncated ? " · resultado limitado" : ""}</p></div><button aria-label="Fechar impacto" onClick={() => setImpact(undefined)}>×</button></div>
-        <div className="env-impact-matches">{impact.matches.map((match) => <button key={`${match.relativePath}:${match.line}`} aria-label={`Abrir ${match.relativePath} no editor`} onClick={() => void gateway.openResourceInEditor(appId, match.relativePath)}><strong>{match.relativePath}</strong><span>L{match.line}</span><small>{match.excerpt}</small></button>)}{!impact.matches.length ? <p>Nenhuma referência encontrada no escopo seguro do projeto.</p> : null}</div>
+        <div className="env-impact-matches">{impact.matches.map((match) => <button key={`${match.relativePath}:${match.line}`} aria-label={`Abrir ${match.relativePath} no editor`} onClick={() => void gateway.openResourceInEditor(appId, match.relativePath).catch((cause: unknown) => { setError(String(cause)); signal("error") })}><strong>{match.relativePath}</strong><span>L{match.line}</span><small>{match.excerpt}</small></button>)}{!impact.matches.length ? <p>Nenhuma referência encontrada no escopo seguro do projeto.</p> : null}</div>
       </aside> : null}
 
       <div className="env-footer">

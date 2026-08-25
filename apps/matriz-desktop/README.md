@@ -51,6 +51,22 @@ workspaces and rejects protected, stale or unobserved PIDs. The visible terminal
 is deliberately different: it is an explicit user console backed by ConPTY,
 limited to six sessions and bounded input/output buffers.
 
+Workspace now includes a native `.env` manager and bounded project Explorer.
+Secrets stay masked until an explicit reveal, while saves use revision checks
+and atomic replacement. Compare and Promote copy selected values inside Rust,
+never through the renderer. Impact Radar scans at most 2,000 small source files,
+ignores generated/vendor directories and returns file/line references without
+source values.
+
+Runtime Recovery restarts only managed processes and preserves external
+listeners. Operational Runbooks are a fixed native catalog: the renderer can
+choose a runbook and app, but cannot provide steps, programs or URLs.
+
+Store and Wallet remain an atomic native ledger. Installation requires consent
+to the exact bundled permission set and creates a SHA-256 receipt from canonical
+catalog metadata. Trust Center reports verified, changed or missing receipts;
+Repair only restores owned, installed packages from the bundled catalog.
+
 ## Commands
 
 ```powershell
@@ -84,9 +100,8 @@ bootstrapper only when the runtime is absent.
   capability only when a concrete product behavior exists.
 - Codex is not scraped. A future bridge must use the supported Codex app-server
   JSONL protocol over stdio and translate only structured task/turn/item events.
-- Inter-app sockets, `.env` editing, file explorer, Store, multi-window overlays
-  and Rooms 3D remain deferred until the runtime/action/activity primitives have
-  a second concrete consumer. A future web-app bridge should use authenticated
+- Inter-app sockets, remote package distribution, multi-window overlays and
+  Rooms 3D remain deferred. A future web-app bridge should use authenticated
   loopback transport; native-only peers may justify named pipes.
 - Updater signing/distribution is reserved for the first trusted release
   channel; the NSIS artifact is currently unsigned.
