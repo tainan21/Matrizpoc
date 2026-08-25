@@ -5,6 +5,7 @@ import Link from "next/link"
 import type { CompanyId } from "../../companies/domain/company"
 import { useSeumeiTenant } from "../../memberships/presentation/use-seumei-tenant"
 import { ProductsScreen } from "../../catalog/presentation/ProductsScreen"
+import { OrdersScreen } from "../../orders/presentation/OrdersScreen"
 
 export function CompanyWorkspaceScreen({ companySlug, appId }: { readonly companySlug: string; readonly appId?: string }) {
   const tenant = useSeumeiTenant()
@@ -25,6 +26,9 @@ export function CompanyWorkspaceScreen({ companySlug, appId }: { readonly compan
 
   if (activeApp?.id === "products" && tenant.catalog) {
     return <ProductsScreen catalog={tenant.catalog} context={tenant.current.context} />
+  }
+  if (activeApp?.id === "orders" && tenant.orders) {
+    return <OrdersScreen orders={tenant.orders} context={tenant.current.context} />
   }
 
   return (

@@ -8,6 +8,7 @@ import { resolveTenantContext } from "../domains/memberships/application/resolve
 import { FIXTURE_STORES } from "../fixtures/stores"
 import { createBusinessOsRepositories } from "./business-os.repositories"
 import { createFixtureOrderRepository } from "./order.repository"
+import { asOrderId, type Order } from "../domains/orders/domain/order"
 
 const demoUserId = asUserId("user-demo-seumei")
 
@@ -47,6 +48,20 @@ const draft = {
 } as const
 
 describe("fixture order repository", () => {
+  it("seeds coherent demo orders once and preserves later persisted changes", async () => {
+    const galaxia = await contextFor("company-galaxia")
+    const storage = createInMemoryStore()
+    const initialOrder: Order = {
+      id: asOrderId("order-demo-1254"), companyId: asCompanyId("company-galaxia"), storeId: asStoreId("store-galaxia"), customerName: "Lucas Ferreira", status: "placed", items: draft.items, subtotalCents: 4780, deliveryFeeCents: 590, totalCents: 5370, createdAt: "2026-08-25T12:45:00.000Z", updatedAt: "2026-08-25T12:45:00.000Z",
+    }
+    const first = createFixtureOrderRepository({ memberships: galaxia.memberships, storage, initialOrders: [initialOrder] })
+    const bound = await first.bind(galaxia.context)
+    await bound!.setStatus(initialOrder.id, "preparing")
+
+    const reopened = createFixtureOrderRepository({ memberships: galaxia.memberships, storage, initialOrders: [initialOrder] })
+    expect((await (await reopened.bind(galaxia.context))!.find(initialOrder.id))?.status).toBe("preparing")
+  })
+
   it("derives tenant and store ownership from the resolved publication", async () => {
     const galaxia = await contextFor("company-galaxia")
     const repository = createFixtureOrderRepository({

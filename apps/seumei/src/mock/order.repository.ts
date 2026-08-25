@@ -6,18 +6,21 @@ import type {
 } from "../domains/orders/domain/order.repository"
 import { asOrderId, type Order } from "../domains/orders/domain/order"
 
-const ORDERS_KEY = "orders:v1"
+const ORDERS_KEY = "orders:v2"
 
 export function createFixtureOrderRepository(input: {
   readonly memberships: MembershipRepository
   readonly storage: KeyValueStore
+  readonly initialOrders?: readonly Order[]
   readonly createOrderId?: () => ReturnType<typeof asOrderId>
   readonly now?: () => string
 }): OrderRepository {
   const createOrderId =
     input.createOrderId ?? (() => asOrderId(`order-${crypto.randomUUID()}`))
   const now = input.now ?? (() => new Date().toISOString())
-  let orders = input.storage.get<Order[]>(ORDERS_KEY) ?? []
+  const storedOrders = input.storage.get<Order[]>(ORDERS_KEY)
+  let orders = storedOrders ?? input.initialOrders?.map((order) => ({ ...order, items: order.items.map((item) => ({ ...item, modifierNames: [...item.modifierNames] })) })) ?? []
+  if (!storedOrders && input.initialOrders) input.storage.set(ORDERS_KEY, orders)
 
   function persist() {
     input.storage.set(ORDERS_KEY, orders)
@@ -83,4 +86,3 @@ export function createFixtureOrderRepository(input: {
     },
   }
 }
-
