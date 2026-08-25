@@ -13,7 +13,8 @@ function available(recipe: any): number {
   return Math.min(...recipe.lines.map((line: any) => Math.floor((line.ingredient.inventory?.balance ?? 0) * recipe.yieldQuantity / line.quantity)))
 }
 function store(row: any): PublishedStoreRecord {
-  return { tenantId: row.tenantId, companyId: row.companyId, storeSlug: row.storeSlug, displayName: row.displayName, description: row.description, version: row.version,
+  const identity = row.publishedVersion
+  return { tenantId: row.tenantId, companyId: row.companyId, storeSlug: row.storeSlug, displayName: identity?.displayName ?? row.displayName, description: identity?.description ?? row.description, version: identity?.version ?? row.version, preset: identity?.preset ?? row.draftPreset ?? "MARKET_FRESH", headline: identity?.headline ?? row.displayName, announcement: identity?.announcement ?? "", heroImageUrl: identity?.heroImageUrl ?? null,
     products: (row.company?.products ?? row.products ?? []).flatMap((product: any) => product.variants.map((variant: any) => ({ productId: product.id, variantId: variant.id, name: product.name, description: product.description, priceCents: variant.priceCents, imageUrl: product.images[0]?.url ?? null, imageAlt: product.images[0]?.altText ?? null, availableQuantity: available(variant.recipe) }))),
   }
 }
@@ -25,7 +26,7 @@ const productInclude = { images: { orderBy: { position: "asc" as const } }, vari
 
 export function createCommerceRepository(db: SeumeiPrismaClient): CommerceRepository {
   async function readStore(storeSlug: string) {
-    const publication = await db.storePublication.findFirst({ where: { storeSlug, isPublished: true } })
+    const publication = await db.storePublication.findFirst({ where: { storeSlug, isPublished: true, publishedVersionId: { not: null } }, include: { publishedVersion: true } })
     if (!publication) return null
     const products = await db.product.findMany({ where: { tenantId: publication.tenantId, status: "ACTIVE" }, include: productInclude, orderBy: { name: "asc" } })
     return store({ ...publication, products })
@@ -35,10 +36,19 @@ export function createCommerceRepository(db: SeumeiPrismaClient): CommerceReposi
       const company = await db.company.findFirst({ where: { id: companyId, tenantId, status: "ACTIVE" } })
       if (!company) throw new StoreUnavailableError()
       const existing = await db.storePublication.findUnique({ where: { tenantId } })
-      if (existing?.isPublished && existing.companyId === companyId && existing.storeSlug === input.storeSlug && existing.displayName === input.displayName && existing.description === input.description) {
+      if (existing?.isPublished && existing.publishedVersionId) {
         const current = await readStore(input.storeSlug); if (!current) throw new StoreUnavailableError(); return current
       }
-      await db.storePublication.upsert({ where: { tenantId }, create: { tenantId, companyId, ...input, isPublished: true, publishedAt: new Date() }, update: { ...input, isPublished: true, publishedAt: new Date(), version: { increment: 1 } } })
+      if (existing && existing.draftVersion > 1) throw new StoreUnavailableError()
+      const preset = input.storeSlug === "galaxia-burger" ? "COSMIC_DINER" : input.storeSlug === "sabor-e-brasa" ? "BRAZILIAN_WARMTH" : "MARKET_FRESH"
+      const description = input.description ?? "Conheça nosso catálogo e faça uma compra simulada."
+      await db.$transaction(async (tx) => {
+        const publication = await tx.storePublication.upsert({ where: { tenantId }, create: { tenantId, companyId, ...input, description, isPublished: false, draftPreset: preset, draftHeadline: input.displayName, draftDescription: description }, update: {} })
+        const aggregate = await tx.storePublicationVersion.aggregate({ where: { tenantId, publicationId: publication.id }, _max: { version: true } })
+        const publishedAt = new Date()
+        const snapshot = await tx.storePublicationVersion.create({ data: { tenantId, publicationId: publication.id, version: (aggregate._max.version ?? 0) + 1, storeSlug: publication.storeSlug, displayName: publication.displayName, preset: publication.draftPreset, headline: publication.draftHeadline, announcement: publication.draftAnnouncement, description: publication.draftDescription, heroImageUrl: publication.draftHeroImageUrl, publishedByUserId: "demo:provision", publishedAt }, select: { id: true } })
+        await tx.storePublication.update({ where: { id: publication.id }, data: { isPublished: true, publishedAt, publishedVersionId: snapshot.id } })
+      })
       const result = await readStore(input.storeSlug)
       if (!result) throw new StoreUnavailableError()
       return result

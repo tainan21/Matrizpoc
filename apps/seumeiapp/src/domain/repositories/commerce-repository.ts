@@ -1,4 +1,5 @@
 import type { CommerceOrderStatus } from "../commerce"
+import type { StoreIdentityPresetId } from "../store-identity"
 
 export interface StoreProductRecord {
   readonly productId: string; readonly variantId: string; readonly name: string; readonly description: string | null
@@ -6,7 +7,8 @@ export interface StoreProductRecord {
 }
 export interface PublishedStoreRecord {
   readonly tenantId: string; readonly companyId: string; readonly storeSlug: string; readonly displayName: string
-  readonly description: string | null; readonly version: number; readonly products: readonly StoreProductRecord[]
+  readonly description: string | null; readonly version: number; readonly preset: StoreIdentityPresetId; readonly headline: string
+  readonly announcement: string; readonly heroImageUrl: string | null; readonly products: readonly StoreProductRecord[]
 }
 export interface CheckoutCommand {
   readonly variantId: string; readonly quantity: number; readonly customer: { readonly name: string; readonly email: string; readonly phone: string | null }
