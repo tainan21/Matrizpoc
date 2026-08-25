@@ -10,6 +10,7 @@ mod ports;
 mod preview;
 mod processes;
 pub mod recovery;
+pub mod runbooks;
 pub mod resources;
 pub mod runtime;
 mod settings;
@@ -30,6 +31,7 @@ use environment::{
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
 use recovery::{recovery_action, RecoveryAction, RecoveryResult};
+use runbooks::{RunbookDefinition, RunbookExecution, RunbookStepResult, RunbookTarget};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
 use tauri::Manager;
@@ -281,6 +283,15 @@ async fn recover_runtime(
     activity: tauri::State<'_, ActivityHub>,
     app_id: String,
 ) -> Result<RecoveryResult, String> {
+    recover_runtime_inner(&terminals, &operations, &activity, app_id)
+}
+
+fn recover_runtime_inner(
+    terminals: &TerminalManager,
+    operations: &OperationsState,
+    activity: &ActivityHub,
+    app_id: String,
+) -> Result<RecoveryResult, String> {
     let listeners = ports::enumerate_listeners()?;
     let current = runtime_snapshot(&listeners, &terminals.list()?)
         .into_iter()
@@ -498,6 +509,79 @@ fn run_gate(
     gate_id: String,
 ) -> Result<tasks::GateResult, String> {
     tasks::run_gate(&state, &gate_id)
+}
+
+#[tauri::command]
+fn get_runbook_catalog() -> Vec<RunbookDefinition> {
+    runbooks::catalog()
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn run_runbook(
+    terminals: tauri::State<'_, TerminalManager>,
+    operations: tauri::State<'_, OperationsState>,
+    activity: tauri::State<'_, ActivityHub>,
+    runbook_id: String,
+    app_id: String,
+) -> Result<RunbookExecution, String> {
+    app_definition(&app_id)?;
+    let definition = runbooks::definition(&runbook_id)?;
+    let mut execution = RunbookExecution {
+        runbook_id: definition.id,
+        app_id: app_id.clone(),
+        status: "completed",
+        steps: Vec::new(),
+        target: None,
+    };
+    activity.publish("runbook.started", "info", "Runbook iniciado", Some(definition.label), Some(&app_id));
+
+    for &step in definition.steps {
+        let result = match step {
+            "environment.validate" => {
+                let service = EnvironmentService::new(resources::WorkspaceResourceService::new(operations.root()?)?);
+                let files = service.list(&app_id)?;
+                let selected = files.iter().find(|item| item.file_name == ".env.local").or_else(|| files.first());
+                match selected.map(|item| service.read(&app_id, &item.file_name)).transpose()? {
+                    Some(document) if document.missing_required.is_empty() => Ok("Ambiente válido".to_string()),
+                    Some(document) => Err(format!("{} variável(is) obrigatória(s) ausente(s)", document.missing_required.len())),
+                    None => Err("Nenhum arquivo de ambiente encontrado".into()),
+                }
+            }
+            "doctor.run" => {
+                let checks = doctor::run_doctor(&operations);
+                if checks.iter().all(|check| check.ok) { Ok("Doctor aprovado".into()) } else { Err("Doctor encontrou dependências indisponíveis".into()) }
+            }
+            "runtime.recover" => {
+                let result = recover_runtime_inner(&terminals, &operations, &activity, app_id.clone())?;
+                if result.status == "ready" { Ok("Runtime pronto".into()) } else { Err("Runtime externo preservado; recuperação automática indisponível".into()) }
+            }
+            "runtime.open" => {
+                let url = runtime_url(&app_id, "/")?;
+                std::process::Command::new("explorer.exe").arg(url).spawn().map(|_| "Rota principal aberta".into()).map_err(|error| format!("Não foi possível abrir o runtime: {error}"))
+            }
+            "preview.offer" => {
+                execution.target = Some(RunbookTarget { app_id: app_id.clone(), route_path: "/" });
+                Ok("Aplicação pronta para visualização".into())
+            }
+            _ => Err("Runbook step is unsupported".into()),
+        };
+        match result {
+            Ok(detail) => execution.steps.push(RunbookStepResult { step_id: step, status: if step == "preview.offer" { "available" } else { "completed" }, detail }),
+            Err(detail) => {
+                execution.status = "failed";
+                execution.steps.push(RunbookStepResult { step_id: step, status: "failed", detail });
+                break;
+            }
+        }
+    }
+    activity.publish(
+        "runbook.completed",
+        if execution.status == "completed" { "success" } else { "error" },
+        if execution.status == "completed" { "Runbook concluído" } else { "Runbook interrompido" },
+        Some(definition.label),
+        Some(&app_id),
+    );
+    Ok(execution)
 }
 
 #[tauri::command(rename_all = "camelCase")]
@@ -1003,6 +1087,8 @@ pub fn run() {
             stop_app,
             get_app_statuses,
             run_gate,
+            get_runbook_catalog,
+            run_runbook,
             open_target,
             run_doctor,
             get_workspace_pulse,

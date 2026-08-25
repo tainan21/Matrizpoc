@@ -11,6 +11,7 @@ import type {
   GateId,
   ManagedOperationId,
   NativeAppRuntime,
+  RuntimeInstance,
   TerminalSession,
   WorkspacePulse,
 } from "../domain/types"
@@ -22,6 +23,7 @@ import { TerminalPane } from "./terminal/terminal-pane"
 import { TerminalView } from "./terminal/terminal-view"
 import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
 import { RuntimeWorkspace } from "./runtime/runtime-workspace"
+import { RunbookPanel } from "./runbooks/runbook-panel"
 import { WorkspaceView } from "./workspace/workspace-view"
 import { StoreView } from "./store/store-view"
 import { requestWorkspaceNavigation } from "./workspace/navigation-guard"
@@ -235,7 +237,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} /> : null}
         {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
-        {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} /> : null}
+        {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} runtimes={runtimes} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
         {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
@@ -283,9 +285,9 @@ export function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, ref
   return <section aria-labelledby="apps-title"><div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 09</span><h1 id="apps-title">APPS</h1></div></div><div className="app-grid">{MATRIZ_DESKTOP_APPS.map((app) => { const state = states.get(app.id); const ready = state?.status === "ready"; const operationId = `app.${app.id}.web` as ManagedOperationId; const managed = sessions.some((session) => session.operationId === operationId); const external = ready && !managed; const native = app.id === "matriz-admin" && adminMode === "native"; const nativeRunning = native && nativeApp.state === "running"; const actionLabel = external ? `Porta ocupada externamente: ${app.label}` : `${ready ? "Parar" : "Iniciar"} ${app.label}`; return <article className={`app-tile${app.id === "matriz-admin" ? " app-tile--seumei" : ""}`} key={app.id}><span className={`status-dot ${external ? "degraded" : nativeRunning || (!native && ready) ? "ready" : "stopped"}`} /><div><strong>{app.label}</strong><small>{native ? nativeApp.state.toUpperCase() : external ? `:${app.port} EXTERNO` : `:${app.port}`}</small></div>{app.id === "matriz-admin" ? <div className="app-runtime-switch" role="group" aria-label="Modo do Matriz Admin"><button aria-label="Matriz Admin Web" aria-pressed={adminMode === "web"} onClick={() => setAdminMode("web")}>WEB</button><button aria-label="Matriz Admin Nativo" aria-pressed={adminMode === "native"} onClick={() => setAdminMode("native")}>NATIVO</button></div> : null}<button className="app-launch" aria-label={native ? `${nativeAction} Matriz Admin nativo` : actionLabel} disabled={!native && external} onClick={() => void act(app.id, ready)}>{nativeRunning || (!native && ready) ? <Icons.stop /> : <Icons.play />}</button></article> })}</div></section>
 }
 
-function ActionsView({ pulse, gateway, activeGate, setActiveGate, feedback, startOperation }: { pulse?: WorkspacePulse; gateway: DesktopGateway; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown> }) {
+function ActionsView({ pulse, gateway, runtimes, activeGate, setActiveGate, feedback, startOperation, signal }: { pulse?: WorkspacePulse; gateway: DesktopGateway; runtimes: readonly RuntimeInstance[]; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown>; signal(kind: "success" | "error"): void }) {
   const run = async (id: GateId) => { setActiveGate(id); try { await startOperation(`gate.${id}`); void feedback.play("navigation") } catch { void feedback.play("error") } finally { setActiveGate(undefined) } }
-  return <section aria-labelledby="actions-title"><div className="section-head"><div><span className="eyebrow">WORKSPACE / {pulse?.clean ? "CLEAN" : `${pulse?.changedFiles ?? "—"} Δ`}</span><h1 id="actions-title">AÇÕES</h1></div><Badge tone={pulse?.clean ? "success" : "warning"}>{pulse?.branch ?? "—"}</Badge></div><h2>GATES</h2><div className="action-grid">{GATES.map((gate) => <Button variant="secondary" key={gate.id} disabled={Boolean(activeGate)} onClick={() => void run(gate.id)}>{activeGate === gate.id ? "•••" : gate.label}</Button>)}</div><h2>JUMP</h2><div className="jump-list">{QUICK_TARGETS.map((target) => <button key={target.id} onClick={() => void gateway.openTarget(target.id)}><span>{target.label}</span><Icons.external /></button>)}</div></section>
+  return <section aria-labelledby="actions-title"><div className="section-head"><div><span className="eyebrow">WORKSPACE / {pulse?.clean ? "CLEAN" : `${pulse?.changedFiles ?? "—"} Δ`}</span><h1 id="actions-title">AÇÕES</h1></div><Badge tone={pulse?.clean ? "success" : "warning"}>{pulse?.branch ?? "—"}</Badge></div><h2>GATES</h2><div className="action-grid">{GATES.map((gate) => <Button variant="secondary" key={gate.id} disabled={Boolean(activeGate)} onClick={() => void run(gate.id)}>{activeGate === gate.id ? "•••" : gate.label}</Button>)}</div><h2>JUMP</h2><div className="jump-list">{QUICK_TARGETS.map((target) => <button key={target.id} onClick={() => void gateway.openTarget(target.id)}><span>{target.label}</span><Icons.external /></button>)}</div><RunbookPanel gateway={gateway} runtimes={runtimes} signal={signal} /></section>
 }
 
 function DoctorView({ checks, refresh }: { checks: readonly DoctorCheck[]; refresh(): Promise<unknown> }) {

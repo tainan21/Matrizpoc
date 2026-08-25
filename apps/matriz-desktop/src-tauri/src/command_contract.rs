@@ -20,6 +20,8 @@ pub const COMMAND_NAMES: &[&str] = &[
     "stop_app",
     "get_app_statuses",
     "run_gate",
+    "get_runbook_catalog",
+    "run_runbook",
     "open_target",
     "select_workspace",
     "run_doctor",
