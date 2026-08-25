@@ -4,6 +4,7 @@ import { createIngredient, createStockMovement, saveProductRecipe } from "./rest
 import type { CatalogRepository } from "../domain/repositories/catalog-repository"
 import type { RestaurantRepository } from "../domain/repositories/restaurant-repository"
 import type { IngredientUnit } from "../domain/recipe"
+import type { FinanceRepository } from "../domain/repositories/finance-repository"
 
 interface DemoIngredient {
   readonly name: string
@@ -142,4 +143,16 @@ export async function provisionDemoRestaurantData(
   }
 
   return { products: definition.products.length, ingredients: definition.ingredients.length }
+}
+
+export async function reconcileDemoOrderReceipts(
+  tenantId: string,
+  orderIds: readonly string[],
+  finance: Pick<FinanceRepository, "reconcileOrderReceipt">,
+): Promise<number> {
+  let reconciled = 0
+  for (const orderId of orderIds) {
+    if (await finance.reconcileOrderReceipt(tenantId, orderId)) reconciled += 1
+  }
+  return reconciled
 }

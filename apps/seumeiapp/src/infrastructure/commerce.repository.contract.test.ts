@@ -14,4 +14,11 @@ describe("commerce repository tenancy contract", () => {
     expect(source).toContain("balance: { gte: quantity }")
     expect(source).toContain("orderStockConsumption.create")
   })
+  it("persists one paid order receipt inside the checkout transaction", () => {
+    expect(source).toContain("financialEntry.create")
+    expect(source).toContain("order-receipt:${created.id}")
+    expect(source).toContain('origin: "ORDER"')
+    expect(source).toContain('status: "PAID"')
+    expect(source.indexOf("financialEntry.create")).toBeLessThan(source.indexOf('isolationLevel: "Serializable"'))
+  })
 })

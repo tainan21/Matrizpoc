@@ -67,6 +67,26 @@ export function createCommerceRepository(db: SeumeiPrismaClient): CommerceReposi
           const movement = await tx.ingredientStockMovement.create({ data: { tenantId: publication.tenantId, ingredientId: line.ingredientId, type: "ORDER_CONSUMPTION", signedQuantity: -quantity, balanceBefore: before, balanceAfter: before - quantity, reason: `Pedido #${created.orderNumber}`, actorUserId: "public:demo-store", idempotencyKey: `order-${created.id}-${line.ingredientId}`, commandHash: hash({ orderId: created.id, ingredientId: line.ingredientId, quantity }) } })
           await tx.orderStockConsumption.create({ data: { tenantId: publication.tenantId, orderItemId: item.id, ingredientId: line.ingredientId, movementId: movement.id, quantity } })
         }
+        const financeAggregate = await tx.financialEntry.aggregate({ where: { tenantId: publication.tenantId }, _max: { entryNumber: true } })
+        await tx.financialEntry.create({ data: {
+          tenantId: publication.tenantId,
+          entryNumber: (financeAggregate._max.entryNumber ?? 0) + 1,
+          kind: "INCOME",
+          origin: "ORDER",
+          status: "PAID",
+          category: "SALES",
+          title: `Pedido #${String(created.orderNumber).padStart(4, "0")}`,
+          description: "Recebimento da compra simulada",
+          amountCents: created.totalCents,
+          currency: created.currency,
+          competenceDate: created.createdAt,
+          dueDate: created.createdAt,
+          paidAt: created.createdAt,
+          orderId: created.id,
+          idempotencyKey: `order-receipt:${created.id}`,
+          createdByUserId: "public:demo-store",
+          events: { create: [{ type: "CREATED", actorUserId: "public:demo-store", note: "Pagamento simulado aprovado" }] },
+        } })
         return order(created)
       }, { isolationLevel: "Serializable", maxWait: 5_000, timeout: 15_000 })
     },
