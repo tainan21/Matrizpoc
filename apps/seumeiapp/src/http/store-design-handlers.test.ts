@@ -23,6 +23,15 @@ describe("store design HTTP boundaries", () => {
     expect(svc.storeDesign.readOrCreateDraft).not.toHaveBeenCalled()
   })
 
+  it("does not serialize tenant or persistence identifiers", async () => {
+    const svc = services("OWNER", { readOrCreateDraft: vi.fn().mockResolvedValue({
+      publicationId: "publication-secret", tenantId: "tenant-secret", companyId: "company-secret", storeSlug: "galaxia-burger", displayName: "Galaxia Burger", preset: "COSMIC_DINER", headline: "Smash de outro mundo.", announcement: "Retirada em 20 minutos", description: "Smashes preparados com receitas conectadas.", heroImageUrl: null, draftVersion: 2, isPublished: false, publishedVersion: null,
+    }) })
+    const result = await readStoreDesignHandler(actor, "company-a", svc)
+    expect(result.status).toBe(200)
+    expect(JSON.stringify(result.body)).not.toMatch(/tenant-secret|company-secret|publication-secret/)
+  })
+
   it("maps stale publication to conflict", async () => {
     const svc = services("OWNER", { publishDraft: vi.fn().mockRejectedValue(new StoreDesignConflictError()) })
     expect(await publishStoreDesignHandler(actor, "company-a", { expectedVersion: 2 }, svc)).toEqual({ status: 409, body: { error: "store_design_conflict" } })

@@ -42,8 +42,10 @@ export function createCommerceRepository(db: SeumeiPrismaClient): CommerceReposi
       if (existing && existing.draftVersion > 1) throw new StoreUnavailableError()
       const preset = input.storeSlug === "galaxia-burger" ? "COSMIC_DINER" : input.storeSlug === "sabor-e-brasa" ? "BRAZILIAN_WARMTH" : "MARKET_FRESH"
       const description = input.description ?? "Conheça nosso catálogo e faça uma compra simulada."
+      const headline = input.storeSlug === "galaxia-burger" ? "Smash de outro mundo." : input.storeSlug === "sabor-e-brasa" ? "Brasil servido na brasa." : input.displayName
+      const announcement = input.storeSlug === "galaxia-burger" ? "Retirada em 20 minutos" : input.storeSlug === "sabor-e-brasa" ? "Feito hoje, com calma" : ""
       await db.$transaction(async (tx) => {
-        const publication = await tx.storePublication.upsert({ where: { tenantId }, create: { tenantId, companyId, ...input, description, isPublished: false, draftPreset: preset, draftHeadline: input.displayName, draftDescription: description }, update: {} })
+        const publication = await tx.storePublication.upsert({ where: { tenantId }, create: { tenantId, companyId, ...input, description, isPublished: false, draftPreset: preset, draftHeadline: headline, draftAnnouncement: announcement, draftDescription: description }, update: {} })
         const aggregate = await tx.storePublicationVersion.aggregate({ where: { tenantId, publicationId: publication.id }, _max: { version: true } })
         const publishedAt = new Date()
         const snapshot = await tx.storePublicationVersion.create({ data: { tenantId, publicationId: publication.id, version: (aggregate._max.version ?? 0) + 1, storeSlug: publication.storeSlug, displayName: publication.displayName, preset: publication.draftPreset, headline: publication.draftHeadline, announcement: publication.draftAnnouncement, description: publication.draftDescription, heroImageUrl: publication.draftHeroImageUrl, publishedByUserId: "demo:provision", publishedAt }, select: { id: true } })

@@ -25,6 +25,9 @@ export function toWorkspaceShellViewModel(
   navigation.push({ label: "Produtos", href: "/workspace/products" })
   navigation.push({ label: "Ingredientes", href: "/workspace/ingredients" })
   navigation.push({ label: "Estoque", href: "/workspace/stock" })
+  if (can(role, "store.design.read")) {
+    navigation.push({ label: "Loja", href: "/workspace/store/design" })
+  }
   navigation.push({ label: "Pedidos", href: "/workspace/orders" })
   navigation.push({ label: "Clientes", href: "/workspace/customers" })
   if (can(role, "finance.read")) {

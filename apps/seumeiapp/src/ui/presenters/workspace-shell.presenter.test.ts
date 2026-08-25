@@ -20,6 +20,7 @@ describe("workspace shell presenter", () => {
       { label: "Produtos", href: "/workspace/products" },
       { label: "Ingredientes", href: "/workspace/ingredients" },
       { label: "Estoque", href: "/workspace/stock" },
+      { label: "Loja", href: "/workspace/store/design" },
       { label: "Pedidos", href: "/workspace/orders" },
       { label: "Clientes", href: "/workspace/customers" },
       { label: "Financeiro", href: "/workspace/finance" },

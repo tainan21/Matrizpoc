@@ -46,4 +46,9 @@ export const CANONICAL_ROUTE_FLOWS: readonly RouteFlowDefinition[] = [
     { route: "/workspace/finance", outcome: "acompanhar caixa, competência, vencimentos e criar lançamento manual" },
     { route: "/workspace/finance/entries/[entryId]", outcome: "consultar eventos e liquidar ou cancelar um lançamento manual aberto" },
   ] },
+  { id: "store-identity-publication", title: "Identidade e publicação", description: "Rascunho tenant-scoped, preview privado e versão pública imutável.", steps: [
+    { route: "/workspace/store/design", outcome: "editar e salvar a identidade autorizada da empresa" },
+    { route: "/workspace/store/preview", outcome: "revisar o rascunho privado com o catálogo real" },
+    { route: "/store/[storeSlug]", outcome: "servir somente a versão publicada sem expor IDs internos" },
+  ] },
 ]

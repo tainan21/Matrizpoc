@@ -33,4 +33,9 @@ describe("route flow scratchpad", () => {
       { route: "/workspace/finance/entries/[entryId]", outcome: "consultar eventos e liquidar ou cancelar um lançamento manual aberto" },
     ])
   })
+
+  it("documents the private draft through immutable public store flow", () => {
+    const identity = CANONICAL_ROUTE_FLOWS.find((flow) => flow.id === "store-identity-publication")
+    expect(identity?.steps.map(({ route }) => route)).toEqual(["/workspace/store/design", "/workspace/store/preview", "/store/[storeSlug]"])
+  })
 })

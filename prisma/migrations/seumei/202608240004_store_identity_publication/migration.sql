@@ -50,7 +50,16 @@ SET
     WHEN "storeSlug" = 'sabor-e-brasa' THEN 'BRAZILIAN_WARMTH'::"StoreIdentityPreset"
     ELSE 'MARKET_FRESH'::"StoreIdentityPreset"
   END,
-  "draftHeadline" = "displayName",
+  "draftHeadline" = CASE
+    WHEN "storeSlug" = 'galaxia-burger' THEN 'Smash de outro mundo.'
+    WHEN "storeSlug" = 'sabor-e-brasa' THEN 'Brasil servido na brasa.'
+    ELSE "displayName"
+  END,
+  "draftAnnouncement" = CASE
+    WHEN "storeSlug" = 'galaxia-burger' THEN 'Retirada em 20 minutos'
+    WHEN "storeSlug" = 'sabor-e-brasa' THEN 'Feito hoje, com calma'
+    ELSE ''
+  END,
   "draftDescription" = COALESCE(description, 'Conheça nosso catálogo e faça uma compra simulada.');
 
 INSERT INTO "store_publication_versions" (
