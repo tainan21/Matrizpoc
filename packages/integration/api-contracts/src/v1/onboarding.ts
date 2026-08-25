@@ -71,6 +71,7 @@ export const appOnboardingPayloadSchemas = {
   "matriz-hub": z.object({}),
   matrizlib: z.object({}),
   "matriz-workbench": z.object({}),
+  "matriz-control": z.object({}),
   sites: z.object({}),
   spot: spotOnboardingPayloadSchema,
   seumei: seumeiOnboardingPayloadSchema,

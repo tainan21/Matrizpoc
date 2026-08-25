@@ -69,6 +69,7 @@
       "@apps/matriz-hub/public-contract": ["./apps/matriz-hub/public-contract.ts"],
       "@apps/matrizlib/public-contract": ["./apps/matrizlib/public-contract.ts"],
       "@apps/matriz-workbench/public-contract": ["./apps/matriz-workbench/public-contract.ts"],
+      "@apps/matriz-control/public-contract": ["./apps/matriz-control/public-contract.ts"],
       "@apps/sites/public-contract": ["./apps/sites/public-contract.ts"],
       "@apps/spot/public-contract": ["./apps/spot/public-contract.ts"],
       "@apps/seumei/public-contract": ["./apps/seumei/public-contract.ts"],

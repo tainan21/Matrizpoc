@@ -31,6 +31,7 @@ export type AppIdLiteral =
   | "matriz-hub"
   | "matrizlib"
   | "matriz-workbench"
+  | "matriz-control"
   | "sites"
   | "spot"
   | "seumei"

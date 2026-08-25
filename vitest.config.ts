@@ -50,6 +50,7 @@ export default defineConfig({
       "@apps/matriz-hub/public-contract": resolve(__dirname, "./apps/matriz-hub/public-contract.ts"),
       "@apps/matrizlib/public-contract": resolve(__dirname, "./apps/matrizlib/public-contract.ts"),
       "@apps/matriz-workbench/public-contract": resolve(__dirname, "./apps/matriz-workbench/public-contract.ts"),
+      "@apps/matriz-control/public-contract": resolve(__dirname, "./apps/matriz-control/public-contract.ts"),
       "@apps/sites/public-contract": resolve(__dirname, "./apps/sites/public-contract.ts"),
       "@apps/spot/public-contract": resolve(__dirname, "./apps/spot/public-contract.ts"),
       "@apps/seumei/public-contract": resolve(__dirname, "./apps/seumei/public-contract.ts"),
