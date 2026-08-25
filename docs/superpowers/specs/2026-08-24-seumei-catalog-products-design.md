@@ -1,7 +1,7 @@
 # Seumei Catalog / Products Design
 
-**Status:** aprovado pelo escopo mestre da Seumei e pela autorização contínua do usuário  
-**Data:** 2026-08-24  
+**Status:** aprovado pelo escopo mestre da Seumei e pela autorização contínua do usuário
+**Data:** 2026-08-24
 **Escopo:** `apps/seumei` somente
 
 ## Objetivo
