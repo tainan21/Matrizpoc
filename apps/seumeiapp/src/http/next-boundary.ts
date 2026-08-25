@@ -7,6 +7,7 @@ import type { PortfolioRepository } from "../domain/repositories/portfolio-repos
 import type { RestaurantRepository } from "../domain/repositories/restaurant-repository"
 import type { CommerceRepository } from "../domain/repositories/commerce-repository"
 import type { FinanceRepository } from "../domain/repositories/finance-repository"
+import type { StoreDesignRepository } from "../domain/repositories/store-design-repository"
 
 export type SeumeiHttpServices = CompanyHttpServices & {
   readonly catalog: CatalogRepository
@@ -14,6 +15,7 @@ export type SeumeiHttpServices = CompanyHttpServices & {
   readonly restaurant: RestaurantRepository
   readonly commerce: CommerceRepository
   readonly finance: FinanceRepository
+  readonly storeDesign: StoreDesignRepository
 }
 
 export function jsonResult(result: HttpResult): NextResponse {
