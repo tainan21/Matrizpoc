@@ -32,6 +32,7 @@ export type AppIdLiteral =
   | "matriz-desktop"
   | "matrizlib"
   | "matriz-workbench"
+  | "matriz-control"
   | "sites"
   | "spot"
   | "matriz-admin"

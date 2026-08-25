@@ -14,6 +14,13 @@
 - **Review when:** a second native app proves a stable shared shell contract,
   a signed update channel exists, or macOS/Linux become release targets.
 
+## 2026-08-24 — Matriz Control owns local process orchestration
+
+- **Decision:** create `apps/matriz-control` on port 3008 with an app-local process supervisor and global terminal dock.
+- **Reason:** operational terminal access must remain available across the cockpit without weakening the Workbench prohibition on generic shell execution.
+- **Impact:** Control may execute only server-resolved actions from validated project metadata; it never imports product internals, accepts arbitrary browser commands, or persists terminal output.
+- **Review when:** a second real consumer needs the supervisor, native PTY fidelity becomes mandatory, or remote/multiuser operation enters scope.
+
 ## 2026-08-18 — MatrizLib sound language is a public design-ui subpath
 
 - **Decision:** publish typed semantic sound contracts, registry, packs,

@@ -355,6 +355,46 @@ importers:
         specifier: 9.31.1
         version: 9.31.1(supports-color@8.1.1)
 
+  apps/matriz-control:
+    dependencies:
+      '@matriz/design-system':
+        specifier: workspace:^
+        version: link:../../packages/design/system
+      '@matriz/integration-api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/api-contracts
+      '@matriz/integration-registry-core':
+        specifier: workspace:*
+        version: link:../../packages/integration/registry-core
+      '@matriz/platform-config':
+        specifier: workspace:*
+        version: link:../../packages/platform/config
+      next:
+        specifier: 16.2.4
+        version: 16.2.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+    devDependencies:
+      '@types/node':
+        specifier: 22.7.5
+        version: 22.7.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1)
+
   apps/matriz-hub:
     dependencies:
       '@matriz/access-tenants':

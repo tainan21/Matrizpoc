@@ -12,6 +12,7 @@ import { manifest as hubManifest } from "@apps/matriz-hub/public-contract"
 import { manifest as matrizlibManifest } from "@apps/matrizlib/public-contract"
 import { manifest as desktopManifest } from "@apps/matriz-desktop/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
+import { manifest as controlManifest } from "@apps/matriz-control/public-contract"
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
 import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contract"
@@ -25,6 +26,7 @@ const allManifests = [
   matrizlibManifest,
   desktopManifest,
   workbenchManifest,
+  controlManifest,
   sitesManifest,
   spotManifest,
   matrizAdminManifest,
@@ -51,11 +53,11 @@ describe("registry", () => {
     registry = buildRegistry()
   })
 
-  it("registra todos os 10 apps", () => {
+  it("registra todos os 11 apps", () => {
     const ids = registry.listEnabled().map((e) => e.manifest.appId)
-    expect(ids).toHaveLength(10)
+    expect(ids).toHaveLength(11)
     expect(new Set(ids)).toEqual(
-      new Set(["matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash"]),
+      new Set(["matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash"]),
     )
   })
 
@@ -82,16 +84,16 @@ describe("registry", () => {
     expect(ids).toContain("matriz-admin")
   })
 
-  it("findWithOnboardingSupport retorna os 9 apps participantes", () => {
+  it("findWithOnboardingSupport retorna os 10 apps participantes", () => {
     const supporting = registry.findWithOnboardingSupport()
     expect(supporting.map((e) => e.appId).sort()).toEqual(
-      ["contracts", "matriz-admin", "matriz-hub", "matriz-workbench", "matrizlib", "seumei", "sites", "spot", "willdash"],
+      ["contracts", "matriz-admin", "matriz-control", "matriz-hub", "matriz-workbench", "matrizlib", "seumei", "sites", "spot", "willdash"],
     )
   })
 
   it("toNavigation produz SharedAppNavigationDTO valido", () => {
     const nav = registry.toNavigation()
-    expect(nav).toHaveLength(10)
+    expect(nav).toHaveLength(11)
     for (const item of nav) {
       expect(item.routes.length).toBeGreaterThan(0)
       expect(item.primaryRoute).toMatch(/^\//)
@@ -107,10 +109,14 @@ describe("registry", () => {
     expect(registry.get("matriz-desktop")?.baseUrl).toBe("matriz://control")
   })
 
+  it("registra Matriz Control na porta 3008", () => {
+    expect(registry.get("matriz-control")?.baseUrl).toBe("http://localhost:3008")
+  })
+
   it("bootstrap real do Hub registra matrizlib com a baseUrl oficial", () => {
     const result = bootstrapMatrizHub()
     expect(result.registeredApps).toContain("matrizlib")
-    expect(result.registeredApps).toHaveLength(10)
+    expect(result.registeredApps).toHaveLength(11)
     expect(monorepoConfig.baseUrls.matrizlib).toBe("http://localhost:3007")
   })
 })
