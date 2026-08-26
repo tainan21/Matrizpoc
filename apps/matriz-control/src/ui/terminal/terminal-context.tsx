@@ -11,7 +11,7 @@ interface TerminalContextValue extends TerminalPreferences {
   setPlacement(placement: "bottom" | "right"): void
   setActiveSessionId(id: string | null): void
   resize(delta: number): void
-  openSession(projectId: string, actionId?: string): Promise<void>
+  openSession(projectId: string, actionId?: string, signal?: AbortSignal): Promise<void>
   sendInput(id: string, input: string): Promise<void>
   stop(id: string): Promise<void>
   restart(id: string): Promise<void>
@@ -20,6 +20,14 @@ interface TerminalContextValue extends TerminalPreferences {
 
 const TerminalContext = createContext<TerminalContextValue | null>(null)
 const storageKey = "matriz-control:terminal"
+
+type TerminalFetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+
+export async function mutateTerminal(fetcher: TerminalFetch, url: string, method: string, body?: unknown, signal?: AbortSignal): Promise<unknown> {
+  const response = await fetcher(url, { method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined, signal })
+  if (!response.ok) throw new Error((await response.json() as { error?: string }).error ?? "Terminal request failed")
+  return response.status === 204 ? null : response.json()
+}
 
 export function TerminalProvider({ children }: { children: ReactNode }) {
   const [preferences, setPreferences] = useState(DEFAULT_TERMINAL_PREFERENCES)
@@ -42,11 +50,10 @@ export function TerminalProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("keydown", onKey)
   }, [])
 
-  const mutate = useCallback(async (url: string, method: string, body?: unknown) => {
-    const response = await fetch(url, { method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined })
-    if (!response.ok) throw new Error((await response.json() as { error?: string }).error ?? "Terminal request failed")
+  const mutate = useCallback(async (url: string, method: string, body?: unknown, signal?: AbortSignal) => {
+    const result = await mutateTerminal(fetch, url, method, body, signal)
     await refresh()
-    return response.status === 204 ? null : response.json()
+    return result
   }, [refresh])
 
   const value = useMemo<TerminalContextValue>(() => ({
@@ -57,7 +64,7 @@ export function TerminalProvider({ children }: { children: ReactNode }) {
     setPlacement: (placement) => setPreferences((current) => ({ ...current, placement })),
     setActiveSessionId: (activeSessionId) => setPreferences((current) => ({ ...current, activeSessionId })),
     resize: (delta) => setPreferences((current) => current.placement === "bottom" ? { ...current, bottomSize: Math.min(720, Math.max(180, current.bottomSize + delta)) } : { ...current, rightSize: Math.min(900, Math.max(360, current.rightSize + delta)) }),
-    openSession: async (projectId, actionId = "dev") => { const session = await mutate("/api/terminal/sessions", "POST", { projectId, actionId }) as TerminalSession; setPreferences((current) => ({ ...current, open: true, activeSessionId: session.id })) },
+    openSession: async (projectId, actionId = "dev", signal) => { const session = await mutate("/api/terminal/sessions", "POST", { projectId, actionId }, signal) as TerminalSession; setPreferences((current) => ({ ...current, open: true, activeSessionId: session.id })) },
     sendInput: async (id, input) => { await mutate(`/api/terminal/sessions/${id}/input`, "POST", { input }) },
     stop: async (id) => { await mutate(`/api/terminal/sessions/${id}`, "PATCH") },
     restart: async (id) => { const session = await mutate(`/api/terminal/sessions/${id}/restart`, "POST") as TerminalSession; setPreferences((current) => ({ ...current, activeSessionId: session.id })) },

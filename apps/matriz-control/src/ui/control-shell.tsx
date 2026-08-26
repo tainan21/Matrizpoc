@@ -21,7 +21,7 @@ function Shell({ children }: { children: ReactNode }) {
     <header className="brand-bar"><Link href="/apps"><b>M</b><span>MATRIZ / CONTROL</span></Link><div><span className="global-score">34</span><button aria-label="Atualizar">↻</button></div></header>
     <nav className="main-nav" aria-label="Navegação principal">{links.map(([href, label]) => <Link className={pathname.startsWith(href) ? "active" : ""} href={href} key={href}>{label}</Link>)}</nav>
     <SmartAppRail apps={apps} activeAppId={state.activeAppId} onActivate={activate} />
-    <div className="control-content">{activeApp ? <ExternalAppStage app={activeApp} openSession={terminal.openSession} onOpenTerminal={() => terminal.setOpen(true)} /> : children}</div>
+    <div className="control-content">{activeApp ? <ExternalAppStage app={activeApp} openSession={(projectId, signal) => terminal.openSession(projectId, "dev", signal)} onOpenTerminal={() => terminal.setOpen(true)} /> : children}</div>
     <TerminalDock />
   </div>
 }

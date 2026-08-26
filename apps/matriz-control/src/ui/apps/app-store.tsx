@@ -3,6 +3,10 @@
 import { useInstalledApps } from "./installed-apps-context"
 import styles from "./app-store.module.css"
 
+export function openInstalledApp(appId: string, activate: (appId: string) => void) {
+  activate(appId)
+}
+
 export function AppStore() {
   const { apps, activate, install, uninstall } = useInstalledApps()
 
@@ -30,7 +34,7 @@ export function AppStore() {
         <ul className={styles.capabilities}>{app.capabilities.map((capability) => <li key={capability.id}><strong>{capability.name}</strong><span>{capability.description}</span></li>)}</ul>
         <div className={styles.actions}>
           {app.installed ? <>
-            <button className={styles.secondary} onClick={() => { activate(app.appId); window.open(app.baseUrl, "_blank", "noopener,noreferrer") }}>Abrir</button>
+            <button className={styles.secondary} onClick={() => openInstalledApp(app.appId, activate)}>Abrir</button>
             <button className={styles.danger} onClick={() => uninstall(app.appId)}>Desinstalar</button>
           </> : <button className={styles.primary} onClick={() => install(app.appId)}>Instalar</button>}
         </div>

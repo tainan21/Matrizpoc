@@ -8,12 +8,13 @@ const visualTransitionMs = 1_000
 const readinessRetryMs = 250
 const defaultReadinessAttempts = 4
 
-type ActivationResult = "ready" | "timeout" | "cancelled"
+type ActivationResult = "ready" | "timeout" | "startup-failed" | "cancelled"
+export interface ExternalAppActivation { readonly appId: string; readonly result: ActivationResult | "starting" }
 
 interface ActivationInput {
   readonly app: InstallableAppViewModel
   readonly signal: AbortSignal
-  readonly openSession: (projectId: string) => Promise<void>
+  readonly openSession: (projectId: string, signal: AbortSignal) => Promise<void>
   readonly wait: (milliseconds: number, signal: AbortSignal) => Promise<void>
   readonly checkReadiness: (appId: string, signal: AbortSignal) => Promise<boolean>
   readonly maxAttempts?: number
@@ -23,11 +24,11 @@ export async function activateExternalApp({ app, signal, openSession, wait, chec
   if (signal.aborted) return "cancelled"
 
   try {
-    await openSession(app.projectId)
+    await openSession(app.projectId, signal)
     if (signal.aborted) return "cancelled"
     await wait(visualTransitionMs, signal)
   } catch {
-    return signal.aborted ? "cancelled" : "timeout"
+    return signal.aborted ? "cancelled" : "startup-failed"
   }
 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -56,14 +57,18 @@ export function ExternalAppFrame({ app }: { readonly app: InstallableAppViewMode
   return <iframe className={styles.frame} src={app.baseUrl} title={app.name} />
 }
 
+export function frameAppForActivation(app: InstallableAppViewModel | null, activation: ExternalAppActivation): InstallableAppViewModel | null {
+  return app?.appId === activation.appId && activation.result === "ready" ? app : null
+}
+
 interface ExternalAppStageProps {
   readonly app: InstallableAppViewModel | null
-  readonly openSession: (projectId: string) => Promise<void>
+  readonly openSession: (projectId: string, signal: AbortSignal) => Promise<void>
   readonly onOpenTerminal: () => void
 }
 
 export function ExternalAppStage({ app, openSession, onOpenTerminal }: ExternalAppStageProps) {
-  const [result, setResult] = useState<ActivationResult | "starting">("starting")
+  const [activation, setActivation] = useState<ExternalAppActivation>({ appId: app?.appId ?? "", result: "starting" })
   const [retry, setRetry] = useState(0)
   const appId = app?.appId
   const appRef = useRef(app)
@@ -76,21 +81,24 @@ export function ExternalAppStage({ app, openSession, onOpenTerminal }: ExternalA
     const selectedApp = appRef.current
     if (!selectedApp) return
     const controller = new AbortController()
-    setResult("starting")
+    setActivation({ appId: selectedApp.appId, result: "starting" })
     void activateExternalApp({
       app: selectedApp,
       signal: controller.signal,
-      openSession: (projectId) => openSessionRef.current(projectId),
+      openSession: (projectId, signal) => openSessionRef.current(projectId, signal),
       wait: waitFor,
       checkReadiness,
     }).then((nextResult) => {
-      if (!controller.signal.aborted) setResult(nextResult)
+      if (!controller.signal.aborted) setActivation((current) => current.appId === selectedApp.appId ? { appId: selectedApp.appId, result: nextResult } : current)
     })
     return () => controller.abort()
   }, [appId, retry])
 
   if (!app) return null
-  if (result === "ready") return <section className={styles.stage} aria-label={`${app.name} externo`}><ExternalAppFrame app={app} /></section>
+  const result = activation.appId === app.appId ? activation.result : "starting"
+  const frameApp = frameAppForActivation(app, activation)
+  if (frameApp) return <section className={styles.stage} aria-label={`${app.name} externo`}><ExternalAppFrame app={frameApp} /></section>
+  if (result === "startup-failed") return <section className={styles.stageMessage} aria-live="polite"><span aria-hidden="true">!</span><h1>Não foi possível iniciar {app.name}</h1><p>O Control não conseguiu iniciar o processo local. Consulte o terminal para ver o erro.</p><div><button type="button" onClick={() => setRetry((value) => value + 1)}>Tentar novamente</button><button type="button" onClick={onOpenTerminal}>Abrir terminal</button></div></section>
   if (result === "timeout") return <section className={styles.stageMessage} aria-live="polite"><span aria-hidden="true">!</span><h1>{app.name} não respondeu</h1><p>O Control iniciou o runtime, mas a verificação local não confirmou disponibilidade.</p><div><button type="button" onClick={() => setRetry((value) => value + 1)}>Tentar novamente</button><button type="button" onClick={onOpenTerminal}>Abrir terminal</button></div></section>
 
   return <section className={styles.stageMessage} aria-live="polite"><span className={styles.loading} aria-hidden="true">{app.glyph}</span><h1>Abrindo {app.name}</h1><p>Iniciando o processo local e verificando a disponibilidade.</p></section>

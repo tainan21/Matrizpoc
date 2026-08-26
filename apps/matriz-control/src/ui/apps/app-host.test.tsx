@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest"
 import { emptyInstalledAppsState, installApp } from "../../domain/installable-apps"
 import { INSTALLABLE_APPS } from "../../integration/apps/installable-app-catalog"
 import { toInstallableAppsViewModels } from "./installable-apps-presenter"
-import { ExternalAppFrame, activateExternalApp } from "./external-app-stage"
+import { ExternalAppFrame, activateExternalApp, frameAppForActivation } from "./external-app-stage"
 import { SmartAppRail } from "./smart-app-rail"
 
 const appId = "health"
@@ -74,6 +74,45 @@ describe("smart app host", () => {
 
     expect(result).toBe("cancelled")
     expect(events).toEqual([])
+  })
+
+  it("passes the selection signal to the terminal start request and cancels it before readiness", async () => {
+    const controller = new AbortController()
+    let receivedSignal: AbortSignal | undefined
+    const resultPromise = activateExternalApp({
+      app: healthViewModel(),
+      signal: controller.signal,
+      openSession: async (_projectId, signal) => new Promise<void>((_resolve, reject) => {
+        receivedSignal = signal
+        signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true })
+      }),
+      wait: async () => undefined,
+      checkReadiness: async () => true,
+    })
+
+    controller.abort()
+
+    await expect(resultPromise).resolves.toBe("cancelled")
+    expect(receivedSignal).toBe(controller.signal)
+  })
+
+  it("does not render a prior ready frame while a different app is activating", () => {
+    const appA = healthViewModel()
+    const appB = { ...appA, appId: "next-app", name: "Next app" }
+
+    expect(frameAppForActivation(appB, { appId: appA.appId, result: "ready" })).toBeNull()
+  })
+
+  it("distinguishes a terminal startup failure from a readiness timeout", async () => {
+    const result = await activateExternalApp({
+      app: healthViewModel(),
+      signal: new AbortController().signal,
+      openSession: async () => { throw new Error("Terminal unavailable") },
+      wait: async () => undefined,
+      checkReadiness: async () => true,
+    })
+
+    expect(result).toBe("startup-failed")
   })
 
   it("reports a timeout after the bounded readiness attempts", async () => {
