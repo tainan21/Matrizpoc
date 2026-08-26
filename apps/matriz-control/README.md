@@ -64,3 +64,9 @@ compilação de produção do Control usa Webpack por compatibilidade de resolu�
 de dependências no Windows; o desenvolvimento continua com Turbopack.
 
 O servidor MCP STDIO é iniciado pelo executável compilado com `corepack pnpm --filter @matriz/app-matriz-control mcp:start`. Ele somente conecta ao desktop já aberto por named pipe autenticado; as ferramentas não expõem shell, cookies, tokens, variáveis de ambiente ou caminhos absolutos.
+
+## Atualizações incrementais do desktop
+
+O botão **Atualizar** no cabeçalho abre o centro de atualizações apenas no app Windows instalado. A verificação, o download diferencial do NSIS e a instalação são ações humanas separadas; download automático e instalação ao sair permanecem desligados. Os comandos `update.*` não fazem parte da superfície MCP e nunca recebem URL, caminho, versão ou artefato do renderer.
+
+Para publicar, o pipeline deve configurar um provider suportado pelo `electron-builder`, gerar `app-update.yml`, publicar instalador e blockmap juntos e assinar o instalador com Authenticode/publisher confiável. Nenhum endpoint, certificado ou segredo de assinatura fica neste repositório. Sem esse canal empacotado, a UI informa que a atualização está indisponível.

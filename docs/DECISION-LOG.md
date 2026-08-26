@@ -304,3 +304,10 @@ próximos do app responsável.
 - **Motivo:** a ferramenta interna precisa funcionar sem login e sem Hub, preservar a versão web e recuperar falhas locais sem virar um SaaS ou conceder execução arbitrária.
 - **Impacto:** Control possui processo/janela; Workbench possui diagnóstico e estado de reparo. O instalador exclui dados e fontes locais. Após três falhas, a recuperação exige intervenção humana.
 - **Revisar quando:** houver assinatura de binário, atualização automática confiável ou um segundo host para o contrato local.
+
+## 2026-08-26 — Atualização desktop explícita e assinada
+
+- **Decisão:** usar o fluxo NSIS oficial do `electron-updater`, com verificação, download diferencial e instalação separados por ações humanas; URLs e artefatos pertencem ao build confiável, nunca ao renderer ou MCP.
+- **Motivo:** entregar correções pequenas sem reinstalação completa preservando a fronteira local e a verificação Authenticode.
+- **Impacto:** `autoDownload` e `autoInstallOnAppQuit` ficam desligados; pacote sem `app-update.yml` declara o updater indisponível; produção exige instalador assinado, publisher confiável, blockmap e provider configurados no pipeline.
+- **Revisar quando:** houver múltiplos canais, rollback assinado ou distribuição de apps independentes fora do NSIS do Control.
