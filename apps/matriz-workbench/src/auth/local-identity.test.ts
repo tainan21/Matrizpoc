@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { readHubIdentity, resolveLocalIdentity } from "./local-identity"
+import { decodeWorkbenchIdentity, encodeWorkbenchIdentity, readHubIdentity, resolveLocalIdentity } from "./local-identity"
 
 describe("local Workbench identity", () => {
   it("trusts the Control-owned desktop session without depending on Hub", async () => {
@@ -85,5 +85,11 @@ describe("local Workbench identity", () => {
     const fetcher: typeof fetch = async () => new Response("unauthorized", { status: 401 })
 
     await expect(readHubIdentity("", fetcher)).resolves.toBeNull()
+  })
+
+  it("round-trips only a bounded visible identity cookie", () => {
+    const identity = { id: "demo-local", label: "Demo local", source: "demo" as const, roles: ["local-operator"] as const }
+    expect(decodeWorkbenchIdentity(encodeWorkbenchIdentity(identity))).toEqual(identity)
+    expect(decodeWorkbenchIdentity("not-base64-json")).toBeUndefined()
   })
 })

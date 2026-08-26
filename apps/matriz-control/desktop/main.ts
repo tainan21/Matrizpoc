@@ -100,6 +100,21 @@ async function openWorkbench() {
     secure: false,
     expirationDate: Math.floor(Date.now() / 1000) + 60 * 60 * 12,
   })
+  await workbenchWindow.webContents.session.cookies.set({
+    url: connection.url,
+    name: "matriz_workbench_identity",
+    value: Buffer.from(JSON.stringify({
+      id: "control-local",
+      label: "Control local",
+      source: "control",
+      roles: ["local-operator"],
+    })).toString("base64url"),
+    path: "/",
+    httpOnly: true,
+    sameSite: "strict",
+    secure: false,
+    expirationDate: Math.floor(Date.now() / 1000) + 60 * 60 * 12,
+  })
   await workbenchWindow.loadURL(connection.url)
   workbenchWindow.once("closed", () => { workbenchWindow = undefined })
   return snapshot

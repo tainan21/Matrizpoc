@@ -41,6 +41,7 @@ import {
   tokenMatches,
 } from "../src/auth/session"
 import { getLocalRateLimiter } from "../src/auth/local-rate-limiter"
+import { resolveWorkbenchRuntimeMode } from "../src/auth/runtime-mode"
 import { projectBlueprintInputSchema } from "../src/domain/project-blueprints"
 import { createProjectBlueprintWorkflow } from "../src/application/project-blueprints"
 import { ProjectBlueprintRepository } from "../src/integration/filesystem/project-blueprint-repository"
@@ -170,6 +171,7 @@ export async function unlockAction(formData: FormData) {
 
 export async function lockAction() {
   await requireWorkbenchSession()
+  if (resolveWorkbenchRuntimeMode() === "control-desktop") redirect("/")
   ;(await cookies()).delete(SESSION_COOKIE)
   redirect("/unlock")
 }

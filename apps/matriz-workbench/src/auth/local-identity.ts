@@ -7,6 +7,28 @@ export interface WorkbenchIdentity {
   roles: readonly ["local-operator"]
 }
 
+export const WORKBENCH_IDENTITY_COOKIE = "matriz_workbench_identity"
+
+export function encodeWorkbenchIdentity(identity: WorkbenchIdentity): string {
+  return Buffer.from(JSON.stringify(identity)).toString("base64url")
+}
+
+export function decodeWorkbenchIdentity(value: string | undefined): WorkbenchIdentity | undefined {
+  if (!value || value.length > 1_024) return undefined
+  try {
+    const parsed = JSON.parse(Buffer.from(value, "base64url").toString("utf8")) as Record<string, unknown>
+    if (
+      typeof parsed.id !== "string" || !parsed.id || parsed.id.length > 128 ||
+      typeof parsed.label !== "string" || !parsed.label || parsed.label.length > 128 ||
+      !["control", "hub", "demo"].includes(String(parsed.source)) ||
+      !Array.isArray(parsed.roles) || parsed.roles.length !== 1 || parsed.roles[0] !== "local-operator"
+    ) return undefined
+    return parsed as unknown as WorkbenchIdentity
+  } catch {
+    return undefined
+  }
+}
+
 export type LocalIdentityResolution =
   | { status: "authenticated"; identity: WorkbenchIdentity }
   | { status: "login_required" }
