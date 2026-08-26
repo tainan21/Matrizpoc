@@ -40,6 +40,13 @@ accepted to make validation faster. This shortcut is disabled when
 `NODE_ENV=production`; production continues to require
 `WORKBENCH_LOCAL_TOKEN` with at least 16 characters.
 
+When started as an installed app by Matriz Control, Workbench is provisioned
+automatically with an internal loopback session and does not show a login
+screen. When started standalone without a Hub session or configured token, it
+uses a local Demo identity; this is an internal development fallback, not a
+commercial account. The web version and its normal Hub session remain
+available.
+
 The session cookie is HTTP-only and `SameSite=Strict`. It is intentionally not
 marked `Secure` on the default loopback HTTP server. Set
 `WORKBENCH_COOKIE_SECURE=true` only behind a trusted HTTPS terminator.
@@ -78,7 +85,8 @@ Agent request details can start or resume a local Codex App Server thread.
 Streaming, plan updates, command evidence, approvals and the aggregated diff
 stay local. Threads start read-only and never run automatically.
 
-See `docs/CODEX-APP-SERVER.md`.
+See `docs/CODEX-APP-SERVER.md`. Control hosting, identity and automatic repair
+are documented in `docs/CONTROL-INTEGRATION.md`.
 
 ## Optional collaboration
 

@@ -5,6 +5,9 @@ import { describe, expect, it } from "vitest"
 
 const workspaceRoot = process.cwd()
 const smokeWorkflow = readFileSync(path.join(workspaceRoot, ".github/workflows/matriz-desktop.yml"), "utf8")
+const controlPackage = JSON.parse(readFileSync(path.join(workspaceRoot, "apps/matriz-control/package.json"), "utf8"))
+const workbenchNextConfig = readFileSync(path.join(workspaceRoot, "apps/matriz-workbench/next.config.mjs"), "utf8")
+const controlNextConfig = readFileSync(path.join(workspaceRoot, "apps/matriz-control/next.config.mjs"), "utf8")
 
 describe("Matriz Desktop Windows workflows", () => {
   it("packages Control and Matriz Admin without stale Seumei desktop paths", () => {
@@ -26,5 +29,29 @@ describe("Matriz Desktop Windows workflows", () => {
     expect(acceptanceWorkflow).toContain("windows-latest")
     expect(acceptanceWorkflow).toContain("acceptance:installed")
     expect(acceptanceWorkflow).toContain("if: always()")
+  })
+
+  it("packages the standalone Workbench inside Matriz Control", () => {
+    expect(workbenchNextConfig).toContain('output: "standalone"')
+    expect(workbenchNextConfig).toContain("outputFileTracingRoot: workspaceRoot")
+    expect(controlNextConfig).toContain("outputFileTracingRoot: workspaceRoot")
+    expect(controlPackage.scripts.build).toBe("next build --webpack")
+    expect(controlPackage.scripts["desktop:build"]).toContain("@matriz/app-matriz-workbench build")
+    const workbenchResource = controlPackage.build.extraResources.find(
+      (resource: { to?: string }) => resource.to === "workbench-runtime",
+    )
+
+    expect(workbenchResource).toMatchObject({
+      from: "../matriz-workbench/.next/standalone",
+    })
+    expect(workbenchResource.filter).toEqual(expect.arrayContaining([
+      "!apps/matriz-workbench/.matriz{,/**}",
+      "!apps/matriz-workbench/.env*",
+      "!apps/matriz-workbench/src{,/**}",
+    ]))
+    expect(controlPackage.build.extraResources).toContainEqual({
+      from: "../matriz-workbench/.next/static",
+      to: "workbench-runtime/apps/matriz-workbench/.next/static",
+    })
   })
 })

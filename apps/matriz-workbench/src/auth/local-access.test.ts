@@ -37,13 +37,16 @@ describe("local Workbench access", () => {
     expect(localTokenMatches(LOCAL_TEST_TOKEN, environment)).toBe(false)
   })
 
-  it("requires a configured strong token in production", () => {
-    expect(() => getRequiredLocalToken({ NODE_ENV: "production" })).toThrow(
+  it("uses an internal demo session only for standalone production", () => {
+    expect(getRequiredLocalToken({ NODE_ENV: "production", WORKBENCH_RUNTIME_MODE: "standalone-web" }))
+      .toHaveLength(64)
+    expect(() => getRequiredLocalToken({ NODE_ENV: "production", WORKBENCH_RUNTIME_MODE: "control-desktop" })).toThrow(
       "WORKBENCH_LOCAL_TOKEN ausente ou curto",
     )
     expect(() =>
       getRequiredLocalToken({
         NODE_ENV: "production",
+        WORKBENCH_RUNTIME_MODE: "control-desktop",
         WORKBENCH_LOCAL_TOKEN: LOCAL_TEST_TOKEN,
       }),
     ).toThrow("WORKBENCH_LOCAL_TOKEN ausente ou curto")

@@ -32,6 +32,27 @@ async function fixture() {
 }
 
 describe("CodexRunManager concurrency", () => {
+  it("starts an automated repair through the same bounded run path", async () => {
+    const manager = new CodexRunManager()
+    const calls: unknown[][] = []
+    manager.start = async (...args: Parameters<CodexRunManager["start"]>) => {
+      calls.push(args)
+      return { revision: "run-revision" } as Awaited<ReturnType<CodexRunManager["start"]>>
+    }
+
+    await expect(manager.startAutomatedRepair(
+      "sample",
+      "req_11111111-1111-4111-8111-111111111111",
+      "request-revision",
+      `diag_${"a".repeat(64)}`,
+    )).resolves.toMatchObject({ revision: "run-revision" })
+    expect(calls).toEqual([[
+      "sample",
+      "req_11111111-1111-4111-8111-111111111111",
+      "request-revision",
+    ]])
+  })
+
   it("requires a live structured claim before starting", () => {
     const legacy = {
       status: "queued",

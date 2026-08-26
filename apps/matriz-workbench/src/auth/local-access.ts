@@ -5,6 +5,8 @@ export const LOCAL_TEST_TOKEN = "1234"
 interface LocalAccessEnvironment {
   NODE_ENV?: string
   WORKBENCH_LOCAL_TOKEN?: string
+  WORKBENCH_RUNTIME_MODE?: string
+  MATRIZ_WORKSPACE_ROOT?: string
 }
 
 export function isLocalTestAccessEnabled(
@@ -19,6 +21,11 @@ export function getRequiredLocalToken(
   const configuredToken = environment.WORKBENCH_LOCAL_TOKEN
   if (configuredToken && configuredToken.length >= 16) return configuredToken
   if (isLocalTestAccessEnabled(environment)) return LOCAL_TEST_TOKEN
+  if (environment.WORKBENCH_RUNTIME_MODE !== "control-desktop") {
+    return createHash("sha256")
+      .update(`matriz-workbench:demo:${environment.MATRIZ_WORKSPACE_ROOT ?? "local"}`)
+      .digest("hex")
+  }
   throw new Error(
     "WORKBENCH_LOCAL_TOKEN ausente ou curto. Defina um segredo local com pelo menos 16 caracteres.",
   )
