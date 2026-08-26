@@ -48,4 +48,3 @@ Closing the dialog does not cancel an in-flight download. Errors stay recoverabl
 - An updater coordinator is tested with a fake adapter, including unavailable development mode, manual download, progress, and explicit install.
 - UI presenter/component tests cover each action state without network or Electron.
 - Final validation runs Control tests, lint, typecheck, build, desktop compile, repository smoke tests, boundary verification, and the browser Health journey.
-
