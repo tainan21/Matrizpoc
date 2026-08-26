@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain, session, WebContentsView, type DownloadItem, type IpcMainInvokeEvent, type WebContents } from "electron"
+import { autoUpdater } from "electron-updater"
 import { createHash, randomBytes, randomUUID } from "node:crypto"
 import { spawn, type ChildProcess } from "node:child_process"
 import { appendFile, chmod, mkdir, readFile, writeFile } from "node:fs/promises"
@@ -6,7 +7,7 @@ import { createServer, type Server } from "node:net"
 import { basename, join } from "node:path"
 import { BrowserRuntime, MemoryBrowserRepository, type BrowserCommand, type BrowserRepository } from "../src/application/browser-runtime"
 import { automationCapabilityForTarget, canAgentBootstrapCapsule, navigationTarget, tabsToSuspend, type AgentCapability, type BrowserTab, type Capsule } from "../src/domain/browser"
-import { parseDesktopCommand, type BrowserEvent, type DesktopCommand, type DesktopResult } from "../src/application/desktop-bridge"
+import { assertAgentDesktopCommand, parseDesktopCommand, type BrowserEvent, type DesktopCommand, type DesktopResult } from "../src/application/desktop-bridge"
 import { SqliteBrowserRepository } from "../src/integration/browser/sqlite-browser-repository"
 import { WorkspaceFileRepository } from "../src/integration/browser/workspace-file-repository"
 import { listTerminalProjects } from "../src/integration/projects/project-catalog"
@@ -18,6 +19,8 @@ import { WorkbenchRepairLoop } from "../src/application/workbench-repair-loop"
 import { TerminalSupervisor } from "../src/application/terminal-supervisor"
 import { WorkbenchClient } from "../src/integration/workbench/workbench-client"
 import { createControlHostHealthSnapshot } from "../src/application/host-health-snapshot"
+import { DesktopUpdateCoordinator } from "../src/application/desktop-update-coordinator"
+import { ElectronUpdateAdapter } from "../src/integration/desktop/electron-update-adapter"
 
 app.enableSandbox()
 
@@ -41,6 +44,8 @@ let windowCloseAuthorized = false
 const rootDir = process.env.MATRIZ_WORKSPACE_ROOT ?? (app.isPackaged ? process.cwd() : join(__dirname, "../../../.."))
 const localToken = process.env.MATRIZ_CONTROL_LOCAL_TOKEN ?? randomBytes(32).toString("hex")
 process.env.MATRIZ_CONTROL_LOCAL_TOKEN = localToken
+const desktopUpdater = new DesktopUpdateCoordinator(new ElectronUpdateAdapter(autoUpdater, { packaged: app.isPackaged, version: app.getVersion() }))
+desktopUpdater.subscribe((snapshot) => send({ type: "update.updated", snapshot }))
 
 const workbenchServerPath = process.env.MATRIZ_WORKBENCH_SERVER_PATH ?? (
   app.isPackaged
@@ -222,6 +227,10 @@ function layoutActiveView() {
 }
 
 async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
+  if (command.type === "update.status") return desktopUpdater.status()
+  if (command.type === "update.check") return desktopUpdater.check()
+  if (command.type === "update.download") return desktopUpdater.download()
+  if (command.type === "update.install") { desktopUpdater.install(); return { ok: true } }
   if (command.type === "workbench.status") return workbenchRuntime.snapshot()
   if (command.type === "workbench.open") return openWorkbench()
   if (command.type === "workbench.restart") {
@@ -399,6 +408,7 @@ async function handleAgentLine(line: string, token: string): Promise<{ id: strin
     if (request.token !== token) throw new Error("Authentication failed")
     const command = parseDesktopCommand(request.command)
     type = command.type
+    assertAgentDesktopCommand(command)
     if (agentKilled && command.type !== "agent.kill") throw new Error("Agent kill switch is active")
     capsuleId = await authorizeAgentCommand(command)
     const result = await dispatch(command)

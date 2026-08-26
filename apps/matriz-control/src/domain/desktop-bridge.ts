@@ -85,6 +85,10 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
   throw new Error(`Unsupported desktop command: ${type}`)
 }
 
+export function assertAgentDesktopCommand(command: DesktopCommand): void {
+  if (command.type.startsWith("update.")) throw new Error("Updater commands require the human interface")
+}
+
 function text(value: unknown, field: string, max: number, allowEmpty = false): string {
   if (typeof value !== "string" || value.length > max || (!allowEmpty && !value.trim())) throw new Error(`Invalid ${field}`)
   return value

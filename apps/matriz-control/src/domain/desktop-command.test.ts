@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { parseDesktopCommand } from "./desktop-bridge"
+import { assertAgentDesktopCommand, parseDesktopCommand } from "./desktop-bridge"
 
 describe("parseDesktopCommand", () => {
   it("accepts only the closed desktop command surface", () => {
@@ -29,6 +29,10 @@ describe("parseDesktopCommand", () => {
 
   it.each(["update.status", "update.check", "update.download", "update.install"])("rejects payload on %s", (type) => {
     expect(() => parseDesktopCommand({ type, url: "https://evil.example" })).toThrow(/payload/i)
+  })
+
+  it("keeps updater commands out of the MCP command surface", () => {
+    expect(() => assertAgentDesktopCommand({ type: "update.check" })).toThrow(/human interface/i)
   })
 
 })

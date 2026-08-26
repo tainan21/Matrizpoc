@@ -53,4 +53,11 @@ describe("DesktopUpdateCoordinator", () => {
     fake.emit({ type: "error", message: "release host unavailable" })
     expect(listener).toHaveBeenLastCalledWith(expect.objectContaining({ state: "error", message: "release host unavailable" }))
   })
+
+  it("treats a missing packaged release channel as unavailable", () => {
+    const fake = adapter()
+    const coordinator = new DesktopUpdateCoordinator(fake)
+    fake.emit({ type: "unavailable", message: "Canal de atualização não configurado." })
+    expect(coordinator.status()).toMatchObject({ state: "unavailable" })
+  })
 })

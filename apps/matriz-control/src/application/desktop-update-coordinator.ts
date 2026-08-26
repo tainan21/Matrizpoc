@@ -1,6 +1,7 @@
 import type { DesktopUpdateSnapshot } from "../domain/desktop-bridge"
 
 export type DesktopUpdateAdapterEvent =
+  | { type: "unavailable"; message: string }
   | { type: "checking" }
   | { type: "available"; version: string; notes: string | null }
   | { type: "current" }
@@ -51,6 +52,7 @@ export class DesktopUpdateCoordinator {
   }
 
   private receive(event: DesktopUpdateAdapterEvent) {
+    if (event.type === "unavailable") this.set({ ...snapshot("unavailable", this.adapter.currentVersion, event.message) })
     if (event.type === "checking") this.set({ ...this.snapshotValue, state: "checking", message: "Verificando atualizações…" })
     if (event.type === "available") this.set({ state: "available", currentVersion: this.adapter.currentVersion, availableVersion: event.version, progress: null, notes: event.notes, message: `Versão ${event.version} disponível.` })
     if (event.type === "current") this.set(snapshot("current", this.adapter.currentVersion, "Você já está na versão mais recente."))
