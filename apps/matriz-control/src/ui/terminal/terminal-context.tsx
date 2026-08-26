@@ -22,6 +22,20 @@ const TerminalContext = createContext<TerminalContextValue | null>(null)
 const storageKey = "matriz-control:terminal"
 
 type TerminalFetch = (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>
+type SchedulePoll = (callback: () => void, delay: number) => number
+
+export function startSequentialTerminalPolling(refresh: () => Promise<void>, schedule: SchedulePoll, clear: (timer: number) => void, delay: number): () => void {
+  let cancelled = false
+  let timer = 0
+  const poll = () => {
+    if (cancelled) return
+    void refresh().catch(() => undefined).finally(() => {
+      if (!cancelled) timer = schedule(poll, delay)
+    })
+  }
+  timer = schedule(poll, delay)
+  return () => { cancelled = true; clear(timer) }
+}
 
 export async function mutateTerminal(fetcher: TerminalFetch, url: string, method: string, body?: unknown, signal?: AbortSignal): Promise<unknown> {
   const response = await fetcher(url, { method, headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined, signal })
@@ -41,8 +55,7 @@ export function TerminalProvider({ children }: { children: ReactNode }) {
   useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(preferences)) }, [preferences])
   useEffect(() => {
     if (!preferences.open && !sessions.some((session) => ["starting", "running", "stopping"].includes(session.status))) return
-    const timer = window.setInterval(() => void refresh(), 700)
-    return () => window.clearInterval(timer)
+    return startSequentialTerminalPolling(refresh, window.setTimeout.bind(window), window.clearTimeout.bind(window), 1_000)
   }, [preferences.open, refresh, sessions])
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => { if (event.ctrlKey && event.key.toLowerCase() === "j") { event.preventDefault(); setPreferences((value) => ({ ...value, open: !value.open })) } }
