@@ -39,4 +39,11 @@ Para gerar o instalador Windows local:
 corepack pnpm --filter @matriz/app-matriz-control desktop:build
 ```
 
+O instalador inclui o Workbench como app interno. O Control inicia o servidor
+em loopback com credenciais efêmeras distintas, valida sua saúde, abre uma
+única janela e encerra o processo junto com o desktop. O pacote exclui
+`.matriz`, arquivos de ambiente, logs, fontes e documentação do Workbench. A
+compilação de produção do Control usa Webpack por compatibilidade de resolução
+de dependências no Windows; o desenvolvimento continua com Turbopack.
+
 O servidor MCP STDIO é iniciado pelo executável compilado com `corepack pnpm --filter @matriz/app-matriz-control mcp:start`. Ele somente conecta ao desktop já aberto por named pipe autenticado; as ferramentas não expõem shell, cookies, tokens, variáveis de ambiente ou caminhos absolutos.

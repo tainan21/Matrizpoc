@@ -283,3 +283,10 @@ próximos do app responsável.
 - **Motivo:** a validação real da Seumei em 3008 provou que a allowlist terminava em 3006 e que handlers compilados separadamente não compartilhavam o `Map` local de sessões.
 - **Impacto:** MatrizLib 3007 e Seumei 3008 conseguem autenticar; origens externas e 3009+ continuam negadas. Apenas o broker de desenvolvimento muda.
 - **Revisar quando:** o broker mock for removido em favor da sessão persistente/implantada.
+
+## 2026-08-26 — Workbench local instalado e reparo limitado
+
+- **Decisão:** embarcar o Workbench no Matriz Control com identidade local automática, contrato loopback autenticado e reparo Codex limitado a uma ação catalogada e um rerun por lease.
+- **Motivo:** a ferramenta interna precisa funcionar sem login e sem Hub, preservar a versão web e recuperar falhas locais sem virar um SaaS ou conceder execução arbitrária.
+- **Impacto:** Control possui processo/janela; Workbench possui diagnóstico e estado de reparo. O instalador exclui dados e fontes locais. Após três falhas, a recuperação exige intervenção humana.
+- **Revisar quando:** houver assinatura de binário, atualização automática confiável ou um segundo host para o contrato local.

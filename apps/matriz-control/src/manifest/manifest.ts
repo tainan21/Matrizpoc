@@ -23,6 +23,7 @@ export const manifest: AppManifestDTO = {
     { id: "control.browser.use", name: "Navegar localmente", description: "Opera abas Chromium reais no runtime desktop local." },
     { id: "control.browser.capsules", name: "Isolar contas", description: "Mantém perfis, cache e sessões separados por cápsula criptografada." },
     { id: "control.browser.automate", name: "Automatizar navegador", description: "Expõe ações tipadas a agentes por MCP local com políticas explícitas." },
+    { id: "control.workbench.host", name: "Hospedar Workbench local", description: "Gerencia o runtime instalado do Workbench e executa somente revalidações catalogadas." },
   ],
   eventsProduced: [], eventsConsumed: [], integrations: [],
   onboardingSupport: { participates: true, hasSpecificStep: false },

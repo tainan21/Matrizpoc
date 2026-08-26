@@ -91,6 +91,13 @@ describe("manifests", () => {
     }
   })
 
+  it("declares the installed Workbench host and bounded repair capabilities", () => {
+    expect(workbenchManifest.capabilities.map((capability) => capability.id))
+      .toContain("workbench.diagnostics.repair")
+    expect(controlManifest.capabilities.map((capability) => capability.id))
+      .toContain("control.workbench.host")
+  })
+
   it("contracts integra com spot e seumei via external-link", () => {
     const targets = contractsManifest.integrations
       .filter((i) => i.kind === "external-link")

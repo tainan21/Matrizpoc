@@ -37,6 +37,11 @@ export const manifest: AppManifestDTO = {
       name: "Usar praticidades locais",
       description: "Instala e acessa automações, snippets, atalhos e gadgets locais.",
     },
+    {
+      id: "workbench.diagnostics.repair",
+      name: "Coordenar reparos locais",
+      description: "Recebe falhas sanitizadas do Control e coordena até três tentativas Codex com aprovação explícita.",
+    },
   ],
   eventsProduced: [],
   eventsConsumed: [],

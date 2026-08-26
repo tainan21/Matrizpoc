@@ -1,6 +1,13 @@
+import { fileURLToPath } from "node:url"
+
+const workspaceRoot = fileURLToPath(new URL("../..", import.meta.url))
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: "standalone",
+  outputFileTracingRoot: workspaceRoot,
+  turbopack: { root: workspaceRoot },
   distDir: process.env.WORKBENCH_NEXT_DIST_DIR ?? ".next",
   transpilePackages: [
     "@matriz/design-system",

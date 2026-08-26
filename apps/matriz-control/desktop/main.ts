@@ -43,7 +43,7 @@ process.env.MATRIZ_CONTROL_LOCAL_TOKEN = localToken
 
 const workbenchServerPath = process.env.MATRIZ_WORKBENCH_SERVER_PATH ?? (
   app.isPackaged
-    ? join(process.resourcesPath, "workbench", "server.js")
+    ? join(process.resourcesPath, "workbench-runtime", "apps", "matriz-workbench", "server.js")
     : join(rootDir, "apps", "matriz-workbench", ".next", "standalone", "apps", "matriz-workbench", "server.js")
 )
 const workbenchRuntime = new WorkbenchRuntimeSupervisor({
