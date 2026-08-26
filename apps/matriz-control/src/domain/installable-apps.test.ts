@@ -13,6 +13,11 @@ describe("installable apps domain", () => {
       .toEqual({ version: 1, installedIds: ["health"], activeAppId: null })
   })
 
+  it("rejects a persisted state from an unsupported version", () => {
+    expect(normalizeInstalledAppsState({ version: 2, installedIds: ["health"], activeAppId: "health" }, ["health"]))
+      .toEqual(emptyInstalledAppsState())
+  })
+
   it("installs and uninstalls idempotently", () => {
     const installed = installApp(emptyInstalledAppsState(), "health", ["health"])
 

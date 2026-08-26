@@ -11,7 +11,7 @@ export function emptyInstalledAppsState(): InstalledAppsState {
 }
 
 export function normalizeInstalledAppsState(value: unknown, allowedIds: readonly string[]): InstalledAppsState {
-  if (!isStoredState(value)) return emptyInstalledAppsState()
+  if (!isStoredState(value) || value.version !== INSTALLED_APPS_STATE_VERSION) return emptyInstalledAppsState()
 
   const allowed = new Set(allowedIds)
   const installedIds = [...new Set(value.installedIds.filter((appId): appId is string => typeof appId === "string" && allowed.has(appId)))]
