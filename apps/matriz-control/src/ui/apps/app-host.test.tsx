@@ -129,4 +129,21 @@ describe("smart app host", () => {
     expect(result).toBe("timeout")
     expect(events).toEqual(["wait:1000", "readiness", "wait:250", "readiness"])
   })
+
+  it("keeps polling through a Windows Next cold start before mounting", async () => {
+    let readinessAttempts = 0
+    const result = await activateExternalApp({
+      app: healthViewModel(),
+      signal: new AbortController().signal,
+      openSession: async () => undefined,
+      wait: async () => undefined,
+      checkReadiness: async () => {
+        readinessAttempts += 1
+        return readinessAttempts >= 5
+      },
+    })
+
+    expect(result).toBe("ready")
+    expect(readinessAttempts).toBe(5)
+  })
 })

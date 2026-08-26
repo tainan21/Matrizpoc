@@ -7,7 +7,10 @@ import { HealthHostBridge } from "./health-host-bridge"
 
 const visualTransitionMs = 1_000
 const readinessRetryMs = 250
-const defaultReadinessAttempts = 4
+// Next's first Windows dev compilation can outlive the original four probes.
+// Keep the probe itself bounded, but allow roughly twelve seconds overall for
+// a cold runtime to begin serving its known base URL.
+const defaultReadinessAttempts = 12
 
 type ActivationResult = "ready" | "timeout" | "startup-failed" | "cancelled"
 export interface ExternalAppActivation { readonly appId: string; readonly result: ActivationResult | "starting" }
