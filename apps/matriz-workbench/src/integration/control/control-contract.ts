@@ -31,3 +31,17 @@ export const controlDiagnosticSchema = z.object({
 })
 
 export type ControlDiagnosticInput = z.infer<typeof controlDiagnosticSchema>
+
+export const controlRepairResultSchema = z.object({
+  actionId: z.enum(["dev", "lint", "typecheck", "test"]),
+  attempt: z.number().int().min(1).max(3),
+  lease: z.string().regex(/^repair_[0-9a-f-]{36}$/),
+  exitCode: z.number().int().min(-1).max(255),
+  lines: z.array(evidenceLineSchema).min(1).max(80),
+}).superRefine((value, context) => {
+  if (Buffer.byteLength(JSON.stringify(value.lines), "utf8") > 16 * 1024) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: "Repair evidence exceeds 16 KiB", path: ["lines"] })
+  }
+})
+
+export type ControlRepairResult = z.infer<typeof controlRepairResultSchema>

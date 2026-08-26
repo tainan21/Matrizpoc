@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { buildControlHealth, controlDiagnosticSchema } from "./control-contract"
+import { buildControlHealth, controlDiagnosticSchema, controlRepairResultSchema } from "./control-contract"
 
 const valid = {
   projectId: "matriz-control",
@@ -37,6 +37,23 @@ describe("Control diagnostic contract", () => {
     expect(controlDiagnosticSchema.safeParse({
       ...valid,
       lines: Array(80).fill("x".repeat(300)),
+    }).success).toBe(false)
+  })
+
+  it("accepts only a bounded result for the leased declared action", () => {
+    expect(controlRepairResultSchema.safeParse({
+      actionId: "test",
+      attempt: 1,
+      lease: "repair_11111111-1111-4111-8111-111111111111",
+      exitCode: 0,
+      lines: ["PASS"],
+    }).success).toBe(true)
+    expect(controlRepairResultSchema.safeParse({
+      actionId: "deploy",
+      attempt: 4,
+      lease: "x",
+      exitCode: 0,
+      lines: [],
     }).success).toBe(false)
   })
 })

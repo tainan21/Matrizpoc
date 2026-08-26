@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto"
-import { mkdir, open, readFile, realpath, rename } from "node:fs/promises"
+import { mkdir, open, readFile, readdir, realpath, rename } from "node:fs/promises"
 import path from "node:path"
 import { persistedControlDiagnosticSchema, type ControlDiagnostic } from "../../domain/control-diagnostic"
 import { WorkspaceError } from "../../domain/errors"
@@ -33,6 +33,14 @@ async function withLock<T>(key: string, operation: () => Promise<T>): Promise<T>
 export class ControlDiagnosticRepository {
   constructor(private readonly repositoryRoot: string) {}
 
+  private async projectIds(): Promise<string[]> {
+    const appsRoot = await realpath(path.join(this.repositoryRoot, "apps"))
+    return (await readdir(appsRoot, { withFileTypes: true }))
+      .filter((entry) => entry.isDirectory() && projectIdPattern.test(entry.name))
+      .map((entry) => entry.name)
+      .sort()
+  }
+
   private async target(projectId: string, fingerprint: string, create = false): Promise<string> {
     if (!projectIdPattern.test(projectId)) throw new WorkspaceError("Invalid project", "INVALID_PATH")
     if (!/^[a-f0-9]{64}$/.test(fingerprint)) throw new WorkspaceError("Invalid diagnostic", "INVALID_PATH")
@@ -54,6 +62,16 @@ export class ControlDiagnosticRepository {
       throw new WorkspaceError("Diagnostic not found", "NOT_FOUND")
     })
     return persistedControlDiagnosticSchema.parse(JSON.parse(source))
+  }
+
+  async findById(diagnosticId: string): Promise<ControlDiagnostic> {
+    const match = /^diag_([a-f0-9]{64})$/.exec(diagnosticId)
+    if (!match) throw new WorkspaceError("Invalid diagnostic", "INVALID_PATH")
+    for (const projectId of await this.projectIds()) {
+      const diagnostic = await this.get(projectId, match[1]).catch(() => undefined)
+      if (diagnostic) return diagnostic
+    }
+    throw new WorkspaceError("Diagnostic not found", "NOT_FOUND")
   }
 
   async record(raw: ControlDiagnosticInput): Promise<{ diagnostic: ControlDiagnostic; created: boolean }> {
@@ -119,6 +137,28 @@ export class ControlDiagnosticRepository {
       })
       await this.atomicWrite(await this.target(projectId, fingerprint, true), diagnostic)
       return diagnostic
+    })
+  }
+
+  async claimNextRerun(): Promise<ControlDiagnostic | undefined> {
+    return withLock("control-diagnostic-rerun-queue", async () => {
+      const appsRoot = await realpath(path.join(this.repositoryRoot, "apps"))
+      const projects = await this.projectIds()
+      for (const projectId of projects) {
+        const folder = path.join(appsRoot, projectId, ".matriz", "diagnostics")
+        const files = await readdir(folder).catch(() => [])
+        for (const file of files.filter((name) => /^[a-f0-9]{64}\.json$/.test(name)).sort()) {
+          const fingerprint = file.slice(0, -5)
+          const current = await this.get(projectId, fingerprint).catch(() => undefined)
+          if (!current || current.state !== "rerun_requested" || !current.rerunLease) continue
+          return this.update(projectId, fingerprint, current.revision, (value) => ({
+            ...value,
+            state: "repairing",
+            updatedAt: new Date().toISOString(),
+          }))
+        }
+      }
+      return undefined
     })
   }
 

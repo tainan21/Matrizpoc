@@ -72,4 +72,20 @@ describe("ControlDiagnosticRepository", () => {
       (current) => ({ ...current, state: "blocked" }),
     )).rejects.toThrow("Diagnostic changed")
   })
+
+  it("allows only one consumer to claim a pending declared rerun", async () => {
+    const { repository: store } = await repository()
+    const created = await store.record(input)
+    await store.update("demo", input.fingerprint, created.diagnostic.revision, (current) => ({
+      ...current,
+      state: "rerun_requested",
+      repairAttempts: 1,
+      rerunLease: "repair_11111111-1111-4111-8111-111111111111",
+    }))
+
+    const [first, second] = await Promise.all([store.claimNextRerun(), store.claimNextRerun()])
+
+    expect([first, second].filter(Boolean)).toHaveLength(1)
+    expect(first ?? second).toMatchObject({ state: "repairing", actionId: "test" })
+  })
 })

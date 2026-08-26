@@ -6,8 +6,10 @@ import { ControlDiagnosticRepository } from "../integration/filesystem/control-d
 import {
   AutomatedRepairCoordinator,
   ControlDiagnosticService,
+  ControlRepairQueue,
   markAutomatedRepairFailed,
   requestAutomatedRepairRerun,
+  resetBlockedDiagnostic,
 } from "./control-diagnostic-service"
 
 const roots: string[] = []
@@ -160,5 +162,57 @@ describe("ControlDiagnosticService", () => {
     )
 
     await expect(repository.get("demo", input.fingerprint)).resolves.toMatchObject({ state: "blocked" })
+  })
+
+  it("claims one rerun and resolves it only from a matching result", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "matriz-diagnostic-result-"))
+    roots.push(root)
+    await mkdir(path.join(root, "apps", "demo", ".matriz"), { recursive: true })
+    const repository = new ControlDiagnosticRepository(root)
+    const created = await repository.record(input)
+    await repository.update("demo", input.fingerprint, created.diagnostic.revision, (current) => ({
+      ...current,
+      state: "rerun_requested",
+      repairAttempts: 1,
+      rerunLease: "repair_11111111-1111-4111-8111-111111111111",
+    }))
+    const queue = new ControlRepairQueue(repository, () => "2026-08-25T18:10:00.000Z")
+
+    const claimed = await queue.next()
+    expect(claimed).toMatchObject({ projectId: "demo", actionId: "test", attempt: 1 })
+    await expect(queue.result(`diag_${input.fingerprint}`, {
+      actionId: "test",
+      attempt: 1,
+      lease: "wrong-lease",
+      exitCode: 0,
+      lines: ["PASS"],
+    })).rejects.toThrow("Rerun result does not match")
+
+    await expect(queue.result(`diag_${input.fingerprint}`, {
+      actionId: "test",
+      attempt: 1,
+      lease: claimed!.lease,
+      exitCode: 0,
+      lines: ["PASS"],
+    })).resolves.toMatchObject({ state: "resolved", latestExitCode: 0 })
+  })
+
+  it("allows an explicit retry to reopen a blocked diagnostic", async () => {
+    const root = await mkdtemp(path.join(tmpdir(), "matriz-diagnostic-manual-retry-"))
+    roots.push(root)
+    await mkdir(path.join(root, "apps", "demo", ".matriz"), { recursive: true })
+    const repository = new ControlDiagnosticRepository(root)
+    const created = await repository.record(input)
+    await repository.update("demo", input.fingerprint, created.diagnostic.revision, (current) => ({
+      ...current,
+      state: "blocked",
+      repairAttempts: 3,
+    }))
+
+    await expect(resetBlockedDiagnostic(
+      repository,
+      `diag_${input.fingerprint}`,
+      "2026-08-25T18:15:00.000Z",
+    )).resolves.toMatchObject({ state: "open", repairAttempts: 0, occurrences: 1 })
   })
 })

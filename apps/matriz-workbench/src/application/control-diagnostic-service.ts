@@ -118,6 +118,32 @@ export async function markAutomatedRepairFailed(
   }))
 }
 
+export async function resetBlockedDiagnostic(
+  repository: ControlDiagnosticRepository,
+  diagnosticId: string,
+  resetAt = new Date().toISOString(),
+): Promise<ControlDiagnostic> {
+  const current = await repository.findById(diagnosticId)
+  if (current.state !== "blocked") {
+    throw new WorkspaceError("Only a blocked diagnostic can be retried", "CONFLICT")
+  }
+  return repository.update(
+    current.projectId,
+    current.fingerprint,
+    current.revision,
+    (value) => ({
+      ...value,
+      state: "open",
+      repairAttempts: 0,
+      agentRequestId: undefined,
+      codexRunRevision: undefined,
+      cooldownUntil: undefined,
+      rerunLease: undefined,
+      updatedAt: resetAt,
+    }),
+  )
+}
+
 export class AutomatedRepairCoordinator {
   constructor(
     private readonly diagnostics: ControlDiagnosticRepository,
@@ -214,5 +240,70 @@ export class AutomatedRepairCoordinator {
       await markAutomatedRepairFailed(this.diagnostics, projectId, lifecycle.id, this.now())
       throw error
     }
+  }
+}
+
+export interface ControlRepairResultInput {
+  actionId: "dev" | "lint" | "typecheck" | "test"
+  attempt: number
+  lease: string
+  exitCode: number
+  lines: string[]
+}
+
+export class ControlRepairQueue {
+  constructor(
+    private readonly diagnostics: ControlDiagnosticRepository,
+    private readonly now: () => string = () => new Date().toISOString(),
+  ) {}
+
+  async next(): Promise<{
+    diagnosticId: string
+    projectId: string
+    actionId: ControlDiagnostic["actionId"]
+    attempt: number
+    lease: string
+  } | undefined> {
+    const diagnostic = await this.diagnostics.claimNextRerun()
+    if (!diagnostic?.rerunLease) return undefined
+    return {
+      diagnosticId: diagnostic.id,
+      projectId: diagnostic.projectId,
+      actionId: diagnostic.actionId,
+      attempt: diagnostic.repairAttempts,
+      lease: diagnostic.rerunLease,
+    }
+  }
+
+  async result(
+    diagnosticId: string,
+    input: ControlRepairResultInput,
+  ): Promise<ControlDiagnostic> {
+    const current = await this.diagnostics.findById(diagnosticId)
+    if (
+      current.state !== "repairing" ||
+      !current.rerunLease ||
+      current.actionId !== input.actionId ||
+      current.repairAttempts !== input.attempt ||
+      current.rerunLease !== input.lease
+    ) {
+      throw new WorkspaceError("Rerun result does not match its lease", "CONFLICT")
+    }
+    const transition = input.exitCode === 0
+      ? { state: "resolved" as const, cooldownUntil: undefined }
+      : repairFailureState(current.repairAttempts, this.now())
+    return this.diagnostics.update(
+      current.projectId,
+      current.fingerprint,
+      current.revision,
+      (value) => ({
+        ...value,
+        ...transition,
+        latestExitCode: input.exitCode,
+        latestEvidence: input.lines,
+        rerunLease: undefined,
+        updatedAt: this.now(),
+      }),
+    )
   }
 }
