@@ -1,6 +1,10 @@
 import { CONTROL_HOST_HEALTH_MESSAGE, controlHostHealthSchema, type ControlHostHealthDTO } from "@matriz/integration-api-contracts"
+import { monorepoConfig } from "@matriz/platform-config"
 
-const controlOrigins = new Set(["http://127.0.0.1:3008", "http://localhost:3008"])
+const controlBaseUrl = new URL(monorepoConfig.baseUrls["matriz-control"])
+const controlLoopbackAlias = new URL(controlBaseUrl)
+controlLoopbackAlias.hostname = controlBaseUrl.hostname === "localhost" ? "127.0.0.1" : "localhost"
+const controlOrigins = new Set([controlBaseUrl.origin, controlLoopbackAlias.origin])
 
 interface ControlHostHealthMessageEvent {
   readonly origin: string
