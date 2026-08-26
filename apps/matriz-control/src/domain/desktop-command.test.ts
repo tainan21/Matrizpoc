@@ -16,4 +16,11 @@ describe("parseDesktopCommand", () => {
     expect(parseDesktopCommand({ type: "workbench.restart", command: "whoami" }))
       .toEqual({ type: "workbench.restart" })
   })
+
+  it("accepts the read-only host health snapshot command without a payload", () => {
+    expect(parseDesktopCommand({ type: "health.host-snapshot", ignored: "value" }))
+      .toEqual({ type: "health.host-snapshot" })
+    expect(() => parseDesktopCommand({ type: "health.host-snapshot-v2" })).toThrow(/unsupported/i)
+  })
+
 })

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { InstallableAppViewModel } from "./installable-apps-presenter"
 import styles from "./app-host.module.css"
+import { HealthHostBridge } from "./health-host-bridge"
 
 const visualTransitionMs = 1_000
 const readinessRetryMs = 250
@@ -53,8 +54,12 @@ export async function activateExternalApp({ app, signal, openSession, wait, chec
 }
 
 export function ExternalAppFrame({ app }: { readonly app: InstallableAppViewModel | null }) {
+  const frameRef = useRef<HTMLIFrameElement>(null)
   if (!app) return null
-  return <iframe className={styles.frame} src={app.baseUrl} title={app.name} />
+  return <>
+    <iframe ref={frameRef} className={styles.frame} src={app.baseUrl} title={app.name} />
+    {app.appId === "health" ? <HealthHostBridge baseUrl={app.baseUrl} frameRef={frameRef} /> : null}
+  </>
 }
 
 export function frameAppForActivation(app: InstallableAppViewModel | null, activation: ExternalAppActivation): InstallableAppViewModel | null {

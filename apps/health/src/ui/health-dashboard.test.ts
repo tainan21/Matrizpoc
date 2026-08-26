@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import type { SystemHealthVM } from "./presenters/system-health-presenter"
-import { createHealthPoller, toHealthDashboardStatus } from "./health-dashboard"
+import { createHealthPoller, toControlHostTabsMetric, toHealthDashboardStatus } from "./health-dashboard"
 
 const view: SystemHealthVM = {
   sampledAt: "25/08, 12:03:04",
@@ -16,6 +16,23 @@ afterEach(() => {
 })
 
 describe("health polling", () => {
+  it("shows the Control Desktop availability copy until a valid tab snapshot arrives", () => {
+    expect(toControlHostTabsMetric(null)).toEqual({
+      label: "Guias do Control",
+      value: "Disponível no Matriz Control Desktop",
+      detail: "Abra o Health no Control Desktop para ler as guias.",
+      percent: null,
+      tone: "unavailable",
+    })
+    expect(toControlHostTabsMetric({ version: "v1", sampledAt: "2026-08-25T12:00:00.000Z", openTabs: 3, suspendedTabs: 1 })).toEqual({
+      label: "Guias do Control",
+      value: "3 abertas",
+      detail: "1 suspensa",
+      percent: null,
+      tone: "healthy",
+    })
+  })
+
   it("presents an explicit unavailable state when the first read fails", async () => {
     vi.useFakeTimers()
     const read = vi.fn<() => Promise<SystemHealthVM>>().mockRejectedValue(new Error("offline"))

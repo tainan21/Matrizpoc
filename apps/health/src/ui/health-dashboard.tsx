@@ -6,6 +6,8 @@ import {
   type MetricVM,
   type SystemHealthVM,
 } from "./presenters/system-health-presenter"
+import type { ControlHostHealthDTO } from "@matriz/integration-api-contracts"
+import { readControlHostHealthMessage } from "../integration/control-host-bridge"
 
 const POLL_INTERVAL_MS = 1_000
 const RETRY_DELAYS_MS = [2_000, 5_000] as const
@@ -33,6 +35,25 @@ export function toHealthDashboardStatus(state: HealthPollingState): HealthDashbo
     return { title: "Leitura indisponível", message: "Tentando reconectar ao sensor local…" }
   }
   return { title: "Saúde do sistema", message: "Conectando ao sensor local…" }
+}
+
+export function toControlHostTabsMetric(snapshot: ControlHostHealthDTO | null): MetricVM {
+  if (!snapshot) {
+    return {
+      label: "Guias do Control",
+      value: "Disponível no Matriz Control Desktop",
+      detail: "Abra o Health no Control Desktop para ler as guias.",
+      percent: null,
+      tone: "unavailable",
+    }
+  }
+  return {
+    label: "Guias do Control",
+    value: `${snapshot.openTabs} abertas`,
+    detail: `${snapshot.suspendedTabs} suspensa${snapshot.suspendedTabs === 1 ? "" : "s"}`,
+    percent: null,
+    tone: "healthy",
+  }
 }
 
 export function createHealthPoller(deps: HealthPollerDependencies) {
@@ -107,6 +128,7 @@ export function createHealthPoller(deps: HealthPollerDependencies) {
 
 export function HealthDashboard() {
   const [state, setState] = useState<HealthPollingState>({ view: null, stale: false })
+  const [controlHostHealth, setControlHostHealth] = useState<ControlHostHealthDTO | null>(null)
 
   useEffect(() => {
     const poller = createHealthPoller({
@@ -122,6 +144,15 @@ export function HealthDashboard() {
     return () => poller.stop()
   }, [])
 
+  useEffect(() => {
+    const onMessage = (event: MessageEvent) => {
+      const snapshot = readControlHostHealthMessage(event, window.parent)
+      if (snapshot) setControlHostHealth(snapshot)
+    }
+    window.addEventListener("message", onMessage)
+    return () => window.removeEventListener("message", onMessage)
+  }, [])
+
   if (state.view === null) {
     const status = toHealthDashboardStatus(state)
     return (
@@ -129,6 +160,9 @@ export function HealthDashboard() {
         <p className="health-dashboard__eyebrow">MONITOR LOCAL</p>
         <h1>{status.title}</h1>
         <p>{status.message}</p>
+        <section className="health-dashboard__metrics" aria-label="Métricas do Control">
+          <MetricCard metric={toControlHostTabsMetric(controlHostHealth)} />
+        </section>
       </main>
     )
   }
@@ -156,6 +190,7 @@ export function HealthDashboard() {
         <MetricCard metric={view.memory} />
         <MetricCard metric={view.temperature} />
         <MetricCard metric={view.uptime} />
+        <MetricCard metric={toControlHostTabsMetric(controlHostHealth)} />
       </section>
 
       <section className="health-processes" aria-labelledby="health-processes-title">

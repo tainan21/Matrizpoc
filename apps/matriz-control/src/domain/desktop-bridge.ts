@@ -3,6 +3,7 @@ import type { BrowserCommand } from "../application/browser-runtime"
 import type { VaultStatus } from "../integration/browser/bitlocker-vault"
 import type { WorkspaceFileSnapshot } from "../integration/browser/workspace-file-repository"
 import type { WorkbenchRuntimeSnapshot } from "./workbench-runtime"
+import type { ControlHostHealthSnapshot } from "../application/host-health-snapshot"
 
 export type DesktopCommand = BrowserCommand
   | { type: "browser.status" }
@@ -23,9 +24,10 @@ export type DesktopCommand = BrowserCommand
   | { type: "vault.status" | "vault.provision" | "vault.unlock" | "vault.lock" }
   | { type: "agent.policy"; capsuleId: string; policy: AgentPolicy }
   | { type: "agent.kill" }
+  | { type: "health.host-snapshot" }
   | { type: "workbench.status" | "workbench.open" | "workbench.restart" }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | WorkbenchRuntimeSnapshot | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | WorkbenchRuntimeSnapshot | ControlHostHealthSnapshot | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -41,7 +43,7 @@ export interface DesktopBridge {
   reportViewport(bounds: { x: number; y: number; width: number; height: number; visible: boolean }): void
 }
 
-const noPayload = new Set(["browser.status", "capsule.list", "project.list", "vault.status", "vault.provision", "vault.unlock", "vault.lock", "agent.kill", "workbench.status", "workbench.open", "workbench.restart"])
+const noPayload = new Set(["browser.status", "capsule.list", "project.list", "vault.status", "vault.provision", "vault.unlock", "vault.lock", "agent.kill", "health.host-snapshot", "workbench.status", "workbench.open", "workbench.restart"])
 const tabOnly = new Set(["tab.activate", "tab.close", "tab.back", "tab.forward", "tab.reload", "page.screenshot", "page.pdf", "page.reader", "page.snapshot"])
 
 export function parseDesktopCommand(value: unknown): DesktopCommand {

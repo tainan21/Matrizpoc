@@ -17,6 +17,7 @@ import { WorkbenchRuntimeSupervisor } from "../src/application/workbench-runtime
 import { WorkbenchRepairLoop } from "../src/application/workbench-repair-loop"
 import { TerminalSupervisor } from "../src/application/terminal-supervisor"
 import { WorkbenchClient } from "../src/integration/workbench/workbench-client"
+import { createControlHostHealthSnapshot } from "../src/application/host-health-snapshot"
 
 app.enableSandbox()
 
@@ -234,6 +235,11 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
     const result = await runtime.execute(command as BrowserCommand)
     if (command.type === "tab.open") { const tab = result as BrowserTab; activeTabId = tab.id; await ensureView(tab); await enforceLiveTabLimit(); layoutActiveView() }
     return result
+  }
+  if (command.type === "health.host-snapshot") {
+    const tabs: BrowserTab[] = []
+    for (const capsule of await repository.listCapsules()) tabs.push(...await repository.listTabs(capsule.id))
+    return createControlHostHealthSnapshot(tabs, new Date().toISOString())
   }
   if (command.type === "browser.status") return { available: true, version: app.getVersion() }
   if (command.type === "tab.activate") { activeTabId = command.tabId; let selected: BrowserTab | undefined; for (const capsule of await repository.listCapsules()) for (const tab of await repository.listTabs(capsule.id)) if (tab.id === command.tabId || tab.active) { const updated = { ...tab, active: tab.id === command.tabId, status: tab.id === command.tabId && tab.status === "suspended" ? "loading" as const : tab.status, lastActiveAt: tab.id === command.tabId ? new Date().toISOString() : tab.lastActiveAt }; await repository.saveTab(updated); if (updated.active) selected = updated } if (!selected) throw new Error("Unknown tab"); await ensureView(selected); layoutActiveView(); return { ok: true } }
