@@ -1,9 +1,8 @@
 "use client"
 
 import { useEffect, useState, type CSSProperties } from "react"
-import type { SystemSnapshot } from "../domain/system-health"
 import {
-  toSystemHealthVM,
+  readSystemHealthVM,
   type MetricVM,
   type SystemHealthVM,
 } from "./presenters/system-health-presenter"
@@ -22,6 +21,18 @@ export interface HealthPollerDependencies {
   readonly isVisible: () => boolean
   readonly subscribeToVisibility: (listener: () => void) => () => void
   readonly onStateChange: (state: HealthPollingState) => void
+}
+
+export interface HealthDashboardStatusVM {
+  readonly title: string
+  readonly message: string
+}
+
+export function toHealthDashboardStatus(state: HealthPollingState): HealthDashboardStatusVM {
+  if (state.stale) {
+    return { title: "Leitura indisponível", message: "Tentando reconectar ao sensor local…" }
+  }
+  return { title: "Saúde do sistema", message: "Conectando ao sensor local…" }
 }
 
 export function createHealthPoller(deps: HealthPollerDependencies) {
@@ -99,7 +110,7 @@ export function HealthDashboard() {
 
   useEffect(() => {
     const poller = createHealthPoller({
-      read: loadSystemHealthVM,
+      read: readSystemHealthVM,
       isVisible: () => document.visibilityState === "visible",
       subscribeToVisibility: (listener) => {
         document.addEventListener("visibilitychange", listener)
@@ -112,11 +123,12 @@ export function HealthDashboard() {
   }, [])
 
   if (state.view === null) {
+    const status = toHealthDashboardStatus(state)
     return (
       <main className="health-dashboard health-dashboard--loading" aria-live="polite">
         <p className="health-dashboard__eyebrow">MONITOR LOCAL</p>
-        <h1>Saúde do sistema</h1>
-        <p>Conectando ao sensor local…</p>
+        <h1>{status.title}</h1>
+        <p>{status.message}</p>
       </main>
     )
   }
@@ -183,11 +195,4 @@ function MetricCard({ metric }: { readonly metric: MetricVM }) {
       <div className="health-metric__bar" aria-hidden="true" style={{ "--health-progress": `${progress}%` } as CSSProperties} />
     </article>
   )
-}
-
-async function loadSystemHealthVM(): Promise<SystemHealthVM> {
-  const response = await fetch("/api/system/snapshot", { cache: "no-store" })
-  if (!response.ok) throw new Error("snapshot_unavailable")
-  const snapshot = await response.json() as SystemSnapshot
-  return toSystemHealthVM(snapshot)
 }

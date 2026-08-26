@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 import type { SystemHealthVM } from "./presenters/system-health-presenter"
-import { createHealthPoller } from "./health-dashboard"
+import { createHealthPoller, toHealthDashboardStatus } from "./health-dashboard"
 
 const view: SystemHealthVM = {
   sampledAt: "25/08, 12:03:04",
@@ -16,6 +16,28 @@ afterEach(() => {
 })
 
 describe("health polling", () => {
+  it("presents an explicit unavailable state when the first read fails", async () => {
+    vi.useFakeTimers()
+    const read = vi.fn<() => Promise<SystemHealthVM>>().mockRejectedValue(new Error("offline"))
+    const states: Array<{ readonly view: SystemHealthVM | null; readonly stale: boolean }> = []
+    const poller = createHealthPoller({
+      read,
+      isVisible: () => true,
+      subscribeToVisibility: () => () => undefined,
+      onStateChange: (state) => states.push(state),
+    })
+
+    poller.start()
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(states.at(-1)).toEqual({ view: null, stale: true })
+    expect(toHealthDashboardStatus(states.at(-1)!)).toEqual({
+      title: "Leitura indisponível",
+      message: "Tentando reconectar ao sensor local…",
+    })
+    poller.stop()
+  })
+
   it("fetches only while visible and resumes when the tab becomes visible", async () => {
     vi.useFakeTimers()
     const read = vi.fn<() => Promise<SystemHealthVM>>().mockResolvedValue(view)

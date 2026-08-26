@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { SystemSnapshot } from "../../domain/system-health"
-import { toSystemHealthVM } from "./system-health-presenter"
+import { readSystemHealthVM, toSystemHealthVM } from "./system-health-presenter"
 
 const sample: SystemSnapshot = {
   sampledAt: "2026-08-25T12:03:04.000Z",
@@ -17,6 +17,15 @@ const sample: SystemSnapshot = {
 }
 
 describe("system health presenter", () => {
+  it("converts the snapshot response into a dashboard view model at the fetch boundary", async () => {
+    const fetchSnapshot = async () => ({ ok: true, json: async () => sample })
+
+    await expect(readSystemHealthVM(fetchSnapshot)).resolves.toMatchObject({
+      cpu: { value: "68,4%" },
+      memory: { value: "12,0 GB / 16,0 GB" },
+    })
+  })
+
   it("formats raw bytes and unavailable sensors for the dashboard", () => {
     const vm = toSystemHealthVM(sample)
 

@@ -26,6 +26,13 @@ export interface SystemHealthVM {
   readonly processes: readonly ProcessVM[]
 }
 
+interface SnapshotResponse {
+  readonly ok: boolean
+  json(): Promise<unknown>
+}
+
+export type SystemHealthFetcher = () => Promise<SnapshotResponse>
+
 const number = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const timestamp = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
@@ -64,6 +71,16 @@ export function toSystemHealthVM(snapshot: SystemSnapshot): SystemHealthVM {
     },
     processes: snapshot.processes.map(toProcessVM),
   }
+}
+
+export async function readSystemHealthVM(fetchSnapshot: SystemHealthFetcher = fetchSystemSnapshot): Promise<SystemHealthVM> {
+  const response = await fetchSnapshot()
+  if (!response.ok) throw new Error("snapshot_unavailable")
+  return toSystemHealthVM(await response.json() as SystemSnapshot)
+}
+
+function fetchSystemSnapshot(): Promise<SnapshotResponse> {
+  return fetch("/api/system/snapshot", { cache: "no-store" })
 }
 
 function metric(label: string, value: string, detail: string, percent: number | null): MetricVM {
