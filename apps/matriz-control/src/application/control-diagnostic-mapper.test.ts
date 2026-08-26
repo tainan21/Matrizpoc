@@ -9,6 +9,7 @@ const failed: TerminalSession = {
   actionId: "test",
   label: "Testes",
   route: "mih/apps/matriz-control",
+  port: null,
   status: "exited",
   pid: 42,
   lines: ["\u001b[31mFAIL\u001b[0m runtime", "API_KEY=super-secret", "C:\\Apps\\matriz-infra-hub\\apps\\matriz-control\\src\\runtime.ts"],
