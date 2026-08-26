@@ -22,10 +22,12 @@ export function createSystemSnapshotGet(deps: SnapshotDependencies) {
   }
 }
 
-const GET = createSystemSnapshotGet({
+const systemSnapshotGet = createSystemSnapshotGet({
   system: new NodeSystemSampler(),
   details: new WindowsDetailSampler(),
   now: () => new Date(),
 })
 
-export { GET }
+export async function GET(): Promise<Response> {
+  return systemSnapshotGet()
+}

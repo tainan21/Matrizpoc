@@ -43,7 +43,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | --- | --- | --- | --- | --- |
 | `HTTP:contracts:GET:/api/health` | `apps/contracts/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:health:GET:/api/health` | `apps/health/app/api/health/route.ts:1` | `GET` | R | `APP-R` |
-| `HTTP:health:GET:/api/system/snapshot` | `apps/health/app/api/system/snapshot/route.ts:15` | `GET` | R | `APP-R` |
+| `HTTP:health:GET:/api/system/snapshot` | `apps/health/app/api/system/snapshot/route.ts:31` | `GET` | R | `APP-R` |
 | `HTTP:matriz-admin:GET:/api/health` | `apps/matriz-admin/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:DELETE:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:6` | `DELETE` | M | `APP-M` |
 | `HTTP:matriz-control:GET:/api/apps/readiness` | `apps/matriz-control/app/api/apps/readiness/route.ts:7` | `GET` | R | `APP-R` |
