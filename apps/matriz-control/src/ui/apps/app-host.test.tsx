@@ -1,0 +1,93 @@
+import { renderToStaticMarkup } from "react-dom/server"
+import { describe, expect, it } from "vitest"
+import { emptyInstalledAppsState, installApp } from "../../domain/installable-apps"
+import { INSTALLABLE_APPS } from "../../integration/apps/installable-app-catalog"
+import { toInstallableAppsViewModels } from "./installable-apps-presenter"
+import { ExternalAppFrame, activateExternalApp } from "./external-app-stage"
+import { SmartAppRail } from "./smart-app-rail"
+
+const appId = "health"
+const allowedIds = INSTALLABLE_APPS.map((app) => app.manifest.appId)
+
+function healthViewModel(installed = true) {
+  const state = installed ? installApp(emptyInstalledAppsState(), appId, allowedIds) : emptyInstalledAppsState()
+  return toInstallableAppsViewModels(INSTALLABLE_APPS, state)[0]!
+}
+
+describe("smart app host", () => {
+  it("keeps the app switcher absent until an app is installed", () => {
+    const withoutInstalledApps = renderToStaticMarkup(<SmartAppRail apps={[healthViewModel(false)]} activeAppId={null} onActivate={() => undefined} />)
+    const withHealthInstalled = renderToStaticMarkup(<SmartAppRail apps={[healthViewModel()]} activeAppId={null} onActivate={() => undefined} />)
+
+    expect(withoutInstalledApps).not.toContain('aria-label="Alternar apps"')
+    expect(withHealthInstalled).toContain('aria-label="Alternar apps"')
+  })
+
+  it("renders exactly one external frame and removes it for Control", () => {
+    const health = healthViewModel()
+    const externalMarkup = renderToStaticMarkup(<ExternalAppFrame app={health} />)
+    const controlMarkup = renderToStaticMarkup(<ExternalAppFrame app={null} />)
+
+    expect((externalMarkup.match(/<iframe/g) ?? [])).toHaveLength(1)
+    expect(controlMarkup).not.toContain("<iframe")
+  })
+
+  it("waits for the visual transition and polls readiness only until the app is ready", async () => {
+    const events: string[] = []
+    const result = await activateExternalApp({
+      app: healthViewModel(),
+      signal: new AbortController().signal,
+      openSession: async (projectId) => { events.push(`session:${projectId}`) },
+      wait: async (milliseconds) => { events.push(`wait:${milliseconds}`) },
+      checkReadiness: async () => { events.push("readiness"); return true },
+    })
+
+    expect(result).toBe("ready")
+    expect(events).toEqual(["session:health", "wait:1000", "readiness"])
+  })
+
+  it("opens the catalogued project instead of deriving a process identifier in the host", async () => {
+    const events: string[] = []
+    const app = { ...healthViewModel(), projectId: "catalogued-health-project" }
+
+    await activateExternalApp({
+      app,
+      signal: new AbortController().signal,
+      openSession: async (projectId) => { events.push(projectId) },
+      wait: async () => undefined,
+      checkReadiness: async () => true,
+    })
+
+    expect(events).toEqual(["catalogued-health-project"])
+  })
+
+  it("stops readiness polling when a later selection cancels activation", async () => {
+    const controller = new AbortController()
+    const events: string[] = []
+    const result = await activateExternalApp({
+      app: healthViewModel(),
+      signal: controller.signal,
+      openSession: async () => { controller.abort() },
+      wait: async () => { events.push("wait") },
+      checkReadiness: async () => { events.push("readiness"); return true },
+    })
+
+    expect(result).toBe("cancelled")
+    expect(events).toEqual([])
+  })
+
+  it("reports a timeout after the bounded readiness attempts", async () => {
+    const events: string[] = []
+    const result = await activateExternalApp({
+      app: healthViewModel(),
+      signal: new AbortController().signal,
+      openSession: async () => undefined,
+      wait: async (milliseconds) => { events.push(`wait:${milliseconds}`) },
+      checkReadiness: async () => { events.push("readiness"); return false },
+      maxAttempts: 2,
+    })
+
+    expect(result).toBe("timeout")
+    expect(events).toEqual(["wait:1000", "readiness", "wait:250", "readiness"])
+  })
+})

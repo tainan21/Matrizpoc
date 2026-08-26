@@ -1,0 +1,86 @@
+.root[data-active-app="health"] {
+  --app-accent: #72efc3;
+  --app-glow: rgb(76 201 156 / 25%);
+  background: radial-gradient(circle at 2% 50%, var(--app-glow), transparent 28%), rgb(7 19 20 / 86%);
+}
+
+.rail {
+  position: fixed;
+  z-index: 12;
+  top: 106px;
+  bottom: 0;
+  left: 0;
+  width: 18px;
+  overflow: hidden;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  padding: 8px 0;
+  border-right: 1px solid rgb(114 239 195 / 35%);
+  background: rgb(6 16 17 / 78%);
+  transition: width 180ms ease, background 180ms ease;
+}
+
+.rail:hover,
+.rail:focus-within {
+  width: 176px;
+  background: rgb(8 23 24 / 94%);
+}
+
+.railItem {
+  width: 176px;
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.railItem:hover,
+.railItem:focus-visible,
+.railItem[data-active] {
+  border-left-color: var(--app-accent, var(--purple));
+  background: rgb(114 239 195 / 10%);
+  outline: none;
+}
+
+.glyph {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgb(114 239 195 / 44%);
+  border-radius: 7px;
+  color: var(--app-accent, #d4b6ff);
+  font: 800 14px ui-monospace, monospace;
+}
+
+.railCopy { display: grid; gap: 2px; }
+.railCopy strong { font-size: 11px; white-space: nowrap; }
+.railCopy small { color: var(--muted); font: 8px ui-monospace, monospace; letter-spacing: .1em; }
+
+.stage,
+.stageMessage { min-height: 100%; background: rgb(6 17 18 / 72%); }
+.stage { display: grid; }
+.frame { width: 100%; height: 100%; border: 0; background: #081011; }
+.stageMessage { display: grid; place-content: center; justify-items: center; gap: 12px; padding: 28px; text-align: center; }
+.stageMessage > span { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid var(--app-accent, var(--purple)); border-radius: 50%; color: var(--app-accent, var(--purple)); font: 700 18px ui-monospace, monospace; }
+.stageMessage h1 { margin: 0; font-size: 22px; }
+.stageMessage p { max-width: 440px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.stageMessage div { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.stageMessage button { border: 1px solid var(--app-accent, var(--purple)); border-radius: 7px; background: rgb(114 239 195 / 10%); padding: 8px 12px; color: var(--text); cursor: pointer; }
+.loading { animation: pulse 1s ease-in-out infinite alternate; }
+
+@keyframes pulse { from { box-shadow: 0 0 0 0 var(--app-glow, rgb(154 85 255 / 14%)); } to { box-shadow: 0 0 0 10px transparent; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .rail,
+  .loading { transition: none; animation: none; }
+}

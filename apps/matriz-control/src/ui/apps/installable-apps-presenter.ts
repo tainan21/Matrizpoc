@@ -3,6 +3,7 @@ import type { InstallableAppDefinition } from "../../integration/apps/installabl
 
 export interface InstallableAppViewModel {
   readonly appId: string
+  readonly projectId: string
   readonly name: string
   readonly description: string
   readonly baseUrl: string
@@ -23,6 +24,7 @@ export function toInstallableAppsViewModels(
 
     return {
       appId: app.manifest.appId,
+      projectId: app.projectId,
       name: app.manifest.name,
       description: app.manifest.description,
       baseUrl: app.baseUrl,
