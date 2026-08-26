@@ -25,6 +25,11 @@ import { WorkspaceRepository } from "../integration/filesystem/workspace-reposit
 import { GitObservationProvider } from "../integration/git/git-observation-provider"
 import { enqueueOptionalNotifications } from "./collaboration/notification-service"
 import { buildContextBundle } from "./context-bundle"
+import {
+  markAutomatedRepairFailed,
+  requestAutomatedRepairRerun,
+} from "./control-diagnostic-service"
+import { ControlDiagnosticRepository } from "../integration/filesystem/control-diagnostic-repository"
 
 type ApprovalDecision = "accept" | "accept_for_session" | "decline" | "cancel"
 type Subscriber = (snapshot: CodexRunSnapshot) => void
@@ -150,6 +155,7 @@ export async function completeCodexRequestRecord(
 export class CodexRunManager {
   private readonly sessions = new Map<string, Session>()
   private readonly pendingStarts = new Set<string>()
+  private readonly automatedDiagnostics = new Map<string, string>()
 
   async runtimeInfo(): Promise<CodexRuntimeInfo & {
     activeRuns: number
@@ -174,6 +180,25 @@ export class CodexRunManager {
     const repository = await WorkspaceRepository.create()
     const record = await new CodexRunStore(repository.repositoryRoot).read(projectId, requestId)
     return record ? { ...record, connected: false } : undefined
+  }
+
+  async startAutomatedRepair(
+    projectId: string,
+    requestId: string,
+    expectedRevision: string,
+    diagnosticId: string,
+  ): Promise<CodexRunSnapshot> {
+    if (!/^diag_[a-f0-9]{64}$/.test(diagnosticId)) {
+      throw new WorkspaceError("Diagnóstico automático inválido.", "INVALID_DATA")
+    }
+    const key = sessionKey(projectId, requestId)
+    this.automatedDiagnostics.set(key, diagnosticId)
+    try {
+      return await this.start(projectId, requestId, expectedRevision)
+    } catch (error) {
+      this.automatedDiagnostics.delete(key)
+      throw error
+    }
   }
 
   subscribe(projectId: string, requestId: string, subscriber: Subscriber): () => void {
@@ -654,6 +679,16 @@ export class CodexRunManager {
         checks: session.record.checks,
       },
     )
+    const diagnosticId = this.automatedDiagnostics.get(session.key)
+    if (diagnosticId) {
+      await requestAutomatedRepairRerun(
+        new ControlDiagnosticRepository(session.repositoryRoot),
+        session.projectId,
+        diagnosticId,
+        () => `repair_${randomUUID()}`,
+      )
+      this.automatedDiagnostics.delete(session.key)
+    }
     await enqueueOptionalNotifications(session.repositoryRoot, {
       projectId: session.projectId,
       event: "review_ready",
@@ -707,6 +742,15 @@ export class CodexRunManager {
       completedAt: new Date().toISOString(),
     })
     await this.stopRequest(session, "blocked").catch(() => undefined)
+    const diagnosticId = this.automatedDiagnostics.get(session.key)
+    if (diagnosticId) {
+      await markAutomatedRepairFailed(
+        new ControlDiagnosticRepository(session.repositoryRoot),
+        session.projectId,
+        diagnosticId,
+      ).catch(() => undefined)
+      this.automatedDiagnostics.delete(session.key)
+    }
     await WorkspaceRepository.create(session.repositoryRoot)
       .then((repository) =>
         repository.appendActivity(session.projectId, {

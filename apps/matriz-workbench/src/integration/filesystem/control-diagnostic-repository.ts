@@ -90,6 +90,38 @@ export class ControlDiagnosticRepository {
     })
   }
 
+  async update(
+    projectId: string,
+    fingerprint: string,
+    expectedRevision: string,
+    change: (current: ControlDiagnostic) => ControlDiagnostic,
+  ): Promise<ControlDiagnostic> {
+    const key = `${projectId}:${fingerprint}`
+    return withLock(key, async () => {
+      const current = await this.get(projectId, fingerprint)
+      if (current.revision !== expectedRevision) {
+        throw new WorkspaceError("Diagnostic changed", "CONFLICT")
+      }
+      const changed = change(current)
+      if (
+        changed.id !== current.id ||
+        changed.projectId !== current.projectId ||
+        changed.actionId !== current.actionId ||
+        changed.fingerprint !== current.fingerprint ||
+        changed.createdAt !== current.createdAt
+      ) {
+        throw new WorkspaceError("Diagnostic identity cannot change", "INVALID_DATA")
+      }
+      const { revision: _ignored, ...base } = changed
+      const diagnostic = persistedControlDiagnosticSchema.parse({
+        ...base,
+        revision: revisionFor(base),
+      })
+      await this.atomicWrite(await this.target(projectId, fingerprint, true), diagnostic)
+      return diagnostic
+    })
+  }
+
   private async atomicWrite(target: string, value: unknown): Promise<void> {
     const temp = `${target}.${randomUUID()}.tmp`
     const handle = await open(temp, "wx", 0o600)

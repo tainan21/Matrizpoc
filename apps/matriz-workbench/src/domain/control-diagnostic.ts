@@ -45,3 +45,27 @@ export function automaticRepairDecision(attempts: number):
   const nextAttempt = attempts + 1
   return { allowed: true, nextAttempt, cooldownMs: repairCooldownMs(nextAttempt) }
 }
+
+export function rerunRequestedState(
+  diagnostic: Pick<ControlDiagnostic, "state" | "repairAttempts">,
+  lease: string,
+): { state: "rerun_requested"; rerunLease: string } {
+  if (diagnostic.state !== "repairing" || diagnostic.repairAttempts < 1) {
+    throw new Error("Only an active repair can request a rerun")
+  }
+  if (!lease.trim()) throw new Error("A rerun lease is required")
+  return { state: "rerun_requested", rerunLease: lease }
+}
+
+export function repairFailureState(
+  attempts: number,
+  failedAt: string,
+):
+  | { state: "cooling_down"; cooldownUntil: string }
+  | { state: "blocked"; cooldownUntil: undefined } {
+  if (attempts >= 3) return { state: "blocked", cooldownUntil: undefined }
+  return {
+    state: "cooling_down",
+    cooldownUntil: new Date(Date.parse(failedAt) + repairCooldownMs(attempts)).toISOString(),
+  }
+}

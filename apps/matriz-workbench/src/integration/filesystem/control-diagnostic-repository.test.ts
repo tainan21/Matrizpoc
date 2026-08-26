@@ -52,4 +52,24 @@ describe("ControlDiagnosticRepository", () => {
     const { repository: store } = await repository()
     await expect(store.record({ ...input, projectId: "../outside" })).rejects.toThrow("Invalid project")
   })
+
+  it("updates lifecycle state only from the expected revision", async () => {
+    const { repository: store } = await repository()
+    const created = await store.record(input)
+
+    const repairing = await store.update(
+      "demo",
+      input.fingerprint,
+      created.diagnostic.revision,
+      (current) => ({ ...current, state: "repairing", repairAttempts: 1 }),
+    )
+
+    expect(repairing).toMatchObject({ state: "repairing", repairAttempts: 1 })
+    await expect(store.update(
+      "demo",
+      input.fingerprint,
+      created.diagnostic.revision,
+      (current) => ({ ...current, state: "blocked" }),
+    )).rejects.toThrow("Diagnostic changed")
+  })
 })
