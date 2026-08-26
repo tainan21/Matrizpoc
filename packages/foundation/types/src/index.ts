@@ -40,6 +40,7 @@ export type AppIdLiteral =
   | "seumei"
   | "contracts"
   | "willdash"
+  | "health"
 
 export type AppId = Brand<AppIdLiteral, "AppId">
 

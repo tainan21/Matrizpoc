@@ -1,5 +1,12 @@
 # Matriz Decision Log
 
+## 2026-08-26 — Matriz Control owns bounded local diagnostics
+
+- **Decision:** keep Doctor resource inspection, regenerable-cache cleanup, terminal metrics, Workspace read models, and startup profiles app-local in Matriz Control.
+- **Reason:** all capabilities operate the same validated project catalog and process supervisor; no second consumer justifies a shared package.
+- **Impact:** browser requests use identifiers and preview tokens only; source, dependencies, secrets, databases, uploads, and user-authored files are never cleanup targets.
+- **Review when:** a second cockpit consumes the same diagnostics or remote/multiuser operation becomes real.
+
 ## 2026-08-18 — Tauri establishes the Matriz native application boundary
 
 - **Decision:** create `apps/matriz-desktop` as Matriz Control using Tauri 2,

@@ -13,6 +13,8 @@ Operate known local processes without exposing a generic remote shell.
 - Do not persist terminal output or secrets.
 - Render workspace terminal routes with the lowercase `mih` alias; never expose or rename the physical `matriz-infra-hub` directory in terminal screens.
 - Resolve only the exact controlled `cd mih` route shortcut. Never generalize it into browser-supplied paths or arbitrary shell navigation.
+- Doctor cleanup targets are limited to server-resolved `.next` and `.turbo` directories inside a validated project and require preview confirmation.
+- Startup profiles contain only known project IDs plus the existing `dev` action; preserve pre-existing sessions during rollback.
 
 ## Validation
 

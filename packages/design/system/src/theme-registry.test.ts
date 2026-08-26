@@ -5,11 +5,13 @@ describe("CSS-first theme registry", () => {
   it("exposes Matriz Base for every registered app", () => {
     expect(getThemeDefinition("matriz-base")?.compatibleApps).toContain("willdash")
     expect(getThemeDefinition("matriz-base")?.compatibleApps).toContain("matriz-control")
+    expect(getThemeDefinition("matriz-base")?.compatibleApps).toContain("health")
     const hubBase = themeDefinitionToCssVars("matriz-base", "matriz-hub")
     expect(hubBase["--matriz-theme-key"]).toBe("matriz-base")
     expect(hubBase["--matriz-theme-surface"]).toBe("#0b111b")
     expect(themeDefinitionToCssVars("matriz-base", "matriz-hub", "light")["--matriz-theme-surface"]).toBe("#ffffff")
     expect(themeDefinitionToCssVars("matriz-base", "matriz-control")["--matriz-theme-accent"]).toBe("#9a55ff")
+    expect(themeDefinitionToCssVars("matriz-base", "health", "light")["--matriz-theme-accent"]).toBe("#0e7490")
   })
 
   it("lists only themes compatible with the consuming app", () => {

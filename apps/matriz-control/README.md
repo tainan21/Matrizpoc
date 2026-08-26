@@ -21,6 +21,15 @@ Open `http://localhost:3009/apps`. The terminal process supervisor is memory-onl
 
 Terminal screens abbreviate the existing workspace root as lowercase `mih` (for example, `mih/apps/matriz-control`). The controlled `cd mih` shortcut returns the displayed route to that root without renaming the physical `matriz-infra-hub` directory or enabling arbitrary path navigation.
 
+## Operations suite
+
+- `/doctor` measures drive capacity, project/cache size, and managed process-tree RAM. Cleanup is restricted to `.next` and `.turbo`, requires a short-lived preview token, and is blocked while the project runs.
+- `/workspace` joins Doctor resource state with active terminal sessions and attention filters.
+- The Apps rail exposes `core` and `products` startup profiles. Profiles validate known projects/actions and ports, preserve existing sessions, and roll back only sessions started by a failed run.
+- The PowerShell support script displays `ps mih [branch*]>` and supports `mih`, `mih control`, `mih hub`, or an exact app directory name.
+
+Never add `node_modules`, `.env*`, databases, uploads, source directories, or user-authored files to cleanup targets.
+
 ## Navegador desktop local
 
 O cockpit web permanece disponível em `http://localhost:3009/browser`. Para anexar o Chromium nativo com cápsulas isoladas, WebGL2, áudio, downloads e o editor seguro:

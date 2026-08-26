@@ -37,18 +37,23 @@ model, not as an endpoint profile. The closed global whitelist remains User,
 authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
-## HTTP Route Handlers — 135 entries
+## HTTP Route Handlers — 142 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
 | `HTTP:contracts:GET:/api/health` | `apps/contracts/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:health:GET:/api/health` | `apps/health/app/api/health/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:matriz-admin:GET:/api/health` | `apps/matriz-admin/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:DELETE:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:6` | `DELETE` | M | `APP-M` |
+| `HTTP:matriz-control:GET:/api/doctor` | `apps/matriz-control/app/api/doctor/route.ts:4` | `GET` | R | `APP-R` |
+| `HTTP:matriz-control:GET:/api/health` | `apps/matriz-control/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/projects` | `apps/matriz-control/app/api/projects/route.ts:5` | `GET` | R | `APP-R` |
-| `HTTP:matriz-control:GET:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:5` | `GET` | R | `APP-R` |
+| `HTTP:matriz-control:GET:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:4` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:PATCH:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:5` | `PATCH` | M | `APP-M` |
-| `HTTP:matriz-control:POST:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:6` | `POST` | M | `APP-M` |
+| `HTTP:matriz-control:POST:/api/doctor/cleanup` | `apps/matriz-control/app/api/doctor/cleanup/route.ts:3` | `POST` | M | `APP-M` |
+| `HTTP:matriz-control:POST:/api/startup` | `apps/matriz-control/app/api/startup/route.ts:9` | `POST` | M | `APP-M` |
+| `HTTP:matriz-control:POST:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:7` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions/[sessionId]/input` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/input/route.ts:4` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions/[sessionId]/restart` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/restart/route.ts:4` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:DELETE:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:26` | `DELETE` | M | `H-MOCK` |
@@ -131,6 +136,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/notifications/config` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/config/route.ts:24` | `POST` | M | `WB-M` |
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/notifications/outbox/[notificationId]` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/outbox/[notificationId]/route.ts:16` | `POST` | M | `WB-M` |
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/vercel/previews/[requestId]` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/vercel/previews/[requestId]/route.ts:22` | `POST` | M | `WB-M` |
+| `HTTP:matrizlib:GET:/api/health` | `apps/matrizlib/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:seumei:GET:/api/health` | `apps/seumei/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:DELETE:/api/members/[membershipId]` | `apps/seumeiapp/app/api/members/[membershipId]/route.ts:21` | `DELETE` | M | `APP-M` |
 | `HTTP:seumeiapp:DELETE:/api/members/invitations/[invitationId]` | `apps/seumeiapp/app/api/members/invitations/[invitationId]/route.ts:6` | `DELETE` | M | `APP-M` |
@@ -140,6 +146,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:seumeiapp:GET:/api/customers/[customerId]` | `apps/seumeiapp/app/api/customers/[customerId]/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/finance/entries` | `apps/seumeiapp/app/api/finance/entries/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/finance/entries/[entryId]` | `apps/seumeiapp/app/api/finance/entries/[entryId]/route.ts:6` | `GET` | R | `APP-R` |
+| `HTTP:seumeiapp:GET:/api/health` | `apps/seumeiapp/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/ingredients` | `apps/seumeiapp/app/api/ingredients/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/members` | `apps/seumeiapp/app/api/members/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/onboarding` | `apps/seumeiapp/app/api/onboarding/route.ts:14` | `GET` | R | `APP-R` |
@@ -284,4 +291,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-Current tracked-source count: **230** = 135 HTTP methods, 44 Server Actions, and 51 MCP tools.
+Current tracked-source count: **237** = 142 HTTP methods, 44 Server Actions, and 51 MCP tools.

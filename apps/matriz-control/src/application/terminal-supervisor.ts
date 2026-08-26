@@ -65,7 +65,7 @@ export class TerminalSupervisor {
     const action = await this.resolver(this.options.rootDir, projectId, actionId)
     const id = `term_${randomUUID()}`
     const handle = this.runtime.start(action)
-    const managed: ManagedSession = { handle, partial: "", currentDirectory: action.cwd, snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, route: terminalRoute(this.options.rootDir, action.cwd), status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
+    const managed: ManagedSession = { handle, partial: "", currentDirectory: action.cwd, snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, route: terminalRoute(this.options.rootDir, action.cwd), port: action.port ?? null, status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
     this.sessions.set(id, managed)
     handle.on("running", () => { managed.snapshot.status = "running" })
     handle.on("output", (chunk: string) => this.append(managed, chunk))

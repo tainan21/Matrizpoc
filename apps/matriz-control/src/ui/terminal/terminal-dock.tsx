@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useTerminal } from "./terminal-context"
+import { terminalMetadata } from "./terminal-presenter"
 
 export function TerminalDock() {
   const terminal = useTerminal()
@@ -10,6 +11,7 @@ export function TerminalDock() {
   useEffect(() => { if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight }, [terminal.activeSession?.lines])
   if (!terminal.open) return <button className="terminal-peek" type="button" onClick={() => terminal.setOpen(true)}><span>›_</span> Terminal <kbd>Ctrl J</kbd></button>
   const session = terminal.activeSession
+  const metadata = session ? terminalMetadata(session) : null
   const style = terminal.placement === "bottom" ? { height: terminal.bottomSize } : { width: terminal.rightSize }
   return <aside className={`terminal-dock terminal-${terminal.placement}`} style={style} aria-label="Terminal global">
     <div className="terminal-resize" role="separator" aria-orientation={terminal.placement === "bottom" ? "horizontal" : "vertical"} tabIndex={0} onKeyDown={(event) => { if (["ArrowUp", "ArrowLeft"].includes(event.key)) terminal.resize(24); if (["ArrowDown", "ArrowRight"].includes(event.key)) terminal.resize(-24) }} />
@@ -21,7 +23,7 @@ export function TerminalDock() {
       </div>
     </header>
     {session ? <>
-      <div className="terminal-meta"><span>{session.route}</span><span>{session.status}{session.pid ? ` · PID ${session.pid}` : ""}{session.exitCode !== null ? ` · exit ${session.exitCode}` : ""}</span><span className="terminal-actions">{["running", "starting"].includes(session.status) ? <button onClick={() => void terminal.stop(session.id)}>Stop</button> : <button onClick={() => void terminal.restart(session.id)}>Restart</button>} {!(["running", "starting", "stopping"] as string[]).includes(session.status) ? <button onClick={() => void terminal.close(session.id)}>Close</button> : null}</span></div>
+      <div className="terminal-meta"><span>{metadata?.route} · {metadata?.port}</span><span>{session.status} · {metadata?.pid} · {metadata?.duration} · {metadata?.memory} · validação {metadata?.validation}{session.exitCode !== null ? ` · exit ${session.exitCode}` : ""}</span><span className="terminal-actions">{["running", "starting"].includes(session.status) ? <button onClick={() => void terminal.stop(session.id)}>Stop</button> : <button onClick={() => void terminal.restart(session.id)}>Restart</button>} {!(["running", "starting", "stopping"] as string[]).includes(session.status) ? <button onClick={() => void terminal.close(session.id)}>Close</button> : null}</span></div>
       <pre ref={outputRef} className="terminal-output" tabIndex={0}>{session.lines.length ? session.lines.join("\n") : "Starting process…"}</pre>
       <form className="terminal-input" onSubmit={(event) => { event.preventDefault(); if (!input) return; void terminal.sendInput(session.id, `${input}\n`); setInput("") }}><span>{session.route} $</span><input aria-label="Enviar entrada ao terminal" value={input} onChange={(event) => setInput(event.target.value)} autoComplete="off" /><button>Send</button></form>
     </> : <div className="terminal-empty"><strong>›_</strong><h2>Nenhuma sessão aberta</h2><p>Inicie um app ou abra uma sessão na página Terminal.</p></div>}

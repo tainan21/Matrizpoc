@@ -53,5 +53,5 @@ export async function resolveTerminalAction(rootDir: string, projectId: string, 
   if (!project) throw new Error("Unknown project")
   const action = project.actions.find((item) => item.id === actionId)
   if (!action) throw new Error("Unsupported action")
-  return { projectId, projectName: project.name, actionId: action.id, label: action.label, command: "corepack", args: ["pnpm", "run", action.id], cwd: project.path }
+  return { projectId, projectName: project.name, actionId: action.id, label: action.label, command: "corepack", args: ["pnpm", "run", action.id], cwd: project.path, port: project.port }
 }

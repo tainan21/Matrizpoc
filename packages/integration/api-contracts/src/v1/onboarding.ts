@@ -80,4 +80,5 @@ export const appOnboardingPayloadSchemas = {
   seumei: seumeiOnboardingPayloadSchema,
   contracts: contractsOnboardingPayloadSchema,
   willdash: willdashOnboardingPayloadSchema,
+  health: z.object({}),
 } as const satisfies Record<(typeof MATRIZ_APP_IDS)[number], z.ZodTypeAny>

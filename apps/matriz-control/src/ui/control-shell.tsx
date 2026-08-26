@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import type { ReactNode } from "react"
 import { TerminalDock } from "./terminal/terminal-dock"
 import { TerminalProvider, useTerminal } from "./terminal/terminal-context"
+import { InstalledAppsProvider } from "./apps/installed-apps-context"
 
 const links = [["/apps", "Apps"], ["/workspace", "Workspace"], ["/terminal", "Terminal"], ["/browser", "Navegador"], ["/actions", "Ações"], ["/store", "Store"], ["/doctor", "Doctor"], ["/settings", "Ajustes"]] as const
 
@@ -19,4 +20,4 @@ function Shell({ children }: { children: ReactNode }) {
   </div>
 }
 
-export function ControlShell({ children }: { children: ReactNode }) { return <TerminalProvider><Shell>{children}</Shell></TerminalProvider> }
+export function ControlShell({ children }: { children: ReactNode }) { return <InstalledAppsProvider><TerminalProvider><Shell>{children}</Shell></TerminalProvider></InstalledAppsProvider> }

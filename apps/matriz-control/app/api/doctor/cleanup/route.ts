@@ -1,0 +1,3 @@
+import { getDoctorService } from "../../../../src/application/doctor-service"
+import { apiError, assertSameOrigin } from "../../../../src/application/http"
+export async function POST(request: Request) { try { assertSameOrigin(request); const body = await request.json() as Record<string, unknown>; if (typeof body.token === "string" && Object.keys(body).length === 1) return Response.json(await getDoctorService().confirmCleanup(body.token)); if (typeof body.projectId !== "string" || typeof body.targetId !== "string" || Object.keys(body).some((key) => !["projectId", "targetId"].includes(key))) throw new Error("Invalid cleanup request"); return Response.json(await getDoctorService().previewCleanup(body.projectId, body.targetId)) } catch (error) { return apiError(error) } }

@@ -56,6 +56,7 @@ describe("Prisma client ownership", () => {
     }
 
     vi.stubEnv("DATABASE_URL", "postgresql://wrong-app")
+    vi.stubEnv(environmentName, "")
     expect(() => getOrCreateSchemaClient(options)).toThrow(`Missing ${environmentName}`)
     expect(constructedWith).toHaveLength(0)
 

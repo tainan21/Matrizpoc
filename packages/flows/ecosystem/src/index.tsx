@@ -13,6 +13,7 @@ const labels: Record<MatrizAppId, string> = {
   "matriz-admin": "Matriz Admin · 3002", seumei: "Seumei · 3008",
   contracts: "Contracts · 3003", willdash: "WillDash · 3004",
   "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006", matrizlib: "MatrizLib · 3007",
+  health: "Health · 3010",
 }
 
 function CacheProof({ appId }: { appId: MatrizAppId }) {

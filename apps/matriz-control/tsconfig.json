@@ -1,6 +1,11 @@
 {
   "extends": "../../tooling/tsconfig/nextjs.json",
-  "compilerOptions": { "baseUrl": "." },
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@apps/health/public-contract": ["../health/public-contract.ts"]
+    }
+  },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

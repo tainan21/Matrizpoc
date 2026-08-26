@@ -64,6 +64,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "willdash", label: "WillDash", brandAccent: "#db2777", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#1f2937", muted: "#fdf2f8", mutedFg: "#831843", border: "#fbcfe8",
   },
+  health: {
+    appId: "health", label: "Health", brandAccent: "#0e7490", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#0f172a", muted: "#ecfeff", mutedFg: "#155e75", border: "#a5f3fc",
+  },
 }
 
 export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
@@ -114,6 +118,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   willdash: {
     appId: "willdash", label: "WillDash", brandAccent: "#ff72b4", brandAccentFg: "#1d0812",
     surface: "#160b14", surfaceFg: "#fff3f9", muted: "#21101e", mutedFg: "#caa9ba", border: "#47243b",
+  },
+  health: {
+    appId: "health", label: "Health", brandAccent: "#22d3ee", brandAccentFg: "#083344",
+    surface: "#071820", surfaceFg: "#ecfeff", muted: "#0c2430", mutedFg: "#a5d8e4", border: "#1f4f61",
   },
 }
 
@@ -190,7 +198,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash",
+  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash", "health",
 ]
 
 export const themeRegistry = [
