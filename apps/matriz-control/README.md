@@ -30,6 +30,14 @@ Terminal screens abbreviate the existing workspace root as lowercase `mih` (for 
 
 Never add `node_modules`, `.env*`, databases, uploads, source directories, or user-authored files to cleanup targets.
 
+## Installable apps and Health
+
+The Store currently offers Health as the installable observability app. Installing it only records the approved app ID in the Control browser's versioned local state (`matriz-control:installed-apps:v1`); it does not download files or start a process. The installed app then appears in the collapsed smart rail, whose labels expand on hover or keyboard focus.
+
+Opening Health from the rail is the runtime boundary: Control starts Health's declared `dev` action through the managed terminal supervisor, waits for its local `/api/health` readiness check, and mounts one iframe only after the check succeeds. Switching back to Control removes that iframe; stop any still-running managed Health session from Terminal when the process itself should end. Health is not started merely by visiting Store or installing it.
+
+Use **Desinstalar** in Store to remove Health from the local installed-app ledger and rail (and clear it as the active app). This does not delete the Health app or its files. Browser privacy modes may prevent persistence; in that case the current session still works but the install must be repeated later.
+
 ## Navegador desktop local
 
 O cockpit web permanece disponível em `http://localhost:3009/browser`. Para anexar o Chromium nativo com cápsulas isoladas, WebGL2, áudio, downloads e o editor seguro:

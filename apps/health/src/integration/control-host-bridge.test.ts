@@ -16,6 +16,14 @@ describe("Control host health receiver", () => {
     }, parent)).toEqual(message.payload)
   })
 
+  it("accepts the valid localhost alias for the Control origin", () => {
+    expect(readControlHostHealthMessage({
+      origin: "http://localhost:3009",
+      source: parent,
+      data: message,
+    }, parent)).toEqual(message.payload)
+  })
+
   it("rejects another origin, source, message type, or malformed payload", () => {
     expect(readControlHostHealthMessage({ origin: "http://127.0.0.1:3008", source: parent, data: message }, parent)).toBeNull()
     expect(readControlHostHealthMessage({ origin: "http://localhost:3009", source: {}, data: message }, parent)).toBeNull()

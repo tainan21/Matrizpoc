@@ -1,5 +1,12 @@
 # Matriz Decision Log
 
+## 2026-08-26 — Installable Health remains app-local with runtime-on-open
+
+- **Decision:** keep the Health install ledger and smart-rail mutation in Matriz Control, while Health owns its read-only Windows observation; installation persists only a local app ID and runtime activation happens on open.
+- **Reason:** the two apps have distinct lifecycle and ownership boundaries, and there is no second consumer that justifies a shared package or a remote installer.
+- **Impact:** Store installation does not start Health; Control starts the declared local action, waits for readiness, and mounts one iframe; switching away removes the iframe, web mode marks Control tab counts unavailable, and unsupported sensors remain explicit.
+- **Review when:** a second consumer needs the install protocol, installation becomes remote/multiuser, or Health requires process-control capabilities.
+
 ## 2026-08-26 — Matriz Control owns bounded local diagnostics
 
 - **Decision:** keep Doctor resource inspection, regenerable-cache cleanup, terminal metrics, Workspace read models, and startup profiles app-local in Matriz Control.
