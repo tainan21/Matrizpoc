@@ -23,4 +23,12 @@ describe("parseDesktopCommand", () => {
     expect(() => parseDesktopCommand({ type: "health.host-snapshot-v2" })).toThrow(/unsupported/i)
   })
 
+  it.each(["update.status", "update.check", "update.download", "update.install"])("accepts payload-free %s", (type) => {
+    expect(parseDesktopCommand({ type })).toEqual({ type })
+  })
+
+  it.each(["update.status", "update.check", "update.download", "update.install"])("rejects payload on %s", (type) => {
+    expect(() => parseDesktopCommand({ type, url: "https://evil.example" })).toThrow(/payload/i)
+  })
+
 })

@@ -5,6 +5,16 @@ import type { WorkspaceFileSnapshot } from "../integration/browser/workspace-fil
 import type { WorkbenchRuntimeSnapshot } from "./workbench-runtime"
 import type { ControlHostHealthSnapshot } from "../application/host-health-snapshot"
 
+export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
+export type DesktopUpdateSnapshot = {
+  state: DesktopUpdateState
+  currentVersion: string
+  availableVersion: string | null
+  progress: number | null
+  notes: string | null
+  message: string
+}
+
 export type DesktopCommand = BrowserCommand
   | { type: "browser.status" }
   | { type: "tab.activate"; tabId: string }
@@ -26,8 +36,9 @@ export type DesktopCommand = BrowserCommand
   | { type: "agent.kill" }
   | { type: "health.host-snapshot" }
   | { type: "workbench.status" | "workbench.open" | "workbench.restart" }
+  | { type: "update.status" | "update.check" | "update.download" | "update.install" }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | WorkbenchRuntimeSnapshot | ControlHostHealthSnapshot | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | WorkbenchRuntimeSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -36,6 +47,7 @@ export type BrowserEvent =
   | { type: "permission.requested"; capsuleId: string; origin: string; permission: string }
   | { type: "runtime.failed"; message: string }
   | { type: "workbench.updated"; snapshot: WorkbenchRuntimeSnapshot }
+  | { type: "update.updated"; snapshot: DesktopUpdateSnapshot }
 
 export interface DesktopBridge {
   invoke(command: DesktopCommand): Promise<DesktopResult>
@@ -44,12 +56,17 @@ export interface DesktopBridge {
 }
 
 const noPayload = new Set(["browser.status", "capsule.list", "project.list", "vault.status", "vault.provision", "vault.unlock", "vault.lock", "agent.kill", "health.host-snapshot", "workbench.status", "workbench.open", "workbench.restart"])
+const updaterCommands = new Set(["update.status", "update.check", "update.download", "update.install"])
 const tabOnly = new Set(["tab.activate", "tab.close", "tab.back", "tab.forward", "tab.reload", "page.screenshot", "page.pdf", "page.reader", "page.snapshot"])
 
 export function parseDesktopCommand(value: unknown): DesktopCommand {
   if (!value || typeof value !== "object") throw new Error("Invalid desktop command")
   const command = value as Record<string, unknown>
   const type = text(command.type, "type", 64)
+  if (updaterCommands.has(type)) {
+    if (Object.keys(command).some((key) => key !== "type")) throw new Error("Updater commands do not accept a payload")
+    return { type } as DesktopCommand
+  }
   if (noPayload.has(type)) return { type } as DesktopCommand
   if (tabOnly.has(type)) return { type, tabId: text(command.tabId, "tabId", 128) } as DesktopCommand
   if (type === "capsule.create") return { type, name: text(command.name, "name", 80), kind: choice(command.kind, ["human", "agent"]), policy: choice(command.policy, ["human", "agent-safe", "agent-full"]) }
