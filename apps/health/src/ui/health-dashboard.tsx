@@ -204,7 +204,7 @@ export function HealthDashboard() {
         <div className="health-processes__table-wrap">
           <table>
             <thead>
-              <tr><th scope="col">Processo</th><th scope="col">PID</th><th scope="col">CPU</th><th scope="col">Memória</th></tr>
+              <tr><th scope="col">Processo</th><th scope="col">PID</th><th scope="col">CPU acumulada</th><th scope="col">Memória</th></tr>
             </thead>
             <tbody>
               {view.processes.slice(0, PROCESS_LIMIT).map((process) => (

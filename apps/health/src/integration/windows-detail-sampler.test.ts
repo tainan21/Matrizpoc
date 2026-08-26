@@ -47,4 +47,23 @@ describe("WindowsDetailSampler", () => {
       temperatureCelsius: null,
     })
   })
+
+  it("asks PowerShell for only the highest-memory processes before JSON serialization", () => {
+    expect(PROCESS_SCRIPT).toContain("Sort-Object WorkingSetSize -Descending")
+    expect(PROCESS_SCRIPT).toContain("Select-Object -First 12")
+    expect(PROCESS_SCRIPT.indexOf("Select-Object -First 12")).toBeLessThan(PROCESS_SCRIPT.indexOf("ConvertTo-Json"))
+  })
+
+  it("defensively orders adapter results by memory", async () => {
+    const sampler = new WindowsDetailSampler(async (_file, args) => args.includes(PROCESS_SCRIPT)
+      ? JSON.stringify([
+          { ProcessId: 1, Name: "small.exe", KernelModeTime: 0, UserModeTime: 10_000_000, WorkingSetSize: 100 },
+          { ProcessId: 2, Name: "large.exe", KernelModeTime: 0, UserModeTime: 20_000_000, WorkingSetSize: 900 },
+        ])
+      : "[]")
+
+    const result = await sampler.sample(1_000)
+
+    expect(result.processes.map((process) => process.name)).toEqual(["large.exe", "small.exe"])
+  })
 })

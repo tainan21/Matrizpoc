@@ -97,7 +97,7 @@ function toProcessVM(process: ProcessReading): ProcessVM {
   return {
     pid: String(process.pid),
     name: process.name,
-    cpu: `${number.format(process.cpuSeconds)} s`,
+    cpu: `${number.format(process.cpuSeconds)} s acumulados`,
     memory: formatBytes(process.memoryBytes),
   }
 }

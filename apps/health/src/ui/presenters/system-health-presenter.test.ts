@@ -31,7 +31,7 @@ describe("system health presenter", () => {
 
     expect(vm.memory.value).toBe("12,0 GB / 16,0 GB")
     expect(vm.temperature.value).toBe("Não disponível neste hardware")
-    expect(vm.processes[0]).toMatchObject({ memory: "1,5 GB", pid: "4242" })
+    expect(vm.processes[0]).toMatchObject({ cpu: "12,3 s acumulados", memory: "1,5 GB", pid: "4242" })
   })
 
   it.each([

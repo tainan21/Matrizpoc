@@ -3,7 +3,7 @@ import type { DetailSample, DetailSampler } from "../application/collect-system-
 import type { ProcessReading } from "../domain/system-health"
 
 export const POWERSHELL_EXECUTABLE = "powershell.exe"
-export const PROCESS_SCRIPT = "Get-CimInstance Win32_Process | Select-Object ProcessId,Name,KernelModeTime,UserModeTime,WorkingSetSize | ConvertTo-Json -Compress"
+export const PROCESS_SCRIPT = "Get-CimInstance Win32_Process | Sort-Object WorkingSetSize -Descending | Select-Object -First 12 -Property ProcessId,Name,KernelModeTime,UserModeTime,WorkingSetSize | ConvertTo-Json -Compress"
 export const TEMPERATURE_SCRIPT = "Get-CimInstance -Namespace root/wmi MSAcpi_ThermalZone -ErrorAction SilentlyContinue | Select-Object CurrentTemperature | ConvertTo-Json -Compress"
 
 const EXEC_OPTIONS = { windowsHide: true, timeout: 2_000, maxBuffer: 64 * 1_024 } as const
@@ -63,7 +63,11 @@ export class WindowsDetailSampler implements DetailSampler {
   private async readProcesses(): Promise<readonly ProcessReading[]> {
     try {
       const result = parseJson(await this.exec(POWERSHELL_EXECUTABLE, powerShellArgs(PROCESS_SCRIPT), EXEC_OPTIONS))
-      return records(result).map(toProcessReading).filter((reading): reading is ProcessReading => reading !== null).slice(0, PROCESS_LIMIT)
+      return records(result)
+        .map(toProcessReading)
+        .filter((reading): reading is ProcessReading => reading !== null)
+        .sort((left, right) => right.memoryBytes - left.memoryBytes)
+        .slice(0, PROCESS_LIMIT)
     } catch {
       return []
     }
