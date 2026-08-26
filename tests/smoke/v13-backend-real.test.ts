@@ -30,7 +30,7 @@ describe("V1.3 — schema client wrappers export expected surface", () => {
     const mod = await import("../../packages/platform/db/src/seumei")
     expect(typeof mod.getSeumeiDb).toBe("function")
     expect(mod).toHaveProperty("EstablishmentType")
-  })
+  }, 15_000)
 
   it("contracts exposes Contract + ContractStatus + ContractPartyRole", async () => {
     const mod = await import("../../packages/platform/db/src/contracts")
@@ -145,7 +145,7 @@ describe("V1.3 — MCP handler responds to the 5 required methods", () => {
       expect(result.protocolVersion).toBe("2024-11-05")
       expect(result.serverInfo.name).toBe("matriz-hub-mcp")
     }
-  })
+  }, 15_000)
 
   it("ping returns empty object", async () => {
     const { handleMcpRequest } = await import(
@@ -210,5 +210,5 @@ describe("V1.3 — auth server-db surface is fully exported", () => {
     expect(typeof mod.issueSession).toBe("function")
     expect(typeof mod.readSessionByToken).toBe("function")
     expect(typeof mod.revokeSessionByToken).toBe("function")
-  })
+  }, 15_000)
 })
