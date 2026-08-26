@@ -41,8 +41,17 @@ describe("DesktopUpdateCoordinator", () => {
     const coordinator = new DesktopUpdateCoordinator(fake)
     expect(() => coordinator.install()).toThrow(/download/i)
     fake.emit({ type: "downloaded", version: "0.2.0", notes: null })
-    coordinator.install()
+    expect(coordinator.install()).toMatchObject({ state: "downloaded", availableVersion: "0.2.0" })
     expect(fake.install).toHaveBeenCalledOnce()
+  })
+
+  it("keeps a valid recoverable snapshot when the installer refuses to start", () => {
+    const fake = adapter()
+    const coordinator = new DesktopUpdateCoordinator(fake)
+    fake.emit({ type: "downloaded", version: "0.2.0", notes: null })
+    vi.mocked(fake.install).mockImplementation(() => { throw new Error("installer refused") })
+
+    expect(coordinator.install()).toMatchObject({ state: "error", currentVersion: "0.1.0", message: "installer refused" })
   })
 
   it("publishes renderer-safe snapshots for updater events", () => {

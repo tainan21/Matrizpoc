@@ -230,7 +230,7 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
   if (command.type === "update.status") return desktopUpdater.status()
   if (command.type === "update.check") return desktopUpdater.check()
   if (command.type === "update.download") return desktopUpdater.download()
-  if (command.type === "update.install") { desktopUpdater.install(); return { ok: true } }
+  if (command.type === "update.install") return desktopUpdater.install()
   if (command.type === "workbench.status") return workbenchRuntime.snapshot()
   if (command.type === "workbench.open") return openWorkbench()
   if (command.type === "workbench.restart") {

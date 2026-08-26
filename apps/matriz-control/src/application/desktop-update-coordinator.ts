@@ -48,7 +48,8 @@ export class DesktopUpdateCoordinator {
 
   install() {
     if (this.snapshotValue.state !== "downloaded") throw new Error("The update must be downloaded before installation")
-    this.adapter.install()
+    try { this.adapter.install() } catch (error) { this.fail(error) }
+    return this.status()
   }
 
   private receive(event: DesktopUpdateAdapterEvent) {
