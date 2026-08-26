@@ -19,6 +19,9 @@ export default defineConfig({
     globals: false,
     reporters: ["default"],
     passWithNoTests: false,
+    // Smoke tests stub process-wide environment variables and inspect the
+    // workspace. Running files concurrently makes those contracts race.
+    fileParallelism: false,
   },
   resolve: {
     alias: {
