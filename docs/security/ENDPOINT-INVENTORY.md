@@ -37,7 +37,7 @@ model, not as an endpoint profile. The closed global whitelist remains User,
 authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
-## HTTP Route Handlers — 148 entries
+## HTTP Route Handlers — 149 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
@@ -298,4 +298,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-Current tracked-source count: **243** = 148 HTTP methods, 44 Server Actions, and 51 MCP tools.
+Current tracked-source count: **244** = 149 HTTP methods, 44 Server Actions, and 51 MCP tools.
