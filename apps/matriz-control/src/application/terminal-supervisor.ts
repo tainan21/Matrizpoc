@@ -52,6 +52,7 @@ const redact = (line: string) => line
 
 export class TerminalSupervisor {
   private readonly sessions = new Map<string, ManagedSession>()
+  private readonly exitWaiters = new Map<string, Set<(session: TerminalSession) => void>>()
   private readonly runtime: ProcessRuntime
   private readonly maxLines: number
   private readonly resolver: NonNullable<SupervisorOptions["resolveAction"]>
@@ -71,8 +72,8 @@ export class TerminalSupervisor {
     this.sessions.set(id, managed)
     handle.on("running", () => { managed.snapshot.status = "running" })
     handle.on("output", (chunk: string) => this.append(managed, chunk))
-    handle.on("exit", (code: number) => { managed.snapshot.status = "exited"; managed.snapshot.exitCode = code; if (managed.partial) this.append(managed, "\n"); this.deliverFailure(managed.snapshot) })
-    handle.on("error", (error: Error) => { managed.snapshot.status = "failed"; managed.snapshot.error = error.message; this.deliverFailure(managed.snapshot) })
+    handle.on("exit", (code: number) => { managed.snapshot.status = "exited"; managed.snapshot.exitCode = code; if (managed.partial) this.append(managed, "\n"); this.deliverFailure(managed.snapshot); this.resolveExitWaiters(managed.snapshot) })
+    handle.on("error", (error: Error) => { managed.snapshot.status = "failed"; managed.snapshot.exitCode = -1; managed.snapshot.error = error.message; this.deliverFailure(managed.snapshot); this.resolveExitWaiters(managed.snapshot) })
     queueMicrotask(() => { if (managed.snapshot.status === "starting") managed.snapshot.status = "running" })
     return structuredClone(managed.snapshot)
   }
@@ -88,6 +89,25 @@ export class TerminalSupervisor {
     const diagnostic = toControlDiagnostic(session)
     if (!diagnostic || !this.options.onEligibleFailure) return
     void this.options.onEligibleFailure(diagnostic).catch(() => undefined)
+  }
+
+  private resolveExitWaiters(session: TerminalSession) {
+    const waiters = this.exitWaiters.get(session.id)
+    if (!waiters) return
+    const snapshot = structuredClone(session)
+    for (const resolve of waiters) resolve(snapshot)
+    this.exitWaiters.delete(session.id)
+  }
+
+  waitForExit(id: string): Promise<TerminalSession> {
+    const session = this.sessions.get(id)?.snapshot
+    if (!session) return Promise.reject(new Error("Unknown session"))
+    if (["exited", "failed"].includes(session.status)) return Promise.resolve(structuredClone(session))
+    return new Promise((resolve) => {
+      const waiters = this.exitWaiters.get(id) ?? new Set()
+      waiters.add(resolve)
+      this.exitWaiters.set(id, waiters)
+    })
   }
 
   write(id: string, input: string) { const item = this.sessions.get(id); if (!item) throw new Error("Unknown session"); if (input.length > 4096) throw new Error("Input too large"); if (input.trim().toLowerCase() === "cd mih") { item.currentDirectory = this.options.rootDir; item.snapshot.route = terminalRoute(this.options.rootDir, item.currentDirectory); return } item.handle.write(input) }

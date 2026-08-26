@@ -15,6 +15,25 @@ const diagnosticResultSchema = z.object({
   occurrences: z.number().int().positive(),
 })
 
+const repairLeaseSchema = z.object({
+  diagnosticId: z.string().regex(/^diag_[a-f0-9]{64}$/),
+  projectId: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,127}$/),
+  actionId: z.enum(["dev", "lint", "typecheck", "test"]),
+  attempt: z.number().int().min(1).max(3),
+  lease: z.string().regex(/^repair_[0-9a-f-]{36}$/),
+})
+
+const repairResultSchema = z.object({
+  diagnosticId: z.string().regex(/^diag_[a-f0-9]{64}$/),
+  state: z.string().min(1).max(64),
+})
+
+export type WorkbenchRepairLease = z.infer<typeof repairLeaseSchema>
+export interface WorkbenchRepairResultInput extends WorkbenchRepairLease {
+  exitCode: number
+  lines: string[]
+}
+
 export interface WorkbenchDiagnosticInput {
   projectId: string
   actionId: "dev" | "lint" | "typecheck" | "test"
@@ -62,5 +81,27 @@ export class WorkbenchClient {
     })
     if (!response.ok) throw new Error("Workbench diagnostic delivery failed")
     return diagnosticResultSchema.parse(await response.json())
+  }
+
+  async nextRepair(): Promise<WorkbenchRepairLease | undefined> {
+    const response = await this.fetcher(`${baseUrl}/api/control/repairs/next`, {
+      headers: this.headers(),
+      signal: AbortSignal.timeout(2_000),
+    })
+    if (response.status === 204) return undefined
+    if (!response.ok) throw new Error("Workbench repair queue unavailable")
+    return repairLeaseSchema.parse(await response.json())
+  }
+
+  async reportRepairResult(input: WorkbenchRepairResultInput) {
+    const { diagnosticId, projectId: _projectId, ...body } = input
+    const response = await this.fetcher(`${baseUrl}/api/control/repairs/${diagnosticId}/result`, {
+      method: "POST",
+      headers: this.headers({ "content-type": "application/json" }),
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(2_000),
+    })
+    if (!response.ok) throw new Error("Workbench repair result delivery failed")
+    return repairResultSchema.parse(await response.json())
   }
 }

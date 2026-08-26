@@ -35,6 +35,17 @@ describe("TerminalSupervisor", () => {
     expect(supervisor.get(session.id)).toMatchObject({ status: "exited", exitCode: 7 })
   })
 
+  it("allows the repair loop to await the exact declared action result", async () => {
+    const runtime = new FakeRuntime()
+    const supervisor = new TerminalSupervisor({ rootDir: "C:/repo", runtime, resolveAction: async () => ({ projectId: "demo", projectName: "Demo", actionId: "test", label: "Test", command: "pnpm", args: ["test"], cwd: "C:/repo/apps/demo" }) })
+    const session = await supervisor.start("demo", "test")
+    const completed = supervisor.waitForExit(session.id)
+    runtime.handle.emit("output", "PASS\n")
+    runtime.handle.emit("exit", 0)
+
+    await expect(completed).resolves.toMatchObject({ status: "exited", exitCode: 0, lines: ["PASS"] })
+  })
+
   it("delivers one eligible failure without blocking terminal state", async () => {
     const runtime = new FakeRuntime()
     const delivered: string[] = []
