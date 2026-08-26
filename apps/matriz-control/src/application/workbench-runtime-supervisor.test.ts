@@ -60,4 +60,23 @@ describe("Workbench runtime supervisor", () => {
 
     await expect(supervisor.start()).resolves.toMatchObject({ status: "incompatible", pid: 77 })
   })
+
+  it("keeps the raw desktop connection secrets outside the public snapshot", async () => {
+    const secrets = ["session".padEnd(64, "s"), "capability".padEnd(64, "c")]
+    const supervisor = new WorkbenchRuntimeSupervisor({
+      rootDir: "C:/repo",
+      serverPath: "C:/resources/workbench/server.js",
+      runtime: new FakeRuntime(),
+      health: async () => ({ contractVersion: "workbench-control-v1" }),
+      randomSecret: () => secrets.shift()!,
+    })
+    const snapshot = await supervisor.start()
+
+    expect(snapshot).not.toHaveProperty("sessionSecret")
+    expect(supervisor.connection()).toEqual({
+      url: "http://127.0.0.1:3005",
+      sessionSecret: "session".padEnd(64, "s"),
+      capability: "capability".padEnd(64, "c"),
+    })
+  })
 })

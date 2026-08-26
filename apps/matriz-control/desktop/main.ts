@@ -1,5 +1,5 @@
 import { app, BrowserWindow, ipcMain, session, WebContentsView, type DownloadItem, type IpcMainInvokeEvent, type WebContents } from "electron"
-import { randomBytes, randomUUID } from "node:crypto"
+import { createHash, randomBytes, randomUUID } from "node:crypto"
 import { spawn, type ChildProcess } from "node:child_process"
 import { appendFile, chmod, mkdir, readFile, writeFile } from "node:fs/promises"
 import { createServer, type Server } from "node:net"
@@ -13,6 +13,10 @@ import { listTerminalProjects } from "../src/integration/projects/project-catalo
 import { BitLockerVhdxVault, type VaultBackend } from "../src/integration/browser/bitlocker-vault"
 import { ElectronSafeStorageKeyStore, PowerShellVaultHelper } from "./electron-vault-adapters"
 import { CONTROL_SESSION_COOKIE, createSessionValue } from "../src/auth/local-access"
+import { WorkbenchRuntimeSupervisor } from "../src/application/workbench-runtime-supervisor"
+import { WorkbenchRepairLoop } from "../src/application/workbench-repair-loop"
+import { TerminalSupervisor } from "../src/application/terminal-supervisor"
+import { WorkbenchClient } from "../src/integration/workbench/workbench-client"
 
 app.enableSandbox()
 
@@ -28,12 +32,78 @@ let runtime: BrowserRuntime
 let commandServer: Server | undefined
 let agentKilled = false
 let rendererServer: ChildProcess | undefined
+let workbenchWindow: BrowserWindow | undefined
+let stopWorkbenchRepairLoop: (() => void) | undefined
 let vaultRoot: string | undefined
 let vault: VaultBackend | undefined
 let windowCloseAuthorized = false
 const rootDir = process.env.MATRIZ_WORKSPACE_ROOT ?? (app.isPackaged ? process.cwd() : join(__dirname, "../../../.."))
 const localToken = process.env.MATRIZ_CONTROL_LOCAL_TOKEN ?? randomBytes(32).toString("hex")
 process.env.MATRIZ_CONTROL_LOCAL_TOKEN = localToken
+
+const workbenchServerPath = process.env.MATRIZ_WORKBENCH_SERVER_PATH ?? (
+  app.isPackaged
+    ? join(process.resourcesPath, "workbench", "server.js")
+    : join(rootDir, "apps", "matriz-workbench", ".next", "standalone", "apps", "matriz-workbench", "server.js")
+)
+const workbenchRuntime = new WorkbenchRuntimeSupervisor({
+  rootDir,
+  serverPath: workbenchServerPath,
+  health: (capability) => new WorkbenchClient({ capability }).health(),
+})
+
+async function ensureWorkbenchRuntime() {
+  const snapshot = await workbenchRuntime.start()
+  send({ type: "workbench.updated", snapshot })
+  if (snapshot.status === "ready" && !stopWorkbenchRepairLoop) {
+    const connection = workbenchRuntime.connection()
+    const client = new WorkbenchClient({ capability: connection.capability })
+    const terminal = new TerminalSupervisor({
+      rootDir,
+      onEligibleFailure: (diagnostic) => client.sendDiagnostic(diagnostic).then(() => undefined),
+    })
+    stopWorkbenchRepairLoop = new WorkbenchRepairLoop(client, terminal).startPolling()
+  }
+  return snapshot
+}
+
+async function openWorkbench() {
+  const snapshot = await ensureWorkbenchRuntime()
+  if (snapshot.status !== "ready") return snapshot
+  if (workbenchWindow && !workbenchWindow.isDestroyed()) {
+    workbenchWindow.show()
+    workbenchWindow.focus()
+    return snapshot
+  }
+  const connection = workbenchRuntime.connection()
+  workbenchWindow = new BrowserWindow({
+    width: 1360,
+    height: 860,
+    minWidth: 980,
+    minHeight: 700,
+    backgroundColor: "#08060e",
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true,
+      webSecurity: true,
+    },
+  })
+  workbenchWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
+  await workbenchWindow.webContents.session.cookies.set({
+    url: connection.url,
+    name: "matriz_workbench_session",
+    value: createHash("sha256").update(`matriz-workbench:v1:${connection.sessionSecret}`).digest("hex"),
+    path: "/",
+    httpOnly: true,
+    sameSite: "strict",
+    secure: false,
+    expirationDate: Math.floor(Date.now() / 1000) + 60 * 60 * 12,
+  })
+  await workbenchWindow.loadURL(connection.url)
+  workbenchWindow.once("closed", () => { workbenchWindow = undefined })
+  return snapshot
+}
 
 function send(event: BrowserEvent) { if (!window.isDestroyed()) window.webContents.send("matriz:browser:event", event) }
 
@@ -136,6 +206,15 @@ function layoutActiveView() {
 }
 
 async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
+  if (command.type === "workbench.status") return workbenchRuntime.snapshot()
+  if (command.type === "workbench.open") return openWorkbench()
+  if (command.type === "workbench.restart") {
+    workbenchWindow?.close()
+    stopWorkbenchRepairLoop?.()
+    stopWorkbenchRepairLoop = undefined
+    await workbenchRuntime.restart()
+    return ensureWorkbenchRuntime()
+  }
   if (["capsule.create", "capsule.list", "capsule.delegate", "tab.open", "tab.list"].includes(command.type)) {
     const result = await runtime.execute(command as BrowserCommand)
     if (command.type === "tab.open") { const tab = result as BrowserTab; activeTabId = tab.id; await ensureView(tab); await enforceLiveTabLimit(); layoutActiveView() }
@@ -341,11 +420,14 @@ ipcMain.on("matriz:browser:viewport", (event, value: typeof viewport) => { if (e
 app.whenReady().then(createWindow).catch((error) => { console.error(error instanceof Error ? error.message : "Desktop startup failed"); app.quit() })
 let quitLockComplete = false
 app.on("before-quit", (event) => {
-  if (quitLockComplete || !vault || !vaultRoot) return
+  if (quitLockComplete) return
   event.preventDefault()
   const root = vaultRoot
-  void closeBrowserStorage()
-    .then(() => vault?.lock())
+  stopWorkbenchRepairLoop?.()
+  stopWorkbenchRepairLoop = undefined
+  void workbenchRuntime.stop()
+    .then(() => root ? closeBrowserStorage() : undefined)
+    .then(() => root ? vault?.lock() : undefined)
     .then((status) => { if (status?.mounted) throw new Error("The vault is still mounted"); vaultRoot = undefined; quitLockComplete = true; app.quit() })
     .catch(async () => { if (root && !window.isDestroyed()) { await activateVault(root); send({ type: "runtime.failed", message: "Não foi possível bloquear o cofre; o Matriz Control permaneceu aberto." }) } })
 })

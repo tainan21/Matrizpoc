@@ -70,6 +70,7 @@ export class WorkbenchRuntimeSupervisor {
   private snapshotValue: WorkbenchRuntimeSnapshot = { status: "stopped", pid: null, error: null, updatedAt: now() }
   private handle?: WorkbenchProcessHandle
   private pending?: Promise<WorkbenchRuntimeSnapshot>
+  private connectionValue?: { url: "http://127.0.0.1:3005"; sessionSecret: string; capability: string }
 
   constructor(private readonly options: SupervisorOptions) {
     this.runtime = options.runtime ?? new NodeWorkbenchProcessRuntime()
@@ -78,6 +79,11 @@ export class WorkbenchRuntimeSupervisor {
   }
 
   snapshot() { return structuredClone(this.snapshotValue) }
+
+  connection() {
+    if (!this.connectionValue) throw new Error("Workbench runtime is not started")
+    return { ...this.connectionValue }
+  }
 
   async start(): Promise<WorkbenchRuntimeSnapshot> {
     if (this.snapshotValue.status === "ready" || this.snapshotValue.status === "incompatible") return this.snapshot()
@@ -88,13 +94,16 @@ export class WorkbenchRuntimeSupervisor {
 
   private async startOnce(): Promise<WorkbenchRuntimeSnapshot> {
     const sessionSecret = this.randomSecret()
-    const capability = this.randomSecret()
+    const candidate = this.randomSecret()
+    const capability = candidate === sessionSecret ? randomBytes(32).toString("hex") : candidate
+    this.connectionValue = { url: "http://127.0.0.1:3005", sessionSecret, capability }
     this.handle = this.runtime.start(
       this.options.serverPath,
       workbenchEnvironment(process.env, sessionSecret, capability, this.options.rootDir),
     )
     this.snapshotValue = { status: "starting", pid: this.handle.pid, error: null, updatedAt: now() }
     this.handle.once("exit", () => {
+      this.connectionValue = undefined
       if (this.snapshotValue.status !== "incompatible") {
         this.snapshotValue = { status: "failed", pid: null, error: "Workbench process exited", updatedAt: now() }
       }
@@ -119,6 +128,7 @@ export class WorkbenchRuntimeSupervisor {
   async stop(): Promise<WorkbenchRuntimeSnapshot> {
     await this.handle?.stop()
     this.handle = undefined
+    this.connectionValue = undefined
     this.snapshotValue = { status: "stopped", pid: null, error: null, updatedAt: now() }
     return this.snapshot()
   }
