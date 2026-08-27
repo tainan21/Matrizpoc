@@ -5,6 +5,7 @@ import type { WorkspaceFileSnapshot } from "../integration/browser/workspace-fil
 import type { ControlHostHealthSnapshot } from "../application/host-health-snapshot"
 import type { ProjectRegistration } from "../modules/projects/domain/project"
 import type { ProjectPreparationPreview } from "../modules/projects/application/project-preparation-service"
+import type { ProjectViewModel } from "../modules/projects/presentation/project-presenter"
 
 export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
 export type DesktopUpdateSnapshot = {
@@ -61,7 +62,7 @@ export type DesktopCommand = BrowserCommand
   | { type: "project.open"; projectId: string; surfaceId: string }
   | { type: "project.remove"; projectId: string }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectPreparationPreview | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -71,7 +72,7 @@ export type BrowserEvent =
   | { type: "runtime.failed"; message: string }
   | { type: "update.updated"; snapshot: DesktopUpdateSnapshot }
   | { type: "store.updated"; snapshots: readonly StoreAppSnapshot[] }
-  | { type: "project.updated"; projects: readonly ProjectRegistration[] }
+  | { type: "project.updated"; projects: readonly ProjectViewModel[] }
 
 export interface DesktopBridge {
   invoke(command: DesktopCommand): Promise<DesktopResult>

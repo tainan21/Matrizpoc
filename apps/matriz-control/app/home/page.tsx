@@ -5,6 +5,7 @@ import { GitCliRepository } from "../../src/modules/git/integration/git-cli-repo
 import { presentGitOverview } from "../../src/modules/git/presentation/git-presenter"
 import { presentHome, type HomeInput } from "../../src/modules/home/presentation/home-presenter"
 import styles from "./home.module.css"
+import { ProjectHomeSummary } from "../../src/ui/projects/project-home-summary"
 
 export const dynamic = "force-dynamic"
 
@@ -23,6 +24,7 @@ export default async function HomePage() {
       <article className={styles.git}><header><span>GIT · MATRIZ CONTROL</span><Link href="/git">Abrir Git →</Link></header>{view.git ? <><div className={styles.gitState}><strong>{view.git.branch}</strong><b data-attention={view.git.attention}>{view.git.status}</b><span>↑ {view.git.ahead} · ↓ {view.git.behind}</span></div><p>{view.git.changeTotal} alterações · {view.git.head} · {view.git.subject}</p></> : <p>Git indisponível nesta sessão.</p>}</article>
       <article className={styles.attention}><span>ATENÇÃO</span><strong>{view.git?.attention === "critical" ? "Conflitos precisam de resolução" : view.git?.attention === "high" ? "Branches divergentes" : view.git?.changeTotal ? "Mudanças aguardando decisão" : "Ambiente sob controle"}</strong><p>{view.unavailable.length ? `${view.unavailable.length} fonte indisponível · dados restantes continuam ativos.` : "Todos os provedores responderam."}</p></article>
     </section>
+    <ProjectHomeSummary />
     <section className={styles.operations}><div><header><span>APPS E PROJETOS</span><Link href="/apps">Gerenciar →</Link></header>{view.projects.slice(0,6).map((project) => <Link href="/apps" key={project.id}><b>{project.name}</b><span>{project.port ? `:${project.port}` : "sem porta"}</span></Link>)}</div><div><header><span>PRÓXIMAS AÇÕES</span></header><Link href="/git">Revisar mudanças do Git <b>→</b></Link><Link href="/doctor">Executar Doctor <b>→</b></Link><Link href="/store">Explorar capacidades <b>→</b></Link><Link href="/terminal">Abrir terminal <b>→</b></Link></div></section>
   </main>
 }

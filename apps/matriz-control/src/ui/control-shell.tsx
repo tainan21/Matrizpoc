@@ -10,6 +10,7 @@ import { ExternalAppStage } from "./apps/external-app-stage"
 import { SmartAppRail } from "./apps/smart-app-rail"
 import styles from "./apps/app-host.module.css"
 import { UpdateCenter } from "./updates/update-center"
+import { ProjectHostProvider } from "./projects/project-host-context"
 
 const links = [["/home", "Início"], ["/apps", "Apps"], ["/workspace", "Workspace"], ["/git", "Git"], ["/terminal", "Terminal"], ["/browser", "Navegador"], ["/actions", "Ações"], ["/store", "Store"], ["/doctor", "Doctor"], ["/settings", "Ajustes"]] as const
 
@@ -28,4 +29,4 @@ function Shell({ children }: { children: ReactNode }) {
   </div>
 }
 
-export function ControlShell({ children }: { children: ReactNode }) { return <InstalledAppsProvider><TerminalProvider><Shell>{children}</Shell></TerminalProvider></InstalledAppsProvider> }
+export function ControlShell({ children }: { children: ReactNode }) { return <InstalledAppsProvider><ProjectHostProvider><TerminalProvider><Shell>{children}</Shell></TerminalProvider></ProjectHostProvider></InstalledAppsProvider> }

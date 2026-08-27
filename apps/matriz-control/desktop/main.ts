@@ -30,6 +30,7 @@ import { ProjectReadinessProbe } from "../src/modules/projects/integration/proje
 import { ProjectHostFacade } from "../src/modules/projects/facade"
 import { ElectronProjectRootAdapter } from "./electron-project-adapters"
 import { ProjectSurfaceHost } from "./project-surface-host"
+import { presentProject } from "../src/modules/projects/presentation/project-presenter"
 
 app.enableSandbox()
 
@@ -100,6 +101,7 @@ const projectPreparation = new ProjectPreparationService({ store: projectStore, 
 const projectSessions = new ProjectSessionService({ store: projectStore, supervisor: projectTerminal, portAvailable, readiness: projectReadiness, now: () => new Date().toISOString() })
 const projectHost = new ProjectHostFacade({ roots: projectRoots, host: projectHostService, preparation: projectPreparation, sessions: projectSessions })
 const projectSurfaceHost = new ProjectSurfaceHost()
+async function projectViews() { return (await projectStore.listNative()).map(presentProject) }
 
 function send(event: BrowserEvent) { if (!window.isDestroyed()) window.webContents.send("matriz:browser:event", event) }
 
@@ -212,16 +214,16 @@ function layoutActiveView() {
 }
 
 async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
-  if (command.type === "project.host.list") return projectHost.list()
-  if (command.type === "project.pick-root") { const result = await projectHost.pickAndRegister(); send({ type: "project.updated", projects: await projectHost.list() }); return result }
-  if (command.type === "project.inspect") { const result = await projectHost.inspect(command.projectId); send({ type: "project.updated", projects: await projectHost.list() }); return result }
-  if (command.type === "project.approve") { const result = await projectHost.approve(command.projectId, command.recipeRevision); send({ type: "project.updated", projects: await projectHost.list() }); return result }
+  if (command.type === "project.host.list") return projectViews()
+  if (command.type === "project.pick-root") { const result = await projectHost.pickAndRegister(); send({ type: "project.updated", projects: await projectViews() }); return result }
+  if (command.type === "project.inspect") { const result = await projectHost.inspect(command.projectId); send({ type: "project.updated", projects: await projectViews() }); return result }
+  if (command.type === "project.approve") { const result = await projectHost.approve(command.projectId, command.recipeRevision); send({ type: "project.updated", projects: await projectViews() }); return result }
   if (command.type === "project.prepare.preview") return projectHost.previewPreparation(command.projectId, command.recipeRevision)
-  if (command.type === "project.prepare") { await projectHost.prepare(command.projectId, command.recipeRevision, command.confirmationToken); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
-  if (command.type === "project.start") { const result = await projectHost.start(command.projectId, command.actionId, command.recipeRevision); send({ type: "project.updated", projects: await projectHost.list() }); return result }
-  if (command.type === "project.stop") { await projectHost.stop(command.projectId, command.sessionId); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
+  if (command.type === "project.prepare") { await projectHost.prepare(command.projectId, command.recipeRevision, command.confirmationToken); send({ type: "project.updated", projects: await projectViews() }); return { ok: true } }
+  if (command.type === "project.start") { const result = await projectHost.start(command.projectId, command.actionId, command.recipeRevision); send({ type: "project.updated", projects: await projectViews() }); return result }
+  if (command.type === "project.stop") { await projectHost.stop(command.projectId, command.sessionId); send({ type: "project.updated", projects: await projectViews() }); return { ok: true } }
   if (command.type === "project.restart") { const result = await projectHost.restart(command.projectId, command.sessionId); return { state: result.status, sessionId: result.id } }
-  if (command.type === "project.remove") { await projectHost.remove(command.projectId); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
+  if (command.type === "project.remove") { await projectHost.remove(command.projectId); send({ type: "project.updated", projects: await projectViews() }); return { ok: true } }
   if (command.type === "project.open") {
     const record = await projectStore.findNative(command.projectId)
     if (!record) throw new Error("Unknown project")

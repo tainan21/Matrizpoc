@@ -1,6 +1,7 @@
 import type { DesktopCommand } from "../../application/desktop-bridge"
 import type { BrowserTabPayload } from "./browser-presenter"
 import type { DesktopUpdateSnapshot, StoreAppSnapshot } from "../../domain/desktop-bridge"
+import type { ProjectViewModel } from "../../modules/projects/presentation/project-presenter"
 
 export type BrowserUiResult = unknown
 export type BrowserUiEvent =
@@ -11,6 +12,7 @@ export type BrowserUiEvent =
   | { type: "runtime.failed"; message: string }
   | { type: "update.updated"; snapshot: DesktopUpdateSnapshot }
   | { type: "store.updated"; snapshots: readonly StoreAppSnapshot[] }
+  | { type: "project.updated"; projects: readonly ProjectViewModel[] }
 
 export interface BrowserUiBridge {
   invoke(command: DesktopCommand): Promise<BrowserUiResult>
