@@ -29,6 +29,7 @@ import { ProjectSessionService } from "../src/modules/projects/application/proje
 import { ProjectReadinessProbe } from "../src/modules/projects/integration/project-readiness"
 import { ProjectHostFacade } from "../src/modules/projects/facade"
 import { ElectronProjectRootAdapter } from "./electron-project-adapters"
+import { ProjectSurfaceHost } from "./project-surface-host"
 
 app.enableSandbox()
 
@@ -98,6 +99,7 @@ const projectReadiness = new ProjectReadinessProbe({ fetch: async (url) => fetch
 const projectPreparation = new ProjectPreparationService({ store: projectStore, now: Date.now, token: () => `confirm_${randomUUID()}`, execute: async (projectId, action) => { const session = await projectTerminal.start(projectId, action.id); const completed = await projectTerminal.waitForExit(session.id); return { exitCode: completed.exitCode ?? -1 } } })
 const projectSessions = new ProjectSessionService({ store: projectStore, supervisor: projectTerminal, portAvailable, readiness: projectReadiness, now: () => new Date().toISOString() })
 const projectHost = new ProjectHostFacade({ roots: projectRoots, host: projectHostService, preparation: projectPreparation, sessions: projectSessions })
+const projectSurfaceHost = new ProjectSurfaceHost()
 
 function send(event: BrowserEvent) { if (!window.isDestroyed()) window.webContents.send("matriz:browser:event", event) }
 
@@ -220,7 +222,18 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
   if (command.type === "project.stop") { await projectHost.stop(command.projectId, command.sessionId); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
   if (command.type === "project.restart") { const result = await projectHost.restart(command.projectId, command.sessionId); return { state: result.status, sessionId: result.id } }
   if (command.type === "project.remove") { await projectHost.remove(command.projectId); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
-  if (command.type === "project.open") throw new Error("Project surface hosting is not available yet")
+  if (command.type === "project.open") {
+    const record = await projectStore.findNative(command.projectId)
+    if (!record) throw new Error("Unknown project")
+    if (record.registration.state !== "running") throw new Error("Project surface requires ready running state")
+    const surface = record.recipe.surfaces.find((item) => item.id === command.surfaceId)
+    if (!surface) throw new Error("Unknown approved surface")
+    const port = record.recipe.runActions.flatMap((action) => action.requestedPorts)[0]?.port
+    if (!port && surface.kind !== "service-only" && surface.kind !== "terminal") throw new Error("Approved surface has no port")
+    const result = await projectSurfaceHost.open(window, { projectId: command.projectId, surfaceId: surface.id, port: port ?? 1, path: surface.healthPath ?? "/", kind: surface.kind })
+    if (result.mode === "embedded") { views.set(result.key, result.view); activeTabId = result.key; layoutActiveView(); return { state: "embedded", sessionId: result.key } }
+    return { state: result.mode === "external" ? "external" : "service_only" }
+  }
   if (command.type === "store.apps.status") return nativeStore.status()
   if (command.type === "store.app.download") { await nativeStore.download(command.appId); return nativeStore.status() }
   if (command.type === "store.app.cancel-download") { await nativeStore.cancelDownload(command.appId); return nativeStore.status() }
