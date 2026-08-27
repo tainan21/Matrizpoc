@@ -1,0 +1,17 @@
+{
+  "extends": "../../tooling/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2022",
+    "outDir": "dist-desktop",
+    "rootDir": ".",
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false,
+    "jsx": "react-jsx",
+    "types": ["node"]
+  },
+  "include": ["desktop/**/*.ts", "mcp/**/*.ts", "src/application/browser-runtime.ts", "src/application/control-diagnostic-mapper.ts", "src/application/desktop-update-coordinator.ts", "src/application/host-health-snapshot.ts", "src/application/store-package-service.ts", "src/application/terminal-supervisor.ts", "src/domain/browser.ts", "src/domain/desktop-bridge.ts", "src/domain/terminal.ts", "src/integration/browser/**/*.ts", "src/integration/desktop/**/*.ts", "src/integration/projects/project-catalog.ts"],
+  "exclude": ["**/*.test.ts", "node_modules"]
+}

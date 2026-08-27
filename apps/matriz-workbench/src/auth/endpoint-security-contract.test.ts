@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest"
 const APP_ROOT = path.resolve(process.cwd(), "app")
 const HTTP_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE"])
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"])
+const PUBLIC_READONLY_ROUTES = new Set(["api/health/route.ts"])
 
 async function routeFiles(root: string): Promise<string[]> {
   const entries = await readdir(root, { withFileTypes: true })
@@ -48,9 +49,21 @@ describe("endpoint security contract", () => {
       for (const handler of functions) {
         const method = handler.name!.text
         const body = handler.body?.getText() ?? ""
+        const relativeFile = path.relative(APP_ROOT, file).split(path.sep).join("/")
+        if (PUBLIC_READONLY_ROUTES.has(relativeFile)) {
+          expect(method, `${relativeFile} must remain read-only`).toBe("GET")
+          continue
+        }
+        if (relativeFile.startsWith("api/control/")) {
+          expect(
+            body,
+            `${relativeFile} ${method} must authenticate the Control capability`,
+          ).toContain("authorizeControlRequest(request")
+          continue
+        }
         expect(
           body,
-          `${path.relative(APP_ROOT, file)} ${method} must authorize the request`,
+          `${relativeFile} ${method} must authorize the request`,
         ).toContain("authorizeApiRequest(request")
         if (MUTATING_METHODS.has(method)) {
           expect(

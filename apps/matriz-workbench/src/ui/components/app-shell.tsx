@@ -23,11 +23,15 @@ const secondaryNavigation = [
 
 export function AppShell({
   projects,
+  identityLabel,
+  identitySource,
   initialRailPreference,
   initialTopbarPreference,
   children,
 }: {
   projects: ProjectNavViewModel[]
+  identityLabel: string
+  identitySource: "native" | "hub" | "demo"
   initialRailPreference: RailPreference
   initialTopbarPreference: TopbarPreference
   children: ReactNode
@@ -53,6 +57,7 @@ export function AppShell({
           <span className="live-dot" aria-hidden="true" />
           <span>Repositório local</span>
           <span className="topbar-path">.matriz · apps/*/.matriz</span>
+          <span className="topbar-path">{identityLabel} · {identitySource}</span>
           <ThemeSystemPicker />
           <ThemeToggle />
           <CommandMenu projects={projects} />

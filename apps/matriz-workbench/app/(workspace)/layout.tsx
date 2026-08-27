@@ -9,6 +9,7 @@ import {
   RAIL_PREFERENCE_COOKIE,
   TOPBAR_PREFERENCE_COOKIE,
 } from "../../src/ui/shell-preferences"
+import { decodeWorkbenchIdentity, WORKBENCH_IDENTITY_COOKIE } from "../../src/auth/local-identity"
 
 export const dynamic = "force-dynamic"
 
@@ -16,8 +17,11 @@ export default async function WorkspaceLayout({ children }: { children: ReactNod
   const cookieStore = await cookies()
   const repository = await WorkspaceRepository.create()
   const projects = (await repository.discoverProjects()).map(toProjectNavViewModel)
+  const identity = decodeWorkbenchIdentity(cookieStore.get(WORKBENCH_IDENTITY_COOKIE)?.value)
   return (
     <AppShell
+      identityLabel={identity?.label ?? "Local"}
+      identitySource={identity?.source ?? "demo"}
       initialRailPreference={normalizeRailPreference(cookieStore.get(RAIL_PREFERENCE_COOKIE)?.value)}
       initialTopbarPreference={normalizeTopbarPreference(cookieStore.get(TOPBAR_PREFERENCE_COOKIE)?.value)}
       projects={projects}

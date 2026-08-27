@@ -25,6 +25,164 @@ afterEach(async () => {
 })
 
 describe("WorkspaceRepository", () => {
+  it("initializes atomic team records without overwriting edited Nilo or Zara profiles", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+
+    const profiles = await repository.listAgentProfiles("sample")
+    expect(profiles.map((profile) => profile.id).sort()).toEqual(["nilo-builder", "zara-link"])
+
+    const niloPath = path.join(root, "apps", "sample", ".matriz", "agents", "profiles", "nilo-builder.json")
+    const edited = { ...profiles.find((profile) => profile.id === "nilo-builder")!, displayName: "Nilo customizado" }
+    await writeFile(niloPath, `${JSON.stringify(edited, null, 2)}\n`)
+
+    await repository.initializeAgentTeam("sample")
+
+    await expect(readFile(niloPath, "utf8")).resolves.toContain("Nilo customizado")
+    await expect(readFile(path.join(root, "apps", "sample", ".matriz", "agents", "profiles", "zara-link.json"), "utf8"))
+      .resolves.toContain("Zara Link")
+  })
+
+  it("persists a mission and its evidence in separate atomic agent records", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    const [profile] = await repository.listAgentProfiles("sample")
+    const mission = await repository.createAgentMission("sample", {
+      schemaVersion: 1,
+      id: "mission_00000000-0000-4000-8000-000000000001",
+      profileId: profile.id,
+      projectId: "sample",
+      title: "Persist team records",
+      objective: "Store mission evidence as reviewable JSON.",
+      allowedPaths: ["src"],
+      authority: "change_scoped",
+      status: "assigned",
+      contextReferences: [],
+      acceptanceCriteria: [],
+      evidenceIds: [],
+      createdAt: "2026-08-27T12:00:00.000Z",
+      updatedAt: "2026-08-27T12:00:00.000Z",
+      revision: "mission-revision",
+    })
+    const nextMission = { ...mission, evidenceIds: ["evidence_00000000-0000-4000-8000-000000000002"], updatedAt: "2026-08-27T12:01:00.000Z", revision: "next-mission-revision" }
+    const evidence = {
+      schemaVersion: 1 as const,
+      id: "evidence_00000000-0000-4000-8000-000000000002",
+      missionId: mission.id,
+      kind: "test" as const,
+      summary: "Focused repository test passed.",
+      recordedBy: "nilo-builder",
+      command: "pnpm --filter @matriz/app-matriz-workbench test",
+      recordedAt: "2026-08-27T12:01:00.000Z",
+    }
+
+    await repository.recordAgentMissionEvidence("sample", evidence, nextMission, mission.revision)
+
+    await expect(repository.getAgentMission("sample", mission.id)).resolves.toEqual(nextMission)
+    await expect(repository.listAgentMissionEvidence("sample", mission.id)).resolves.toEqual([evidence])
+    await expect(repository.updateAgentMission("sample", nextMission, "stale-revision"))
+      .rejects.toBeInstanceOf(RevisionConflictError)
+    await expect(readFile(path.join(root, "apps", "sample", ".matriz", "agents", "missions", `${mission.id}.json`), "utf8"))
+      .resolves.toContain("next-mission-revision")
+  })
+
+  it("recovers an evidence write when the mission update fails after the append", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const profile = (await repository.listAgentProfiles("sample"))[0]!
+    const mission = await repository.createAgentMission("sample", {
+      schemaVersion: 1,
+      id: "mission_00000000-0000-4000-8000-000000000006",
+      profileId: profile.id,
+      projectId: "sample",
+      title: "Recover evidence persistence",
+      objective: "Make the aggregate write retry-safe.",
+      allowedPaths: ["src"], authority: "change_scoped", status: "assigned",
+      contextReferences: [], acceptanceCriteria: [], evidenceIds: [],
+      createdAt: "2026-08-27T12:00:00.000Z", updatedAt: "2026-08-27T12:00:00.000Z",
+      revision: "mission-revision",
+    })
+    const evidence = {
+      schemaVersion: 1 as const,
+      id: "evidence_00000000-0000-4000-8000-000000000007",
+      missionId: mission.id,
+      kind: "note" as const,
+      summary: "Retry-safe aggregate evidence.",
+      recordedBy: "nilo-builder",
+      note: "The evidence is durable before the mission reference is committed.",
+      recordedAt: "2026-08-27T12:01:00.000Z",
+    }
+    const nextMission = { ...mission, evidenceIds: [evidence.id], updatedAt: evidence.recordedAt, revision: "next-mission-revision" }
+    type AtomicWrite = (projectId: string, segments: string[], value: unknown) => Promise<void>
+    const originalAtomicWrite = (repository as unknown as { atomicWrite: AtomicWrite }).atomicWrite
+    let failMissionOnce = true
+    ;(repository as unknown as { atomicWrite: (...args: unknown[]) => Promise<void> }).atomicWrite = async (...args) => {
+      const segments = args[1] as string[]
+      if (failMissionOnce && segments[1] === "missions") {
+        failMissionOnce = false
+        throw new Error("simulated mission write failure")
+      }
+      return originalAtomicWrite.call(repository, args[0] as string, segments, args[2])
+    }
+
+    await expect(repository.recordAgentMissionEvidence("sample", evidence, nextMission, mission.revision))
+      .rejects.toThrow("simulated mission write failure")
+    await expect(repository.listAgentMissionEvidence("sample", mission.id)).resolves.toEqual([evidence])
+    await expect(repository.recordAgentMissionEvidence("sample", evidence, nextMission, mission.revision))
+      .resolves.toEqual({ mission: nextMission, evidence })
+  })
+
+  it("does not take over an expired coordinator lease while its process remains alive", async () => {
+    const { root, repository } = await fixture()
+    await mkdir(path.join(root, ".runtime", "workbench", "locks"), { recursive: true })
+    const lockPath = path.join(root, ".runtime", "workbench", "locks", "coordinator--agent-team.lock")
+    await writeFile(lockPath, JSON.stringify({ pid: process.pid, expiresAt: Date.now() - 1 }))
+
+    await expect((repository as unknown as {
+      withCoordinatorLock: (key: string, operation: () => Promise<string>, maxAttempts: number) => Promise<string>
+    }).withCoordinatorLock("agent-team", async () => "taken-over", 2))
+      .rejects.toMatchObject({ code: "CONFLICT" })
+  })
+
+  it("appends validated handoffs without replacing an earlier mission context", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const profile = (await repository.listAgentProfiles("sample"))[0]!
+    const mission = await repository.createAgentMission("sample", {
+      schemaVersion: 1,
+      id: "mission_00000000-0000-4000-8000-000000000003",
+      profileId: profile.id,
+      projectId: "sample",
+      title: "Preserve a team handoff",
+      objective: "Store a compact, human-authored continuation point.",
+      allowedPaths: ["src"],
+      authority: "propose",
+      status: "assigned",
+      contextReferences: [],
+      acceptanceCriteria: [],
+      evidenceIds: [],
+      createdAt: "2026-08-27T12:00:00.000Z",
+      updatedAt: "2026-08-27T12:00:00.000Z",
+      revision: "mission-revision",
+    })
+    const handoff = {
+      schemaVersion: 1 as const,
+      id: "handoff_00000000-0000-4000-8000-000000000004",
+      missionId: mission.id,
+      contextSummary: "Repository records have been initialized.",
+      decisions: ["Human review remains required."],
+      risks: ["No execution runtime exists in phase one."],
+      nextStep: "Review the persisted mission.",
+      authoredBy: { kind: "human" as const, id: "human_00000000-0000-4000-8000-000000000005" },
+      createdAt: "2026-08-27T12:01:00.000Z",
+    }
+
+    await repository.createAgentMissionHandoff("sample", handoff, mission.revision)
+
+    await expect(repository.listAgentMissionHandoffs("sample", mission.id)).resolves.toEqual([handoff])
+    await expect(repository.getAgentMission("sample", mission.id)).resolves.toEqual(mission)
+  })
+
   it("discovers package folders and ignores invalid folders", async () => {
     const { root, repository } = await fixture()
     await mkdir(path.join(root, "apps", "no-package"))
@@ -85,6 +243,16 @@ describe("WorkspaceRepository", () => {
       readdir(path.join(root, "apps", "sample", ".matriz", "docs", "product")),
     ).resolves.toEqual([])
     expect(JSON.parse(await readFile(path.join(root, "apps", "sample", ".matriz", "project.json"), "utf8"))).toMatchObject({ projectId: "sample" })
+  })
+
+  it("treats a missing agent requests subdirectory as an empty collection", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    const agents = path.join(root, "apps", "sample", ".matriz", "agents")
+    await rm(path.join(agents, "requests"), { recursive: true, force: true })
+
+    await expect(readdir(agents)).resolves.not.toContain("requests")
+    await expect(repository.listAgentRequests("sample")).resolves.toEqual([])
   })
 
   it("rejects stale revisions", async () => {
@@ -518,6 +686,137 @@ describe("WorkspaceRepository", () => {
       accepted.revision,
     )
     expect(done.status).toBe("done")
+  })
+
+  it("claims a bounded scope atomically and rejects overlapping live ownership", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const task = await repository.createWorkItem("sample", {
+      kind: "task",
+      title: "Coordinate two agents",
+      description: "",
+      productStatus: "ready",
+      validationStatus: "pending",
+      humanReviewStatus: "pending",
+      documentationStatus: "pending",
+      priority: "high",
+    })
+    const first = await repository.createAgentRequest("sample", task.id, "First agent")
+    const second = await repository.createAgentRequest("sample", task.id, "Second agent")
+    const claimInput = {
+      claimedBy: "codex:thread-a",
+      executionMode: "change" as const,
+      intendedFiles: ["apps/sample/src/domain"],
+      intendedSurfaces: ["sample-domain"],
+      plannedChecks: ["pnpm --filter sample test"],
+      baseCommit: "a".repeat(40),
+      dirtyPaths: [],
+      acquiredAt: "2026-08-04T15:00:00.000Z",
+      expiresAt: "2026-08-04T15:30:00.000Z",
+    }
+
+    const claimed = await repository.claimAgentRequest(
+      "sample",
+      first.id,
+      claimInput,
+      first.revision,
+      "2026-08-04T15:05:00.000Z",
+    )
+    expect(claimed.executionClaim?.intendedFiles).toEqual(["apps/sample/src/domain"])
+
+    await expect(repository.claimAgentRequest(
+      "sample",
+      first.id,
+      { ...claimInput, claimedBy: "codex:thread-b" },
+      claimed.revision,
+      "2026-08-04T15:05:00.000Z",
+    )).rejects.toMatchObject({ code: "CONFLICT" })
+
+    const renewed = await repository.renewAgentRequestClaim(
+      "sample",
+      first.id,
+      claimed.revision,
+      1,
+      "2026-08-04T15:10:00.000Z",
+      "2026-08-04T15:40:00.000Z",
+      "Concluído o contrato de domínio.",
+    )
+    expect(renewed.executionClaim?.lease.generation).toBe(2)
+
+    await expect(repository.claimAgentRequest(
+      "sample",
+      second.id,
+      {
+        ...claimInput,
+        claimedBy: "codex:thread-b",
+        intendedFiles: ["apps/sample/src/domain/models.ts"],
+      },
+      second.revision,
+      "2026-08-04T15:05:00.000Z",
+    )).rejects.toMatchObject({ code: "CONFLICT" })
+  })
+
+  it("completes a claimed plan-only request without fake checks", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const task = await repository.createWorkItem("sample", {
+      kind: "task",
+      title: "Plan the protocol",
+      description: "",
+      productStatus: "ready",
+      validationStatus: "pending",
+      humanReviewStatus: "pending",
+      documentationStatus: "pending",
+      priority: "high",
+    })
+    const queued = await repository.createAgentRequest("sample", task.id, "Plan only")
+    const claimed = await repository.claimAgentRequest("sample", queued.id, {
+      claimedBy: "codex:planner",
+      executionMode: "plan_only",
+      intendedFiles: [],
+      intendedSurfaces: ["engineering-operations"],
+      plannedChecks: [],
+      baseCommit: "a".repeat(40),
+      dirtyPaths: ["AGENTS.md"],
+      acquiredAt: "2026-08-04T15:00:00.000Z",
+      expiresAt: "2026-08-04T15:30:00.000Z",
+    }, queued.revision, "2026-08-04T15:05:00.000Z")
+
+    const completed = await repository.updateAgentRequest("sample", queued.id, {
+      status: "completed",
+      resultSummary: "Plano entregue para revisão humana.",
+      changedFiles: [],
+      checks: [],
+    }, claimed.revision, "codex")
+
+    expect(completed.status).toBe("completed")
+    expect(completed.checks).toEqual([])
+  })
+
+  it("persists reconciliation snapshots with optimistic revision", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const snapshot = await repository.writeReconciliationSnapshot("sample", {
+      status: "divergent",
+      projectId: "sample",
+      requestId: "req_00000000-0000-4000-8000-000000000001",
+      requestRevision: "request-revision",
+      runRevision: "run-revision",
+      observedAt: "2026-08-04T15:20:00.000Z",
+      threadObservation: "unavailable",
+      findings: [{
+        code: "review_stale",
+        severity: "error",
+        summary: "A revisão está stale.",
+      }],
+    })
+
+    await expect(repository.getReconciliationSnapshot("sample", snapshot.requestId))
+      .resolves.toEqual(snapshot)
+    await expect(repository.writeReconciliationSnapshot("sample", {
+      ...snapshot,
+      observedAt: "2026-08-04T15:21:00.000Z",
+    }, "stale-revision")).rejects.toBeInstanceOf(RevisionConflictError)
   })
 
   it("reviews a completed execution without moving the product and rejects stale review writes", async () => {

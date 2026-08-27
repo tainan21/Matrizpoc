@@ -86,6 +86,22 @@ gate is complete only after its first green run from committed sources.
 
 Never restore all of `apps/**` or the repository root to fix one record.
 
+## Installed runtime recovery
+
+Matriz Control owns the installed Workbench process. Use the Workbench card to
+inspect its state, open it or restart it. A compatible runtime reports its
+authenticated loopback health contract before Control opens the window.
+
+Runtime failures may be recorded as sanitized diagnostics and offered to Codex
+through a bounded repair request. Repair attempts keep the original catalog
+action, never approve commands automatically, cool down after a failure and
+block after the third unsuccessful attempt. A successful Codex run grants one
+rerun lease; it does not create an unbounded restart loop.
+
+If repair is blocked, inspect the diagnostic under `.matriz/diagnostics`, fix
+the declared app action manually and restart Workbench from Control. Do not
+copy cookies, runtime tokens or packaged files into Git.
+
 ## Retention
 
 The current policy is deliberately manual and Git-backed:

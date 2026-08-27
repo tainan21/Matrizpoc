@@ -6,6 +6,13 @@ import {
   type CodexRunSnapshot,
 } from "../domain/codex-run"
 import { WorkspaceError } from "../domain/errors"
+import type { AgentRequest } from "../domain/schemas"
+import {
+  buildCheckExecution,
+  buildExecutionAttempt,
+  finishExecutionAttempt,
+  recordCheckResult,
+} from "../domain/execution-evidence"
 import {
   CodexAppServerClient,
   resolveCodexRuntime,
@@ -15,8 +22,14 @@ import {
 } from "../integration/codex/app-server-client"
 import { CodexRunStore } from "../integration/codex/codex-run-store"
 import { WorkspaceRepository } from "../integration/filesystem/workspace-repository"
+import { GitObservationProvider } from "../integration/git/git-observation-provider"
 import { enqueueOptionalNotifications } from "./collaboration/notification-service"
 import { buildContextBundle } from "./context-bundle"
+import {
+  markAutomatedRepairFailed,
+  requestAutomatedRepairRerun,
+} from "./control-diagnostic-service"
+import { ControlDiagnosticRepository } from "../integration/filesystem/control-diagnostic-repository"
 
 type ApprovalDecision = "accept" | "accept_for_session" | "decline" | "cancel"
 type Subscriber = (snapshot: CodexRunSnapshot) => void
@@ -39,6 +52,7 @@ interface Session {
   record: CodexRunRecord
   connected: boolean
   cancelRequested: boolean
+  executionMode?: "plan_only" | "change"
   approvals: Map<string, { rpcId: string | number; method: string }>
   subscribers: Set<Subscriber>
   persistTimer?: NodeJS.Timeout
@@ -79,6 +93,43 @@ function maxConcurrentCodexRuns(): number {
   return Number.isInteger(configured) && configured >= 1 && configured <= 4 ? configured : 2
 }
 
+export function mutationApprovalRejection(
+  executionMode: Session["executionMode"],
+): string | undefined {
+  if (!executionMode) {
+    return "Mutação recusada: a solicitação não possui claim de execução com escopo declarado."
+  }
+  if (executionMode === "plan_only") {
+    return "Mutação recusada: uma execução plan-only não pode alterar arquivos nem executar comandos aprovados."
+  }
+  return undefined
+}
+
+export function assertExecutionCanStart(
+  request: AgentRequest,
+  observedAt = new Date().toISOString(),
+): void {
+  if (!request.executionClaim) {
+    throw new WorkspaceError(
+      "Declare ownership, escopo e checks pelo workflow de claim antes de iniciar.",
+      "CONFLICT",
+    )
+  }
+  if (Date.parse(request.executionClaim.lease.expiresAt) <= Date.parse(observedAt)) {
+    throw new WorkspaceError(
+      "A ownership lease expirou; reconcilie e faça um novo claim antes de iniciar.",
+      "CONFLICT",
+    )
+  }
+}
+
+export function hasRequiredCheckEvidence(
+  executionMode: Session["executionMode"],
+  checks: readonly string[],
+): boolean {
+  return executionMode === "plan_only" || (executionMode === "change" && checks.length > 0)
+}
+
 export async function completeCodexRequestRecord(
   repository: WorkspaceRepository,
   projectId: string,
@@ -104,6 +155,7 @@ export async function completeCodexRequestRecord(
 export class CodexRunManager {
   private readonly sessions = new Map<string, Session>()
   private readonly pendingStarts = new Set<string>()
+  private readonly automatedDiagnostics = new Map<string, string>()
 
   async runtimeInfo(): Promise<CodexRuntimeInfo & {
     activeRuns: number
@@ -128,6 +180,25 @@ export class CodexRunManager {
     const repository = await WorkspaceRepository.create()
     const record = await new CodexRunStore(repository.repositoryRoot).read(projectId, requestId)
     return record ? { ...record, connected: false } : undefined
+  }
+
+  async startAutomatedRepair(
+    projectId: string,
+    requestId: string,
+    expectedRevision: string,
+    diagnosticId: string,
+  ): Promise<CodexRunSnapshot> {
+    if (!/^diag_[a-f0-9]{64}$/.test(diagnosticId)) {
+      throw new WorkspaceError("Diagnóstico automático inválido.", "INVALID_DATA")
+    }
+    const key = sessionKey(projectId, requestId)
+    this.automatedDiagnostics.set(key, diagnosticId)
+    try {
+      return await this.start(projectId, requestId, expectedRevision)
+    } catch (error) {
+      this.automatedDiagnostics.delete(key)
+      throw error
+    }
   }
 
   subscribe(projectId: string, requestId: string, subscriber: Subscriber): () => void {
@@ -176,11 +247,13 @@ export class CodexRunManager {
     if (request.status === "completed" || request.status === "cancelled") {
       throw new WorkspaceError("A solicitação já está encerrada.", "CONFLICT")
     }
-    if (request.status === "queued") {
+    assertExecutionCanStart(request)
+    const claimOwner = request.executionClaim!.claimedBy
+    if (request.status === "queued" || request.status === "blocked" || request.status === "interrupted") {
       request = await repository.updateAgentRequest(
         projectId,
         requestId,
-        { status: "claimed", claimedBy: "codex-app-server" },
+        { status: "claimed", claimedBy: claimOwner },
         request.revision,
         "codex",
       )
@@ -199,6 +272,15 @@ export class CodexRunManager {
     const store = new CodexRunStore(repository.repositoryRoot)
     const previous = await store.read(projectId, requestId)
     const timestamp = new Date().toISOString()
+    const plannedCheckExecutions = request.executionClaim
+      ? request.executionClaim.plannedChecks.map((command) => buildCheckExecution({
+          id: `check_${randomUUID()}`,
+          name: command,
+          command,
+          source: "app_server",
+          baseCommit: request.executionClaim!.baseGit.commit,
+        }))
+      : []
     const record = await store.write({
       schemaVersion: 1,
       projectId,
@@ -211,6 +293,8 @@ export class CodexRunManager {
       commands: [],
       changedFiles: [],
       checks: [],
+      attempts: previous?.attempts ?? [],
+      checkExecutions: [...(previous?.checkExecutions ?? []), ...plannedCheckExecutions].slice(-100),
       approvals: [],
       diff: "",
       startedAt: timestamp,
@@ -228,6 +312,7 @@ export class CodexRunManager {
       record,
       connected: true,
       cancelRequested: false,
+      executionMode: request.executionClaim?.executionMode,
       approvals: new Map(),
       subscribers: existingSession?.subscribers ?? new Set(),
     }
@@ -284,6 +369,16 @@ export class CodexRunManager {
         ...session.record,
         turnId: turn.turn.id,
         status: "running",
+        attempts: [
+          ...session.record.attempts,
+          buildExecutionAttempt({
+            id: `attempt_${randomUUID()}`,
+            requestId,
+            threadId: thread.thread.id,
+            turnId: turn.turn.id,
+            startedAt: new Date().toISOString(),
+          }),
+        ].slice(-50),
       })
       await repository.appendActivity(projectId, {
         actor: "codex",
@@ -435,10 +530,26 @@ export class CodexRunManager {
       const index = session.record.commands.findIndex((entry) => entry.id === id)
       if (index >= 0) session.record.commands[index] = command
       else session.record.commands = [...session.record.commands, command].slice(-50)
-      session.record.checks = session.record.commands
-        .filter((entry) => entry.status === "completed" && entry.exitCode === 0)
-        .map((entry) => clamp(entry.command, 500))
-        .slice(0, 100)
+      const plannedCheckIndex = session.record.checkExecutions.findIndex(
+        (entry) => entry.command === command.command && ["planned", "running"].includes(entry.state),
+      )
+      if (plannedCheckIndex >= 0 && command.status === "in_progress") {
+        const current = session.record.checkExecutions[plannedCheckIndex]
+        session.record.checkExecutions[plannedCheckIndex] = {
+          ...current,
+          state: "running",
+          startedAt: current.startedAt ?? new Date().toISOString(),
+        }
+      }
+      session.record.checks = session.record.checkExecutions.length
+        ? session.record.checkExecutions
+            .filter((entry) => entry.state === "passed")
+            .map((entry) => clamp(entry.command, 500))
+            .slice(0, 100)
+        : session.record.commands
+            .filter((entry) => entry.status === "completed" && entry.exitCode === 0)
+            .map((entry) => clamp(entry.command, 500))
+            .slice(0, 100)
       return
     }
     if (type === "fileChange") {
@@ -491,6 +602,22 @@ export class CodexRunManager {
       ),
       createdAt: new Date().toISOString(),
     }
+    const rejectionReason = mutationApprovalRejection(session.executionMode)
+    if (rejectionReason) {
+      session.client.respond(request.id, { decision: "decline" })
+      const declinedApproval: CodexApproval = {
+        ...approval,
+        status: "declined",
+        detail: clamp([approval.detail, rejectionReason].filter(Boolean).join("\n"), 4_000),
+        resolvedAt: new Date().toISOString(),
+      }
+      session.record = await this.persistNow(session, {
+        ...session.record,
+        approvals: [...session.record.approvals, declinedApproval].slice(-50),
+      })
+      this.publish(session)
+      return
+    }
     session.approvals.set(approval.id, { rpcId: request.id, method: request.method })
     session.record = await this.persistNow(session, {
       ...session.record,
@@ -505,21 +632,26 @@ export class CodexRunManager {
     turn: Record<string, unknown>,
   ): Promise<void> {
     const status = stringValue(turn.status)
-    if (status === "completed" && session.record.checks.length) {
+    if (status === "completed") await this.finalizePlannedChecks(session)
+    if (status === "completed" && hasRequiredCheckEvidence(session.executionMode, session.record.checks)) {
       session.record = await this.persistNow(session, {
-        ...session.record,
+        ...this.finishActiveAttempt(session.record, "completed"),
         status: "completed",
         completedAt: new Date().toISOString(),
       })
       await this.completeRequest(session)
     } else if (status === "interrupted") {
       session.record = await this.persistNow(session, {
-        ...session.record,
+        ...this.finishActiveAttempt(
+          session.record,
+          session.cancelRequested ? "cancelled" : "interrupted",
+          session.cancelRequested ? "Execução cancelada pelo usuário." : "Execução interrompida.",
+        ),
         status: "interrupted",
         error: session.cancelRequested ? "Execução cancelada pelo usuário." : "Execução interrompida.",
         completedAt: new Date().toISOString(),
       })
-      await this.stopRequest(session, session.cancelRequested ? "cancelled" : "blocked")
+      await this.stopRequest(session, session.cancelRequested ? "cancelled" : "interrupted")
     } else {
       const error = objectValue(turn.error)
       const message =
@@ -547,6 +679,16 @@ export class CodexRunManager {
         checks: session.record.checks,
       },
     )
+    const diagnosticId = this.automatedDiagnostics.get(session.key)
+    if (diagnosticId) {
+      await requestAutomatedRepairRerun(
+        new ControlDiagnosticRepository(session.repositoryRoot),
+        session.projectId,
+        diagnosticId,
+        () => `repair_${randomUUID()}`,
+      )
+      this.automatedDiagnostics.delete(session.key)
+    }
     await enqueueOptionalNotifications(session.repositoryRoot, {
       projectId: session.projectId,
       event: "review_ready",
@@ -561,7 +703,7 @@ export class CodexRunManager {
 
   private async stopRequest(
     session: Session,
-    status: "blocked" | "cancelled",
+    status: "blocked" | "cancelled" | "interrupted",
   ): Promise<void> {
     const repository = await WorkspaceRepository.create(session.repositoryRoot)
     const request = await repository.getAgentRequest(session.projectId, session.requestId)
@@ -594,12 +736,21 @@ export class CodexRunManager {
 
   private async finishWithFailure(session: Session, message: string): Promise<void> {
     session.record = await this.persistNow(session, {
-      ...session.record,
+      ...this.finishActiveAttempt(session.record, "failed", message),
       status: "failed",
       error: clamp(message, 4_000),
       completedAt: new Date().toISOString(),
     })
     await this.stopRequest(session, "blocked").catch(() => undefined)
+    const diagnosticId = this.automatedDiagnostics.get(session.key)
+    if (diagnosticId) {
+      await markAutomatedRepairFailed(
+        new ControlDiagnosticRepository(session.repositoryRoot),
+        session.projectId,
+        diagnosticId,
+      ).catch(() => undefined)
+      this.automatedDiagnostics.delete(session.key)
+    }
     await WorkspaceRepository.create(session.repositoryRoot)
       .then((repository) =>
         repository.appendActivity(session.projectId, {
@@ -614,6 +765,62 @@ export class CodexRunManager {
     session.connected = false
     this.publish(session)
     session.client.close()
+  }
+
+  private async finalizePlannedChecks(session: Session): Promise<void> {
+    const pending = session.record.checkExecutions.some((check) =>
+      check.state === "planned" || check.state === "running",
+    )
+    if (!pending) return
+    const observation = await new GitObservationProvider(session.repositoryRoot)
+      .observeCurrent()
+      .catch(() => undefined)
+    if (!observation) return
+    const headCommit = observation.headCommit
+    const finishedAt = new Date().toISOString()
+    session.record.checkExecutions = session.record.checkExecutions.map((check) => {
+      if (check.state !== "planned" && check.state !== "running") return check
+      const command = session.record.commands.find((candidate) =>
+        candidate.command === check.command &&
+        (candidate.status === "completed" || candidate.status === "failed") &&
+        typeof candidate.exitCode === "number",
+      )
+      if (!command || typeof command.exitCode !== "number") return check
+      return recordCheckResult(check, {
+        startedAt: check.startedAt ?? session.record.startedAt,
+        finishedAt,
+        exitCode: command.exitCode,
+        output: command.output,
+        headCommit,
+      })
+    })
+    session.record.checks = session.record.checkExecutions
+      .filter((check) => check.state === "passed")
+      .map((check) => clamp(check.command, 500))
+      .slice(0, 100)
+  }
+
+  private finishActiveAttempt(
+    record: CodexRunRecord,
+    status: "completed" | "failed" | "interrupted" | "cancelled",
+    error?: string,
+  ): CodexRunRecord {
+    let index = -1
+    for (let candidate = record.attempts.length - 1; candidate >= 0; candidate -= 1) {
+      if (record.attempts[candidate].status === "running") {
+        index = candidate
+        break
+      }
+    }
+    if (index < 0) return record
+    const attempts = [...record.attempts]
+    attempts[index] = finishExecutionAttempt(
+      attempts[index],
+      status,
+      new Date().toISOString(),
+      error,
+    )
+    return { ...record, attempts }
   }
 
   private repositoryRelativePath(session: Session, file: string): string | undefined {

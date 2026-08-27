@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "./dist/native-desktop",
+    "rootDir": "./src/native-desktop"
+  },
+  "include": ["src/native-desktop/**/*.ts"],
+  "exclude": ["src/native-desktop/**/*.test.ts"]
+}

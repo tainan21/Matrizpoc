@@ -34,6 +34,17 @@ Roadmap, backlog, activity and score are different artifacts. A change may be
 registered without changing the score. Never award a point without observable
 evidence, and never hide a regression to preserve the total.
 
+## Engineering Operations
+
+- Use `AgentRequest.id` as the canonical execution correlation identifier.
+- Before mutation, declare `executionMode`, intended files/surfaces, planned checks and owner.
+- Let the Workbench observe the Git baseline; do not invent `HEAD` or dirty paths.
+- A claim uses a bounded lease. Renew it only at a material checkpoint.
+- Treat `interrupted`, `blocked`, `failed`, `cancelled` and `completed` as different facts.
+- Plan-only completion records no changed files and no executed checks.
+- Reconciliation reports divergence; it never edits Git or approves governance state.
+- Only a person may approve execution, product, validation, documentation, score, gates or release.
+
 ## Validation
 
 - `pnpm --filter @matriz/app-matriz-workbench lint`

@@ -15,6 +15,18 @@
    - alteração de contrato.
 6. Declare a interpretação quando houver ambiguidade relevante.
 
+## Engineering Operations obrigatório
+
+Antes de qualquer mutação, vincule a task Codex a uma solicitação e registre um
+claim com modo (`plan_only` ou `change`), owner, arquivos/superfícies pretendidos,
+checks planejados e baseline Git. O lease é renovado apenas em marcos materiais;
+um lease expirado não comprova abandono por si só, mas libera novo claim após a
+reconciliação confirmar que não há execução ativa.
+
+Conflitos de arquivo ou superfície devem ser resolvidos antes da edição. Mudanças
+que já estavam no working tree entram no baseline como preexistentes e nunca são
+atribuídas automaticamente à execução atual.
+
 ## Durante
 
 1. Prefira uma fatia vertical pequena e utilizável.
@@ -34,6 +46,11 @@
 5. Atualize roadmap somente se direção, outcome ou iniciativa mudou.
 6. Revalide score; não conceda ponto por esforço.
 7. Informe o próximo estado pendente.
+
+Reconcile task, solicitação, run e Git antes de declarar conclusão. Registre
+interrupção, timeout ou abandono como estado terminal da tentativa, mantendo a
+solicitação retomável. Em `plan_only`, não registre arquivos alterados nem checks
+executados; o resultado é o plano factual e continua sujeito a revisão humana.
 
 ## Mesma task ou nova task do Codex
 

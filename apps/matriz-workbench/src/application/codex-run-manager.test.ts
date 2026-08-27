@@ -2,7 +2,13 @@ import { afterEach, describe, expect, it } from "vitest"
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises"
 import os from "node:os"
 import path from "node:path"
-import { CodexRunManager, completeCodexRequestRecord } from "./codex-run-manager"
+import {
+  CodexRunManager,
+  assertExecutionCanStart,
+  completeCodexRequestRecord,
+  hasRequiredCheckEvidence,
+  mutationApprovalRejection,
+} from "./codex-run-manager"
 import { WorkspaceRepository } from "../integration/filesystem/workspace-repository"
 
 const originalLimit = process.env.WORKBENCH_MAX_CONCURRENT_CODEX_RUNS
@@ -26,6 +32,54 @@ async function fixture() {
 }
 
 describe("CodexRunManager concurrency", () => {
+  it("starts an automated repair through the same bounded run path", async () => {
+    const manager = new CodexRunManager()
+    const calls: unknown[][] = []
+    manager.start = async (...args: Parameters<CodexRunManager["start"]>) => {
+      calls.push(args)
+      return { revision: "run-revision" } as Awaited<ReturnType<CodexRunManager["start"]>>
+    }
+
+    await expect(manager.startAutomatedRepair(
+      "sample",
+      "req_11111111-1111-4111-8111-111111111111",
+      "request-revision",
+      `diag_${"a".repeat(64)}`,
+    )).resolves.toMatchObject({ revision: "run-revision" })
+    expect(calls).toEqual([[
+      "sample",
+      "req_11111111-1111-4111-8111-111111111111",
+      "request-revision",
+    ]])
+  })
+
+  it("requires a live structured claim before starting", () => {
+    const legacy = {
+      status: "queued",
+      executionClaim: undefined,
+    } as unknown as Parameters<typeof assertExecutionCanStart>[0]
+    expect(() => assertExecutionCanStart(legacy)).toThrow("workflow de claim")
+
+    const expired = {
+      ...legacy,
+      executionClaim: { lease: { expiresAt: "2026-08-04T15:00:00.000Z" } },
+    } as unknown as Parameters<typeof assertExecutionCanStart>[0]
+    expect(() => assertExecutionCanStart(expired, "2026-08-04T15:00:00.000Z"))
+      .toThrow("expirou")
+  })
+
+  it("allows plan-only completion without inventing a check", () => {
+    expect(hasRequiredCheckEvidence("plan_only", [])).toBe(true)
+    expect(hasRequiredCheckEvidence("change", [])).toBe(false)
+    expect(hasRequiredCheckEvidence(undefined, ["pnpm test"])).toBe(false)
+  })
+
+  it("fails closed for mutations without a change claim", () => {
+    expect(mutationApprovalRejection(undefined)).toContain("não possui claim")
+    expect(mutationApprovalRejection("plan_only")).toContain("plan-only")
+    expect(mutationApprovalRejection("change")).toBeUndefined()
+  })
+
   it("rejects a start before filesystem/runtime work when the local cap is full", async () => {
     process.env.WORKBENCH_MAX_CONCURRENT_CODEX_RUNS = "1"
     const manager = new CodexRunManager()

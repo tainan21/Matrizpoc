@@ -46,6 +46,39 @@ npx --yes pnpm@9.12.0 --filter @matriz/app-matriz-workbench dev
 
 The server binds only to `http://127.0.0.1:3005`.
 
+## Native Workbench package
+
+The package is independent of Matriz Control. Its Electron main process starts
+the traced Next standalone server on `127.0.0.1:3005`, creates the local
+HTTP-only session itself and opens only that loopback origin. `control-desktop`
+remains accepted as a one-version runtime-mode alias and resolves to
+`native-desktop`; `workbench-control-v1` remains unchanged.
+
+The shell obtains a repository root from the validated Control environment when
+available, otherwise from its machine-local Electron user-data binding, and only
+then from a native directory picker. A selected directory must contain
+`pnpm-workspace.yaml`, `apps/`, and `apps/matriz-workbench/package.json`. It is
+never written to `.matriz` or Git.
+
+```powershell
+pnpm --filter @matriz/app-matriz-workbench desktop:compile
+pnpm --filter @matriz/app-matriz-workbench desktop:prepare
+$env:WORKBENCH_WINDOWS_SIGNING_CERTIFICATE = "C:\secure\matriz-workbench.pfx"
+$env:WORKBENCH_STORE_MANIFEST_PRIVATE_KEY = Get-Content -Raw "C:\secure\store-ed25519-private.pem"
+$env:WORKBENCH_RELEASE_BASE_URL = "https://releases.example.com/workbench/"
+pnpm --filter @matriz/app-matriz-workbench desktop:release
+```
+
+The release command refuses to continue without the signing-certificate path
+and the Ed25519 private key used to create `release-manifest.json.sig`. The
+private key, generated manifest, signature, installer and updater metadata are
+release artifacts and must not enter Git. Update check, download and install
+remain three separate actions in the trusted native menu; renderer URLs cannot
+trigger them.
+It generates exactly `matriz-workbench-<version>-windows-x64-setup.exe` and a
+deterministic `release-manifest.json` in `apps/matriz-workbench/release/`.
+Never commit that output, a certificate, `.env*`, logs, `.next`, or `dist`.
+
 ## Start MCP directly
 
 ```powershell
