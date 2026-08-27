@@ -13,6 +13,7 @@ import { appOnboardingPayloadSchemas } from "@matriz/integration-api-contracts"
 import { asAppId, asTenantId } from "@matriz/foundation-types"
 import {
   createTelemetryClient,
+  environmentTelemetryOptions,
   registerTelemetryClient,
   type TelemetryClient,
 } from "@matriz/platform-telemetry"
@@ -24,7 +25,7 @@ let telemetry: TelemetryClient | undefined
 
 export function getWilldashTelemetry(): TelemetryClient {
   if (!telemetry) {
-    telemetry = createTelemetryClient(WILLDASH_APP_ID)
+    telemetry = createTelemetryClient(WILLDASH_APP_ID, environmentTelemetryOptions())
     registerTelemetryClient(telemetry)
   }
   return telemetry

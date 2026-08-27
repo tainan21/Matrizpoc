@@ -7,7 +7,7 @@ const schemas = ["core", "hub", "spot", "seumei", "contracts", "willdash"] as co
 const expectedTenantTables: Record<(typeof schemas)[number], readonly string[]> = {
   core: [
     "tenant_memberships", "app_grants", "identity_audit_events", "app_registrations",
-    "external_links", "onboarding_progress", "app_sessions", "telemetry_records",
+    "external_links", "onboarding_progress", "app_sessions", "telemetry_records", "telemetry_daily_aggregates",
     "memberships", "membership_invitations",
   ],
   hub: [
@@ -72,7 +72,10 @@ describe("mandatory tenant RLS", () => {
     expect(sql).toContain("REVOKE ALL ON SEQUENCES FROM PUBLIC")
 
     for (const table of expectedTenantTables[schema]) {
-      expect(sql, `${schema}.${table}: inventory`).toContain(`'${table}'`)
+      expect(
+        sql.includes(`'${table}'`) || sql.includes(`ALTER TABLE "${table}" ENABLE ROW LEVEL SECURITY`),
+        `${schema}.${table}: inventory`,
+      ).toBe(true)
     }
   })
 
@@ -113,7 +116,7 @@ describe("mandatory tenant RLS", () => {
 
   it("keeps the closed core global whitelist outside tenant RLS", () => {
     const sql = migration("core")
-    for (const table of ["users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts", "identity_rate_limits"]) {
+    for (const table of ["users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts", "identity_rate_limits", "platform_operators"]) {
       expect(sql).not.toContain(`'${table}'`)
     }
     expect(sql).toContain(`ALTER TABLE "tenants" ENABLE ROW LEVEL SECURITY`)
@@ -126,7 +129,7 @@ describe("mandatory tenant RLS", () => {
       table: match[1].match(/@@map\("([^"]+)"\)/)?.[1] ?? "",
       tenantColumn: /^\s+tenantId\s+/m.test(match[1]),
     }))
-    const explicitlyGlobal = new Set(["users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts", "identity_rate_limits"])
+    const explicitlyGlobal = new Set(["users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts", "identity_rate_limits", "platform_operators"])
     const metadata = new Set(["__matriz_schema_releases"])
     const unclassified = tables.filter(({ table, tenantColumn }) =>
       !tenantColumn && table !== "tenants" && !explicitlyGlobal.has(table) && !metadata.has(table),

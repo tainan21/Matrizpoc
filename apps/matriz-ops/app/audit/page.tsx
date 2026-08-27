@@ -1,0 +1,5 @@
+import { getOpsDb } from "@matriz/platform-db/ops"
+import { requireOpsPagePrincipal } from "../../src/server/ops-session"
+import { AppShell } from "../../src/ui/AppShell"
+export const dynamic="force-dynamic"
+export default async function AuditPage(){const principal=await requireOpsPagePrincipal();if(!principal)return <div className="access-card"><h1>Acesso necessário</h1></div>;const events=await getOpsDb().opsAuditEvent.findMany({orderBy:{occurredAt:"desc"},take:200});return <AppShell><section className="hero"><h2>Auditoria</h2><p>Trilha sanitizada de toda mutação administrativa e financeira.</p></section><section className="panel table-wrap"><table className="data-table"><thead><tr><th>Quando</th><th>Ação</th><th>Alvo</th><th>Ator</th><th>Motivo</th><th>Correlação</th></tr></thead><tbody>{events.map(event=><tr key={event.id}><td>{event.occurredAt.toLocaleString("pt-BR")}</td><td>{event.action}</td><td>{event.targetType}:{event.targetId}</td><td>{event.actorRole}</td><td>{event.reason}</td><td>{event.correlationId}</td></tr>)}</tbody></table></section></AppShell>}

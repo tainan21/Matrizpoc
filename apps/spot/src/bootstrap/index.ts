@@ -15,6 +15,7 @@ import { appOnboardingPayloadSchemas } from "@matriz/integration-api-contracts"
 import { asAppId, asTenantId } from "@matriz/foundation-types"
 import {
   createTelemetryClient,
+  environmentTelemetryOptions,
   registerTelemetryClient,
   type TelemetryClient,
 } from "@matriz/platform-telemetry"
@@ -28,7 +29,7 @@ let telemetry: TelemetryClient | undefined
 
 export function getSpotTelemetry(): TelemetryClient {
   if (!telemetry) {
-    telemetry = createTelemetryClient(SPOT_APP_ID)
+    telemetry = createTelemetryClient(SPOT_APP_ID, environmentTelemetryOptions())
     registerTelemetryClient(telemetry)
   }
   return telemetry
@@ -57,7 +58,7 @@ export function bootstrapSpot(): { appId: string } {
     t.track({
       tenantId: asTenantId(envelope.tenantId),
       type: "spot.gig.created",
-      properties: { gigId: envelope.payload.gigId, title: envelope.payload.title },
+      properties: { gigId: envelope.payload.gigId },
     })
   })
 

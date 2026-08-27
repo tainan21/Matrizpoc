@@ -2,7 +2,7 @@
  * @matriz/platform-telemetry
  *
  * Base telemetry engine for the ecosystem. Defines the envelope shape and a
- * mock in-memory sink. Each app instantiates `createTelemetryClient(appId)`
+ * pluggable persistent sink. Each app instantiates `createTelemetryClient(appId)`
  * via its bootstrap (L11) and sends domain-agnostic envelopes; the hub can
  * later read the collected events.
  *
@@ -87,15 +87,62 @@ export interface TelemetryClient {
   list(): readonly TelemetryEnvelope[]
   clear(): void
   subscribe(listener: (env: TelemetryEnvelope) => void): () => void
+  flush(): Promise<void>
+  pending(): number
 }
 
-export function createTelemetryClient(appId: MatrizAppId): TelemetryClient {
+export interface TelemetrySink {
+  write(events: readonly TelemetryEnvelope[]): Promise<void>
+}
+
+export interface TelemetryClientOptions {
+  readonly sink?: TelemetrySink
+  readonly maxBatchSize?: number
+  readonly autoFlush?: boolean
+}
+
+const sensitivePropertyNames = new Set([
+  "email", "name", "displayname", "cookie", "token", "authorization", "body",
+  "password", "secret", "amountminor", "pixkey", "document", "cpf", "cnpj",
+])
+
+export function assertSafeTelemetryProperties(value: unknown, path = "properties"): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => assertSafeTelemetryProperties(item, `${path}[${index}]`))
+    return
+  }
+  if (!value || typeof value !== "object") return
+  for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+    if (sensitivePropertyNames.has(key.toLowerCase())) {
+      throw new Error(`Sensitive telemetry property is forbidden: ${path}.${key}`)
+    }
+    assertSafeTelemetryProperties(item, `${path}.${key}`)
+  }
+}
+
+export function createTelemetryClient(appId: MatrizAppId, options: TelemetryClientOptions = {}): TelemetryClient {
   const events: TelemetryEnvelope[] = []
+  const pending: TelemetryEnvelope[] = []
   const listeners = new Set<(e: TelemetryEnvelope) => void>()
+  const maxBatchSize = options.maxBatchSize ?? 100
+  let flushing: Promise<void> | undefined
+  const flushPending = async (): Promise<void> => {
+    if (!options.sink || pending.length === 0) return
+    if (flushing) return flushing
+    flushing = (async () => {
+      while (pending.length > 0) {
+        const batch = pending.slice(0, maxBatchSize)
+        await options.sink!.write(batch)
+        pending.splice(0, batch.length)
+      }
+    })().finally(() => { flushing = undefined })
+    return flushing
+  }
 
   return {
     appId,
     track({ tenantId, type, properties, category }) {
+      assertSafeTelemetryProperties(properties ?? {})
       const env: TelemetryEnvelope = {
         id: generateId("tel"),
         version: "v1",
@@ -107,7 +154,9 @@ export function createTelemetryClient(appId: MatrizAppId): TelemetryClient {
         ...(category ? { category } : {}),
       }
       events.unshift(env)
+      if (options.sink) pending.push(env)
       for (const l of listeners) l(env)
+      if (options.sink && options.autoFlush) queueMicrotask(() => { void flushPending().catch(() => undefined) })
       return env
     },
     list: () => [...events],
@@ -117,6 +166,43 @@ export function createTelemetryClient(appId: MatrizAppId): TelemetryClient {
     subscribe(listener) {
       listeners.add(listener)
       return () => listeners.delete(listener)
+    },
+    async flush() {
+      await flushPending()
+    },
+    pending: () => pending.length,
+  }
+}
+
+export function environmentTelemetryOptions(): TelemetryClientOptions {
+  if (typeof window !== "undefined") return {}
+  const token = process.env.MATRIZ_TELEMETRY_INGEST_TOKEN
+  const endpoint = process.env.MATRIZ_TELEMETRY_INGEST_URL ?? "http://127.0.0.1:3000/api/v1/telemetry/batches"
+  return token ? { sink: createHttpTelemetrySink({ endpoint, token }), autoFlush: true } : {}
+}
+
+type TelemetryFetch = (input: string, init: RequestInit) => Promise<Response>
+
+export function createHttpTelemetrySink(input: {
+  readonly endpoint: string
+  readonly token: string
+  readonly fetcher?: TelemetryFetch
+}): TelemetrySink {
+  const endpoint = new URL(input.endpoint)
+  if (endpoint.protocol !== "https:" && endpoint.hostname !== "127.0.0.1" && endpoint.hostname !== "localhost") {
+    throw new Error("Telemetry endpoint must use HTTPS outside loopback")
+  }
+  if (input.token.length < 8) throw new Error("Telemetry service token is required")
+  const fetcher = input.fetcher ?? fetch
+  return {
+    async write(events) {
+      if (events.length === 0 || events.length > 100) throw new Error("Telemetry batch size must be between 1 and 100")
+      const response = await fetcher(endpoint.toString(), {
+        method: "POST",
+        headers: { authorization: `Bearer ${input.token}`, "content-type": "application/json" },
+        body: JSON.stringify({ contractVersion: "v1", events }),
+      })
+      if (!response.ok) throw new Error(`Telemetry ingestion failed with status ${response.status}`)
     },
   }
 }

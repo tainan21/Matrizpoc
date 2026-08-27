@@ -12,6 +12,7 @@ import { getGlobalRegistry } from "@matriz/integration-registry-core"
 import { monorepoConfig } from "@matriz/platform-config"
 import {
   createTelemetryClient,
+  environmentTelemetryOptions,
   registerTelemetryClient,
   type TelemetryClient,
 } from "@matriz/platform-telemetry"
@@ -27,7 +28,7 @@ export interface MatrizLibBootstrapConfig {
 
 export function getMatrizLibTelemetry(): TelemetryClient {
   if (!telemetry) {
-    telemetry = createTelemetryClient(MATRIZLIB_APP_ID)
+    telemetry = createTelemetryClient(MATRIZLIB_APP_ID, environmentTelemetryOptions())
     registerTelemetryClient(telemetry)
   }
   return telemetry

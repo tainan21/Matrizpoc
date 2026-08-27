@@ -618,6 +618,116 @@ importers:
         specifier: 2.1.2
         version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1(@noble/hashes@2.3.0))
 
+  apps/matriz-ops:
+    dependencies:
+      '@matriz/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design/system
+      '@matriz/design-ui':
+        specifier: workspace:*
+        version: link:../../packages/design/ui
+      '@matriz/integration-api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/api-contracts
+      '@matriz/integration-registry-core':
+        specifier: workspace:*
+        version: link:../../packages/integration/registry-core
+      '@matriz/integration-wallet-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/wallet-contracts
+      '@matriz/platform-auth':
+        specifier: workspace:*
+        version: link:../../packages/platform/auth
+      '@matriz/platform-config':
+        specifier: workspace:*
+        version: link:../../packages/platform/config
+      '@matriz/platform-db':
+        specifier: workspace:*
+        version: link:../../packages/platform/db
+      next:
+        specifier: 16.2.12
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@tauri-apps/cli':
+        specifier: 2.11.4
+        version: 2.11.4
+      '@types/node':
+        specifier: 22.7.5
+        version: 22.7.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 4.3.4
+        version: 4.3.4(vite@5.4.21(@types/node@22.7.5))
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vite:
+        specifier: 5.4.21
+        version: 5.4.21(@types/node@22.7.5)
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1(@noble/hashes@2.3.0))
+
+  apps/matriz-pay:
+    dependencies:
+      '@matriz/integration-api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/api-contracts
+      '@matriz/integration-registry-core':
+        specifier: workspace:*
+        version: link:../../packages/integration/registry-core
+      '@matriz/integration-wallet-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/wallet-contracts
+      '@matriz/platform-config':
+        specifier: workspace:*
+        version: link:../../packages/platform/config
+      '@matriz/platform-db':
+        specifier: workspace:*
+        version: link:../../packages/platform/db
+      next:
+        specifier: 16.2.12
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@types/node':
+        specifier: 22.7.5
+        version: 22.7.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1(@noble/hashes@2.3.0))
+
   apps/matriz-workbench:
     dependencies:
       '@matriz/design-system':
@@ -1449,6 +1559,16 @@ importers:
       '@matriz/integration-manifests':
         specifier: workspace:^
         version: link:../manifests
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
+  packages/integration/wallet-contracts:
+    dependencies:
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -9933,7 +10053,7 @@ snapshots:
 
   '@rollup/pluginutils@5.4.0(rollup@4.62.5)':
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       estree-walker: 2.0.2
       picomatch: 4.0.5
     optionalDependencies:
@@ -10369,7 +10489,7 @@ snapshots:
 
   '@types/estree-jsx@1.0.5':
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
 
   '@types/estree@1.0.8': {}
 
@@ -12599,7 +12719,7 @@ snapshots:
 
   estree-util-attach-comments@3.0.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
 
   estree-util-build-jsx@3.0.1:
     dependencies:
@@ -12612,7 +12732,7 @@ snapshots:
 
   estree-util-scope@1.0.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       devlop: 1.1.0
 
   estree-util-to-js@2.0.0:
@@ -12630,7 +12750,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
 
   esutils@2.0.3: {}
 
@@ -13083,7 +13203,7 @@ snapshots:
 
   hast-util-to-estree@3.1.3:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@types/estree-jsx': 1.0.5
       '@types/hast': 3.0.5
       comma-separated-tokens: 2.0.3
@@ -13104,7 +13224,7 @@ snapshots:
 
   hast-util-to-jsx-runtime@2.3.6:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@types/hast': 3.0.5
       '@types/unist': 3.0.3
       comma-separated-tokens: 2.0.3
@@ -13783,7 +13903,7 @@ snapshots:
 
   micromark-extension-mdx-expression@3.0.1:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       devlop: 1.1.0
       micromark-factory-mdx-expression: 2.0.3
       micromark-factory-space: 2.0.1
@@ -13794,7 +13914,7 @@ snapshots:
 
   micromark-extension-mdx-jsx@3.0.2:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       devlop: 1.1.0
       estree-util-is-identifier-name: 3.0.0
       micromark-factory-mdx-expression: 2.0.3
@@ -13811,7 +13931,7 @@ snapshots:
 
   micromark-extension-mdxjs-esm@3.0.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       devlop: 1.1.0
       micromark-core-commonmark: 2.0.3
       micromark-util-character: 2.1.1
@@ -13847,7 +13967,7 @@ snapshots:
 
   micromark-factory-mdx-expression@2.0.3:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       devlop: 1.1.0
       micromark-factory-space: 2.0.1
       micromark-util-character: 2.1.1
@@ -13911,7 +14031,7 @@ snapshots:
 
   micromark-util-events-to-acorn@2.0.3:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@types/unist': 3.0.3
       devlop: 1.1.0
       estree-util-visit: 2.0.0
@@ -14741,7 +14861,7 @@ snapshots:
 
   recma-build-jsx@1.0.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       estree-util-build-jsx: 3.0.1
       vfile: 6.0.3
 
@@ -14756,14 +14876,14 @@ snapshots:
 
   recma-parse@1.0.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       esast-util-from-js: 2.0.1
       unified: 11.0.5
       vfile: 6.0.3
 
   recma-stringify@1.0.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       estree-util-to-js: 2.0.0
       unified: 11.0.5
       vfile: 6.0.3
@@ -14779,7 +14899,7 @@ snapshots:
 
   rehype-recma@1.0.0:
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@types/hast': 3.0.5
       hast-util-to-estree: 3.1.3
     transitivePeerDependencies:

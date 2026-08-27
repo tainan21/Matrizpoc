@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "vitest"
 
 const root = process.cwd()
-const schemas = ["core", "hub", "spot", "seumei", "contracts", "willdash"] as const
+const schemas = ["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] as const
 const databaseUrlNames = {
   core: "CORE_DATABASE_URL",
   hub: "HUB_DATABASE_URL",
@@ -11,6 +11,8 @@ const databaseUrlNames = {
   seumei: "SEUMEI_DATABASE_URL",
   contracts: "CONTRACTS_DATABASE_URL",
   willdash: "WILLDASH_DATABASE_URL",
+  ops: "OPS_DATABASE_URL",
+  pay: "PAY_DATABASE_URL",
 } as const
 
 describe("independent Prisma migration roots", () => {

@@ -17,6 +17,8 @@ import { manifest as controlManifest } from "@apps/matriz-control/public-contrac
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
 import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contract"
+import { manifest as matrizOpsManifest } from "@apps/matriz-ops/public-contract"
+import { manifest as matrizPayManifest } from "@apps/matriz-pay/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
@@ -33,6 +35,8 @@ const allManifests = [
   sitesManifest,
   spotManifest,
   matrizAdminManifest,
+  matrizOpsManifest,
+  matrizPayManifest,
   seumeiManifest,
   contractsManifest,
   willdashManifest,
@@ -57,12 +61,12 @@ describe("registry", () => {
     registry = buildRegistry()
   })
 
-  it("registra todos os 13 apps", () => {
+  it("registra todos os 15 apps", () => {
     const ids = registry.listEnabled().map((e) => e.manifest.appId)
-    expect(ids).toHaveLength(13)
+    expect(ids).toHaveLength(15)
     expect(new Set(ids)).toContain("health")
     expect(new Set(ids)).toEqual(
-      new Set(["matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash", "health"]),
+      new Set(["matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash", "health"]),
     )
   })
 
@@ -98,7 +102,7 @@ describe("registry", () => {
 
   it("toNavigation produz SharedAppNavigationDTO valido", () => {
     const nav = registry.toNavigation()
-    expect(nav).toHaveLength(13)
+    expect(nav).toHaveLength(15)
     for (const item of nav) {
       expect(item.routes.length).toBeGreaterThan(0)
       expect(item.primaryRoute).toMatch(/^\//)
@@ -114,8 +118,9 @@ describe("registry", () => {
     expect(registry.get("matriz-desktop")?.baseUrl).toBe("matriz://control")
   })
 
-  it("registra Matriz Control na porta 3009", () => {
+  it("preserva Control em 3009 e registra Ops em 3011", () => {
     expect(registry.get("matriz-control")?.baseUrl).toBe("http://127.0.0.1:3009")
+    expect(registry.get("matriz-ops")?.baseUrl).toBe("http://127.0.0.1:3011")
   })
 
   it("registra Health na porta 3010", () => {
@@ -127,7 +132,7 @@ describe("registry", () => {
     expect(result.registeredApps).toContain("matriz-identity")
     expect(result.registeredApps).toContain("matrizlib")
     expect(result.registeredApps).toContain("health")
-    expect(result.registeredApps).toHaveLength(13)
+    expect(result.registeredApps).toHaveLength(15)
     expect(monorepoConfig.baseUrls["matriz-identity"]).toBe("http://127.0.0.1:8080")
     expect(monorepoConfig.baseUrls.matrizlib).toBe("http://127.0.0.1:3007")
   })

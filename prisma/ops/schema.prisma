@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/ops"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("OPS_DATABASE_URL")
+}
+
+model OpsAuditEvent {
+  id             String   @id @default(cuid())
+  actorUserId    String
+  actorRole      String
+  action         String
+  targetType     String
+  targetId       String
+  reason         String
+  correlationId  String
+  idempotencyKey String?
+  beforeJson     Json?
+  afterJson      Json?
+  sourceIpHash   String?
+  occurredAt     DateTime @default(now())
+
+  @@index([targetType, targetId, occurredAt])
+  @@index([actorUserId, occurredAt])
+  @@unique([actorUserId, idempotencyKey])
+  @@map("audit_events")
+}
+
+model MatrizSchemaRelease {
+  id        String   @id @default(cuid())
+  version   String   @unique
+  appliedAt DateTime @default(now())
+
+  @@map("__matriz_schema_releases")
+}

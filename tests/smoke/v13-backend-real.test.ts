@@ -81,13 +81,13 @@ describe("V1.3 — core repositories compose with expected methods", () => {
     )
   })
 
-  it("telemetry repo has record, countByCategory, listRecent", async () => {
+  it("telemetry repo has record, recordBatch, countByCategory, listRecent", async () => {
     const { makeTelemetryRepo } = await import(
       "../../packages/platform/db/src/repositories/core/telemetry.repo"
     )
     const repo = makeTelemetryRepo({} as never)
     expect(Object.keys(repo).sort()).toEqual(
-      ["countByCategory", "listRecent", "record"].sort(),
+      ["countByCategory", "listRecent", "record", "recordBatch"].sort(),
     )
   })
 })

@@ -37,6 +37,10 @@ export type EventEnvelope<T = unknown> = {
 // ---------- typed payload map ----------
 
 export interface MatrizEventPayloads {
+  "wallet.created": { walletId: string; userId: string }
+  "wallet.entry.posted": { transactionId: string; walletId: string; currency: "MTRZ" | "BRL"; amountMinor: string; correlationId: string }
+  "wallet.entry.reversed": { transactionId: string; walletId: string; reversesTransactionId: string; correlationId: string }
+  "wallet.reconciliation.failed": { reconciliationRunId: string; correlationId: string; discrepancyCount?: number; error?: string }
   "onboarding.completed": {
     tenantId: string
     appId: AppId
