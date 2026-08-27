@@ -12,7 +12,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "app/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "app/**/*.test.ts", "desktop/**/*.test.ts"],
     poolOptions: { threads: { singleThread: true } },
   },
 })
