@@ -73,19 +73,32 @@ function deriveCapabilities(m: AppManifestDTO): ProjectIntegrationCapabilities {
 }
 
 function baselineHealth(
+  sourceId: string,
   lastCheckAt: string,
   override?: Partial<Omit<ProjectHealthSnapshot, "lastCheckAt">>,
 ): ProjectHealthSnapshot {
+  const observation = override?.observation ?? {
+    sourceId,
+    nature: "declared" as const,
+    collectedAt: lastCheckAt,
+    freshness: "unknown" as const,
+    confidence: "unverified" as const,
+    lastError: {
+      code: "health_not_observed",
+      message: "No runtime health check is configured for this project.",
+      occurredAt: lastCheckAt,
+    },
+  }
+  const isObserved = observation.nature === "observed"
+
   return {
-    status: override?.status ?? "healthy",
-    readinessScore: override?.readinessScore ?? 100,
+    status: isObserved ? (override?.status ?? "unknown") : "unknown",
+    readinessScore: isObserved ? (override?.readinessScore ?? 0) : 0,
     lastCheckAt,
-    checks: override?.checks ?? [
-      { name: "manifest", status: "pass" },
-      { name: "boundaries", status: "pass" },
-    ],
-    uptimeWindow: override?.uptimeWindow,
-    uptimePercent: override?.uptimePercent,
+    checks: isObserved ? (override?.checks ?? []) : [],
+    uptimeWindow: isObserved ? override?.uptimeWindow : undefined,
+    uptimePercent: isObserved ? override?.uptimePercent : undefined,
+    observation,
   }
 }
 
@@ -115,7 +128,7 @@ export function createLocalContractImportAdapter(
           contractVersion: "v1",
           brand: d.brand,
           capabilities: deriveCapabilities(m),
-          health: baselineHealth(ranAt, d.healthBaseline),
+          health: baselineHealth(opts.id, ranAt, d.healthBaseline),
           metrics: d.metrics,
           telemetry: d.telemetry,
           mcp: d.mcp,

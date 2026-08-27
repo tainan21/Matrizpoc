@@ -10,11 +10,13 @@ import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join, resolve } from "node:path"
 
 const APPS = [
+  "matriz-identity",
   "matriz-hub",
   "matriz-workbench",
   "sites",
   "spot",
-  "seumei",
+  "matriz-admin",
+  "seumeiapp",
   "contracts",
   "willdash",
 ] as const
@@ -28,6 +30,7 @@ function walk(dir: string, out: string[] = []): string[] {
       || entry === ".turbo"
       || entry === ".runtime"
       || entry === ".matriz"
+      || entry === "dist"
     ) continue
     const p = join(dir, entry)
     const st = statSync(p)

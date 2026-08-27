@@ -13,6 +13,17 @@ Antes de criar uma pasta, registre:
 
 ## App dentro do monorepo
 
+Registre primeiro um blueprint no Workbench e revise a prévia. A aplicação
+local usa a Project Factory documentada em `docs/PROJECT-FACTORY.md`:
+
+```text
+pnpm app create <blueprint.json> --preview
+pnpm app create <blueprint.json> --apply
+```
+
+O segundo comando recusa sobrescritas e só deve ser usado após aprovação
+humana da mesma revisão apresentada no preview.
+
 Crie `apps/<app>` com:
 
 ```text
@@ -52,6 +63,18 @@ Não use imports por caminho entre repositórios. Escolha uma fronteira:
 
 O Infra Hub não deve copiar o domínio do produto externo. Mantenha um adapter
 e um contrato pequeno, com proprietário e estratégia de versão.
+
+Para uma migração por cópia, inventarie primeiro e use staging fora do
+workspace:
+
+```text
+pnpm app import <source> --slug <slug> --snapshot <id> --preview
+pnpm app import <source> --slug <slug> --snapshot <id> --apply
+```
+
+Staging não torna a origem um app confiável. A aceitação ocorre somente após
+execução isolada, adaptação de auth/env/design/manifest/bootstrap/contratos,
+boundary checks e revisão humana.
 
 ## Critério para compartilhar
 

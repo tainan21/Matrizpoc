@@ -7,16 +7,22 @@
 import { describe, it, expect } from "vitest"
 import * as hub from "../../apps/matriz-hub/public-contract"
 import * as matrizlib from "../../apps/matrizlib/public-contract"
+import * as desktop from "../../apps/matriz-desktop/public-contract"
+import * as identity from "../../apps/matriz-identity/public-contract"
 import * as spot from "../../apps/spot/public-contract"
-import * as seumei from "../../apps/seumei/public-contract"
+import * as matrizAdmin from "../../apps/matriz-admin/public-contract"
+import * as seumei from "../../apps/seumeiapp/public-contract"
 import * as contracts from "../../apps/contracts/public-contract"
 import * as willdash from "../../apps/willdash/public-contract"
 import * as sounds from "@matriz/design-ui/sounds"
 
 const APPS = [
+  ["matriz-identity", identity],
   ["matriz-hub", hub],
   ["matrizlib", matrizlib],
+  ["matriz-desktop", desktop],
   ["spot", spot],
+  ["matriz-admin", matrizAdmin],
   ["seumei", seumei],
   ["contracts", contracts],
   ["willdash", willdash],

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_d1ff677b-1f32-4e5b-9778-4cd14317daf5",
+  "projectId": "matriz-infra-hub",
+  "kind": "bug",
+  "title": "Corrigir dependências vulneráveis",
+  "description": "Conter dependências conhecidas com vulnerabilidades relevantes.",
+  "productStatus": "completed",
+  "validationStatus": "passed",
+  "humanReviewStatus": "approved",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:1",
+    "dependencies"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_6db01b06-0ca6-41ca-be90-cf3a315ddade",
+      "text": "Next >=16.2.11, MCP SDK, PostCSS e Sharp corrigidos; nenhum high/critical silencioso.",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [
+    "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/architectural-laws.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:25.742Z",
+  "updatedAt": "2026-08-12T04:22:03.365Z",
+  "revision": "00eb2e38728e9077"
+}

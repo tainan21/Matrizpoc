@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "req_82d52463-4715-4dfb-94be-a5741e69744b",
+  "projectId": "matriz-infra-hub",
+  "backlogItemId": "wi_ec60d182-d540-4a8a-a442-1882f5fe634a",
+  "title": "Corrigir writes e consultas tenant-unsafe",
+  "instructions": "Implementar item 09 com TDD: tenant scope server-owned para reads/writes Hub e MatrizDocs, incluindo A/B, IDs estrangeiros e validações proporcionais.",
+  "status": "completed",
+  "claimedBy": "codex",
+  "resultSummary": "Item 09 implementado com isolamento tenant A/B em APIs/projeções Hub e MatrizDocs. Round 1 fechou relações, sugestões e context packages com validação transacional de referências tenant-owned.",
+  "changedFiles": [
+    "apps/matriz-hub/src/domains/docs/integration/prisma/docs-repository.ts",
+    "apps/matriz-hub/src/auth/page-context.ts",
+    "apps/matriz-hub/src/domains/docs/application/page-context.ts",
+    "apps/matriz-hub/app/api/events/route.ts",
+    "apps/matriz-hub/app/api/external-links/route.ts",
+    "apps/matriz-hub/app/api/telemetry/route.ts",
+    "apps/matriz-hub/app/api/ecosystem/cache/route.ts",
+    "apps/matriz-hub/app/events/page.tsx",
+    "apps/matriz-hub/app/external-links/page.tsx",
+    "apps/matriz-hub/app/telemetry/page.tsx",
+    "tests/smoke/hub-tenant-isolation.test.ts",
+    "docs/security/ENDPOINT-INVENTORY.md",
+    ".superpowers/sdd/2026-08-05-matriz-wave-1/task-8-brief.md",
+    ".superpowers/sdd/2026-08-05-matriz-wave-1/task-8-report.md"
+  ],
+  "checks": [
+    "pnpm exec vitest run --config vitest.config.ts tests/smoke/hub-tenant-isolation.test.ts --no-file-parallelism (10/10 PASS)",
+    "pnpm --filter @matriz/app-matriz-hub typecheck (PASS before round-1; follow-up required by reviewer)",
+    "pnpm --filter @matriz/app-matriz-hub lint (PASS before round-1; follow-up required by reviewer)",
+    "git diff --check (PASS before round-1; final repeat required by reviewer)"
+  ],
+  "review": {
+    "status": "approved",
+    "reviewedBy": "independent-review",
+    "reviewedAt": "2026-08-12T04:54:18.906Z",
+    "note": "Revisão independente aprova a evidência A/B, os predicados tenant-scoped e as transações para IDs controlados pelo cliente."
+  },
+  "createdAt": "2026-08-12T04:54:18.871Z",
+  "updatedAt": "2026-08-12T04:54:18.906Z",
+  "revision": "26b2d44bc285cfcf"
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+  "projectId": "matriz-infra-hub",
+  "kind": "outcome",
+  "title": "Outcome: provar comunicação real entre processos",
+  "description": "Outcome da Onda 3 para provar integração distribuída real e durável.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "pending",
+  "priority": "critical",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:3",
+    "integration"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_f3f8ba36-4eb8-482b-8928-78250600bd7c",
+      "text": "Spot→Contracts e Seumei→Contracts entre processos, persistentes e restart/retry safe.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.064Z",
+  "updatedAt": "2026-08-05T18:33:29.701Z",
+  "revision": "a5fb4e368a97f727"
+}

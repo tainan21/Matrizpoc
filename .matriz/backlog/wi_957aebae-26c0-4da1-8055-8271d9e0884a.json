@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_957aebae-26c0-4da1-8055-8271d9e0884a",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Evoluir Sites com criação e publicação controladas",
+  "description": "Evoluir a criação e publicação de Sites com gates explícitos.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "medium",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "sites"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_8d2cf044-4a82-4c4c-aae4-e4245467c419",
+      "text": "CLI/editor presets, locale/assets/metadata validation, offline/static preview and promotion gate.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_dee3f049-e4f6-44a7-8a1a-5d1854a8329f",
+    "wi_511950d2-1264-4b26-846d-45bcab1a6a08"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.494Z",
+  "updatedAt": "2026-08-05T18:33:31.519Z",
+  "revision": "149197125def01a0"
+}

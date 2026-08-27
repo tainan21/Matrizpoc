@@ -156,6 +156,8 @@ pela fonte.
 ```ts
 // packages/integration/api-contracts/src/v1/institutional/index.ts
 export * from "./source-classification"
+export * from "./observation-meta"
+export * from "./project-environment"
 export * from "./project-brand-identity"
 export * from "./project-health-snapshot"
 export * from "./project-public-metrics"

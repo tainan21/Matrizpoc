@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_dee3f049-e4f6-44a7-8a1a-5d1854a8329f",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Aplicar baseline de segurança Next.js/React",
+  "description": "Aplicar proteções web consistentes nos apps Next.js e React.",
+  "productStatus": "completed",
+  "validationStatus": "passed",
+  "humanReviewStatus": "approved",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:1",
+    "web-security"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_f207bf61-3524-4881-a713-ef60795bfec0",
+      "text": "CSP nonce, headers, CSRF/origin, allowlists, cache privado, server-only e error/loading/not-found.",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [
+    "wi_d1ff677b-1f32-4e5b-9778-4cd14317daf5",
+    "wi_50e69a55-1e8b-45bd-8698-451bbd13e488"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/architectural-laws.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.001Z",
+  "updatedAt": "2026-08-12T17:40:35.927Z",
+  "revision": "f05323b4721cf887"
+}

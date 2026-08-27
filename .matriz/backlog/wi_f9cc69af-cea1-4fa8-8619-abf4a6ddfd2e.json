@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_f9cc69af-cea1-4fa8-8619-abf4a6ddfd2e",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Criar dispatcher/worker durável",
+  "description": "Entregar eventos do outbox com execução durável.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:3",
+    "workers"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_8e587065-9f5c-4911-b68d-a47320549d61",
+      "text": "Polling Postgres, leases, backoff, idempotência, shutdown e métricas.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_bfeb5ff2-23c8-433b-af68-c9bcc8f4f777"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.307Z",
+  "updatedAt": "2026-08-05T18:33:30.066Z",
+  "revision": "0c4ad40ae4db696a"
+}

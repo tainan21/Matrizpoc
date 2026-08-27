@@ -11,6 +11,8 @@
  * Ver docs/control-plane-overview.md e docs/project-intelligence-contracts.md.
  */
 export * from "./source-classification"
+export * from "./observation-meta"
+export * from "./project-environment"
 export * from "./project-brand-identity"
 export * from "./project-health-snapshot"
 export * from "./project-public-metrics"

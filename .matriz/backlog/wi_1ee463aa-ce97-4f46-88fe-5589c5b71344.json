@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_1ee463aa-ce97-4f46-88fe-5589c5b71344",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Aplicar roles, grants e RLS obrigatórios",
+  "description": "Aplicar isolamento e autorização de dados no banco por padrão.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "rls"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_ea802055-b1db-4498-aa67-5b5e434d3f65",
+      "text": "Role por app/schema, contexto transacional e negação cross-tenant/app.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_f8da65b4-fd34-49d5-9669-6d242be80a11"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.814Z",
+  "updatedAt": "2026-08-05T18:33:29.415Z",
+  "revision": "13fcceda731574b7"
+}

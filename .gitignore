@@ -15,8 +15,10 @@ next.user-config.*
 # Common ignores
 node_modules
 .next/
+apps/*/next-env.d.ts
 .turbo/
 .runtime/
+migration-staging/
 *.tsbuildinfo
 .codex-*.log
 .DS_Store
@@ -28,6 +30,43 @@ node_modules
 .worktrees/
 output/
 *.log
+
+# Generated builds, packaged desktop apps and test output
+dist/
+build/
+out/
+coverage/
+storybook-static/
+desktop-dist/
+.prisma/
+.cache/
+.parcel-cache/
+
+# Local installers and distributable archives stay on disk, never in Git
+*.exe
+*.msi
+*.msix
+*.appx
+*.appinstaller
+*.dmg
+*.pkg
+*.AppImage
+*.deb
+*.rpm
+*.asar
+*.blockmap
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+
+# External migration sources stay local until their app-first assimilation is complete.
+/apps/incoming/
+
+# Implementation screenshots are temporary evidence; final QA artifacts live under output/.
+/apps/*/implementation-*.png
 *.pid
 
 # Interrupted atomic Workbench writes

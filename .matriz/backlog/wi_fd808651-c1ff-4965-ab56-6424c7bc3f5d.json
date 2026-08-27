@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_fd808651-c1ff-4965-ab56-6424c7bc3f5d",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Criar migrations independentes por schema",
+  "description": "Separar migrations e validações por schema com ownership explícito.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "migrations"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_df65c7b6-ba4e-4f06-9b85-21c877e1372f",
+      "text": "prisma/<schema>/schema.prisma+migrations, zero/N-1/deploy/drift.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_94bd4c86-705a-4924-bf95-02e8571f684f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.639Z",
+  "updatedAt": "2026-08-05T18:33:29.257Z",
+  "revision": "d900c9d95f72034d"
+}

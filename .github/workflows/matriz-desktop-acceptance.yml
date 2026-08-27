@@ -1,0 +1,62 @@
+name: matriz-desktop-acceptance
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: matriz-desktop-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-acceptance:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            apps/matriz-desktop/src-tauri
+            apps/matriz-admin/desktop/src-tauri
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @matriz/app-matriz-desktop test
+      - run: pnpm --filter @matriz/app-matriz-desktop typecheck
+      - run: pnpm --filter @matriz/app-matriz-desktop lint
+      - run: cargo test --manifest-path apps/matriz-desktop/src-tauri/Cargo.toml
+      - run: cargo clippy --manifest-path apps/matriz-desktop/src-tauri/Cargo.toml --all-targets -- -D warnings
+      - run: pnpm --filter @matriz/app-matriz-desktop package
+      - name: Installed acceptance cycle 1
+        env:
+          MATRIZ_ACCEPTANCE_RUN_ID: ci-${{ github.run_id }}-1
+        run: pnpm --filter @matriz/app-matriz-desktop acceptance:installed
+      - name: Installed acceptance cycle 2
+        env:
+          MATRIZ_ACCEPTANCE_RUN_ID: ci-${{ github.run_id }}-2
+        run: pnpm --filter @matriz/app-matriz-desktop acceptance:installed
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: matriz-desktop-installers-${{ github.run_id }}
+          path: |
+            apps/matriz-desktop/src-tauri/target/release/bundle/nsis/*-setup.exe*
+            apps/matriz-admin/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe*
+          if-no-files-found: error
+      - name: Upload acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: matriz-desktop-acceptance-${{ github.run_id }}
+          path: output/matriz-control-acceptance/
+          if-no-files-found: warn

@@ -16,7 +16,8 @@ como dimensão de cada app: a estratégia padrão vive localmente em
   `src/bootstrap/**`, `src/manifest/**`.
 - **Pode importar**: `packages/*`, `@apps/matrizlib/public-contract`,
   `@apps/matriz-workbench/public-contract`, `@apps/sites/public-contract`,
-  `@apps/spot/public-contract`, `@apps/seumei/public-contract`,
+  `@apps/spot/public-contract`, `@apps/matriz-admin/public-contract`,
+  `@apps/seumei/public-contract`,
   `@apps/contracts/public-contract`, `@apps/willdash/public-contract`.
 - **Não pode importar**: qualquer `apps/<X>/src/**`.
 - **Auth**: estratégia padrão = **magic link**. Adoção em
@@ -71,6 +72,25 @@ como dimensão de cada app: a estratégia padrão vive localmente em
 - **Não pode importar**: outros apps via `src/**`.
 - **Auth**: estratégia padrão = **magic link**. UI âmbar via
   `appThemes.willdash`.
+
+### matriz-desktop
+
+- **Responsabilidade**: utility Windows local para portas, processos e ações
+  operacionais allowlisted do workspace Matriz.
+- **Expõe**: somente manifest via `public-contract.ts`.
+- **Não expõe**: Win32, shell, filesystem, processos ou internals da UI.
+- **Pode importar**: superfícies públicas domain-free de `packages/*`.
+- **Não pode importar**: `src/**` ou `app/**` de outro app.
+- **Autoridade privilegiada**: exclusiva de `src-tauri`; o renderer consome
+  apenas o gateway tipado.
+- **Terminal**: entrada arbitrária existe somente dentro da sessão ConPTY
+  explícita; cards, Command Deck e integrações continuam allowlisted.
+- **Auth**: não participa de onboarding nem autenticação web.
+
+O shell nativo de Matriz Admin vive em `apps/matriz-admin/desktop` porque é outra
+entrega do mesmo app. Pode consumir `apps/matriz-admin/src/**` localmente. A
+Seumei permanente vive em `apps/seumeiapp`, possui o schema Seumei e não pode
+ser importada internamente pelo Admin.
 
 ## Packages (resumo)
 

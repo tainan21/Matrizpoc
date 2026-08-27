@@ -4,6 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["SITES_CANONICAL_ORIGINS"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
     "dev": {

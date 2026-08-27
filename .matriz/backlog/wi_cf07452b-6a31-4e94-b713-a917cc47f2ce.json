@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_cf07452b-6a31-4e94-b713-a917cc47f2ce",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Consolidar busca e governança do MatrizDocs",
+  "description": "Consolidar busca, autorização e lifecycle documental.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "high",
+  "parentId": "wi_b44bc4c8-d86c-40b6-9362-b34d293ddfe9",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:5",
+    "matrizdocs"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_aa84e0e3-8b96-4251-a42a-f00683a80d07",
+      "text": "Tenant-aware search, lifecycle, block/document auth, export and capability-protected MCP.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_1f396d29-2e4a-4901-8abb-078f0d799f2e",
+    "wi_1ee463aa-ce97-4f46-88fe-5589c5b71344",
+    "wi_65236fc2-f7ee-4f27-af9e-90d9b637e42f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/monorepo-structure.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:28.458Z",
+  "updatedAt": "2026-08-05T18:33:31.439Z",
+  "revision": "4b56626a45cb65f0"
+}

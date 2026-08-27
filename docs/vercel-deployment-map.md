@@ -7,7 +7,8 @@ public subdomain, and its future standalone repository.
 |---|---|---|---|---|
 | matriz-hub | `apps/matriz-hub` | `matriz-hub` | `matrizhub.com.br` | `matriz/hub` |
 | spot | `apps/spot` | `matriz-spot` | `spot.matrizhub.com.br` | `matriz/spot` |
-| seumei | `apps/seumei` | `matriz-seumei` | `seumei.matrizhub.com.br` | `matriz/seumei` |
+| matriz-admin | `apps/matriz-admin` | `matriz-admin` | `admin.matrizhub.com.br` | `matriz/matriz-admin` |
+| seumei | `apps/seumeiapp` | `matriz-seumei` | `seumei.matrizhub.com.br` | `matriz/seumei` |
 | contracts | `apps/contracts` | `matriz-contracts` | `contracts.matrizhub.com.br` | `matriz/contracts` |
 | willdash | `apps/willdash` | `matriz-willdash` | `willdash.matrizhub.com.br` | `matriz/willdash` |
 

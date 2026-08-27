@@ -4,6 +4,7 @@
  * storage format stable even if branded types evolve.
  */
 import { asAppId, asTenantId, asUserId } from "@matriz/foundation-types"
+import type { MatrizAppId } from "@matriz/foundation-constants"
 import type { AuthSession } from "../types"
 import type { SessionSnapshot } from "../contracts"
 
@@ -47,7 +48,7 @@ export function fromSessionSnapshot(snap: SessionSnapshot): AuthSession {
         tenantName: t.tenantName,
         roles: t.roles,
         enabledApps: t.enabledApps.map((a) =>
-          asAppId(a as "matriz-hub" | "spot" | "seumei" | "contracts" | "willdash"),
+          asAppId(a as MatrizAppId),
         ),
       })),
     },

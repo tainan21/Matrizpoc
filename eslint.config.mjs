@@ -36,6 +36,7 @@ export default [
       "**/.next/**",
       "**/dist/**",
       "**/.turbo/**",
+      "**/src-tauri/target/**",
       "**/coverage/**",
       "**/*.config.js",
       "**/*.config.mjs",

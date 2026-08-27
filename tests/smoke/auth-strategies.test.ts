@@ -18,7 +18,12 @@ describe("auth strategies — OTP", () => {
 
     const verified = await otp.verify({ email: "user@matriz.dev", code: "654321" })
     expect(verified.ok).toBe(true)
-    if (verified.ok) expect(verified.value.user.email).toBe("user@matriz.dev")
+    if (verified.ok) {
+      expect(verified.value.user.email).toBe("user@matriz.dev")
+      expect(verified.value.tenants[0]?.enabledApps).toEqual(
+        expect.arrayContaining(["matriz-admin", "seumei"]),
+      )
+    }
   })
 
   it("verify(wrong code) fails with invalid-credentials", async () => {
@@ -47,7 +52,12 @@ describe("auth strategies — Magic Link", () => {
     expect(typeof started.value.token).toBe("string")
     const verified = await ml.verify({ token: started.value.token })
     expect(verified.ok).toBe(true)
-    if (verified.ok) expect(verified.value.user.email).toBe("owner@matriz.dev")
+    if (verified.ok) {
+      expect(verified.value.user.email).toBe("owner@matriz.dev")
+      expect(verified.value.tenants[0]?.enabledApps).toEqual(
+        expect.arrayContaining(["matriz-admin", "seumei"]),
+      )
+    }
   })
 
   it("verify(unknown token) fails with invalid-credentials", async () => {

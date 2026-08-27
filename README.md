@@ -19,7 +19,8 @@ rejeitado via `pnpm lint` ou via smoke `app-boundaries.test.ts`.
 |---|---|---|---|
 | `matriz-hub` | 3000 | Consolidador: catálogo, registry/events/links | magic link |
 | `spot` | 3001 | Domínio bandas/gigs | OTP |
-| `seumei` | 3002 | Domínio estabelecimentos | OTP |
+| `matriz-admin` | 3002 | Administração do ecossistema | OTP |
+| `seumei` | 3008 | Empresa, loja, pedidos e estoque | OTP |
 | `contracts` | 3003 | Domínio contratos compartilháveis | magic link |
 | `willdash` | 3004 | Metas/atividades/recompensas | magic link |
 

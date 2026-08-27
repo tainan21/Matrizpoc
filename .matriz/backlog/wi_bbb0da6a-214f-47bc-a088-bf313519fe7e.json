@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_bbb0da6a-214f-47bc-a088-bf313519fe7e",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Automatizar E2E cross-process",
+  "description": "Provar fluxos distribuídos e cenários de recuperação ponta a ponta.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_6755bd17-8e21-4759-8dc4-a69493cabe85",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:3",
+    "e2e"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_d47f6851-eee8-4955-8a76-545c7e718dd3",
+      "text": "Login, A/B, ambos flows, restart/retry/duplicate/DLQ e projeções Hub/WillDash.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_bdcc6c51-b847-46bc-9479-ad75d4b340d0",
+    "wi_caf2c291-68d7-451b-b83f-3bb7bcad8167",
+    "wi_a524f28a-251d-48a3-913f-f2966677934b",
+    "wi_65236fc2-f7ee-4f27-af9e-90d9b637e42f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:27.565Z",
+  "updatedAt": "2026-08-05T18:33:30.243Z",
+  "revision": "db8d106a2ed0cbe9"
+}

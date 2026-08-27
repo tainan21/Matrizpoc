@@ -19,6 +19,9 @@ export default defineConfig({
     globals: false,
     reporters: ["default"],
     passWithNoTests: false,
+    // Smoke tests stub process-wide environment variables and inspect the
+    // workspace. Running files concurrently makes those contracts race.
+    fileParallelism: false,
   },
   resolve: {
     alias: {
@@ -48,13 +51,18 @@ export default defineConfig({
       "@matriz/flows-auth": resolve(__dirname, "./packages/flows/auth/src/login-machine.ts"),
       "@matriz/flows-ecosystem": resolve(__dirname, "./packages/flows/ecosystem/src/index.tsx"),
       "@apps/matriz-hub/public-contract": resolve(__dirname, "./apps/matriz-hub/public-contract.ts"),
+      "@apps/matriz-desktop/public-contract": resolve(__dirname, "./apps/matriz-desktop/public-contract.ts"),
       "@apps/matrizlib/public-contract": resolve(__dirname, "./apps/matrizlib/public-contract.ts"),
+      "@apps/matriz-identity/public-contract": resolve(__dirname, "./apps/matriz-identity/public-contract.ts"),
       "@apps/matriz-workbench/public-contract": resolve(__dirname, "./apps/matriz-workbench/public-contract.ts"),
+      "@apps/matriz-control/public-contract": resolve(__dirname, "./apps/matriz-control/public-contract.ts"),
       "@apps/sites/public-contract": resolve(__dirname, "./apps/sites/public-contract.ts"),
       "@apps/spot/public-contract": resolve(__dirname, "./apps/spot/public-contract.ts"),
-      "@apps/seumei/public-contract": resolve(__dirname, "./apps/seumei/public-contract.ts"),
+      "@apps/matriz-admin/public-contract": resolve(__dirname, "./apps/matriz-admin/public-contract.ts"),
+      "@apps/seumei/public-contract": resolve(__dirname, "./apps/seumeiapp/public-contract.ts"),
       "@apps/contracts/public-contract": resolve(__dirname, "./apps/contracts/public-contract.ts"),
       "@apps/willdash/public-contract": resolve(__dirname, "./apps/willdash/public-contract.ts"),
+      "@apps/health/public-contract": resolve(__dirname, "./apps/health/public-contract.ts"),
     },
   },
 })

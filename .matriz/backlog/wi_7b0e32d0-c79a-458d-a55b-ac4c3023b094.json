@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_7b0e32d0-c79a-458d-a55b-ac4c3023b094",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Normalizar identidade, tenants e grants no core",
+  "description": "Definir o modelo central de identidade, tenants e concessões.",
+  "productStatus": "discovery",
+  "validationStatus": "pending",
+  "humanReviewStatus": "not_required",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_0277ea53-01ad-4748-bdf8-debbbfc3a12e",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:2",
+    "tenancy"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_18df371a-60f8-4b96-8f42-3de86b5b54b6",
+      "text": "TenantMembership, AppGrant, User global, unicidades, revogação, auditoria e clientes OIDC.",
+      "completed": false
+    }
+  ],
+  "dependencyIds": [
+    "wi_94bd4c86-705a-4924-bf95-02e8571f684f"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/app-communication.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:26.710Z",
+  "updatedAt": "2026-08-05T18:33:29.366Z",
+  "revision": "9eb51667003359d0"
+}

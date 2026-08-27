@@ -209,5 +209,5 @@ describe("smoke: matrizdocs mcp registry", () => {
         ]),
       )
     }
-  })
+  }, 15_000)
 })

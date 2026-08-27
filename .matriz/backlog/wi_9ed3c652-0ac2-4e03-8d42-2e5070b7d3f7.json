@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_9ed3c652-0ac2-4e03-8d42-2e5070b7d3f7",
+  "projectId": "matriz-infra-hub",
+  "kind": "feature",
+  "title": "Fortalecer CI e matriz de testes",
+  "description": "Elevar os gates de CI e a cobertura de validação do monorepo.",
+  "productStatus": "completed",
+  "validationStatus": "passed",
+  "humanReviewStatus": "approved",
+  "documentationStatus": "not_required",
+  "priority": "critical",
+  "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:1",
+    "ci"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_507875cb-2097-4447-ba5a-43af8b3bfd63",
+      "text": "Audit, Workbench/Sites, Prisma completo, boundaries, builds afetados e working tree limpo.",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [
+    "wi_d1ff677b-1f32-4e5b-9778-4cd14317daf5"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/architectural-laws.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:25.823Z",
+  "updatedAt": "2026-08-12T04:22:03.433Z",
+  "revision": "b863ded3402f58eb"
+}

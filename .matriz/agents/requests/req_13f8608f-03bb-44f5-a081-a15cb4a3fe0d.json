@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "req_13f8608f-03bb-44f5-a081-a15cb4a3fe0d",
+  "projectId": "matriz-infra-hub",
+  "backlogItemId": "wi_99490eb7-0446-4e4e-8620-4d99499830f8",
+  "title": "Atualizar leis, mapas e Decision Log",
+  "instructions": "Reconcile documented Wave 1 delivery and record verification evidence.",
+  "status": "completed",
+  "claimedBy": "codex-wave1-reconciliation",
+  "resultSummary": "Verified completed Wave 1 delivery for matriz-program-v1-04.",
+  "changedFiles": [
+    "docs/architectural-laws.md",
+    "docs/monorepo-structure.md",
+    "docs/app-communication.md",
+    "docs/DECISION-LOG.md",
+    "docs/CHANGE-SAFETY.md"
+  ],
+  "checks": [
+    "paths/links/UTF-8 validation",
+    "git diff --check"
+  ],
+  "review": {
+    "status": "approved",
+    "reviewedBy": "human-coordinator",
+    "reviewedAt": "2026-08-12T04:22:03.242Z",
+    "note": "Observed evidence and recorded checks approved.",
+    "runRevision": "9052834f"
+  },
+  "createdAt": "2026-08-12T04:22:03.226Z",
+  "updatedAt": "2026-08-12T04:22:03.242Z",
+  "revision": "e120c7a28a26bbf4"
+}

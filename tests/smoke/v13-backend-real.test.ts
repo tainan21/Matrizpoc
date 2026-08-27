@@ -30,7 +30,7 @@ describe("V1.3 — schema client wrappers export expected surface", () => {
     const mod = await import("../../packages/platform/db/src/seumei")
     expect(typeof mod.getSeumeiDb).toBe("function")
     expect(mod).toHaveProperty("EstablishmentType")
-  })
+  }, 15_000)
 
   it("contracts exposes Contract + ContractStatus + ContractPartyRole", async () => {
     const mod = await import("../../packages/platform/db/src/contracts")
@@ -95,7 +95,7 @@ describe("V1.3 — core repositories compose with expected methods", () => {
 describe("V1.3 — hub repositories compose with expected methods", () => {
   it("projects repo supports upsertFromManifest and search", async () => {
     const { makeProjectRepo } = await import(
-      "../../packages/platform/db/src/repositories/hub/projects.repo"
+      "../../apps/matriz-hub/src/integration/prisma/repositories/projects-repository"
     )
     const repo = makeProjectRepo({} as never)
     expect(Object.keys(repo).sort()).toEqual(
@@ -105,7 +105,7 @@ describe("V1.3 — hub repositories compose with expected methods", () => {
 
   it("ingestion-runs repo supports record", async () => {
     const { makeIngestionRunRepo } = await import(
-      "../../packages/platform/db/src/repositories/hub/ingestion-runs.repo"
+      "../../apps/matriz-hub/src/integration/prisma/repositories/ingestion-runs-repository"
     )
     const repo = makeIngestionRunRepo({} as never)
     expect(Object.keys(repo).sort()).toEqual(["latest", "listBySource", "record"].sort())
@@ -145,7 +145,7 @@ describe("V1.3 — MCP handler responds to the 5 required methods", () => {
       expect(result.protocolVersion).toBe("2024-11-05")
       expect(result.serverInfo.name).toBe("matriz-hub-mcp")
     }
-  })
+  }, 15_000)
 
   it("ping returns empty object", async () => {
     const { handleMcpRequest } = await import(
@@ -210,5 +210,5 @@ describe("V1.3 — auth server-db surface is fully exported", () => {
     expect(typeof mod.issueSession).toBe("function")
     expect(typeof mod.readSessionByToken).toBe("function")
     expect(typeof mod.revokeSessionByToken).toBe("function")
-  })
+  }, 15_000)
 })

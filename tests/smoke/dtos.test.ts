@@ -6,12 +6,21 @@ import {
   externalLinkSchema,
   telemetryEventSchema,
   appManifestSchema,
+  appIdSchema,
+  storePackageManifestV1Schema,
 } from "@matriz/integration-api-contracts"
+import { monorepoConfig } from "@matriz/platform-config"
 
 /**
  * Smoke test — DTOs publicos (L7 + L8)
  */
 describe("smoke: dtos", () => {
+  it("registers Matriz Admin and keeps Seumei on its dedicated port", () => {
+    expect(appIdSchema.parse("matriz-admin")).toBe("matriz-admin")
+    expect(monorepoConfig.baseUrls["matriz-admin"]).toBe("http://127.0.0.1:3002")
+    expect(monorepoConfig.baseUrls.seumei).toBe("http://127.0.0.1:3008")
+  })
+
   it("CreateContractFromGigInput: valid sample parses", () => {
     const sample = {
       tenantId: "tenant-acme",
@@ -126,5 +135,71 @@ describe("smoke: dtos", () => {
     }
     const r = appManifestSchema.safeParse(sample)
     expect(r.success).toBe(true)
+  })
+
+  it("StorePackageManifestV1 accepts a trusted Windows x64 release envelope", () => {
+    const parsed = storePackageManifestV1Schema.parse({
+      schemaVersion: "v1",
+      appId: "matriz-workbench",
+      version: "0.1.0",
+      channel: "stable",
+      platform: "win32",
+      arch: "x64",
+      releasedAt: "2026-08-27T12:00:00.000Z",
+      minimumControlVersion: "0.1.0",
+      releaseNotes: "Primeira distribuição independente.",
+      installer: {
+        fileName: "matriz-workbench-0.1.0-windows-x64-setup.exe",
+        downloadUrl: "https://github.com/tainan21/Matrizpoc/releases/download/workbench-v0.1.0/matriz-workbench-0.1.0-windows-x64-setup.exe",
+        sizeBytes: 123_456,
+        sha256: "a".repeat(64),
+      },
+    })
+
+    expect(parsed.appId).toBe("matriz-workbench")
+  })
+
+  it("StorePackageManifestV1 rejects non-store apps and unsafe installer metadata", () => {
+    const sample = {
+      schemaVersion: "v1",
+      appId: "health",
+      version: "0.1.0",
+      channel: "stable",
+      platform: "win32",
+      arch: "x64",
+      releasedAt: "2026-08-27T12:00:00.000Z",
+      minimumControlVersion: "0.1.0",
+      releaseNotes: null,
+      installer: {
+        fileName: "../health.exe",
+        downloadUrl: "http://evil.test/health.exe",
+        sizeBytes: 0,
+        sha256: "bad",
+      },
+    }
+
+    expect(storePackageManifestV1Schema.safeParse(sample).success).toBe(false)
+  })
+
+  it("StorePackageManifestV1 binds the installer name to app and version", () => {
+    const result = storePackageManifestV1Schema.safeParse({
+      schemaVersion: "v1",
+      appId: "matriz-workbench",
+      version: "0.1.0",
+      channel: "stable",
+      platform: "win32",
+      arch: "x64",
+      releasedAt: "2026-08-27T12:00:00.000Z",
+      minimumControlVersion: "0.1.0",
+      releaseNotes: null,
+      installer: {
+        fileName: "seumei-0.1.0-windows-x64-setup.exe",
+        downloadUrl: "https://github.com/tainan21/Matrizpoc/releases/download/workbench-v0.1.0/seumei-0.1.0-windows-x64-setup.exe",
+        sizeBytes: 123,
+        sha256: "a".repeat(64),
+      },
+    })
+
+    expect(result.success).toBe(false)
   })
 })

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 2,
+  "id": "wi_1f396d29-2e4a-4901-8abb-078f0d799f2e",
+  "projectId": "matriz-infra-hub",
+  "kind": "bug",
+  "title": "Fechar bypasses do Hub, MatrizDocs e MCP",
+  "description": "Remover bypasses de autoridade e endurecer superfícies expostas.",
+  "productStatus": "completed",
+  "validationStatus": "passed",
+  "humanReviewStatus": "approved",
+  "documentationStatus": "current",
+  "priority": "critical",
+  "parentId": "wi_b5ac8a40-e410-493f-8e3f-79f91a64f0bf",
+  "workScope": {
+    "kind": "project"
+  },
+  "tags": [
+    "program:matriz-v1",
+    "wave:1",
+    "authorization"
+  ],
+  "acceptanceCriteria": [
+    {
+      "id": "ac_813a0a79-644b-41f2-bbd2-6af26e7e10f8",
+      "text": "Autoridade não vem de headers públicos; deny-by-default, auth, limites, rate e erros sanitizados.",
+      "completed": true
+    }
+  ],
+  "dependencyIds": [
+    "wi_50e69a55-1e8b-45bd-8698-451bbd13e488"
+  ],
+  "references": [
+    {
+      "kind": "repository_file",
+      "path": "docs/architectural-laws.md"
+    },
+    {
+      "kind": "repository_file",
+      "path": "tests/smoke/hub-security-containment.test.ts"
+    },
+    {
+      "kind": "repository_file",
+      "path": "docs/security/THREAT-MODEL.md"
+    }
+  ],
+  "createdAt": "2026-08-05T18:33:25.905Z",
+  "updatedAt": "2026-08-12T04:11:26.281Z",
+  "revision": "b09b42bbd014d84f"
+}
