@@ -1,0 +1,14 @@
+@import "@matriz/design-system/css";
+@import "@matriz/design-ui/styles.css";
+
+:root {
+  color-scheme: light;
+}
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--surface, #ffffff);
+  color: var(--surface-fg, #052e16);
+}
+* { box-sizing: border-box; }
+a { color: inherit; }

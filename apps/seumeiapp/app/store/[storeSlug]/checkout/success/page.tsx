@@ -1,0 +1,3 @@
+import Link from "next/link"
+import { money } from "../../../../../src/ui/presenters/commerce.presenter"
+export default async function SuccessPage({ params, searchParams }: { params: Promise<{ storeSlug: string }>; searchParams: Promise<{ number?: string; total?: string }> }) { const { storeSlug } = await params; const query = await searchParams; return <main className="checkout-success"><span className="eyebrow">PEDIDO PERSISTIDO</span><h1>Compra simulada concluída.</h1><p>Pedido <strong>#{String(query.number ?? "").padStart(4, "0")}</strong> · {money(Number(query.total ?? 0))}</p><p>O cliente, o pedido e o consumo dos ingredientes já estão disponíveis no workspace autorizado.</p><Link href={`/store/${storeSlug}`}>Voltar à loja</Link></main> }
