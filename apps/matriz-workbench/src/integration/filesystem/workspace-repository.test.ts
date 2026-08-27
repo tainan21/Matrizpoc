@@ -113,7 +113,8 @@ describe("WorkspaceRepository", () => {
       recordedAt: "2026-08-27T12:01:00.000Z",
     }
     const nextMission = { ...mission, evidenceIds: [evidence.id], updatedAt: evidence.recordedAt, revision: "next-mission-revision" }
-    const originalAtomicWrite = (repository as unknown as { atomicWrite: WorkspaceRepository["createAgentMission"] }).atomicWrite
+    type AtomicWrite = (projectId: string, segments: string[], value: unknown) => Promise<void>
+    const originalAtomicWrite = (repository as unknown as { atomicWrite: AtomicWrite }).atomicWrite
     let failMissionOnce = true
     ;(repository as unknown as { atomicWrite: (...args: unknown[]) => Promise<void> }).atomicWrite = async (...args) => {
       const segments = args[1] as string[]
@@ -121,7 +122,7 @@ describe("WorkspaceRepository", () => {
         failMissionOnce = false
         throw new Error("simulated mission write failure")
       }
-      return (originalAtomicWrite as (...values: unknown[]) => Promise<void>).apply(repository, args)
+      return originalAtomicWrite.call(repository, args[0] as string, segments, args[2])
     }
 
     await expect(repository.recordAgentMissionEvidence("sample", evidence, nextMission, mission.revision))
