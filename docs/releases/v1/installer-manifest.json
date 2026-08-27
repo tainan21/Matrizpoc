@@ -1,0 +1,64 @@
+{
+  "release": "Matriz V1",
+  "generatedAt": "2026-08-27",
+  "publication": "local-only",
+  "artifactRoot": "output/releases/v1/installers",
+  "installers": [
+    {
+      "app": "Matriz Control Electron",
+      "version": "0.1.0",
+      "format": "NSIS EXE",
+      "fileName": "Matriz-Control-Electron-0.1.0-local-unsigned.exe",
+      "sizeBytes": 208790596,
+      "sha256": "29e181ab66842a720e46ae1cf0bcd7e4927bfa0a8d855674dba2db6a7627bc6a",
+      "command": "corepack pnpm --filter @matriz/app-matriz-control desktop:build",
+      "signed": false,
+      "status": "success"
+    },
+    {
+      "app": "Matriz Desktop Tauri Control",
+      "version": "0.1.0",
+      "format": "NSIS EXE",
+      "fileName": "Matriz-Desktop-Tauri-Control-0.1.0-local-unsigned.exe",
+      "sizeBytes": 2558138,
+      "sha256": "8bb6c42fc7bba27e6de92ad3c9cca8c73115e6bb1fc5762933052c9a04b3ee37",
+      "command": "corepack pnpm --filter @matriz/app-matriz-desktop package",
+      "signed": false,
+      "status": "success"
+    },
+    {
+      "app": "Matriz Admin Desktop",
+      "version": "0.1.0",
+      "format": "NSIS EXE",
+      "fileName": "Matriz-Admin-Tauri-0.1.0-local-unsigned.exe",
+      "sizeBytes": 1984831,
+      "sha256": "b08271a8ecdce3fc7f09ac767ac3aec388d40ca18227b85fd44466cf774288f6",
+      "command": "pwsh -NoProfile -File apps/matriz-desktop/scripts/package-matriz-admin.ps1",
+      "signed": false,
+      "status": "success"
+    },
+    {
+      "app": "Matriz Ops Desktop",
+      "version": "0.1.0",
+      "format": "NSIS EXE",
+      "fileName": "Matriz-Ops-Tauri-0.1.0-local-unsigned.exe",
+      "sizeBytes": 1834979,
+      "sha256": "f2e4704076f703cfb70322c6b5742c91c60efffbcd6ab464e6a1b89e289e18d2",
+      "command": "corepack pnpm --filter @matriz/app-matriz-ops package:desktop",
+      "signed": false,
+      "status": "success"
+    },
+    {
+      "app": "Seumei Desktop",
+      "version": "0.1.0",
+      "format": "NSIS EXE",
+      "fileName": null,
+      "sizeBytes": null,
+      "sha256": null,
+      "command": "corepack pnpm --filter @matriz/app-seumei desktop:package",
+      "signed": false,
+      "status": "blocked",
+      "reason": "SEUMEI_DESKTOP_APP_URL and SEUMEI_DESKTOP_HUB_URL are required HTTPS release origins; official values were not available and were not fabricated."
+    }
+  ]
+}
