@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest"
-import { cleanup, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 import { CompanyWorkspaceShell } from "./CompanyWorkspaceShell"
 
@@ -30,5 +30,28 @@ describe("CompanyWorkspaceShell", () => {
       </CompanyWorkspaceShell>,
     )
     expect(screen.queryByRole("link", { name: "Membros" })).toBeNull()
+  })
+
+  it("opens a searchable command palette without duplicating routes", () => {
+    render(
+      <CompanyWorkspaceShell shell={{
+        companyName: "Oficina Aurora",
+        roleLabel: "Proprietário",
+        navigation: [
+          { label: "Visão geral", href: "/workspace" },
+          { label: "Produtos", href: "/workspace/products" },
+        ],
+      }}><span>Conteúdo</span></CompanyWorkspaceShell>,
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Buscar no workspace" }))
+    const dialog = screen.getByRole("dialog", { name: "Busca global" })
+    expect(dialog).toBeInTheDocument()
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "Buscar no Seumei" }), {
+      target: { value: "produtos" },
+    })
+    expect(within(dialog).getAllByRole("link", { name: /Produtos/ })).toHaveLength(1)
+    expect(within(dialog).queryByRole("link", { name: /Visão geral/ })).toBeNull()
   })
 })

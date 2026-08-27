@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
 import type { WorkspaceShellViewModel } from "./presenters/workspace-shell.presenter"
+import { WorkspaceCommandPalette } from "./WorkspaceCommandPalette"
 
 export function CompanyWorkspaceShell({
   shell,
@@ -27,6 +28,7 @@ export function CompanyWorkspaceShell({
             </Link>
           ))}
         </nav>
+        <WorkspaceCommandPalette commands={shell.navigation} />
         <Link href="/" className="company-switch">Trocar empresa</Link>
       </aside>
       <div className="company-surface">{children}</div>
