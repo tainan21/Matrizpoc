@@ -182,6 +182,16 @@ async function releaseBatchLock(server: Server): Promise<void> {
   })
 }
 
+function isLiveProcess(pid: unknown): boolean {
+  if (typeof pid !== "number" || !Number.isSafeInteger(pid) || pid <= 0) return false
+  try {
+    process.kill(pid, 0)
+    return true
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "EPERM"
+  }
+}
+
 export interface DiscoveredProject {
   id: string
   folderName: string
@@ -476,8 +486,10 @@ export class WorkspaceRepository {
         break
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error
-        const lease = await readFile(target, "utf8").then((value) => JSON.parse(value) as { expiresAt?: number }).catch(() => undefined)
-        if (lease?.expiresAt && lease.expiresAt < Date.now()) {
+        const lease = await readFile(target, "utf8")
+          .then((value) => JSON.parse(value) as { expiresAt?: number; pid?: number })
+          .catch(() => undefined)
+        if (lease?.expiresAt && lease.expiresAt < Date.now() && !isLiveProcess(lease.pid)) {
           await unlink(target).catch(() => undefined)
           continue
         }
@@ -1954,10 +1966,31 @@ export class WorkspaceRepository {
     }
     return this.withCoordinatorLock(`agent-mission-${next.id}`, async () => {
       const current = await this.getAgentMission(projectId, next.id)
-      if (current.revision !== expectedMissionRevision) throw new RevisionConflictError()
       const evidenceTarget = await this.safeMatrixPath(projectId, ["agents", "evidence", `${nextEvidence.id}.json`])
-      if (await exists(evidenceTarget)) throw new WorkspaceError("A evidência já existe.", "CONFLICT")
-      await this.atomicWrite(projectId, ["agents", "evidence", `${nextEvidence.id}.json`], nextEvidence)
+      const existingEvidence = await this.readJson(
+        projectId,
+        ["agents", "evidence", `${nextEvidence.id}.json`],
+        missionEvidenceSchema,
+      ).catch((error: unknown) => {
+        if (error instanceof WorkspaceError && error.code === "NOT_FOUND") return undefined
+        throw error
+      })
+      if (existingEvidence && JSON.stringify(existingEvidence) !== JSON.stringify(nextEvidence)) {
+        throw new WorkspaceError("A evidência já existe com conteúdo diferente.", "CONFLICT")
+      }
+      if (current.revision !== expectedMissionRevision) {
+        if (
+          current.revision === next.revision &&
+          current.evidenceIds.includes(nextEvidence.id) &&
+          existingEvidence
+        ) {
+          return { mission: current, evidence: existingEvidence }
+        }
+        throw new RevisionConflictError()
+      }
+      if (!existingEvidence) {
+        await this.atomicWrite(projectId, ["agents", "evidence", `${nextEvidence.id}.json`], nextEvidence)
+      }
       await this.atomicWrite(projectId, ["agents", "missions", `${next.id}.json`], next)
       await this.appendActivity(projectId, {
         actor,
