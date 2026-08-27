@@ -3,7 +3,7 @@ import type { WorkbenchRuntimeMode } from "./runtime-mode"
 export interface WorkbenchIdentity {
   id: string
   label: string
-  source: "control" | "hub" | "demo"
+  source: "native" | "hub" | "demo"
   roles: readonly ["local-operator"]
 }
 
@@ -20,7 +20,7 @@ export function decodeWorkbenchIdentity(value: string | undefined): WorkbenchIde
     if (
       typeof parsed.id !== "string" || !parsed.id || parsed.id.length > 128 ||
       typeof parsed.label !== "string" || !parsed.label || parsed.label.length > 128 ||
-      !["control", "hub", "demo"].includes(String(parsed.source)) ||
+      !["native", "hub", "demo"].includes(String(parsed.source)) ||
       !Array.isArray(parsed.roles) || parsed.roles.length !== 1 || parsed.roles[0] !== "local-operator"
     ) return undefined
     return parsed as unknown as WorkbenchIdentity
@@ -79,8 +79,8 @@ const localIdentity = (
 export async function resolveLocalIdentity(
   input: ResolveLocalIdentityInput,
 ): Promise<LocalIdentityResolution> {
-  if (input.mode === "control-desktop") {
-    return localIdentity("control-local", "Control local", "control")
+  if (input.mode === "native-desktop") {
+    return localIdentity("native-desktop-local", "Desktop local", "native")
   }
 
   try {

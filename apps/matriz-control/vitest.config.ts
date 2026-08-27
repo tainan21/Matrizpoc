@@ -6,6 +6,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@apps/health/public-contract": fileURLToPath(new URL("../health/public-contract.ts", import.meta.url)),
+      "@apps/matriz-workbench/public-contract": fileURLToPath(new URL("../matriz-workbench/public-contract.ts", import.meta.url)),
+      "@apps/seumei/public-contract": fileURLToPath(new URL("../seumeiapp/public-contract.ts", import.meta.url)),
     },
   },
   test: {

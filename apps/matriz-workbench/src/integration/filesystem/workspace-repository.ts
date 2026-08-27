@@ -76,6 +76,16 @@ import {
   reconciliationRecordSchema,
   type ReconciliationRecord,
 } from "../../domain/reconciliation"
+import {
+  agentProfileSchema,
+  missionEvidenceSchema,
+  missionHandoffSchema,
+  missionSchema,
+  type AgentProfile,
+  type Mission,
+  type MissionEvidence,
+  type MissionHandoff,
+} from "../../domain/agent-operations"
 
 const MAX_JSON_BYTES = 256_000
 const MAX_DOCUMENT_BYTES = 100_000
@@ -95,6 +105,38 @@ const REPOSITORY_REFERENCE_EXCLUDED_SEGMENTS = new Set([
 ])
 const documentFolder = (kind: WorkbenchDocument["kind"]) =>
   kind === "decision" ? "decisions" : kind
+
+function seededAgentProfile(
+  id: "nilo-builder" | "zara-link",
+  timestamp: string,
+): AgentProfile {
+  const base = id === "nilo-builder"
+    ? {
+        schemaVersion: 1 as const,
+        id,
+        displayName: "Nilo Builder",
+        personaSummary: "Agente de implementação para missões de código estritamente delimitadas.",
+        missionStatement: "Transformar uma missão aprovada em uma entrega revisável dentro do escopo autorizado.",
+        capabilityIds: ["code-change", "test-evidence"],
+        defaultAuthority: "change_scoped" as const,
+        humanOwner: "Tai",
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }
+    : {
+        schemaVersion: 1 as const,
+        id,
+        displayName: "Zara Link",
+        personaSummary: "Agente de contexto para preparar conexões, sínteses e handoffs revisáveis.",
+        missionStatement: "Preservar contexto útil e sinalizar decisões humanas pendentes sem executar mudanças implícitas.",
+        capabilityIds: ["context-synthesis", "handoff"],
+        defaultAuthority: "propose" as const,
+        humanOwner: "Tai",
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }
+  return agentProfileSchema.parse({ ...base, revision: revisionFor(base) })
+}
 
 async function replaceFile(temp: string, target: string): Promise<void> {
   for (let attempt = 0; attempt < 8; attempt += 1) {
@@ -614,7 +656,10 @@ export class WorkspaceRepository {
 
   async initializeProject(projectId: string): Promise<ProjectWorkspace> {
     const project = await this.getProject(projectId)
-    if (project.initialized && project.workspace) return project.workspace
+    if (project.initialized && project.workspace) {
+      await this.initializeAgentTeam(projectId)
+      return project.workspace
+    }
     const timestamp = now()
     const workspaceBase = {
       schemaVersion: 1 as const,
@@ -658,6 +703,10 @@ export class WorkspaceRepository {
       ["docs", "decisions"],
       ["agents", "requests"],
       ["agents", "reconciliation"],
+      ["agents", "profiles"],
+      ["agents", "missions"],
+      ["agents", "handoffs"],
+      ["agents", "evidence"],
       ["activity"],
     ]) {
       await this.ensureMatrixDirectory(projectId, folder)
@@ -670,6 +719,7 @@ export class WorkspaceRepository {
     await this.atomicWrite(projectId, ["roadmap.json"], roadmap)
     await this.atomicWrite(projectId, ["context.json"], context)
     await this.ensureControlDefaults(projectId)
+    await this.initializeAgentTeam(projectId)
     await this.appendActivity(projectId, {
       actor: "human",
       action: "project.initialized",
@@ -1738,6 +1788,227 @@ export class WorkspaceRepository {
       entityId: itemId,
     })
     return next
+  }
+
+  /**
+   * Creates the phase-one team folders and their templates once. Existing
+   * profiles remain the project owner's source of truth and are never seeded
+   * again over a user edit.
+   */
+  async initializeAgentTeam(projectId: string): Promise<AgentProfile[]> {
+    return this.withCoordinatorLock("agent-team", async () => {
+      await Promise.all([
+        this.ensureMatrixDirectory(projectId, ["agents", "profiles"]),
+        this.ensureMatrixDirectory(projectId, ["agents", "missions"]),
+        this.ensureMatrixDirectory(projectId, ["agents", "handoffs"]),
+        this.ensureMatrixDirectory(projectId, ["agents", "evidence"]),
+      ])
+      for (const id of ["nilo-builder", "zara-link"] as const) {
+        const target = await this.safeMatrixPath(projectId, ["agents", "profiles", `${id}.json`])
+        if (await exists(target)) continue
+        const profile = seededAgentProfile(id, now())
+        await this.atomicWrite(projectId, ["agents", "profiles", `${profile.id}.json`], profile)
+      }
+      return this.listAgentProfiles(projectId)
+    })
+  }
+
+  async listAgentProfiles(projectId: string): Promise<AgentProfile[]> {
+    const folder = await this.safeMatrixPath(projectId, ["agents", "profiles"])
+    const files = (await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return [] as string[]
+      throw error
+    })).filter((name) => /^[a-z][a-z0-9.-]{1,79}\.json$/.test(name))
+    return (await Promise.all(files.map((name) =>
+      this.readJson(projectId, ["agents", "profiles", name], agentProfileSchema),
+    ))).sort((a, b) => a.displayName.localeCompare(b.displayName, "pt-BR"))
+  }
+
+  async getAgentProfile(projectId: string, profileId: string): Promise<AgentProfile> {
+    if (!/^[a-z][a-z0-9.-]{1,79}$/.test(profileId)) {
+      throw new WorkspaceError("ID de perfil de agente inválido.", "INVALID_PATH")
+    }
+    return this.readJson(projectId, ["agents", "profiles", `${profileId}.json`], agentProfileSchema)
+  }
+
+  async createAgentProfile(
+    projectId: string,
+    profile: AgentProfile,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<AgentProfile> {
+    const next = agentProfileSchema.parse(profile)
+    return this.withCoordinatorLock("agent-team", async () => {
+      const target = await this.safeMatrixPath(projectId, ["agents", "profiles", `${next.id}.json`], true)
+      if (await exists(target)) throw new WorkspaceError("O perfil de agente já existe.", "CONFLICT")
+      await this.atomicWrite(projectId, ["agents", "profiles", `${next.id}.json`], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "agent_team.profile_created",
+        summary: `Perfil de agente criado: ${next.displayName}`,
+        entityType: "project",
+        entityId: projectId,
+      })
+      return next
+    })
+  }
+
+  async listAgentMissions(projectId: string): Promise<Mission[]> {
+    const folder = await this.safeMatrixPath(projectId, ["agents", "missions"])
+    const files = (await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return [] as string[]
+      throw error
+    })).filter((name) => /^mission_[0-9a-f-]{36}\.json$/.test(name))
+    return (await Promise.all(files.map((name) =>
+      this.readJson(projectId, ["agents", "missions", name], missionSchema),
+    ))).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
+  }
+
+  async getAgentMission(projectId: string, missionId: string): Promise<Mission> {
+    if (!/^mission_[0-9a-f-]{36}$/.test(missionId)) {
+      throw new WorkspaceError("ID de missão inválido.", "INVALID_PATH")
+    }
+    return this.readJson(projectId, ["agents", "missions", `${missionId}.json`], missionSchema)
+  }
+
+  async createAgentMission(
+    projectId: string,
+    mission: Mission,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<Mission> {
+    const next = missionSchema.parse(mission)
+    if (next.projectId !== projectId) {
+      throw new WorkspaceError("A missão pertence a outro projeto.", "INVALID_DATA")
+    }
+    await this.initializeAgentTeam(projectId)
+    return this.withCoordinatorLock(`agent-mission-${next.id}`, async () => {
+      const target = await this.safeMatrixPath(projectId, ["agents", "missions", `${next.id}.json`])
+      if (await exists(target)) throw new WorkspaceError("A missão já existe.", "CONFLICT")
+      await this.atomicWrite(projectId, ["agents", "missions", `${next.id}.json`], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "agent_team.mission_created",
+        summary: `Missão criada: ${next.title}`,
+        entityType: "project",
+        entityId: projectId,
+      })
+      return next
+    })
+  }
+
+  async updateAgentMission(
+    projectId: string,
+    mission: Mission,
+    expectedRevision: string,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<Mission> {
+    const next = missionSchema.parse(mission)
+    if (next.projectId !== projectId) {
+      throw new WorkspaceError("A missão pertence a outro projeto.", "INVALID_DATA")
+    }
+    return this.withCoordinatorLock(`agent-mission-${next.id}`, async () => {
+      const current = await this.getAgentMission(projectId, next.id)
+      if (current.revision !== expectedRevision) throw new RevisionConflictError()
+      await this.atomicWrite(projectId, ["agents", "missions", `${next.id}.json`], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "agent_team.mission_updated",
+        summary: `Missão atualizada: ${next.title} → ${next.status}`,
+        entityType: "project",
+        entityId: projectId,
+      })
+      return next
+    })
+  }
+
+  async listAgentMissionEvidence(projectId: string, missionId?: string): Promise<MissionEvidence[]> {
+    if (missionId && !/^mission_[0-9a-f-]{36}$/.test(missionId)) {
+      throw new WorkspaceError("ID de missão inválido.", "INVALID_PATH")
+    }
+    const folder = await this.safeMatrixPath(projectId, ["agents", "evidence"])
+    const files = (await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return [] as string[]
+      throw error
+    })).filter((name) => /^evidence_[0-9a-f-]{36}\.json$/.test(name))
+    const evidence = await Promise.all(files.map((name) =>
+      this.readJson(projectId, ["agents", "evidence", name], missionEvidenceSchema),
+    ))
+    return evidence
+      .filter((item) => !missionId || item.missionId === missionId)
+      .sort((a, b) => b.recordedAt.localeCompare(a.recordedAt))
+  }
+
+  async recordAgentMissionEvidence(
+    projectId: string,
+    evidence: MissionEvidence,
+    nextMission: Mission,
+    expectedMissionRevision: string,
+    actor: ActivityEvent["actor"] = "agent",
+  ): Promise<{ mission: Mission; evidence: MissionEvidence }> {
+    const nextEvidence = missionEvidenceSchema.parse(evidence)
+    const next = missionSchema.parse(nextMission)
+    if (next.projectId !== projectId || nextEvidence.missionId !== next.id) {
+      throw new WorkspaceError("A evidência e a missão precisam pertencer ao projeto selecionado.", "INVALID_DATA")
+    }
+    if (!next.evidenceIds.includes(nextEvidence.id)) {
+      throw new WorkspaceError("A missão precisa vincular a evidência registrada.", "INVALID_DATA")
+    }
+    return this.withCoordinatorLock(`agent-mission-${next.id}`, async () => {
+      const current = await this.getAgentMission(projectId, next.id)
+      if (current.revision !== expectedMissionRevision) throw new RevisionConflictError()
+      const evidenceTarget = await this.safeMatrixPath(projectId, ["agents", "evidence", `${nextEvidence.id}.json`])
+      if (await exists(evidenceTarget)) throw new WorkspaceError("A evidência já existe.", "CONFLICT")
+      await this.atomicWrite(projectId, ["agents", "evidence", `${nextEvidence.id}.json`], nextEvidence)
+      await this.atomicWrite(projectId, ["agents", "missions", `${next.id}.json`], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "agent_team.evidence_recorded",
+        summary: `Evidência registrada para a missão: ${next.title}`,
+        entityType: "project",
+        entityId: projectId,
+      })
+      return { mission: next, evidence: nextEvidence }
+    })
+  }
+
+  async listAgentMissionHandoffs(projectId: string, missionId?: string): Promise<MissionHandoff[]> {
+    if (missionId && !/^mission_[0-9a-f-]{36}$/.test(missionId)) {
+      throw new WorkspaceError("ID de missão inválido.", "INVALID_PATH")
+    }
+    const folder = await this.safeMatrixPath(projectId, ["agents", "handoffs"])
+    const files = (await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return [] as string[]
+      throw error
+    })).filter((name) => /^handoff_[0-9a-f-]{36}\.json$/.test(name))
+    const handoffs = await Promise.all(files.map((name) =>
+      this.readJson(projectId, ["agents", "handoffs", name], missionHandoffSchema),
+    ))
+    return handoffs
+      .filter((item) => !missionId || item.missionId === missionId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  }
+
+  async createAgentMissionHandoff(
+    projectId: string,
+    handoff: MissionHandoff,
+    expectedMissionRevision: string,
+    actor: ActivityEvent["actor"] = "human",
+  ): Promise<MissionHandoff> {
+    const next = missionHandoffSchema.parse(handoff)
+    return this.withCoordinatorLock(`agent-mission-${next.missionId}`, async () => {
+      const mission = await this.getAgentMission(projectId, next.missionId)
+      if (mission.revision !== expectedMissionRevision) throw new RevisionConflictError()
+      const target = await this.safeMatrixPath(projectId, ["agents", "handoffs", `${next.id}.json`])
+      if (await exists(target)) throw new WorkspaceError("O handoff já existe.", "CONFLICT")
+      await this.atomicWrite(projectId, ["agents", "handoffs", `${next.id}.json`], next)
+      await this.appendActivity(projectId, {
+        actor,
+        action: "agent_team.handoff_recorded",
+        summary: `Handoff registrado para a missão: ${mission.title}`,
+        entityType: "project",
+        entityId: projectId,
+      })
+      return next
+    })
   }
 
   async listAgentRequests(projectId: string): Promise<AgentRequest[]> {

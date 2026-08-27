@@ -25,6 +25,163 @@ afterEach(async () => {
 })
 
 describe("WorkspaceRepository", () => {
+  it("initializes atomic team records without overwriting edited Nilo or Zara profiles", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+
+    const profiles = await repository.listAgentProfiles("sample")
+    expect(profiles.map((profile) => profile.id).sort()).toEqual(["nilo-builder", "zara-link"])
+
+    const niloPath = path.join(root, "apps", "sample", ".matriz", "agents", "profiles", "nilo-builder.json")
+    const edited = { ...profiles.find((profile) => profile.id === "nilo-builder")!, displayName: "Nilo customizado" }
+    await writeFile(niloPath, `${JSON.stringify(edited, null, 2)}\n`)
+
+    await repository.initializeAgentTeam("sample")
+
+    await expect(readFile(niloPath, "utf8")).resolves.toContain("Nilo customizado")
+    await expect(readFile(path.join(root, "apps", "sample", ".matriz", "agents", "profiles", "zara-link.json"), "utf8"))
+      .resolves.toContain("Zara Link")
+  })
+
+  it("persists a mission and its evidence in separate atomic agent records", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    const [profile] = await repository.listAgentProfiles("sample")
+    const mission = await repository.createAgentMission("sample", {
+      schemaVersion: 1,
+      id: "mission_00000000-0000-4000-8000-000000000001",
+      profileId: profile.id,
+      projectId: "sample",
+      title: "Persist team records",
+      objective: "Store mission evidence as reviewable JSON.",
+      allowedPaths: ["src"],
+      authority: "change_scoped",
+      status: "assigned",
+      contextReferences: [],
+      acceptanceCriteria: [],
+      evidenceIds: [],
+      createdAt: "2026-08-27T12:00:00.000Z",
+      updatedAt: "2026-08-27T12:00:00.000Z",
+      revision: "mission-revision",
+    })
+    const nextMission = { ...mission, evidenceIds: ["evidence_00000000-0000-4000-8000-000000000002"], updatedAt: "2026-08-27T12:01:00.000Z", revision: "next-mission-revision" }
+    const evidence = {
+      schemaVersion: 1 as const,
+      id: "evidence_00000000-0000-4000-8000-000000000002",
+      missionId: mission.id,
+      kind: "test" as const,
+      summary: "Focused repository test passed.",
+      recordedBy: "nilo-builder",
+      command: "pnpm --filter @matriz/app-matriz-workbench test",
+      recordedAt: "2026-08-27T12:01:00.000Z",
+    }
+
+    await repository.recordAgentMissionEvidence("sample", evidence, nextMission, mission.revision)
+
+    await expect(repository.getAgentMission("sample", mission.id)).resolves.toEqual(nextMission)
+    await expect(repository.listAgentMissionEvidence("sample", mission.id)).resolves.toEqual([evidence])
+    await expect(repository.updateAgentMission("sample", nextMission, "stale-revision"))
+      .rejects.toBeInstanceOf(RevisionConflictError)
+    await expect(readFile(path.join(root, "apps", "sample", ".matriz", "agents", "missions", `${mission.id}.json`), "utf8"))
+      .resolves.toContain("next-mission-revision")
+  })
+
+  it("recovers an evidence write when the mission update fails after the append", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const profile = (await repository.listAgentProfiles("sample"))[0]!
+    const mission = await repository.createAgentMission("sample", {
+      schemaVersion: 1,
+      id: "mission_00000000-0000-4000-8000-000000000006",
+      profileId: profile.id,
+      projectId: "sample",
+      title: "Recover evidence persistence",
+      objective: "Make the aggregate write retry-safe.",
+      allowedPaths: ["src"], authority: "change_scoped", status: "assigned",
+      contextReferences: [], acceptanceCriteria: [], evidenceIds: [],
+      createdAt: "2026-08-27T12:00:00.000Z", updatedAt: "2026-08-27T12:00:00.000Z",
+      revision: "mission-revision",
+    })
+    const evidence = {
+      schemaVersion: 1 as const,
+      id: "evidence_00000000-0000-4000-8000-000000000007",
+      missionId: mission.id,
+      kind: "note" as const,
+      summary: "Retry-safe aggregate evidence.",
+      recordedBy: "nilo-builder",
+      note: "The evidence is durable before the mission reference is committed.",
+      recordedAt: "2026-08-27T12:01:00.000Z",
+    }
+    const nextMission = { ...mission, evidenceIds: [evidence.id], updatedAt: evidence.recordedAt, revision: "next-mission-revision" }
+    const originalAtomicWrite = (repository as unknown as { atomicWrite: WorkspaceRepository["createAgentMission"] }).atomicWrite
+    let failMissionOnce = true
+    ;(repository as unknown as { atomicWrite: (...args: unknown[]) => Promise<void> }).atomicWrite = async (...args) => {
+      const segments = args[1] as string[]
+      if (failMissionOnce && segments[1] === "missions") {
+        failMissionOnce = false
+        throw new Error("simulated mission write failure")
+      }
+      return (originalAtomicWrite as (...values: unknown[]) => Promise<void>).apply(repository, args)
+    }
+
+    await expect(repository.recordAgentMissionEvidence("sample", evidence, nextMission, mission.revision))
+      .rejects.toThrow("simulated mission write failure")
+    await expect(repository.listAgentMissionEvidence("sample", mission.id)).resolves.toEqual([evidence])
+    await expect(repository.recordAgentMissionEvidence("sample", evidence, nextMission, mission.revision))
+      .resolves.toEqual({ mission: nextMission, evidence })
+  })
+
+  it("does not take over an expired coordinator lease while its process remains alive", async () => {
+    const { root, repository } = await fixture()
+    await mkdir(path.join(root, ".runtime", "workbench", "locks"), { recursive: true })
+    const lockPath = path.join(root, ".runtime", "workbench", "locks", "coordinator--agent-team.lock")
+    await writeFile(lockPath, JSON.stringify({ pid: process.pid, expiresAt: Date.now() - 1 }))
+
+    await expect((repository as unknown as {
+      withCoordinatorLock: (key: string, operation: () => Promise<string>, maxAttempts: number) => Promise<string>
+    }).withCoordinatorLock("agent-team", async () => "taken-over", 2))
+      .rejects.toMatchObject({ code: "CONFLICT" })
+  })
+
+  it("appends validated handoffs without replacing an earlier mission context", async () => {
+    const { repository } = await fixture()
+    await repository.initializeProject("sample")
+    const profile = (await repository.listAgentProfiles("sample"))[0]!
+    const mission = await repository.createAgentMission("sample", {
+      schemaVersion: 1,
+      id: "mission_00000000-0000-4000-8000-000000000003",
+      profileId: profile.id,
+      projectId: "sample",
+      title: "Preserve a team handoff",
+      objective: "Store a compact, human-authored continuation point.",
+      allowedPaths: ["src"],
+      authority: "propose",
+      status: "assigned",
+      contextReferences: [],
+      acceptanceCriteria: [],
+      evidenceIds: [],
+      createdAt: "2026-08-27T12:00:00.000Z",
+      updatedAt: "2026-08-27T12:00:00.000Z",
+      revision: "mission-revision",
+    })
+    const handoff = {
+      schemaVersion: 1 as const,
+      id: "handoff_00000000-0000-4000-8000-000000000004",
+      missionId: mission.id,
+      contextSummary: "Repository records have been initialized.",
+      decisions: ["Human review remains required."],
+      risks: ["No execution runtime exists in phase one."],
+      nextStep: "Review the persisted mission.",
+      authoredBy: { kind: "human" as const, id: "human_00000000-0000-4000-8000-000000000005" },
+      createdAt: "2026-08-27T12:01:00.000Z",
+    }
+
+    await repository.createAgentMissionHandoff("sample", handoff, mission.revision)
+
+    await expect(repository.listAgentMissionHandoffs("sample", mission.id)).resolves.toEqual([handoff])
+    await expect(repository.getAgentMission("sample", mission.id)).resolves.toEqual(mission)
+  })
+
   it("discovers package folders and ignores invalid folders", async () => {
     const { root, repository } = await fixture()
     await mkdir(path.join(root, "apps", "no-package"))

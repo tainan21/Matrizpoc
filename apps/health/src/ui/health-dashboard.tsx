@@ -126,7 +126,7 @@ export function createHealthPoller(deps: HealthPollerDependencies) {
   }
 }
 
-export function HealthDashboard() {
+export function HealthDashboard({ section = "overview" }: { readonly section?: "overview" | "resources" }) {
   const [state, setState] = useState<HealthPollingState>({ view: null, stale: false })
   const [controlHostHealth, setControlHostHealth] = useState<ControlHostHealthDTO | null>(null)
 
@@ -185,13 +185,17 @@ export function HealthDashboard() {
         </div>
       </header>
 
-      <section className="health-dashboard__metrics" aria-label="Métricas do sistema">
+      {section === "overview" ? <section className="health-dashboard__metrics" aria-label="Métricas do sistema">
         <MetricCard metric={view.cpu} />
         <MetricCard metric={view.memory} />
         <MetricCard metric={view.temperature} />
         <MetricCard metric={view.uptime} />
         <MetricCard metric={toControlHostTabsMetric(controlHostHealth)} />
-      </section>
+      </section> : <section className="health-dashboard__metrics" aria-label="Recursos do sistema">
+        <MetricCard metric={view.cpu} />
+        <MetricCard metric={view.memory} />
+        <MetricCard metric={view.temperature} />
+      </section>}
 
       <section className="health-processes" aria-labelledby="health-processes-title">
         <div className="health-processes__header">

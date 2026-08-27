@@ -1,4 +1,4 @@
-export type WorkbenchRuntimeMode = "control-desktop" | "standalone-web" | "test"
+export type WorkbenchRuntimeMode = "native-desktop" | "standalone-web" | "test"
 
 interface RuntimeEnvironment {
   NODE_ENV?: string
@@ -9,7 +9,7 @@ export function resolveWorkbenchRuntimeMode(
   environment: RuntimeEnvironment = process.env,
 ): WorkbenchRuntimeMode {
   if (environment.NODE_ENV === "test") return "test"
-  return environment.WORKBENCH_RUNTIME_MODE === "control-desktop"
-    ? "control-desktop"
+  return ["native-desktop", "control-desktop"].includes(environment.WORKBENCH_RUNTIME_MODE ?? "")
+    ? "native-desktop"
     : "standalone-web"
 }

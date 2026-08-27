@@ -84,3 +84,4 @@
   .rail,
   .loading { transition: none; animation: none; }
 }
+.railGroup{display:grid}.extensionNav{display:grid;gap:3px;margin:2px 0 7px 30px;padding-left:10px;border-left:1px solid var(--line)}.extensionNav strong{font:700 8px ui-monospace;color:#8d7ba3;letter-spacing:.08em}.extensionNav button{border:0;background:transparent;color:#b7a8c8;text-align:left;font:9px ui-monospace;padding:3px 0;cursor:pointer}.extensionNav button:hover{color:#d6a7ff}

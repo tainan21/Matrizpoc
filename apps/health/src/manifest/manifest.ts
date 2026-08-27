@@ -7,7 +7,10 @@ export const manifest: AppManifestDTO = {
   version: "0.1.0",
   contractVersion: "v1",
   primaryRoute: "/",
-  routes: [{ label: "Visão geral", path: "/", order: 0 }],
+  routes: [
+    { label: "Overview", path: "/", order: 0 },
+    { label: "Resources", path: "/resources", order: 1 },
+  ],
   capabilities: [{ id: "health.system.observe", name: "Observar sistema", description: "Lê métricas locais sem controlar processos." }],
   eventsProduced: [], eventsConsumed: [], integrations: [],
   onboardingSupport: { participates: true, hasSpecificStep: false },

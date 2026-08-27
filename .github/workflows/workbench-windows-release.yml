@@ -1,0 +1,31 @@
+name: workbench-windows-release
+
+on:
+  push:
+    tags: ["workbench-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @matriz/app-matriz-workbench test
+      - run: pnpm --filter @matriz/app-matriz-workbench lint
+      - run: pnpm --filter @matriz/app-matriz-workbench typecheck
+      - run: pnpm --filter @matriz/app-matriz-workbench desktop:release
+        env:
+          WORKBENCH_WINDOWS_SIGNING_CERTIFICATE: ${{ secrets.WORKBENCH_WINDOWS_SIGNING_CERTIFICATE }}
+          WORKBENCH_STORE_MANIFEST_PRIVATE_KEY: ${{ secrets.WORKBENCH_STORE_MANIFEST_PRIVATE_KEY }}
+          WORKBENCH_RELEASE_BASE_URL: https://github.com/tainan21/Matrizpoc/releases/download/${{ github.ref_name }}/
+          WORKBENCH_RELEASED_AT: ${{ github.event.repository.updated_at }}
+      - uses: softprops/action-gh-release@v2
+        with: { files: "apps/matriz-workbench/release/*" }

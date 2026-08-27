@@ -51,6 +51,36 @@ The session cookie is HTTP-only and `SameSite=Strict`. It is intentionally not
 marked `Secure` on the default loopback HTTP server. Set
 `WORKBENCH_COOKIE_SECURE=true` only behind a trusted HTTPS terminator.
 
+## Windows desktop
+
+The standalone Windows application is an Electron shell around the packaged
+Next standalone runtime. It accepts only `http://127.0.0.1:3005`, enforces a
+single instance, denies Electron permissions, and runs its renderer with a
+sandbox, context isolation and Node integration disabled. If port `3005` is
+already held by another process, startup stops with an explicit message and
+never terminates that process.
+
+The native process resolves its workspace in this order: the Control-provided
+`MATRIZ_REPO_ROOT` after repository-marker validation, a validated machine-local
+binding in Electron user data, then a folder picked by the native dialog. The
+browser cannot select source paths and the binding is never stored in Git or in
+`.matriz`.
+
+```powershell
+pnpm --filter @matriz/app-matriz-workbench desktop:compile
+pnpm --filter @matriz/app-matriz-workbench desktop:package
+```
+
+`desktop:release` requires `WORKBENCH_WINDOWS_SIGNING_CERTIFICATE`; absence of
+that value, an Ed25519 `WORKBENCH_STORE_MANIFEST_PRIVATE_KEY`, or an HTTPS
+`WORKBENCH_RELEASE_BASE_URL` fails before packaging. The release output contains
+the NSIS setup artifact, a `StorePackageManifestV1` and its detached `.sig`.
+Update check, download and installation are separate trusted native-menu
+actions; the renderer has no updater bridge. The native pairing secret is
+protected with Windows DPAPI through Electron `safeStorage`. The installer includes
+only Electron, the compiled native shell and Next traced runtime/static assets;
+it excludes `.matriz`, `.env*`, sources, docs, logs and caches.
+
 On Windows, confirm that the repository's pinned pnpm 9 is the executable being
 used before installing dependencies. The diagnostic and recovery commands are
 documented in `docs/WINDOWS.md`.

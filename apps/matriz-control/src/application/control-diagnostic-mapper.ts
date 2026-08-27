@@ -1,6 +1,8 @@
 import { createHash } from "node:crypto"
 import type { TerminalSession } from "../domain/terminal"
-import type { WorkbenchDiagnosticInput } from "../integration/workbench/workbench-client"
+export interface ControlDiagnosticInput {
+  projectId: string; actionId: string; sessionId: string; status: "failed" | "exited"; exitCode: number; lines: readonly string[]; occurredAt: string; fingerprint: string
+}
 
 const ansiPattern = /\u001B\[[0-?]*[ -/]*[@-~]/g
 const secretPattern = /((?:token|secret|password|api[_-]?key)\s*[=:]\s*)\S+/gi
@@ -16,7 +18,7 @@ function sanitize(line: string): string {
     .slice(0, 500)
 }
 
-export function toControlDiagnostic(session: TerminalSession): WorkbenchDiagnosticInput | undefined {
+export function toControlDiagnostic(session: TerminalSession): ControlDiagnosticInput | undefined {
   if (session.status !== "failed" && session.status !== "exited") return undefined
   const exitCode = session.exitCode ?? -1
   if (session.status === "exited" && exitCode === 0) return undefined

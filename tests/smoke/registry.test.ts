@@ -122,11 +122,13 @@ describe("registry", () => {
     expect(registry.get("health")?.baseUrl).toBe("http://127.0.0.1:3010")
   })
 
-  it("bootstrap real do Hub registra matrizlib e Health", () => {
+  it("bootstrap real do Hub registra Matriz Identity, MatrizLib e Health", () => {
     const result = bootstrapMatrizHub()
+    expect(result.registeredApps).toContain("matriz-identity")
     expect(result.registeredApps).toContain("matrizlib")
     expect(result.registeredApps).toContain("health")
-    expect(result.registeredApps).toHaveLength(12)
+    expect(result.registeredApps).toHaveLength(13)
+    expect(monorepoConfig.baseUrls["matriz-identity"]).toBe("http://127.0.0.1:8080")
     expect(monorepoConfig.baseUrls.matrizlib).toBe("http://127.0.0.1:3007")
   })
 })

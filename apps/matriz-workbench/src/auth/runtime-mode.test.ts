@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest"
 import { resolveWorkbenchRuntimeMode } from "./runtime-mode"
 
 describe("Workbench runtime mode", () => {
-  it("uses the Control desktop mode only when the server environment declares it", () => {
+  it("uses native desktop mode and maps the legacy Control value to it", () => {
+    expect(resolveWorkbenchRuntimeMode({ WORKBENCH_RUNTIME_MODE: "native-desktop" })).toBe(
+      "native-desktop",
+    )
     expect(resolveWorkbenchRuntimeMode({ WORKBENCH_RUNTIME_MODE: "control-desktop" })).toBe(
-      "control-desktop",
+      "native-desktop",
     )
     expect(resolveWorkbenchRuntimeMode({ WORKBENCH_RUNTIME_MODE: "browser-choice" })).toBe(
       "standalone-web",
@@ -15,7 +18,7 @@ describe("Workbench runtime mode", () => {
     expect(
       resolveWorkbenchRuntimeMode({
         NODE_ENV: "test",
-        WORKBENCH_RUNTIME_MODE: "control-desktop",
+        WORKBENCH_RUNTIME_MODE: "native-desktop",
       }),
     ).toBe("test")
   })

@@ -23,12 +23,21 @@ describe("smart app host", () => {
     expect(withHealthInstalled).toContain('aria-label="Alternar apps"')
   })
 
+  it("exposes Health Overview and Resources only after Health is installed", () => {
+    const markup = renderToStaticMarkup(<SmartAppRail apps={[healthViewModel()]} activeAppId="health" onActivate={() => undefined} onOpenPath={() => undefined} />)
+
+    expect(markup).toContain("System Health")
+    expect(markup).toContain("Overview")
+    expect(markup).toContain("Resources")
+  })
+
   it("renders exactly one external frame and removes it for Control", () => {
     const health = healthViewModel()
-    const externalMarkup = renderToStaticMarkup(<ExternalAppFrame app={health} />)
+    const externalMarkup = renderToStaticMarkup(<ExternalAppFrame app={health} path="/resources" />)
     const controlMarkup = renderToStaticMarkup(<ExternalAppFrame app={null} />)
 
     expect((externalMarkup.match(/<iframe/g) ?? [])).toHaveLength(1)
+    expect(externalMarkup).toContain('src="http://127.0.0.1:3010/resources"')
     expect(controlMarkup).not.toContain("<iframe")
   })
 

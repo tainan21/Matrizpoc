@@ -56,11 +56,11 @@ export async function activateExternalApp({ app, signal, openSession, wait, chec
   return signal.aborted ? "cancelled" : "timeout"
 }
 
-export function ExternalAppFrame({ app }: { readonly app: InstallableAppViewModel | null }) {
+export function ExternalAppFrame({ app, path = "" }: { readonly app: InstallableAppViewModel | null; readonly path?: string }) {
   const frameRef = useRef<HTMLIFrameElement>(null)
   if (!app) return null
   return <>
-    <iframe ref={frameRef} className={styles.frame} src={app.baseUrl} title={app.name} />
+    <iframe ref={frameRef} className={styles.frame} src={`${app.baseUrl}${path}`} title={app.name} />
     {app.appId === "health" ? <HealthHostBridge baseUrl={app.baseUrl} frameRef={frameRef} /> : null}
   </>
 }
@@ -73,9 +73,10 @@ interface ExternalAppStageProps {
   readonly app: InstallableAppViewModel | null
   readonly openSession: (projectId: string, signal: AbortSignal) => Promise<void>
   readonly onOpenTerminal: () => void
+  readonly path?: string
 }
 
-export function ExternalAppStage({ app, openSession, onOpenTerminal }: ExternalAppStageProps) {
+export function ExternalAppStage({ app, openSession, onOpenTerminal, path = "" }: ExternalAppStageProps) {
   const [activation, setActivation] = useState<ExternalAppActivation>({ appId: app?.appId ?? "", result: "starting" })
   const [retry, setRetry] = useState(0)
   const appId = app?.appId
@@ -105,7 +106,7 @@ export function ExternalAppStage({ app, openSession, onOpenTerminal }: ExternalA
   if (!app) return null
   const result = activation.appId === app.appId ? activation.result : "starting"
   const frameApp = frameAppForActivation(app, activation)
-  if (frameApp) return <section className={styles.stage} aria-label={`${app.name} externo`}><ExternalAppFrame app={frameApp} /></section>
+  if (frameApp) return <section className={styles.stage} aria-label={`${app.name} externo`}><ExternalAppFrame app={frameApp} path={path} /></section>
   if (result === "startup-failed") return <section className={styles.stageMessage} aria-live="polite"><span aria-hidden="true">!</span><h1>Não foi possível iniciar {app.name}</h1><p>O Control não conseguiu iniciar o processo local. Consulte o terminal para ver o erro.</p><div><button type="button" onClick={() => setRetry((value) => value + 1)}>Tentar novamente</button><button type="button" onClick={onOpenTerminal}>Abrir terminal</button></div></section>
   if (result === "timeout") return <section className={styles.stageMessage} aria-live="polite"><span aria-hidden="true">!</span><h1>{app.name} não respondeu</h1><p>O Control iniciou o runtime, mas a verificação local não confirmou disponibilidade.</p><div><button type="button" onClick={() => setRetry((value) => value + 1)}>Tentar novamente</button><button type="button" onClick={onOpenTerminal}>Abrir terminal</button></div></section>
 

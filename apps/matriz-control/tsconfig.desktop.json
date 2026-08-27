@@ -12,6 +12,6 @@
     "jsx": "react-jsx",
     "types": ["node"]
   },
-  "include": ["desktop/**/*.ts", "mcp/**/*.ts", "src/application/browser-runtime.ts", "src/application/control-diagnostic-mapper.ts", "src/application/desktop-update-coordinator.ts", "src/application/host-health-snapshot.ts", "src/application/terminal-supervisor.ts", "src/application/workbench-repair-loop.ts", "src/application/workbench-runtime-supervisor.ts", "src/domain/browser.ts", "src/domain/desktop-bridge.ts", "src/domain/terminal.ts", "src/domain/workbench-runtime.ts", "src/integration/browser/**/*.ts", "src/integration/desktop/**/*.ts", "src/integration/projects/project-catalog.ts", "src/integration/workbench/workbench-client.ts"],
+  "include": ["desktop/**/*.ts", "mcp/**/*.ts", "src/application/browser-runtime.ts", "src/application/control-diagnostic-mapper.ts", "src/application/desktop-update-coordinator.ts", "src/application/host-health-snapshot.ts", "src/application/store-package-service.ts", "src/application/terminal-supervisor.ts", "src/domain/browser.ts", "src/domain/desktop-bridge.ts", "src/domain/terminal.ts", "src/integration/browser/**/*.ts", "src/integration/desktop/**/*.ts", "src/integration/projects/project-catalog.ts"],
   "exclude": ["**/*.test.ts", "node_modules"]
 }

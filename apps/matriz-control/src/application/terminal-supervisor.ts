@@ -3,7 +3,7 @@ import { spawn } from "node:child_process"
 import { randomUUID } from "node:crypto"
 import { resolve } from "node:path"
 import type { ResolvedTerminalAction, TerminalSession } from "../domain/terminal"
-import type { WorkbenchDiagnosticInput } from "../integration/workbench/workbench-client"
+import type { ControlDiagnosticInput } from "./control-diagnostic-mapper"
 import { resolveTerminalAction, terminalRoute } from "../integration/projects/project-catalog"
 import { toControlDiagnostic } from "./control-diagnostic-mapper"
 
@@ -44,7 +44,7 @@ class NodeProcessRuntime implements ProcessRuntime {
   }
 }
 
-interface SupervisorOptions { rootDir: string; runtime?: ProcessRuntime; maxLines?: number; resolveAction?: (rootDir: string, projectId: string, actionId: string) => Promise<ResolvedTerminalAction>; onEligibleFailure?: (diagnostic: WorkbenchDiagnosticInput) => Promise<void> }
+interface SupervisorOptions { rootDir: string; runtime?: ProcessRuntime; maxLines?: number; resolveAction?: (rootDir: string, projectId: string, actionId: string) => Promise<ResolvedTerminalAction>; onEligibleFailure?: (diagnostic: ControlDiagnosticInput) => Promise<void> }
 interface ManagedSession { snapshot: TerminalSession; handle: ProcessHandle; partial: string; currentDirectory: string }
 const redact = (line: string) => line
   .replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "")

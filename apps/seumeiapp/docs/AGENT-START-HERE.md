@@ -43,6 +43,12 @@ An invited identity follows `/invite/[token]` → `/login?returnTo=...` when sig
 
 Do not import other apps' internals, create a second Prisma client/config system, persist business state in local storage, or add future placeholder pages.
 
+## Windows shell boundary
+
+The Windows shell is web-first delivery, not another Seumei runtime. Keep Electron code in `desktop/**` and release helpers in `scripts/**`; it must never bundle Next, Prisma, database clients, credentials, or product data. Resolve production origins only through trusted build configuration (`SEUMEI_DESKTOP_APP_URL` and `SEUMEI_DESKTOP_HUB_URL`), never the installed machine environment, and preserve the explicit unavailable screen when configuration or connectivity fails.
+
+Electron may navigate in-app only to the configured Seumei and MyHub origins. External HTTPS links belong in the system browser; deny all other schemes, downloads, permissions, and pop-ups. Keep the browser session persistent but sandboxed, context-isolated, with Node integration and remote preload bridges disabled.
+
 ## Next recommended slice
 
 Integrações justificadas pelo domínio consumidor. Priorize um contrato transacional de convite por e-mail somente quando houver provedor/sandbox; preserve o link manual verdadeiro enquanto isso. Não iniciar pagamento, frete, domínio customizado ou analytics sem requisito, credencial e teste de callback/idempotência.

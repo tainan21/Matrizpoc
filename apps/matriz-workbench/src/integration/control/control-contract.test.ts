@@ -14,11 +14,11 @@ const valid = {
 
 describe("Control diagnostic contract", () => {
   it("publishes a bounded compatible health response", () => {
-    expect(buildControlHealth("control-desktop")).toEqual({
+    expect(buildControlHealth("native-desktop")).toEqual({
       status: "ok",
       appId: "matriz-workbench",
       contractVersion: "workbench-control-v1",
-      mode: "control-desktop",
+      mode: "native-desktop",
     })
   })
 

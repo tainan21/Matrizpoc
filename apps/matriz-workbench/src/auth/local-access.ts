@@ -21,7 +21,7 @@ export function getRequiredLocalToken(
   const configuredToken = environment.WORKBENCH_LOCAL_TOKEN
   if (configuredToken && configuredToken.length >= 16) return configuredToken
   if (isLocalTestAccessEnabled(environment)) return LOCAL_TEST_TOKEN
-  if (environment.WORKBENCH_RUNTIME_MODE !== "control-desktop") {
+  if (!["native-desktop", "control-desktop"].includes(environment.WORKBENCH_RUNTIME_MODE ?? "")) {
     return createHash("sha256")
       .update(`matriz-workbench:demo:${environment.MATRIZ_WORKSPACE_ROOT ?? "local"}`)
       .digest("hex")

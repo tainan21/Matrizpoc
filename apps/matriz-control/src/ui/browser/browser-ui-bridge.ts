@@ -1,7 +1,6 @@
 import type { DesktopCommand } from "../../application/desktop-bridge"
 import type { BrowserTabPayload } from "./browser-presenter"
-import type { WorkbenchRuntimeSnapshot } from "../../domain/workbench-runtime"
-import type { DesktopUpdateSnapshot } from "../../domain/desktop-bridge"
+import type { DesktopUpdateSnapshot, StoreAppSnapshot } from "../../domain/desktop-bridge"
 
 export type BrowserUiResult = unknown
 export type BrowserUiEvent =
@@ -10,8 +9,8 @@ export type BrowserUiEvent =
   | { type: "download.updated"; id: string; filename: string; state: "progressing" | "completed" | "cancelled" | "failed" }
   | { type: "permission.requested"; capsuleId: string; origin: string; permission: string }
   | { type: "runtime.failed"; message: string }
-  | { type: "workbench.updated"; snapshot: WorkbenchRuntimeSnapshot }
   | { type: "update.updated"; snapshot: DesktopUpdateSnapshot }
+  | { type: "store.updated"; snapshots: readonly StoreAppSnapshot[] }
 
 export interface BrowserUiBridge {
   invoke(command: DesktopCommand): Promise<BrowserUiResult>

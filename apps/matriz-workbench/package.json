@@ -2,6 +2,7 @@
   "name": "@matriz/app-matriz-workbench",
   "version": "0.1.0",
   "private": true,
+  "main": "dist/native-desktop/main.js",
   "scripts": {
     "dev": "next dev -H 127.0.0.1 -p 3005",
     "build": "next build",
@@ -16,7 +17,11 @@
     "materialize:matriz-program": "tsx src/cli/materialize-matriz-program.ts",
     "sync:federated-evidence": "tsx src/cli/sync-federated-plan-evidence.ts",
     "verify:mcp": "tsx src/cli/verify-mcp.ts",
-    "mcp": "tsx src/mcp/server.ts"
+    "mcp": "tsx src/mcp/server.ts",
+    "desktop:compile": "tsc -p tsconfig.desktop.json",
+    "desktop:prepare": "pnpm run build && pnpm run desktop:compile && tsx scripts/prepare-desktop-runtime.ts",
+    "desktop:package": "pnpm run desktop:prepare && electron-builder --config electron-builder.config.cjs --win nsis --x64",
+    "desktop:release": "tsx scripts/assert-release-signing.ts && pnpm run desktop:package && tsx scripts/generate-release-manifest.ts"
   },
   "dependencies": {
     "@matriz/design-system": "workspace:*",
@@ -28,6 +33,7 @@
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",
     "@modelcontextprotocol/sdk": "1.30.0",
+    "electron-updater": "6.8.9",
     "next": "16.2.12",
     "react": "19.2.5",
     "react-dom": "19.2.5",
@@ -42,6 +48,8 @@
     "tsx": "4.19.1",
     "typescript": "5.6.3",
     "vitest": "2.1.2",
-    "jsdom": "30.0.1"
+    "jsdom": "30.0.1",
+    "electron": "37.2.5",
+    "electron-builder": "26.0.12"
   }
 }

@@ -31,7 +31,7 @@ export function AppShell({
 }: {
   projects: ProjectNavViewModel[]
   identityLabel: string
-  identitySource: "control" | "hub" | "demo"
+  identitySource: "native" | "hub" | "demo"
   initialRailPreference: RailPreference
   initialTopbarPreference: TopbarPreference
   children: ReactNode

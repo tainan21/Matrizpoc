@@ -62,6 +62,20 @@ geração e investigue qualquer saída inesperada.
 Também são proibidos no Git: `node_modules`, `.next`, `.turbo`, artefatos de
 build/cache/runtime, cobertura gerada, screenshots temporários e logs.
 
+## Instaladores e Store nativa
+
+- O renderer envia somente `appId` e ações tipadas; URLs, paths, comandos,
+  publishers e argumentos de instalador pertencem ao catálogo nativo confiável.
+- Manifest de distribuição remoto exige assinatura verificável, HTTPS,
+  tamanho limitado e SHA-256; o executável exige Authenticode e publisher
+  aprovado antes de ser iniciado.
+- Ausência de canal, chave pública, certificado, publisher ou origem HTTPS
+  obrigatória produz estado `unavailable`; nunca habilita bypass de produção.
+- Instalação e desinstalação usam o mecanismo registrado do Windows. O Control
+  não remove diretamente dados do app nem diretórios de usuário.
+- Instaladores, blockmaps, manifests gerados, assinaturas e caches de download
+  são artefatos de release e não entram no Git.
+
 ## Proposta de package novo
 
 Antes de criar `packages/<grupo>/<pacote>`, registre na proposta:

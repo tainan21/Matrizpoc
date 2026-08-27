@@ -93,11 +93,11 @@ describe("manifests", () => {
     }
   })
 
-  it("declares the installed Workbench host and bounded repair capabilities", () => {
+  it("declares Workbench repair capability without embedding its desktop host in Control", () => {
     expect(workbenchManifest.capabilities.map((capability) => capability.id))
       .toContain("workbench.diagnostics.repair")
     expect(controlManifest.capabilities.map((capability) => capability.id))
-      .toContain("control.workbench.host")
+      .not.toContain("control.workbench.host")
   })
 
   it("contracts integra com spot e seumei via external-link", () => {

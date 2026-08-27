@@ -1,0 +1,18 @@
+appId: com.matriz.seumei
+productName: Seumei
+directories:
+  app: desktop-stage
+  output: desktop-release
+publish:
+  provider: generic
+  url: ${env.SEUMEI_DESKTOP_UPDATE_URL}
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+artifactName: seumei-${version}-windows-x64-setup.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true

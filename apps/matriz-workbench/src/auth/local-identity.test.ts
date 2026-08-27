@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest"
 import { decodeWorkbenchIdentity, encodeWorkbenchIdentity, readHubIdentity, resolveLocalIdentity } from "./local-identity"
 
 describe("local Workbench identity", () => {
-  it("trusts the Control-owned desktop session without depending on Hub", async () => {
+  it("provisions the native desktop identity without depending on Hub", async () => {
     const result = await resolveLocalIdentity({
-      mode: "control-desktop",
+      mode: "native-desktop",
       readHubSession: async () => {
         throw new Error("Hub must not be contacted")
       },
@@ -13,9 +13,9 @@ describe("local Workbench identity", () => {
     expect(result).toEqual({
       status: "authenticated",
       identity: {
-        id: "control-local",
-        label: "Control local",
-        source: "control",
+        id: "native-desktop-local",
+        label: "Desktop local",
+        source: "native",
         roles: ["local-operator"],
       },
     })

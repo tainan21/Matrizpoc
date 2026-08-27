@@ -8,7 +8,7 @@
     "dev:web": "next dev -p 3009",
     "desktop:compile": "tsc -p tsconfig.desktop.json",
     "desktop:dev": "pnpm run desktop:compile && node desktop/launch.mjs",
-    "desktop:build": "corepack pnpm --filter @matriz/app-matriz-workbench build && pnpm run build && pnpm run desktop:compile && electron-builder --win nsis",
+    "desktop:build": "pnpm run build && pnpm run desktop:compile && electron-builder --win nsis",
     "mcp:start": "node dist-desktop/mcp/server.js",
     "build": "next build --webpack",
     "start": "node desktop/start-standalone.mjs",
@@ -32,26 +32,6 @@
       {
         "from": ".next/static",
         "to": "next/apps/matriz-control/.next/static"
-      },
-      {
-        "from": "../matriz-workbench/.next/standalone",
-        "to": "workbench-runtime",
-        "filter": [
-          "**/*",
-          "!apps/matriz-workbench/.matriz{,/**}",
-          "!apps/matriz-workbench/.env*",
-          "!apps/matriz-workbench/*.log",
-          "!apps/matriz-workbench/src{,/**}",
-          "!apps/matriz-workbench/app{,/**}",
-          "!apps/matriz-workbench/docs{,/**}",
-          "!apps/matriz-workbench/AGENTS.md",
-          "!apps/matriz-workbench/README.md",
-          "!apps/matriz-workbench/tsconfig.json"
-        ]
-      },
-      {
-        "from": "../matriz-workbench/.next/static",
-        "to": "workbench-runtime/apps/matriz-workbench/.next/static"
       },
       {
         "from": "desktop/vault-helper.ps1",
@@ -81,7 +61,7 @@
     "@matriz/platform-config": "workspace:*",
     "@modelcontextprotocol/sdk": "1.30.0",
     "@uiw/react-codemirror": "4.25.4",
-    "electron-updater": "6.6.2",
+    "electron-updater": "6.8.9",
     "next": "16.2.12",
     "react": "19.2.5",
     "react-dom": "19.2.5",

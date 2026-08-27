@@ -31,27 +31,18 @@ describe("Matriz Desktop Windows workflows", () => {
     expect(acceptanceWorkflow).toContain("if: always()")
   })
 
-  it("packages the standalone Workbench inside Matriz Control", () => {
+  it("keeps Workbench standalone and ships independent Windows release workflows", () => {
+    const workbenchRelease = readFileSync(path.join(workspaceRoot, ".github/workflows/workbench-windows-release.yml"), "utf8")
+    const seumeiRelease = readFileSync(path.join(workspaceRoot, ".github/workflows/seumei-windows-release.yml"), "utf8")
     expect(workbenchNextConfig).toContain('output: "standalone"')
     expect(workbenchNextConfig).toContain("outputFileTracingRoot: workspaceRoot")
     expect(controlNextConfig).toContain("outputFileTracingRoot: workspaceRoot")
     expect(controlPackage.scripts.build).toBe("next build --webpack")
-    expect(controlPackage.scripts["desktop:build"]).toContain("@matriz/app-matriz-workbench build")
-    const workbenchResource = controlPackage.build.extraResources.find(
-      (resource: { to?: string }) => resource.to === "workbench-runtime",
-    )
-
-    expect(workbenchResource).toMatchObject({
-      from: "../matriz-workbench/.next/standalone",
-    })
-    expect(workbenchResource.filter).toEqual(expect.arrayContaining([
-      "!apps/matriz-workbench/.matriz{,/**}",
-      "!apps/matriz-workbench/.env*",
-      "!apps/matriz-workbench/src{,/**}",
-    ]))
-    expect(controlPackage.build.extraResources).toContainEqual({
-      from: "../matriz-workbench/.next/static",
-      to: "workbench-runtime/apps/matriz-workbench/.next/static",
-    })
+    expect(controlPackage.scripts["desktop:build"]).not.toContain("@matriz/app-matriz-workbench build")
+    expect(controlPackage.build.extraResources.some((resource: { to?: string }) => resource.to === "workbench-runtime")).toBe(false)
+    expect(workbenchRelease).toContain("workbench-v*")
+    expect(workbenchRelease).toContain("desktop:release")
+    expect(seumeiRelease).toContain("seumei-v*")
+    expect(seumeiRelease).toContain("desktop:release")
   })
 })

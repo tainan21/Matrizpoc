@@ -1,5 +1,24 @@
 # Matriz Decision Log
 
+## 2026-08-27 — Workbench e Seumei têm distribuição Windows independente
+
+- **Decisão:** distribuir Workbench e Seumei como apps Electron/NSIS x64
+  independentes, adquiridos pela Store do Matriz Control por manifests v1
+  assinados. Workbench mantém runtime Next local e `.matriz/**`; Seumei mantém
+  a aplicação web como autoridade e usa um shell restrito à origem HTTPS
+  oficial.
+- **Motivo:** cada produto precisa de instalação, atualização e lifecycle
+  próprios sem aumentar o instalador do Control, compartilhar internals ou
+  levar banco/credenciais da Seumei ao desktop.
+- **Impacto:** esta decisão substitui o Workbench embarcado no instalador do
+  Control, a proibição temporária de shell para a nova Seumei e o ledger de
+  instalação exclusivamente no navegador. Health continua como ativação
+  leve; apps nativos usam o registro do Windows como evidência de instalação.
+  Sem assinatura Ed25519 do manifesto, Authenticode/publisher confiável ou
+  origem HTTPS da Seumei, a distribuição permanece indisponível.
+- **Revisar quando:** macOS/Linux/ARM64, catálogo de terceiros, offline Seumei
+  ou um segundo host da Store justificarem outro formato ou trust root.
+
 ## 2026-08-26 — Installable Health remains app-local with runtime-on-open
 
 - **Decision:** keep the Health install ledger and smart-rail mutation in Matriz Control, while Health owns its read-only Windows observation; installation persists only a local app ID and runtime activation happens on open.

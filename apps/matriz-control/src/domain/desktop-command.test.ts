@@ -8,15 +8,6 @@ describe("parseDesktopCommand", () => {
     expect(() => parseDesktopCommand({ type: "page.type", tabId: "tab_1", ref: "m1", text: "x".repeat(100_001) })).toThrow(/invalid/i)
   })
 
-  it("accepts fixed Workbench operations without browser supplied URLs or paths", () => {
-    expect(parseDesktopCommand({ type: "workbench.status", url: "https://evil.example" }))
-      .toEqual({ type: "workbench.status" })
-    expect(parseDesktopCommand({ type: "workbench.open", path: "C:/secret" }))
-      .toEqual({ type: "workbench.open" })
-    expect(parseDesktopCommand({ type: "workbench.restart", command: "whoami" }))
-      .toEqual({ type: "workbench.restart" })
-  })
-
   it("accepts the read-only host health snapshot command without a payload", () => {
     expect(parseDesktopCommand({ type: "health.host-snapshot", ignored: "value" }))
       .toEqual({ type: "health.host-snapshot" })
@@ -33,6 +24,18 @@ describe("parseDesktopCommand", () => {
 
   it("keeps updater commands out of the MCP command surface", () => {
     expect(() => assertAgentDesktopCommand({ type: "update.check" })).toThrow(/human interface/i)
+  })
+
+  it("accepts Store app operations with only a catalog app id and keeps them out of MCP", () => {
+    expect(() => parseDesktopCommand({ type: "store.apps.status", path: "C:/ignored" })).toThrow(/payload/i)
+    expect(() => parseDesktopCommand({ type: "store.app.download", appId: "matriz-workbench", url: "https://evil.example" })).toThrow(/payload/i)
+    expect(() => parseDesktopCommand({ type: "store.app.cancel-download", appId: "seumei", command: "whoami" })).toThrow(/payload/i)
+    expect(parseDesktopCommand({ type: "store.app.install", appId: "seumei" })).toEqual({ type: "store.app.install", appId: "seumei" })
+    expect(parseDesktopCommand({ type: "store.app.open", appId: "seumei" })).toEqual({ type: "store.app.open", appId: "seumei" })
+    expect(parseDesktopCommand({ type: "store.app.uninstall", appId: "seumei" })).toEqual({ type: "store.app.uninstall", appId: "seumei" })
+    expect(parseDesktopCommand({ type: "store.app.check-update", appId: "seumei" })).toEqual({ type: "store.app.check-update", appId: "seumei" })
+    expect(() => parseDesktopCommand({ type: "store.app.download", appId: "unknown" })).toThrow(/invalid/i)
+    expect(() => assertAgentDesktopCommand({ type: "store.app.install", appId: "seumei" })).toThrow(/human interface/i)
   })
 
 })

@@ -171,7 +171,7 @@ export async function unlockAction(formData: FormData) {
 
 export async function lockAction() {
   await requireWorkbenchSession()
-  if (resolveWorkbenchRuntimeMode() === "control-desktop") redirect("/")
+  if (resolveWorkbenchRuntimeMode() === "native-desktop") redirect("/")
   ;(await cookies()).delete(SESSION_COOKIE)
   redirect("/unlock")
 }

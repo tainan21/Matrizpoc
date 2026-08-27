@@ -1,0 +1,33 @@
+name: seumei-windows-release
+
+on:
+  push:
+    tags: ["seumei-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @matriz/app-seumei test
+      - run: pnpm --filter @matriz/app-seumei lint
+      - run: pnpm --filter @matriz/app-seumei typecheck
+      - run: pnpm --filter @matriz/app-seumei desktop:release
+        env:
+          CSC_LINK: ${{ secrets.SEUMEI_WINDOWS_SIGNING_CERTIFICATE }}
+          SEUMEI_STORE_MANIFEST_PRIVATE_KEY: ${{ secrets.SEUMEI_STORE_MANIFEST_PRIVATE_KEY }}
+          SEUMEI_DESKTOP_APP_URL: ${{ vars.SEUMEI_DESKTOP_APP_URL }}
+          SEUMEI_DESKTOP_HUB_URL: ${{ vars.SEUMEI_DESKTOP_HUB_URL }}
+          SEUMEI_DESKTOP_INSTALLER_URL: https://github.com/tainan21/Matrizpoc/releases/download/${{ github.ref_name }}/seumei-0.1.0-windows-x64-setup.exe
+          SEUMEI_DESKTOP_RELEASED_AT: ${{ github.event.repository.updated_at }}
+      - uses: softprops/action-gh-release@v2
+        with: { files: "apps/seumeiapp/desktop-release/*" }

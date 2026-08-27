@@ -69,9 +69,10 @@ describe("production dependency audit gate", () => {
     ]
 
     expect(rootDevDependencies.next).toBe("16.2.12")
+    expect(rootPnpm.overrides["js-yaml"]).toBe("5.4.1")
     expect(rootPnpm.overrides.postcss).toBe("8.5.26")
     expect(rootPnpm.overrides.sharp).toBe("0.35.3")
-    expect(rootPnpm.overrides.nanoid).toBe("3.3.17")
+    expect(rootPnpm.overrides.nanoid).toBe("3.3.18")
 
     for (const app of apps) {
       const manifest = readJson(`apps/${app}/package.json`)

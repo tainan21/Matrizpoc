@@ -2,7 +2,6 @@ import type { AgentPolicy, BrowserTab, Capsule } from "./browser"
 import type { BrowserCommand } from "../application/browser-runtime"
 import type { VaultStatus } from "../integration/browser/bitlocker-vault"
 import type { WorkspaceFileSnapshot } from "../integration/browser/workspace-file-repository"
-import type { WorkbenchRuntimeSnapshot } from "./workbench-runtime"
 import type { ControlHostHealthSnapshot } from "../application/host-health-snapshot"
 
 export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
@@ -12,6 +11,17 @@ export type DesktopUpdateSnapshot = {
   availableVersion: string | null
   progress: number | null
   notes: string | null
+  message: string
+}
+
+export type StoreAppSnapshot = {
+  appId: string
+  kind: "activation" | "windows_installer"
+  state: "unavailable" | "available" | "downloading" | "downloaded" | "cancelled" | "installing" | "installed" | "update_available" | "failed"
+  version: string | null
+  availableVersion: string | null
+  bytesDownloaded: number
+  totalBytes: number | null
   message: string
 }
 
@@ -35,10 +45,11 @@ export type DesktopCommand = BrowserCommand
   | { type: "agent.policy"; capsuleId: string; policy: AgentPolicy }
   | { type: "agent.kill" }
   | { type: "health.host-snapshot" }
-  | { type: "workbench.status" | "workbench.open" | "workbench.restart" }
   | { type: "update.status" | "update.check" | "update.download" | "update.install" }
+  | { type: "store.apps.status" }
+  | { type: "store.app.download" | "store.app.cancel-download" | "store.app.install" | "store.app.open" | "store.app.uninstall" | "store.app.check-update"; appId: "matriz-workbench" | "seumei" }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | WorkbenchRuntimeSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -46,8 +57,8 @@ export type BrowserEvent =
   | { type: "download.updated"; id: string; filename: string; state: "progressing" | "completed" | "cancelled" | "failed" }
   | { type: "permission.requested"; capsuleId: string; origin: string; permission: string }
   | { type: "runtime.failed"; message: string }
-  | { type: "workbench.updated"; snapshot: WorkbenchRuntimeSnapshot }
   | { type: "update.updated"; snapshot: DesktopUpdateSnapshot }
+  | { type: "store.updated"; snapshots: readonly StoreAppSnapshot[] }
 
 export interface DesktopBridge {
   invoke(command: DesktopCommand): Promise<DesktopResult>
@@ -55,8 +66,9 @@ export interface DesktopBridge {
   reportViewport(bounds: { x: number; y: number; width: number; height: number; visible: boolean }): void
 }
 
-const noPayload = new Set(["browser.status", "capsule.list", "project.list", "vault.status", "vault.provision", "vault.unlock", "vault.lock", "agent.kill", "health.host-snapshot", "workbench.status", "workbench.open", "workbench.restart"])
+const noPayload = new Set(["browser.status", "capsule.list", "project.list", "vault.status", "vault.provision", "vault.unlock", "vault.lock", "agent.kill", "health.host-snapshot"])
 const updaterCommands = new Set(["update.status", "update.check", "update.download", "update.install"])
+const storeAppCommands = new Set(["store.app.download", "store.app.cancel-download", "store.app.install", "store.app.open", "store.app.uninstall", "store.app.check-update"])
 const tabOnly = new Set(["tab.activate", "tab.close", "tab.back", "tab.forward", "tab.reload", "page.screenshot", "page.pdf", "page.reader", "page.snapshot"])
 
 export function parseDesktopCommand(value: unknown): DesktopCommand {
@@ -67,6 +79,8 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
     if (Object.keys(command).some((key) => key !== "type")) throw new Error("Updater commands do not accept a payload")
     return { type } as DesktopCommand
   }
+  if (type === "store.apps.status") { assertOnlyKeys(command, ["type"], "Store status commands do not accept a payload"); return { type } }
+  if (storeAppCommands.has(type)) { assertOnlyKeys(command, ["type", "appId"], "Store app command payload may contain only appId"); return { type, appId: choice(command.appId, ["matriz-workbench", "seumei"]) } as DesktopCommand }
   if (noPayload.has(type)) return { type } as DesktopCommand
   if (tabOnly.has(type)) return { type, tabId: text(command.tabId, "tabId", 128) } as DesktopCommand
   if (type === "capsule.create") return { type, name: text(command.name, "name", 80), kind: choice(command.kind, ["human", "agent"]), policy: choice(command.policy, ["human", "agent-safe", "agent-full"]) }
@@ -87,6 +101,7 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
 
 export function assertAgentDesktopCommand(command: DesktopCommand): void {
   if (command.type.startsWith("update.")) throw new Error("Updater commands require the human interface")
+  if (command.type.startsWith("store.")) throw new Error("Store commands require the human interface")
 }
 
 function text(value: unknown, field: string, max: number, allowEmpty = false): string {
@@ -97,4 +112,8 @@ function text(value: unknown, field: string, max: number, allowEmpty = false): s
 function choice<T extends string>(value: unknown, values: readonly T[]): T {
   if (typeof value !== "string" || !values.includes(value as T)) throw new Error("Invalid command choice")
   return value as T
+}
+
+function assertOnlyKeys(command: Record<string, unknown>, allowed: readonly string[], error: string) {
+  if (Object.keys(command).some((key) => !allowed.includes(key))) throw new Error(error)
 }

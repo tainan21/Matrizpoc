@@ -42,3 +42,21 @@ Configure `CORE_DATABASE_URL` e `SEUMEI_DATABASE_URL`, ou uma `DATABASE_URL` com
 - `/api/companies`, `/api/company-selection`, `/api/onboarding`, `/api/members`, `/api/catalog/**`, `/api/recipes/**`, `/api/stock/**`, `/api/orders/**`, `/api/customers/**` e `/api/public/v1/stores/**`: fronteiras HTTP app-local.
 
 Consulte `docs/AGENT-START-HERE.md` para continuar e `../../docs/seumei-migration-ledger.md` para o mapa de assimilação.
+
+## Windows shell
+
+Seumei continua **web-first**. O shell Windows é apenas um cliente Electron mínimo que abre a origem web já publicada; ele não inclui Next.js, Prisma, banco de dados, credenciais ou dados de produto.
+
+O build de produção exige `SEUMEI_DESKTOP_APP_URL` e `SEUMEI_DESKTOP_HUB_URL` HTTPS. Essas origens são gravadas no artefato e não podem ser trocadas pelo ambiente da máquina instalada. Desenvolvimento usa somente `http://127.0.0.1:3008` e `http://127.0.0.1:3000`. Não registre essas variáveis em `.env` versionado.
+
+```powershell
+corepack pnpm --filter @matriz/app-seumei desktop:dev
+corepack pnpm --filter @matriz/app-seumei desktop:compile
+corepack pnpm --filter @matriz/app-seumei desktop:package
+```
+
+O shell usa a sessão persistente `persist:seumei`, sandbox, isolamento de contexto e sem bridge de preload para conteúdo remoto. Somente Seumei e MyHub configurados abrem dentro do aplicativo; links HTTPS externos são encaminhados ao navegador padrão. Pop-ups, permissões, downloads e esquemas inseguros são negados.
+
+Atualizações NSIS são sempre manuais: verificar, baixar e instalar são três ações separadas no menu, com download e instalação ao sair desativados. O build recebe `SEUMEI_DESKTOP_UPDATE_URL` para gerar `app-update.yml` sem aceitar URL do renderer.
+
+Para gerar uma release assinada, defina `CSC_LINK`, `SEUMEI_DESKTOP_INSTALLER_URL`, `SEUMEI_DESKTOP_RELEASED_AT` e `SEUMEI_STORE_MANIFEST_PRIVATE_KEY` (arquivo PEM Ed25519). `desktop:release` gera `release-manifest.json` no contrato `StorePackageManifestV1` e `release-manifest.json.sig`; o manifesto inclui URL HTTPS, tamanho e SHA-256 do instalador determinístico `seumei-<version>-windows-x64-setup.exe`.
