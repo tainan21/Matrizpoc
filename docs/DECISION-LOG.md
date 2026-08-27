@@ -330,3 +330,10 @@ próximos do app responsável.
 - **Motivo:** entregar correções pequenas sem reinstalação completa preservando a fronteira local e a verificação Authenticode.
 - **Impacto:** `autoDownload` e `autoInstallOnAppQuit` ficam desligados; pacote sem `app-update.yml` declara o updater indisponível; produção exige instalador assinado, publisher confiável, blockmap e provider configurados no pipeline.
 - **Revisar quando:** houver múltiplos canais, rollback assinado ou distribuição de apps independentes fora do NSIS do Control.
+
+## 2026-08-27 — Project Host externo permanece app-local e revisado
+
+- **Decisão:** permitir que o Matriz Control registre projetos Node/web externos por seleção nativa, inspeção limitada, receita versionada e aprovação humana; toda execução continua pertencendo ao `TerminalSupervisor` e toda superfície web fica presa à origem loopback aprovada.
+- **Motivo:** operar projetos fora do monorepo sem converter descoberta universal em filesystem ou execução arbitrários, nem criar um package compartilhado sem consumidores reais.
+- **Impacto:** renderer envia somente IDs, revisões e tokens; o processo nativo resolve caminhos, ações, ambiente, portas e URLs. Listeners estrangeiros não são adotados nem encerrados. Remover cadastro preserva os arquivos.
+- **Revisar quando:** houver segundo host real, suporte a stacks não Node, sandbox de sistema operacional ou contrato público estável com outro app.

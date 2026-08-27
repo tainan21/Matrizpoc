@@ -2,6 +2,8 @@
 
 Local operational cockpit for known Matriz projects and processes.
 
+O desktop também hospeda projetos Node/web externos por um fluxo nativo revisado. Consulte [Project Host](docs/PROJECT-HOST.md), [modelo de ameaças](docs/PROJECT-HOST-THREAT-MODEL.md) e [solução de problemas](docs/PROJECT-HOST-TROUBLESHOOTING.md).
+
 ## Ownership
 
 - **Responsibility:** start declared project actions and expose bounded local terminal sessions.
