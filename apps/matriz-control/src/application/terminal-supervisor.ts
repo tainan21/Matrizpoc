@@ -10,10 +10,8 @@ import { toControlDiagnostic } from "./control-diagnostic-mapper"
 export interface ProcessHandle extends EventEmitter { pid: number | null; write(input: string): void; stop(): Promise<void> }
 export interface ProcessRuntime { start(action: ResolvedTerminalAction): ProcessHandle }
 
-export function resolveSpawnSpec(action: ResolvedTerminalAction, platform: NodeJS.Platform = process.platform, commandProcessor = process.env.ComSpec ?? "cmd.exe") {
-  if (platform === "win32" && action.command === "corepack") {
-    return { command: commandProcessor, args: ["/d", "/s", "/c", [action.command, ...action.args].join(" ")] }
-  }
+export function resolveSpawnSpec(action: ResolvedTerminalAction, platform: NodeJS.Platform = process.platform, _commandProcessor = process.env.ComSpec ?? "cmd.exe") {
+  if (platform === "win32" && ["corepack", "npm", "pnpm", "bun"].includes(action.command)) return { command: `${action.command}.cmd`, args: action.args }
   return { command: action.command, args: action.args }
 }
 
@@ -68,7 +66,7 @@ export class TerminalSupervisor {
     const action = await this.resolver(this.options.rootDir, projectId, actionId)
     const id = `term_${randomUUID()}`
     const handle = this.runtime.start(action)
-    const managed: ManagedSession = { handle, partial: "", currentDirectory: action.cwd, snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, route: terminalRoute(this.options.rootDir, action.cwd), port: action.port ?? null, status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
+    const managed: ManagedSession = { handle, partial: "", currentDirectory: action.cwd, snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, route: action.route ?? terminalRoute(this.options.rootDir, action.cwd), port: action.port ?? null, status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
     this.sessions.set(id, managed)
     handle.on("running", () => { managed.snapshot.status = "running" })
     handle.on("output", (chunk: string) => this.append(managed, chunk))

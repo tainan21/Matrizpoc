@@ -9,10 +9,17 @@ class FakeRuntime implements ProcessRuntime {
 }
 
 describe("TerminalSupervisor", () => {
-  it("uses the explicit Windows command processor for a controlled shim", () => {
+  it("resolves a controlled Windows shim without joining arguments into a shell string", () => {
     const action = { projectId: "demo", projectName: "Demo", actionId: "dev" as const, label: "Run", command: "corepack", args: ["pnpm", "run", "dev"], cwd: "C:/repo/apps/demo" }
-    expect(resolveSpawnSpec(action, "win32", "C:/Windows/System32/cmd.exe")).toEqual({ command: "C:/Windows/System32/cmd.exe", args: ["/d", "/s", "/c", "corepack pnpm run dev"] })
+    expect(resolveSpawnSpec(action, "win32", "C:/Windows/System32/cmd.exe")).toEqual({ command: "corepack.cmd", args: ["pnpm", "run", "dev"] })
     expect(resolveSpawnSpec(action, "linux", "")).toEqual({ command: "corepack", args: ["pnpm", "run", "dev"] })
+  })
+
+  it("supports approved external action ids without widening the caller payload", async () => {
+    const runtime = new FakeRuntime()
+    const supervisor = new TerminalSupervisor({ rootDir: "C:/repo", runtime, resolveAction: async () => ({ projectId: "external", projectName: "External", actionId: "run.dev", label: "Run", command: "npm", args: ["run", "dev"], cwd: "C:/Projects/external", route: "project/external", port: 4100 }) })
+    const session = await supervisor.start("external", "run.dev")
+    expect(session).toMatchObject({ actionId: "run.dev", route: "project/external", port: 4100 })
   })
   it("does not pass Control credentials to child projects", () => {
     expect(terminalEnvironment({ NODE_ENV: "test", PATH: "bin", MATRIZ_CONTROL_LOCAL_TOKEN: "secret", MATRIZ_CONTROL_COOKIE_SECURE: "true" })).toEqual({ NODE_ENV: "test", PATH: "bin" })
