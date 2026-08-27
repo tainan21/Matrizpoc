@@ -1,0 +1,177 @@
+{"kind":"deck","id":"pr/61m3tm","name":"Deck"}
+{"kind":"layout","layoutId":"bc6618a2-912a-41a6-87a0-428bd492ca71","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"1b0af4f7-6253-4c00-8efe-af7e688ad80b","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/yq5bpq","slide":1,"title":"MATRIZ / V1","textShapes":4}
+{"kind":"shape","id":"sh/g3qhk3yt","slide":1,"bbox":[0,0,22,720]}
+{"kind":"textbox","id":"sh/f2x0ryx8","slide":1,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[72,74,300,28]}
+{"kind":"textbox","id":"sh/e1ozitgn","slide":1,"text":"Uma principal coerente.\nUm patrimônio preservado.","textPreview":"Uma principal coerente. | Um patrimônio preservado.","textChars":49,"textLines":2,"bbox":[72,168,1030,160]}
+{"kind":"textbox","id":"sh/pszix8fa","slide":1,"text":"Consolidação histórica, arquitetura, instaladores e gates de publicação","textPreview":"Consolidação histórica, arquitetura, instaladores e gates de publicação","textChars":71,"textLines":1,"bbox":[76,374,900,42]}
+{"kind":"textbox","id":"sh/orqho3yp","slide":1,"text":"27 DE AGOSTO DE 2026","textPreview":"27 DE AGOSTO DE 2026","textChars":20,"textLines":1,"bbox":[76,610,350,24]}
+{"kind":"notes","id":"nt/yq5bpq","slide":1,"text":""}
+{"kind":"slide","id":"sl/hhczor","slide":2,"title":"MATRIZ / V1","textShapes":16}
+{"kind":"shape","id":"sh/ihcnyx8v","slide":2,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/5k3mtc7m","slide":2,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/4ju50761","slide":2,"text":"A V1 é seleção auditada — não soma indiscriminada","textPreview":"A V1 é seleção auditada — não soma indiscriminada","textChars":49,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/rm54v2pc","slide":2,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"textbox","id":"sh/6lwn2xor","slide":2,"text":"Branches úteis","textPreview":"Branches úteis","textChars":14,"textLines":1,"bbox":[72,190,260,30]}
+{"kind":"textbox","id":"sh/tonmxc7i","slide":2,"text":"implementadas ou reconstruídas","textPreview":"implementadas ou reconstruídas","textChars":30,"textLines":1,"bbox":[72,230,280,60]}
+{"kind":"textbox","id":"sh/sne5476x","slide":2,"text":"Duplicações","textPreview":"Duplicações","textChars":11,"textLines":1,"bbox":[430,190,260,30]}
+{"kind":"textbox","id":"sh/fq5ozmpo","slide":2,"text":"mantidas como referência histórica","textPreview":"mantidas como referência histórica","textChars":34,"textLines":1,"bbox":[430,230,280,60]}
+{"kind":"textbox","id":"sh/epwn6ho3","slide":2,"text":"Experimentos","textPreview":"Experimentos","textChars":12,"textLines":1,"bbox":[788,190,260,30]}
+{"kind":"textbox","id":"sh/4z2dcjyd","slide":2,"text":"preservados fora da linha principal","textPreview":"preservados fora da linha principal","textChars":35,"textLines":1,"bbox":[788,230,320,60]}
+{"kind":"shape","id":"sh/50be5ozi","slide":2,"bbox":[72,365,1080,150]}
+{"kind":"textbox","id":"sh/ix0va9g7","slide":2,"text":"master","textPreview":"master","textChars":6,"textLines":1,"bbox":[115,405,180,45]}
+{"kind":"textbox","id":"sh/jy9w3ehs","slide":2,"text":"laboratório V1","textPreview":"laboratório V1","textChars":14,"textLines":1,"bbox":[115,454,210,32]}
+{"kind":"textbox","id":"sh/s32dg3y9","slide":2,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[375,420,60,45]}
+{"kind":"textbox","id":"sh/t4be9ozu","slide":2,"text":"gates + auditoria","textPreview":"gates + auditoria","textChars":17,"textLines":1,"bbox":[480,417,300,45]}
+{"kind":"textbox","id":"sh/61kvetg3","slide":2,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[820,420,60,45]}
+{"kind":"textbox","id":"sh/r2tw7yho","slide":2,"text":"main","textPreview":"main","textChars":4,"textLines":1,"bbox":[930,405,160,45]}
+{"kind":"textbox","id":"sh/g7mxk3yl","slide":2,"text":"V1 canônica","textPreview":"V1 canônica","textChars":11,"textLines":1,"bbox":[930,454,180,32]}
+{"kind":"notes","id":"nt/hhczor","slide":2,"text":""}
+{"kind":"slide","id":"sl/ep433f","slide":3,"title":"MATRIZ / V1","textShapes":19}
+{"kind":"shape","id":"sh/xwnuh43i","slide":3,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/a9wb6pk7","slide":3,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/vu5cfuls","slide":3,"text":"O núcleo funcional chegou em oito ondas rastreáveis","textPreview":"O núcleo funcional chegou em oito ondas rastreáveis","textChars":51,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/kzedcz29","slide":3,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"shape","id":"sh/507ul43u","slide":3,"bbox":[72,180,245,145]}
+{"kind":"textbox","id":"sh/ixwvapk3","slide":3,"text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[90,194,50,42]}
+{"kind":"textbox","id":"sh/jy5cjulo","slide":3,"text":"Fundação","textPreview":"Fundação","textChars":8,"textLines":1,"bbox":[90,252,205,48]}
+{"kind":"shape","id":"sh/03utgf25","slide":3,"bbox":[350,180,245,145]}
+{"kind":"textbox","id":"sh/l43u9k3a","slide":3,"text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[368,194,50,42]}
+{"kind":"textbox","id":"sh/h8bihknq","slide":3,"text":"Apps centrais","textPreview":"Apps centrais","textChars":13,"textLines":1,"bbox":[368,252,205,48]}
+{"kind":"shape","id":"sh/w72hofm5","slide":3,"bbox":[628,180,245,145]}
+{"kind":"textbox","id":"sh/v6tgfa5k","slide":3,"text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[646,194,50,42]}
+{"kind":"textbox","id":"sh/u5kzm54z","slide":3,"text":"Identity/Desktop","textPreview":"Identity/Desktop","textChars":16,"textLines":1,"bbox":[646,252,205,48]}
+{"kind":"shape","id":"sh/5cvilknm","slide":3,"bbox":[906,180,245,145]}
+{"kind":"textbox","id":"sh/4bmhsfmh","slide":3,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[924,194,50,42]}
+{"kind":"textbox","id":"sh/jat0ja5w","slide":3,"text":"Seumei/Admin","textPreview":"Seumei/Admin","textChars":12,"textLines":1,"bbox":[924,252,205,48]}
+{"kind":"shape","id":"sh/i9kzq54b","slide":3,"bbox":[72,370,245,145]}
+{"kind":"textbox","id":"sh/t0vip4ny","slide":3,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[90,384,50,42]}
+{"kind":"textbox","id":"sh/szmhwzmd","slide":3,"text":"Hub/MatrizLib","textPreview":"Hub/MatrizLib","textChars":13,"textLines":1,"bbox":[90,442,205,48]}
+{"kind":"shape","id":"sh/cvet8nyl","slide":3,"bbox":[350,370,245,145]}
+{"kind":"textbox","id":"sh/xgnahsz6","slide":3,"text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[368,384,50,42]}
+{"kind":"textbox","id":"sh/atwb6xgv","slide":3,"text":"Control/Workbench","textPreview":"Control/Workbench","textChars":17,"textLines":1,"bbox":[368,442,205,48]}
+{"kind":"shape","id":"sh/bu5sf2hg","slide":3,"bbox":[628,370,245,145]}
+{"kind":"textbox","id":"sh/kjytc7yx","slide":3,"text":"7","textPreview":"7","textChars":1,"textLines":1,"bbox":[646,384,50,42]}
+{"kind":"textbox","id":"sh/lk7alczi","slide":3,"text":"Comandos/Auditoria","textPreview":"Comandos/Auditoria","textChars":18,"textLines":1,"bbox":[646,442,205,48]}
+{"kind":"shape","id":"sh/yhwbaxgr","slide":3,"bbox":[906,370,245,145]}
+{"kind":"textbox","id":"sh/zi5sj2hc","slide":3,"text":"8","textPreview":"8","textChars":1,"textLines":1,"bbox":[924,384,50,42]}
+{"kind":"textbox","id":"sh/0nu903yt","slide":3,"text":"Ops/Pay","textPreview":"Ops/Pay","textChars":7,"textLines":1,"bbox":[924,442,205,48]}
+{"kind":"notes","id":"nt/ep433f","slide":3,"text":""}
+{"kind":"slide","id":"sl/84f4mt","slide":4,"title":"MATRIZ / V1","textShapes":13}
+{"kind":"shape","id":"sh/jm1kjyp0","slide":4,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/kna1c3q5","slide":4,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/loj2l87q","slide":4,"text":"Os gates dão evidência concreta à promoção","textPreview":"Os gates dão evidência concreta à promoção","textChars":42,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/6psjetob","slide":4,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"textbox","id":"sh/7q1knypw","slide":4,"text":"366","textPreview":"366","textChars":3,"textLines":1,"bbox":[80,190,220,72]}
+{"kind":"textbox","id":"sh/8ralg36h","slide":4,"text":"testes smoke aprovados","textPreview":"testes smoke aprovados","textChars":22,"textLines":1,"bbox":[80,264,230,40]}
+{"kind":"textbox","id":"sh/ts32p872","slide":4,"text":"50","textPreview":"50","textChars":2,"textLines":1,"bbox":[365,190,220,72]}
+{"kind":"textbox","id":"sh/2t8j2987","slide":4,"text":"arquivos de teste","textPreview":"arquivos de teste","textChars":17,"textLines":1,"bbox":[365,264,230,40]}
+{"kind":"textbox","id":"sh/nuhkbeps","slide":4,"text":"43/43","textPreview":"43/43","textChars":5,"textLines":1,"bbox":[650,190,220,72]}
+{"kind":"textbox","id":"sh/z2toralg","slide":4,"text":"lint + typecheck","textPreview":"lint + typecheck","textChars":16,"textLines":1,"bbox":[650,264,230,40]}
+{"kind":"textbox","id":"sh/e1k7yp4v","slide":4,"text":"8","textPreview":"8","textChars":1,"textLines":1,"bbox":[955,190,220,72]}
+{"kind":"textbox","id":"sh/14b6tk3m","slide":4,"text":"fontes Prisma auditadas","textPreview":"fontes Prisma auditadas","textChars":23,"textLines":1,"bbox":[955,264,230,40]}
+{"kind":"shape","id":"sh/032p0fm1","slide":4,"bbox":[72,390,1080,128]}
+{"kind":"textbox","id":"sh/ry9ona5k","slide":4,"text":"A main só virou V1 depois da validação do laboratório.","textPreview":"A main só virou V1 depois da validação do laboratório.","textChars":54,"textLines":1,"bbox":[110,426,1000,44]}
+{"kind":"textbox","id":"sh/qx0nu54z","slide":4,"text":"Validação local não equivale a produção: instalação limpa, assinatura e integrações reais continuam no gate.","textPreview":"Validação local não equivale a produção: instalação limpa, assinatura e integrações reais continuam no gate.","textChars":108,"textLines":1,"bbox":[150,545,950,64]}
+{"kind":"notes","id":"nt/84f4mt","slide":4,"text":""}
+{"kind":"slide","id":"sl/o8dw95","slide":5,"title":"MATRIZ / V1","textShapes":5}
+{"kind":"shape","id":"sh/ipkn25of","slide":5,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/5sb6dkn6","slide":5,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/kr254f6l","slide":5,"text":"Control materializa o cockpit operacional","textPreview":"Control materializa o cockpit operacional","textChars":41,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/v2t47q54","slide":5,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"textbox","id":"sh/xobm90nu","slide":5,"text":"Evidência real","textPreview":"Evidência real","textChars":14,"textLines":1,"bbox":[900,205,250,34]}
+{"kind":"textbox","id":"sh/w3250v6p","slide":5,"text":"Execução local com navegação operacional visível e sem dados sensíveis no registro.","textPreview":"Execução local com navegação operacional visível e sem dados sensíveis no registro.","textChars":83,"textLines":1,"bbox":[900,255,270,140]}
+{"kind":"image","id":"im/futsvahk","slide":5,"name":"","alt":"Tela real do Matriz Control","bbox":[72,160,780,490]}
+{"kind":"notes","id":"nt/o8dw95","slide":5,"text":""}
+{"kind":"slide","id":"sl/r23wxm","slide":6,"title":"MATRIZ / V1","textShapes":9}
+{"kind":"shape","id":"sh/x0r2xsrm","slide":6,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/ax0j2dsb","slide":6,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/by9kvi9g","slide":6,"text":"MatrizLib torna os contratos visuais auditáveis","textPreview":"MatrizLib torna os contratos visuais auditáveis","textChars":47,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/k3il8nqd","slide":6,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"textbox","id":"sh/y10j6ds7","slide":6,"text":"99","textPreview":"99","textChars":2,"textLines":1,"bbox":[910,205,220,72]}
+{"kind":"textbox","id":"sh/j29kzi9s","slide":6,"text":"componentes","textPreview":"componentes","textChars":11,"textLines":1,"bbox":[910,279,230,40]}
+{"kind":"textbox","id":"sh/07y1w3at","slide":6,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[910,350,220,72]}
+{"kind":"textbox","id":"sh/1872pore","slide":6,"text":"disponíveis","textPreview":"disponíveis","textChars":11,"textLines":1,"bbox":[910,424,230,40]}
+{"kind":"textbox","id":"sh/tozmx8vy","slide":6,"text":"85","textPreview":"85","textChars":2,"textLines":1,"bbox":[910,495,220,72]}
+{"kind":"textbox","id":"sh/sn6543ut","slide":6,"text":"candidatos","textPreview":"candidatos","textChars":10,"textLines":1,"bbox":[910,569,230,40]}
+{"kind":"image","id":"im/cn25k7yl","slide":6,"name":"","alt":"Catálogo real do MatrizLib","bbox":[72,160,790,500]}
+{"kind":"notes","id":"nt/r23wxm","slide":6,"text":""}
+{"kind":"slide","id":"sl/e6qtqs","slide":7,"title":"MATRIZ / V1","textShapes":19}
+{"kind":"shape","id":"sh/kzqlojyd","slide":7,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/zyh4vexs","slide":7,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/yx83m9g7","slide":7,"text":"Quatro instaladores estão prontos para teste local","textPreview":"Quatro instaladores estão prontos para teste local","textChars":50,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/xwz2t4fm","slide":7,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"shape","id":"sh/cvqlkzy1","slide":7,"bbox":[72,175,1080,62]}
+{"kind":"textbox","id":"sh/bahkrexg","slide":7,"text":"Control Electron","textPreview":"Control Electron","textChars":16,"textLines":1,"bbox":[96,191,420,28]}
+{"kind":"textbox","id":"sh/a983i9gv","slide":7,"text":"208,8 MB","textPreview":"208,8 MB","textChars":8,"textLines":1,"bbox":[570,191,180,28]}
+{"kind":"textbox","id":"sh/p8z2p4fq","slide":7,"text":"OK","textPreview":"OK","textChars":2,"textLines":1,"bbox":[900,191,200,28]}
+{"kind":"shape","id":"sh/o76lgzy5","slide":7,"bbox":[72,255,1080,62]}
+{"kind":"textbox","id":"sh/2pwf2hon","slide":7,"text":"Desktop Tauri","textPreview":"Desktop Tauri","textChars":13,"textLines":1,"bbox":[96,271,420,28]}
+{"kind":"textbox","id":"sh/nq5gvm58","slide":7,"text":"2,6 MB","textPreview":"2,6 MB","textChars":6,"textLines":1,"bbox":[570,271,180,28]}
+{"kind":"textbox","id":"sh/orex4r6d","slide":7,"text":"OK","textPreview":"OK","textChars":2,"textLines":1,"bbox":[900,271,200,28]}
+{"kind":"shape","id":"sh/psnyxwny","slide":7,"bbox":[72,335,1080,62]}
+{"kind":"textbox","id":"sh/elcfyhob","slide":7,"text":"Admin Tauri","textPreview":"Admin Tauri","textChars":11,"textLines":1,"bbox":[96,351,420,28]}
+{"kind":"textbox","id":"sh/fmlgrm5w","slide":7,"text":"2,0 MB","textPreview":"2,0 MB","textChars":6,"textLines":1,"bbox":[570,351,180,28]}
+{"kind":"textbox","id":"sh/0nex0r6h","slide":7,"text":"OK","textPreview":"OK","textChars":2,"textLines":1,"bbox":[900,351,200,28]}
+{"kind":"shape","id":"sh/1onytcn2","slide":7,"bbox":[72,415,1080,62]}
+{"kind":"textbox","id":"sh/qxcfuxof","slide":7,"text":"Ops Tauri","textPreview":"Ops Tauri","textChars":9,"textLines":1,"bbox":[96,431,420,28]}
+{"kind":"textbox","id":"sh/rylgn250","slide":7,"text":"1,8 MB","textPreview":"1,8 MB","textChars":6,"textLines":1,"bbox":[570,431,180,28]}
+{"kind":"textbox","id":"sh/vqh4fehg","slide":7,"text":"OK","textPreview":"OK","textChars":2,"textLines":1,"bbox":[900,431,200,28]}
+{"kind":"shape","id":"sh/apo3690v","slide":7,"bbox":[72,495,1080,62]}
+{"kind":"textbox","id":"sh/xszmh4zm","slide":7,"text":"Seumei Desktop","textPreview":"Seumei Desktop","textChars":14,"textLines":1,"bbox":[96,511,420,28]}
+{"kind":"textbox","id":"sh/wrql8ji1","slide":7,"text":"—","textPreview":"—","textChars":1,"textLines":1,"bbox":[570,511,180,28]}
+{"kind":"textbox","id":"sh/juh4jehc","slide":7,"text":"BLOQUEADO","textPreview":"BLOQUEADO","textChars":9,"textLines":1,"bbox":[900,511,200,28]}
+{"kind":"textbox","id":"sh/it83a907","slide":7,"text":"Hashes SHA-256 completos no manifesto. Binários locais e não assinados.","textPreview":"Hashes SHA-256 completos no manifesto. Binários locais e não assinados.","textChars":71,"textLines":1,"bbox":[72,605,1000,28]}
+{"kind":"notes","id":"nt/e6qtqs","slide":7,"text":""}
+{"kind":"slide","id":"sl/ds0chz","slide":8,"title":"MATRIZ / V1","textShapes":18}
+{"kind":"shape","id":"sh/w72tkru5","slide":8,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/v6tcbmtk","slide":8,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/a5kbihcf","slide":8,"text":"As fronteiras impedem que a consolidação vire acoplamento","textPreview":"As fronteiras impedem que a consolidação vire acoplamento","textChars":57,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/94ru9cbu","slide":8,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"shape","id":"sh/83itg7u9","slide":8,"bbox":[75,250,180,110]}
+{"kind":"textbox","id":"sh/n29c72to","slide":8,"text":"Hub","textPreview":"Hub","textChars":3,"textLines":1,"bbox":[87,272,156,30]}
+{"kind":"textbox","id":"sh/m10bexc3","slide":8,"text":"entrada","textPreview":"entrada","textChars":7,"textLines":1,"bbox":[87,313,156,24]}
+{"kind":"textbox","id":"sh/t0vulwby","slide":8,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[259,282,38,40]}
+{"kind":"shape","id":"sh/szmdsbad","slide":8,"bbox":[300,250,180,110]}
+{"kind":"textbox","id":"sh/ehkz6tcb","slide":8,"text":"Identity","textPreview":"Identity","textChars":8,"textLines":1,"bbox":[312,272,156,30]}
+{"kind":"textbox","id":"sh/zit0zydw","slide":8,"text":"autoridade","textPreview":"autoridade","textChars":10,"textLines":1,"bbox":[312,313,156,24]}
+{"kind":"textbox","id":"sh/0j2h83uh","slide":8,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[484,282,38,40]}
+{"kind":"shape","id":"sh/1kbi18v2","slide":8,"bbox":[525,250,180,110]}
+{"kind":"textbox","id":"sh/qt0z2tcf","slide":8,"text":"Apps","textPreview":"Apps","textChars":4,"textLines":1,"bbox":[537,272,156,30]}
+{"kind":"textbox","id":"sh/rut0vyd0","slide":8,"text":"domínio local","textPreview":"domínio local","textChars":13,"textLines":1,"bbox":[537,313,156,24]}
+{"kind":"textbox","id":"sh/cv2h43ul","slide":8,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[709,282,38,40]}
+{"kind":"shape","id":"sh/dgbix8v6","slide":8,"bbox":[750,250,180,110]}
+{"kind":"textbox","id":"sh/ap4jedcj","slide":8,"text":"Contratos v1","textPreview":"Contratos v1","textChars":12,"textLines":1,"bbox":[762,272,156,30]}
+{"kind":"textbox","id":"sh/bqd07it4","slide":8,"text":"integração","textPreview":"integração","textChars":10,"textLines":1,"bbox":[762,313,156,24]}
+{"kind":"textbox","id":"sh/7u5wzatg","slide":8,"text":"→","textPreview":"→","textChars":1,"textLines":1,"bbox":[934,282,38,40]}
+{"kind":"shape","id":"sh/6twf6psb","slide":8,"bbox":[975,250,180,110]}
+{"kind":"textbox","id":"sh/tw7e1kbm","slide":8,"text":"Storage próprio","textPreview":"Storage próprio","textChars":15,"textLines":1,"bbox":[987,272,156,30]}
+{"kind":"textbox","id":"sh/svyx8fa1","slide":8,"text":"ownership","textPreview":"ownership","textChars":9,"textLines":1,"bbox":[987,313,156,24]}
+{"kind":"textbox","id":"sh/fypw3uts","slide":8,"text":"Sem imports de internals entre apps • UI por ViewModels • domínio forte app-local • bootstrap como composição","textPreview":"Sem imports de internals entre apps • UI por ViewModels • domínio forte app-local • bootstrap como composição","textChars":109,"textLines":1,"bbox":[110,450,1060,80]}
+{"kind":"notes","id":"nt/ds0chz","slide":8,"text":""}
+{"kind":"slide","id":"sl/edcxeg","slide":9,"title":"MATRIZ / V1","textShapes":11}
+{"kind":"shape","id":"sh/03mh0n21","slide":9,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/z2dgri1g","slide":9,"text":"MATRIZ / V1","textPreview":"MATRIZ / V1","textChars":11,"textLines":1,"bbox":[62,42,300,24]}
+{"kind":"textbox","id":"sh/e14fydkv","slide":9,"text":"A publicação depende de quatro decisões objetivas","textPreview":"A publicação depende de quatro decisões objetivas","textChars":49,"textLines":1,"bbox":[62,78,1130,60]}
+{"kind":"textbox","id":"sh/98fyxcji","slide":9,"text":"27 AGO 2026","textPreview":"27 AGO 2026","textChars":11,"textLines":1,"bbox":[1080,48,130,20]}
+{"kind":"textbox","id":"sh/o76h472d","slide":9,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[76,170,60,42]}
+{"kind":"textbox","id":"sh/n6xgv21s","slide":9,"text":"Assinar e testar os executáveis em Windows limpo","textPreview":"Assinar e testar os executáveis em Windows limpo","textChars":48,"textLines":1,"bbox":[150,170,980,56]}
+{"kind":"shape","id":"sh/m5oz2xk7","slide":9,"bbox":[150,234,920,2]}
+{"kind":"textbox","id":"sh/xczy1cju","slide":9,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[76,275,60,42]}
+{"kind":"textbox","id":"sh/wb6h8729","slide":9,"text":"Diagnosticar o Hub preso em carregamento","textPreview":"Diagnosticar o Hub preso em carregamento","textChars":40,"textLines":1,"bbox":[150,275,980,56]}
+{"kind":"shape","id":"sh/6lkve9gv","slide":9,"bbox":[150,339,920,2]}
+{"kind":"textbox","id":"sh/rmdw7exg","slide":9,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[76,380,60,42]}
+{"kind":"textbox","id":"sh/snmdgjy1","slide":9,"text":"Definir duas URLs HTTPS oficiais do Seumei Desktop","textPreview":"Definir duas URLs HTTPS oficiais do Seumei Desktop","textChars":50,"textLines":1,"bbox":[150,380,980,56]}
+{"kind":"shape","id":"sh/d8ve9ofm","slide":9,"bbox":[150,444,920,2]}
+{"kind":"textbox","id":"sh/e94vitg7","slide":9,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[76,485,60,42]}
+{"kind":"textbox","id":"sh/fadwbyxc","slide":9,"text":"Repetir gates e criar a tag v1.0.0 após aceite humano","textPreview":"Repetir gates e criar a tag v1.0.0 após aceite humano","textChars":53,"textLines":1,"bbox":[150,485,980,56]}
+{"kind":"shape","id":"sh/0bmdkjex","slide":9,"bbox":[150,549,920,2]}
+{"kind":"notes","id":"nt/edcxeg","slide":9,"text":""}
+{"kind":"slide","id":"sl/g7gxpb","slide":10,"title":"PRÓXIMO MARCO","textShapes":4}
+{"kind":"shape","id":"sh/3210ji58","slide":10,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/43a1snmt","slide":10,"text":"PRÓXIMO MARCO","textPreview":"PRÓXIMO MARCO","textChars":13,"textLines":1,"bbox":[74,80,300,25]}
+{"kind":"textbox","id":"sh/p4jilsne","slide":10,"text":"Transformar a V1 local\nem uma release pública confiável.","textPreview":"Transformar a V1 local | em uma release pública confiável.","textChars":56,"textLines":2,"bbox":[74,170,1040,135]}
+{"kind":"textbox","id":"sh/ud8zmtor","slide":10,"text":"Assinar  →  instalar em ambiente limpo  →  repetir gates  →  taguear  →  publicar","textPreview":"Assinar  →  instalar em ambiente limpo  →  repetir gates  →  taguear  →  publicar","textChars":81,"textLines":1,"bbox":[75,400,1100,55]}
+{"kind":"textbox","id":"sh/veh0fy5c","slide":10,"text":"O patrimônio permanece recuperável até o aceite final.","textPreview":"O patrimônio permanece recuperável até o aceite final.","textChars":54,"textLines":1,"bbox":[75,570,1000,34]}
+{"kind":"notes","id":"nt/g7gxpb","slide":10,"text":""}
