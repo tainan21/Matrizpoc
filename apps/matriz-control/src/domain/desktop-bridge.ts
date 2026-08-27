@@ -3,6 +3,8 @@ import type { BrowserCommand } from "../application/browser-runtime"
 import type { VaultStatus } from "../integration/browser/bitlocker-vault"
 import type { WorkspaceFileSnapshot } from "../integration/browser/workspace-file-repository"
 import type { ControlHostHealthSnapshot } from "../application/host-health-snapshot"
+import type { ProjectRegistration } from "../modules/projects/domain/project"
+import type { ProjectPreparationPreview } from "../modules/projects/application/project-preparation-service"
 
 export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
 export type DesktopUpdateSnapshot = {
@@ -48,8 +50,18 @@ export type DesktopCommand = BrowserCommand
   | { type: "update.status" | "update.check" | "update.download" | "update.install" }
   | { type: "store.apps.status" }
   | { type: "store.app.download" | "store.app.cancel-download" | "store.app.install" | "store.app.open" | "store.app.uninstall" | "store.app.check-update"; appId: "matriz-workbench" | "seumei" }
+  | { type: "project.pick-root" }
+  | { type: "project.host.list" }
+  | { type: "project.inspect"; projectId: string }
+  | { type: "project.approve"; projectId: string; recipeRevision: string }
+  | { type: "project.prepare.preview"; projectId: string; recipeRevision: string }
+  | { type: "project.prepare"; projectId: string; recipeRevision: string; confirmationToken: string }
+  | { type: "project.start"; projectId: string; actionId: string; recipeRevision: string }
+  | { type: "project.stop" | "project.restart"; projectId: string; sessionId: string }
+  | { type: "project.open"; projectId: string; surfaceId: string }
+  | { type: "project.remove"; projectId: string }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectPreparationPreview | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -59,6 +71,7 @@ export type BrowserEvent =
   | { type: "runtime.failed"; message: string }
   | { type: "update.updated"; snapshot: DesktopUpdateSnapshot }
   | { type: "store.updated"; snapshots: readonly StoreAppSnapshot[] }
+  | { type: "project.updated"; projects: readonly ProjectRegistration[] }
 
 export interface DesktopBridge {
   invoke(command: DesktopCommand): Promise<DesktopResult>
@@ -81,6 +94,13 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
   }
   if (type === "store.apps.status") { assertOnlyKeys(command, ["type"], "Store status commands do not accept a payload"); return { type } }
   if (storeAppCommands.has(type)) { assertOnlyKeys(command, ["type", "appId"], "Store app command payload may contain only appId"); return { type, appId: choice(command.appId, ["matriz-workbench", "seumei"]) } as DesktopCommand }
+  if (type === "project.pick-root" || type === "project.host.list") { assertOnlyKeys(command, ["type"], "Project command payload is invalid"); return { type } }
+  if (type === "project.inspect" || type === "project.remove") { assertOnlyKeys(command, ["type", "projectId"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128) } as DesktopCommand }
+  if (type === "project.approve" || type === "project.prepare.preview") { assertOnlyKeys(command, ["type", "projectId", "recipeRevision"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), recipeRevision: text(command.recipeRevision, "recipeRevision", 128) } as DesktopCommand }
+  if (type === "project.prepare") { assertOnlyKeys(command, ["type", "projectId", "recipeRevision", "confirmationToken"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), recipeRevision: text(command.recipeRevision, "recipeRevision", 128), confirmationToken: text(command.confirmationToken, "confirmationToken", 256) } }
+  if (type === "project.start") { assertOnlyKeys(command, ["type", "projectId", "actionId", "recipeRevision"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), actionId: text(command.actionId, "actionId", 128), recipeRevision: text(command.recipeRevision, "recipeRevision", 128) } }
+  if (type === "project.stop" || type === "project.restart") { assertOnlyKeys(command, ["type", "projectId", "sessionId"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), sessionId: text(command.sessionId, "sessionId", 128) } }
+  if (type === "project.open") { assertOnlyKeys(command, ["type", "projectId", "surfaceId"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), surfaceId: text(command.surfaceId, "surfaceId", 128) } }
   if (noPayload.has(type)) return { type } as DesktopCommand
   if (tabOnly.has(type)) return { type, tabId: text(command.tabId, "tabId", 128) } as DesktopCommand
   if (type === "capsule.create") return { type, name: text(command.name, "name", 80), kind: choice(command.kind, ["human", "agent"]), policy: choice(command.policy, ["human", "agent-safe", "agent-full"]) }
@@ -102,6 +122,7 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
 export function assertAgentDesktopCommand(command: DesktopCommand): void {
   if (command.type.startsWith("update.")) throw new Error("Updater commands require the human interface")
   if (command.type.startsWith("store.")) throw new Error("Store commands require the human interface")
+  if (command.type.startsWith("project.") && command.type !== "project.list" && command.type !== "project.host.list") throw new Error("Project Host mutations require the human interface")
 }
 
 function text(value: unknown, field: string, max: number, allowEmpty = false): string {

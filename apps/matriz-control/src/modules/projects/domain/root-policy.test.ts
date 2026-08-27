@@ -14,6 +14,7 @@ describe("external project root policy", () => {
 
   it("allows an ordinary project directory", () => {
     expect(assertAllowedCanonicalRoot("C:\\Projects\\demo", context)).toBe("C:\\Projects\\demo")
+    expect(assertAllowedCanonicalRoot("C:\\Users\\Taina\\Projects\\demo", context)).toBe("C:\\Users\\Taina\\Projects\\demo")
   })
 
   it("deduplicates canonical Windows paths case-insensitively", () => {

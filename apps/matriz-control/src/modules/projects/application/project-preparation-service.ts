@@ -7,7 +7,7 @@ type Options = {
   store: AtomicProjectStore
   now(): number
   token(): string
-  execute(action: ProjectAction): Promise<{ exitCode: number }>
+  execute(projectId: string, action: ProjectAction): Promise<{ exitCode: number }>
 }
 
 export type ProjectPreparationPreview = Readonly<{
@@ -60,7 +60,7 @@ export class ProjectPreparationService {
     if (record.registration.recipeRevision !== recipeRevision || record.recipe.revision !== recipeRevision) throw new Error("Recipe revision is stale")
     const action = record.recipe.prepareActions.find((item) => item.id === confirmation.actionId)
     if (!action) throw new Error("Approved preparation action is unavailable")
-    const result = await this.options.execute(action)
+    const result = await this.options.execute(projectId, action)
     await this.options.store.save({ ...record, preparationEvidence: { recipeRevision, completedAt: new Date(this.options.now()).toISOString(), exitCode: result.exitCode } })
     return result
   }

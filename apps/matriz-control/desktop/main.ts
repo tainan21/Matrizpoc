@@ -1,16 +1,17 @@
-import { app, BrowserWindow, ipcMain, session, WebContentsView, type DownloadItem, type IpcMainInvokeEvent, type WebContents } from "electron"
+import { app, BrowserWindow, dialog, ipcMain, session, WebContentsView, type DownloadItem, type IpcMainInvokeEvent, type WebContents } from "electron"
 import { autoUpdater } from "electron-updater"
 import { randomBytes, randomUUID } from "node:crypto"
 import { spawn, type ChildProcess } from "node:child_process"
 import { appendFile, chmod, mkdir, readFile, writeFile } from "node:fs/promises"
 import { createServer, type Server } from "node:net"
 import { basename, join } from "node:path"
+import { homedir } from "node:os"
 import { BrowserRuntime, MemoryBrowserRepository, type BrowserCommand, type BrowserRepository } from "../src/application/browser-runtime"
 import { automationCapabilityForTarget, canAgentBootstrapCapsule, navigationTarget, tabsToSuspend, type AgentCapability, type BrowserTab, type Capsule } from "../src/domain/browser"
 import { assertAgentDesktopCommand, parseDesktopCommand, type BrowserEvent, type DesktopCommand, type DesktopResult } from "../src/application/desktop-bridge"
 import { SqliteBrowserRepository } from "../src/integration/browser/sqlite-browser-repository"
 import { WorkspaceFileRepository } from "../src/integration/browser/workspace-file-repository"
-import { listTerminalProjects } from "../src/integration/projects/project-catalog"
+import { listTerminalProjects, resolveTerminalAction } from "../src/integration/projects/project-catalog"
 import { BitLockerVhdxVault, type VaultBackend } from "../src/integration/browser/bitlocker-vault"
 import { ElectronSafeStorageKeyStore, PowerShellVaultHelper } from "./electron-vault-adapters"
 import { CONTROL_SESSION_COOKIE, createSessionValue } from "../src/auth/local-access"
@@ -20,6 +21,14 @@ import { DesktopUpdateCoordinator } from "../src/application/desktop-update-coor
 import { ElectronUpdateAdapter } from "../src/integration/desktop/electron-update-adapter"
 import { StorePackageService, type StorePackageDefinition } from "../src/application/store-package-service"
 import { ElectronStorePackageAdapters } from "./electron-store-adapters"
+import { AtomicProjectStore } from "../src/modules/projects/integration/atomic-project-store"
+import { BoundedProjectReader } from "../src/modules/projects/integration/bounded-project-reader"
+import { ProjectHostService } from "../src/modules/projects/application/project-host-service"
+import { ProjectPreparationService } from "../src/modules/projects/application/project-preparation-service"
+import { ProjectSessionService } from "../src/modules/projects/application/project-session-service"
+import { ProjectReadinessProbe } from "../src/modules/projects/integration/project-readiness"
+import { ProjectHostFacade } from "../src/modules/projects/facade"
+import { ElectronProjectRootAdapter } from "./electron-project-adapters"
 
 app.enableSandbox()
 
@@ -60,11 +69,50 @@ const nativeStore = new StorePackageService({
   trust: { publicKey: process.env.MATRIZ_STORE_ED25519_PUBLIC_KEY, publisher: process.env.MATRIZ_STORE_WINDOWS_PUBLISHER, controlVersion: app.getVersion() },
 })
 nativeStore.subscribe((snapshots) => send({ type: "store.updated", snapshots }))
+const projectStore = new AtomicProjectStore(join(app.getPath("userData"), "project-host", "catalog.json"))
+const projectRoots = new ElectronProjectRootAdapter({
+  pickDirectory: async () => {
+    const result = await dialog.showOpenDialog(window, { properties: ["openDirectory"], title: "Adicionar projeto local" })
+    return result.canceled ? null : result.filePaths[0] ?? null
+  },
+  findRegisteredPath: async (rootRef) => (await projectStore.listNative()).find((item) => item.registration.canonicalRootRef === rootRef)?.canonicalPath,
+  policy: { homeDirectory: homedir(), windowsDirectory: process.env.SystemRoot ?? "C:\\Windows", programFilesDirectories: [process.env.ProgramFiles, process.env["ProgramFiles(x86)"]].filter((value): value is string => Boolean(value)) },
+  id: () => `candidate_${randomUUID()}`,
+  rootId: () => `root_${randomUUID()}`,
+})
+const projectReader = new BoundedProjectReader({ resolveRoot: (rootRef) => projectRoots.resolve(rootRef) })
+const projectHostService = new ProjectHostService({ roots: projectRoots, reader: projectReader, store: projectStore, id: () => `project_${randomUUID()}`, now: () => new Date().toISOString(), desktop: true })
+const projectTerminal = new TerminalSupervisor({
+  rootDir,
+  resolveAction: async (workspaceRoot, projectId, actionId) => {
+    const record = await projectStore.findNative(projectId)
+    if (!record) return resolveTerminalAction(workspaceRoot, projectId, actionId)
+    if (record.registration.trust !== "reviewed") throw new Error("Recipe requires review")
+    const action = [...record.recipe.prepareActions, ...record.recipe.runActions].find((item) => item.id === actionId)
+    if (!action) throw new Error("Unknown approved action")
+    const cwd = await projectRoots.resolve(record.registration.canonicalRootRef)
+    return { projectId, projectName: record.registration.displayName, actionId, label: action.label, command: action.executable, args: [...action.args], cwd, route: `project/${projectId}`, port: action.requestedPorts[0]?.port ?? null }
+  },
+})
+const projectReadiness = new ProjectReadinessProbe({ fetch: async (url) => fetch(url), delay: (ms) => new Promise((resolve) => setTimeout(resolve, ms)), now: Date.now })
+const projectPreparation = new ProjectPreparationService({ store: projectStore, now: Date.now, token: () => `confirm_${randomUUID()}`, execute: async (projectId, action) => { const session = await projectTerminal.start(projectId, action.id); const completed = await projectTerminal.waitForExit(session.id); return { exitCode: completed.exitCode ?? -1 } } })
+const projectSessions = new ProjectSessionService({ store: projectStore, supervisor: projectTerminal, portAvailable, readiness: projectReadiness, now: () => new Date().toISOString() })
+const projectHost = new ProjectHostFacade({ roots: projectRoots, host: projectHostService, preparation: projectPreparation, sessions: projectSessions })
 
 function send(event: BrowserEvent) { if (!window.isDestroyed()) window.webContents.send("matriz:browser:event", event) }
 
+async function portAvailable(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = createServer()
+    probe.unref()
+    probe.once("error", () => resolve(false))
+    probe.listen({ host: "127.0.0.1", port, exclusive: true }, () => probe.close(() => resolve(true)))
+  })
+}
+
 async function createWindow() {
   await ensureRendererServer()
+  await projectHost.reconcile()
   if (!vaultRoot) {
     const userData = app.getPath("userData")
     const helperPath = app.isPackaged ? join(process.resourcesPath, "vault-helper.ps1") : join(__dirname, "../../desktop/vault-helper.ps1")
@@ -162,6 +210,17 @@ function layoutActiveView() {
 }
 
 async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
+  if (command.type === "project.host.list") return projectHost.list()
+  if (command.type === "project.pick-root") { const result = await projectHost.pickAndRegister(); send({ type: "project.updated", projects: await projectHost.list() }); return result }
+  if (command.type === "project.inspect") { const result = await projectHost.inspect(command.projectId); send({ type: "project.updated", projects: await projectHost.list() }); return result }
+  if (command.type === "project.approve") { const result = await projectHost.approve(command.projectId, command.recipeRevision); send({ type: "project.updated", projects: await projectHost.list() }); return result }
+  if (command.type === "project.prepare.preview") return projectHost.previewPreparation(command.projectId, command.recipeRevision)
+  if (command.type === "project.prepare") { await projectHost.prepare(command.projectId, command.recipeRevision, command.confirmationToken); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
+  if (command.type === "project.start") { const result = await projectHost.start(command.projectId, command.actionId, command.recipeRevision); send({ type: "project.updated", projects: await projectHost.list() }); return result }
+  if (command.type === "project.stop") { await projectHost.stop(command.projectId, command.sessionId); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
+  if (command.type === "project.restart") { const result = await projectHost.restart(command.projectId, command.sessionId); return { state: result.status, sessionId: result.id } }
+  if (command.type === "project.remove") { await projectHost.remove(command.projectId); send({ type: "project.updated", projects: await projectHost.list() }); return { ok: true } }
+  if (command.type === "project.open") throw new Error("Project surface hosting is not available yet")
   if (command.type === "store.apps.status") return nativeStore.status()
   if (command.type === "store.app.download") { await nativeStore.download(command.appId); return nativeStore.status() }
   if (command.type === "store.app.cancel-download") { await nativeStore.cancelDownload(command.appId); return nativeStore.status() }

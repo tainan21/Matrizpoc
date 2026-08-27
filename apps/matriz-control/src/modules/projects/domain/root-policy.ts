@@ -24,7 +24,7 @@ export function assertAllowedCanonicalRoot(path: string, context: RootPolicyCont
   const canonical = normalize(resolve(path)).replace(/[\\/]+$/, "") || parse(path).root
   const key = normalizedKey(canonical)
   const rootKey = normalizedKey(parse(canonical).root)
-  const protectedRoots = [context.homeDirectory, context.windowsDirectory, ...context.programFilesDirectories].map((item) => normalize(resolve(item)))
+  const protectedTrees = [context.windowsDirectory, ...context.programFilesDirectories].map((item) => normalize(resolve(item)))
   const sensitive = [
     resolve(context.homeDirectory, ".ssh"),
     resolve(context.homeDirectory, ".gnupg"),
@@ -32,7 +32,7 @@ export function assertAllowedCanonicalRoot(path: string, context: RootPolicyCont
     resolve(context.homeDirectory, ".azure"),
     resolve(context.homeDirectory, "AppData", "Roaming", "Microsoft", "Credentials"),
   ]
-  if (key === rootKey || protectedRoots.some((item) => isSameOrInside(item, canonical)) || sensitive.some((item) => isSameOrInside(item, canonical))) {
+  if (key === rootKey || key === normalizedKey(context.homeDirectory) || protectedTrees.some((item) => isSameOrInside(item, canonical)) || sensitive.some((item) => isSameOrInside(item, canonical))) {
     throw new Error("Project root is too broad or sensitive")
   }
   return canonical

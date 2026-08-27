@@ -20,7 +20,7 @@ async function setup() {
   await store.save({ registration, canonicalPath: "C:\\Projects\\Demo", recipe: { ...material, revision }, sessions: [], preparationEvidence: null, surfacePreference: null, reconciliation: null })
   let now = 1_000
   const executed: ProjectAction[] = []
-  const service = new ProjectPreparationService({ store, now: () => now, token: () => "confirmation_1", execute: async (resolved) => { executed.push(resolved); return { exitCode: 0 } } })
+  const service = new ProjectPreparationService({ store, now: () => now, token: () => "confirmation_1", execute: async (_projectId, resolved) => { executed.push(resolved); return { exitCode: 0 } } })
   return { service, store, revision, executed, advance(ms: number) { now += ms } }
 }
 

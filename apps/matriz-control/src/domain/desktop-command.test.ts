@@ -38,4 +38,25 @@ describe("parseDesktopCommand", () => {
     expect(() => assertAgentDesktopCommand({ type: "store.app.install", appId: "seumei" })).toThrow(/human interface/i)
   })
 
+  it("accepts only ID-based Project Host intents and rejects execution material", () => {
+    expect(parseDesktopCommand({ type: "project.pick-root" })).toEqual({ type: "project.pick-root" })
+    expect(parseDesktopCommand({ type: "project.inspect", projectId: "project_1" })).toEqual({ type: "project.inspect", projectId: "project_1" })
+    expect(parseDesktopCommand({ type: "project.approve", projectId: "project_1", recipeRevision: "rev_1" })).toEqual({ type: "project.approve", projectId: "project_1", recipeRevision: "rev_1" })
+    expect(parseDesktopCommand({ type: "project.prepare.preview", projectId: "project_1", recipeRevision: "rev_1" })).toEqual({ type: "project.prepare.preview", projectId: "project_1", recipeRevision: "rev_1" })
+    expect(parseDesktopCommand({ type: "project.prepare", projectId: "project_1", recipeRevision: "rev_1", confirmationToken: "confirmation_1" })).toEqual({ type: "project.prepare", projectId: "project_1", recipeRevision: "rev_1", confirmationToken: "confirmation_1" })
+    expect(parseDesktopCommand({ type: "project.start", projectId: "project_1", actionId: "run.dev", recipeRevision: "rev_1" })).toEqual({ type: "project.start", projectId: "project_1", actionId: "run.dev", recipeRevision: "rev_1" })
+    expect(parseDesktopCommand({ type: "project.stop", projectId: "project_1", sessionId: "term_1" })).toEqual({ type: "project.stop", projectId: "project_1", sessionId: "term_1" })
+    expect(parseDesktopCommand({ type: "project.restart", projectId: "project_1", sessionId: "term_1" })).toEqual({ type: "project.restart", projectId: "project_1", sessionId: "term_1" })
+    expect(parseDesktopCommand({ type: "project.open", projectId: "project_1", surfaceId: "web" })).toEqual({ type: "project.open", projectId: "project_1", surfaceId: "web" })
+    expect(parseDesktopCommand({ type: "project.remove", projectId: "project_1" })).toEqual({ type: "project.remove", projectId: "project_1" })
+    for (const forbidden of ["path", "command", "args", "env", "port", "url"]) {
+      expect(() => parseDesktopCommand({ type: "project.start", projectId: "project_1", actionId: "run.dev", recipeRevision: "rev_1", [forbidden]: "attacker" })).toThrow(/payload/i)
+    }
+  })
+
+  it("keeps Project Host mutation out of the agent command surface", () => {
+    expect(() => assertAgentDesktopCommand({ type: "project.remove", projectId: "project_1" })).toThrow(/human interface/i)
+    expect(() => assertAgentDesktopCommand({ type: "project.start", projectId: "project_1", actionId: "run.dev", recipeRevision: "rev_1" })).toThrow(/human interface/i)
+  })
+
 })
