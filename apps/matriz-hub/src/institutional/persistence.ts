@@ -16,7 +16,7 @@ import {
   makeIngestionRunRepo,
   makeProjectRepo,
   makeSourceRepo,
-} from "@matriz/platform-db/hub/repositories"
+} from "../integration/prisma/repositories"
 import type { IngestionPipelineRun } from "@matriz/integration-ingestion"
 import type { ProjectManifest } from "@matriz/integration-api-contracts/v1/institutional"
 

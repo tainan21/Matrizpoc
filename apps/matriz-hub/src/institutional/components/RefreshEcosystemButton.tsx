@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
+import { playOperationalSound } from "../../ui/feedback/operational-sounds"
 
 interface RefreshResponse {
   ok: boolean
@@ -30,6 +31,7 @@ export function RefreshEcosystemButton() {
   const [error, setError] = useState<string | null>(null)
 
   function onClick() {
+    void playOperationalSound("execution")
     setError(null)
     startTransition(async () => {
       try {
@@ -40,8 +42,10 @@ export function RefreshEcosystemButton() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = (await res.json()) as RefreshResponse
         setResult(data)
+        void playOperationalSound(data.rejected.length || data.adapters.some((adapter) => adapter.failed) ? "attention" : "success")
         router.refresh()
       } catch (err) {
+        void playOperationalSound("failure")
         setError(err instanceof Error ? err.message : "unknown error")
       }
     })

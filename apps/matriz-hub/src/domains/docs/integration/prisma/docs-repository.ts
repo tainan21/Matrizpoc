@@ -161,10 +161,11 @@ export class DocsPrismaRepository {
       },
     })
 
-    await this.db.docDocument.update({
-      where: { id: document.id },
+    const linked = await this.db.docDocument.updateMany({
+      where: { id: document.id, tenantId: actor.tenantId },
       data: { currentVersionId: version.id },
     })
+    if (linked.count !== 1) throw new Error("MatrizDocs target not found")
 
     const blocks = await this.createBlocks(actor, document.id, version.id, parsed)
     await this.createChunks(actor, document.id, version.id, blocks)
@@ -261,8 +262,8 @@ export class DocsPrismaRepository {
         createdByActorType: actor.actorType,
       },
     })
-    await this.db.docDocument.update({
-      where: { id: doc.id },
+    const updated = await this.db.docDocument.updateMany({
+      where: { id: doc.id, tenantId: actor.tenantId },
       data: {
         title: input.title ?? doc.title,
         status: "draft",
@@ -270,6 +271,7 @@ export class DocsPrismaRepository {
         sensitivity: deriveDocumentSensitivity(parsed),
       },
     })
+    if (updated.count !== 1) throw new Error("Document not found")
     const blocks = await this.createBlocks(actor, doc.id, version.id, parsed)
     await this.createChunks(actor, doc.id, version.id, blocks)
     await this.detectEntities(actor, doc.id, version.id, blocks)
@@ -291,17 +293,24 @@ export class DocsPrismaRepository {
     assertTenantScoped(doc, actor)
     if (!doc.currentVersionId) throw new Error("Document has no current version")
     const now = new Date()
-    const version = await this.db.docDocumentVersion.update({
-      where: { id: doc.currentVersionId },
+    const currentVersion = await this.db.docDocumentVersion.findFirst({
+      where: { id: doc.currentVersionId, documentId: doc.id, tenantId: actor.tenantId },
+    })
+    assertTenantScoped(currentVersion, actor)
+    if (!currentVersion) throw new Error("Document not found")
+    const publishedVersion = await this.db.docDocumentVersion.updateMany({
+      where: { id: doc.currentVersionId, documentId: doc.id, tenantId: actor.tenantId },
       data: { status: "published", publishedAt: now },
     })
-    await this.db.docDocument.update({ where: { id: doc.id }, data: { status: "published" } })
+    if (publishedVersion.count !== 1) throw new Error("Document not found")
+    const publishedDocument = await this.db.docDocument.updateMany({ where: { id: doc.id, tenantId: actor.tenantId }, data: { status: "published" } })
+    if (publishedDocument.count !== 1) throw new Error("Document not found")
     await this.markContextsOutdatedForDocument(actor, doc.id)
     await this.recordTimeline(actor, {
       name: "docs.document.version.published",
       targetType: "document",
       targetId: doc.id,
-      payload: { versionId: version.id, versionNumber: version.versionNumber },
+      payload: { versionId: currentVersion.id, versionNumber: currentVersion.versionNumber },
     })
     const detail = await this.getDocument(actor, doc.id)
     if (!detail) throw new Error("Failed to load published document")
@@ -366,19 +375,31 @@ export class DocsPrismaRepository {
   }
 
   async createKnowledgeEdge(actor: DocsActorContext, input: CreateKnowledgeEdgeInput): Promise<KnowledgeEdgeDTO> {
-    const edge = await this.db.knowledgeEdge.create({
-      data: {
-        tenantId: actor.tenantId,
-        sourceNodeId: input.sourceNodeId,
-        targetNodeId: input.targetNodeId,
-        relationType: input.relationType,
-        status: input.status ?? "suggested",
-        confidence: input.confidence ?? null,
-        evidence: (input.evidence ?? { source: "manual" }) as never,
-        createdByActorId: actor.actorId,
-        createdByActorType: actor.actorType,
-        approvedByActorId: input.status === "approved" ? actor.actorId : null,
-      },
+    if (!input.sourceNodeId || !input.targetNodeId || input.sourceNodeId === input.targetNodeId) {
+      throw new Error("Knowledge relation requires two distinct tenant nodes")
+    }
+    const edge = await this.db.$transaction(async (tx) => {
+      const nodes = await tx.knowledgeNode.findMany({
+        where: { tenantId: actor.tenantId, id: { in: [input.sourceNodeId, input.targetNodeId] } },
+        select: { id: true },
+      })
+      if (nodes.length !== 2 || new Set(nodes.map((node) => node.id)).size !== 2) {
+        throw new Error("Knowledge relation nodes not found for tenant")
+      }
+      return tx.knowledgeEdge.create({
+        data: {
+          tenantId: actor.tenantId,
+          sourceNodeId: input.sourceNodeId,
+          targetNodeId: input.targetNodeId,
+          relationType: input.relationType,
+          status: input.status ?? "suggested",
+          confidence: input.confidence ?? null,
+          evidence: (input.evidence ?? { source: "manual" }) as never,
+          createdByActorId: actor.actorId,
+          createdByActorType: actor.actorType,
+          approvedByActorId: input.status === "approved" ? actor.actorId : null,
+        },
+      })
     })
     await this.recordTimeline(actor, {
       name: input.status === "approved" ? "docs.relation.approved" : "docs.relation.suggested",
@@ -395,20 +416,25 @@ export class DocsPrismaRepository {
   }
 
   async createSuggestion(actor: DocsActorContext, input: CreateSuggestionInput): Promise<SuggestionDTO> {
-    const suggestion = await this.db.docSuggestion.create({
-      data: {
-        tenantId: actor.tenantId,
-        type: input.type,
-        status: "suggested",
-        title: input.title,
-        description: input.description,
-        confidence: input.confidence ?? null,
-        evidence: (input.evidence ?? {}) as never,
-        targetType: input.targetType,
-        targetId: input.targetId,
-        createdByActorId: actor.actorId,
-        createdByActorType: actor.actorType,
-      },
+    if (input.targetType !== "document" || !input.targetId) throw new Error("Suggestions require a tenant-owned document target")
+    const suggestion = await this.db.$transaction(async (tx) => {
+      const target = await tx.docDocument.findFirst({ where: { id: input.targetId, tenantId: actor.tenantId }, select: { id: true } })
+      if (!target) throw new Error("Suggestion document target not found for tenant")
+      return tx.docSuggestion.create({
+        data: {
+          tenantId: actor.tenantId,
+          type: input.type,
+          status: "suggested",
+          title: input.title,
+          description: input.description,
+          confidence: input.confidence ?? null,
+          evidence: (input.evidence ?? {}) as never,
+          targetType: input.targetType,
+          targetId: input.targetId,
+          createdByActorId: actor.actorId,
+          createdByActorType: actor.actorType,
+        },
+      })
     })
     await this.recordTimeline(actor, {
       name: "docs.suggestion.created",
@@ -429,8 +455,12 @@ export class DocsPrismaRepository {
   }
 
   async reviewSuggestion(actor: DocsActorContext, suggestionId: string, status: "accepted" | "rejected"): Promise<SuggestionDTO> {
-    const suggestion = await this.db.docSuggestion.update({
-      where: { id: suggestionId },
+    const target = await this.db.docSuggestion.findFirst({
+      where: { id: suggestionId, tenantId: actor.tenantId },
+    })
+    assertTenantScoped(target, actor)
+    const result = await this.db.docSuggestion.updateMany({
+      where: { id: suggestionId, tenantId: actor.tenantId },
       data: {
         status,
         reviewedByActorId: actor.actorId,
@@ -438,7 +468,12 @@ export class DocsPrismaRepository {
         result: { reviewedAt: new Date().toISOString(), status } as never,
       },
     })
+    if (result.count !== 1) throw new Error("MatrizDocs target not found")
+    const suggestion = await this.db.docSuggestion.findFirst({
+      where: { id: suggestionId, tenantId: actor.tenantId },
+    })
     assertTenantScoped(suggestion, actor)
+    if (!suggestion) throw new Error("MatrizDocs target not found")
     await this.recordTimeline(actor, {
       name: status === "accepted" ? "docs.suggestion.accepted" : "docs.suggestion.rejected",
       targetType: "suggestion",
@@ -456,36 +491,48 @@ export class DocsPrismaRepository {
 
   async createContextPackage(actor: DocsActorContext, input: CreateContextPackageInput): Promise<ContextPackageDTO> {
     const slug = await this.uniqueContextSlug(actor.tenantId, slugify(input.slug ?? input.title))
-    const context = await this.db.docContextPackage.create({
-      data: {
-        tenantId: actor.tenantId,
-        slug,
-        title: input.title,
-        description: input.description,
-        audience: input.audience ?? "internal",
-        status: "draft",
-        visibility: input.visibility ?? "internal",
-        version: 1,
-        summary: input.description ?? `Pacote de contexto ${input.title}.`,
-        mcpUri: `matriz://context/${slug}`,
-      },
-    })
-    let order = 0
-    for (const documentId of input.documentIds ?? []) {
-      const doc = await this.db.docDocument.findFirst({ where: { id: documentId, tenantId: actor.tenantId } })
-      if (!doc) continue
-      await this.db.docContextPackageItem.create({
+    const documentIds = input.documentIds ?? []
+    if (new Set(documentIds).size !== documentIds.length) throw new Error("Context package document IDs must be distinct")
+    const context = await this.db.$transaction(async (tx) => {
+      const documents = documentIds.length === 0
+        ? []
+        : await tx.docDocument.findMany({
+            where: { tenantId: actor.tenantId, id: { in: documentIds } },
+            select: { id: true, currentVersionId: true, title: true },
+          })
+      if (documents.length !== documentIds.length) throw new Error("Context package documents not found for tenant")
+      const byId = new Map(documents.map((document) => [document.id, document]))
+      const created = await tx.docContextPackage.create({
         data: {
           tenantId: actor.tenantId,
-          contextPackageId: context.id,
-          documentId,
-          versionId: doc.currentVersionId,
-          sortOrder: order++,
-          required: order === 1,
-          label: doc.title,
+          slug,
+          title: input.title,
+          description: input.description,
+          audience: input.audience ?? "internal",
+          status: "draft",
+          visibility: input.visibility ?? "internal",
+          version: 1,
+          summary: input.description ?? `Pacote de contexto ${input.title}.`,
+          mcpUri: `matriz://context/${slug}`,
         },
       })
-    }
+      for (const [order, documentId] of documentIds.entries()) {
+        const document = byId.get(documentId)
+        if (!document) throw new Error("Context package documents not found for tenant")
+        await tx.docContextPackageItem.create({
+          data: {
+            tenantId: actor.tenantId,
+            contextPackageId: created.id,
+            documentId,
+            versionId: document.currentVersionId,
+            sortOrder: order,
+            required: order === 0,
+            label: document.title,
+          },
+        })
+      }
+      return created
+    })
     await this.recordTimeline(actor, {
       name: "docs.context.created",
       targetType: "context_package",
@@ -521,8 +568,8 @@ export class DocsPrismaRepository {
     const row = await this.db.docContextPackage.findFirst({ where: { tenantId: actor.tenantId, OR: [{ id: idOrSlug }, { slug: idOrSlug }] } })
     if (!row) throw new Error("Context package not found")
     assertTenantScoped(row, actor)
-    const published = await this.db.docContextPackage.update({
-      where: { id: row.id },
+    const publishedResult = await this.db.docContextPackage.updateMany({
+      where: { id: row.id, tenantId: actor.tenantId },
       data: {
         status: "published",
         version: row.version + 1,
@@ -530,6 +577,10 @@ export class DocsPrismaRepository {
         mcpUri: row.mcpUri ?? `matriz://context/${row.slug}`,
       },
     })
+    if (publishedResult.count !== 1) throw new Error("Context package not found")
+    const published = await this.db.docContextPackage.findFirst({ where: { id: row.id, tenantId: actor.tenantId } })
+    assertTenantScoped(published, actor)
+    if (!published) throw new Error("Context package not found")
     await this.refreshMcpSnapshot(actor, {
       uri: published.mcpUri ?? `matriz://context/${published.slug}`,
       resourceType: "context",

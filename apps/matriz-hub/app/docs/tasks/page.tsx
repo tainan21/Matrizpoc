@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, Stack, Text, Badge } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable } from "../../../src/domains/docs/presentation/components"
 import { docsToneForStatus } from "../../../src/domains/docs/presentation/presenters"
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export default async function TaskCandidatesPage() {
   try {
-    const candidates = await makeDocsRepository().listTaskCandidates(defaultDocsActorContext)
+    const candidates = await makeDocsRepository().listTaskCandidates(await getDocsPageActorContext())
     return (
       <Stack gap={6}>
         <DocsHeader title="Task candidates" description="Fila de tarefas sugeridas por documentos. MatrizDocs nao cria Sprint final diretamente." />

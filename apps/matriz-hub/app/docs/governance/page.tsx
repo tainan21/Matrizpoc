@@ -1,5 +1,5 @@
 import { Card, CardHeader, CardTitle, Stack, Text, Badge } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable } from "../../../src/domains/docs/presentation/components"
 import { docsToneForSensitivity, docsToneForStatus } from "../../../src/domains/docs/presentation/presenters"
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export default async function GovernanceCandidatesPage() {
   try {
-    const candidates = await makeDocsRepository().listGovernanceCandidates(defaultDocsActorContext)
+    const candidates = await makeDocsRepository().listGovernanceCandidates(await getDocsPageActorContext())
     return (
       <Stack gap={6}>
         <DocsHeader title="Governance candidates" description="Documentos sensiveis viram candidatos para revisao institucional, sem aprovar nada automaticamente." />

@@ -19,6 +19,9 @@ import {
 } from "./types"
 import { listResources, readResource } from "./resources"
 import { MCP_TOOLS, callTool } from "./tools"
+import type { DocsActorContext } from "../domains/docs/domain/types"
+
+export type McpPrincipal = { docsActor: DocsActorContext; userId: string; tenantId: string }
 
 const SERVER_INFO = {
   name: "matriz-hub-mcp",
@@ -34,6 +37,7 @@ const SERVER_CAPABILITIES = {
 
 export async function handleMcpRequest(
   req: JsonRpcRequest,
+  principal?: McpPrincipal,
 ): Promise<JsonRpcResponse> {
   const id = req.id ?? null
 
@@ -44,6 +48,9 @@ export async function handleMcpRequest(
       error: { code: JSON_RPC_ERRORS.INVALID_REQUEST, message: "Invalid JSON-RPC request" },
     }
   }
+  const requirePrincipal = () => principal
+    ? principal
+    : null
 
   try {
     switch (req.method) {
@@ -62,7 +69,9 @@ export async function handleMcpRequest(
         return { jsonrpc: "2.0", id, result: {} }
 
       case "resources/list": {
-        const resources = await listResources()
+        const authenticated = requirePrincipal()
+        if (!authenticated) return { jsonrpc: "2.0", id, error: { code: JSON_RPC_ERRORS.INTERNAL_ERROR, message: "Authentication required" } }
+        const resources = await listResources(authenticated)
         return { jsonrpc: "2.0", id, result: { resources } }
       }
 
@@ -78,7 +87,9 @@ export async function handleMcpRequest(
             },
           }
         }
-        const content = await readResource(uri)
+        const authenticated = requirePrincipal()
+        if (!authenticated) return { jsonrpc: "2.0", id, error: { code: JSON_RPC_ERRORS.INTERNAL_ERROR, message: "Authentication required" } }
+        const content = await readResource(uri, authenticated)
         if (!content) {
           return {
             jsonrpc: "2.0",
@@ -108,7 +119,9 @@ export async function handleMcpRequest(
             },
           }
         }
-        const result = await callTool(name, args)
+        const authenticated = requirePrincipal()
+        if (!authenticated) return { jsonrpc: "2.0", id, error: { code: JSON_RPC_ERRORS.INTERNAL_ERROR, message: "Authentication required" } }
+        const result = await callTool(name, args, authenticated)
         return { jsonrpc: "2.0", id, result }
       }
 
@@ -122,15 +135,13 @@ export async function handleMcpRequest(
           },
         }
     }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
+  } catch {
     return {
       jsonrpc: "2.0",
       id,
       error: {
         code: JSON_RPC_ERRORS.INTERNAL_ERROR,
         message: "Internal MCP server error",
-        data: message,
       },
     }
   }

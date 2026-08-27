@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button, Card, CardHeader, CardTitle, Stack, Text } from "@matriz/design-ui"
-import { defaultDocsActorContext } from "../../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable } from "../../../../src/domains/docs/presentation/components"
 
@@ -13,7 +13,7 @@ interface Props {
 export default async function EditDocPage({ params }: Props) {
   try {
     const { docId } = await params
-    const detail = await makeDocsRepository().getDocument(defaultDocsActorContext, docId)
+    const detail = await makeDocsRepository().getDocument(await getDocsPageActorContext(), docId)
     if (!detail) return <DocsUnavailable error={new Error("Documento nao encontrado")} />
     const content = detail.blocks.map((b) => (b.type === "heading" ? `# ${b.plainText}` : b.plainText)).join("\n\n")
     return (

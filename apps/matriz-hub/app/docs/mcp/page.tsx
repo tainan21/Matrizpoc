@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, Stack, Text, Badge } from "@matriz/design-ui"
 import { DOCS_MCP_TOOLS } from "../../../src/domains/docs/mcp/tools"
-import { defaultDocsActorContext } from "../../../src/domains/docs/application/access"
+import { getDocsPageActorContext } from "../../../src/domains/docs/application/page-context"
 import { makeDocsRepository } from "../../../src/domains/docs/integration/prisma/docs-repository"
 import { DocsHeader, DocsNav, DocsUnavailable } from "../../../src/domains/docs/presentation/components"
 
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export default async function McpPage() {
   try {
-    const resources = await makeDocsRepository().listMcpResources(defaultDocsActorContext)
+    const resources = await makeDocsRepository().listMcpResources(await getDocsPageActorContext())
     return (
       <Stack gap={6}>
         <DocsHeader title="MCP MatrizDocs" description="Painel de recursos e tools para agentes. Toda leitura deve gerar timeline." />

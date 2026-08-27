@@ -1,18 +1,19 @@
 import { NextResponse } from "next/server"
-import { mockTenants } from "@matriz/access-tenants"
 import { getGlobalOnboardingStore } from "@matriz/flows-onboarding"
 import { MATRIZ_APP_IDS } from "@matriz/foundation-constants"
+import { getHubRequestContext, HubAuthError } from "../../../src/auth/hub-session"
 
 export const dynamic = "force-dynamic"
 
-export function GET() {
+export function GET(request: Request) {
+  let context
+  try { context = getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
   const store = getGlobalOnboardingStore()
-  const status = mockTenants.map((tenant) => {
-    const progress = store.load(tenant.id)
+  const status = [context.session.activeTenantId].map((tenantId) => {
+    const progress = store.load(tenantId)
     const completed = Boolean(progress?.completedAt)
     return {
-      tenantId: tenant.id,
-      tenantName: tenant.name,
+      tenantId,
       startedAt: progress?.startedAt ?? null,
       completedAt: progress?.completedAt ?? null,
       apps: MATRIZ_APP_IDS.map((appId) => {
@@ -29,5 +30,5 @@ export function GET() {
       }),
     }
   })
-  return NextResponse.json({ status })
+  return NextResponse.json({ status }, { headers: { "cache-control": "private, no-store" } })
 }
