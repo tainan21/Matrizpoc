@@ -76,4 +76,15 @@ describe("independent Prisma migration roots", () => {
     expect(runner).toContain("Expected release table to be absent")
     expect(runner).toContain("Expected release table to exist")
   })
+
+  it("prepares every migration role with database CREATE permission", () => {
+    const preparation = readFileSync(
+      join(root, "tooling", "sql", "prepare-ci-runtime-roles.sql"),
+      "utf8",
+    )
+
+    expect(preparation).toContain("'ops', 'pay'")
+    expect(preparation).toContain("GRANT CREATE ON DATABASE")
+    expect(preparation).toContain("current_database()")
+  })
 })

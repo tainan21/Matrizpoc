@@ -68,5 +68,11 @@ was the source of the stale Control experience.
 - global smoke suite after official Prisma client generation: 50 files and
   366 tests passed.
 
+The first PR validation exposed a pre-existing CI bootstrap gap: migration
+roles owned their schemas but lacked database-level `CREATE`, and the role list
+omitted the already-supported `ops` and `pay` schemas. The preparation SQL now
+creates all eight role pairs and grants database `CREATE` only to migration
+roles; runtime roles remain restricted.
+
 All generated build outputs remain ignored. No generated `app.asar` is included
 in this consolidation change.
