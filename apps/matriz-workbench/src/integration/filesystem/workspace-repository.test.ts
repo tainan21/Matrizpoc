@@ -217,9 +217,9 @@ describe("WorkspaceRepository", () => {
     await expect(
       readFile(path.join(root, ".matriz", "project.json"), "utf8"),
     ).resolves.toContain('"projectId": "matriz-infra-hub"')
-    await expect(readdir(path.join(root, "apps", "sample"))).resolves.toEqual([
-      "package.json",
+    expect((await readdir(path.join(root, "apps", "sample"))).sort()).toEqual([
       "README.md",
+      "package.json",
     ])
   })
 

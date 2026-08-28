@@ -14,7 +14,7 @@ export function workbenchDesktopServer(installRoot: string) {
   return {
     host: WORKBENCH_DESKTOP_HOST,
     port: WORKBENCH_DESKTOP_PORT,
-    serverPath: path.join(
+    serverPath: path.win32.join(
       installRoot,
       ".next",
       "standalone",

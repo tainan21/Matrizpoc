@@ -76,4 +76,31 @@ describe("independent Prisma migration roots", () => {
     expect(runner).toContain("Expected release table to be absent")
     expect(runner).toContain("Expected release table to exist")
   })
+
+  it("prepares every migration role with database CREATE permission", () => {
+    const preparation = readFileSync(
+      join(root, "tooling", "sql", "prepare-ci-runtime-roles.sql"),
+      "utf8",
+    )
+
+    expect(preparation).toContain("'ops', 'pay'")
+    expect(preparation).toContain("GRANT CREATE ON DATABASE")
+    expect(preparation).toContain("current_database()")
+  })
+
+  it("keeps the contracts template relation aligned with its migration", () => {
+    const contractsSchema = readFileSync(join(root, "prisma", "contracts", "schema.prisma"), "utf8")
+
+    expect(contractsSchema).toContain(
+      "@relation(fields: [tenantId, templateId], references: [tenantId, id], onDelete: NoAction)",
+    )
+  })
+
+  it("keeps the CI forced-RLS inventory aligned with the consolidated schemas", () => {
+    const verification = readFileSync(join(root, "tooling", "sql", "verify-tenant-rls.sql"), "utf8")
+
+    expect(verification).toContain("actual <> 79")
+    expect(verification).toContain("Expected 79 forced-RLS tenant tables")
+    expect(verification.match(/ON CONFLICT \("tenantId"\) DO UPDATE SET id=EXCLUDED\.id/g)).toHaveLength(3)
+  })
 })

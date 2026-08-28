@@ -7,7 +7,7 @@ BEGIN
   FROM pg_class table_object JOIN pg_namespace namespace ON namespace.oid = table_object.relnamespace
   WHERE namespace.nspname IN ('core', 'hub', 'spot', 'seumei', 'contracts', 'willdash')
     AND table_object.relrowsecurity AND table_object.relforcerowsecurity;
-  IF actual <> 46 THEN RAISE EXCEPTION 'Expected 46 forced-RLS tenant tables, got %', actual; END IF;
+  IF actual <> 79 THEN RAISE EXCEPTION 'Expected 79 forced-RLS tenant tables, got %', actual; END IF;
 
   IF EXISTS (
     SELECT 1 FROM pg_roles WHERE rolname = ANY (ARRAY[
@@ -91,7 +91,7 @@ SET ROLE matriz_hub_runtime; DO $$ BEGIN IF (SELECT count(*) FROM hub.knowledge_
 
 BEGIN; SET ROLE matriz_spot_runtime; SELECT set_config('matriz.tenant_id', 'tenant-a', true);
 SELECT pg_temp.verify_runtime_role('matriz_spot_runtime', 'SELECT count(*) FROM spot.spot_preferences',
-  'INSERT INTO spot.spot_preferences (id,"tenantId","updatedAt") VALUES (''spot-new'',''tenant-a'',CURRENT_TIMESTAMP)',
+  'INSERT INTO spot.spot_preferences (id,"tenantId","updatedAt") VALUES (''spot-new'',''tenant-a'',CURRENT_TIMESTAMP) ON CONFLICT ("tenantId") DO UPDATE SET id=EXCLUDED.id',
   'UPDATE spot.spot_preferences SET "tenantId"=''tenant-b'' WHERE id=''spot-new''',
   'UPDATE spot.spot_preferences SET "preferredCurrency"=''USD'' WHERE id=''spot-new''', 'DELETE FROM spot.spot_preferences WHERE id=''spot-new''',
   'SELECT count(*) FROM hub.knowledge_nodes'); COMMIT;
@@ -99,7 +99,7 @@ SET ROLE matriz_spot_runtime; DO $$ BEGIN IF (SELECT count(*) FROM spot.spot_pre
 
 BEGIN; SET ROLE matriz_seumei_runtime; SELECT set_config('matriz.tenant_id', 'tenant-a', true);
 SELECT pg_temp.verify_runtime_role('matriz_seumei_runtime', 'SELECT count(*) FROM seumei.seumei_preferences',
-  'INSERT INTO seumei.seumei_preferences (id,"tenantId","updatedAt") VALUES (''seumei-new'',''tenant-a'',CURRENT_TIMESTAMP)',
+  'INSERT INTO seumei.seumei_preferences (id,"tenantId","updatedAt") VALUES (''seumei-new'',''tenant-a'',CURRENT_TIMESTAMP) ON CONFLICT ("tenantId") DO UPDATE SET id=EXCLUDED.id',
   'UPDATE seumei.seumei_preferences SET "tenantId"=''tenant-b'' WHERE id=''seumei-new''',
   'UPDATE seumei.seumei_preferences SET "preferredCurrency"=''USD'' WHERE id=''seumei-new''', 'DELETE FROM seumei.seumei_preferences WHERE id=''seumei-new''',
   'SELECT count(*) FROM contracts.contract_templates'); COMMIT;
@@ -115,7 +115,7 @@ SET ROLE matriz_contracts_runtime; DO $$ BEGIN IF (SELECT count(*) FROM contract
 
 BEGIN; SET ROLE matriz_willdash_runtime; SELECT set_config('matriz.tenant_id', 'tenant-a', true);
 SELECT pg_temp.verify_runtime_role('matriz_willdash_runtime', 'SELECT count(*) FROM willdash.willdash_preferences',
-  'INSERT INTO willdash.willdash_preferences (id,"tenantId","updatedAt") VALUES (''willdash-new'',''tenant-a'',CURRENT_TIMESTAMP)',
+  'INSERT INTO willdash.willdash_preferences (id,"tenantId","updatedAt") VALUES (''willdash-new'',''tenant-a'',CURRENT_TIMESTAMP) ON CONFLICT ("tenantId") DO UPDATE SET id=EXCLUDED.id',
   'UPDATE willdash.willdash_preferences SET "tenantId"=''tenant-b'' WHERE id=''willdash-new''',
   'UPDATE willdash.willdash_preferences SET "preferredCadence"=''DAILY'' WHERE id=''willdash-new''', 'DELETE FROM willdash.willdash_preferences WHERE id=''willdash-new''',
   'SELECT count(*) FROM core.tenants'); COMMIT;

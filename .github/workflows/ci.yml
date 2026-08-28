@@ -39,6 +39,9 @@ jobs:
       SEUMEI_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=seumei
       CONTRACTS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=contracts
       WILLDASH_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=willdash
+      OPS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=ops
+      PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay
+      SITES_CANONICAL_ORIGINS: https://sites.example.invalid
       MIGRATION_TEST_ZERO_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_zero
       MIGRATION_TEST_N_MINUS_ONE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_previous
       CORE_MIGRATION_DATABASE_URL: postgresql://matriz_core_migration:ci-core-migration@127.0.0.1:5432/matriz_migrations_zero?schema=core
@@ -97,7 +100,9 @@ jobs:
         run: pnpm verify:boundaries
       - name: Build affected applications
         if: github.event_name == 'pull_request'
-        run: pnpm build:affected
+        run: |
+          git branch --force main origin/main
+          pnpm build:affected
       - name: Build all applications
         if: github.event_name == 'push'
         run: pnpm build

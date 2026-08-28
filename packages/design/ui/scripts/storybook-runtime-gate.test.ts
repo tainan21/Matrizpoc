@@ -10,6 +10,7 @@ const packageJson = JSON.parse(
 describe("Storybook runtime gate", () => {
   it("scans JavaScript module outputs in both supported extensions", () => {
     expect(runtimeGate.isJavaScriptModuleFile).toBeTypeOf("function")
+    expect(runtimeGate.checkStorybookRuntime).toBeTypeOf("function")
     expect(runtimeGate.isJavaScriptModuleFile?.("iframe.js")).toBe(true)
     expect(runtimeGate.isJavaScriptModuleFile?.("catalog.mjs")).toBe(true)
     expect(runtimeGate.isJavaScriptModuleFile?.("catalog.css")).toBe(false)
