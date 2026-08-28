@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto"
 
-import type { DistributionProductInputV1, DistributionProductV1, DistributionReleaseInputV1 } from "@matriz/integration-api-contracts"
+import type {
+  DistributionProductInputV1,
+  DistributionProductV1,
+  DistributionReleaseInputV1,
+} from "@matriz/integration-api-contracts"
 import type { DistributionRepository } from "../application/distribution-service"
 
 export function createMemoryDistributionRepository(): DistributionRepository {
@@ -10,7 +14,9 @@ export function createMemoryDistributionRepository(): DistributionRepository {
   const idempotent = new Map<string, unknown>()
   const audits: Array<{ actorId: string; action: string; targetId: string }> = []
 
-  function replay<T>(operation: string, key: string): T | undefined { return idempotent.get(`${operation}:${key}`) as T | undefined }
+  function replay<T>(operation: string, key: string): T | undefined {
+    return idempotent.get(`${operation}:${key}`) as T | undefined
+  }
   function record<T>(key: string, value: T, actorId: string, action: string, targetId: string): T {
     idempotent.set(`${action}:${key}`, value)
     audits.push({ actorId, action, targetId })
@@ -31,21 +37,38 @@ export function createMemoryDistributionRepository(): DistributionRepository {
       if (existing) return existing
       const current = products.get(productId)
       if (!current) throw new Error("Distribution product was not found")
-      const updated = { ...current, ...input, windows: input.windows ? { ...current.windows, ...input.windows } : current.windows }
+      const updated = {
+        ...current,
+        ...input,
+        windows: input.windows ? { ...current.windows, ...input.windows } : current.windows,
+      }
       products.set(productId, updated)
       return record(key, updated, actorId, "product.updated", productId)
     },
-    async createRelease(productId: string, input: DistributionReleaseInputV1, actorId: string, key: string) {
+    async createRelease(
+      productId: string,
+      input: DistributionReleaseInputV1,
+      actorId: string,
+      key: string,
+    ) {
       const existing = replay<NonNullable<DistributionProductV1["release"]>>("release.created", key)
       if (existing) return existing
       if (!products.has(productId)) throw new Error("Distribution product was not found")
-      const created = { ...input, releaseId: randomUUID(), status: "draft" as const, publishedAt: null }
+      const created = {
+        ...input,
+        releaseId: randomUUID(),
+        status: "draft" as const,
+        publishedAt: null,
+      }
       releaseProducts.set(created.releaseId, productId)
       releases.set(created.releaseId, created)
       return record(key, created, actorId, "release.created", created.releaseId)
     },
     async publishRelease(releaseId: string, actorId: string, key: string, publishedAt: string) {
-      const existing = replay<NonNullable<DistributionProductV1["release"]>>("release.published", key)
+      const existing = replay<NonNullable<DistributionProductV1["release"]>>(
+        "release.published",
+        key,
+      )
       if (existing) return existing
       const productId = releaseProducts.get(releaseId)
       if (!productId) throw new Error("Distribution release was not found")
@@ -67,13 +90,18 @@ export function createMemoryDistributionRepository(): DistributionRepository {
       const retired = { ...current, status: "retired" as const }
       releases.set(releaseId, retired)
       const product = products.get(productId)
-      if (product?.release?.releaseId === releaseId) products.set(productId, { ...product, release: null })
+      if (product?.release?.releaseId === releaseId)
+        products.set(productId, { ...product, release: null })
       return record(key, retired, actorId, "release.retired", releaseId)
     },
-    async product(productId) { return products.get(productId) ?? null },
+    async product(productId) {
+      return products.get(productId) ?? null
+    },
     async catalog(generatedAt: string) {
       return { schemaVersion: "v1" as const, generatedAt, products: [...products.values()] }
     },
-    async audit() { return [...audits] },
+    async audit() {
+      return [...audits]
+    },
   }
 }

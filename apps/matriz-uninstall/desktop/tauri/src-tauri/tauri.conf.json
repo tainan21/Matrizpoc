@@ -10,8 +10,18 @@
     "frontendDist": "../../../dist"
   },
   "app": {
-    "windows": [{ "title": "Matriz Uninstall Tauri", "width": 1240, "height": 820, "minWidth": 940, "minHeight": 640 }],
-    "security": { "csp": "default-src 'self'; connect-src 'self' https://github.com https://*.githubusercontent.com http://127.0.0.1:*; style-src 'self' 'unsafe-inline'" }
+    "windows": [
+      {
+        "title": "Matriz Uninstall Tauri",
+        "width": 1240,
+        "height": 820,
+        "minWidth": 940,
+        "minHeight": 640
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' https://github.com https://*.githubusercontent.com http://127.0.0.1:*; style-src 'self' 'unsafe-inline'"
+    }
   },
   "bundle": {
     "active": true,

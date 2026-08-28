@@ -8,22 +8,32 @@ describe("DistributionCatalogClient", () => {
 
   it("uses the last validated catalog while offline", async () => {
     localStorage.clear()
-    const online = new DistributionCatalogClient("http://hub.test", async () => Response.json(catalog))
+    const online = new DistributionCatalogClient("http://hub.test", async () =>
+      Response.json(catalog),
+    )
     await online.load()
-    const offline = new DistributionCatalogClient("http://hub.test", async () => { throw new Error("offline") })
+    const offline = new DistributionCatalogClient("http://hub.test", async () => {
+      throw new Error("offline")
+    })
 
     expect(await offline.load()).toEqual(catalog)
   })
 
   it("fails closed when neither network nor a valid cache is available", async () => {
     localStorage.clear()
-    const client = new DistributionCatalogClient("http://hub.test", async () => { throw new Error("offline") })
+    const client = new DistributionCatalogClient("http://hub.test", async () => {
+      throw new Error("offline")
+    })
     await expect(client.load()).rejects.toThrow("Nenhum catálogo confiável")
   })
 
   it("does not discard a validated network catalog when file storage is unavailable", async () => {
-    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new DOMException("blocked") })
-    const client = new DistributionCatalogClient("http://hub.test", async () => Response.json(catalog))
+    vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("blocked")
+    })
+    const client = new DistributionCatalogClient("http://hub.test", async () =>
+      Response.json(catalog),
+    )
     await expect(client.load()).resolves.toEqual(catalog)
   })
 

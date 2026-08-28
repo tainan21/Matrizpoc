@@ -9,11 +9,19 @@ describe("initial distribution catalog", () => {
     await seedInitialDistributionCatalog(service)
     const products = (await service.catalog()).products
 
-    expect(products.map(({ productId }) => productId)).toEqual(expect.arrayContaining([
-      "matriz-control-tauri", "matriz-control-electron", "matriz-admin-tauri", "matriz-ops-tauri",
-      "seumei-electron", "matriz-workbench-electron", "matriz-pay", "matriz-uninstall-tauri", "matriz-uninstall-electron",
-    ]))
+    expect(products.map(({ productId }) => productId)).toEqual(
+      expect.arrayContaining([
+        "matriz-control-tauri",
+        "matriz-control-electron",
+        "matriz-admin-tauri",
+        "matriz-ops-tauri",
+        "seumei-electron",
+        "matriz-workbench-electron",
+        "matriz-pay",
+        "matriz-uninstall-tauri",
+        "matriz-uninstall-electron",
+      ]),
+    )
     expect(products.find(({ productId }) => productId === "matriz-pay")?.state).toBe("unavailable")
   })
 })
-

@@ -1,4 +1,7 @@
-import type { DistributionCatalogV1, DistributionProductV1 } from "@matriz/integration-api-contracts"
+import type {
+  DistributionCatalogV1,
+  DistributionProductV1,
+} from "@matriz/integration-api-contracts"
 
 export type { DistributionCatalogV1, DistributionProductV1 }
 export type ProductStatus = "installed" | "outdated" | "available" | "unavailable" | "inconsistent"
@@ -36,7 +39,11 @@ export interface CleanupCandidate {
   readonly estimatedBytes: number
 }
 
-export interface OperationResult { readonly operationId: string; readonly status: "completed" | "cancelled" | "failed"; readonly message: string }
+export interface OperationResult {
+  readonly operationId: string
+  readonly status: "completed" | "cancelled" | "failed"
+  readonly message: string
+}
 
 export interface DesktopGateway {
   readonly shell: "tauri" | "electron" | "browser"
@@ -49,4 +56,3 @@ export interface DesktopGateway {
   cleanup(productId: string, candidateIds: readonly string[]): Promise<OperationResult>
   selfUninstall(): Promise<OperationResult>
 }
-

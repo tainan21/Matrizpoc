@@ -48,10 +48,24 @@
     "appId": "com.matriz.uninstall.electron",
     "productName": "Matriz Uninstall Electron",
     "asar": true,
-    "directories": { "output": "release" },
-    "files": ["desktop/electron-dist/**/*", "dist/**/*", "package.json"],
-    "win": { "target": ["nsis"] },
-    "nsis": { "oneClick": false, "perMachine": false, "allowToChangeInstallationDirectory": true },
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/electron-dist/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
     "artifactName": "Matriz-Uninstall-Electron-Setup-${version}.${ext}"
   }
 }

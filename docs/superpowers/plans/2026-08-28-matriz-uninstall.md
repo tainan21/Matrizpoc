@@ -35,4 +35,3 @@ Electron 44 e NSIS.
 - [ ] Catálogo inicial, cache offline e auto-desinstalação.
 - [ ] Aceitação Windows, benchmark, workflow e artefatos.
 - [ ] Gates finais, revisão, PR e merge sem force em `main`.
-

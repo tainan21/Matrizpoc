@@ -35,7 +35,10 @@ const release = {
 
 describe("DistributionService", () => {
   it("publishes an idempotent release and exposes only the published catalog", async () => {
-    const service = new DistributionService(createMemoryDistributionRepository(), () => new Date("2026-08-28T13:00:00.000Z"))
+    const service = new DistributionService(
+      createMemoryDistributionRepository(),
+      () => new Date("2026-08-28T13:00:00.000Z"),
+    )
     await service.createProduct(actor, product, "product-request")
     const draft = await service.createRelease(actor, product.productId, release, "release-request")
 
@@ -52,7 +55,8 @@ describe("DistributionService", () => {
   it("denies catalog changes without the management capability", async () => {
     const service = new DistributionService(createMemoryDistributionRepository())
 
-    expect(() => service.createProduct({ userId: "viewer", capabilities: [] }, product, "denied-request"))
-      .toThrow("distribution.catalog.manage")
+    expect(() =>
+      service.createProduct({ userId: "viewer", capabilities: [] }, product, "denied-request"),
+    ).toThrow("distribution.catalog.manage")
   })
 })

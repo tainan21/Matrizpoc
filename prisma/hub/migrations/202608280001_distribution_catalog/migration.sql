@@ -68,4 +68,3 @@ CREATE INDEX "distribution_idempotency_actorId_createdAt_idx" ON "distribution_i
 ALTER TABLE "distribution_releases" ADD CONSTRAINT "distribution_releases_productId_fkey" FOREIGN KEY ("productId") REFERENCES "distribution_products"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "distribution_audits" ADD CONSTRAINT "distribution_audits_productId_fkey" FOREIGN KEY ("productId") REFERENCES "distribution_products"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "distribution_audits" ADD CONSTRAINT "distribution_audits_releaseId_fkey" FOREIGN KEY ("releaseId") REFERENCES "distribution_releases"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-

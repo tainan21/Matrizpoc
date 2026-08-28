@@ -8,9 +8,15 @@ export function parseWindowsCommandLine(command: string): { executable: string; 
   let quoted = false
   for (let index = 0; index < input.length; index += 1) {
     const character = input[index]
-    if (character === '"') { quoted = !quoted; continue }
+    if (character === '"') {
+      quoted = !quoted
+      continue
+    }
     if (/\s/.test(character) && !quoted) {
-      if (token) { tokens.push(token); token = "" }
+      if (token) {
+        tokens.push(token)
+        token = ""
+      }
       continue
     }
     token += character
