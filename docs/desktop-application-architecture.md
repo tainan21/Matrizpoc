@@ -4,6 +4,11 @@
 > Matriz. Este documento complementa as leis arquiteturais; ele não autoriza
 > imports entre apps nem desloca domínio de produto para packages.
 
+O estado comprovado e a classificação de cada app ficam em
+`docs/application-runtime-inventory.md`. Este documento define a regra; o
+inventário registra onde cada aplicação está sem transformar implementação
+existente em exceção automática.
+
 ## Política vigente
 
 O ecossistema é **Tauri-first, Electron-by-exception**.

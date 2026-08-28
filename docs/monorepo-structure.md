@@ -3,6 +3,10 @@
 > Mapa canônico de ownership e promoção. Este documento separa o que existe no
 > repositório do alvo aprovado pelo programa Matriz.
 
+Stacks e classificações desktop mudam em ritmo diferente do ownership. Consulte
+`docs/application-runtime-inventory.md` para o estado vivo de runtime e
+`docs/desktop-application-architecture.md` para a política Tauri-first.
+
 ## Estado atual
 
 ```text
