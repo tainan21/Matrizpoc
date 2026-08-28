@@ -50,7 +50,7 @@ describe("health polling", () => {
     expect(states.at(-1)).toEqual({ view: null, stale: true })
     expect(toHealthDashboardStatus(states.at(-1)!)).toEqual({
       title: "Leitura indisponível",
-      message: "Tentando reconectar ao sensor local…",
+      message: "Tentando reconectar ao sensor local….",
     })
     poller.stop()
   })
