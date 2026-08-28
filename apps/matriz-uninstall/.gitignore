@@ -1,0 +1,6 @@
+/dist/
+/release/
+/desktop/electron-dist/
+/desktop/tauri/src-tauri/target/
+/desktop/tauri/src-tauri/gen/
+*.log

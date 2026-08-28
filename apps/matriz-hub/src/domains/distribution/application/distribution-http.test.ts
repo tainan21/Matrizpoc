@@ -27,6 +27,7 @@ describe("distribution HTTP handlers", () => {
 
     expect(response.status).toBe(200)
     expect(response.headers.get("cache-control")).toBe("public, max-age=60, stale-while-revalidate=300")
+    expect(response.headers.get("access-control-allow-origin")).toBe("*")
     expect(await response.json()).toMatchObject({ schemaVersion: "v1", products: [] })
   })
 
@@ -51,4 +52,3 @@ describe("distribution HTTP handlers", () => {
     expect(await authorized.json()).toMatchObject({ productId: "matriz-pay", release: null })
   })
 })
-

@@ -36,6 +36,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#5b5bd6", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17171c", muted: "#f5f5f7", mutedFg: "#666671", border: "#dfdfe5",
   },
+  "matriz-uninstall": {
+    appId: "matriz-uninstall", label: "Matriz Uninstall", brandAccent: "#c2410c", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#1c1917", muted: "#fff7ed", mutedFg: "#7c2d12", border: "#fed7aa",
+  },
   sites: {
     appId: "sites", label: "Matriz Sites", brandAccent: "#4d7c0f", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#151a12", muted: "#f3f6ed", mutedFg: "#626b5b", border: "#dfe5d7",
@@ -98,6 +102,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   "matriz-workbench": {
     appId: "matriz-workbench", label: "Matriz Workbench", brandAccent: "#9b8cff", brandAccentFg: "#0b0818",
     surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246",
+  },
+  "matriz-uninstall": {
+    appId: "matriz-uninstall", label: "Matriz Uninstall", brandAccent: "#fb923c", brandAccentFg: "#1c0a00",
+    surface: "#17100c", surfaceFg: "#fff7ed", muted: "#24140c", mutedFg: "#fdba74", border: "#4a2818",
   },
   sites: {
     appId: "sites", label: "Matriz Sites", brandAccent: "#c8ff66", brandAccentFg: "#10131a",
@@ -214,7 +222,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "sites", "spot", "matriz-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash", "health",
+  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "matriz-uninstall", "sites", "spot", "matriz-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash", "health",
 ]
 
 export const themeRegistry = [

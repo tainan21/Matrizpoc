@@ -1,3 +1,2 @@
 import { distributionHttp } from "../../../../../src/domains/distribution/runtime"
-export const GET = distributionHttp.catalog
-
+export async function GET(request: Request) { return distributionHttp.catalog(request) }

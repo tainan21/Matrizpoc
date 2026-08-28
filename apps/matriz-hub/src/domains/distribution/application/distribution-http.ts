@@ -20,11 +20,11 @@ export function createDistributionHttpHandlers(service: DistributionService, opt
     catch (error) { return json({ error: error instanceof Error ? error.message : "Distribution operation failed" }, 400, { "cache-control": "no-store" }) }
   }
   return {
-    catalog: async (_request: Request) => { await options.ready; return json(await service.catalog(), 200, { "cache-control": "public, max-age=60, stale-while-revalidate=300" }) },
+    catalog: async (_request: Request) => { await options.ready; return json(await service.catalog(), 200, { "cache-control": "public, max-age=60, stale-while-revalidate=300", "access-control-allow-origin": "*" }) },
     product: async (_request: Request, productId: string) => {
       await options.ready
       const product = await service.product(productId)
-      return product ? json(product, 200, { "cache-control": "public, max-age=60" }) : json({ error: "Not found" }, 404)
+      return product ? json(product, 200, { "cache-control": "public, max-age=60", "access-control-allow-origin": "*" }) : json({ error: "Not found" }, 404, { "access-control-allow-origin": "*" })
     },
     createProduct: (request: Request) => mutate(request, (actor, body, idempotencyKey) => service.createProduct(actor, distributionProductInputV1Schema.parse(body), idempotencyKey), 201),
     updateProduct: (request: Request, productId: string) => mutate(request, (actor, body, idempotencyKey) => service.updateProduct(actor, productId, distributionProductPatchV1Schema.parse(body), idempotencyKey)),

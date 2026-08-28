@@ -1,3 +1,2 @@
 import { distributionHttp } from "../../../../../../src/domains/distribution/runtime"
-export const POST = distributionHttp.createProduct
-
+export async function POST(request: Request) { return distributionHttp.createProduct(request) }

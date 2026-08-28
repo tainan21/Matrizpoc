@@ -64,10 +64,11 @@ export const monorepoConfig: MonorepoConfig = {
     (typeof process !== "undefined" && process.env?.NODE_ENV === "production"
       ? "production"
       : "development"),
-  baseUrls: {
-    "matriz-identity": "http://127.0.0.1:8080",
-    "matriz-desktop": "matriz://control",
-    ...preferredBaseUrls,
+    baseUrls: {
+      "matriz-identity": "http://127.0.0.1:8080",
+      "matriz-desktop": "matriz://control",
+      "matriz-uninstall": "matriz://uninstall",
+      ...preferredBaseUrls,
   } as Readonly<Record<MatrizAppId, string>>,
 }
 
