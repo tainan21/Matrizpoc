@@ -23,6 +23,11 @@ export const distributionProductInputV1Schema = z.object({
   windows: distributionWindowsIdentityV1Schema,
 })
 
+export const distributionProductPatchV1Schema = distributionProductInputV1Schema
+  .omit({ productId: true })
+  .partial()
+  .extend({ state: z.enum(["active", "unavailable", "retired"]).optional() })
+
 export const distributionInstallerV1Schema = z.object({
   fileName: z.string().min(1).max(180).regex(/^[A-Za-z0-9][A-Za-z0-9._-]*\.exe$/i),
   downloadUrl: z.string().url().refine((value) => new URL(value).protocol === "https:", "Stable installers require HTTPS"),
@@ -57,7 +62,7 @@ export const distributionCatalogV1Schema = z.object({
 })
 
 export type DistributionProductInputV1 = z.infer<typeof distributionProductInputV1Schema>
+export type DistributionProductPatchV1 = z.infer<typeof distributionProductPatchV1Schema>
 export type DistributionReleaseInputV1 = z.infer<typeof distributionReleaseInputV1Schema>
 export type DistributionProductV1 = z.infer<typeof distributionProductV1Schema>
 export type DistributionCatalogV1 = z.infer<typeof distributionCatalogV1Schema>
-
