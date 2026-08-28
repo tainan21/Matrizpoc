@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process"
 import { mkdir, open, rename, rm } from "node:fs/promises"
-import { basename, isAbsolute, join, relative, resolve } from "node:path"
+import { basename, isAbsolute, join, win32 } from "node:path"
 import type { SignedStorePackageManifest, StorePackageAdapters, StorePackageDefinition } from "../src/application/store-package-service"
 
 const uninstallRoots = [
@@ -143,10 +143,10 @@ export class ElectronStorePackageAdapters implements StorePackageAdapters {
 }
 
 export function safeInstalledPath(root: string, fileName: string) {
-  const base = resolve(root)
-  const target = resolve(base, fileName)
-  const route = relative(base, target)
-  if (!route || route.startsWith("..") || isAbsolute(route)) throw new Error("Installed package path is invalid")
+  const base = win32.resolve(root)
+  const target = win32.resolve(base, fileName)
+  const route = win32.relative(base, target)
+  if (!route || route.startsWith("..") || win32.isAbsolute(route)) throw new Error("Installed package path is invalid")
   return target
 }
 

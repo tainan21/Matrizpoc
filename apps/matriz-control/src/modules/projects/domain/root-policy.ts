@@ -1,4 +1,4 @@
-import { isAbsolute, normalize, parse, relative, resolve, sep } from "node:path"
+import pathApi from "node:path"
 
 export type RootPolicyContext = Readonly<{
   homeDirectory: string
@@ -6,12 +6,18 @@ export type RootPolicyContext = Readonly<{
   programFilesDirectories: readonly string[]
 }>
 
+function pathsFor(path: string) {
+  return /^[a-z]:[\\/]/i.test(path) ? pathApi.win32 : pathApi
+}
+
 function normalizedKey(path: string): string {
+  const { normalize, resolve } = pathsFor(path)
   const normalized = normalize(resolve(path)).replace(/[\\/]+$/, "")
   return normalized.toLocaleLowerCase("en-US")
 }
 
 function isSameOrInside(parent: string, child: string): boolean {
+  const { isAbsolute, relative, sep } = pathsFor(parent)
   const rel = relative(parent, child)
   return rel === "" || (rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel))
 }
@@ -21,6 +27,7 @@ export function canonicalRootKey(path: string): string {
 }
 
 export function assertAllowedCanonicalRoot(path: string, context: RootPolicyContext): string {
+  const { normalize, parse, resolve } = pathsFor(path)
   const canonical = normalize(resolve(path)).replace(/[\\/]+$/, "") || parse(path).root
   const key = normalizedKey(canonical)
   const rootKey = normalizedKey(parse(canonical).root)
