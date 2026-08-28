@@ -9,10 +9,12 @@ Before changing anything, read in this order:
 1. `docs/architectural-laws.md`
 2. `docs/monorepo-structure.md`
 3. `docs/app-communication.md`
-4. the target app `docs/AGENT-START-HERE.md`
-5. the target app `README.md`
-6. the target app `src/manifest/manifest.ts`
-7. the target app `src/bootstrap/index.ts`
+4. `docs/desktop-application-architecture.md` when desktop runtime, packaging,
+   distribution or migration is in scope
+5. the target app `docs/AGENT-START-HERE.md`
+6. the target app `README.md`
+7. the target app `src/manifest/manifest.ts`
+8. the target app `src/bootstrap/index.ts`
 
 ## Scope rule
 Always work in the smallest possible scope.
@@ -46,6 +48,19 @@ When migrating an external app into this monorepo:
 2. adapt auth, env, design system and bootstrap
 3. keep business rules local
 4. refactor shared code only after stabilization
+
+## Desktop runtime rule
+
+- New desktop applications assume Tauri by default.
+- Electron requires an explicit exception recorded according to
+  `docs/desktop-application-architecture.md`.
+- Investigate the current app, active documentation and relevant history before
+  introducing or replacing a desktop framework.
+- Old branches and worktrees are evidence, not architectural authority.
+- Port small, understood changes; do not merge large branches merely because
+  they contain newer code.
+- Keep migrations reversible and update architecture documentation with the
+  decision.
 
 ## Validation
 Prefer scoped validation:

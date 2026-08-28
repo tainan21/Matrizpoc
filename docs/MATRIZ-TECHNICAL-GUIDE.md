@@ -28,13 +28,16 @@ Princípio central:
 - experiência mobile-first responsiva em apps web;
 - PWA quando instalação web, offline ou notificações justificarem o custo;
 - React Native para experiências realmente nativas e distribuição em lojas;
-- Tauri para produtos desktop quando APIs nativas e empacotamento forem
-  requisitos concretos;
+- Tauri como padrão para novas aplicações e edições desktop;
+- Electron apenas como exceção arquitetural documentada quando requisitos
+  concretos dependerem materialmente de Chromium, Node ou browser automation;
 - adapters cloud e colaboração remota opcionais;
 - múltiplos repositórios conectados por contratos, sem imports cruzados.
 
-React Native, PWA e Tauri não devem ser adicionados a todos os apps por padrão.
-Cada plataforma nasce de um caso de uso, proprietário e orçamento de operação.
+React Native e PWA continuam dependentes do caso de uso. Uma aplicação web ou
+serviço não recebe desktop por uniformidade; quando uma edição desktop é
+necessária, a avaliação começa por Tauri. A política, o processo de exceção e
+as regras de migração estão em `docs/desktop-application-architecture.md`.
 
 ## 3. Modelo arquitetural
 
@@ -171,7 +174,9 @@ file-backed e não cria schema Prisma vazio.
 - React Native compartilha contratos, tokens e lógica realmente portátil, não
   componentes DOM;
 - Tauri pode reutilizar frontend web, mas integrações nativas ficam atrás de
-  ports/adapters.
+  ports/adapters;
+- Electron existente é preservado até avaliação app-local; sua existência não
+  cria precedente para novos apps.
 
 O design system deve compartilhar semântica — cores, espaçamento, tipografia,
 estados e acessibilidade — sem fingir que DOM, React Native e desktop possuem

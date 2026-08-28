@@ -2,6 +2,11 @@
 
 ## 2026-08-27 — Workbench e Seumei têm distribuição Windows independente
 
+> **Status em 2026-08-28:** parcialmente substituída pela política
+> Tauri-first. A independência de distribuição permanece válida; a escolha de
+> Electron para cada produto passa a ser provisória e exige avaliação app-local
+> pelo processo de `docs/desktop-application-architecture.md`.
+
 - **Decisão:** distribuir Workbench e Seumei como apps Electron/NSIS x64
   independentes, adquiridos pela Store do Matriz Control por manifests v1
   assinados. Workbench mantém runtime Next local e `.matriz/**`; Seumei mantém
@@ -340,7 +345,7 @@ próximos do app responsável.
 
 ## 2026-08-28 — Tauri é o runtime desktop preferencial
 
-- **Decisão:** novos produtos desktop Matriz usam Tauri por padrão. Electron fica reservado a superfícies cujo requisito concreto dependa do Chromium, Node ou compatibilidade Electron; no Matriz Uninstall, Tauri é a edição principal e Electron é compatibilidade e benchmark.
+- **Decisão:** novos produtos desktop Matriz usam Tauri por padrão, conforme `docs/desktop-application-architecture.md`. Electron fica reservado a superfícies cujo requisito concreto dependa do Chromium, Node, browser automation ou compatibilidade Electron; no Matriz Uninstall, Tauri é a edição principal e Electron é compatibilidade e benchmark.
 - **Motivo:** reduzir tamanho instalado, consumo de memória e custo de atualização sem perder uma alternativa para casos específicos.
-- **Impacto:** catálogo, documentação e CI identificam claramente a edição recomendada. O núcleo React, os ViewModels e contratos continuam compartilhados, sem apagar as edições Electron existentes.
+- **Impacto:** catálogo, documentação e CI identificam claramente a edição recomendada. O núcleo React, os ViewModels e contratos continuam compartilhados, sem apagar as edições Electron existentes antes de avaliação, alternativa verificada e rollback.
 - **Revisar quando:** um benchmark reproduzível ou uma limitação funcional do WebView2 demonstrar vantagem material do Electron para um produto específico.
