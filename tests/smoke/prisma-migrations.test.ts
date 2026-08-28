@@ -95,4 +95,11 @@ describe("independent Prisma migration roots", () => {
       "@relation(fields: [tenantId, templateId], references: [tenantId, id], onDelete: NoAction)",
     )
   })
+
+  it("keeps the CI forced-RLS inventory aligned with the consolidated schemas", () => {
+    const verification = readFileSync(join(root, "tooling", "sql", "verify-tenant-rls.sql"), "utf8")
+
+    expect(verification).toContain("actual <> 79")
+    expect(verification).toContain("Expected 79 forced-RLS tenant tables")
+  })
 })

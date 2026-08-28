@@ -7,7 +7,7 @@ BEGIN
   FROM pg_class table_object JOIN pg_namespace namespace ON namespace.oid = table_object.relnamespace
   WHERE namespace.nspname IN ('core', 'hub', 'spot', 'seumei', 'contracts', 'willdash')
     AND table_object.relrowsecurity AND table_object.relforcerowsecurity;
-  IF actual <> 46 THEN RAISE EXCEPTION 'Expected 46 forced-RLS tenant tables, got %', actual; END IF;
+  IF actual <> 79 THEN RAISE EXCEPTION 'Expected 79 forced-RLS tenant tables, got %', actual; END IF;
 
   IF EXISTS (
     SELECT 1 FROM pg_roles WHERE rolname = ANY (ARRAY[
