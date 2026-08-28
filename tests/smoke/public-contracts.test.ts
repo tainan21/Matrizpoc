@@ -11,6 +11,8 @@ import * as desktop from "../../apps/matriz-desktop/public-contract"
 import * as identity from "../../apps/matriz-identity/public-contract"
 import * as spot from "../../apps/spot/public-contract"
 import * as matrizAdmin from "../../apps/matriz-admin/public-contract"
+import * as matrizOps from "../../apps/matriz-ops/public-contract"
+import * as matrizPay from "../../apps/matriz-pay/public-contract"
 import * as seumei from "../../apps/seumeiapp/public-contract"
 import * as contracts from "../../apps/contracts/public-contract"
 import * as willdash from "../../apps/willdash/public-contract"
@@ -23,6 +25,8 @@ const APPS = [
   ["matriz-desktop", desktop],
   ["spot", spot],
   ["matriz-admin", matrizAdmin],
+  ["matriz-ops", matrizOps],
+  ["matriz-pay", matrizPay],
   ["seumei", seumei],
   ["contracts", contracts],
   ["willdash", willdash],

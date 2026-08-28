@@ -29,6 +29,29 @@ export function makeTelemetryRepo(db: CorePrismaClient) {
         },
       }),
 
+    recordBatch: (events: readonly {
+      sourceEventId: string
+      tenantId: string
+      appId: string
+      eventName: string
+      eventVersion: string
+      category?: string | null
+      properties: Record<string, unknown>
+      occurredAt: Date
+    }[]) => db.telemetryRecord.createMany({
+      data: events.map((event) => ({
+        sourceEventId: event.sourceEventId,
+        tenantId: event.tenantId,
+        appId: event.appId,
+        eventName: event.eventName,
+        eventVersion: event.eventVersion,
+        category: event.category ?? null,
+        properties: event.properties as never,
+        occurredAt: event.occurredAt,
+      })),
+      skipDuplicates: true,
+    }),
+
     countByCategory: (tenantId: string, since: Date) =>
       db.telemetryRecord.groupBy({
         by: ["category"],

@@ -134,7 +134,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -225,7 +225,7 @@ importers:
         version: 2.11.1
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -289,7 +289,7 @@ importers:
         version: link:../../packages/platform/config
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -486,7 +486,7 @@ importers:
         version: 9.7.0(@types/react@19.2.14)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(three@0.185.1)
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -541,6 +541,116 @@ importers:
         specifier: 2.1.2
         version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1)
 
+  apps/matriz-ops:
+    dependencies:
+      '@matriz/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design/system
+      '@matriz/design-ui':
+        specifier: workspace:*
+        version: link:../../packages/design/ui
+      '@matriz/integration-api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/api-contracts
+      '@matriz/integration-registry-core':
+        specifier: workspace:*
+        version: link:../../packages/integration/registry-core
+      '@matriz/integration-wallet-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/wallet-contracts
+      '@matriz/platform-auth':
+        specifier: workspace:*
+        version: link:../../packages/platform/auth
+      '@matriz/platform-config':
+        specifier: workspace:*
+        version: link:../../packages/platform/config
+      '@matriz/platform-db':
+        specifier: workspace:*
+        version: link:../../packages/platform/db
+      next:
+        specifier: 16.2.12
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@tauri-apps/cli':
+        specifier: 2.11.4
+        version: 2.11.4
+      '@types/node':
+        specifier: 22.7.5
+        version: 22.7.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 4.3.4
+        version: 4.3.4(vite@5.4.21(@types/node@22.7.5))
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vite:
+        specifier: 5.4.21
+        version: 5.4.21(@types/node@22.7.5)
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1)
+
+  apps/matriz-pay:
+    dependencies:
+      '@matriz/integration-api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/api-contracts
+      '@matriz/integration-registry-core':
+        specifier: workspace:*
+        version: link:../../packages/integration/registry-core
+      '@matriz/integration-wallet-contracts':
+        specifier: workspace:*
+        version: link:../../packages/integration/wallet-contracts
+      '@matriz/platform-config':
+        specifier: workspace:*
+        version: link:../../packages/platform/config
+      '@matriz/platform-db':
+        specifier: workspace:*
+        version: link:../../packages/platform/db
+      next:
+        specifier: 16.2.12
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      '@types/node':
+        specifier: 22.7.5
+        version: 22.7.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1)
+
   apps/matriz-workbench:
     dependencies:
       '@matriz/design-system':
@@ -572,7 +682,7 @@ importers:
         version: 1.30.0(zod@3.25.76)
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -642,7 +752,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -721,7 +831,7 @@ importers:
         version: link:../../packages/platform/db
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -779,7 +889,7 @@ importers:
         version: link:../../packages/platform/config
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -867,7 +977,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -958,7 +1068,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -1354,6 +1464,16 @@ importers:
       '@matriz/integration-manifests':
         specifier: workspace:^
         version: link:../manifests
+      zod:
+        specifier: 3.23.8
+        version: 3.23.8
+    devDependencies:
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+
+  packages/integration/wallet-contracts:
+    dependencies:
       zod:
         specifier: 3.23.8
         version: 3.23.8
@@ -11367,7 +11487,7 @@ snapshots:
 
   netmask@2.1.1: {}
 
-  next@16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+  next@16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       '@next/env': 16.2.12
       '@swc/helpers': 0.5.15
@@ -11376,7 +11496,7 @@ snapshots:
       postcss: 8.5.26
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
-      styled-jsx: 5.1.6(react@19.2.0)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.12
       '@next/swc-darwin-x64': 16.2.12
@@ -12331,10 +12451,12 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(react@19.2.0):
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.0):
     dependencies:
       client-only: 0.0.1
       react: 19.2.0
+    optionalDependencies:
+      '@babel/core': 7.29.7
 
   styled-jsx@5.1.6(react@19.2.5):
     dependencies:

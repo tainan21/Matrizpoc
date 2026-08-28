@@ -28,7 +28,7 @@ export function createMagicLinkStrategy(
   const ttlMs = options.ttlMs ?? DEFAULT_TTL_MS
   const defaultEnabledApps: readonly AppId[] =
     options.enabledAppsPerTenant ??
-    (["matriz-hub", "spot", "matriz-admin", "seumei", "contracts", "willdash"] as const).map((a) =>
+    (["matriz-hub", "spot", "matriz-admin", "matriz-ops", "seumei", "contracts", "willdash"] as const).map((a) =>
       asAppId(a),
     )
 

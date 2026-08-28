@@ -52,6 +52,14 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#6d4aff", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17131d", muted: "#f4f1fb", mutedFg: "#625a70", border: "#ddd5e8",
   },
+  "matriz-ops": {
+    appId: "matriz-ops", label: "Matriz Ops", brandAccent: "#6d4aff", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#17131d", muted: "#f4f1fb", mutedFg: "#625a70", border: "#ddd5e8",
+  },
+  "matriz-pay": {
+    appId: "matriz-pay", label: "Matriz Pay", brandAccent: "#047857", brandAccentFg: "#ffffff",
+    surface: "#ffffff", surfaceFg: "#052e16", muted: "#ecfdf5", mutedFg: "#065f46", border: "#a7f3d0",
+  },
   seumei: {
     appId: "seumei", label: "Seu Mei", brandAccent: "#059669", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#052e16", muted: "#ecfdf5", mutedFg: "#065f46", border: "#a7f3d0",
@@ -102,6 +110,14 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   "matriz-admin": {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#a98cff", brandAccentFg: "#0b0712",
     surface: "#0f0c16", surfaceFg: "#f5f1fb", muted: "#18121f", mutedFg: "#aaa0b7", border: "#362a42",
+  },
+  "matriz-ops": {
+    appId: "matriz-ops", label: "Matriz Ops", brandAccent: "#a98cff", brandAccentFg: "#0b0712",
+    surface: "#0f0c16", surfaceFg: "#f5f1fb", muted: "#18121f", mutedFg: "#aaa0b7", border: "#362a42",
+  },
+  "matriz-pay": {
+    appId: "matriz-pay", label: "Matriz Pay", brandAccent: "#34d399", brandAccentFg: "#04130d",
+    surface: "#071511", surfaceFg: "#effcf6", muted: "#0d211a", mutedFg: "#a5c7b8", border: "#244639",
   },
   seumei: {
     appId: "seumei", label: "Seu Mei", brandAccent: "#43d39e", brandAccentFg: "#04130d",
@@ -190,7 +206,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "sites", "spot", "matriz-admin", "seumei", "contracts", "willdash",
+  "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "sites", "spot", "matriz-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash",
 ]
 
 export const themeRegistry = [

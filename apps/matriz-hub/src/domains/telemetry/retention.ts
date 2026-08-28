@@ -1,0 +1,14 @@
+import { getCoreDb } from "@matriz/platform-db/core"
+
+function properties(value: unknown): Record<string, unknown> { return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : {} }
+function p95(values: number[]): number | null { if (!values.length) return null; values.sort((a,b)=>a-b); return values[Math.ceil(values.length*.95)-1] ?? null }
+
+export async function aggregateAndRetainTelemetry(now = new Date()) {
+  const rawCutoff = new Date(now.getTime() - 90*24*60*60*1000)
+  const aggregateCutoff = new Date(now); aggregateCutoff.setUTCMonth(aggregateCutoff.getUTCMonth()-13)
+  const rows = await getCoreDb().telemetryRecord.findMany({ where:{occurredAt:{gte:rawCutoff}}, select:{tenantId:true,appId:true,eventName:true,occurredAt:true,properties:true}, orderBy:{occurredAt:"asc"} })
+  const buckets = new Map<string,{tenantId:string;appId:string;day:Date;events:number;errors:number;users:Set<string>;sessions:Set<string>;durations:number[];last:Date;version:string|null}>()
+  for(const row of rows){const day=new Date(Date.UTC(row.occurredAt.getUTCFullYear(),row.occurredAt.getUTCMonth(),row.occurredAt.getUTCDate()));const key=`${row.tenantId}:${row.appId}:${day.toISOString()}`;const item=buckets.get(key)??{tenantId:row.tenantId,appId:row.appId,day,events:0,errors:0,users:new Set<string>(),sessions:new Set<string>(),durations:[],last:row.occurredAt,version:null};const props=properties(row.properties);item.events+=1;if(row.eventName.includes("error")||props.error===true)item.errors+=1;if(typeof props.subjectHash==="string")item.users.add(props.subjectHash);if(typeof props.sessionHash==="string")item.sessions.add(props.sessionHash);if(typeof props.durationMs==="number"&&Number.isFinite(props.durationMs)&&props.durationMs>=0)item.durations.push(props.durationMs);if(row.occurredAt>item.last)item.last=row.occurredAt;if(typeof props.appVersion==="string")item.version=props.appVersion;buckets.set(key,item)}
+  await getCoreDb().$transaction(async tx=>{for(const item of buckets.values())await tx.telemetryDailyAggregate.upsert({where:{tenantId_appId_day:{tenantId:item.tenantId,appId:item.appId,day:item.day}},create:{tenantId:item.tenantId,appId:item.appId,day:item.day,eventCount:item.events,errorCount:item.errors,activeUserCount:item.users.size,sessionCount:item.sessions.size,p95DurationMs:p95(item.durations),lastSignalAt:item.last,appVersion:item.version},update:{eventCount:item.events,errorCount:item.errors,activeUserCount:item.users.size,sessionCount:item.sessions.size,p95DurationMs:p95(item.durations),lastSignalAt:item.last,appVersion:item.version}});await tx.telemetryRecord.deleteMany({where:{occurredAt:{lt:rawCutoff}}});await tx.telemetryDailyAggregate.deleteMany({where:{day:{lt:aggregateCutoff}}})},{timeout:30000})
+  return {aggregates:buckets.size,rawCutoff:rawCutoff.toISOString(),aggregateCutoff:aggregateCutoff.toISOString()}
+}

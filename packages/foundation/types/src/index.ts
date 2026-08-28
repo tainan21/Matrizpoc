@@ -37,6 +37,8 @@ export type AppIdLiteral =
   | "sites"
   | "spot"
   | "matriz-admin"
+  | "matriz-ops"
+  | "matriz-pay"
   | "seumei"
   | "contracts"
   | "willdash"

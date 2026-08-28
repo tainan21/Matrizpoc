@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/pay"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("PAY_DATABASE_URL")
+}
+
+enum WalletCurrency {
+  MTRZ
+  BRL
+}
+
+enum WalletStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum LedgerTransactionKind {
+  ISSUE
+  WITHDRAW
+  TRANSFER
+  REVERSAL
+  BRL_CASH_IN
+  BRL_CASH_OUT
+}
+
+enum LedgerTransactionStatus {
+  PENDING
+  POSTED
+  REVERSED
+  FAILED
+}
+
+enum PostingSide {
+  DEBIT
+  CREDIT
+}
+
+enum ProviderEventStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  RETRY
+  DEAD_LETTER
+  REJECTED
+}
+
+enum ReconciliationRunStatus {
+  RUNNING
+  HEALTHY
+  DIVERGENT
+  FAILED
+}
+
+enum DiscrepancyStatus {
+  OPEN
+  RESOLVED
+  WAIVED
+}
+
+model Wallet {
+  id        String       @id @default(cuid())
+  userId    String       @unique
+  status    WalletStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  accounts  WalletAccount[]
+  transactions LedgerTransaction[]
+  providerLinks ProviderAccountLink[]
+
+  @@index([status])
+  @@map("wallets")
+}
+
+model WalletAccount {
+  id        String         @id @default(cuid())
+  walletId  String
+  currency  WalletCurrency
+  createdAt DateTime       @default(now())
+  wallet    Wallet         @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  postings  LedgerPosting[]
+
+  @@unique([walletId, currency])
+  @@index([currency])
+  @@map("wallet_accounts")
+}
+
+model LedgerTransaction {
+  id                    String                  @id @default(cuid())
+  walletId              String?
+  kind                  LedgerTransactionKind
+  status                LedgerTransactionStatus @default(PENDING)
+  currency              WalletCurrency
+  amountMinor           BigInt
+  idempotencyKey        String                  @unique
+  requestHash           String
+  reason                String
+  actorId               String
+  correlationId         String
+  providerReference     String?                 @unique
+  reversesTransactionId String?                 @unique
+  createdAt             DateTime                @default(now())
+  postedAt              DateTime?
+  wallet                Wallet?                 @relation(fields: [walletId], references: [id], onDelete: Restrict)
+  postings              LedgerPosting[]
+  reverses              LedgerTransaction?      @relation("TransactionReversal", fields: [reversesTransactionId], references: [id], onDelete: Restrict)
+  reversedBy            LedgerTransaction?      @relation("TransactionReversal")
+  outboxEvents          PayOutboxEvent[]
+
+  @@index([walletId, createdAt])
+  @@index([correlationId])
+  @@index([providerReference])
+  @@map("ledger_transactions")
+}
+
+model PayOutboxEvent {
+  id            String            @id @default(cuid())
+  transactionId String?
+  eventName     String
+  eventVersion  String            @default("v1")
+  payloadJson   Json
+  occurredAt    DateTime          @default(now())
+  publishedAt   DateTime?
+  attempts      Int               @default(0)
+  transaction   LedgerTransaction? @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+
+  @@index([publishedAt, occurredAt])
+  @@map("outbox_events")
+}
+
+model LedgerPosting {
+  id            String            @id @default(cuid())
+  transactionId String
+  accountId     String
+  currency      WalletCurrency
+  side          PostingSide
+  amountMinor   BigInt
+  createdAt     DateTime          @default(now())
+  transaction   LedgerTransaction @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  account       WalletAccount     @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([transactionId])
+  @@index([accountId, createdAt])
+  @@map("ledger_postings")
+}
+
+model ProviderAccountLink {
+  id                String   @id @default(cuid())
+  walletId          String
+  provider          String
+  providerAccountId String
+  kycStatus         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  wallet            Wallet   @relation(fields: [walletId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, providerAccountId])
+  @@unique([walletId, provider])
+  @@map("provider_account_links")
+}
+
+model ProviderEvent {
+  id              String              @id @default(cuid())
+  provider        String
+  providerEventId String
+  eventType       String
+  status          ProviderEventStatus @default(RECEIVED)
+  payloadJson     Json
+  payloadHash     String
+  signature       String
+  receivedAt      DateTime            @default(now())
+  processedAt     DateTime?
+  nextRetryAt     DateTime?
+  attempts        Int                 @default(0)
+  lastError       String?
+  processedTransactionId String?         @unique
+
+  @@unique([provider, providerEventId])
+  @@index([status, nextRetryAt])
+  @@map("provider_events")
+}
+
+model ReconciliationRun {
+  id             String                  @id @default(cuid())
+  provider       String
+  status         ReconciliationRunStatus @default(RUNNING)
+  startedAt      DateTime                @default(now())
+  finishedAt     DateTime?
+  correlationId  String                  @unique
+  summaryJson    Json?
+  discrepancies  ReconciliationDiscrepancy[]
+
+  @@index([provider, startedAt])
+  @@map("reconciliation_runs")
+}
+
+model ReconciliationDiscrepancy {
+  id                  String            @id @default(cuid())
+  reconciliationRunId String
+  walletId             String?
+  currency             WalletCurrency
+  ledgerAmountMinor    BigInt
+  providerAmountMinor  BigInt
+  status               DiscrepancyStatus @default(OPEN)
+  reason               String
+  createdAt            DateTime          @default(now())
+  resolvedAt           DateTime?
+  run                   ReconciliationRun @relation(fields: [reconciliationRunId], references: [id], onDelete: Restrict)
+
+  @@index([status, createdAt])
+  @@index([walletId])
+  @@map("reconciliation_discrepancies")
+}
+
+model MatrizSchemaRelease {
+  id        String   @id @default(cuid())
+  version   String   @unique
+  appliedAt DateTime @default(now())
+
+  @@map("__matriz_schema_releases")
+}

@@ -3,11 +3,10 @@ import type { AuthSession } from "@matriz/platform-auth"
 import { getGlobalEventBus } from "@matriz/integration-events"
 import { getGlobalExternalLinkStore } from "@matriz/integration-external-links"
 import { hubSessionStore } from "../../apps/matriz-hub/src/auth/hub-session"
-import { getHubTelemetry } from "../../apps/matriz-hub/src/bootstrap"
 import { DocsPrismaRepository } from "../../apps/matriz-hub/src/domains/docs/integration/prisma/docs-repository"
 import { GET as getEvents } from "../../apps/matriz-hub/app/api/events/route"
 import { GET as getExternalLinks } from "../../apps/matriz-hub/app/api/external-links/route"
-import { GET as getTelemetry } from "../../apps/matriz-hub/app/api/telemetry/route"
+import { createTelemetryGet } from "../../apps/matriz-hub/app/api/telemetry/route"
 import { GET as getSharedCache, PUT as putSharedCache } from "../../apps/matriz-hub/app/api/ecosystem/cache/route"
 
 const now = new Date(Date.now() + 60_000).toISOString()
@@ -46,9 +45,11 @@ describe("Hub tenant isolation", () => {
     links.create({ tenantId: tenantB, localApp: "matriz-hub", localEntityType: "doc", localEntityId: "b", externalApp: "spot", externalEntityType: "gig", externalEntityId: "b", relationType: "contract.reference" })
     events.emit("docs.document.created", { sourceApp: "matriz-hub", tenantId: tenantA, payload: { documentId: "doc-a", tenantId: tenantA, title: "A", type: "institutional", actorId: "user-a", actorType: "human_user" } })
     events.emit("docs.document.created", { sourceApp: "matriz-hub", tenantId: tenantB, payload: { documentId: "doc-b", tenantId: tenantB, title: "B", type: "institutional", actorId: "user-b", actorType: "human_user" } })
-    const telemetry = getHubTelemetry()
-    telemetry.track({ tenantId: tenantA as never, type: "tenant-a-event" })
-    telemetry.track({ tenantId: tenantB as never, type: "tenant-b-event" })
+    const telemetryRecords = [tenantA, tenantB].map((tenantId) => ({
+      id: `telemetry-${tenantId}`, eventVersion: 1, appId: "matriz-hub", tenantId,
+      eventName: `${tenantId}-event`, occurredAt: new Date(), properties: {}, category: null,
+    }))
+    const getTelemetry = createTelemetryGet({ telemetryRecord: { findMany: async ({ where }: { where: { tenantId: string } }) => telemetryRecords.filter((record) => record.tenantId === where.tenantId) } } as never)
 
     const [linksResponse, eventsResponse, telemetryResponse] = await Promise.all([
       getExternalLinks(tenantRequest("/api/external-links", tokenA)),

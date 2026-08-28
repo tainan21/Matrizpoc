@@ -48,6 +48,7 @@ model Tenant {
   onboardingProgress    OnboardingProgress[]
   appSessions           AppSession[]
   telemetryRecords      TelemetryRecord[]
+  telemetryDailyAggregates TelemetryDailyAggregate[]
 
   @@map("tenants")
 }
@@ -57,14 +58,19 @@ model Tenant {
 // memberships. No direct tenantId FK; isolation happens at Membership level.
 // ---------------------------------------------------------------------------
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  displayName String
-  avatarUrl   String?
-  locale      String? // e.g., "pt-BR", "en-US" — future cross-app UI locale
-  timezone    String? // e.g., "America/Sao_Paulo" — for scheduling/timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String     @id @default(cuid())
+  email               String     @unique
+  displayName         String
+  avatarUrl           String?
+  locale              String?
+  timezone            String?
+  status              UserStatus @default(ACTIVE)
+  suspendedAt         DateTime?
+  suspensionReason    String?
+  anonymizedAt        DateTime?
+  anonymizedEmailHash String?    @unique
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
   memberships         TenantMembership[]
   legacyMemberships   Membership[]
@@ -78,8 +84,37 @@ model User {
   identityAuditEvents IdentityAuditEvent[]   @relation("IdentityAuditActor")
   authAccounts        AuthAccount[]
   appSessions         AppSession[]
+  platformOperator    PlatformOperator?
 
   @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  ANONYMIZED
+}
+
+model PlatformOperator {
+  id              String               @id @default(cuid())
+  userId          String               @unique
+  role            PlatformOperatorRole
+  active          Boolean              @default(true)
+  createdByUserId String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  revokedAt       DateTime?
+  revocationReason String?
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([role, active])
+  @@map("platform_operators")
+}
+
+enum PlatformOperatorRole {
+  OWNER
+  OPERATOR
+  AUDITOR
 }
 
 // ---------------------------------------------------------------------------
@@ -435,6 +470,7 @@ model AppSession {
 // ---------------------------------------------------------------------------
 model TelemetryRecord {
   id           String   @id @default(cuid())
+  sourceEventId String? @unique
   tenantId     String
   appId        String
   eventName    String
@@ -451,6 +487,26 @@ model TelemetryRecord {
   @@index([occurredAt, category])
   @@index([occurredAt])
   @@map("telemetry_records")
+}
+
+model TelemetryDailyAggregate {
+  id              String   @id @default(cuid())
+  tenantId        String
+  appId           String
+  day             DateTime @db.Date
+  eventCount      Int
+  errorCount      Int
+  activeUserCount Int
+  sessionCount    Int
+  p95DurationMs   Int?
+  lastSignalAt    DateTime?
+  appVersion      String?
+  updatedAt       DateTime @updatedAt
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, appId, day])
+  @@index([day, appId])
+  @@map("telemetry_daily_aggregates")
 }
 
 model MatrizSchemaRelease {

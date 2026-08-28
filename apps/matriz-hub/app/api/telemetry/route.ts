@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server"
-import { collectAllTelemetry } from "@matriz/platform-telemetry"
-import { bootstrapMatrizHub } from "../../../src/bootstrap"
+import { getCoreDb } from "@matriz/platform-db/core"
 import { getHubRequestContext, HubAuthError } from "../../../src/auth/hub-session"
 
-export async function GET(request: Request) {
+type TelemetryReader = Pick<ReturnType<typeof getCoreDb>, "telemetryRecord">
+
+export function createTelemetryGet(db: TelemetryReader) {
+  return async function getTelemetry(request: Request) {
   let context
   try { context = getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
-  bootstrapMatrizHub()
-  const events = collectAllTelemetry().filter((event) => event.tenantId === context.session.activeTenantId)
+  const records = await db.telemetryRecord.findMany({where:{tenantId:context.session.activeTenantId},orderBy:{occurredAt:"desc"},take:500})
+  const events=records.map(record=>({id:record.id,version:record.eventVersion,appId:record.appId,tenantId:record.tenantId,type:record.eventName,occurredAt:record.occurredAt.toISOString(),properties:record.properties,category:record.category??undefined}))
   return NextResponse.json({ count: events.length, events }, { headers: { "cache-control": "private, no-store" } })
+  }
+}
+
+export async function GET(request: Request) {
+  return createTelemetryGet(getCoreDb())(request)
 }

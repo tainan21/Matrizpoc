@@ -24,6 +24,7 @@ const KNOWN_APP_IDS: readonly AppIdLiteral[] = [
   "matriz-hub",
   "spot",
   "matriz-admin",
+  "matriz-ops",
   "seumei",
   "contracts",
   "willdash",

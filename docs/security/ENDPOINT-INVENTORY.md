@@ -37,12 +37,14 @@ model, not as an endpoint profile. The closed global whitelist remains User,
 authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
-## HTTP Route Handlers — 134 entries
+## HTTP Route Handlers — 170 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
 | `HTTP:contracts:GET:/api/health` | `apps/contracts/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-admin:GET:/api/health` | `apps/matriz-admin/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:DELETE:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:6` | `DELETE` | M | `APP-M` |
+| `HTTP:matriz-control:GET:/api/health` | `apps/matriz-control/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/projects` | `apps/matriz-control/app/api/projects/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:4` | `GET` | R | `APP-R` |
@@ -77,10 +79,11 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/onboarding-status` | `apps/matriz-hub/app/api/onboarding-status/route.ts:8` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/praticies/patterns/[format]` | `apps/matriz-hub/app/api/praticies/patterns/[format]/route.ts:17` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/registry` | `apps/matriz-hub/app/api/registry/route.ts:6` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:GET:/api/telemetry` | `apps/matriz-hub/app/api/telemetry/route.ts:6` | `GET` | R | `H-R` |
+| `HTTP:matriz-hub:GET:/api/telemetry` | `apps/matriz-hub/app/api/telemetry/route.ts:17` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/capabilities/themes` | `apps/matriz-hub/app/api/v1/capabilities/themes/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/v1/telemetry/summary` | `apps/matriz-hub/app/api/v1/telemetry/summary/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/google` | `apps/matriz-hub/app/api/auth/mock/google/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
@@ -114,11 +117,42 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:POST:/api/institutional/refresh` | `apps/matriz-hub/app/api/institutional/refresh/route.ts:22` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/mcp` | `apps/matriz-hub/app/api/mcp/route.ts:34` | `POST` | M | `H-MCP-M` |
 | `HTTP:matriz-hub:POST:/api/v1/capabilities/themes/checkout` | `apps/matriz-hub/app/api/v1/capabilities/themes/checkout/route.ts:1` | `POST` | M | `APP-M` |
+| `HTTP:matriz-hub:POST:/api/v1/telemetry/batches` | `apps/matriz-hub/app/api/v1/telemetry/batches/route.ts:8` | `POST` | M | `APP-M` |
+| `HTTP:matriz-hub:POST:/api/v1/telemetry/maintenance` | `apps/matriz-hub/app/api/v1/telemetry/maintenance/route.ts:3` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:21` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:12` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:39` | `PUT` | M | `H-CACHE` |
 | `HTTP:matriz-hub:PUT:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `PUT` | M | `APP-M` |
+| `HTTP:matriz-ops:DELETE:/api/v1/users/[userId]/sessions/[sessionId]` | `apps/matriz-ops/app/api/v1/users/[userId]/sessions/[sessionId]/route.ts:5` | `DELETE` | M | `APP-M` |
+| `HTTP:matriz-ops:GET:/api/e2e/session` | `apps/matriz-ops/app/api/e2e/session/route.ts:6` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/health` | `apps/matriz-ops/app/api/health/route.ts:4` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/v1/audit` | `apps/matriz-ops/app/api/v1/audit/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/v1/platforms` | `apps/matriz-ops/app/api/v1/platforms/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/v1/telemetry/summary` | `apps/matriz-ops/app/api/v1/telemetry/summary/route.ts:2` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/v1/users` | `apps/matriz-ops/app/api/v1/users/route.ts:4` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/v1/users/[userId]` | `apps/matriz-ops/app/api/v1/users/[userId]/route.ts:17` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:PATCH:/api/v1/users/[userId]` | `apps/matriz-ops/app/api/v1/users/[userId]/route.ts:24` | `PATCH` | M | `APP-M` |
+| `HTTP:matriz-ops:POST:/api/v1/users/[userId]/anonymize` | `apps/matriz-ops/app/api/v1/users/[userId]/anonymize/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-ops:POST:/api/v1/users/[userId]/restore` | `apps/matriz-ops/app/api/v1/users/[userId]/restore/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-ops:POST:/api/v1/users/[userId]/suspend` | `apps/matriz-ops/app/api/v1/users/[userId]/suspend/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-ops:POST:/api/v1/wallets/[walletId]/mtrz-adjustments` | `apps/matriz-ops/app/api/v1/wallets/[walletId]/mtrz-adjustments/route.ts:5` | `POST` | M | `APP-M` |
+| `HTTP:matriz-ops:PUT:/api/v1/users/[userId]/grants/[appId]` | `apps/matriz-ops/app/api/v1/users/[userId]/grants/[appId]/route.ts:10` | `PUT` | M | `APP-M` |
+| `HTTP:matriz-pay:GET:/api/health` | `apps/matriz-pay/app/api/health/route.ts:4` | `GET` | R | `APP-R` |
+| `HTTP:matriz-pay:GET:/api/v1/overview` | `apps/matriz-pay/app/api/v1/overview/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-pay:GET:/api/v1/reconciliation` | `apps/matriz-pay/app/api/v1/reconciliation/route.ts:8` | `GET` | R | `APP-R` |
+| `HTTP:matriz-pay:GET:/api/v1/wallets` | `apps/matriz-pay/app/api/v1/wallets/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-pay:GET:/api/v1/wallets/[walletId]/transactions` | `apps/matriz-pay/app/api/v1/wallets/[walletId]/transactions/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-pay:GET:/api/v1/wallets/users/[userId]` | `apps/matriz-pay/app/api/v1/wallets/users/[userId]/route.ts:4` | `GET` | R | `APP-R` |
+| `HTTP:matriz-pay:GET:/api/v1/wallets/users/[userId]/obligations` | `apps/matriz-pay/app/api/v1/wallets/users/[userId]/obligations/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-pay:POST:/api/v1/providers/celcoin/process-pending` | `apps/matriz-pay/app/api/v1/providers/celcoin/process-pending/route.ts:3` | `POST` | M | `APP-M` |
+| `HTTP:matriz-pay:POST:/api/v1/providers/celcoin/webhooks` | `apps/matriz-pay/app/api/v1/providers/celcoin/webhooks/route.ts:16` | `POST` | M | `APP-M` |
+| `HTTP:matriz-pay:POST:/api/v1/reconciliation` | `apps/matriz-pay/app/api/v1/reconciliation/route.ts:18` | `POST` | M | `APP-M` |
+| `HTTP:matriz-pay:POST:/api/v1/wallets/[walletId]/brl-intents` | `apps/matriz-pay/app/api/v1/wallets/[walletId]/brl-intents/route.ts:5` | `POST` | M | `APP-M` |
+| `HTTP:matriz-pay:POST:/api/v1/wallets/[walletId]/mtrz-adjustments` | `apps/matriz-pay/app/api/v1/wallets/[walletId]/mtrz-adjustments/route.ts:5` | `POST` | M | `APP-M` |
+| `HTTP:matriz-pay:POST:/api/v1/wallets/[walletId]/mtrz-transfers` | `apps/matriz-pay/app/api/v1/wallets/[walletId]/mtrz-transfers/route.ts:4` | `POST` | M | `APP-M` |
+| `HTTP:matriz-pay:POST:/api/v1/wallets/[walletId]/transactions/[transactionId]/reverse` | `apps/matriz-pay/app/api/v1/wallets/[walletId]/transactions/[transactionId]/reverse/route.ts:4` | `POST` | M | `APP-M` |
+| `HTTP:matriz-pay:POST:/api/v1/wallets/users/[userId]` | `apps/matriz-pay/app/api/v1/wallets/users/[userId]/route.ts:11` | `POST` | M | `APP-M` |
 | `HTTP:matriz-workbench:GET:/api/codex/projects/[projectId]/requests/[requestId]/events` | `apps/matriz-workbench/app/api/codex/projects/[projectId]/requests/[requestId]/events/route.ts:13` | `GET` | R | `WB-R` |
 | `HTTP:matriz-workbench:GET:/api/codex/runtime` | `apps/matriz-workbench/app/api/codex/runtime/route.ts:9` | `GET` | R | `WB-R` |
 | `HTTP:matriz-workbench:GET:/api/health` | `apps/matriz-workbench/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
@@ -130,6 +164,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/notifications/config` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/config/route.ts:24` | `POST` | M | `WB-M` |
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/notifications/outbox/[notificationId]` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/notifications/outbox/[notificationId]/route.ts:16` | `POST` | M | `WB-M` |
 | `HTTP:matriz-workbench:POST:/api/collaboration/projects/[projectId]/vercel/previews/[requestId]` | `apps/matriz-workbench/app/api/collaboration/projects/[projectId]/vercel/previews/[requestId]/route.ts:22` | `POST` | M | `WB-M` |
+| `HTTP:matrizlib:GET:/api/health` | `apps/matrizlib/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:seumei:GET:/api/health` | `apps/seumei/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:DELETE:/api/members/[membershipId]` | `apps/seumeiapp/app/api/members/[membershipId]/route.ts:21` | `DELETE` | M | `APP-M` |
 | `HTTP:seumeiapp:DELETE:/api/members/invitations/[invitationId]` | `apps/seumeiapp/app/api/members/invitations/[invitationId]/route.ts:6` | `DELETE` | M | `APP-M` |
@@ -139,6 +174,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:seumeiapp:GET:/api/customers/[customerId]` | `apps/seumeiapp/app/api/customers/[customerId]/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/finance/entries` | `apps/seumeiapp/app/api/finance/entries/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/finance/entries/[entryId]` | `apps/seumeiapp/app/api/finance/entries/[entryId]/route.ts:6` | `GET` | R | `APP-R` |
+| `HTTP:seumeiapp:GET:/api/health` | `apps/seumeiapp/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/ingredients` | `apps/seumeiapp/app/api/ingredients/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/members` | `apps/seumeiapp/app/api/members/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/onboarding` | `apps/seumeiapp/app/api/onboarding/route.ts:14` | `GET` | R | `APP-R` |
@@ -283,4 +319,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-Current tracked-source count: **229** = 134 HTTP methods, 44 Server Actions, and 51 MCP tools.
+Current tracked-source count: **265** = 170 HTTP methods, 44 Server Actions, and 51 MCP tools.

@@ -12,6 +12,7 @@ import { appOnboardingPayloadSchemas } from "@matriz/integration-api-contracts"
 import { asAppId, asTenantId } from "@matriz/foundation-types"
 import {
   createTelemetryClient,
+  environmentTelemetryOptions,
   registerTelemetryClient,
   type TelemetryClient,
 } from "@matriz/platform-telemetry"
@@ -24,7 +25,7 @@ let telemetry: TelemetryClient | undefined
 
 export function getContractsTelemetry(): TelemetryClient {
   if (!telemetry) {
-    telemetry = createTelemetryClient(CONTRACTS_APP_ID)
+    telemetry = createTelemetryClient(CONTRACTS_APP_ID, environmentTelemetryOptions())
     registerTelemetryClient(telemetry)
   }
   return telemetry

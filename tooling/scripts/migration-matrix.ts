@@ -3,7 +3,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { spawnSync } from "node:child_process"
 
-const schemas = ["core", "hub", "spot", "seumei", "contracts", "willdash"] as const
+const schemas = ["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] as const
 type SchemaName = (typeof schemas)[number]
 type Mode = "deploy" | "test" | "drift"
 

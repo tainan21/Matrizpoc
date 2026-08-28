@@ -17,6 +17,8 @@ import { manifest as controlManifest } from "@apps/matriz-control/public-contrac
 import { manifest as sitesManifest } from "@apps/sites/public-contract"
 import { manifest as spotManifest } from "@apps/spot/public-contract"
 import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contract"
+import { manifest as matrizOpsManifest } from "@apps/matriz-ops/public-contract"
+import { manifest as matrizPayManifest } from "@apps/matriz-pay/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
@@ -27,6 +29,7 @@ import type { AppManifestDTO } from "@matriz/integration-api-contracts"
 import { asAppId, asTenantId } from "@matriz/foundation-types"
 import {
   createTelemetryClient,
+  environmentTelemetryOptions,
   registerTelemetryClient,
   type TelemetryClient,
 } from "@matriz/platform-telemetry"
@@ -39,7 +42,7 @@ let telemetry: TelemetryClient | undefined
 
 export function getHubTelemetry(): TelemetryClient {
   if (!telemetry) {
-    telemetry = createTelemetryClient(HUB_APP_ID)
+    telemetry = createTelemetryClient(HUB_APP_ID, environmentTelemetryOptions())
     registerTelemetryClient(telemetry)
   }
   return telemetry
@@ -63,6 +66,8 @@ export function bootstrapMatrizHub(): HubBootstrapResult {
       sitesManifest,
       spotManifest,
       matrizAdminManifest,
+      matrizOpsManifest,
+      matrizPayManifest,
       seumeiManifest,
       contractsManifest,
       willdashManifest,

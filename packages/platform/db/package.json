@@ -10,6 +10,8 @@
     "./seumei": "./src/seumei.ts",
     "./contracts": "./src/contracts.ts",
     "./willdash": "./src/willdash.ts",
+    "./ops": "./src/ops.ts",
+    "./pay": "./src/pay.ts",
     "./tenant-context": "./src/tenant-context.ts",
     "./core/repositories": "./src/repositories/core/index.ts"
   },

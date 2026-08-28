@@ -47,7 +47,9 @@ export const localAppRuntimes: readonly LocalAppRuntimeConfig[] = [
   { slug: "sites", appId: "sites", directory: "apps/sites", preferredPort: 3006, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
   { slug: "matrizlib", appId: "matrizlib", directory: "apps/matrizlib", preferredPort: 3007, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
   { slug: "seumei", appId: "seumei", directory: "apps/seumeiapp", preferredPort: 3008, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
-  { slug: "control", appId: "matriz-control", directory: "apps/matriz-control", preferredPort: 3009, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "experimental", runtimeAdapter: "next" },
+  { slug: "ops", appId: "matriz-ops", directory: "apps/matriz-ops", preferredPort: 3009, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "pay", appId: "matriz-pay", directory: "apps/matriz-pay", preferredPort: 3010, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "active", runtimeAdapter: "next" },
+  { slug: "control", appId: "matriz-control", directory: "apps/matriz-control", preferredPort: 3011, host: "127.0.0.1", healthPath: "/api/health", lifecycle: "experimental", runtimeAdapter: "next" },
 ] as const
 
 const preferredBaseUrls = Object.fromEntries(
