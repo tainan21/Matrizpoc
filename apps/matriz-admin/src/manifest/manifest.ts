@@ -15,8 +15,14 @@ export const manifest: AppManifestDTO = {
     { label: "Dashboard", path: "/", order: 0 },
     { label: "Estabelecimentos", path: "/establishments", order: 1 },
     { label: "Onboarding", path: "/onboarding", order: 2 },
+    { label: "Distribuição", path: "/distribution", order: 3 },
   ],
   capabilities: [
+    {
+      id: "distribution.catalog.manage",
+      name: "Gerenciar distribuição",
+      description: "Cadastra produtos e publica manifests de releases confiáveis.",
+    },
     {
       id: "seumei.establishment.read",
       name: "Ler estabelecimentos",
