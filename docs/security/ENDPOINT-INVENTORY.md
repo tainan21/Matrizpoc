@@ -37,7 +37,7 @@ model, not as an endpoint profile. The closed global whitelist remains User,
 authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
-## HTTP Route Handlers — 183 entries
+## HTTP Route Handlers — 190 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
@@ -91,6 +91,8 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/capabilities/themes` | `apps/matriz-hub/app/api/v1/capabilities/themes/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/v1/distribution/catalog` | `apps/matriz-hub/app/api/v1/distribution/catalog/route.ts:2` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/v1/distribution/products/[productId]` | `apps/matriz-hub/app/api/v1/distribution/products/[productId]/route.ts:2` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/telemetry/summary` | `apps/matriz-hub/app/api/v1/telemetry/summary/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
@@ -103,6 +105,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:PATCH:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:25` | `PATCH` | M | `H-M` |
+| `HTTP:matriz-hub:PATCH:/api/v1/distribution/admin/products/[productId]` | `apps/matriz-hub/app/api/v1/distribution/admin/products/[productId]/route.ts:2` | `PATCH` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:7` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:7` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/google` | `apps/matriz-hub/app/api/auth/mock/google/route.ts:7` | `POST` | M | `H-MOCK` |
@@ -125,6 +128,10 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:POST:/api/institutional/refresh` | `apps/matriz-hub/app/api/institutional/refresh/route.ts:22` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/mcp` | `apps/matriz-hub/app/api/mcp/route.ts:34` | `POST` | M | `H-MCP-M` |
 | `HTTP:matriz-hub:POST:/api/v1/capabilities/themes/checkout` | `apps/matriz-hub/app/api/v1/capabilities/themes/checkout/route.ts:1` | `POST` | M | `APP-M` |
+| `HTTP:matriz-hub:POST:/api/v1/distribution/admin/products` | `apps/matriz-hub/app/api/v1/distribution/admin/products/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-hub:POST:/api/v1/distribution/admin/products/[productId]/releases` | `apps/matriz-hub/app/api/v1/distribution/admin/products/[productId]/releases/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-hub:POST:/api/v1/distribution/admin/releases/[releaseId]/publish` | `apps/matriz-hub/app/api/v1/distribution/admin/releases/[releaseId]/publish/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-hub:POST:/api/v1/distribution/admin/releases/[releaseId]/retire` | `apps/matriz-hub/app/api/v1/distribution/admin/releases/[releaseId]/retire/route.ts:2` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/v1/telemetry/batches` | `apps/matriz-hub/app/api/v1/telemetry/batches/route.ts:8` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/v1/telemetry/maintenance` | `apps/matriz-hub/app/api/v1/telemetry/maintenance/route.ts:3` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:21` | `PUT` | M | `APP-M` |
@@ -225,10 +232,15 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:spot:GET:/api/health` | `apps/spot/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:willdash:GET:/api/health` | `apps/willdash/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 
-## Workbench Server Actions — 44 entries
+## Workbench Server Actions — 49 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
+| `ACTION:matriz-admin:changeProductStateAction` | `apps/matriz-admin/app/distribution/actions.ts:57` | `changeProductStateAction` | M | `WB-A` |
+| `ACTION:matriz-admin:createProductAction` | `apps/matriz-admin/app/distribution/actions.ts:9` | `createProductAction` | M | `WB-A` |
+| `ACTION:matriz-admin:createReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:35` | `createReleaseAction` | M | `WB-A` |
+| `ACTION:matriz-admin:publishReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:67` | `publishReleaseAction` | M | `WB-A` |
+| `ACTION:matriz-admin:retireReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:76` | `retireReleaseAction` | M | `WB-A` |
 | `ACTION:matriz-control:unlockAction` | `apps/matriz-control/app/actions.ts:7` | `unlockAction` | M | `WB-A` |
 | `ACTION:matriz-hub:generatePatternsAction` | `apps/matriz-hub/app/praticies/actions.ts:17` | `generatePatternsAction` | M | `WB-A` |
 | `ACTION:matriz-hub:runHealthCheckAction` | `apps/matriz-hub/app/health/checks/actions.ts:14` | `runHealthCheckAction` | M | `WB-A` |
@@ -332,4 +344,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-Current tracked-source count: **278** = 183 HTTP methods, 44 Server Actions, and 51 MCP tools.
+Current tracked-source count: **290** = 190 HTTP methods, 49 Server Actions, and 51 MCP tools.

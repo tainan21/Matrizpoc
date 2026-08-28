@@ -74,6 +74,7 @@ export const appOnboardingPayloadSchemas = {
   matrizlib: z.object({}),
   "matriz-workbench": z.object({}),
   "matriz-control": z.object({}),
+  "matriz-uninstall": z.object({}),
   sites: z.object({}),
   spot: spotOnboardingPayloadSchema,
   "matriz-admin": z.object({}),

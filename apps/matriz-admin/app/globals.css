@@ -12,3 +12,10 @@ body {
 }
 * { box-sizing: border-box; }
 a { color: inherit; }
+.distribution-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
+.distribution-meta,.distribution-inline { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:10px 0; }
+.distribution-form { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; }
+.distribution-form label { display:grid; gap:6px; font-size:12px; color:var(--muted-fg); }
+.distribution-form input,.distribution-form select,.distribution-inline select { min-height:38px; border:1px solid var(--border); border-radius:8px; padding:8px; background:var(--surface); color:var(--surface-fg); }
+.distribution-form button,.distribution-inline button { min-height:38px; border:0; border-radius:8px; padding:8px 14px; background:var(--brand); color:var(--brand-fg); cursor:pointer; }
+.distribution-warning { border:1px solid #d97706; border-radius:10px; padding:12px; background:#fffbeb; color:#92400e; }

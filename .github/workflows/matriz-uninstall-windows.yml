@@ -1,0 +1,30 @@
+name: Matriz Uninstall Windows
+on:
+  pull_request:
+    paths: ["apps/matriz-uninstall/**", "packages/integration/api-contracts/**", "prisma/hub/**", ".github/workflows/matriz-uninstall-windows.yml"]
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm }
+      - uses: dtolnay/rust-toolchain@stable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @matriz/app-matriz-uninstall test
+      - run: pnpm --filter @matriz/app-matriz-uninstall typecheck
+      - run: pnpm --filter @matriz/app-matriz-uninstall package:electron
+      - run: pnpm --filter @matriz/app-matriz-uninstall package:tauri
+      - name: Normalize artifacts and hashes
+        shell: pwsh
+        run: |
+          New-Item artifacts -ItemType Directory
+          Copy-Item apps/matriz-uninstall/release/Matriz-Uninstall-Electron-Setup-*.exe artifacts/
+          $tauri = Get-ChildItem apps/matriz-uninstall/desktop/tauri/src-tauri/target/release/bundle/nsis/*.exe | Select-Object -First 1
+          Copy-Item $tauri.FullName "artifacts/Matriz-Uninstall-Tauri_0.1.0_x64-setup.exe"
+          Get-ChildItem artifacts/*.exe | Get-FileHash -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $([IO.Path]::GetFileName($_.Path))" } | Set-Content artifacts/SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with: { name: matriz-uninstall-windows, path: artifacts }

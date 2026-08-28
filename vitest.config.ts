@@ -58,6 +58,7 @@ export default defineConfig({
       "@apps/matriz-identity/public-contract": resolve(__dirname, "./apps/matriz-identity/public-contract.ts"),
       "@apps/matriz-workbench/public-contract": resolve(__dirname, "./apps/matriz-workbench/public-contract.ts"),
       "@apps/matriz-control/public-contract": resolve(__dirname, "./apps/matriz-control/public-contract.ts"),
+      "@apps/matriz-uninstall/public-contract": resolve(__dirname, "./apps/matriz-uninstall/public-contract.ts"),
       "@apps/sites/public-contract": resolve(__dirname, "./apps/sites/public-contract.ts"),
       "@apps/spot/public-contract": resolve(__dirname, "./apps/spot/public-contract.ts"),
       "@apps/matriz-admin/public-contract": resolve(__dirname, "./apps/matriz-admin/public-contract.ts"),

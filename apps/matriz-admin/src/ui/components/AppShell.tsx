@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { href: "/establishments", label: "Estabelecimentos" },
   { href: "/owners", label: "Proprietarios" },
   { href: "/onboarding", label: "Onboarding" },
+  { href: "/distribution", label: "Distribuicao" },
 ]
 
 export function AppShell({ children }: { children: React.ReactNode }) {

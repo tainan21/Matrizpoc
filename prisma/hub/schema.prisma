@@ -821,6 +821,79 @@ model CapabilityEvent {
   @@map("capability_events")
 }
 
+model DistributionProduct {
+  id             String   @id @default(cuid())
+  productId      String   @unique
+  displayName    String
+  edition        String
+  runtime        String
+  platform       String
+  arch           String
+  state          String   @default("active")
+  uninstallKey   String
+  windowsName    String
+  publisher      String
+  executableName String
+  aliases        String[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  releases       DistributionRelease[]
+  audits         DistributionAudit[]
+
+  @@index([state, platform, arch])
+  @@map("distribution_products")
+}
+
+model DistributionRelease {
+  id           String   @id @default(uuid())
+  productId    String
+  version      String
+  channel      String
+  status       String   @default("draft")
+  releasedAt   DateTime
+  publishedAt  DateTime?
+  releaseNotes String?
+  installer    Json
+  signature    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  product      DistributionProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  audits       DistributionAudit[]
+
+  @@unique([productId, channel, version])
+  @@index([productId, status, channel])
+  @@map("distribution_releases")
+}
+
+model DistributionAudit {
+  id           String   @id @default(cuid())
+  actorId      String
+  action       String
+  productId    String?
+  releaseId    String?
+  beforeDigest String?
+  afterDigest  String?
+  occurredAt   DateTime @default(now())
+  product      DistributionProduct? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  release      DistributionRelease? @relation(fields: [releaseId], references: [id], onDelete: SetNull)
+
+  @@index([occurredAt])
+  @@index([productId, occurredAt])
+  @@map("distribution_audits")
+}
+
+model DistributionIdempotency {
+  id             String   @id @default(cuid())
+  idempotencyKey String   @unique
+  actorId        String
+  operation      String
+  result         Json
+  createdAt      DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@map("distribution_idempotency")
+}
+
 model MatrizSchemaRelease {
   id        String   @id @default(cuid())
   version   String   @unique

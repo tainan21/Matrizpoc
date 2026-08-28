@@ -1,0 +1,71 @@
+{
+  "name": "@matriz/app-matriz-uninstall",
+  "version": "0.1.0",
+  "description": "Instala, atualiza, reinstala e remove produtos Matriz com segurança.",
+  "author": "Matriz",
+  "private": true,
+  "type": "module",
+  "main": "desktop/electron-dist/main.js",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 1430",
+    "build": "vite build",
+    "test": "vitest run --config vitest.config.ts",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p desktop/tsconfig.json",
+    "lint": "eslint src public-contract.ts --max-warnings 0",
+    "desktop:electron:compile": "tsc -p desktop/tsconfig.json",
+    "desktop:electron:dev": "pnpm desktop:electron:compile && electron desktop/electron-dist/main.js",
+    "package:electron": "pnpm build && pnpm desktop:electron:compile && electron-builder --win nsis --x64",
+    "desktop:tauri:dev": "tauri dev --config desktop/tauri/src-tauri/tauri.conf.json",
+    "package:tauri": "tauri build --config desktop/tauri/src-tauri/tauri.conf.json --bundles nsis"
+  },
+  "dependencies": {
+    "@matriz/design-system": "workspace:^",
+    "@matriz/design-ui": "workspace:*",
+    "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-registry-core": "workspace:*",
+    "@matriz/platform-config": "workspace:*",
+    "@tauri-apps/api": "2.11.1",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "22.7.5",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "4.3.4",
+    "electron": "44.0.0",
+    "electron-builder": "26.15.3",
+    "jsdom": "30.0.1",
+    "typescript": "5.6.3",
+    "vite": "5.4.21",
+    "vitest": "2.1.2"
+  },
+  "build": {
+    "appId": "com.matriz.uninstall.electron",
+    "productName": "Matriz Uninstall Electron",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/electron-dist/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "artifactName": "Matriz-Uninstall-Electron-Setup-${version}.${ext}"
+  }
+}

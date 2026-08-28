@@ -337,3 +337,10 @@ próximos do app responsável.
 - **Motivo:** operar projetos fora do monorepo sem converter descoberta universal em filesystem ou execução arbitrários, nem criar um package compartilhado sem consumidores reais.
 - **Impacto:** renderer envia somente IDs, revisões e tokens; o processo nativo resolve caminhos, ações, ambiente, portas e URLs. Listeners estrangeiros não são adotados nem encerrados. Remover cadastro preserva os arquivos.
 - **Revisar quando:** houver segundo host real, suporte a stacks não Node, sandbox de sistema operacional ou contrato público estável com outro app.
+
+## 2026-08-28 — Tauri é o runtime desktop preferencial
+
+- **Decisão:** novos produtos desktop Matriz usam Tauri por padrão. Electron fica reservado a superfícies cujo requisito concreto dependa do Chromium, Node ou compatibilidade Electron; no Matriz Uninstall, Tauri é a edição principal e Electron é compatibilidade e benchmark.
+- **Motivo:** reduzir tamanho instalado, consumo de memória e custo de atualização sem perder uma alternativa para casos específicos.
+- **Impacto:** catálogo, documentação e CI identificam claramente a edição recomendada. O núcleo React, os ViewModels e contratos continuam compartilhados, sem apagar as edições Electron existentes.
+- **Revisar quando:** um benchmark reproduzível ou uma limitação funcional do WebView2 demonstrar vantagem material do Electron para um produto específico.
