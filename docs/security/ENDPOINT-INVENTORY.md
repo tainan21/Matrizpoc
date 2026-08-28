@@ -236,11 +236,11 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
-| `ACTION:matriz-admin:changeProductStateAction` | `apps/matriz-admin/app/distribution/actions.ts:45` | `changeProductStateAction` | M | `WB-A` |
+| `ACTION:matriz-admin:changeProductStateAction` | `apps/matriz-admin/app/distribution/actions.ts:57` | `changeProductStateAction` | M | `WB-A` |
 | `ACTION:matriz-admin:createProductAction` | `apps/matriz-admin/app/distribution/actions.ts:9` | `createProductAction` | M | `WB-A` |
-| `ACTION:matriz-admin:createReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:29` | `createReleaseAction` | M | `WB-A` |
-| `ACTION:matriz-admin:publishReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:51` | `publishReleaseAction` | M | `WB-A` |
-| `ACTION:matriz-admin:retireReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:57` | `retireReleaseAction` | M | `WB-A` |
+| `ACTION:matriz-admin:createReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:35` | `createReleaseAction` | M | `WB-A` |
+| `ACTION:matriz-admin:publishReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:67` | `publishReleaseAction` | M | `WB-A` |
+| `ACTION:matriz-admin:retireReleaseAction` | `apps/matriz-admin/app/distribution/actions.ts:76` | `retireReleaseAction` | M | `WB-A` |
 | `ACTION:matriz-control:unlockAction` | `apps/matriz-control/app/actions.ts:7` | `unlockAction` | M | `WB-A` |
 | `ACTION:matriz-hub:generatePatternsAction` | `apps/matriz-hub/app/praticies/actions.ts:17` | `generatePatternsAction` | M | `WB-A` |
 | `ACTION:matriz-hub:runHealthCheckAction` | `apps/matriz-hub/app/health/checks/actions.ts:14` | `runHealthCheckAction` | M | `WB-A` |
