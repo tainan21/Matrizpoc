@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "/": {
+      "targetKind": "existing-ui",
+      "projectId": "b89529d2-9485-43e5-a687-5cd82ce2a40e",
+      "baselineDraftId": "0f541f4e-a466-4567-bdda-f3c1553235cb",
+      "activeDraftId": "7cf27a86-41c6-4870-9600-51e8d2d3d614",
+      "designSystemPath": ".superdesign/design-system.md",
+      "referenceIds": ["matriz-admin-desktop-logo"],
+      "brandAssets": {
+        "logo": {
+          "assetKey": "matriz-admin-desktop-logo",
+          "url": "https://vgbujcuwptvheqijyjbe.supabase.co/storage/v1/object/public/hmac-uploads/projects/b89529d2-9485-43e5-a687-5cd82ce2a40e/brand-assets/matriz-admin-desktop-logo/icon.svg",
+          "sourcePath": "apps/matriz-admin/desktop/src-tauri/icons/icon.svg"
+        }
+      },
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "apps/matriz-ops/src/ui/AppShell.tsx",
+        "apps/matriz-ops/app/page.tsx",
+        "apps/matriz-ops/app/globals.css",
+        "apps/matriz-ops/src/manifest/manifest.ts"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "ef0e44bf08055c7c3580b03cc6b6217b11228b1350bb36ad067934ab161986f3",
+        "apps/matriz-ops/src/ui/AppShell.tsx": "7c025e6bc633658c224bbd4593b7650760c5bf127195b9b561cad2ae02319d65",
+        "apps/matriz-ops/app/page.tsx": "9e32895aac88bd60306f23bf2674186b767a2d8862b80e6268a6a6c0d5f42cc2",
+        "apps/matriz-ops/app/globals.css": "d402752d2e0cc4a4ad114b92c37c1c67918261e1922c79df595b7f05f38e5f5e",
+        "apps/matriz-ops/src/manifest/manifest.ts": "4a20f1e35b5bf5dc0293407ae3585b81493584a69f9db3ea8599ac73a5bdc15d"
+      },
+      "components": [
+        {
+          "name": "OpsSidebarShell",
+          "id": "06cac4fe-70e5-47ea-8182-a70fb1c9dea4",
+          "sourcePath": "apps/matriz-ops/src/ui/AppShell.tsx",
+          "logoAssetKey": "matriz-admin-desktop-logo"
+        }
+      ],
+      "drafts": {
+        "0f541f4e-a466-4567-bdda-f3c1553235cb": {
+          "title": "Matriz Ops — Visão Geral",
+          "visualDirection": "baseline fiel ao Matriz Admin Desktop",
+          "currentVersion": 1
+        },
+        "7cf27a86-41c6-4870-9600-51e8d2d3d614": {
+          "title": "Matriz Ops — Centro de Controle Evoluído",
+          "visualDirection": "dark premium, leitura operacional e gates financeiros visíveis",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-08-25T20:21:05.6355526Z"
+    }
+  }
+}

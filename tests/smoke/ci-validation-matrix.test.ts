@@ -23,6 +23,7 @@ describe("Linux CI validation matrix", () => {
     expect(scripts["test:apps"]).toBe("pnpm -r --workspace-concurrency=1 --if-present run test")
     expect(scripts["next:typegen"]).toBe('pnpm --filter "./apps/*" exec next typegen')
     expect(scripts["verify:boundaries"]).toBe("tsx tooling/scripts/verify-app-boundaries.ts")
+    expect(scripts["verify:tracked-artifacts"]).toBe("tsx tooling/scripts/verify-tracked-artifacts.ts")
     expect(scripts["build:affected"]).toBe("turbo run build --affected --concurrency=4")
     expect(scripts["check:clean"]).toBe("git diff --exit-code && git diff --cached --exit-code")
 
@@ -59,6 +60,7 @@ describe("Linux CI validation matrix", () => {
       "pnpm lint",
       "pnpm test:smoke",
       "pnpm verify:boundaries",
+      "pnpm verify:tracked-artifacts",
       "pnpm build",
       "pnpm check:clean",
     ]
