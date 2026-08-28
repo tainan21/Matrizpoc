@@ -87,4 +87,12 @@ describe("independent Prisma migration roots", () => {
     expect(preparation).toContain("GRANT CREATE ON DATABASE")
     expect(preparation).toContain("current_database()")
   })
+
+  it("keeps the contracts template relation aligned with its migration", () => {
+    const contractsSchema = readFileSync(join(root, "prisma", "contracts", "schema.prisma"), "utf8")
+
+    expect(contractsSchema).toContain(
+      "@relation(fields: [tenantId, templateId], references: [tenantId, id], onDelete: NoAction)",
+    )
+  })
 })
