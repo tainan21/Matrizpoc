@@ -71,6 +71,8 @@ describe("Linux CI validation matrix", () => {
     expect(ci).toContain('node-version: "22"')
     expect(ci).toContain("pnpm install --frozen-lockfile")
     expect(ci).toContain("CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core")
+    expect(ci).toContain("OPS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=ops")
+    expect(ci).toContain("PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay")
     expect(ci).toContain("pnpm next:typegen")
     expect(ci).toContain("pnpm build:affected")
     for (const command of rootCommands) expect(ci).toContain(command)
@@ -78,6 +80,8 @@ describe("Linux CI validation matrix", () => {
     for (const command of rootCommands) expect(deploy).toContain(command)
     expect(deploy).toContain("pnpm next:typegen")
     expect(deploy).toContain("CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core")
+    expect(deploy).toContain("OPS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=ops")
+    expect(deploy).toContain("PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay")
     expect(deploy).toContain("version: 9.12.0")
     expect(deploy).toContain('node-version: "22"')
 

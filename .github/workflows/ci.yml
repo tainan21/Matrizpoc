@@ -39,6 +39,8 @@ jobs:
       SEUMEI_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=seumei
       CONTRACTS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=contracts
       WILLDASH_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=willdash
+      OPS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=ops
+      PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay
       MIGRATION_TEST_ZERO_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_zero
       MIGRATION_TEST_N_MINUS_ONE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz_migrations_previous
       CORE_MIGRATION_DATABASE_URL: postgresql://matriz_core_migration:ci-core-migration@127.0.0.1:5432/matriz_migrations_zero?schema=core

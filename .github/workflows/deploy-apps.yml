@@ -44,6 +44,8 @@ jobs:
       SEUMEI_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=seumei
       CONTRACTS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=contracts
       WILLDASH_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=willdash
+      OPS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=ops
+      PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay
     steps:
       - uses: actions/checkout@v4
       - name: Install pnpm
