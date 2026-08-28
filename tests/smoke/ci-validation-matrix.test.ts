@@ -75,6 +75,8 @@ describe("Linux CI validation matrix", () => {
     expect(ci).toContain("PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay")
     expect(ci).toContain("pnpm next:typegen")
     expect(ci).toContain("pnpm build:affected")
+    expect(ci).toContain("git branch --force main origin/main")
+    expect(ci).toContain("SITES_CANONICAL_ORIGINS: https://sites.example.invalid")
     for (const command of rootCommands) expect(ci).toContain(command)
 
     for (const command of rootCommands) expect(deploy).toContain(command)
@@ -86,6 +88,8 @@ describe("Linux CI validation matrix", () => {
     expect(deploy).toContain('node-version: "22"')
 
     expect(workbench).toContain("pnpm --filter @matriz/app-matriz-workbench exec next typegen")
+    expect(workbench).toContain("pnpm prisma:generate")
+    expect(workbench).toContain("PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay")
     expect(workbench).toContain("pnpm check:clean")
   })
 })
