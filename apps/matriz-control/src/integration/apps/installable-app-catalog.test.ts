@@ -4,7 +4,7 @@ import { INSTALLABLE_APPS } from "./installable-app-catalog"
 
 describe("installable app catalog", () => {
   it("keeps activation and Windows installer identities in the approved public catalog", () => {
-    expect(INSTALLABLE_APPS.map((app) => app.manifest.appId)).toEqual(["health", "matriz-workbench", "seumei"])
+    expect(INSTALLABLE_APPS.map((app) => app.manifest.appId)).toEqual(["health", "matriz-workbench", "seumei", "matriz-uninstall"])
     expect(INSTALLABLE_APPS[0]).toMatchObject({
       manifest: healthManifest,
       projectId: "health",
@@ -16,6 +16,7 @@ describe("installable app catalog", () => {
     expect(INSTALLABLE_APPS.slice(1)).toMatchObject([
       { manifest: { appId: "matriz-workbench" }, kind: "windows_installer", releaseId: "matriz-workbench-windows-x64-stable", windows: { appUserModelId: "com.matriz.workbench", publisher: "Matriz" } },
       { manifest: { appId: "seumei" }, kind: "windows_installer", releaseId: "seumei-windows-x64-stable", windows: { appUserModelId: "com.matriz.seumei", publisher: "Matriz" } },
+      { manifest: { appId: "matriz-uninstall" }, kind: "windows_installer", releaseId: "matriz-uninstall-tauri-windows-x64-stable", windows: { appUserModelId: "com.matriz.uninstall.tauri", publisher: "Matriz" } },
     ])
   })
 })

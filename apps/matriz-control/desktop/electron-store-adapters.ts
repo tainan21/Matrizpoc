@@ -12,6 +12,7 @@ const uninstallRoots = [
 const nativeFiles: Record<StorePackageDefinition["appId"], { executable: string; uninstaller: string }> = {
   "matriz-workbench": { executable: "Matriz Workbench.exe", uninstaller: "Uninstall Matriz Workbench.exe" },
   seumei: { executable: "Seumei.exe", uninstaller: "Uninstall Seumei.exe" },
+  "matriz-uninstall": { executable: "matriz-uninstall-tauri.exe", uninstaller: "uninstall.exe" },
 }
 
 interface ElectronStoreAdapterOptions {

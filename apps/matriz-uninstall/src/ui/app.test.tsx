@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import type { DesktopGateway, DistributionCatalogV1 } from "../domain/types"
 import { UninstallApp } from "./app"
 
@@ -44,6 +44,8 @@ const catalog: DistributionCatalogV1 = {
   ],
 }
 
+afterEach(cleanup)
+
 describe("Matriz Uninstall UI", () => {
   it("keeps both Control installations visible and confirms exact destructive target", async () => {
     const uninstall = vi
@@ -79,16 +81,33 @@ describe("Matriz Uninstall UI", () => {
       cleanup: vi.fn(),
       selfUninstall: vi.fn(),
     } satisfies DesktopGateway
-    vi.spyOn(window, "confirm").mockReturnValue(true)
     render(<UninstallApp gateway={gateway} loadCatalog={async () => catalog} />)
 
-    expect(await screen.findByText("Matriz Control · Tauri")).toBeVisible()
-    expect(screen.getByText("Matriz Control · Electron")).toBeVisible()
+    expect((await screen.findAllByText("Matriz Control · Tauri"))[0]).toBeVisible()
+    const electronLabels = screen.getAllByText("Matriz Control · Electron")
+    expect(electronLabels[0]).toBeVisible()
+    fireEvent.click(electronLabels[0])
     fireEvent.click(screen.getByRole("button", { name: "Desinstalar Matriz Control · Electron" }))
 
+    expect(screen.getByRole("dialog", { name: "Confirmar desinstalação" })).toBeVisible()
+    expect(screen.getByText("Matriz Control · Electron", { selector: "strong" })).toBeVisible()
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar desinstalação" }))
     await waitFor(() => expect(uninstall).toHaveBeenCalledWith("electron"))
-    expect(window.confirm).toHaveBeenCalledWith(
-      expect.stringContaining("Matriz Control · Electron"),
-    )
+  })
+
+  it("offers navigation, filters and theme choices without losing product context", async () => {
+    const gateway = {
+      shell: "tauri",
+      listInstalled: vi.fn().mockResolvedValue([]),
+      uninstall: vi.fn(), install: vi.fn(), update: vi.fn(), reinstall: vi.fn(),
+      cleanupPreview: vi.fn().mockResolvedValue([]), cleanup: vi.fn(), selfUninstall: vi.fn(),
+    } satisfies DesktopGateway
+    render(<UninstallApp gateway={gateway} loadCatalog={async () => catalog} />)
+
+    expect(await screen.findByRole("heading", { name: "Produtos Matriz" })).toBeVisible()
+    fireEvent.click(screen.getByRole("button", { name: "Tema claro" }))
+    expect(screen.getByTestId("uninstall-shell")).toHaveAttribute("data-theme", "light")
+    fireEvent.click(screen.getByRole("tab", { name: "Atualizações" }))
+    expect(screen.getByRole("heading", { name: "Atualizações" })).toBeVisible()
   })
 })

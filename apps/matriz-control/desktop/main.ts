@@ -57,6 +57,7 @@ desktopUpdater.subscribe((snapshot) => send({ type: "update.updated", snapshot }
 const nativeStoreApps: readonly StorePackageDefinition[] = [
   { appId: "matriz-workbench", name: "Matriz Workbench", kind: "windows_installer", releaseId: "matriz-workbench-windows-x64-stable", windows: { appUserModelId: "com.matriz.workbench", displayName: "Matriz Workbench", publisher: "Matriz" } },
   { appId: "seumei", name: "Seumei", kind: "windows_installer", releaseId: "seumei-windows-x64-stable", windows: { appUserModelId: "com.matriz.seumei", displayName: "Seumei", publisher: "Matriz" } },
+  { appId: "matriz-uninstall", name: "Matriz Uninstall", kind: "windows_installer", releaseId: "matriz-uninstall-tauri-windows-x64-stable", windows: { appUserModelId: "com.matriz.uninstall.tauri", displayName: "Matriz Uninstall Tauri", publisher: "Matriz" } },
 ]
 const nativeStore = new StorePackageService({
   apps: nativeStoreApps,
@@ -66,6 +67,7 @@ const nativeStore = new StorePackageService({
     releaseUrls: {
       "matriz-workbench-windows-x64-stable": process.env.MATRIZ_STORE_WORKBENCH_MANIFEST_URL,
       "seumei-windows-x64-stable": process.env.MATRIZ_STORE_SEUMEI_MANIFEST_URL,
+      "matriz-uninstall-tauri-windows-x64-stable": process.env.MATRIZ_STORE_UNINSTALL_MANIFEST_URL,
     },
   }),
   trust: { publicKey: process.env.MATRIZ_STORE_ED25519_PUBLIC_KEY, publisher: process.env.MATRIZ_STORE_WINDOWS_PUBLISHER, controlVersion: app.getVersion() },
