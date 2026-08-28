@@ -46,7 +46,7 @@ export function AppStore() {
           {app.kind === "activation" && app.installed ? <>
             <button className={styles.secondary} onClick={() => openInstalledApp(app.appId, activate)}>Abrir</button>
             <button className={styles.danger} onClick={() => uninstall(app.appId)}>Desinstalar</button>
-          </> : app.kind === "activation" ? <button className={styles.primary} onClick={() => install(app.appId)}>Instalar</button> : <NativeStoreActions appId={app.appId as "matriz-workbench" | "seumei"} state={app.nativeState!} onAction={storeAction} />}
+          </> : app.kind === "activation" ? <button className={styles.primary} onClick={() => install(app.appId)}>Instalar</button> : <NativeStoreActions appId={app.appId as NativeAppId} state={app.nativeState!} onAction={storeAction} />}
         </div>
       </article>)}
     </section>
@@ -55,7 +55,8 @@ export function AppStore() {
 
 type StoreMutationType = Extract<DesktopCommand, { type: `store.app.${string}` }>["type"]
 
-function NativeStoreActions({ appId, state, onAction }: { appId: "matriz-workbench" | "seumei"; state: StoreAppSnapshot["state"]; onAction: (type: StoreMutationType, appId: "matriz-workbench" | "seumei") => Promise<void> }) {
+type NativeAppId = "matriz-workbench" | "seumei" | "matriz-uninstall"
+function NativeStoreActions({ appId, state, onAction }: { appId: NativeAppId; state: StoreAppSnapshot["state"]; onAction: (type: StoreMutationType, appId: NativeAppId) => Promise<void> }) {
   const action = presentNativeStoreAction(state)
   if (state === "unavailable") return null
   if (state === "installed" || state === "update_available") return <>

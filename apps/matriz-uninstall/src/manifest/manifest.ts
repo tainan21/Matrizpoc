@@ -3,7 +3,7 @@ export const manifest: AppManifestDTO = {
   appId: "matriz-uninstall",
   name: "Matriz Uninstall",
   description: "Instala, atualiza, reinstala e remove produtos Windows do ecossistema Matriz.",
-  version: "0.1.0",
+  version: "0.2.0",
   contractVersion: "v1",
   primaryRoute: "/",
   routes: [{ label: "Produtos", path: "/", order: 0 }],

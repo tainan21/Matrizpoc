@@ -31,6 +31,7 @@ describe("parseDesktopCommand", () => {
     expect(() => parseDesktopCommand({ type: "store.app.download", appId: "matriz-workbench", url: "https://evil.example" })).toThrow(/payload/i)
     expect(() => parseDesktopCommand({ type: "store.app.cancel-download", appId: "seumei", command: "whoami" })).toThrow(/payload/i)
     expect(parseDesktopCommand({ type: "store.app.install", appId: "seumei" })).toEqual({ type: "store.app.install", appId: "seumei" })
+    expect(parseDesktopCommand({ type: "store.app.install", appId: "matriz-uninstall" })).toEqual({ type: "store.app.install", appId: "matriz-uninstall" })
     expect(parseDesktopCommand({ type: "store.app.open", appId: "seumei" })).toEqual({ type: "store.app.open", appId: "seumei" })
     expect(parseDesktopCommand({ type: "store.app.uninstall", appId: "seumei" })).toEqual({ type: "store.app.uninstall", appId: "seumei" })
     expect(parseDesktopCommand({ type: "store.app.check-update", appId: "seumei" })).toEqual({ type: "store.app.check-update", appId: "seumei" })

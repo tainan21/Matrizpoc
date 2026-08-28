@@ -1,6 +1,6 @@
 [package]
 name = "matriz-uninstall-tauri"
-version = "0.1.0"
+version = "0.2.0"
 description = "Gerenciador seguro de produtos Matriz"
 edition = "2021"
 

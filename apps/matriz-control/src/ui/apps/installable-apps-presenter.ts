@@ -9,7 +9,7 @@ export interface InstallableAppViewModel {
   readonly description: string
   readonly baseUrl: string
   readonly glyph: string
-  readonly accent: "health" | "workbench" | "seumei"
+  readonly accent: "health" | "workbench" | "seumei" | "uninstall"
   readonly kind: "activation" | "windows_installer"
   readonly capabilities: readonly { readonly id: string; readonly name: string; readonly description: string }[]
   readonly installed: boolean

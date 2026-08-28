@@ -20,7 +20,7 @@ interface InstalledAppsContextValue {
   readonly install: (appId: string) => void
   readonly uninstall: (appId: string) => void
   readonly activate: (appId: string | null) => void
-  readonly storeAction: (type: Extract<DesktopCommand["type"], `store.app.${string}`>, appId: "matriz-workbench" | "seumei") => Promise<void>
+  readonly storeAction: (type: Extract<DesktopCommand["type"], `store.app.${string}`>, appId: "matriz-workbench" | "seumei" | "matriz-uninstall") => Promise<void>
 }
 
 const InstalledAppsContext = createContext<InstalledAppsContextValue | null>(null)

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 180" role="img" aria-labelledby="title">
+  <title id="title">Matriz Uninstall</title>
+  <g transform="translate(12 12) scale(.61)"><rect width="256" height="256" rx="44" fill="#0b0710"/><path d="M54 171V70l74 68 74-68v66" fill="none" stroke="#9c5ee3" stroke-width="22"/><path d="M202 132a74 74 0 0 1-145 20" fill="none" stroke="#45d59a" stroke-width="18"/><path d="m46 137 11 15 16-10" fill="none" stroke="#45d59a" stroke-width="12"/></g>
+  <text x="198" y="84" fill="#f4eff9" font-family="Segoe UI,Arial,sans-serif" font-size="58" font-weight="750" letter-spacing="-2">MATRIZ</text>
+  <text x="198" y="137" fill="#9c5ee3" font-family="Segoe UI,Arial,sans-serif" font-size="44" font-weight="650" letter-spacing="5">UNINSTALL</text>
+</svg>

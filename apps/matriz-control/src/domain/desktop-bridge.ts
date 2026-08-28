@@ -50,7 +50,7 @@ export type DesktopCommand = BrowserCommand
   | { type: "health.host-snapshot" }
   | { type: "update.status" | "update.check" | "update.download" | "update.install" }
   | { type: "store.apps.status" }
-  | { type: "store.app.download" | "store.app.cancel-download" | "store.app.install" | "store.app.open" | "store.app.uninstall" | "store.app.check-update"; appId: "matriz-workbench" | "seumei" }
+  | { type: "store.app.download" | "store.app.cancel-download" | "store.app.install" | "store.app.open" | "store.app.uninstall" | "store.app.check-update"; appId: "matriz-workbench" | "seumei" | "matriz-uninstall" }
   | { type: "project.pick-root" }
   | { type: "project.host.list" }
   | { type: "project.inspect"; projectId: string }
@@ -94,7 +94,7 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
     return { type } as DesktopCommand
   }
   if (type === "store.apps.status") { assertOnlyKeys(command, ["type"], "Store status commands do not accept a payload"); return { type } }
-  if (storeAppCommands.has(type)) { assertOnlyKeys(command, ["type", "appId"], "Store app command payload may contain only appId"); return { type, appId: choice(command.appId, ["matriz-workbench", "seumei"]) } as DesktopCommand }
+  if (storeAppCommands.has(type)) { assertOnlyKeys(command, ["type", "appId"], "Store app command payload may contain only appId"); return { type, appId: choice(command.appId, ["matriz-workbench", "seumei", "matriz-uninstall"]) } as DesktopCommand }
   if (type === "project.pick-root" || type === "project.host.list") { assertOnlyKeys(command, ["type"], "Project command payload is invalid"); return { type } }
   if (type === "project.inspect" || type === "project.remove") { assertOnlyKeys(command, ["type", "projectId"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128) } as DesktopCommand }
   if (type === "project.approve" || type === "project.prepare.preview") { assertOnlyKeys(command, ["type", "projectId", "recipeRevision"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), recipeRevision: text(command.recipeRevision, "recipeRevision", 128) } as DesktopCommand }
