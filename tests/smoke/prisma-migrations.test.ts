@@ -101,5 +101,6 @@ describe("independent Prisma migration roots", () => {
 
     expect(verification).toContain("actual <> 79")
     expect(verification).toContain("Expected 79 forced-RLS tenant tables")
+    expect(verification.match(/ON CONFLICT \("tenantId"\) DO UPDATE SET id=EXCLUDED\.id/g)).toHaveLength(3)
   })
 })
