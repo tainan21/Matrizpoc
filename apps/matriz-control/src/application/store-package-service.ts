@@ -5,7 +5,7 @@ export type StorePackageKind = InstallationKind
 export type NativeStoreState = "unavailable" | "available" | "downloading" | "downloaded" | "cancelled" | "installing" | "installed" | "update_available" | "failed"
 
 export interface StorePackageDefinition {
-  readonly appId: "matriz-workbench" | "seumei"
+  readonly appId: "matriz-workbench" | "seumei" | "matriz-uninstall"
   readonly name: string
   readonly kind: "windows_installer"
   readonly releaseId: string
@@ -29,7 +29,7 @@ export interface StorePackageSnapshot {
 
 export interface StorePackageManifest {
   readonly schemaVersion: "v1"
-  readonly appId: "matriz-workbench" | "seumei"
+  readonly appId: "matriz-workbench" | "seumei" | "matriz-uninstall"
   readonly version: string
   readonly channel: "stable"
   readonly platform: "win32"
@@ -253,6 +253,6 @@ function validateManifest(value: unknown): StorePackageManifest {
   if (!value || typeof value !== "object") throw new Error("Invalid signed release manifest")
   const manifest = value as Partial<StorePackageManifest>
   const installer = manifest.installer
-  if (manifest.schemaVersion !== "v1" || (manifest.appId !== "matriz-workbench" && manifest.appId !== "seumei") || manifest.channel !== "stable" || manifest.platform !== "win32" || manifest.arch !== "x64" || typeof manifest.version !== "string" || typeof manifest.minimumControlVersion !== "string" || !installer || typeof installer.fileName !== "string" || typeof installer.downloadUrl !== "string" || !Number.isSafeInteger(installer.sizeBytes) || installer.sizeBytes <= 0 || !/^[a-f0-9]{64}$/.test(installer.sha256 ?? "")) throw new Error("Invalid signed release manifest")
+  if (manifest.schemaVersion !== "v1" || !["matriz-workbench", "seumei", "matriz-uninstall"].includes(manifest.appId ?? "") || manifest.channel !== "stable" || manifest.platform !== "win32" || manifest.arch !== "x64" || typeof manifest.version !== "string" || typeof manifest.minimumControlVersion !== "string" || !installer || typeof installer.fileName !== "string" || typeof installer.downloadUrl !== "string" || !Number.isSafeInteger(installer.sizeBytes) || installer.sizeBytes <= 0 || !/^[a-f0-9]{64}$/.test(installer.sha256 ?? "")) throw new Error("Invalid signed release manifest")
   return value as StorePackageManifest
 }

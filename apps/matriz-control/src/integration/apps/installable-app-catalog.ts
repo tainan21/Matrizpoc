@@ -3,13 +3,14 @@ import { localAppRuntimes, monorepoConfig } from "@matriz/platform-config"
 import { manifest as healthManifest } from "@apps/health/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
+import { manifest as uninstallManifest } from "@apps/matriz-uninstall/public-contract"
 
 export interface InstallableAppDefinition {
   readonly manifest: AppManifestDTO
   readonly projectId: string
   readonly baseUrl: string
   readonly glyph: string
-  readonly accent: "health" | "workbench" | "seumei"
+  readonly accent: "health" | "workbench" | "seumei" | "uninstall"
   readonly kind: "activation" | "windows_installer"
   readonly mutationId: "control.smart-app-rail" | null
   readonly releaseId: string | null
@@ -54,4 +55,14 @@ export const INSTALLABLE_APPS: readonly InstallableAppDefinition[] = [{
   mutationId: null,
   releaseId: "seumei-windows-x64-stable",
   windows: { appUserModelId: "com.matriz.seumei", displayName: "Seumei", publisher: "Matriz" },
+}, {
+  manifest: uninstallManifest,
+  projectId: "matriz-uninstall",
+  baseUrl: "",
+  glyph: "↺",
+  accent: "uninstall",
+  kind: "windows_installer",
+  mutationId: null,
+  releaseId: "matriz-uninstall-tauri-windows-x64-stable",
+  windows: { appUserModelId: "com.matriz.uninstall.tauri", displayName: "Matriz Uninstall Tauri", publisher: "Matriz" },
 }]
