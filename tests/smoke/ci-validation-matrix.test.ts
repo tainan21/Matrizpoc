@@ -29,7 +29,9 @@ describe("Linux CI validation matrix", () => {
     const workbench = JSON.parse(read("apps/matriz-workbench/package.json")) as {
       scripts: Record<string, string>
     }
-    expect(workbench.scripts.test).toBe("vitest run --config vitest.config.ts --no-file-parallelism")
+    expect(workbench.scripts.test).toBe(
+      "vitest run --config vitest.config.ts --no-file-parallelism",
+    )
   })
 
   it("treats Next environment declarations as generated files", () => {
@@ -41,9 +43,32 @@ describe("Linux CI validation matrix", () => {
     }).trim()
     expect(tracked).toBe("")
 
-    for (const app of ["contracts", "matriz-admin", "matriz-control", "matriz-hub", "matriz-workbench", "matrizlib", "seumeiapp", "sites", "spot", "willdash"]) {
+    for (const app of [
+      "contracts",
+      "matriz-admin",
+      "matriz-control",
+      "matriz-hub",
+      "matriz-workbench",
+      "matrizlib",
+      "seumeiapp",
+      "sites",
+      "spot",
+      "willdash",
+    ]) {
       expect(read(`apps/${app}/tsconfig.json`)).toContain('"next-env.d.ts"')
     }
+  })
+
+  it("runs a tracked-artifact guard before protected branches can accept build output", () => {
+    const scripts = rootScripts()
+    const ci = read(".github/workflows/ci.yml")
+    const deploy = read(".github/workflows/deploy-apps.yml")
+
+    expect(scripts["verify:tracked-artifacts"]).toBe(
+      "tsx tooling/scripts/verify-tracked-artifacts.ts",
+    )
+    expect(ci).toContain("pnpm verify:tracked-artifacts")
+    expect(deploy).toContain("pnpm verify:tracked-artifacts")
   })
 
   it("keeps primary, deploy, and Workbench Linux gates aligned", () => {
@@ -70,14 +95,18 @@ describe("Linux CI validation matrix", () => {
     expect(ci).toContain("version: 9.12.0")
     expect(ci).toContain('node-version: "22"')
     expect(ci).toContain("pnpm install --frozen-lockfile")
-    expect(ci).toContain("CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core")
+    expect(ci).toContain(
+      "CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core",
+    )
     expect(ci).toContain("pnpm next:typegen")
     expect(ci).toContain("pnpm build:affected")
     for (const command of rootCommands) expect(ci).toContain(command)
 
     for (const command of rootCommands) expect(deploy).toContain(command)
     expect(deploy).toContain("pnpm next:typegen")
-    expect(deploy).toContain("CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core")
+    expect(deploy).toContain(
+      "CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core",
+    )
     expect(deploy).toContain("version: 9.12.0")
     expect(deploy).toContain('node-version: "22"')
 

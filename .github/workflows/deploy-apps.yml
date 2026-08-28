@@ -57,6 +57,8 @@ jobs:
           cache: "pnpm"
       - name: Install frozen dependencies
         run: pnpm install --frozen-lockfile
+      - name: Reject generated artifacts tracked by Git
+        run: pnpm verify:tracked-artifacts
       - name: Audit production dependencies
         run: pnpm audit:prod
       - name: Validate Prisma schemas
