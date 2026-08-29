@@ -21,7 +21,7 @@ async function waitForControl() {
 
 try {
   await waitForControl()
-  const desktop = spawn(electronPath, ["."], { cwd: appRoot, stdio: "inherit", windowsHide: true, env: { ...localEnvironment, MATRIZ_CONTROL_DESKTOP_URL: "http://127.0.0.1:3009/browser" } })
+  const desktop = spawn(electronPath, ["."], { cwd: appRoot, stdio: "inherit", windowsHide: true, env: { ...localEnvironment, MATRIZ_CONTROL_DESKTOP_URL: "http://127.0.0.1:3009/home" } })
   desktop.once("exit", (code) => { web.kill(); process.exitCode = code ?? 0 })
 } catch (error) {
   web.kill()

@@ -1,0 +1,67 @@
+name: matriz-control-windows-release
+
+on:
+  push:
+    tags: ["control-v*"]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing control-v<version> tag to publish
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Verify immutable release tag and package version
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+        run: |
+          $version = node -p "require('./apps/matriz-control/package.json').version"
+          if ($env:RELEASE_TAG -ne "control-v$version") { throw "Release tag must equal control-v$version" }
+      - run: pnpm --filter @matriz/app-matriz-control test
+      - run: pnpm --filter @matriz/app-matriz-control lint
+      - run: pnpm --filter @matriz/app-matriz-control typecheck
+      - run: pnpm --filter @matriz/app-matriz-control build
+      - name: Require Authenticode signing certificate
+        shell: pwsh
+        env:
+          CSC_LINK: ${{ secrets.MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:CSC_LINK)) { throw "MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE is required" }
+      - run: pnpm --filter @matriz/app-matriz-control desktop:release
+        env:
+          CSC_LINK: ${{ secrets.MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+      - name: Verify release assets and write checksums
+        shell: pwsh
+        run: |
+          $release = "apps/matriz-control/release"
+          $installer = Get-ChildItem "$release/matriz-control-*-windows-x64-setup.exe" | Select-Object -First 1
+          if (-not $installer) { throw "NSIS installer was not generated" }
+          if (-not (Test-Path "$($installer.FullName).blockmap")) { throw "Installer blockmap was not generated" }
+          if (-not (Test-Path "$release/latest.yml")) { throw "Updater metadata was not generated" }
+          $signature = Get-AuthenticodeSignature -FilePath $installer.FullName
+          if ($signature.Status -ne "Valid") { throw "Installer Authenticode signature is invalid" }
+          Get-ChildItem "$release/*.exe" | Get-FileHash -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $([IO.Path]::GetFileName($_.Path))" } | Set-Content "$release/SHA256SUMS.txt"
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          files: |
+            apps/matriz-control/release/matriz-control-*-windows-x64-setup.exe
+            apps/matriz-control/release/matriz-control-*-windows-x64-setup.exe.blockmap
+            apps/matriz-control/release/latest.yml
+            apps/matriz-control/release/SHA256SUMS.txt

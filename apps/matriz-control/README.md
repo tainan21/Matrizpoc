@@ -64,6 +64,10 @@ executável e abre somente esse aplicativo instalado. A compilação de produç�
 do Control usa Webpack por compatibilidade de resolução de dependências no
 Windows; o desenvolvimento continua com Turbopack.
 
+O aplicativo Windows inicia no cockpit completo (`/home`), com a mesma
+navegação do Control web. As capacidades que exigem o bridge desktop — como
+cápsulas e browser nativo — continuam explícitas e indisponíveis no navegador.
+
 O servidor MCP STDIO é iniciado pelo executável compilado com `corepack pnpm --filter @matriz/app-matriz-control mcp:start`. Ele somente conecta ao desktop já aberto por named pipe autenticado; as ferramentas não expõem shell, cookies, tokens, variáveis de ambiente ou caminhos absolutos.
 
 ## Atualizações incrementais do desktop
@@ -71,3 +75,11 @@ O servidor MCP STDIO é iniciado pelo executável compilado com `corepack pnpm -
 O botão **Atualizar** no cabeçalho abre o centro de atualizações apenas no app Windows instalado. A verificação, o download diferencial do NSIS e a instalação são ações humanas separadas; download automático e instalação ao sair permanecem desligados. Os comandos `update.*` não fazem parte da superfície MCP e nunca recebem URL, caminho, versão ou artefato do renderer.
 
 Para publicar, o pipeline deve configurar um provider suportado pelo `electron-builder`, gerar `app-update.yml`, publicar instalador e blockmap juntos e assinar o instalador com Authenticode/publisher confiável. Nenhum endpoint, certificado ou segredo de assinatura fica neste repositório. Sem esse canal empacotado, a UI informa que a atualização está indisponível.
+
+A release Windows é publicada apenas por uma tag exata `control-v<versão>`.
+O workflow `matriz-control-windows-release` exige o segredo
+`MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE`, executa os gates do Control,
+gera instalador NSIS, blockmap, `latest.yml` e `SHA256SUMS.txt`, e só então
+anexa os artefatos à GitHub Release. A senha opcional do certificado fica em
+`MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE_PASSWORD`; não use `.env` nem
+argumentos para esses valores.

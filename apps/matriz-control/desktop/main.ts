@@ -133,7 +133,7 @@ async function createWindow() {
   window = new BrowserWindow({ width: 1440, height: 900, minWidth: 980, minHeight: 700, backgroundColor: "#08060e", webPreferences: { preload: join(__dirname, "preload.js"), nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true } })
   window.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
   await window.webContents.session.cookies.set({ url: "http://127.0.0.1:3009", name: CONTROL_SESSION_COOKIE, value: createSessionValue(localToken), path: "/", httpOnly: true, sameSite: "strict", secure: false, expirationDate: Math.floor(Date.now() / 1000) + 60 * 60 * 12 })
-  await window.loadURL(process.env.MATRIZ_CONTROL_DESKTOP_URL ?? "http://127.0.0.1:3009/browser")
+  await window.loadURL(process.env.MATRIZ_CONTROL_DESKTOP_URL ?? "http://127.0.0.1:3009/home")
   window.on("close", (event) => {
     if (windowCloseAuthorized || !vault || !vaultRoot) return
     event.preventDefault()
@@ -158,7 +158,7 @@ async function ensureRendererServer() {
     windowsHide: true,
   })
   for (let attempt = 0; attempt < 100; attempt += 1) {
-    try { const response = await fetch("http://127.0.0.1:3009/browser"); if (response.ok) return } catch { /* renderer is still starting */ }
+    try { const response = await fetch("http://127.0.0.1:3009/home"); if (response.ok) return } catch { /* renderer is still starting */ }
     await new Promise((resolve) => setTimeout(resolve, 100))
   }
   throw new Error("The local Matriz Control renderer did not start")

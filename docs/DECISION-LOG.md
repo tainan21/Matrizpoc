@@ -361,3 +361,10 @@ próximos do app responsável.
 - **Motivo:** reduzir tamanho instalado, consumo de memória e custo de atualização sem perder uma alternativa para casos específicos.
 - **Impacto:** catálogo, documentação e CI identificam claramente a edição recomendada. O núcleo React, os ViewModels e contratos continuam compartilhados, sem apagar as edições Electron existentes antes de avaliação, alternativa verificada e rollback.
 - **Revisar quando:** um benchmark reproduzível ou uma limitação funcional do WebView2 demonstrar vantagem material do Electron para um produto específico.
+
+## 2026-08-29 — Control 0.2.0 usa um único cockpit Next no Windows
+
+- **Decisão:** o Electron do Matriz Control abre `/home`, empacota o mesmo standalone Next usado no web e publica NSIS somente por tag `control-v<versão>` validada e assinada.
+- **Motivo:** o download 0.1.0 iniciava diretamente na rota de navegador nativo e não apresentava as novas áreas operacionais 0.2.0; a distribuição precisa conservar o updater seguro sem registrar segredos no repositório.
+- **Impacto:** a paridade de navegação web/desktop passa a vir do mesmo build. O pipeline falha antes de publicar se o certificado Authenticode não estiver configurado; ausências de canal continuam `unavailable` no aplicativo.
+- **Revisar quando:** houver migração aprovada para Tauri, canais beta/rollback assinados ou distribuição fora do GitHub Releases.

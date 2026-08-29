@@ -8,7 +8,8 @@
     "dev:web": "next dev -p 3009",
     "desktop:compile": "tsc -p tsconfig.desktop.json",
     "desktop:dev": "pnpm run desktop:compile && node desktop/launch.mjs",
-    "desktop:build": "pnpm run build && pnpm run desktop:compile && electron-builder --win nsis",
+    "desktop:build": "pnpm run build && pnpm run desktop:compile && electron-builder --win nsis --publish never",
+    "desktop:release": "pnpm run desktop:build",
     "mcp:start": "node dist-desktop/mcp/server.js",
     "build": "next build --webpack",
     "start": "node desktop/start-standalone.mjs",
@@ -20,6 +21,18 @@
     "appId": "com.matriz.control",
     "productName": "Matriz Control",
     "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "artifactName": "matriz-control-${version}-windows-x64-setup.${ext}",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "tainan21",
+        "repo": "Matrizpoc",
+        "releaseType": "release"
+      }
+    ],
     "files": [
       "dist-desktop/**/*",
       "package.json"
