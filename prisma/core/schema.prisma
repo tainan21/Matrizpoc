@@ -274,7 +274,7 @@ model IdentityMfaMethod {
   publicKey        String?
   signCount        Int?
   lastTotpCounter  BigInt?
-  transports       String[]
+  transports       String[] @default([])
   verifiedAt       DateTime?
   revokedAt        DateTime?
   createdAt        DateTime @default(now())

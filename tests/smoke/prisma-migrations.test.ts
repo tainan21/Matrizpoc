@@ -16,6 +16,11 @@ const databaseUrlNames = {
 } as const
 
 describe("independent Prisma migration roots", () => {
+  it("keeps the MFA transports default aligned with the deployed migration", () => {
+    const schema = readFileSync(join(root, "prisma", "core", "schema.prisma"), "utf8")
+    expect(schema).toMatch(/transports\s+String\[\]\s+@default\(\[\]\)/)
+  })
+
   it.each(schemas)("keeps %s schema and versioned migrations together", (schema) => {
     const schemaPath = join(root, "prisma", schema, "schema.prisma")
     const baselinePath = join(
