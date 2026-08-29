@@ -91,6 +91,19 @@ The source of truth is `apps/<app>/.matriz/**`. JSON stores structured state,
 Markdown stores human knowledge, and monthly JSONL files store append-only
 activity. No database or internet connection is required.
 
+## Local agent team
+
+`/team` organizes descriptive, local agent profiles and bounded missions for a
+selected project. Profiles such as Nilo Builder and Zara Link are seeded once
+under `.matriz/agents/profiles/**`; edited profiles are never overwritten.
+Missions, evidence and handoffs stay in the same project under
+`.matriz/agents/**`, with a bounded relative-path scope and a declared
+authority level. They never grant shell, source-editing or MCP authority.
+
+A mission can be completed only from human review after reviewable evidence.
+The Team interface writes only these named local workflow records; Codex runs
+continue through their existing explicit request and approval flow.
+
 See `docs/AGENT-START-HERE.md`, `docs/FILE-PROTOCOL.md` and `docs/MCP.md`.
 O launcher compartilhado de utilitários está descrito em `docs/PRACTICIES.md`.
 Federated repositories, blueprints and Sites are described in

@@ -13,6 +13,7 @@ const sample: SystemSnapshot = {
     percent: 75,
   },
   temperature: { availability: "unavailable", value: null, unit: "celsius" },
+  storage: { totalBytes: 512 * 1024 ** 3, freeBytes: 128 * 1024 ** 3, percent: 75 },
   processes: [{ pid: 4242, name: "Matriz Control", cpuSeconds: 12.3, memoryBytes: 1.5 * 1024 ** 3 }],
 }
 

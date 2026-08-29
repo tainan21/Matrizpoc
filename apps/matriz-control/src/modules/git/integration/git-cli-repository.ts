@@ -30,6 +30,14 @@ export interface GitBranch {
   readonly subject: string
 }
 
+export interface GitCommit {
+  readonly id: string
+  readonly shortId: string
+  readonly subject: string
+  readonly author: string
+  readonly occurredAt: string
+}
+
 export class GitCliRepository {
   private root: string | null = null
   constructor(private readonly requestedRoot: string) {}
@@ -83,6 +91,35 @@ export class GitCliRepository {
     })
   }
 
+  async history(limit = 50): Promise<readonly GitCommit[]> {
+    if (!Number.isInteger(limit) || limit < 1 || limit > 200) throw new Error("Invalid history limit")
+    const output = await this.git(["log", `--max-count=${limit}`, "--format=%H%x00%h%x00%s%x00%an%x00%cI%x00"])
+    const fields = output.split("\0").filter(Boolean)
+    const commits: GitCommit[] = []
+    for (let index = 0; index + 4 < fields.length; index += 5) {
+      const [id, shortId, subject, author, occurredAt] = fields.slice(index, index + 5)
+      if (id && shortId && subject && author && occurredAt) commits.push({ id, shortId, subject, author, occurredAt })
+    }
+    return commits
+  }
+
+  async renameBranch(name: string) {
+    await this.git(["check-ref-format", "--branch", name])
+    await this.git(["branch", "-m", name])
+  }
+
+  async deleteBranch(name: string, force = false) {
+    await this.git(["check-ref-format", "--branch", name])
+    await this.git(["branch", force ? "-D" : "-d", name])
+  }
+
+  async fetch() { await this.git(["fetch", "--prune"]) }
+  async pull() { await this.git(["pull", "--ff-only"]) }
+  async push() { await this.git(["push"]) }
+  async merge(name: string) { await this.git(["check-ref-format", "--branch", name]); await this.git(["merge", "--no-edit", name]) }
+  async abortMerge() { await this.git(["merge", "--abort"]) }
+  async reflog(limit = 30) { return this.git(["reflog", `--max-count=${Math.max(1, Math.min(100, limit))}`, "--format=%h%x00%gs%x00%cI"]) }
+
   async stage(paths: readonly string[]) {
     if (!paths.length) throw new Error("Select at least one Git path")
     paths.forEach(assertSafePath)
@@ -119,7 +156,7 @@ export class GitCliRepository {
       timeout: 15_000,
       maxBuffer: 4 * 1024 * 1024,
       windowsHide: true,
-      env: { ...process.env, GIT_TERMINAL_PROMPT: "0", GCM_INTERACTIVE: "Never", LC_ALL: "C" },
+      env: { NODE_ENV: process.env.NODE_ENV, PATH: process.env.PATH, SystemRoot: process.env.SystemRoot, ComSpec: process.env.ComSpec, HOME: process.env.HOME, USERPROFILE: process.env.USERPROFILE, GIT_TERMINAL_PROMPT: "0", GCM_INTERACTIVE: "Never", LC_ALL: "C" },
     })
     return stdout
   }

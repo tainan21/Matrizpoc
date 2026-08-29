@@ -9,7 +9,8 @@ export default async function GitPage() {
   const root = process.env.MATRIZ_WORKSPACE_ROOT ?? resolve(process.cwd(), "../..")
   try {
     const client = new GitCliRepository(root)
-    return <GitConsole initial={{ overview: presentGitOverview(await client.overview()), branches: await client.branches() }} />
+    const [overview, branches, history, reflog] = await Promise.all([client.overview(), client.branches(), client.history(), client.reflog()])
+    return <GitConsole initial={{ overview: presentGitOverview(overview), branches, history, reflog }} />
   } catch (error) {
     return <GitConsole initial={null} />
   }

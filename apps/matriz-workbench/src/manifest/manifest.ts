@@ -13,8 +13,9 @@ export const manifest: AppManifestDTO = {
     { label: "Controle", path: "/control", order: 1 },
     { label: "Trabalho", path: "/work/inbox", order: 2 },
     { label: "Projetos", path: "/projects", order: 3 },
-    { label: "Configurações", path: "/settings", order: 4 },
-    { label: "Praticies", path: "/praticies", order: 5 },
+    { label: "Equipe", path: "/team", order: 4 },
+    { label: "Configurações", path: "/settings", order: 5 },
+    { label: "Praticies", path: "/praticies", order: 6 },
   ],
   capabilities: [
     {

@@ -1,13 +1,13 @@
 import type { LoginSkin } from "@matriz/flows-auth"
 import { asAppId } from "@matriz/foundation-types"
-import { createHttpMockAuthBroker, createOtpStrategy, type AuthProviderConfig } from "@matriz/platform-auth"
+import { createConfiguredAuthBroker, createOtpStrategy, type AuthProviderConfig } from "@matriz/platform-auth"
 import { monorepoConfig } from "@matriz/platform-config"
 
 export const seumeiAuthConfig: AuthProviderConfig = {
   appId: asAppId("seumei"),
   strategies: [createOtpStrategy()],
   sessionTtlMs: 24 * 60 * 60 * 1000,
-  broker: createHttpMockAuthBroker(monorepoConfig.baseUrls["matriz-hub"]),
+  broker: createConfiguredAuthBroker({ developmentMockBaseUrl: monorepoConfig.baseUrls["matriz-hub"] }),
 }
 
 export const seumeiLoginSkin: LoginSkin = {

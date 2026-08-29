@@ -71,4 +71,19 @@ describe("GitCliRepository", () => {
     expect((await client.overview()).branch).toBe("feat/observability")
     expect((await client.overview()).counts.staged).toBe(0)
   })
+
+  it("exposes a bounded history and supports safe branch lifecycle operations", async () => {
+    const root = await repository()
+    const client = new GitCliRepository(root)
+    await client.createBranch("feat/temporary", true)
+    await writeFile(join(root, "new.txt"), "new\n")
+    await client.stage(["new.txt"])
+    await client.commit("feat: temporary work")
+
+    expect((await client.history()).map((commit) => commit.subject)).toContain("feat: temporary work")
+    await client.renameBranch("feat/renamed")
+    await client.switchBranch("main")
+    await client.deleteBranch("feat/renamed", true)
+    expect((await client.branches()).map((branch) => branch.name)).not.toContain("feat/renamed")
+  })
 }, 20_000)

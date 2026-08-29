@@ -17,13 +17,13 @@ const links = [["/home", "Início"], ["/apps", "Apps"], ["/workspace", "Workspac
 function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const terminal = useTerminal()
-  const { apps, state, activate } = useInstalledApps()
+  const { apps, state, activate, navigation } = useInstalledApps()
   const [activeAppPath, setActiveAppPath] = useState("")
   const activeApp = apps.find((app) => app.appId === state.activeAppId) ?? null
   return <div className={`control-root ${styles.root} dock-${terminal.open ? terminal.placement : "closed"}`} data-active-app={activeApp?.appId === "health" ? "health" : undefined}>
     <header className="brand-bar"><Link href="/home"><b>M</b><span>MATRIZ / CONTROL</span></Link><div><span className="global-score">34</span><UpdateCenter /></div></header>
     <nav className="main-nav" aria-label="Navegação principal">{links.map(([href, label]) => <Link className={pathname.startsWith(href) ? "active" : ""} href={href} key={href}>{label}</Link>)}</nav>
-    <SmartAppRail apps={apps} activeAppId={state.activeAppId} onActivate={(appId) => { setActiveAppPath(""); activate(appId) }} onOpenPath={(appId, path) => { setActiveAppPath(path); activate(appId) }} />
+    <SmartAppRail apps={apps} navigation={navigation} activeAppId={state.activeAppId} onActivate={(appId) => { setActiveAppPath(""); activate(appId) }} onOpenPath={(appId, path) => { setActiveAppPath(path); activate(appId) }} />
     <div className="control-content">{activeApp ? <ExternalAppStage app={activeApp} path={activeApp.appId === "health" ? activeAppPath : ""} openSession={(projectId, signal) => terminal.openSession(projectId, "dev", signal)} onOpenTerminal={() => terminal.setOpen(true)} /> : children}</div>
     <TerminalDock />
   </div>

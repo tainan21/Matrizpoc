@@ -1,7 +1,7 @@
 export type ExtensionPermission = "system.metrics.read" | "git.repository.read" | "git.repository.write"
 
 export interface ExtensionNavigationItem { readonly id: string; readonly label: string; readonly path: string }
-export interface ExtensionNavigationGroup { readonly id: string; readonly label: string; readonly items: readonly ExtensionNavigationItem[] }
+export interface ExtensionNavigationGroup { readonly id: string; readonly appId: string; readonly label: string; readonly items: readonly ExtensionNavigationItem[] }
 export interface ExtensionWidget { readonly id: string; readonly label: string }
 
 export interface ExtensionDefinition {

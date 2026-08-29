@@ -1,6 +1,7 @@
 "use client"
 
 import type { InstallableAppViewModel } from "./installable-apps-presenter"
+import type { ExtensionNavigationGroup } from "../../modules/extensions/public"
 import styles from "./app-host.module.css"
 
 interface SmartAppRailProps {
@@ -8,9 +9,10 @@ interface SmartAppRailProps {
   readonly activeAppId: string | null
   readonly onActivate: (appId: string | null) => void
   readonly onOpenPath?: (appId: string, path: string) => void
+  readonly navigation?: readonly ExtensionNavigationGroup[]
 }
 
-export function SmartAppRail({ apps, activeAppId, onActivate, onOpenPath }: SmartAppRailProps) {
+export function SmartAppRail({ apps, activeAppId, onActivate, onOpenPath, navigation = [] }: SmartAppRailProps) {
   const installedApps = apps.filter((app) => app.installed)
   if (installedApps.length === 0) return null
 
@@ -22,6 +24,6 @@ export function SmartAppRail({ apps, activeAppId, onActivate, onOpenPath }: Smar
     {installedApps.map((app) => <div key={app.appId} className={styles.railGroup}><button className={styles.railItem} data-active={app.appId === activeAppId || undefined} type="button" aria-label={app.name} aria-pressed={app.appId === activeAppId} onClick={() => onActivate(app.appId)}>
       <span className={styles.glyph} aria-hidden="true">{app.glyph}</span>
       <span className={styles.railCopy}><strong>{app.name}</strong><small>{app.appId === activeAppId ? "ATIVO" : "PRONTO"}</small></span>
-    </button>{app.appId === "health" ? <div className={styles.extensionNav} aria-label="System Health"><strong>System Health</strong><button type="button" onClick={() => onOpenPath?.("health", "/")}>Overview</button><button type="button" onClick={() => onOpenPath?.("health", "/resources")}>Resources</button></div> : null}</div>)}
+    </button>{navigation.filter((group) => group.appId === app.appId).map((group) => <div className={styles.extensionNav} aria-label={group.label} key={group.id}><strong>{group.label}</strong>{group.items.map((item) => <button key={item.id} type="button" onClick={() => onOpenPath?.(group.appId, item.path)}>{item.label}</button>)}</div>)}</div>)}
   </nav>
 }

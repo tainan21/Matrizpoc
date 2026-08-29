@@ -7,6 +7,7 @@ const view: SystemHealthVM = {
   cpu: { label: "CPU", value: "24,0%", detail: "Uso atual do processador", percent: 24, tone: "healthy" },
   memory: { label: "Memória", value: "4,0 GB / 16,0 GB", detail: "25,0% em uso", percent: 25, tone: "healthy" },
   temperature: { label: "Temperatura", value: "42,0 °C", detail: "Sensor do sistema", percent: null, tone: "healthy" },
+  storage: { label: "Disco", value: "12,0 GB livres", detail: "75,0% em uso", percent: 75, tone: "attention" },
   uptime: { label: "Atividade", value: "2h 3min", detail: "Tempo desde a última inicialização", percent: null, tone: "healthy" },
   processes: [],
 }
@@ -50,7 +51,7 @@ describe("health polling", () => {
     expect(states.at(-1)).toEqual({ view: null, stale: true })
     expect(toHealthDashboardStatus(states.at(-1)!)).toEqual({
       title: "Leitura indisponível",
-      message: "Tentando reconectar ao sensor local….",
+      message: "Tentando reconectar ao sensor local…",
     })
     poller.stop()
   })

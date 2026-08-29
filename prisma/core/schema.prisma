@@ -83,6 +83,7 @@ model User {
   revokedAppGrants    AppGrant[]             @relation("AppGrantRevokedBy")
   revokedOidcClients  OidcClient[]           @relation("OidcClientRevokedBy")
   identityAuditEvents IdentityAuditEvent[]   @relation("IdentityAuditActor")
+<<<<<<< HEAD
 =======
   invitedMemberships  TenantMembership[] @relation("MembershipInvitedBy")
   revokedMemberships  TenantMembership[] @relation("MembershipRevokedBy")
@@ -93,6 +94,10 @@ model User {
   mfaMethods          IdentityMfaMethod[]
   recoveryCodes       IdentityRecoveryCode[]
 >>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
+=======
+  mfaMethods          IdentityMfaMethod[]
+  recoveryCodes       IdentityRecoveryCode[]
+>>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
   authAccounts        AuthAccount[]
   appSessions         AppSession[]
   platformOperator    PlatformOperator?
@@ -252,11 +257,15 @@ model OidcClient {
 <<<<<<< HEAD
   id                      String    @id @default(cuid())
   clientId                String    @unique
+<<<<<<< HEAD
 =======
   id                      String   @id @default(cuid())
   clientId                String   @unique
   appId                   String
 >>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
+=======
+  appId                   String
+>>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
   name                    String
   redirectUris            String[]
   postLogoutRedirectUris  String[]
@@ -288,7 +297,11 @@ model IdentityMfaMethod {
   publicKey        String?
   signCount        Int?
   lastTotpCounter  BigInt?
+<<<<<<< HEAD
   transports       String[]
+=======
+  transports       String[] @default([])
+>>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
   verifiedAt       DateTime?
   revokedAt        DateTime?
   createdAt        DateTime @default(now())

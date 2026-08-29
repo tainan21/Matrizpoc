@@ -189,12 +189,14 @@ export function HealthDashboard({ section = "overview" }: { readonly section?: "
         <MetricCard metric={view.cpu} />
         <MetricCard metric={view.memory} />
         <MetricCard metric={view.temperature} />
+        <MetricCard metric={view.storage} />
         <MetricCard metric={view.uptime} />
         <MetricCard metric={toControlHostTabsMetric(controlHostHealth)} />
       </section> : <section className="health-dashboard__metrics" aria-label="Recursos do sistema">
         <MetricCard metric={view.cpu} />
         <MetricCard metric={view.memory} />
         <MetricCard metric={view.temperature} />
+        <MetricCard metric={view.storage} />
       </section>}
 
       <section className="health-processes" aria-labelledby="health-processes-title">

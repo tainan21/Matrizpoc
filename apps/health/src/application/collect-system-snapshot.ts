@@ -22,6 +22,7 @@ export interface SystemSampler {
 export interface DetailSample {
   readonly processes: readonly ProcessReading[]
   readonly temperatureCelsius: number | null
+  readonly storage: { readonly totalBytes: number | null; readonly freeBytes: number | null }
 }
 
 export interface DetailSampler {
@@ -49,6 +50,7 @@ export async function collectSystemSnapshot(deps: {
       percent: memoryUsagePercent(usedBytes, lightweight.totalMemoryBytes),
     },
     temperature: sensorReading(details.temperatureCelsius, "celsius"),
+    storage: { totalBytes: details.storage.totalBytes, freeBytes: details.storage.freeBytes, percent: details.storage.totalBytes && details.storage.freeBytes !== null ? memoryUsagePercent(details.storage.totalBytes - details.storage.freeBytes, details.storage.totalBytes) : null },
     processes: details.processes,
   }
 }

@@ -21,6 +21,7 @@ describe("collectSystemSnapshot", () => {
           return {
             processes: [{ pid: 8, name: "System", cpuSeconds: 4, memoryBytes: 500 }],
             temperatureCelsius: 42.4,
+            storage: { totalBytes: 2_000, freeBytes: 500 },
           }
         },
       },
@@ -35,6 +36,7 @@ describe("collectSystemSnapshot", () => {
       cpuPercent: 75,
       memory: { totalBytes: 1_000, usedBytes: 750, percent: 75 },
       temperature: { availability: "available", value: 42.4, unit: "celsius" },
+      storage: { totalBytes: 2_000, freeBytes: 500, percent: 75 },
       processes: [{ pid: 8, name: "System", cpuSeconds: 4, memoryBytes: 500 }],
     })
   })

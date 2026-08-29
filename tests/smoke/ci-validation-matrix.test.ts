@@ -86,6 +86,7 @@ describe("Linux CI validation matrix", () => {
     expect(deploy).toContain("CORE_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=core")
     expect(deploy).toContain("OPS_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=ops")
     expect(deploy).toContain("PAY_DATABASE_URL: postgresql://prisma:prisma@127.0.0.1:5432/matriz?schema=pay")
+    expect(deploy).toContain("SITES_CANONICAL_ORIGINS: https://sites.example.invalid")
     expect(deploy).toContain("version: 9.12.0")
     expect(deploy).toContain('node-version: "22"')
 

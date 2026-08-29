@@ -13,7 +13,7 @@ describe("system snapshot route", () => {
           freeMemoryBytes: 20,
         }),
       },
-      details: { sample: async () => ({ processes: [], temperatureCelsius: null }) },
+      details: { sample: async () => ({ processes: [], temperatureCelsius: null, storage: { totalBytes: null, freeBytes: null } }) },
       now: () => new Date("2026-08-25T12:00:00.000Z"),
     })
 
@@ -29,7 +29,7 @@ describe("system snapshot route", () => {
   it("returns a sanitized unavailable response for unexpected failures", async () => {
     const GET = createSystemSnapshotGet({
       system: { sample: () => { throw new Error("unexpected") } },
-      details: { sample: async () => ({ processes: [], temperatureCelsius: null }) },
+      details: { sample: async () => ({ processes: [], temperatureCelsius: null, storage: { totalBytes: null, freeBytes: null } }) },
       now: () => new Date("2026-08-25T12:00:00.000Z"),
     })
 

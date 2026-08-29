@@ -341,7 +341,7 @@ describe("Matriz Control", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Apps" }))
     fireEvent.click(await screen.findByRole("button", { name: "Abrir rota… Matriz Admin" }))
-    fireEvent.click(screen.getByRole("button", { name: /\/establishments.*Estabelecimentos/ }))
+    fireEvent.click(await screen.findByRole("button", { name: /\/establishments.*Estabelecimentos/ }))
     fireEvent.click(screen.getByRole("button", { name: "Preview Matriz Admin" }))
 
     await waitFor(() => expect(desktop.openPreview).toHaveBeenCalledWith(

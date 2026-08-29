@@ -39,25 +39,34 @@ authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ## HTTP Route Handlers — 190 entries
+=======
+## HTTP Route Handlers — 215 entries
+>>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
+| `HTTP:contracts:DELETE:/api/auth/oidc/session` | `apps/contracts/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
+| `HTTP:contracts:GET:/api/auth/oidc/callback` | `apps/contracts/app/api/auth/oidc/callback/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:contracts:GET:/api/auth/oidc/login` | `apps/contracts/app/api/auth/oidc/login/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:contracts:GET:/api/auth/oidc/session` | `apps/contracts/app/api/auth/oidc/session/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:contracts:GET:/api/health` | `apps/contracts/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:contracts:POST:/api/auth/oidc/tenant` | `apps/contracts/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
 | `HTTP:health:GET:/api/health` | `apps/health/app/api/health/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:health:GET:/api/system/snapshot` | `apps/health/app/api/system/snapshot/route.ts:31` | `GET` | R | `APP-R` |
 | `HTTP:matriz-admin:GET:/api/health` | `apps/matriz-admin/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:DELETE:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:6` | `DELETE` | M | `APP-M` |
 | `HTTP:matriz-control:GET:/api/apps/readiness` | `apps/matriz-control/app/api/apps/readiness/route.ts:7` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/doctor` | `apps/matriz-control/app/api/doctor/route.ts:4` | `GET` | R | `APP-R` |
-| `HTTP:matriz-control:GET:/api/git` | `apps/matriz-control/app/api/git/route.ts:14` | `GET` | R | `APP-R` |
+| `HTTP:matriz-control:GET:/api/git` | `apps/matriz-control/app/api/git/route.ts:15` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/health` | `apps/matriz-control/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/projects` | `apps/matriz-control/app/api/projects/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:4` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:PATCH:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:5` | `PATCH` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/doctor/cleanup` | `apps/matriz-control/app/api/doctor/cleanup/route.ts:3` | `POST` | M | `APP-M` |
-| `HTTP:matriz-control:POST:/api/git` | `apps/matriz-control/app/api/git/route.ts:19` | `POST` | M | `APP-M` |
+| `HTTP:matriz-control:POST:/api/git` | `apps/matriz-control/app/api/git/route.ts:20` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/startup` | `apps/matriz-control/app/api/startup/route.ts:9` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:7` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions/[sessionId]/input` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/input/route.ts:4` | `POST` | M | `APP-M` |
@@ -94,13 +103,18 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:willdash:POST:/api/auth/oidc/tenant` | `apps/willdash/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `OIDC-BFF` |
 >>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
 | `HTTP:matriz-hub:DELETE:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:26` | `DELETE` | M | `H-MOCK` |
+| `HTTP:matriz-hub:DELETE:/api/auth/oidc/session` | `apps/matriz-hub/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
 | `HTTP:matriz-hub:GET:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:9` | `GET` | R | `H-MOCK` |
+| `HTTP:matriz-hub:GET:/api/auth/oidc/callback` | `apps/matriz-hub/app/api/auth/oidc/callback/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/auth/oidc/login` | `apps/matriz-hub/app/api/auth/oidc/login/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/auth/oidc/session` | `apps/matriz-hub/app/api/auth/oidc/session/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:15` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:8` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/capabilities/themes` | `apps/matriz-hub/app/api/capabilities/themes/route.ts:8` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:9` | `GET` | R | `H-R` |
 <<<<<<< HEAD
 | `HTTP:matriz-hub:GET:/api/docs/documents` | `apps/matriz-hub/app/api/docs/documents/route.ts:9` | `GET` | R | `H-R` |
+<<<<<<< HEAD
 | `HTTP:matriz-hub:GET:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:13` | `GET` | R | `H-R` |
 =======
 | `HTTP:matriz-hub:POST:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:19` | `POST` | M | `H-M` |
@@ -113,6 +127,9 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:POST:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:9` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/documents/[docId]/versions` | `apps/matriz-hub/app/api/docs/documents/[docId]/versions/route.ts:7` | `POST` | M | `H-M` |
 >>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
+=======
+| `HTTP:matriz-hub:GET:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:7` | `GET` | R | `H-R` |
+>>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
 | `HTTP:matriz-hub:GET:/api/docs/entities` | `apps/matriz-hub/app/api/docs/entities/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/exports` | `apps/matriz-hub/app/api/docs/exports/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/governance` | `apps/matriz-hub/app/api/docs/governance/route.ts:9` | `GET` | R | `H-R` |
@@ -155,27 +172,28 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:20` | `OPTIONS` | R | `H-CACHE` |
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `OPTIONS` | R | `APP-R` |
-| `HTTP:matriz-hub:PATCH:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:25` | `PATCH` | M | `H-M` |
+| `HTTP:matriz-hub:PATCH:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:8` | `PATCH` | M | `H-M` |
 | `HTTP:matriz-hub:PATCH:/api/v1/distribution/admin/products/[productId]` | `apps/matriz-hub/app/api/v1/distribution/admin/products/[productId]/route.ts:2` | `PATCH` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:7` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:7` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/google` | `apps/matriz-hub/app/api/auth/mock/google/route.ts:7` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:18` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-hub:POST:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:7` | `POST` | M | `H-MOCK` |
+| `HTTP:matriz-hub:POST:/api/auth/oidc/tenant` | `apps/matriz-hub/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/capabilities/themes/checkout` | `apps/matriz-hub/app/api/capabilities/themes/checkout/route.ts:6` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:19` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/context-packages/[id]/publish` | `apps/matriz-hub/app/api/docs/context-packages/[id]/publish/route.ts:13` | `POST` | M | `H-M` |
+| `HTTP:matriz-hub:POST:/api/docs/context-packages/[id]/publish` | `apps/matriz-hub/app/api/docs/context-packages/[id]/publish/route.ts:7` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/conversions` | `apps/matriz-hub/app/api/docs/conversions/route.ts:9` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/documents` | `apps/matriz-hub/app/api/docs/documents/route.ts:25` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:42` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/documents/[docId]/versions` | `apps/matriz-hub/app/api/docs/documents/[docId]/versions/route.ts:13` | `POST` | M | `H-M` |
+| `HTTP:matriz-hub:POST:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:9` | `POST` | M | `H-M` |
+| `HTTP:matriz-hub:POST:/api/docs/documents/[docId]/versions` | `apps/matriz-hub/app/api/docs/documents/[docId]/versions/route.ts:7` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/entities` | `apps/matriz-hub/app/api/docs/entities/route.ts:19` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/exports` | `apps/matriz-hub/app/api/docs/exports/route.ts:19` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/imports` | `apps/matriz-hub/app/api/docs/imports/route.ts:9` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/relations` | `apps/matriz-hub/app/api/docs/relations/route.ts:19` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/suggestions` | `apps/matriz-hub/app/api/docs/suggestions/route.ts:20` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/suggestions/[id]/accept` | `apps/matriz-hub/app/api/docs/suggestions/[id]/accept/route.ts:13` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/suggestions/[id]/reject` | `apps/matriz-hub/app/api/docs/suggestions/[id]/reject/route.ts:13` | `POST` | M | `H-M` |
+| `HTTP:matriz-hub:POST:/api/docs/suggestions/[id]/accept` | `apps/matriz-hub/app/api/docs/suggestions/[id]/accept/route.ts:7` | `POST` | M | `H-M` |
+| `HTTP:matriz-hub:POST:/api/docs/suggestions/[id]/reject` | `apps/matriz-hub/app/api/docs/suggestions/[id]/reject/route.ts:7` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/institutional/refresh` | `apps/matriz-hub/app/api/institutional/refresh/route.ts:22` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/mcp` | `apps/matriz-hub/app/api/mcp/route.ts:34` | `POST` | M | `H-MCP-M` |
 | `HTTP:matriz-hub:POST:/api/v1/capabilities/themes/checkout` | `apps/matriz-hub/app/api/v1/capabilities/themes/checkout/route.ts:1` | `POST` | M | `APP-M` |
@@ -237,8 +255,12 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-workbench:POST:/api/control/repairs/[diagnosticId]/result` | `apps/matriz-workbench/app/api/control/repairs/[diagnosticId]/result/route.ts:9` | `POST` | M | `APP-M` |
 | `HTTP:matrizlib:GET:/api/health` | `apps/matrizlib/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:seumei:GET:/api/health` | `apps/seumei/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:seumeiapp:DELETE:/api/auth/oidc/session` | `apps/seumeiapp/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
 | `HTTP:seumeiapp:DELETE:/api/members/[membershipId]` | `apps/seumeiapp/app/api/members/[membershipId]/route.ts:21` | `DELETE` | M | `APP-M` |
 | `HTTP:seumeiapp:DELETE:/api/members/invitations/[invitationId]` | `apps/seumeiapp/app/api/members/invitations/[invitationId]/route.ts:6` | `DELETE` | M | `APP-M` |
+| `HTTP:seumeiapp:GET:/api/auth/oidc/callback` | `apps/seumeiapp/app/api/auth/oidc/callback/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:seumeiapp:GET:/api/auth/oidc/login` | `apps/seumeiapp/app/api/auth/oidc/login/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:seumeiapp:GET:/api/auth/oidc/session` | `apps/seumeiapp/app/api/auth/oidc/session/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/catalog/products` | `apps/seumeiapp/app/api/catalog/products/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/companies` | `apps/seumeiapp/app/api/companies/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:seumeiapp:GET:/api/customers` | `apps/seumeiapp/app/api/customers/route.ts:5` | `GET` | R | `APP-R` |
@@ -264,6 +286,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:seumeiapp:PATCH:/api/orders/[orderId]` | `apps/seumeiapp/app/api/orders/[orderId]/route.ts:6` | `PATCH` | M | `APP-M` |
 | `HTTP:seumeiapp:PATCH:/api/recipes/[productId]` | `apps/seumeiapp/app/api/recipes/[productId]/route.ts:6` | `PATCH` | M | `APP-M` |
 | `HTTP:seumeiapp:PATCH:/api/store/design` | `apps/seumeiapp/app/api/store/design/route.ts:6` | `PATCH` | M | `APP-M` |
+| `HTTP:seumeiapp:POST:/api/auth/oidc/tenant` | `apps/seumeiapp/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
 | `HTTP:seumeiapp:POST:/api/catalog/categories` | `apps/seumeiapp/app/api/catalog/categories/route.ts:5` | `POST` | M | `APP-M` |
 | `HTTP:seumeiapp:POST:/api/catalog/products` | `apps/seumeiapp/app/api/catalog/products/route.ts:9` | `POST` | M | `APP-M` |
 | `HTTP:seumeiapp:POST:/api/companies` | `apps/seumeiapp/app/api/companies/route.ts:9` | `POST` | M | `APP-M` |
@@ -280,10 +303,20 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:seumeiapp:POST:/api/store/design/publish` | `apps/seumeiapp/app/api/store/design/publish/route.ts:5` | `POST` | M | `APP-M` |
 | `HTTP:seumeiapp:POST:/api/store/design/unpublish` | `apps/seumeiapp/app/api/store/design/unpublish/route.ts:5` | `POST` | M | `APP-M` |
 | `HTTP:sites:GET:/api/health` | `apps/sites/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:spot:DELETE:/api/auth/oidc/session` | `apps/spot/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
+| `HTTP:spot:GET:/api/auth/oidc/callback` | `apps/spot/app/api/auth/oidc/callback/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:spot:GET:/api/auth/oidc/login` | `apps/spot/app/api/auth/oidc/login/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:spot:GET:/api/auth/oidc/session` | `apps/spot/app/api/auth/oidc/session/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:spot:GET:/api/health` | `apps/spot/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:spot:POST:/api/auth/oidc/tenant` | `apps/spot/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
+| `HTTP:willdash:DELETE:/api/auth/oidc/session` | `apps/willdash/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
+| `HTTP:willdash:GET:/api/auth/oidc/callback` | `apps/willdash/app/api/auth/oidc/callback/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:willdash:GET:/api/auth/oidc/login` | `apps/willdash/app/api/auth/oidc/login/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:willdash:GET:/api/auth/oidc/session` | `apps/willdash/app/api/auth/oidc/session/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:willdash:GET:/api/health` | `apps/willdash/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:willdash:POST:/api/auth/oidc/tenant` | `apps/willdash/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
 
-## Workbench Server Actions — 49 entries
+## Workbench Server Actions — 56 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
@@ -295,47 +328,54 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `ACTION:matriz-control:unlockAction` | `apps/matriz-control/app/actions.ts:7` | `unlockAction` | M | `WB-A` |
 | `ACTION:matriz-hub:generatePatternsAction` | `apps/matriz-hub/app/praticies/actions.ts:17` | `generatePatternsAction` | M | `WB-A` |
 | `ACTION:matriz-hub:runHealthCheckAction` | `apps/matriz-hub/app/health/checks/actions.ts:14` | `runHealthCheckAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:acceptInboxItemAction` | `apps/matriz-workbench/app/actions.ts:920` | `acceptInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addBacklogReferenceAction` | `apps/matriz-workbench/app/actions.ts:431` | `addBacklogReferenceAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:521` | `addRoadmapInitiativeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:612` | `addRoadmapMarkerAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addRoadmapPhaseAction` | `apps/matriz-workbench/app/actions.ts:493` | `addRoadmapPhaseAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addSprintDependencyAction` | `apps/matriz-workbench/app/actions.ts:1089` | `addSprintDependencyAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1031` | `addSprintOutcomeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addSprintWorkAction` | `apps/matriz-workbench/app/actions.ts:1066` | `addSprintWorkAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addWorkItemReferenceAction` | `apps/matriz-workbench/app/actions.ts:340` | `addWorkItemReferenceAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:advanceRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:692` | `advanceRoadmapInitiativeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:archiveBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:478` | `archiveBacklogItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:bulkWorkItemsAction` | `apps/matriz-workbench/app/actions.ts:964` | `bulkWorkItemsAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:captureInboxItemAction` | `apps/matriz-workbench/app/actions.ts:886` | `captureInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:closeSprintAction` | `apps/matriz-workbench/app/actions.ts:1128` | `closeSprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createAgentRequestAction` | `apps/matriz-workbench/app/actions.ts:825` | `createAgentRequestAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:370` | `createBacklogItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createControlSnippetAction` | `apps/matriz-workbench/app/actions.ts:1202` | `createControlSnippetAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createProjectBlueprintAction` | `apps/matriz-workbench/app/actions.ts:188` | `createProjectBlueprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createSprintAction` | `apps/matriz-workbench/app/actions.ts:947` | `createSprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createWorkItemAction` | `apps/matriz-workbench/app/actions.ts:220` | `createWorkItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:decideSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1110` | `decideSprintOutcomeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:discardInboxItemAction` | `apps/matriz-workbench/app/actions.ts:935` | `discardInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:initializeProjectAction` | `apps/matriz-workbench/app/actions.ts:179` | `initializeProjectAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:initializeRoadmapScorecardAction` | `apps/matriz-workbench/app/actions.ts:728` | `initializeRoadmapScorecardAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:initializeRoadmapScorecardsAction` | `apps/matriz-workbench/app/actions.ts:777` | `initializeRoadmapScorecardsAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:lockAction` | `apps/matriz-workbench/app/actions.ts:172` | `lockAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:moveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:318` | `moveWorkItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:reconcileRoadmapScoreAction` | `apps/matriz-workbench/app/actions.ts:759` | `reconcileRoadmapScoreAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:reviewAgentExecutionAction` | `apps/matriz-workbench/app/actions.ts:838` | `reviewAgentExecutionAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:reviewControlEvidenceAction` | `apps/matriz-workbench/app/actions.ts:1190` | `reviewControlEvidenceAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:566` | `saveRoadmapInitiativeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:642` | `saveRoadmapMarkerAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveSprintAction` | `apps/matriz-workbench/app/actions.ts:1011` | `saveSprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:250` | `saveWorkItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:toggleCriterionAction` | `apps/matriz-workbench/app/actions.ts:456` | `toggleCriterionAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:toggleRoadmapGoalAction` | `apps/matriz-workbench/app/actions.ts:742` | `toggleRoadmapGoalAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:toggleRoadmapScorecardGoalAction` | `apps/matriz-workbench/app/actions.ts:797` | `toggleRoadmapScorecardGoalAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:triageInboxItemAction` | `apps/matriz-workbench/app/actions.ts:900` | `triageInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:unlockAction` | `apps/matriz-workbench/app/actions.ts:156` | `unlockAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:updateBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:392` | `updateBacklogItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:writeDocumentAction` | `apps/matriz-workbench/app/actions.ts:1170` | `writeDocumentAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:acceptInboxItemAction` | `apps/matriz-workbench/app/actions.ts:923` | `acceptInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addBacklogReferenceAction` | `apps/matriz-workbench/app/actions.ts:434` | `addBacklogReferenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:524` | `addRoadmapInitiativeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:615` | `addRoadmapMarkerAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addRoadmapPhaseAction` | `apps/matriz-workbench/app/actions.ts:496` | `addRoadmapPhaseAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addSprintDependencyAction` | `apps/matriz-workbench/app/actions.ts:1092` | `addSprintDependencyAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1034` | `addSprintOutcomeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addSprintWorkAction` | `apps/matriz-workbench/app/actions.ts:1069` | `addSprintWorkAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addWorkItemReferenceAction` | `apps/matriz-workbench/app/actions.ts:343` | `addWorkItemReferenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:advanceRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:695` | `advanceRoadmapInitiativeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:archiveBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:481` | `archiveBacklogItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:bulkWorkItemsAction` | `apps/matriz-workbench/app/actions.ts:967` | `bulkWorkItemsAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:captureInboxItemAction` | `apps/matriz-workbench/app/actions.ts:889` | `captureInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:closeSprintAction` | `apps/matriz-workbench/app/actions.ts:1131` | `closeSprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentRequestAction` | `apps/matriz-workbench/app/actions.ts:828` | `createAgentRequestAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentTeamHandoffAction` | `apps/matriz-workbench/app/actions.ts:1287` | `createAgentTeamHandoffAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentTeamMissionAction` | `apps/matriz-workbench/app/actions.ts:1242` | `createAgentTeamMissionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentTeamProfileAction` | `apps/matriz-workbench/app/actions.ts:1233` | `createAgentTeamProfileAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:373` | `createBacklogItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createControlSnippetAction` | `apps/matriz-workbench/app/actions.ts:1205` | `createControlSnippetAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createProjectBlueprintAction` | `apps/matriz-workbench/app/actions.ts:191` | `createProjectBlueprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createSprintAction` | `apps/matriz-workbench/app/actions.ts:950` | `createSprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createWorkItemAction` | `apps/matriz-workbench/app/actions.ts:223` | `createWorkItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:decideSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1113` | `decideSprintOutcomeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:discardInboxItemAction` | `apps/matriz-workbench/app/actions.ts:938` | `discardInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeAgentTeamAction` | `apps/matriz-workbench/app/actions.ts:1223` | `initializeAgentTeamAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeProjectAction` | `apps/matriz-workbench/app/actions.ts:182` | `initializeProjectAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeRoadmapScorecardAction` | `apps/matriz-workbench/app/actions.ts:731` | `initializeRoadmapScorecardAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeRoadmapScorecardsAction` | `apps/matriz-workbench/app/actions.ts:780` | `initializeRoadmapScorecardsAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:lockAction` | `apps/matriz-workbench/app/actions.ts:175` | `lockAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:moveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:321` | `moveWorkItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reconcileRoadmapScoreAction` | `apps/matriz-workbench/app/actions.ts:762` | `reconcileRoadmapScoreAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:recordAgentTeamEvidenceAction` | `apps/matriz-workbench/app/actions.ts:1265` | `recordAgentTeamEvidenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reviewAgentExecutionAction` | `apps/matriz-workbench/app/actions.ts:841` | `reviewAgentExecutionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reviewAgentTeamMissionAction` | `apps/matriz-workbench/app/actions.ts:1301` | `reviewAgentTeamMissionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reviewControlEvidenceAction` | `apps/matriz-workbench/app/actions.ts:1193` | `reviewControlEvidenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:569` | `saveRoadmapInitiativeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:645` | `saveRoadmapMarkerAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveSprintAction` | `apps/matriz-workbench/app/actions.ts:1014` | `saveSprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:253` | `saveWorkItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:toggleCriterionAction` | `apps/matriz-workbench/app/actions.ts:459` | `toggleCriterionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:toggleRoadmapGoalAction` | `apps/matriz-workbench/app/actions.ts:745` | `toggleRoadmapGoalAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:toggleRoadmapScorecardGoalAction` | `apps/matriz-workbench/app/actions.ts:800` | `toggleRoadmapScorecardGoalAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:transitionAgentTeamMissionAction` | `apps/matriz-workbench/app/actions.ts:1251` | `transitionAgentTeamMissionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:triageInboxItemAction` | `apps/matriz-workbench/app/actions.ts:903` | `triageInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:unlockAction` | `apps/matriz-workbench/app/actions.ts:159` | `unlockAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:updateBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:395` | `updateBacklogItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:writeDocumentAction` | `apps/matriz-workbench/app/actions.ts:1173` | `writeDocumentAction` | M | `WB-A` |
 
 ## MCP tools — 51 entries
 
@@ -396,6 +436,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 ## Counts and zero-endpoint apps
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 Current tracked-source count: **290** = 190 HTTP methods, 49 Server Actions, and 51 MCP tools.
 =======
 Current tracked-source count: **172** = 86 HTTP methods (56 Hub, 10 Workbench, 20 product apps),
@@ -408,3 +449,6 @@ handlers, exported Server Actions, and declared MCP tools** in tracked app
 source. Their page-level mock/domain operations are intentionally not counted
 as request-facing endpoints.
 >>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
+=======
+Current tracked-source count: **322** = 215 HTTP methods, 56 Server Actions, and 51 MCP tools.
+>>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
