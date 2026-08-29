@@ -1,5 +1,17 @@
 # Matriz Decision Log
 
+## 2026-08-29 — `v1-consolidation` é evidência histórica, não fonte de merge
+
+- **Decisão:** não mesclar nem aplicar diretamente a árvore staged de
+  `codex/v1-consolidation-2026-08-27`; sua análise permanece registrada em
+  `docs/audit/2026-08-29-v1-consolidation-selective-assimilation.md`.
+- **Motivo:** a árvore é predominantemente regressiva contra a `main` e reduz
+  controles de arquitetura, autorização, cobertura de segurança e runtime.
+- **Impacto:** recuperação futura exige proposta app-local, testes e revisão
+  independente; não autoriza merge, cherry-pick ou cópia ampla da v1.
+- **Revisar quando:** surgir um commit isolado, testado e ausente da `main`,
+  com benefício atual e compatibilidade comprovada com as leis arquiteturais.
+
 ## 2026-08-27 — Workbench e Seumei têm distribuição Windows independente
 
 > **Status em 2026-08-28:** parcialmente substituída pela política
