@@ -54,4 +54,36 @@ describe("CompanyWorkspaceShell", () => {
     expect(within(dialog).getAllByRole("link", { name: /Produtos/ })).toHaveLength(1)
     expect(within(dialog).queryByRole("link", { name: /Visão geral/ })).toBeNull()
   })
+
+  it("opens the command palette with the platform shortcut", () => {
+    render(
+      <CompanyWorkspaceShell shell={{
+        companyName: "Oficina Aurora",
+        roleLabel: "Proprietário",
+        navigation: [{ label: "Visão geral", href: "/workspace" }],
+      }}><span>Conteúdo</span></CompanyWorkspaceShell>,
+    )
+
+    fireEvent.keyDown(window, { key: "k", ctrlKey: true })
+
+    expect(screen.getByRole("dialog", { name: "Busca global" })).toBeInTheDocument()
+    expect(screen.getByRole("searchbox", { name: "Buscar no Seumei" })).toHaveFocus()
+  })
+
+  it("returns focus to its trigger after Escape", () => {
+    render(
+      <CompanyWorkspaceShell shell={{
+        companyName: "Oficina Aurora",
+        roleLabel: "Proprietário",
+        navigation: [{ label: "Visão geral", href: "/workspace" }],
+      }}><span>Conteúdo</span></CompanyWorkspaceShell>,
+    )
+
+    const trigger = screen.getByRole("button", { name: "Buscar no workspace" })
+    fireEvent.click(trigger)
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Busca global" }), { key: "Escape" })
+
+    expect(screen.queryByRole("dialog", { name: "Busca global" })).toBeNull()
+    expect(trigger).toHaveFocus()
+  })
 })
