@@ -116,7 +116,7 @@ describe("mandatory tenant RLS", () => {
 
   it("keeps the closed core global whitelist outside tenant RLS", () => {
     const sql = migration("core")
-    for (const table of ["users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts", "identity_rate_limits", "platform_operators"]) {
+    for (const table of ["users", "auth_accounts", "auth_verification_challenges", "identity_mfa_methods", "identity_recovery_codes", "oidc_clients", "oidc_artifacts", "oidc_app_sessions", "identity_rate_limits", "platform_operators"]) {
       expect(sql).not.toContain(`'${table}'`)
     }
     expect(sql).toContain(`ALTER TABLE "tenants" ENABLE ROW LEVEL SECURITY`)
@@ -129,7 +129,7 @@ describe("mandatory tenant RLS", () => {
       table: match[1].match(/@@map\("([^"]+)"\)/)?.[1] ?? "",
       tenantColumn: /^\s+tenantId\s+/m.test(match[1]),
     }))
-    const explicitlyGlobal = new Set(["users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts", "identity_rate_limits", "platform_operators"])
+    const explicitlyGlobal = new Set(["users", "auth_accounts", "auth_verification_challenges", "identity_mfa_methods", "identity_recovery_codes", "oidc_clients", "oidc_artifacts", "oidc_app_sessions", "identity_rate_limits", "platform_operators"])
     const metadata = new Set(["__matriz_schema_releases"])
     const unclassified = tables.filter(({ table, tenantColumn }) =>
       !tenantColumn && table !== "tenants" && !explicitlyGlobal.has(table) && !metadata.has(table),
