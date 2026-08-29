@@ -11,7 +11,7 @@ import type { DesktopCommand } from "../src/domain/desktop-bridge"
 interface RuntimeDiscovery { endpoint: string; token: string }
 interface CommandResponse { id: string | null; result?: unknown; error?: string }
 
-const server = new McpServer({ name: "matriz-control-browser", version: "0.1.0" })
+const server = new McpServer({ name: "matriz-control-browser", version: "0.2.0" })
 const capsuleId = z.string().min(1).max(128)
 const tabId = z.string().min(1).max(128)
 

@@ -153,7 +153,7 @@ async function ensureRendererServer() {
   const server = join(process.resourcesPath, "next", "apps", "matriz-control", "server.js")
   rendererServer = spawn(process.execPath, [server], {
     cwd: join(process.resourcesPath, "next", "apps", "matriz-control"),
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", HOSTNAME: "127.0.0.1", PORT: "3009" },
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", MATRIZ_CONTROL_RUNTIME: "desktop-packaged", HOSTNAME: "127.0.0.1", PORT: "3009" },
     stdio: "ignore",
     windowsHide: true,
   })

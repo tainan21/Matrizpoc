@@ -7,12 +7,13 @@ import { presentHome, type HomeInput } from "../../src/modules/home/presentation
 import styles from "./home.module.css"
 import { ProjectHomeSummary } from "../../src/ui/projects/project-home-summary"
 import { getDoctorService } from "../../src/application/doctor-service"
+import { withReadDeadline } from "../../src/application/read-deadline"
 
 export const dynamic = "force-dynamic"
 
 export default async function HomePage() {
   const root = process.env.MATRIZ_WORKSPACE_ROOT ?? resolve(process.cwd(), "../..")
-  const [git, projects, doctor] = await Promise.allSettled([new GitCliRepository(root).overview().then(presentGitOverview), listTerminalProjects(root).then((items) => items.map(({ id, name, port }) => ({ id, name, port }))), getDoctorService().snapshot()])
+  const [git, projects, doctor] = await Promise.allSettled([withReadDeadline(new GitCliRepository(root).overview().then(presentGitOverview), 2_000), listTerminalProjects(root).then((items) => items.map(({ id, name, port }) => ({ id, name, port }))), withReadDeadline(getDoctorService().snapshot(), 2_000)])
   const input: HomeInput = {
     git: git.status === "fulfilled" ? { status: "fulfilled", value: git.value } : { status: "rejected", reason: String(git.reason) },
     projects: projects.status === "fulfilled" ? { status: "fulfilled", value: projects.value } : { status: "rejected", reason: String(projects.reason) },

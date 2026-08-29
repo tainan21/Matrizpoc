@@ -10,6 +10,7 @@ async function workspace() {
   await mkdir(app, { recursive: true })
   await writeFile(join(app, "package.json"), JSON.stringify({
     name: "@matriz/app-demo",
+    version: "4.2.0",
     scripts: { dev: "next dev --port=3999", lint: "eslint .", dangerous: "format C:" },
   }))
   return { root, app }
@@ -25,7 +26,14 @@ describe("project catalog", () => {
     const projects = await listTerminalProjects(root)
     expect(projects).toHaveLength(1)
     expect(projects[0]?.port).toBe(3999)
+    expect(projects[0]?.version).toBe("4.2.0")
     expect(projects[0]?.actions.map((action) => action.id)).toEqual(["dev", "lint"])
+  })
+
+  it("does not expose invalid declared ports", async () => {
+    const { root, app } = await workspace()
+    await writeFile(join(app, "package.json"), JSON.stringify({ name: "@matriz/app-demo", version: "4.2.0", scripts: { dev: "next dev --port=99999" } }))
+    expect((await listTerminalProjects(root))[0]?.port).toBeNull()
   })
 
   it("resolves cwd and command on the server", async () => {

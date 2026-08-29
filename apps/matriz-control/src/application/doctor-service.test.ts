@@ -6,7 +6,7 @@ describe("DoctorService cleanup", () => {
     const removed: string[] = []
     const service = new DoctorService({
       rootDir: "C:/repo",
-      listProjects: async () => [{ id: "demo", name: "demo", path: "C:/repo/apps/demo", port: 3000, actions: [] }],
+      listProjects: async () => [{ id: "demo", name: "demo", version: null, path: "C:/repo/apps/demo", port: 3000, actions: [] }],
       listSessions: () => [],
       inspect: async () => ({ generatedAt: "now", drive: { totalBytes: 100, freeBytes: 50, status: "healthy" }, projects: [{ id: "demo", name: "demo", route: "mih/apps/demo", totalBytes: 10, cacheBytes: 5, memoryBytes: null, branch: "main", dirty: false, status: "healthy", cacheTargets: [{ id: "next", bytes: 5, reclaimable: true }] }] }),
       remove: async (path) => { removed.push(path) },
@@ -20,7 +20,7 @@ describe("DoctorService cleanup", () => {
   })
 
   it("rejects cleanup while the project runs", async () => {
-    const service = new DoctorService({ rootDir: "C:/repo", listProjects: async () => [{ id: "demo", name: "demo", path: "C:/repo/apps/demo", port: null, actions: [] }], listSessions: () => [{ projectId: "demo", status: "running" }], inspect: async () => ({ generatedAt: "now", drive: { totalBytes: null, freeBytes: null, status: "unknown" }, projects: [] }), remove: async () => {}, now: () => 1 })
+    const service = new DoctorService({ rootDir: "C:/repo", listProjects: async () => [{ id: "demo", name: "demo", version: null, path: "C:/repo/apps/demo", port: null, actions: [] }], listSessions: () => [{ projectId: "demo", status: "running" }], inspect: async () => ({ generatedAt: "now", drive: { totalBytes: null, freeBytes: null, status: "unknown" }, projects: [] }), remove: async () => {}, now: () => 1 })
     await expect(service.previewCleanup("demo", "next")).rejects.toThrow("active session")
   })
 })

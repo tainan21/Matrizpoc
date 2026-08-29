@@ -5,7 +5,7 @@ import { TERMINAL_ACTION_IDS, type ResolvedTerminalAction, type TerminalActionId
 const labels: Record<TerminalActionId, string> = { dev: "Iniciar", lint: "Lint", typecheck: "Typecheck", test: "Testes" }
 const idPattern = /^[a-z0-9][a-z0-9-]*$/
 
-interface PackageJson { name?: string; scripts?: Record<string, string> }
+interface PackageJson { name?: string; version?: string; scripts?: Record<string, string> }
 
 async function readPackage(path: string): Promise<PackageJson> {
   return JSON.parse(await readFile(path, "utf8")) as PackageJson
@@ -39,8 +39,9 @@ export async function listTerminalProjects(rootDir: string): Promise<TerminalPro
       const pkg = await readPackage(join(path, "package.json"))
       const actions = TERMINAL_ACTION_IDS.filter((id) => Boolean(pkg.scripts?.[id])).map((id) => ({ id, label: labels[id] }))
       const portMatch = pkg.scripts?.dev?.match(/(?:-p|--port)(?:=|\s+)(\d{2,5})/)
-      const port = portMatch ? Number(portMatch[1]) : null
-      if (actions.length) projects.push({ id: entry.name, name: pkg.name?.replace(/^@matriz\/app-/, "") ?? entry.name, path, port, actions })
+      const declaredPort = portMatch ? Number(portMatch[1]) : null
+      const port = declaredPort !== null && declaredPort >= 1 && declaredPort <= 65_535 ? declaredPort : null
+      if (actions.length) projects.push({ id: entry.name, name: pkg.name?.replace(/^@matriz\/app-/, "") ?? entry.name, version: pkg.version ?? null, path, port, actions })
     } catch { /* Invalid project entries are not executable. */ }
   }
   return projects.sort((a, b) => a.name.localeCompare(b.name))

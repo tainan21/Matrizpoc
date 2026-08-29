@@ -62,7 +62,7 @@ export function InstalledAppsProvider({ children }: { children: ReactNode }) {
   const navigation = useMemo(() => {
     const definitionIds = new Set(CONTROL_EXTENSION_DEFINITIONS.map((definition) => definition.id))
     const receipts = state.installedIds.filter((id) => definitionIds.has(id)).map((id) => ({ id, version: "0.1.0", state: state.activeIds.includes(id) ? "active" as const : "installed-inactive" as const, grantedPermissions: id === "health" ? ["system.metrics.read" as const] : [], installedAt: "local", updatedAt: "local" }))
-    return createExtensionRegistry(CONTROL_EXTENSION_DEFINITIONS, "0.1.0", receipts).contributions.navigation
+    return createExtensionRegistry(CONTROL_EXTENSION_DEFINITIONS, "0.2.0", receipts).contributions.navigation
   }, [state.activeIds, state.installedIds])
 
   const value = useMemo<InstalledAppsContextValue>(() => ({
