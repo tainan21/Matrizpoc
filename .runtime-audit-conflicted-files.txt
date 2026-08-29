@@ -1,0 +1,9 @@
+apps/matriz-admin/src/auth/oidc.server.ts
+apps/matriz-hub/app/api/telemetry/route.ts
+docs/security/ENDPOINT-INVENTORY.md
+packages/design/system/src/index.ts
+packages/flows/ecosystem/src/index.tsx
+prisma/core/schema.prisma
+tests/smoke/security-endpoint-inventory.test.ts
+tests/smoke/tenant-rls.test.ts
+vitest.config.ts

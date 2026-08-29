@@ -7,11 +7,16 @@ import { createSharedCacheClient, type SharedCacheEntry } from "@matriz/platform
 import type { MatrizAppId } from "@matriz/foundation-constants"
 
 const labels: Record<MatrizAppId, string> = {
+<<<<<<< HEAD
   "matriz-identity": "Matriz Identity · auth",
   "matriz-hub": "Hub · 3000", "matriz-desktop": "Matriz Control · native", spot: "Spot · 3001",
   "matriz-control": "Matriz Control · 3009",
   "matriz-uninstall": "Matriz Uninstall · native",
   "matriz-admin": "Matriz Admin · 3002", "matriz-ops": "Matriz Ops · 3009", "matriz-pay": "Matriz Pay · 3010", seumei: "Seumei · 3008",
+=======
+  "matriz-identity": "Identity · Cloud Run",
+  "matriz-hub": "Hub · 3000", spot: "Spot · 3001", seumei: "Seumei · 3002",
+>>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
   contracts: "Contracts · 3003", willdash: "WillDash · 3004",
   "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006", matrizlib: "MatrizLib · 3007",
   health: "Health · 3010",

@@ -21,7 +21,7 @@ export interface AuthContextValue {
   acceptSession(session: AuthSession): void
   signOut(): void
   refresh(): void
-  setActiveTenant(tenantId: string): void
+  setActiveTenant(tenantId: string): Promise<boolean>
 }
 
 export const AuthContext = React.createContext<AuthContextValue | null>(null)

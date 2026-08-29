@@ -84,3 +84,4 @@ export type {
 export { MOCK_GOOGLE_ACCOUNTS, createMockAuthState } from "./v1/mock/mock-auth"
 export type { MockAuthBroker } from "./v1/mock/mock-auth-broker"
 export { createHttpMockAuthBroker } from "./v1/mock/mock-auth-broker"
+export * from "./v2/oidc-bff"

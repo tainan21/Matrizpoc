@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { isSharedCacheOriginAllowed, parseSharedCacheWrite, sharedCacheHeaders } from "../../../../src/ecosystem/shared-cache-contract"
-import { getHubRequestContext, HubAuthError, requireSameOrigin } from "../../../../src/auth/hub-session"
+import { getDurableHubRequestContext, HubAuthError, requireSameOrigin } from "../../../../src/auth/hub-session"
 import { readBoundedText, RequestBodyTooLargeError } from "../../../../src/http/bounded-body"
 
 const MAX_CACHE_WRITE_BYTES = 8 * 1024
@@ -26,7 +26,7 @@ export function OPTIONS(request: Request) {
 
 export async function GET(request: Request) {
   let context
-  try { context = getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
+  try { context = await getDurableHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
   const key = new URL(request.url).searchParams.get("key")?.trim()
   const headers = sharedCacheHeaders(request.headers.get("origin"))
   if (!isSharedCacheOriginAllowed(request.headers.get("origin"))) return NextResponse.json({ error: "origin not allowed" }, { status: 403 })
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
 
 export async function PUT(request: Request) {
   let context
-  try { requireSameOrigin(request); context = getHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
+  try { requireSameOrigin(request); context = await getDurableHubRequestContext(request) } catch (error) { return NextResponse.json({ error: "Authentication required" }, { status: error instanceof HubAuthError ? error.status : 401, headers: { "cache-control": "private, no-store" } }) }
   const origin = request.headers.get("origin")
   const headers = { ...sharedCacheHeaders(origin), "cache-control": "private, no-store" }
   if (!request.headers.get("content-type")?.includes("application/json")) return NextResponse.json({ error: "invalid cache payload" }, { status: 400, headers })

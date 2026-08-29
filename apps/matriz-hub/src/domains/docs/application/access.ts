@@ -1,5 +1,5 @@
 import type { DocActorType, DocSensitivity, DocVisibility } from "@matriz/integration-api-contracts/v1/docs"
-import { allowHubRequest, getHubRequestContext, requireSameOrigin, HubRateLimitError } from "../../../auth/hub-session"
+import { allowHubRequest, getDurableHubRequestContext, requireSameOrigin, HubRateLimitError } from "../../../auth/hub-session"
 import {
   MATRIZ_DOCS_DEFAULT_TENANT,
   MATRIZ_DOCS_SYSTEM_ACTOR_ID,
@@ -18,12 +18,12 @@ export const defaultDocsActorContext: DocsActorContext = {
   displayName: "MatrizDocs demo renderer",
 }
 
-export function getDocsActorContextFromRequest(request: Request): DocsActorContext {
+export async function getDocsActorContextFromRequest(request: Request): Promise<DocsActorContext> {
   // Deliberately server-only: public x-tenant/x-actor headers cannot grant authority.
   if (!["GET", "HEAD", "OPTIONS"].includes(request.method)) {
     requireSameOrigin(request)
   }
-  const context = getHubRequestContext(request)
+  const context = await getDurableHubRequestContext(request)
   if (!["GET", "HEAD", "OPTIONS"].includes(request.method) && !allowHubRequest(`docs:mutation:${context.session.identity.user.id}`, Date.now(), 20)) throw new HubRateLimitError()
   return { tenantId: context.session.activeTenantId, actorId: context.session.identity.user.id, actorType: "human_user", displayName: context.session.identity.user.name }
 }

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const url = new URL(request.url)
     const repo = makeDocsRepository()
     const documents = await repo.listDocuments(actor, {
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const body = await readDocsRequestBody(request)
     const repo = makeDocsRepository()
     const detail = await repo.createDocument(actor, {

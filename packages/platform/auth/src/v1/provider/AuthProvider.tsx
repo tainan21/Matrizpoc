@@ -184,20 +184,20 @@ export function AuthProvider({ config, children }: AuthProviderProps) {
 
   // --- tenant switch --------------------------------------------------
   const setActiveTenant = React.useCallback(
-    (tenantId: string) => {
-      setState((prev) => {
-        if (prev.status !== "signed-in") return prev
-        const match = prev.session.identity.tenants.find((t) => t.tenantId === tenantId)
-        if (!match) return prev
-        const next: AuthSession = {
-          ...prev.session,
-          activeTenantId: asTenantId(tenantId),
-        }
+    async (tenantId: string): Promise<boolean> => {
+      if (!config.broker?.switchTenant) return false
+      try {
+        const next = await config.broker.switchTenant(tenantId)
+        if (next.activeTenantId !== asTenantId(tenantId)) return false
         persistSession(storage, next)
-        return { status: "signed-in", session: next, error: null }
-      })
+        setState({ status: "signed-in", session: next, error: null })
+        return true
+      } catch (cause) {
+        setState((previous) => ({ status: "error", session: previous.session, error: { code: "unknown", message: "Nao foi possivel trocar o tenant.", cause } }))
+        return false
+      }
     },
-    [storage],
+    [config.broker, storage],
   )
 
   // --- context value --------------------------------------------------

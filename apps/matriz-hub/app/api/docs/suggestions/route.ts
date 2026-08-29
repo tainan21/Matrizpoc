@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const status = new URL(request.url).searchParams.get("status") ?? undefined
     const suggestions = await makeDocsRepository().listSuggestions(actor, status)
     return NextResponse.json({ ok: true, suggestions })
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const body = await readDocsRequestBody(request)
     const suggestion = await makeDocsRepository().createSuggestion(actor, {
       type: String(body.type ?? "document_patch") as never,

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const runs = await makeDocsRepository().listRuns(actor)
     return NextResponse.json({ ok: true, runs })
   } catch (error) {

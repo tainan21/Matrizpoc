@@ -8,7 +8,7 @@
 import { asAppId } from "@matriz/foundation-types"
 import type { AuthProviderConfig } from "@matriz/platform-auth"
 import { spotStrategies } from "./strategies"
-import { createHttpMockAuthBroker } from "@matriz/platform-auth"
+import { createConfiguredAuthBroker } from "@matriz/platform-auth"
 import { monorepoConfig } from "@matriz/platform-config"
 import type { LoginSkin } from "@matriz/flows-auth"
 
@@ -18,7 +18,7 @@ export const spotAuthConfig: AuthProviderConfig = {
   appId: SPOT_APP_ID,
   strategies: spotStrategies,
   sessionTtlMs: 24 * 60 * 60 * 1000,
-  broker: createHttpMockAuthBroker(monorepoConfig.baseUrls["matriz-hub"]),
+  broker: createConfiguredAuthBroker({ developmentMockBaseUrl: monorepoConfig.baseUrls["matriz-hub"] }),
 }
 
 export const spotLoginSkin: LoginSkin = {

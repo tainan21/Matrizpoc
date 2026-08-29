@@ -73,6 +73,7 @@ model User {
   updatedAt           DateTime   @updatedAt
 
   memberships         TenantMembership[]
+<<<<<<< HEAD
   legacyMemberships   Membership[]
   invitationsSent     MembershipInvitation[] @relation("MembershipInvitationsSent")
   invitationsAccepted MembershipInvitation[] @relation("MembershipInvitationsAccepted")
@@ -82,6 +83,16 @@ model User {
   revokedAppGrants    AppGrant[]             @relation("AppGrantRevokedBy")
   revokedOidcClients  OidcClient[]           @relation("OidcClientRevokedBy")
   identityAuditEvents IdentityAuditEvent[]   @relation("IdentityAuditActor")
+=======
+  invitedMemberships  TenantMembership[] @relation("MembershipInvitedBy")
+  revokedMemberships  TenantMembership[] @relation("MembershipRevokedBy")
+  grantedAppGrants    AppGrant[]          @relation("AppGrantGrantedBy")
+  revokedAppGrants    AppGrant[]          @relation("AppGrantRevokedBy")
+  revokedOidcClients  OidcClient[]         @relation("OidcClientRevokedBy")
+  identityAuditEvents IdentityAuditEvent[] @relation("IdentityAuditActor")
+  mfaMethods          IdentityMfaMethod[]
+  recoveryCodes       IdentityRecoveryCode[]
+>>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
   authAccounts        AuthAccount[]
   appSessions         AppSession[]
   platformOperator    PlatformOperator?
@@ -238,8 +249,14 @@ model AppGrant {
 }
 
 model OidcClient {
+<<<<<<< HEAD
   id                      String    @id @default(cuid())
   clientId                String    @unique
+=======
+  id                      String   @id @default(cuid())
+  clientId                String   @unique
+  appId                   String
+>>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
   name                    String
   redirectUris            String[]
   postLogoutRedirectUris  String[]
@@ -257,7 +274,41 @@ model OidcClient {
   revokedBy User? @relation("OidcClientRevokedBy", fields: [revokedByUserId], references: [id], onDelete: SetNull)
 
   @@index([enabled, revokedAt])
+  @@index([appId, enabled, revokedAt])
   @@map("oidc_clients")
+}
+
+model IdentityMfaMethod {
+  id               String   @id @default(cuid())
+  userId           String
+  kind             String
+  label            String?
+  secretCiphertext String?
+  credentialId     String?  @unique
+  publicKey        String?
+  signCount        Int?
+  lastTotpCounter  BigInt?
+  transports       String[]
+  verifiedAt       DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, kind, revokedAt])
+  @@map("identity_mfa_methods")
+}
+
+model IdentityRecoveryCode {
+  id         String   @id @default(cuid())
+  userId     String
+  codeHash   String
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, consumedAt])
+  @@map("identity_recovery_codes")
 }
 
 model IdentityAuditEvent {
@@ -297,6 +348,23 @@ model OidcArtifact {
   @@index([model, uid])
   @@index([expiresAt])
   @@map("oidc_artifacts")
+}
+
+// Opaque BFF session payload. Ciphertext is bound to the confidential OIDC
+// client and app; browser handles are stored only as hashes.
+model OidcAppSession {
+  handleHash String   @id
+  clientId   String
+  appId      String
+  ciphertext String
+  revision   Int      @default(0)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([clientId, appId, expiresAt])
+  @@index([expiresAt])
+  @@map("oidc_app_sessions")
 }
 
 // ---------------------------------------------------------------------------
