@@ -18,7 +18,7 @@ const health: ExtensionDefinition = {
   permissions: ["system.metrics.read"],
   dependencies: [],
   contributions: {
-    navigation: [{ id: "system-health", label: "System Health", items: [{ id: "overview", label: "Overview", path: "/extensions/health/overview" }, { id: "resources", label: "Resources", path: "/extensions/health/resources" }] }],
+    navigation: [{ id: "system-health", appId: "health", label: "System Health", items: [{ id: "overview", label: "Overview", path: "/" }, { id: "resources", label: "Resources", path: "/resources" }] }],
     widgets: [{ id: "health.widget.system", label: "System Health" }],
     doctorProviders: ["health.system.observe"],
   },

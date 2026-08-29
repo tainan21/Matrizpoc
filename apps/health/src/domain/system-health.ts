@@ -27,6 +27,7 @@ export interface SystemSnapshot {
     readonly percent: number
   }
   readonly temperature: SensorReading
+  readonly storage: { readonly totalBytes: number | null; readonly freeBytes: number | null; readonly percent: number | null }
   readonly processes: readonly ProcessReading[]
 }
 

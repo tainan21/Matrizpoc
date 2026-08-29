@@ -53,14 +53,14 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-control:DELETE:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:6` | `DELETE` | M | `APP-M` |
 | `HTTP:matriz-control:GET:/api/apps/readiness` | `apps/matriz-control/app/api/apps/readiness/route.ts:7` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/doctor` | `apps/matriz-control/app/api/doctor/route.ts:4` | `GET` | R | `APP-R` |
-| `HTTP:matriz-control:GET:/api/git` | `apps/matriz-control/app/api/git/route.ts:14` | `GET` | R | `APP-R` |
+| `HTTP:matriz-control:GET:/api/git` | `apps/matriz-control/app/api/git/route.ts:15` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/health` | `apps/matriz-control/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/projects` | `apps/matriz-control/app/api/projects/route.ts:5` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:4` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:PATCH:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:5` | `PATCH` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/doctor/cleanup` | `apps/matriz-control/app/api/doctor/cleanup/route.ts:3` | `POST` | M | `APP-M` |
-| `HTTP:matriz-control:POST:/api/git` | `apps/matriz-control/app/api/git/route.ts:19` | `POST` | M | `APP-M` |
+| `HTTP:matriz-control:POST:/api/git` | `apps/matriz-control/app/api/git/route.ts:20` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/startup` | `apps/matriz-control/app/api/startup/route.ts:9` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:7` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions/[sessionId]/input` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/input/route.ts:4` | `POST` | M | `APP-M` |

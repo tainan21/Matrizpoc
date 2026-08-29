@@ -5,6 +5,7 @@ import { INSTALLABLE_APPS } from "../../integration/apps/installable-app-catalog
 import { toInstallableAppsViewModels } from "./installable-apps-presenter"
 import { ExternalAppFrame, activateExternalApp, frameAppForActivation } from "./external-app-stage"
 import { SmartAppRail } from "./smart-app-rail"
+import { CONTROL_EXTENSION_DEFINITIONS, createExtensionRegistry } from "../../modules/extensions/public"
 
 const appId = "health"
 const allowedIds = INSTALLABLE_APPS.map((app) => app.manifest.appId)
@@ -24,8 +25,11 @@ describe("smart app host", () => {
   })
 
   it("exposes Health Overview and Resources only after Health is installed", () => {
-    const markup = renderToStaticMarkup(<SmartAppRail apps={[healthViewModel()]} activeAppId="health" onActivate={() => undefined} onOpenPath={() => undefined} />)
+    const inactive = renderToStaticMarkup(<SmartAppRail apps={[healthViewModel()]} activeAppId="health" onActivate={() => undefined} onOpenPath={() => undefined} />)
+    const navigation = createExtensionRegistry(CONTROL_EXTENSION_DEFINITIONS, "0.1.0", [{ id: "health", version: "0.1.0", state: "active", grantedPermissions: ["system.metrics.read"], installedAt: "now", updatedAt: "now" }]).contributions.navigation
+    const markup = renderToStaticMarkup(<SmartAppRail apps={[healthViewModel()]} navigation={navigation} activeAppId="health" onActivate={() => undefined} onOpenPath={() => undefined} />)
 
+    expect(inactive).not.toContain("System Health")
     expect(markup).toContain("System Health")
     expect(markup).toContain("Overview")
     expect(markup).toContain("Resources")

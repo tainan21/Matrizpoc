@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   POWERSHELL_EXECUTABLE,
   PROCESS_SCRIPT,
+  STORAGE_SCRIPT,
   TEMPERATURE_SCRIPT,
   WindowsDetailSampler,
   type PowerShellExec,
@@ -14,7 +15,7 @@ describe("WindowsDetailSampler", () => {
       calls.push(args)
       return calls.length === 1
         ? JSON.stringify([{ ProcessId: 4, Name: "System", KernelModeTime: 10_000_000, UserModeTime: 20_000_000, WorkingSetSize: 4_096 }])
-        : JSON.stringify([{ CurrentTemperature: 3_000 }])
+        : calls.length === 2 ? JSON.stringify([{ CurrentTemperature: 3_000 }]) : JSON.stringify({ Size: 2_000, FreeSpace: 500 })
     }
     const sampler = new WindowsDetailSampler(exec)
 
@@ -24,13 +25,15 @@ describe("WindowsDetailSampler", () => {
     expect(first).toEqual({
       processes: [{ pid: 4, name: "System", cpuSeconds: 3, memoryBytes: 4_096 }],
       temperatureCelsius: 26.9,
+      storage: { totalBytes: 2_000, freeBytes: 500 },
     })
     expect(cached).toEqual(first)
-    expect(calls).toHaveLength(2)
-    expect(calls.map(([file]) => file)).toEqual([POWERSHELL_EXECUTABLE, POWERSHELL_EXECUTABLE])
+    expect(calls).toHaveLength(3)
+    expect(calls.map(([file]) => file)).toEqual([POWERSHELL_EXECUTABLE, POWERSHELL_EXECUTABLE, POWERSHELL_EXECUTABLE])
     expect(calls.map(([, args]) => args)).toEqual([
       ["-NoProfile", "-NonInteractive", "-Command", PROCESS_SCRIPT],
       ["-NoProfile", "-NonInteractive", "-Command", TEMPERATURE_SCRIPT],
+      ["-NoProfile", "-NonInteractive", "-Command", STORAGE_SCRIPT],
     ])
     for (const [, , options] of calls) {
       expect(options.windowsHide).toBe(true)
@@ -45,6 +48,7 @@ describe("WindowsDetailSampler", () => {
     await expect(sampler.sample(1_000)).resolves.toEqual({
       processes: [],
       temperatureCelsius: null,
+      storage: { totalBytes: null, freeBytes: null },
     })
   })
 

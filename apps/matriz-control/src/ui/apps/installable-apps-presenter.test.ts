@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { emptyInstalledAppsState, installApp } from "../../domain/installable-apps"
+import { activateCapability, emptyInstalledAppsState, installApp } from "../../domain/installable-apps"
 import { INSTALLABLE_APPS } from "../../integration/apps/installable-app-catalog"
 import { toInstallableAppsViewModels } from "./installable-apps-presenter"
 
@@ -8,7 +8,7 @@ describe("installable apps presenter", () => {
     const available = toInstallableAppsViewModels(INSTALLABLE_APPS, emptyInstalledAppsState())
     const installed = toInstallableAppsViewModels(
       INSTALLABLE_APPS,
-      installApp(emptyInstalledAppsState(), "health", ["health"]),
+      activateCapability(installApp(emptyInstalledAppsState(), "health", ["health"]), "health"),
     )
 
     expect(available[0]).toMatchObject({ appId: "health", installed: false, shellMutationId: null })

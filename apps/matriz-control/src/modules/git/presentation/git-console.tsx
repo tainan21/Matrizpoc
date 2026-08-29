@@ -1,11 +1,11 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
-import type { GitBranch } from "../integration/git-cli-repository"
+import type { GitBranch, GitCommit } from "../integration/git-cli-repository"
 import type { GitOverviewViewModel } from "./git-presenter"
 import styles from "../../../../app/git/git.module.css"
 
-interface GitResponse { readonly overview: GitOverviewViewModel; readonly branches: readonly GitBranch[] }
+interface GitResponse { readonly overview: GitOverviewViewModel; readonly branches: readonly GitBranch[]; readonly history: readonly GitCommit[]; readonly reflog: string }
 type GitResult = GitResponse | { readonly error: string }
 
 export function GitConsole({ initial }: { readonly initial: GitResponse | null }) {
@@ -31,12 +31,12 @@ export function GitConsole({ initial }: { readonly initial: GitResponse | null }
   const { overview, branches } = data
   return <main className={styles.page}>
     <header className={styles.header}><div><span>GIT / REPOSITÓRIO</span><h1>Matriz Control</h1><p>Estado real do workspace configurado.</p></div><div className={styles.branch}><b>{overview.branch}</b><span data-attention={overview.attention}>{overview.status}</span><small>↑ {overview.ahead} · ↓ {overview.behind}</small></div></header>
-    <nav className={styles.tabs} aria-label="Áreas do Git"><b>Visão geral</b><span>Changes {overview.changeTotal}</span><span>Branches {branches.length}</span><button onClick={() => void refresh().catch((cause: unknown) => setError(cause instanceof Error ? cause.message : "Git indisponível"))}>Atualizar</button></nav>
+    <nav className={styles.tabs} aria-label="Áreas do Git"><b>Visão geral</b><span>Changes {overview.changeTotal}</span><span>Branches {branches.length}</span><button onClick={() => void action({ action: "fetch" })}>Fetch</button><button onClick={() => void action({ action: "pull" })}>Pull</button><button onClick={() => void action({ action: "push" })}>Push</button><button onClick={() => void refresh().catch((cause: unknown) => setError(cause instanceof Error ? cause.message : "Git indisponível"))}>Atualizar</button></nav>
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
     <section className={styles.workspace}>
       <div className={styles.summary}><article><small>HEAD</small><strong>{overview.head}</strong><span>{overview.subject}</span></article><article><small>MUDANÇAS</small><strong>{overview.changeTotal}</strong><span>{overview.status}</span></article><article><small>SINCRONIZAÇÃO</small><strong>{overview.ahead} / {overview.behind}</strong><span>ahead / behind</span></article></div>
       <div className={styles.changes}><header><div><span>WORKING TREE</span><strong>{overview.changeTotal} arquivos</strong></div><button disabled={!overview.changes.length} onClick={() => void action({ action: "stage", paths: overview.changes.map((change) => change.path) })}>Stage all</button></header>{overview.changes.length ? overview.changes.map((change) => <article key={change.path}><code>{change.path}</code><span>{change.staged ? `staged · ${change.staged}` : ""}</span><div><button onClick={() => void action({ action: change.staged ? "unstage" : "stage", paths: [change.path] })}>{change.staged ? "Unstage" : "Stage"}</button><b>{change.unstaged ?? "—"}</b></div></article>) : <p>Working tree limpo. Nenhuma ação necessária.</p>}</div>
-      <aside className={styles.inspector}><span>BRANCHES</span><h2>{overview.branch}</h2><div className={styles.branchList}>{branches.map((branch) => <button key={branch.name} data-current={branch.current || undefined} onClick={() => !branch.current && void action({ action: "switch-branch", name: branch.name })}><b>{branch.name}</b><small>↑{branch.ahead} ↓{branch.behind}</small></button>)}</div><form onSubmit={(event) => { event.preventDefault(); if (branchName.trim()) void action({ action: "create-branch", name: branchName.trim(), checkout: true }) }}><label>Nova branch<input value={branchName} onChange={(event) => setBranchName(event.target.value)} placeholder="feat/nova-capacidade" /></label><button>Criar e trocar</button></form><form onSubmit={(event) => { event.preventDefault(); if (message.trim()) void action({ action: "commit", message }) }}><label>Commit<input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="feat: descreva a mudança" /></label><button disabled={!message.trim()}>Commit</button></form></aside>
+      <aside className={styles.inspector}><span>BRANCHES</span><h2>{overview.branch}</h2><div className={styles.branchList}>{branches.map((branch) => <button key={branch.name} data-current={branch.current || undefined} onClick={() => !branch.current && void action({ action: "switch-branch", name: branch.name })}><b>{branch.name}</b><small>↑{branch.ahead} ↓{branch.behind}</small></button>)}</div><form onSubmit={(event) => { event.preventDefault(); if (branchName.trim()) void action({ action: "create-branch", name: branchName.trim(), checkout: true }) }}><label>Nova branch<input value={branchName} onChange={(event) => setBranchName(event.target.value)} placeholder="feat/nova-capacidade" /></label><button>Criar e trocar</button></form><form onSubmit={(event) => { event.preventDefault(); if (message.trim()) void action({ action: "commit", message }) }}><label>Commit<input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="feat: descreva a mudança" /></label><button disabled={!message.trim()}>Commit</button></form><section className={styles.history}><span>HISTÓRICO</span>{data.history.slice(0, 6).map((commit) => <p key={commit.id}><b>{commit.shortId}</b> {commit.subject}</p>)}</section></aside>
     </section>
   </main>
 }

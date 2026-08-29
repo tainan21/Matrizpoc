@@ -22,6 +22,7 @@ export interface SystemHealthVM {
   readonly cpu: MetricVM
   readonly memory: MetricVM
   readonly temperature: MetricVM
+  readonly storage: MetricVM
   readonly uptime: MetricVM
   readonly processes: readonly ProcessVM[]
 }
@@ -62,6 +63,9 @@ export function toSystemHealthVM(snapshot: SystemSnapshot): SystemHealthVM {
           percent: null,
           tone: "unavailable",
         },
+    storage: snapshot.storage.totalBytes !== null && snapshot.storage.freeBytes !== null && snapshot.storage.percent !== null
+      ? metric("Disco", `${formatBytes(snapshot.storage.freeBytes)} livres`, `${number.format(snapshot.storage.percent)}% em uso`, snapshot.storage.percent)
+      : { label: "Disco", value: "Não disponível", detail: "Unidade do sistema não exposta", percent: null, tone: "unavailable" },
     uptime: {
       label: "Atividade",
       value: formatUptime(snapshot.uptimeSeconds),

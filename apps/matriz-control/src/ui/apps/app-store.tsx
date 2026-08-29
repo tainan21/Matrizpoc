@@ -17,7 +17,7 @@ export function presentNativeStoreAction(state: StoreAppSnapshot["state"]): "dow
 }
 
 export function AppStore() {
-  const { apps, activate, install, uninstall, storeAction } = useInstalledApps()
+  const { apps, activate, install, uninstall, activateExtension, deactivateExtension, storeAction } = useInstalledApps()
 
   return <main className={styles.store}>
     <header className={styles.header}>
@@ -44,7 +44,7 @@ export function AppStore() {
         <ul className={styles.capabilities}>{app.capabilities.map((capability) => <li key={capability.id}><strong>{capability.name}</strong><span>{capability.description}</span></li>)}</ul>
         <div className={styles.actions}>
           {app.kind === "activation" && app.installed ? <>
-            <button className={styles.secondary} onClick={() => openInstalledApp(app.appId, activate)}>Abrir</button>
+            {app.active ? <><button className={styles.secondary} onClick={() => openInstalledApp(app.appId, activate)}>Abrir</button><button className={styles.secondary} onClick={() => deactivateExtension(app.appId)}>Desativar</button></> : <button className={styles.primary} onClick={() => activateExtension(app.appId)}>Ativar capacidade</button>}
             <button className={styles.danger} onClick={() => uninstall(app.appId)}>Desinstalar</button>
           </> : app.kind === "activation" ? <button className={styles.primary} onClick={() => install(app.appId)}>Instalar</button> : <NativeStoreActions appId={app.appId as NativeAppId} state={app.nativeState!} onAction={storeAction} />}
         </div>

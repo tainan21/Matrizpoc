@@ -14,7 +14,7 @@ describe("installed apps storage", () => {
     const storage = new MemoryStorage()
     storage.setItem(INSTALLED_APPS_STORAGE_KEY, JSON.stringify({ version: 1, installedIds: ["health"], activeAppId: "health" }))
 
-    expect(readInstalledAppsState(storage, ["health"])).toEqual({ version: 1, installedIds: ["health"], activeAppId: "health" })
+    expect(readInstalledAppsState(storage, ["health"])).toEqual({ version: 2, installedIds: ["health"], activeIds: ["health"], activeAppId: "health" })
 
     storage.setItem(INSTALLED_APPS_STORAGE_KEY, "not-json")
     expect(readInstalledAppsState(storage, ["health"])).toEqual(emptyInstalledAppsState())
@@ -22,8 +22,8 @@ describe("installed apps storage", () => {
 
   it("writes only the versioned installation state", () => {
     const storage = new MemoryStorage()
-    writeInstalledAppsState(storage, { version: 1, installedIds: ["health"], activeAppId: null })
+    writeInstalledAppsState(storage, { version: 2, installedIds: ["health"], activeIds: [], activeAppId: null })
 
-    expect(storage.getItem(INSTALLED_APPS_STORAGE_KEY)).toBe('{"version":1,"installedIds":["health"],"activeAppId":null}')
+    expect(storage.getItem(INSTALLED_APPS_STORAGE_KEY)).toBe('{"version":2,"installedIds":["health"],"activeIds":[],"activeAppId":null}')
   })
 })

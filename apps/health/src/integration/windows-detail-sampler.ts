@@ -5,6 +5,7 @@ import type { ProcessReading } from "../domain/system-health"
 export const POWERSHELL_EXECUTABLE = "powershell.exe"
 export const PROCESS_SCRIPT = "Get-CimInstance Win32_Process | Sort-Object WorkingSetSize -Descending | Select-Object -First 12 -Property ProcessId,Name,KernelModeTime,UserModeTime,WorkingSetSize | ConvertTo-Json -Compress"
 export const TEMPERATURE_SCRIPT = "Get-CimInstance -Namespace root/wmi MSAcpi_ThermalZone -ErrorAction SilentlyContinue | Select-Object CurrentTemperature | ConvertTo-Json -Compress"
+export const STORAGE_SCRIPT = "Get-CimInstance Win32_LogicalDisk -Filter \"DeviceID='C:'\" | Select-Object Size,FreeSpace | ConvertTo-Json -Compress"
 
 const EXEC_OPTIONS = { windowsHide: true, timeout: 2_000, maxBuffer: 64 * 1_024 } as const
 const PROCESS_CACHE_MS = 5_000
@@ -28,16 +29,19 @@ export class WindowsDetailSampler implements DetailSampler {
   private processesSampledAt = Number.NEGATIVE_INFINITY
   private temperatureCelsius: number | null | undefined
   private temperatureSampledAt = Number.NEGATIVE_INFINITY
+  private storage: { totalBytes: number | null; freeBytes: number | null } | undefined
+  private storageSampledAt = Number.NEGATIVE_INFINITY
 
   constructor(private readonly exec: PowerShellExec = executePowerShell) {}
 
   async sample(nowMs: number): Promise<DetailSample> {
-    const [processes, temperatureCelsius] = await Promise.all([
+    const [processes, temperatureCelsius, storage] = await Promise.all([
       this.processesAt(nowMs),
       this.temperatureAt(nowMs),
+      this.storageAt(nowMs),
     ])
 
-    return { processes, temperatureCelsius }
+    return { processes, temperatureCelsius, storage }
   }
 
   private async processesAt(nowMs: number): Promise<readonly ProcessReading[]> {
@@ -82,6 +86,20 @@ export class WindowsDetailSampler implements DetailSampler {
     } catch {
       return null
     }
+  }
+
+  private async storageAt(nowMs: number) {
+    if (this.storage !== undefined && nowMs - this.storageSampledAt < PROCESS_CACHE_MS) return this.storage
+    this.storage = await this.readStorage()
+    this.storageSampledAt = nowMs
+    return this.storage
+  }
+
+  private async readStorage() {
+    try {
+      const value = records(parseJson(await this.exec(POWERSHELL_EXECUTABLE, powerShellArgs(STORAGE_SCRIPT), EXEC_OPTIONS))).at(0)
+      return { totalBytes: numberValue(value?.Size) ?? null, freeBytes: numberValue(value?.FreeSpace) ?? null }
+    } catch { return { totalBytes: null, freeBytes: null } }
   }
 }
 
