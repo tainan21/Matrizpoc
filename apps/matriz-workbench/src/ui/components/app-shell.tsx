@@ -12,6 +12,7 @@ const primaryNavigation = [
   { href: "/control", icon: "◈", label: "Controle" },
   { activePrefixes: ["/work"], href: "/work/inbox", icon: "◎", label: "Trabalho" },
   { href: "/projects", icon: "⌘", label: "Projetos" },
+  { href: "/team", icon: "◌", label: "Equipe" },
   { href: "/knowledge", icon: "◇", label: "Conhecimento" },
   { href: "/sites", icon: "▦", label: "Sites" },
   { href: "/praticies", icon: "+", label: "Praticies" },

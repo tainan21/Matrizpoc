@@ -257,7 +257,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:willdash:GET:/api/health` | `apps/willdash/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:willdash:POST:/api/auth/oidc/tenant` | `apps/willdash/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
 
-## Workbench Server Actions — 49 entries
+## Workbench Server Actions — 56 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
@@ -269,47 +269,54 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `ACTION:matriz-control:unlockAction` | `apps/matriz-control/app/actions.ts:7` | `unlockAction` | M | `WB-A` |
 | `ACTION:matriz-hub:generatePatternsAction` | `apps/matriz-hub/app/praticies/actions.ts:17` | `generatePatternsAction` | M | `WB-A` |
 | `ACTION:matriz-hub:runHealthCheckAction` | `apps/matriz-hub/app/health/checks/actions.ts:14` | `runHealthCheckAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:acceptInboxItemAction` | `apps/matriz-workbench/app/actions.ts:920` | `acceptInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addBacklogReferenceAction` | `apps/matriz-workbench/app/actions.ts:431` | `addBacklogReferenceAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:521` | `addRoadmapInitiativeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:612` | `addRoadmapMarkerAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addRoadmapPhaseAction` | `apps/matriz-workbench/app/actions.ts:493` | `addRoadmapPhaseAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addSprintDependencyAction` | `apps/matriz-workbench/app/actions.ts:1089` | `addSprintDependencyAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1031` | `addSprintOutcomeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addSprintWorkAction` | `apps/matriz-workbench/app/actions.ts:1066` | `addSprintWorkAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:addWorkItemReferenceAction` | `apps/matriz-workbench/app/actions.ts:340` | `addWorkItemReferenceAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:advanceRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:692` | `advanceRoadmapInitiativeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:archiveBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:478` | `archiveBacklogItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:bulkWorkItemsAction` | `apps/matriz-workbench/app/actions.ts:964` | `bulkWorkItemsAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:captureInboxItemAction` | `apps/matriz-workbench/app/actions.ts:886` | `captureInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:closeSprintAction` | `apps/matriz-workbench/app/actions.ts:1128` | `closeSprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createAgentRequestAction` | `apps/matriz-workbench/app/actions.ts:825` | `createAgentRequestAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:370` | `createBacklogItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createControlSnippetAction` | `apps/matriz-workbench/app/actions.ts:1202` | `createControlSnippetAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createProjectBlueprintAction` | `apps/matriz-workbench/app/actions.ts:188` | `createProjectBlueprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createSprintAction` | `apps/matriz-workbench/app/actions.ts:947` | `createSprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:createWorkItemAction` | `apps/matriz-workbench/app/actions.ts:220` | `createWorkItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:decideSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1110` | `decideSprintOutcomeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:discardInboxItemAction` | `apps/matriz-workbench/app/actions.ts:935` | `discardInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:initializeProjectAction` | `apps/matriz-workbench/app/actions.ts:179` | `initializeProjectAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:initializeRoadmapScorecardAction` | `apps/matriz-workbench/app/actions.ts:728` | `initializeRoadmapScorecardAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:initializeRoadmapScorecardsAction` | `apps/matriz-workbench/app/actions.ts:777` | `initializeRoadmapScorecardsAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:lockAction` | `apps/matriz-workbench/app/actions.ts:172` | `lockAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:moveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:318` | `moveWorkItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:reconcileRoadmapScoreAction` | `apps/matriz-workbench/app/actions.ts:759` | `reconcileRoadmapScoreAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:reviewAgentExecutionAction` | `apps/matriz-workbench/app/actions.ts:838` | `reviewAgentExecutionAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:reviewControlEvidenceAction` | `apps/matriz-workbench/app/actions.ts:1190` | `reviewControlEvidenceAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:566` | `saveRoadmapInitiativeAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:642` | `saveRoadmapMarkerAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveSprintAction` | `apps/matriz-workbench/app/actions.ts:1011` | `saveSprintAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:saveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:250` | `saveWorkItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:toggleCriterionAction` | `apps/matriz-workbench/app/actions.ts:456` | `toggleCriterionAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:toggleRoadmapGoalAction` | `apps/matriz-workbench/app/actions.ts:742` | `toggleRoadmapGoalAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:toggleRoadmapScorecardGoalAction` | `apps/matriz-workbench/app/actions.ts:797` | `toggleRoadmapScorecardGoalAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:triageInboxItemAction` | `apps/matriz-workbench/app/actions.ts:900` | `triageInboxItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:unlockAction` | `apps/matriz-workbench/app/actions.ts:156` | `unlockAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:updateBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:392` | `updateBacklogItemAction` | M | `WB-A` |
-| `ACTION:matriz-workbench:writeDocumentAction` | `apps/matriz-workbench/app/actions.ts:1170` | `writeDocumentAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:acceptInboxItemAction` | `apps/matriz-workbench/app/actions.ts:923` | `acceptInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addBacklogReferenceAction` | `apps/matriz-workbench/app/actions.ts:434` | `addBacklogReferenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:524` | `addRoadmapInitiativeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:615` | `addRoadmapMarkerAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addRoadmapPhaseAction` | `apps/matriz-workbench/app/actions.ts:496` | `addRoadmapPhaseAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addSprintDependencyAction` | `apps/matriz-workbench/app/actions.ts:1092` | `addSprintDependencyAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1034` | `addSprintOutcomeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addSprintWorkAction` | `apps/matriz-workbench/app/actions.ts:1069` | `addSprintWorkAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:addWorkItemReferenceAction` | `apps/matriz-workbench/app/actions.ts:343` | `addWorkItemReferenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:advanceRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:695` | `advanceRoadmapInitiativeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:archiveBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:481` | `archiveBacklogItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:bulkWorkItemsAction` | `apps/matriz-workbench/app/actions.ts:967` | `bulkWorkItemsAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:captureInboxItemAction` | `apps/matriz-workbench/app/actions.ts:889` | `captureInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:closeSprintAction` | `apps/matriz-workbench/app/actions.ts:1131` | `closeSprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentRequestAction` | `apps/matriz-workbench/app/actions.ts:828` | `createAgentRequestAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentTeamHandoffAction` | `apps/matriz-workbench/app/actions.ts:1287` | `createAgentTeamHandoffAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentTeamMissionAction` | `apps/matriz-workbench/app/actions.ts:1242` | `createAgentTeamMissionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createAgentTeamProfileAction` | `apps/matriz-workbench/app/actions.ts:1233` | `createAgentTeamProfileAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:373` | `createBacklogItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createControlSnippetAction` | `apps/matriz-workbench/app/actions.ts:1205` | `createControlSnippetAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createProjectBlueprintAction` | `apps/matriz-workbench/app/actions.ts:191` | `createProjectBlueprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createSprintAction` | `apps/matriz-workbench/app/actions.ts:950` | `createSprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:createWorkItemAction` | `apps/matriz-workbench/app/actions.ts:223` | `createWorkItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:decideSprintOutcomeAction` | `apps/matriz-workbench/app/actions.ts:1113` | `decideSprintOutcomeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:discardInboxItemAction` | `apps/matriz-workbench/app/actions.ts:938` | `discardInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeAgentTeamAction` | `apps/matriz-workbench/app/actions.ts:1223` | `initializeAgentTeamAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeProjectAction` | `apps/matriz-workbench/app/actions.ts:182` | `initializeProjectAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeRoadmapScorecardAction` | `apps/matriz-workbench/app/actions.ts:731` | `initializeRoadmapScorecardAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:initializeRoadmapScorecardsAction` | `apps/matriz-workbench/app/actions.ts:780` | `initializeRoadmapScorecardsAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:lockAction` | `apps/matriz-workbench/app/actions.ts:175` | `lockAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:moveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:321` | `moveWorkItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reconcileRoadmapScoreAction` | `apps/matriz-workbench/app/actions.ts:762` | `reconcileRoadmapScoreAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:recordAgentTeamEvidenceAction` | `apps/matriz-workbench/app/actions.ts:1265` | `recordAgentTeamEvidenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reviewAgentExecutionAction` | `apps/matriz-workbench/app/actions.ts:841` | `reviewAgentExecutionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reviewAgentTeamMissionAction` | `apps/matriz-workbench/app/actions.ts:1301` | `reviewAgentTeamMissionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:reviewControlEvidenceAction` | `apps/matriz-workbench/app/actions.ts:1193` | `reviewControlEvidenceAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveRoadmapInitiativeAction` | `apps/matriz-workbench/app/actions.ts:569` | `saveRoadmapInitiativeAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveRoadmapMarkerAction` | `apps/matriz-workbench/app/actions.ts:645` | `saveRoadmapMarkerAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveSprintAction` | `apps/matriz-workbench/app/actions.ts:1014` | `saveSprintAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:saveWorkItemAction` | `apps/matriz-workbench/app/actions.ts:253` | `saveWorkItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:toggleCriterionAction` | `apps/matriz-workbench/app/actions.ts:459` | `toggleCriterionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:toggleRoadmapGoalAction` | `apps/matriz-workbench/app/actions.ts:745` | `toggleRoadmapGoalAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:toggleRoadmapScorecardGoalAction` | `apps/matriz-workbench/app/actions.ts:800` | `toggleRoadmapScorecardGoalAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:transitionAgentTeamMissionAction` | `apps/matriz-workbench/app/actions.ts:1251` | `transitionAgentTeamMissionAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:triageInboxItemAction` | `apps/matriz-workbench/app/actions.ts:903` | `triageInboxItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:unlockAction` | `apps/matriz-workbench/app/actions.ts:159` | `unlockAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:updateBacklogItemAction` | `apps/matriz-workbench/app/actions.ts:395` | `updateBacklogItemAction` | M | `WB-A` |
+| `ACTION:matriz-workbench:writeDocumentAction` | `apps/matriz-workbench/app/actions.ts:1173` | `writeDocumentAction` | M | `WB-A` |
 
 ## MCP tools — 51 entries
 
@@ -369,4 +376,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-Current tracked-source count: **315** = 215 HTTP methods, 49 Server Actions, and 51 MCP tools.
+Current tracked-source count: **322** = 215 HTTP methods, 56 Server Actions, and 51 MCP tools.

@@ -53,6 +53,9 @@ import {
   sprintOutcomeResultSchema,
   sprintStatusSchema,
 } from "../src/domain/adaptive-work"
+import { AgentTeamService } from "../src/application/agent-team-service"
+import { parseAgentTeamForm } from "../src/application/agent-team-form"
+import type { MissionEvidenceInput } from "../src/domain/agent-operations"
 
 function required(formData: FormData, key: string): string {
   const value = formData.get(key)
@@ -1211,4 +1214,100 @@ export async function createControlSnippetAction(formData: FormData) {
   })
   await repository.createSnippet(projectId, input)
   revalidatePath("/control")
+}
+
+function teamPath(projectId: string): string {
+  return `/team?projectId=${encodeURIComponent(projectId)}`
+}
+
+export async function initializeAgentTeamAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const projectId = required(formData, "projectId")
+  const repository = await WorkspaceRepository.create()
+  await repository.initializeProject(projectId)
+  await new AgentTeamService(repository).initialize(projectId)
+  revalidatePath("/team")
+  redirect(teamPath(projectId))
+}
+
+export async function createAgentTeamProfileAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const parsed = parseAgentTeamForm("profile", formData)
+  const repository = await WorkspaceRepository.create()
+  await new AgentTeamService(repository).createProfile(parsed.projectId, parsed.input)
+  revalidatePath("/team")
+  redirect(teamPath(parsed.projectId))
+}
+
+export async function createAgentTeamMissionAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const parsed = parseAgentTeamForm("mission", formData)
+  const repository = await WorkspaceRepository.create()
+  await new AgentTeamService(repository).createMission(parsed.projectId, parsed.input)
+  revalidatePath("/team")
+  redirect(teamPath(parsed.projectId))
+}
+
+export async function transitionAgentTeamMissionAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const parsed = parseAgentTeamForm("transition", formData)
+  const repository = await WorkspaceRepository.create()
+  await new AgentTeamService(repository).transitionMission(
+    parsed.projectId,
+    parsed.missionId,
+    parsed.target,
+    parsed.revision,
+  )
+  revalidatePath("/team")
+  redirect(teamPath(parsed.projectId))
+}
+
+export async function recordAgentTeamEvidenceAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const parsed = parseAgentTeamForm("evidence", formData)
+  const repository = await WorkspaceRepository.create()
+  await new AgentTeamService(repository).addEvidence(
+    parsed.projectId,
+    parsed.missionId,
+    withServerEvidenceId(parsed.input),
+    parsed.revision,
+  )
+  revalidatePath("/team")
+  redirect(teamPath(parsed.projectId))
+}
+
+function withServerEvidenceId(input: MissionEvidenceInput): MissionEvidenceInput {
+  const id = `evidence_${randomUUID()}`
+  if (input.kind === "file") return { ...input, id }
+  if (input.kind === "test") return { ...input, id }
+  if (input.kind === "url") return { ...input, id }
+  return { ...input, id }
+}
+
+export async function createAgentTeamHandoffAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const parsed = parseAgentTeamForm("handoff", formData)
+  const repository = await WorkspaceRepository.create()
+  await new AgentTeamService(repository).createHandoff(
+    parsed.projectId,
+    parsed.missionId,
+    parsed.input,
+    parsed.revision,
+  )
+  revalidatePath("/team")
+  redirect(teamPath(parsed.projectId))
+}
+
+export async function reviewAgentTeamMissionAction(formData: FormData) {
+  await requireWorkbenchSession()
+  const parsed = parseAgentTeamForm("review", formData)
+  const repository = await WorkspaceRepository.create()
+  await new AgentTeamService(repository).reviewMission(
+    parsed.projectId,
+    parsed.missionId,
+    parsed.input,
+    parsed.revision,
+  )
+  revalidatePath("/team")
+  redirect(teamPath(parsed.projectId))
 }
