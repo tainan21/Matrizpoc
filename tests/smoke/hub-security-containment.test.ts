@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import { readFileSync } from "node:fs"
 import { globSync } from "node:fs"
 import type { AuthSession } from "@matriz/platform-auth"
@@ -25,6 +25,13 @@ const session: AuthSession = {
   expiresAt: "2026-08-12T11:00:00.000Z",
   strategyId: "mock",
 }
+
+const previousAuthAdapter = process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER
+beforeAll(() => { process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER = "mock" })
+afterAll(() => {
+  if (previousAuthAdapter === undefined) delete process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER
+  else process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER = previousAuthAdapter
+})
 
 describe("Hub containment", () => {
   it("RED: rejects missing and forged cookies, and never accepts actor headers", () => {

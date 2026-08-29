@@ -3,6 +3,7 @@ export type IdentityEnvironment = {
   databaseUrl: string
   csrfSecret?: string
   cookieKeys?: string[]
+  mfaEncryptionKey: string
   jwks: { keys: JsonWebKey[] }
   trustProxy: boolean
   trustedProxyHops: number
@@ -65,7 +66,9 @@ export function loadIdentityEnvironment(env: NodeJS.ProcessEnv): IdentityEnviron
   if (csrfSecret.length < 32) throw new Error("IDENTITY_CSRF_SECRET must contain at least 32 characters")
   const cookieKeys = required(env, "IDENTITY_COOKIE_KEYS").split(",").map((value) => value.trim()).filter(Boolean)
   if (cookieKeys.length < 2 || cookieKeys.some((key) => key.length < 32)) throw new Error("IDENTITY_COOKIE_KEYS requires at least two 32-character keys")
-  return { issuer: parsedIssuer.toString().replace(/\/$/, ""), databaseUrl, jwks: { keys }, trustProxy, trustedProxyHops, port, csrfSecret, cookieKeys }
+  const mfaEncryptionKey = required(env, "IDENTITY_MFA_ENCRYPTION_KEY")
+  if (Buffer.from(mfaEncryptionKey, "base64url").length !== 32) throw new Error("IDENTITY_MFA_ENCRYPTION_KEY must encode exactly 32 bytes")
+  return { issuer: parsedIssuer.toString().replace(/\/$/, ""), databaseUrl, jwks: { keys }, trustProxy, trustedProxyHops, port, csrfSecret, cookieKeys, mfaEncryptionKey }
 }
 
 export function buildProviderConfiguration(environment: IdentityEnvironment): ProviderConfiguration {

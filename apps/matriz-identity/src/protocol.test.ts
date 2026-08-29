@@ -21,7 +21,7 @@ describe("OIDC protocol surface", () => {
         jwks: { keys: [{ ...jwk, kid: "test-key", use: "sig", alg: "RS256" } as JsonWebKey] },
         trustProxy: false, trustedProxyHops: 0,
         port: 0,
-        csrfSecret: "x".repeat(32),
+        csrfSecret: "x".repeat(32), mfaEncryptionKey: Buffer.alloc(32, 1).toString("base64url"),
       }),
       clients: [{
         client_id: "test-client",
@@ -56,7 +56,7 @@ describe("OIDC protocol surface", () => {
     const sql = new BehavioralOidcSql()
     const Adapter = createNeonAdapterFactory(sql)
     const configuration = {
-      ...buildProviderConfiguration({ issuer, databaseUrl: "unused", jwks: { keys: [{ ...jwk, kid: "e2e", use: "sig", alg: "RS256" } as JsonWebKey] }, trustProxy: false, trustedProxyHops: 0, port, csrfSecret: "x".repeat(32), cookieKeys: ["a".repeat(32), "b".repeat(32)] }),
+      ...buildProviderConfiguration({ issuer, databaseUrl: "unused", jwks: { keys: [{ ...jwk, kid: "e2e", use: "sig", alg: "RS256" } as JsonWebKey] }, trustProxy: false, trustedProxyHops: 0, port, csrfSecret: "x".repeat(32), cookieKeys: ["a".repeat(32), "b".repeat(32)], mfaEncryptionKey: Buffer.alloc(32, 1).toString("base64url") }),
       adapter: Adapter,
       clients: [{ client_id: "e2e", redirect_uris: [redirectUri], response_types: ["code"], grant_types: ["authorization_code", "refresh_token"], token_endpoint_auth_method: "none" }],
       findAccount: async (_ctx: unknown, id: string) => ({ accountId: id, claims: async () => ({ sub: id }) }),

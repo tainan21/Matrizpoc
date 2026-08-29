@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
 import type { AuthSession } from "@matriz/platform-auth"
 import { getGlobalEventBus } from "@matriz/integration-events"
 import { getGlobalExternalLinkStore } from "@matriz/integration-external-links"
@@ -12,6 +12,13 @@ import { GET as getSharedCache, PUT as putSharedCache } from "../../apps/matriz-
 const now = new Date(Date.now() + 60_000).toISOString()
 const tenantA = "tenant-a"
 const tenantB = "tenant-b"
+
+const previousAuthAdapter = process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER
+beforeAll(() => { process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER = "mock" })
+afterAll(() => {
+  if (previousAuthAdapter === undefined) delete process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER
+  else process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER = previousAuthAdapter
+})
 
 function issueSession(tenantId: string, userId: string): string {
   const session: AuthSession = {

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const exports = await makeDocsRepository().listExports(actor)
     return NextResponse.json({ ok: true, exports })
   } catch (error) {
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const body = await readDocsRequestBody(request)
     const artifact = await makeDocsRepository().generateExport(actor, {
       targetType: String(body.targetType ?? "document") as never,

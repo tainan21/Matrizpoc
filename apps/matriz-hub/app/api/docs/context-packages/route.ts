@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const contexts = await makeDocsRepository().listContextPackages(actor)
     return NextResponse.json({ ok: true, contexts })
   } catch (error) {
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const body = await readDocsRequestBody(request)
     const documentIds = typeof body.documentIds === "string"
       ? body.documentIds.split(",").map((x) => x.trim()).filter(Boolean)

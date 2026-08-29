@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto"
 import type { AuthSession, RecentAppAccess } from "@matriz/platform-auth"
+import { resolveOidcServerSession, type OidcAuthorizationContext } from "@matriz/platform-auth/server"
 
 export const HUB_SESSION_COOKIE = "matriz_mock_session"
 const SESSION_LIMIT = 512
@@ -64,13 +65,25 @@ function cookieToken(request: Request): string | undefined {
 }
 
 export function resolveHubSession(request: Request, store = hubSessionStore): StoredSession {
+  const oidc = resolveOidcServerSession(request)
+  if (oidc) {
+    if (oidc.context.appId !== "matriz-hub") throw new HubAuthError(403)
+    return { session: oidc.session, recentApps: [] }
+  }
+  if (process.env.NODE_ENV === "production" || process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER !== "mock") throw new HubAuthError(401)
   const stored = store.resolve(cookieToken(request))
   if (!stored) throw new HubAuthError(401)
   return stored
 }
 
-export type HubRequestContext = { session: AuthSession; token: string }
+export type HubRequestContext = { session: AuthSession; token: string; authorizationContext?: OidcAuthorizationContext }
 export function getHubRequestContext(request: Request, store = hubSessionStore): HubRequestContext {
+  const oidc = resolveOidcServerSession(request)
+  if (oidc) {
+    if (oidc.context.appId !== "matriz-hub") throw new HubAuthError(403)
+    return { session: oidc.session, token: oidc.opaqueId, authorizationContext: oidc.context }
+  }
+  if (process.env.NODE_ENV === "production" || process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER !== "mock") throw new HubAuthError(401)
   const token = cookieToken(request)
   const stored = store.resolve(token)
   if (!stored || !token) throw new HubAuthError(401)
@@ -80,6 +93,17 @@ export function getHubRequestContext(request: Request, store = hubSessionStore):
     session: stored.session,
     token,
   }
+}
+
+export async function getDurableHubRequestContext(request: Request): Promise<HubRequestContext> {
+  if (process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER === "mock") {
+    return getHubRequestContext(request)
+  }
+  const { resolveSession } = await import("./oidc.server")
+  const oidc = await resolveSession(request)
+  if (!oidc) throw new HubAuthError(401)
+  if (oidc.context.appId !== "matriz-hub") throw new HubAuthError(403)
+  return { session: oidc.session, token: oidc.opaqueId, authorizationContext: oidc.context }
 }
 
 export function sessionCookieOptions(maxAge = SESSION_MAX_AGE_SECONDS) {

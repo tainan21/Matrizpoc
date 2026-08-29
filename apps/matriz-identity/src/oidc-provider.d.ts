@@ -13,5 +13,9 @@ declare module "oidc-provider" {
       addResourceScope(indicator: string, scope: string): void
       save(): Promise<string>
     }
+    AccessToken: {
+      new (input: Record<string, unknown>): { save(ttl?: number): Promise<string> }
+      find(token: string): Promise<{ accountId?: string; clientId?: string; grantId?: string; jti?: string; authTime?: number; auth_time?: number; acr?: string; amr?: string[] } | undefined>
+    }
   }
 }

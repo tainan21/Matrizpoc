@@ -1,9 +1,13 @@
 import { PrismaClient, type Prisma } from "../../../node_modules/.prisma/core/index.js"
-import { createHash } from "node:crypto"
+import { createHash, timingSafeEqual } from "node:crypto"
 import { withTenantContext } from "@matriz/platform-db/tenant-context"
 
 import type { AccessRepository, ActiveAccess } from "./authorization.js"
 import type { SqlExecutor } from "./neon-adapter.js"
+import type { AccessApiRepository } from "./access-api.js"
+import type { MfaRuntimeRepository } from "./mfa-api.js"
+import type { AppSessionVaultRepository } from "./app-session-vault.js"
+import { consumeRecoveryCode, decryptTotpSecret, verifyAndConsumeTotp } from "./mfa.js"
 
 export type OidcClientRegistration = {
   client_id: string
@@ -56,6 +60,100 @@ export function createAccessRepository(client: CorePrismaClient = getIdentityDb(
         }
       })
     },
+  }
+}
+
+export function createAccessApiRepository(client: CorePrismaClient = getIdentityDb()): AccessApiRepository {
+  return {
+    async findClientAppId(clientId) {
+      const registration = await client.oidcClient.findFirst({ where: { clientId, enabled: true, revokedAt: null }, select: { appId: true } })
+      return registration?.appId ?? null
+    },
+    async findEligibleTenants({ userId, appId }) {
+      const memberships = await client.tenantMembership.findMany({
+        where: { userId, revokedAt: null, appGrants: { some: { appId, revokedAt: null } } },
+        include: { tenant: { select: { name: true } }, appGrants: { where: { appId, revokedAt: null }, take: 1 } },
+      })
+      return memberships.map((membership) => ({ tenantId: membership.tenantId, tenantName: membership.tenant.name, membershipId: membership.id, tenantRoles: membership.tenantRoles, appRoles: membership.appGrants[0]!.appRoles, capabilities: membership.appGrants[0]!.capabilities }))
+    },
+    async audit(event) {
+      await client.identityAuditEvent.create({ data: { tenantId: event.tenantId, actorUserId: event.actorUserId, eventType: event.eventType, subjectType: "AppSession", subjectId: event.subjectId, metadata: event.metadata } })
+    },
+  }
+}
+
+export function createMfaRepository(client: CorePrismaClient = getIdentityDb()): MfaRuntimeRepository {
+  return {
+    async requiresMfa(userId) {
+      return Boolean(await client.identityMfaMethod.findFirst({ where: { userId, verifiedAt: { not: null }, revokedAt: null }, select: { id: true } }))
+    },
+    async createTotp(input) {
+      return client.identityMfaMethod.create({ data: { userId: input.userId, kind: "totp", secretCiphertext: input.secretCiphertext, transports: [] }, select: { id: true } })
+    },
+    async findTotp({ methodId, userId, verifiedOnly }) {
+      return client.identityMfaMethod.findFirst({
+        where: { id: methodId, userId, kind: "totp", revokedAt: null, secretCiphertext: { not: null }, ...(verifiedOnly ? { verifiedAt: { not: null } } : {}) },
+        select: { id: true, userId: true, secretCiphertext: true, verifiedAt: true },
+      }) as Promise<{ id: string; userId: string; secretCiphertext: string; verifiedAt: Date | null } | null>
+    },
+    async advanceCounter(methodId, counter) {
+      const result = await client.identityMfaMethod.updateMany({ where: { id: methodId, revokedAt: null, OR: [{ lastTotpCounter: null }, { lastTotpCounter: { lt: counter } }] }, data: { lastTotpCounter: counter } })
+      return result.count === 1
+    },
+    async markVerified(methodId, verifiedAt) {
+      await client.identityMfaMethod.updateMany({ where: { id: methodId, verifiedAt: null, revokedAt: null }, data: { verifiedAt } })
+    },
+    async findActive(userId) {
+      return client.identityRecoveryCode.findMany({ where: { userId, consumedAt: null }, select: { id: true, codeHash: true } })
+    },
+    async consume(id, consumedAt) {
+      const result = await client.identityRecoveryCode.updateMany({ where: { id, consumedAt: null }, data: { consumedAt } })
+      return result.count === 1
+    },
+    async audit(event) {
+      await client.identityAuditEvent.create({ data: { actorUserId: event.actorUserId, eventType: event.eventType, subjectType: "IdentityMfaMethod", subjectId: event.subjectId } })
+    },
+  }
+}
+
+export function createAppSessionVaultRepository(client: CorePrismaClient = getIdentityDb()): AppSessionVaultRepository {
+  return {
+    async create(row) { await client.oidcAppSession.create({ data: row }) },
+    async read(input) { return client.oidcAppSession.findFirst({ where: { ...input, expiresAt: { gt: new Date() } } }) },
+    async rotate(previous, row) {
+      return client.$transaction(async transaction => {
+        const removed = await transaction.oidcAppSession.deleteMany({ where: previous })
+        if (removed.count !== 1) return false
+        await transaction.oidcAppSession.create({ data: row })
+        return true
+      })
+    },
+    async update(input, row) { return (await client.oidcAppSession.updateMany({ where: input, data: { ...row, revision: { increment: 1 } } })).count === 1 },
+    async delete(input) { return (await client.oidcAppSession.deleteMany({ where: input })).count === 1 },
+  }
+}
+
+export function createAppSessionClientAuthenticator(client: CorePrismaClient = getIdentityDb()) {
+  return async (clientId: string, secret: string) => {
+    const registration = await client.oidcClient.findFirst({ where: { clientId, enabled: true, revokedAt: null }, select: { clientId: true, appId: true, secretFingerprint: true, tokenEndpointAuthMethod: true } })
+    if (!registration?.secretFingerprint || registration.tokenEndpointAuthMethod === "none") return null
+    const actual = createHash("sha256").update(secret).digest("hex")
+    if (actual.length !== registration.secretFingerprint.length || !timingSafeEqual(Buffer.from(actual), Buffer.from(registration.secretFingerprint))) return null
+    return { clientId: registration.clientId, appId: registration.appId }
+  }
+}
+
+export function createInteractionMfaChallenge(encryptionKey: string, client: CorePrismaClient = getIdentityDb()) {
+  const repository = createMfaRepository(client)
+  return {
+    async verifyTotp(userId: string, code: string) {
+      const method = await client.identityMfaMethod.findFirst({ where: { userId, kind: "totp", verifiedAt: { not: null }, revokedAt: null, secretCiphertext: { not: null } }, select: { id: true, secretCiphertext: true } })
+      if (!method?.secretCiphertext) return false
+      const accepted = await verifyAndConsumeTotp(repository, { methodId: method.id, secret: decryptTotpSecret(method.secretCiphertext, encryptionKey), code })
+      if (accepted) await repository.audit({ actorUserId: userId, eventType: "MFA_VERIFIED", subjectId: method.id })
+      return accepted
+    },
+    async verifyRecovery(userId: string, code: string) { return consumeRecoveryCode(repository, { userId, code }) },
   }
 }
 

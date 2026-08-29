@@ -5,7 +5,7 @@ import type Provider from "oidc-provider"
 import type { RateLimitStore } from "./rate-limit.js"
 
 export interface IdentityAuthenticator {
-  authenticate(input: { login: string; credential: string }): Promise<{ accountId: string } | null>
+  authenticate(input: { login: string; credential: string }): Promise<{ accountId: string; mfaRequired?: boolean; amr?: readonly string[] } | null>
 }
 
 const MAX_BODY = 8 * 1024
@@ -16,6 +16,8 @@ export function createInteractionHandler(input: {
   issuer: string
   csrfSecret: string
   rateLimits: RateLimitStore
+  mfaPolicy?: { requiresMfa(userId: string): Promise<boolean> }
+  mfaChallenge?: { verifyTotp(userId: string, code: string): Promise<boolean>; verifyRecovery(userId: string, code: string): Promise<boolean> }
   trustProxy?: boolean
   trustedProxyHops?: number
 }) {
@@ -47,9 +49,26 @@ export function createInteractionHandler(input: {
     if (!safeEqual(body.get("csrf") ?? "", csrfToken(uid, input.csrfSecret))) return reject(response, 403, "invalid csrf")
 
     if (details.prompt.name === "login") {
+      const pending = verifyMfaState(body.get("mfa_state"), input.csrfSecret, uid, clientId)
+      if (pending) {
+        const code = body.get("code") ?? ""
+        const accepted = body.get("proof") === "recovery"
+          ? await input.mfaChallenge?.verifyRecovery(pending.accountId, code)
+          : await input.mfaChallenge?.verifyTotp(pending.accountId, code)
+        if (!accepted) return reject(response, 401, "mfa proof failed")
+        await input.provider.interactionFinished(request, response, { login: { accountId: pending.accountId, acr: "urn:matriz:loa:2", amr: ["pwd", "otp"] } }, { mergeWithLastSubmission: false })
+        return true
+      }
       const result = await input.authenticator.authenticate({ login: body.get("login") ?? "", credential: body.get("credential") ?? "" })
       if (!result) return reject(response, 401, "authentication failed")
-      await input.provider.interactionFinished(request, response, { login: { accountId: result.accountId } }, { mergeWithLastSubmission: false })
+      const mfaRequired = result.mfaRequired || await input.mfaPolicy?.requiresMfa(result.accountId) === true
+      if (mfaRequired && !result.amr?.some((method) => method === "otp" || method === "hwk")) {
+        if (!input.mfaChallenge) return reject(response, 403, "mfa step-up unavailable")
+        response.writeHead(200, { "content-type": "text/html; charset=utf-8" })
+        response.end(renderMfa(uid, csrfToken(uid, input.csrfSecret), signMfaState({ uid, clientId, accountId: result.accountId, exp: Date.now() + 5 * 60_000 }, input.csrfSecret)))
+        return true
+      }
+      await input.provider.interactionFinished(request, response, { login: { accountId: result.accountId, ...(result.amr ? { amr: [...result.amr] } : {}) } }, { mergeWithLastSubmission: false })
       return true
     }
     if (details.prompt.name === "consent") {
@@ -68,6 +87,10 @@ function render(prompt: string, uid: string, csrf: string): string {
   const fields = prompt === "login" ? '<label>Login<input name="login" required maxlength="254"></label><label>Credential<input name="credential" type="password" required maxlength="1024"></label>' : '<p>Authorize this application?</p>'
   return `<!doctype html><html><body><main><h1>${prompt === "login" ? "Sign in" : "Consent"}</h1><form method="post" action="/interaction/${escapeHtml(uid)}"><input type="hidden" name="csrf" value="${csrf}">${fields}<button type="submit">Continue</button></form></main></body></html>`
 }
+function renderMfa(uid: string, csrf: string, state: string) { return `<!doctype html><html><body><main><h1>Verify sign in</h1><form method="post" action="/interaction/${escapeHtml(uid)}"><input type="hidden" name="csrf" value="${csrf}"><input type="hidden" name="mfa_state" value="${state}"><label>Code<input name="code" required autocomplete="one-time-code"></label><label><input type="radio" name="proof" value="totp" checked>TOTP</label><label><input type="radio" name="proof" value="recovery">Recovery code</label><button type="submit">Verify</button></form></main></body></html>` }
+type MfaState = { uid: string; clientId: string; accountId: string; exp: number }
+function signMfaState(state: MfaState, secret: string) { const payload = Buffer.from(JSON.stringify(state)).toString("base64url"); return `${payload}.${createHmac("sha256", secret).update(payload).digest("base64url")}` }
+function verifyMfaState(value: string | null, secret: string, uid: string, clientId: string): MfaState | null { if (!value) return null; const [payload, signature] = value.split("."); if (!payload || !signature || !safeEqual(signature, createHmac("sha256", secret).update(payload).digest("base64url"))) return null; try { const state = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as MfaState; return state.uid === uid && state.clientId === clientId && state.exp > Date.now() ? state : null } catch { return null } }
 function escapeHtml(value: string) { return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!) }
 function csrfToken(uid: string, secret: string) { return createHmac("sha256", secret).update(uid).digest("base64url") }
 function safeEqual(a: string, b: string) { const x = Buffer.from(a); const y = Buffer.from(b); return x.length === y.length && timingSafeEqual(x, y) }

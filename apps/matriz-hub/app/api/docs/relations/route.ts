@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const relations = await makeDocsRepository().listKnowledgeEdges(actor)
     return NextResponse.json({ ok: true, relations })
   } catch (error) {
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const body = await readDocsRequestBody(request)
     const relation = await makeDocsRepository().createKnowledgeEdge(actor, {
       sourceNodeId: String(body.sourceNodeId ?? ""),

@@ -47,6 +47,7 @@ describe("identity configuration", () => {
       port: 8080,
       csrfSecret: "x".repeat(32),
       cookieKeys: ["a".repeat(32), "b".repeat(32)],
+      mfaEncryptionKey: Buffer.alloc(32, 1).toString("base64url"),
     })
 
     expect(configuration.pkce).toEqual({ methods: ["S256"], required: expect.any(Function) })

@@ -7,7 +7,7 @@
 import { handleMcpRequest } from "../../../src/mcp/handler"
 import { MCP_PROTOCOL_VERSION } from "../../../src/mcp/types"
 import type { JsonRpcRequest } from "../../../src/mcp/types"
-import { allowHubRequest, getHubRequestContext, requireSameOrigin, HubAuthError } from "../../../src/auth/hub-session"
+import { allowHubRequest, getDurableHubRequestContext, requireSameOrigin, HubAuthError } from "../../../src/auth/hub-session"
 import { readBoundedText, RequestBodyTooLargeError } from "../../../src/http/bounded-body"
 
 export const runtime = "nodejs"
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   let principal
   try {
     requireSameOrigin(request)
-    const context = getHubRequestContext(request)
+    const context = await getDurableHubRequestContext(request)
     if (!allowHubRequest(context.session.identity.user.id)) return Response.json({ jsonrpc: "2.0", id: null, error: { code: -32603, message: "Rate limit exceeded" } }, { status: 429, headers: { "cache-control": "private, no-store" } })
     principal = { docsActor: { tenantId: context.session.activeTenantId, actorId: context.session.identity.user.id, actorType: "human_user" as const, displayName: context.session.identity.user.name }, userId: context.session.identity.user.id, tenantId: context.session.activeTenantId }
   } catch (error) {

@@ -11,6 +11,7 @@ export interface MockAuthBroker {
   restoreSession(): Promise<SharedAuthSession | null>
   recordAppOpen(appId: MatrizAppId): Promise<void>
   signOut(): Promise<void>
+  switchTenant?(tenantId: string): Promise<AuthSession>
 }
 
 interface BrokerErrorBody { error?: { message?: string } }
@@ -47,5 +48,6 @@ export function createHttpMockAuthBroker(baseUrl: string): MockAuthBroker {
     restoreSession: () => request("/session"),
     recordAppOpen: (appId) => post("/session", { appId }),
     signOut: () => request("/session", { method: "DELETE" }),
+    switchTenant: async () => { throw new Error("Tenant switch is unavailable in the development mock") },
   }
 }

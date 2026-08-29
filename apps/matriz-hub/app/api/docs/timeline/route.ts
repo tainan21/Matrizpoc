@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const url = new URL(request.url)
     const timeline = await makeDocsRepository().listTimeline(actor, {
       targetType: url.searchParams.get("targetType") ?? undefined,

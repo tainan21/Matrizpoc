@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function POST(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const body = await readDocsRequestBody(request)
     const documentId = String(body.documentId ?? "")
     const document = await makeDocsRepository().getDocument(actor, documentId)

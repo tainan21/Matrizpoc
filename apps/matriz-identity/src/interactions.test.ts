@@ -42,4 +42,35 @@ describe("secure OIDC interactions", () => {
     expect(requestIp(request, true, 2)).toBe("198.51.100.7")
     expect(requestIp({ headers: { "x-forwarded-for": "spoofed" }, socket: { remoteAddress: "10.0.0.5" } } as never, true, 1)).toBe("10.0.0.5")
   })
+
+  it("continues the same login interaction with signed MFA state and finishes only after proof", async () => {
+    let finished = false
+    const provider = { interactionDetails: async () => ({ uid: "uid-1", prompt: { name: "login", details: {} }, params: { client_id: "spot" } }), interactionFinished: async () => { finished = true } }
+    const handler = createInteractionHandler({ provider: provider as never, authenticator: { authenticate: async () => ({ accountId: "user-1", mfaRequired: true, amr: ["pwd"] }) }, mfaChallenge: { verifyTotp: async (_user, code) => code === "123456", verifyRecovery: async () => false }, rateLimits: { consume: async () => true }, issuer: "https://identity.test", csrfSecret: "x".repeat(32) })
+    const getResponse = new Response()
+    await handler({ url: "/interaction/uid-1", method: "GET", headers: {}, socket: {} } as never, getResponse as never)
+    const csrf = /name="csrf" value="([^"]+)"/.exec(getResponse.body)![1]
+    const response = new Response()
+    await handler({ url: "/interaction/uid-1", method: "POST", headers: { origin: "https://identity.test" }, socket: {}, [Symbol.asyncIterator]: async function* () { yield Buffer.from(`csrf=${csrf}&login=user%40test&credential=correct`) } } as never, response as never)
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toContain('name="mfa_state"')
+    expect(finished).toBe(false)
+
+    const state = /name="mfa_state" value="([^"]+)"/.exec(response.body)![1]
+    const proof = new Response()
+    await handler({ url: "/interaction/uid-1", method: "POST", headers: { origin: "https://identity.test" }, socket: {}, [Symbol.asyncIterator]: async function* () { yield Buffer.from(`csrf=${csrf}&mfa_state=${encodeURIComponent(state)}&code=123456&proof=totp`) } } as never, proof as never)
+    expect(finished).toBe(true)
+  })
+
+  it("accepts a recovery proof inside the interaction without bearer authentication", async () => {
+    let completed: unknown
+    const provider = { interactionDetails: async () => ({ uid: "uid-2", prompt: { name: "login", details: {} }, params: { client_id: "spot" } }), interactionFinished: async (_request: unknown, _response: unknown, result: unknown) => { completed = result } }
+    const handler = createInteractionHandler({ provider: provider as never, authenticator: { authenticate: async () => ({ accountId: "user-2", mfaRequired: true, amr: ["pwd"] }) }, mfaChallenge: { verifyTotp: async () => false, verifyRecovery: async (_user, code) => code === "recovery-code" }, rateLimits: { consume: async () => true }, issuer: "https://identity.test", csrfSecret: "y".repeat(32) })
+    const get = new Response(); await handler({ url: "/interaction/uid-2", method: "GET", headers: {}, socket: {} } as never, get as never)
+    const csrf = /name="csrf" value="([^"]+)"/.exec(get.body)![1]
+    const password = new Response(); await handler({ url: "/interaction/uid-2", method: "POST", headers: { origin: "https://identity.test" }, socket: {}, [Symbol.asyncIterator]: async function* () { yield Buffer.from(`csrf=${csrf}&login=user&credential=correct`) } } as never, password as never)
+    const state = /name="mfa_state" value="([^"]+)"/.exec(password.body)![1]
+    await handler({ url: "/interaction/uid-2", method: "POST", headers: { origin: "https://identity.test" }, socket: {}, [Symbol.asyncIterator]: async function* () { yield Buffer.from(`csrf=${csrf}&mfa_state=${encodeURIComponent(state)}&code=recovery-code&proof=recovery`) } } as never, new Response() as never)
+    expect(completed).toEqual({ login: { accountId: "user-2", acr: "urn:matriz:loa:2", amr: ["pwd", "otp"] } })
+  })
 })

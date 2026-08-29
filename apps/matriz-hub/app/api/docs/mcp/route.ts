@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET(request: Request) {
   try {
-    const actor = getDocsActorContextFromRequest(request)
+    const actor = await getDocsActorContextFromRequest(request)
     const resources = await makeDocsRepository().listMcpResources(actor)
     return NextResponse.json({ ok: true, resources })
   } catch (error) {
