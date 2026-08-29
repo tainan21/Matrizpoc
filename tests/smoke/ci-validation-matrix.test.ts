@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process"
+import { execFileSync, spawnSync } from "node:child_process"
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { describe, expect, it } from "vitest"
@@ -15,6 +15,20 @@ function rootScripts(): Record<string, string> {
 }
 
 describe("Linux CI validation matrix", () => {
+  it("rejects unresolved merge-conflict markers in tracked files", () => {
+    const result = spawnSync(
+      "git",
+      ["grep", "-n", "-E", "^(<<<<<<<|=======|>>>>>>>)", "--", ":!pnpm-lock.yaml"],
+      {
+        cwd: ROOT,
+        encoding: "utf8",
+      },
+    )
+
+    expect([0, 1]).toContain(result.status)
+    expect(result.stdout.trim()).toBe("")
+  })
+
   it("exposes reusable root commands for the complete validation contract", () => {
     const scripts = rootScripts()
 

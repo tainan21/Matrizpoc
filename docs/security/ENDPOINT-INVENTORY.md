@@ -20,7 +20,6 @@ CSRF/origin, cache, validation/limit/error posture, risk, and remediation.
 | `H-R` | Hub/MatrizDocs read; opaque server-owned mock/dev session derives actor/tenant, headers do not grant authority. **Item 9** fixes tenant-unsafe queries; **item 17** establishes roles/grants/RLS. |
 | `H-M` | Hub/MatrizDocs mutation; server actor, explicit cross-origin rejection, bounded ordinary bodies and private/sanitized error response. **Item 9** fixes tenant-unsafe queries; **item 17** adds grants/RLS. |
 | `H-MOCK` | Mock-auth browser transport; opaque HttpOnly server-resolved cookie and localhost credential CORS allowlist, not production identity. **Item 17** replaces it with identity/grants. |
-| `OIDC-BFF` | Confidential app-owned OIDC BFF transport; server-only client credentials, PKCE/state/nonce, opaque HttpOnly session handles, exact callback/origin checks, tenant re-authorization, rotation and revocation. |
 | `H-CACHE` | Shared cache; Hub session guards reads/writes and binds `updatedBy` to its server session. Cache keys remain non-tenant-prefixed until **items 9/17**. |
 | `WB-R` | Workbench local-loopback read. This inventory is **item 7**; no separate canonical remediation is assigned. |
 | `WB-M` | Workbench local mutation. This inventory is **item 7**; retain local trust review before networking it. |
@@ -38,12 +37,7 @@ model, not as an endpoint profile. The closed global whitelist remains User,
 authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-## HTTP Route Handlers — 190 entries
-=======
-## HTTP Route Handlers — 215 entries
->>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
+## HTTP Route Handlers — 220 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
@@ -71,37 +65,6 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-control:POST:/api/terminal/sessions` | `apps/matriz-control/app/api/terminal/sessions/route.ts:7` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions/[sessionId]/input` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/input/route.ts:4` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:POST:/api/terminal/sessions/[sessionId]/restart` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/restart/route.ts:4` | `POST` | M | `APP-M` |
-=======
-## HTTP Route Handlers — 86 entries
-
-| ID | Source | Function/tool | Effect | Profile |
-| --- | --- | --- | --- | --- |
-| `HTTP:contracts:DELETE:/api/auth/oidc/session` | `apps/contracts/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `OIDC-BFF` |
-| `HTTP:contracts:GET:/api/auth/oidc/callback` | `apps/contracts/app/api/auth/oidc/callback/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:contracts:GET:/api/auth/oidc/login` | `apps/contracts/app/api/auth/oidc/login/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:contracts:GET:/api/auth/oidc/session` | `apps/contracts/app/api/auth/oidc/session/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:contracts:POST:/api/auth/oidc/tenant` | `apps/contracts/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `OIDC-BFF` |
-| `HTTP:matriz-hub:DELETE:/api/auth/oidc/session` | `apps/matriz-hub/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `OIDC-BFF` |
-| `HTTP:matriz-hub:GET:/api/auth/oidc/callback` | `apps/matriz-hub/app/api/auth/oidc/callback/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:matriz-hub:GET:/api/auth/oidc/login` | `apps/matriz-hub/app/api/auth/oidc/login/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:matriz-hub:GET:/api/auth/oidc/session` | `apps/matriz-hub/app/api/auth/oidc/session/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:matriz-hub:POST:/api/auth/oidc/tenant` | `apps/matriz-hub/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `OIDC-BFF` |
-| `HTTP:seumei:DELETE:/api/auth/oidc/session` | `apps/seumei/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `OIDC-BFF` |
-| `HTTP:seumei:GET:/api/auth/oidc/callback` | `apps/seumei/app/api/auth/oidc/callback/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:seumei:GET:/api/auth/oidc/login` | `apps/seumei/app/api/auth/oidc/login/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:seumei:GET:/api/auth/oidc/session` | `apps/seumei/app/api/auth/oidc/session/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:seumei:POST:/api/auth/oidc/tenant` | `apps/seumei/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `OIDC-BFF` |
-| `HTTP:spot:DELETE:/api/auth/oidc/session` | `apps/spot/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `OIDC-BFF` |
-| `HTTP:spot:GET:/api/auth/oidc/callback` | `apps/spot/app/api/auth/oidc/callback/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:spot:GET:/api/auth/oidc/login` | `apps/spot/app/api/auth/oidc/login/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:spot:GET:/api/auth/oidc/session` | `apps/spot/app/api/auth/oidc/session/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:spot:POST:/api/auth/oidc/tenant` | `apps/spot/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `OIDC-BFF` |
-| `HTTP:willdash:DELETE:/api/auth/oidc/session` | `apps/willdash/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `OIDC-BFF` |
-| `HTTP:willdash:GET:/api/auth/oidc/callback` | `apps/willdash/app/api/auth/oidc/callback/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:willdash:GET:/api/auth/oidc/login` | `apps/willdash/app/api/auth/oidc/login/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:willdash:GET:/api/auth/oidc/session` | `apps/willdash/app/api/auth/oidc/session/route.ts:1` | `GET` | M | `OIDC-BFF` |
-| `HTTP:willdash:POST:/api/auth/oidc/tenant` | `apps/willdash/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `OIDC-BFF` |
->>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
 | `HTTP:matriz-hub:DELETE:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:26` | `DELETE` | M | `H-MOCK` |
 | `HTTP:matriz-hub:DELETE:/api/auth/oidc/session` | `apps/matriz-hub/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
 | `HTTP:matriz-hub:GET:/api/auth/mock/session` | `apps/matriz-hub/app/api/auth/mock/session/route.ts:9` | `GET` | R | `H-MOCK` |
@@ -112,24 +75,8 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:8` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/capabilities/themes` | `apps/matriz-hub/app/api/capabilities/themes/route.ts:8` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:9` | `GET` | R | `H-R` |
-<<<<<<< HEAD
 | `HTTP:matriz-hub:GET:/api/docs/documents` | `apps/matriz-hub/app/api/docs/documents/route.ts:9` | `GET` | R | `H-R` |
-<<<<<<< HEAD
-| `HTTP:matriz-hub:GET:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:13` | `GET` | R | `H-R` |
-=======
-| `HTTP:matriz-hub:POST:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:19` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/context-packages/[id]/publish` | `apps/matriz-hub/app/api/docs/context-packages/[id]/publish/route.ts:7` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/conversions` | `apps/matriz-hub/app/api/docs/conversions/route.ts:9` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:GET:/api/docs/documents` | `apps/matriz-hub/app/api/docs/documents/route.ts:9` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:POST:/api/docs/documents` | `apps/matriz-hub/app/api/docs/documents/route.ts:25` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:GET:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:7` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:PATCH:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:8` | `PATCH` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:9` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/documents/[docId]/versions` | `apps/matriz-hub/app/api/docs/documents/[docId]/versions/route.ts:7` | `POST` | M | `H-M` |
->>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
-=======
-| `HTTP:matriz-hub:GET:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:7` | `GET` | R | `H-R` |
->>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
 | `HTTP:matriz-hub:GET:/api/docs/entities` | `apps/matriz-hub/app/api/docs/entities/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/exports` | `apps/matriz-hub/app/api/docs/exports/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/governance` | `apps/matriz-hub/app/api/docs/governance/route.ts:9` | `GET` | R | `H-R` |
@@ -137,12 +84,6 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/docs/relations` | `apps/matriz-hub/app/api/docs/relations/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/runs` | `apps/matriz-hub/app/api/docs/runs/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/suggestions` | `apps/matriz-hub/app/api/docs/suggestions/route.ts:9` | `GET` | R | `H-R` |
-<<<<<<< HEAD
-=======
-| `HTTP:matriz-hub:POST:/api/docs/suggestions` | `apps/matriz-hub/app/api/docs/suggestions/route.ts:20` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/suggestions/[id]/accept` | `apps/matriz-hub/app/api/docs/suggestions/[id]/accept/route.ts:7` | `POST` | M | `H-M` |
-| `HTTP:matriz-hub:POST:/api/docs/suggestions/[id]/reject` | `apps/matriz-hub/app/api/docs/suggestions/[id]/reject/route.ts:7` | `POST` | M | `H-M` |
->>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
 | `HTTP:matriz-hub:GET:/api/docs/tasks` | `apps/matriz-hub/app/api/docs/tasks/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/timeline` | `apps/matriz-hub/app/api/docs/timeline/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:27` | `GET` | R | `H-CACHE` |
@@ -254,7 +195,12 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-workbench:POST:/api/control/diagnostics/[diagnosticId]/repair` | `apps/matriz-workbench/app/api/control/diagnostics/[diagnosticId]/repair/route.ts:13` | `POST` | M | `APP-M` |
 | `HTTP:matriz-workbench:POST:/api/control/repairs/[diagnosticId]/result` | `apps/matriz-workbench/app/api/control/repairs/[diagnosticId]/result/route.ts:9` | `POST` | M | `APP-M` |
 | `HTTP:matrizlib:GET:/api/health` | `apps/matrizlib/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:seumei:DELETE:/api/auth/oidc/session` | `apps/seumei/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
+| `HTTP:seumei:GET:/api/auth/oidc/callback` | `apps/seumei/app/api/auth/oidc/callback/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:seumei:GET:/api/auth/oidc/login` | `apps/seumei/app/api/auth/oidc/login/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:seumei:GET:/api/auth/oidc/session` | `apps/seumei/app/api/auth/oidc/session/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:seumei:GET:/api/health` | `apps/seumei/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:seumei:POST:/api/auth/oidc/tenant` | `apps/seumei/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
 | `HTTP:seumeiapp:DELETE:/api/auth/oidc/session` | `apps/seumeiapp/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
 | `HTTP:seumeiapp:DELETE:/api/members/[membershipId]` | `apps/seumeiapp/app/api/members/[membershipId]/route.ts:21` | `DELETE` | M | `APP-M` |
 | `HTTP:seumeiapp:DELETE:/api/members/invitations/[invitationId]` | `apps/seumeiapp/app/api/members/invitations/[invitationId]/route.ts:6` | `DELETE` | M | `APP-M` |
@@ -435,20 +381,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-Current tracked-source count: **290** = 190 HTTP methods, 49 Server Actions, and 51 MCP tools.
-=======
-Current tracked-source count: **172** = 86 HTTP methods (56 Hub, 10 Workbench, 20 product apps),
-41 Workbench Server Actions, and 45 MCP tools (11 Hub/MatrizDocs, 34 Workbench).
-HTTP mutations: 56; HTTP reads/preflight: 30. The AST inventory adds five
-mock-auth `OPTIONS` aliases that a declaration-only scan missed.
-
-`sites` has **zero request
-handlers, exported Server Actions, and declared MCP tools** in tracked app
-source. Their page-level mock/domain operations are intentionally not counted
-as request-facing endpoints.
->>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
-=======
-Current tracked-source count: **322** = 215 HTTP methods, 56 Server Actions, and 51 MCP tools.
->>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
+Current tracked-source count: **327** = 220 HTTP methods, 56 Server Actions, and 51 MCP tools.

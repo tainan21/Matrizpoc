@@ -19,13 +19,9 @@ export default defineConfig({
     globals: false,
     reporters: ["default"],
     passWithNoTests: false,
-<<<<<<< HEAD
     // Smoke tests stub process-wide environment variables and inspect the
     // workspace. Running files concurrently makes those contracts race.
     fileParallelism: false,
-=======
-    testTimeout: 15_000,
->>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
   },
   resolve: {
     alias: {

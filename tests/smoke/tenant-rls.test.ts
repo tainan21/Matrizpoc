@@ -129,18 +129,7 @@ describe("mandatory tenant RLS", () => {
       table: match[1].match(/@@map\("([^"]+)"\)/)?.[1] ?? "",
       tenantColumn: /^\s+tenantId\s+/m.test(match[1]),
     }))
-<<<<<<< HEAD
-<<<<<<< HEAD
-    const explicitlyGlobal = new Set(["users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts", "identity_rate_limits", "platform_operators"])
-=======
-    const explicitlyGlobal = new Set([
-      "users", "auth_accounts", "auth_verification_challenges", "oidc_clients", "oidc_artifacts",
-      "identity_rate_limits", "identity_mfa_methods", "identity_recovery_codes", "oidc_app_sessions",
-    ])
->>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
-=======
     const explicitlyGlobal = new Set(["users", "auth_accounts", "auth_verification_challenges", "identity_mfa_methods", "identity_recovery_codes", "oidc_clients", "oidc_artifacts", "oidc_app_sessions", "identity_rate_limits", "platform_operators"])
->>>>>>> 58d541de05392a0560f6f35d81006a28a902c4e6
     const metadata = new Set(["__matriz_schema_releases"])
     const unclassified = tables.filter(({ table, tenantColumn }) =>
       !tenantColumn && table !== "tenants" && !explicitlyGlobal.has(table) && !metadata.has(table),

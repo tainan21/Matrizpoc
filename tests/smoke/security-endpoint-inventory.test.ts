@@ -195,19 +195,6 @@ function documentedSurfaces(markdown = source("docs/security/ENDPOINT-INVENTORY.
     if (section.title !== "MCP tools" && !lines[cursor]?.startsWith("## ")) throw new Error(`Unexpected inventory content after ${section.title}: ${lines[cursor]}`)
   }
   if (lines[cursor] !== "## Counts and zero-endpoint apps") throw new Error(`Expected summary heading: ${lines[cursor]}`)
-<<<<<<< HEAD
-=======
-  const summaryLines = [
-    /^Current tracked-source count: \*\*(\d+)\*\* = (\d+) HTTP methods \((\d+) Hub, (\d+) Workbench, (\d+) product apps\),$/,
-    /^(\d+) Workbench Server Actions, and (\d+) MCP tools \((\d+) Hub\/MatrizDocs, (\d+) Workbench\)\.$/,
-    /^HTTP mutations: (\d+); HTTP reads\/preflight: (\d+)\. The AST inventory adds five$/,
-    /^mock-auth `OPTIONS` aliases that a declaration-only scan missed\.$/,
-    /^`sites` has \*\*zero request$/,
-    /^handlers, exported Server Actions, and declared MCP tools\*\* in tracked app$/,
-    /^source\. Their page-level mock\/domain operations are intentionally not counted$/,
-    /^as request-facing endpoints\.$/,
-  ]
->>>>>>> 73482d5 (checkpoint: preserve Wave 1 OIDC foundation worktree)
   cursor += 1
   if (lines[cursor] === "") cursor += 1
   if (!/^Current tracked-source count: \*\*(\d+)\*\* = (\d+) HTTP methods, (\d+) Server Actions, and (\d+) MCP tools\.$/.test(lines[cursor] ?? "")) {
