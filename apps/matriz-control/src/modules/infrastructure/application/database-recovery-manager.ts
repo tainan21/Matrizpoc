@@ -42,6 +42,10 @@ export class DatabaseRecoveryManager {
     return this.deps.host.list()
   }
 
+  async createGuardBackup(): Promise<void> {
+    await this.deps.host.execute("backup", null)
+  }
+
   async compensateMissedDailyBackup(): Promise<boolean> {
     const today = new Date(this.deps.now()).toISOString().slice(0, 10)
     const hasToday = (await this.list()).some((backup) => backup.kind === "daily" && backup.valid && backup.createdAt.slice(0, 10) === today)

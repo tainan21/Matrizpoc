@@ -8,6 +8,7 @@ import type { DatabaseBackupSnapshot, DatabaseRecoveryAction, DatabaseRecoveryPr
 import type { MigrationGateStatus } from "../../modules/infrastructure/application/database-migration-gate"
 import type { LocalDevelopmentSeedPreview, LocalDevelopmentSeedResult } from "../../modules/infrastructure/application/local-development-seed-manager"
 import type { LocalEnvironmentExportPreview } from "../../modules/infrastructure/application/local-environment-export-manager"
+import type { DatabaseMigrationPreview } from "../../modules/infrastructure/application/database-migration-manager"
 
 const tabs = ["Overview", "Database", "Cache", "Events", "Backups", "Migrations", "Contracts", "Logs"] as const
 type Tab = typeof tabs[number]
@@ -21,6 +22,7 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
   const [migrations, setMigrations] = useState<readonly MigrationGateStatus[]>([])
   const [seedPreview, setSeedPreview] = useState<LocalDevelopmentSeedPreview | null>(null)
   const [environmentPreview, setEnvironmentPreview] = useState<LocalEnvironmentExportPreview | null>(null)
+  const [migrationPreview, setMigrationPreview] = useState<DatabaseMigrationPreview | null>(null)
   const [logs, setLogs] = useState<readonly string[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [bridge, setBridge] = useState<{ invoke(command: DesktopCommand): Promise<unknown> } | undefined>()
@@ -79,6 +81,21 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
     }
     catch (error) { setEnvironmentPreview(null); setMessage(error instanceof Error ? error.message : "Exportação de ambiente recusada") }
   }
+  async function requestMigrations() {
+    if (!bridge) return
+    try { setMigrationPreview(await bridge.invoke({ type: "infrastructure.database.migration.preview" }) as DatabaseMigrationPreview); setMessage(null) }
+    catch (error) { setMessage(error instanceof Error ? error.message : "Aplicação de migrations recusada") }
+  }
+  async function confirmMigrations() {
+    if (!bridge || !migrationPreview) return
+    try {
+      const result = await bridge.invoke({ type: "infrastructure.database.migration.confirm", confirmationToken: migrationPreview.confirmationToken }) as { state: "clean"; appliedSchemas: readonly string[] }
+      setMigrationPreview(null)
+      setMessage(`Migrations aplicadas e verificadas: ${result.appliedSchemas.join(", ")}.`)
+      setMigrations(await bridge.invoke({ type: "infrastructure.database.migrations" }) as readonly MigrationGateStatus[])
+    }
+    catch (error) { setMigrationPreview(null); setMessage(error instanceof Error ? error.message : "Aplicação de migrations recusada") }
+  }
 
   return <>
     <nav className="infra-tabs" aria-label="Áreas da infraestrutura">{tabs.map((item) => <button type="button" key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
@@ -93,13 +110,14 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
     {tab === "Cache" ? <Panel title="Cache"><p>Garnet 2.1.5 em <code>127.0.0.1:46379</code>. Credenciais e namespaces entram no gate de Identity/Secrets.</p></Panel> : null}
     {tab === "Events" ? <Panel title="Events"><p>NATS 2.14.5 com JetStream em <code>54222</code> e monitoramento local em <code>58222</code>.</p></Panel> : null}
     {tab === "Backups" ? <Panel title="Backups e recuperação"><p>Backups lógicos validados do database <code>matriz</code>. Restore usa database temporário e mantém a base anterior em quarentena.</p>{bridge ? <button className="infra-primary" onClick={() => requestRecovery("backup")}>Criar backup de guarda</button> : null}<div className="operation-table" aria-label="Catálogo de backups">{backups.map((backup) => <article key={backup.id}><span><b>{backup.id}</b><small>{backup.kind} · {new Date(backup.createdAt).toLocaleString("pt-BR")}</small></span><span><code>{backup.valid ? "válido" : "inválido"}</code><small>{backup.bytes.toLocaleString("pt-BR")} bytes · SHA-256 {backup.sha256.slice(0, 12)}…</small></span>{bridge && backup.valid ? <span className="infra-actions"><button onClick={() => requestRecovery("restore", backup.id)}>Restaurar</button><button className="danger-button" onClick={() => requestRecovery("recreate", backup.id)}>Recriar</button></span> : null}</article>)}</div>{!backups.length ? <p className="muted">Nenhum backup catalogado.</p> : null}</Panel> : null}
-    {tab === "Migrations" ? <Panel title="Migrations"><p>Runtime nunca executa migration. Qualquer estado diferente de <code>clean</code> bloqueia o start do app antes de abrir portas ou processos.</p><div className="operation-table" aria-label="Ledgers de migrations">{migrations.map((ledger) => <article key={ledger.schema}><span><b>{ledger.schema}</b><small>{ledger.state}</small></span><span><code>{ledger.pending.length} pendentes</code><small>{ledger.altered.length} alteradas · {ledger.unexpected.length} inesperadas · {ledger.failed.length} falhas</small></span></article>)}</div>{!migrations.length ? <p className="muted">Nenhum ledger disponível.</p> : null}</Panel> : null}
+    {tab === "Migrations" ? <Panel title="Migrations"><p>Runtime nunca executa migration. Qualquer estado diferente de <code>clean</code> bloqueia o start do app antes de abrir portas ou processos.</p>{bridge && migrations.some((ledger) => ledger.state === "pending") ? <button className="infra-primary" onClick={requestMigrations}>Aplicar migrations pendentes</button> : null}<div className="operation-table" aria-label="Ledgers de migrations">{migrations.map((ledger) => <article key={ledger.schema}><span><b>{ledger.schema}</b><small>{ledger.state}</small></span><span><code>{ledger.pending.length} pendentes</code><small>{ledger.altered.length} alteradas · {ledger.unexpected.length} inesperadas · {ledger.failed.length} falhas</small></span></article>)}</div>{!migrations.length ? <p className="muted">Nenhum ledger disponível.</p> : null}</Panel> : null}
     {tab === "Contracts" ? <section className="operation-table" aria-label="Infrastructure Contracts">{inventory.apps.map((app) => <article key={app.appId}><span><b>{app.appId}</b><small>{app.classification} · {app.runtime}</small></span><span><code>{app.database}</code><small>{app.identity} · {app.cache}</small></span><span><small>{app.events}</small><small>{app.secrets}</small>{bridge ? <button onClick={() => requestEnvironmentExport(app.appId)}>Exportar env local</button> : null}</span></article>)}</section> : null}
     {tab === "Logs" ? <Panel title="Logs sanitizados"><pre className="infra-logs">{logs.length ? logs.join("\n") : "Selecione Logs em um serviço. No máximo 200 linhas são exibidas."}</pre></Panel> : null}
     {preview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar operação de infraestrutura"><div><span>CONFIRMAÇÃO DE USO ÚNICO</span><h2>{preview.title}</h2>{preview.impact.map((line) => <p key={line}>{line}</p>)}<div className="infra-actions"><button onClick={() => setPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirm}>Confirmar agora</button></div></div></div> : null}
     {recoveryPreview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar recuperação do database"><div><span>RECUPERAÇÃO · TOKEN DE USO ÚNICO</span><h2>{recoveryPreview.title}</h2>{recoveryPreview.impact.map((line) => <p key={line}>{line}</p>)}<div className="infra-actions"><button onClick={() => setRecoveryPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirmRecovery}>Confirmar agora</button></div></div></div> : null}
     {seedPreview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar seed local"><div><span>SEED LOCAL · TOKEN DE USO ÚNICO</span><h2>{seedPreview.title}</h2>{seedPreview.impact.map((line) => <p key={line}>{line}</p>)}<div className="infra-actions"><button onClick={() => setSeedPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirmSeed}>Popular agora</button></div></div></div> : null}
     {environmentPreview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar exportação de ambiente local"><div><span>SECRETS LOCAIS · TOKEN DE USO ÚNICO</span><h2>{environmentPreview.title}</h2>{environmentPreview.impact.map((line) => <p key={line}>{line}</p>)}<div className="infra-actions"><button onClick={() => setEnvironmentPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirmEnvironmentExport}>Exportar agora</button></div></div></div> : null}
+    {migrationPreview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar aplicação de migrations"><div><span>MIGRATIONS · BACKUP DE GUARDA · TOKEN ÚNICO</span><h2>{migrationPreview.title}</h2>{migrationPreview.impact.map((line) => <p key={line}>{line}</p>)}<p>Schemas: <code>{migrationPreview.schemas.join(", ")}</code></p><div className="infra-actions"><button onClick={() => setMigrationPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirmMigrations}>Criar backup e aplicar</button></div></div></div> : null}
   </>
 }
 

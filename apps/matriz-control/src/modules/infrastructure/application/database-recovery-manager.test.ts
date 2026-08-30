@@ -44,6 +44,13 @@ describe("database recovery manager", () => {
     expect(native.execute).toHaveBeenCalledWith("backup", null)
   })
 
+  it("allows a confirmed privileged workflow to create its mandatory guard backup", async () => {
+    const native = host()
+    const manager = new DatabaseRecoveryManager({ host: native, now: () => 1_000, token: () => "unused" })
+    await manager.createGuardBackup()
+    expect(native.execute).toHaveBeenCalledWith("backup", null)
+  })
+
   it("compensates one missed daily backup and does not duplicate today's run", async () => {
     const native = host()
     const now = Date.parse("2026-08-30T18:00:00.000Z")

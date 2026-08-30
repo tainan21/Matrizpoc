@@ -116,3 +116,27 @@ em `5432` permaneceram inalterados.
 - O start continua incapaz de executar migration automaticamente. A execução
   privilegiada permanece uma operação explícita pelo runner Prisma do workspace
   até o bundle do runner ser incorporado ao instalador.
+
+## Incremento 6 — executor offline de migrations
+
+- O instalador inclui os SQLs imutáveis e um helper PowerShell fixo; o renderer
+  nunca fornece schema, caminho, SQL, executável ou credencial.
+- A aba Migrations cria preview a partir dos oito ledgers. Drift, checksum
+  alterado ou migration falha bloqueiam a aplicação; ausência de pendências é
+  tratada como no-op recusado.
+- A confirmação é descartável, revalida o plano, cria backup de guarda e aplica
+  somente schemas pendentes usando `matriz_<schema>_migration` e sua credencial
+  DPAPI. Cada arquivo SQL e seu registro `_prisma_migrations` compartilham uma
+  única transação PostgreSQL.
+- Ao final, todos os oito ledgers precisam ficar `clean`; runtime continua sem
+  autoridade de migration e o listener externo `5432` não é consultado.
+
+### Evidência descartável do executor offline
+
+Em PostgreSQL 17, um cluster vazio foi iniciado em `55432` com vault DPAPI
+isolado. As seis migrations de Pay foram aplicadas pela role
+`matriz_pay_migration`; uma segunda execução foi idempotente e manteve seis
+registros finalizados no ledger. O teste também comprovou que schemas
+pré-provisionados e `search_path` explícito não exigem `CREATE` no database.
+Cluster, vault e SQLs temporários foram removidos; `55432` voltou a zero
+listeners e os dois listeners preexistentes em `5432` permaneceram ativos.

@@ -42,6 +42,8 @@ import { LocalDevelopmentSeedManager } from "../src/modules/infrastructure/appli
 import { WindowsLocalDevelopmentSeedHost } from "./windows-local-development-seed-host"
 import { LocalEnvironmentExportManager } from "../src/modules/infrastructure/application/local-environment-export-manager"
 import { WindowsLocalEnvironmentExportHost } from "./windows-local-environment-export-host"
+import { DatabaseMigrationManager } from "../src/modules/infrastructure/application/database-migration-manager"
+import { WindowsDatabaseMigrationHost } from "./windows-database-migration-host"
 
 app.enableSandbox()
 
@@ -140,6 +142,15 @@ const databaseRecoveryManager = new DatabaseRecoveryManager({
   token: () => `recovery_confirm_${randomUUID()}`,
 })
 const managedSchemas = ["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] as const
+const migrationApplyHelper = app.isPackaged ? join(process.resourcesPath, "database-migration-apply-helper.ps1") : join(__dirname, "../../desktop/database-migration-apply-helper.ps1")
+const databaseMigrationHost = new WindowsDatabaseMigrationHost({ helperPath: migrationApplyHelper, migrationsRoot })
+const databaseMigrationManager = new DatabaseMigrationManager({
+  statuses: () => Promise.all(managedSchemas.map((schema) => databaseMigrationGate.status(schema))),
+  backup: () => databaseRecoveryManager.createGuardBackup(),
+  apply: (schema) => databaseMigrationHost.apply(schema),
+  now: Date.now,
+  token: () => `migration_confirm_${randomUUID()}`,
+})
 const localDevelopmentSeedManager = new LocalDevelopmentSeedManager({
   host: new WindowsLocalDevelopmentSeedHost({
     workspaceRoot: rootDir,
@@ -279,6 +290,8 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
   if (command.type === "infrastructure.database.recovery.preview") return databaseRecoveryManager.preview(command.actionId, command.backupId)
   if (command.type === "infrastructure.database.recovery.confirm") return databaseRecoveryManager.confirm(command.confirmationToken)
   if (command.type === "infrastructure.database.migrations") return Promise.all(managedSchemas.map((schema) => databaseMigrationGate.status(schema)))
+  if (command.type === "infrastructure.database.migration.preview") return databaseMigrationManager.preview()
+  if (command.type === "infrastructure.database.migration.confirm") return databaseMigrationManager.confirm(command.confirmationToken)
   if (command.type === "infrastructure.local.seed.preview") return localDevelopmentSeedManager.preview()
   if (command.type === "infrastructure.local.seed.confirm") return localDevelopmentSeedManager.confirm(command.confirmationToken)
   if (command.type === "infrastructure.local.environment.preview") return localEnvironmentExportManager.preview(command.appId)

@@ -97,6 +97,14 @@ describe("parseDesktopCommand", () => {
     expect(() => assertAgentDesktopCommand({ type: "infrastructure.database.backups" })).toThrow(/human interface/i)
   })
 
+  it("accepts migration execution only through preview and confirmation", () => {
+    expect(parseDesktopCommand({ type: "infrastructure.database.migration.preview" })).toEqual({ type: "infrastructure.database.migration.preview" })
+    expect(parseDesktopCommand({ type: "infrastructure.database.migration.confirm", confirmationToken: "migration_confirm_1" }))
+      .toEqual({ type: "infrastructure.database.migration.confirm", confirmationToken: "migration_confirm_1" })
+    expect(() => parseDesktopCommand({ type: "infrastructure.database.migration.preview", schema: "core" })).toThrow(/payload/i)
+    expect(() => parseDesktopCommand({ type: "infrastructure.database.migration.confirm", confirmationToken: "token", sql: "DROP DATABASE" })).toThrow(/payload/i)
+  })
+
   it("accepts local seed only through preview and a confirmation token", () => {
     expect(parseDesktopCommand({ type: "infrastructure.local.seed.preview" })).toEqual({ type: "infrastructure.local.seed.preview" })
     expect(parseDesktopCommand({ type: "infrastructure.local.seed.confirm", confirmationToken: "seed_confirm_1" }))
