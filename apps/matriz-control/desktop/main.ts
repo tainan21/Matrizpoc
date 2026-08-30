@@ -40,6 +40,8 @@ import { WindowsAppliedMigrationReader } from "./windows-applied-migration-reade
 import { WindowsLocalEnvironmentResolver } from "./windows-local-environment-resolver"
 import { LocalDevelopmentSeedManager } from "../src/modules/infrastructure/application/local-development-seed-manager"
 import { WindowsLocalDevelopmentSeedHost } from "./windows-local-development-seed-host"
+import { LocalEnvironmentExportManager } from "../src/modules/infrastructure/application/local-environment-export-manager"
+import { WindowsLocalEnvironmentExportHost } from "./windows-local-environment-export-host"
 
 app.enableSandbox()
 
@@ -147,6 +149,14 @@ const localDevelopmentSeedManager = new LocalDevelopmentSeedManager({
   }),
   now: Date.now,
   token: () => `seed_confirm_${randomUUID()}`,
+})
+const localEnvironmentExportManager = new LocalEnvironmentExportManager({
+  host: new WindowsLocalEnvironmentExportHost({
+    workspaceRoot: rootDir,
+    resolveEnvironment: (projectRoot) => localEnvironment.resolve(projectRoot),
+  }),
+  now: Date.now,
+  token: () => `env_confirm_${randomUUID()}`,
 })
 async function projectViews() { return (await projectStore.listNative()).map(presentProject) }
 
@@ -271,6 +281,8 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
   if (command.type === "infrastructure.database.migrations") return Promise.all(managedSchemas.map((schema) => databaseMigrationGate.status(schema)))
   if (command.type === "infrastructure.local.seed.preview") return localDevelopmentSeedManager.preview()
   if (command.type === "infrastructure.local.seed.confirm") return localDevelopmentSeedManager.confirm(command.confirmationToken)
+  if (command.type === "infrastructure.local.environment.preview") return localEnvironmentExportManager.preview(command.appId)
+  if (command.type === "infrastructure.local.environment.confirm") return localEnvironmentExportManager.confirm(command.confirmationToken)
   if (command.type === "project.host.list") return projectViews()
   if (command.type === "project.pick-root") { const result = await projectHost.pickAndRegister(); send({ type: "project.updated", projects: await projectViews() }); return result }
   if (command.type === "project.inspect") { const result = await projectHost.inspect(command.projectId); send({ type: "project.updated", projects: await projectViews() }); return result }

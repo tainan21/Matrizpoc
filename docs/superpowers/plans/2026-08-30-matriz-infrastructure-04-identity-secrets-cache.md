@@ -64,3 +64,14 @@ autenticam somente nos apps autorizados e cache funciona entre processos.
 - A confirmação executa o seed idempotente de domínio e depois o seed scrypt do
   Identity. O ambiente existe apenas na memória dos processos filhos e erros
   passam pela mesma lista de redaction do terminal.
+
+## Incremento 4 — exportação explícita de ambiente local
+
+- A aba Contracts permite exportar apenas pelo `appId`; renderer não fornece
+  caminho, conteúdo, comando ou valores de ambiente.
+- O Control descobre o diretório pelo `infrastructure.json`, verifica com Git
+  que `.env.development.local` está ignorado e bloqueia a operação caso não esteja.
+- Preview informa criação ou substituição e a confirmação usa token descartável.
+  A escrita é atômica, o conteúdo inclui somente chaves declaradas no contract e
+  a ACL remove herança e concede acesso apenas ao usuário Windows atual.
+- Preview, confirmação e retorno IPC nunca contêm secrets.

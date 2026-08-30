@@ -10,6 +10,7 @@ import type { InfrastructureActionPreview, InfrastructureSnapshot } from "../mod
 import type { DatabaseBackupSnapshot, DatabaseRecoveryPreview } from "../modules/infrastructure/application/database-recovery-manager"
 import type { MigrationGateStatus } from "../modules/infrastructure/application/database-migration-gate"
 import type { LocalDevelopmentSeedPreview, LocalDevelopmentSeedResult } from "../modules/infrastructure/application/local-development-seed-manager"
+import type { LocalEnvironmentExportPreview } from "../modules/infrastructure/application/local-environment-export-manager"
 
 export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
 export type DesktopUpdateSnapshot = {
@@ -75,8 +76,10 @@ export type DesktopCommand = BrowserCommand
   | { type: "infrastructure.database.migrations" }
   | { type: "infrastructure.local.seed.preview" }
   | { type: "infrastructure.local.seed.confirm"; confirmationToken: string }
+  | { type: "infrastructure.local.environment.preview"; appId: string }
+  | { type: "infrastructure.local.environment.confirm"; confirmationToken: string }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | InfrastructureSnapshot | InfrastructureActionPreview | DatabaseRecoveryPreview | readonly DatabaseBackupSnapshot[] | readonly MigrationGateStatus[] | LocalDevelopmentSeedPreview | LocalDevelopmentSeedResult | readonly string[] | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | InfrastructureSnapshot | InfrastructureActionPreview | DatabaseRecoveryPreview | readonly DatabaseBackupSnapshot[] | readonly MigrationGateStatus[] | LocalDevelopmentSeedPreview | LocalDevelopmentSeedResult | LocalEnvironmentExportPreview | readonly string[] | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | { state: "exported"; appId: string } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -132,6 +135,8 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
   if (type === "infrastructure.database.migrations") { assertOnlyKeys(command, ["type"], "Infrastructure database command payload is invalid"); return { type } }
   if (type === "infrastructure.local.seed.preview") { assertOnlyKeys(command, ["type"], "Infrastructure seed command payload is invalid"); return { type } }
   if (type === "infrastructure.local.seed.confirm") { assertOnlyKeys(command, ["type", "confirmationToken"], "Infrastructure seed command payload is invalid"); return { type, confirmationToken: text(command.confirmationToken, "confirmationToken", 256) } }
+  if (type === "infrastructure.local.environment.preview") { assertOnlyKeys(command, ["type", "appId"], "Infrastructure environment command payload is invalid"); return { type, appId: appId(command.appId) } }
+  if (type === "infrastructure.local.environment.confirm") { assertOnlyKeys(command, ["type", "confirmationToken"], "Infrastructure environment command payload is invalid"); return { type, confirmationToken: text(command.confirmationToken, "confirmationToken", 256) } }
   if (noPayload.has(type)) return { type } as DesktopCommand
   if (tabOnly.has(type)) return { type, tabId: text(command.tabId, "tabId", 128) } as DesktopCommand
   if (type === "capsule.create") return { type, name: text(command.name, "name", 80), kind: choice(command.kind, ["human", "agent"]), policy: choice(command.policy, ["human", "agent-safe", "agent-full"]) }
@@ -165,6 +170,12 @@ function text(value: unknown, field: string, max: number, allowEmpty = false): s
 function choice<T extends string>(value: unknown, values: readonly T[]): T {
   if (typeof value !== "string" || !values.includes(value as T)) throw new Error("Invalid command choice")
   return value as T
+}
+
+function appId(value: unknown): string {
+  const parsed = text(value, "appId", 80)
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(parsed)) throw new Error("Invalid appId")
+  return parsed
 }
 
 function assertOnlyKeys(command: Record<string, unknown>, allowed: readonly string[], error: string) {

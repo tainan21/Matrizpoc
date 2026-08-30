@@ -106,4 +106,13 @@ describe("parseDesktopCommand", () => {
     expect(() => assertAgentDesktopCommand({ type: "infrastructure.local.seed.preview" })).toThrow(/human interface/i)
   })
 
+  it("accepts local environment export by app id only", () => {
+    expect(parseDesktopCommand({ type: "infrastructure.local.environment.preview", appId: "matriz-hub" }))
+      .toEqual({ type: "infrastructure.local.environment.preview", appId: "matriz-hub" })
+    expect(parseDesktopCommand({ type: "infrastructure.local.environment.confirm", confirmationToken: "env_confirm_1" }))
+      .toEqual({ type: "infrastructure.local.environment.confirm", confirmationToken: "env_confirm_1" })
+    expect(() => parseDesktopCommand({ type: "infrastructure.local.environment.preview", appId: "../outside" })).toThrow(/appId/i)
+    expect(() => parseDesktopCommand({ type: "infrastructure.local.environment.preview", appId: "matriz-hub", path: "C:/outside" })).toThrow(/payload/i)
+  })
+
 })
