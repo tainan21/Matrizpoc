@@ -25,7 +25,7 @@ describe("Control infrastructure inventory", () => {
     expect(inventory.apps.find((app) => app.appId === "matriz-ops")).toMatchObject({
       schema: "ops",
       tenancy: "operator-global",
-      secretKeyCount: 3,
+      secretKeyCount: 4,
     })
   })
 })

@@ -26,6 +26,27 @@ function New-RandomSecret {
   return [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+','-').Replace('/','_')
 }
 
+function New-TotpSecret {
+  $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+  $bytes = New-Object byte[] 20
+  $random = [Security.Cryptography.RandomNumberGenerator]::Create()
+  try { $random.GetBytes($bytes) } finally { $random.Dispose() }
+  $builder = [Text.StringBuilder]::new()
+  $buffer = 0
+  $bits = 0
+  foreach ($byte in $bytes) {
+    $buffer = ($buffer -shl 8) -bor $byte
+    $bits += 8
+    while ($bits -ge 5) {
+      $bits -= 5
+      [void]$builder.Append($alphabet[($buffer -shr $bits) -band 31])
+      if ($bits -gt 0) { $buffer = $buffer -band ((1 -shl $bits) - 1) } else { $buffer = 0 }
+    }
+  }
+  if ($bits -gt 0) { [void]$builder.Append($alphabet[($buffer -shl (5 - $bits)) -band 31]) }
+  return $builder.ToString()
+}
+
 function ConvertTo-Base64Url([byte[]]$bytes) {
   return [Convert]::ToBase64String($bytes).TrimEnd('=').Replace('+','-').Replace('/','_')
 }
@@ -81,6 +102,8 @@ foreach ($declaration in $contract.environment.keys) {
   elseif ($name -eq 'IDENTITY_ISSUER' -or $name -eq 'MATRIZ_IDENTITY_ISSUER') { $value = 'http://127.0.0.1:8080' }
   elseif ($name -eq 'IDENTITY_AUTHENTICATOR_MODULE') { $value = './credential-authenticator.js' }
   elseif ($name -eq 'CACHE_URL') { $value = 'redis://127.0.0.1:46379' }
+  elseif ($name -eq 'MATRIZ_PAY_INTERNAL_URL') { $value = 'http://127.0.0.1:3012' }
+  elseif ($name -eq 'MATRIZ_OPS_SERVICE_TOKEN') { $value = Get-OrCreateSecret $applicationSecrets 'service::matriz-ops::matriz-pay' { New-RandomSecret } }
   elseif ($name -match '_CACHE_USERNAME$') { $value = 'matriz_' + $AppId.Replace('matriz-','').Replace('-','_') }
   elseif ($name -match '_CACHE_DEFAULT_TTL_SECONDS$') { $value = [string]$contract.cache.defaultTtlSeconds }
   elseif ($name -match '_OIDC_CLIENT_ID$') { $value = [string]$contract.identity.oidcClientId }
@@ -88,6 +111,8 @@ foreach ($declaration in $contract.environment.keys) {
   elseif ($name -eq 'IDENTITY_SIGNING_JWKS') { $value = Get-OrCreateSecret $applicationSecrets 'identity::signing-jwks' { New-SigningJwks } }
   elseif ($name -eq 'IDENTITY_COOKIE_KEYS') { $value = Get-OrCreateSecret $applicationSecrets 'identity::cookie-keys' { "$(New-RandomSecret),$(New-RandomSecret)" } }
   elseif ($name -eq 'IDENTITY_MFA_ENCRYPTION_KEY') { $value = Get-OrCreateSecret $applicationSecrets 'identity::mfa-key' { New-RandomSecret } }
+  elseif ($name -eq 'IDENTITY_LOCAL_OWNER_TOTP_SECRET') { $value = Get-OrCreateSecret $applicationSecrets 'identity::local-owner-totp' { New-TotpSecret } }
+  elseif ($name -eq 'IDENTITY_LOCAL_OPERATOR_TOTP_SECRET') { $value = Get-OrCreateSecret $applicationSecrets 'identity::local-operator-totp' { New-TotpSecret } }
   elseif ($name -like 'OIDC_CLIENT_SECRET_*') {
     $clientId = $name.Substring('OIDC_CLIENT_SECRET_'.Length).ToLowerInvariant().Replace('_','-')
     $value = Get-OrCreateSecret $applicationSecrets "oidc::$clientId" { New-RandomSecret }

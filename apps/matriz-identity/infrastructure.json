@@ -20,6 +20,8 @@
     { "name": "IDENTITY_LOCAL_OWNER_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
     { "name": "IDENTITY_LOCAL_OPERATOR_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
     { "name": "IDENTITY_LOCAL_DENIED_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_LOCAL_OWNER_TOTP_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_LOCAL_OPERATOR_TOTP_SECRET", "secret": true, "required": true, "source": "control-vault" },
     { "name": "OIDC_CLIENT_SECRET_MATRIZ_HUB", "secret": true, "required": true, "source": "control-vault" },
     { "name": "OIDC_CLIENT_SECRET_SPOT", "secret": true, "required": true, "source": "control-vault" },
     { "name": "OIDC_CLIENT_SECRET_SEUMEI", "secret": true, "required": true, "source": "control-vault" },

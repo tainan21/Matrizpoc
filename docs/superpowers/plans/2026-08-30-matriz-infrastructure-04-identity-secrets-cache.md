@@ -75,3 +75,16 @@ autenticam somente nos apps autorizados e cache funciona entre processos.
   A escrita é atômica, o conteúdo inclui somente chaves declaradas no contract e
   a ACL remove herança e concede acesso apenas ao usuário Windows atual.
 - Preview, confirmação e retorno IPC nunca contêm secrets.
+
+## Incremento 5 — MFA local e canal Ops → Pay
+
+- O vault gera segredos TOTP base32 estáveis para owner e operador. O seed do
+  Identity persiste somente ciphertext AES-256-GCM, marca os dois fatores como
+  verificados e mantém o usuário sem acesso sem fator privilegiado.
+- Os segredos TOTP continuam acessíveis apenas por injeção em memória ou pela
+  exportação local explicitamente confirmada; logs e renderer não os recebem.
+- Ops e Pay agora declaram o token de serviço compartilhado. O helper deriva a
+  mesma credencial DPAPI pela chave lógica `service::matriz-ops::matriz-pay` e
+  injeta também o endpoint fixo `http://127.0.0.1:3012` no Ops.
+- O token é separado da sessão OIDC humana: usuário entra no Ops pelo Identity;
+  somente o backend Ops usa a credencial para chamar a API interna do Pay.

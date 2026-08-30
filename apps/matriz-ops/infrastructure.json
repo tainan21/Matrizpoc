@@ -13,7 +13,9 @@
     { "name": "OPS_OIDC_CLIENT_ID", "secret": false, "required": true, "source": "generated" },
     { "name": "OPS_OIDC_CALLBACK_URL", "secret": false, "required": true, "source": "generated" },
     { "name": "OPS_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
-    { "name": "OPS_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" }
+    { "name": "OPS_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "MATRIZ_PAY_INTERNAL_URL", "secret": false, "required": true, "source": "generated" },
+    { "name": "MATRIZ_OPS_SERVICE_TOKEN", "secret": true, "required": true, "source": "control-vault" }
   ] },
   "filesystem": { "required": false }
 }
