@@ -60,3 +60,11 @@ instalador. Backups diários válidos e não fixados retêm os sete mais recente
 backups de guarda, fixados e evidências inválidas nunca são podados. O Control
 oferece backup de guarda, restore e recreate apenas no Desktop, sempre com
 preview e token de confirmação de uso único por 30 segundos.
+
+## Seed local
+
+Depois de migrations e health gate verdes, execute `pnpm matriz:seed:dev` com
+`MATRIZ_ENVIRONMENT=local` e as oito URLs server-only fornecidas pelo vault apontando para
+`127.0.0.1:55432/matriz?schema=<schema>`. O comando é idempotente e falha antes
+de conectar caso qualquer URL aponte para `5432`, cloud, `localhost` ou outro
+database. Use somente dados sintéticos; o seed não importa ambientes antigos.

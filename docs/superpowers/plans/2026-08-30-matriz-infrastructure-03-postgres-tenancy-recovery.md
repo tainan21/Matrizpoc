@@ -62,3 +62,25 @@ como gates abertos.
 
 O seed local, execução privilegiada de migrations pelo cockpit e o teste real
 de restore/recreate permanecem como próximos gates do Plano 3.
+
+## Incremento 3 — seed local idempotente
+
+- `pnpm matriz:seed:dev` exige `MATRIZ_ENVIRONMENT=local` e as oito URLs no
+  endpoint exato `127.0.0.1:55432/matriz`; localhost, `5432`, cloud e outro
+  database falham antes de abrir qualquer cliente.
+- O seed cria três identidades sintéticas (owner, operador e sem acesso), tenant,
+  memberships, grants, registros de app, operador ativo, fixtures dos oito
+  schemas e três wallets globais. Nenhum segredo ou credencial fixa é emitido.
+- Escritas nos seis domínios tenant usam transação com
+  `set_config('matriz.tenant_id', ..., true)`; Ops e Pay respeitam suas exceções
+  operator-global e global-user.
+- O tooling ganhou typecheck próprio para que o seed e as políticas locais
+  entrem no gate do repositório.
+
+### Evidência descartável do seed
+
+Em PostgreSQL 17, no endpoint isolado `55432`, foram aplicadas todas as
+migrations e o seed rodou duas vezes. As contagens permaneceram estáveis:
+3 usuários, 3 wallets e uma fixture em Hub, Spot, Seumei, Contracts, WillDash e
+Ops. O cluster temporário foi parado e removido; os dois listeners preexistentes
+em `5432` permaneceram inalterados.
