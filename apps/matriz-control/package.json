@@ -53,6 +53,10 @@
       {
         "from": "desktop/infrastructure-helper.ps1",
         "to": "infrastructure-helper.ps1"
+      },
+      {
+        "from": "desktop/database-recovery-helper.ps1",
+        "to": "database-recovery-helper.ps1"
       }
     ],
     "win": {

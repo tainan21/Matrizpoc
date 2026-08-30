@@ -49,5 +49,14 @@ sempre ocorre primeiro em `matriz_restore_<id>`; validações de migrations,
 topologia, ACL e RLS precisam passar antes do corte. A base anterior entra em
 quarentena e roles/secrets são reprovisionados, nunca restaurados do dump.
 
-Retenção, quarantine e recreate serão habilitados somente após o segundo gate
-do Plano 3. Até lá, o cockpit apresenta a operação como indisponível.
+O Desktop aceita somente IDs `backup_YYYYMMDD_<suffix>` presentes no catálogo;
+o renderer nunca fornece paths. Cada restore verifica manifest, tamanho,
+SHA-256 e catálogo do `pg_restore`, restaura em `matriz_restore_<suffix>`,
+valida os oito schemas e índices e só então promove. A base anterior permanece
+como `matriz_quarantine_<timestamp>`.
+
+O instalador registra `MatrizDatabaseDailyBackup` às 03:00 sob o usuário
+instalador. Backups diários válidos e não fixados retêm os sete mais recentes;
+backups de guarda, fixados e evidências inválidas nunca são podados. O Control
+oferece backup de guarda, restore e recreate apenas no Desktop, sempre com
+preview e token de confirmação de uso único por 30 segundos.

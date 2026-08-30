@@ -42,4 +42,23 @@ provisionado, migrado, seedado, destruído e restaurado sem tocar em `5432`.
 Em PostgreSQL 17.4 local, porta isolada `55439`, passaram zero-state e N−1 para
 os oito schemas, `migrate deploy`, `migrate diff`, release marker, ACL/RLS e
 limpeza de contexto após commit. O cluster foi parado e removido ao fim; `5432`
-permaneceu inalterado. Backup/restore, recreate e seed ainda são gates abertos.
+permaneceu inalterado. Naquele incremento, recuperação e seed permaneceram
+como gates abertos.
+
+## Incremento 2 — backup e recuperação
+
+- O cockpit Desktop cataloga backups sem expor paths e usa comandos IPC
+  fechados por action ID e backup ID validado.
+- Backup usa `pg_dump -Fc`, escrita temporária, move atômico e manifest V1 com
+  versão, oito schemas, tamanho e SHA-256.
+- Restore/recreate validam checksum e catálogo, restauram primeiro em database
+  temporário, verificam schemas e índices e preservam o database anterior em
+  quarentena antes do health gate.
+- Tokens de confirmação duram 30 segundos, são vinculados à ação/backup e
+  consumidos antes da execução. O backup é relido antes da confirmação.
+- A tarefa `MatrizDatabaseDailyBackup` roda sob o usuário instalador; a retenção
+  mantém sete diários válidos e nunca poda pins, backups de guarda ou evidência
+  inválida.
+
+O seed local, execução privilegiada de migrations pelo cockpit e o teste real
+de restore/recreate permanecem como próximos gates do Plano 3.

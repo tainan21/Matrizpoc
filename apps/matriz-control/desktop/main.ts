@@ -33,6 +33,8 @@ import { ProjectSurfaceHost } from "./project-surface-host"
 import { presentProject } from "../src/modules/projects/presentation/project-presenter"
 import { InfrastructureServiceManager } from "../src/modules/infrastructure/application/infrastructure-service-manager"
 import { WindowsInfrastructureHost } from "./windows-infrastructure-host"
+import { DatabaseRecoveryManager } from "../src/modules/infrastructure/application/database-recovery-manager"
+import { WindowsDatabaseRecoveryHost } from "./windows-database-recovery-host"
 
 app.enableSandbox()
 
@@ -111,6 +113,12 @@ const infrastructureManager = new InfrastructureServiceManager({
   programData: process.env.ProgramData ?? "C:\\ProgramData",
   now: Date.now,
   token: () => `infra_confirm_${randomUUID()}`,
+})
+const databaseRecoveryHelper = app.isPackaged ? join(process.resourcesPath, "database-recovery-helper.ps1") : join(__dirname, "../../desktop/database-recovery-helper.ps1")
+const databaseRecoveryManager = new DatabaseRecoveryManager({
+  host: new WindowsDatabaseRecoveryHost(databaseRecoveryHelper),
+  now: Date.now,
+  token: () => `recovery_confirm_${randomUUID()}`,
 })
 async function projectViews() { return (await projectStore.listNative()).map(presentProject) }
 
@@ -229,6 +237,9 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
   if (command.type === "infrastructure.logs") return infrastructureManager.logs(command.serviceId)
   if (command.type === "infrastructure.action.preview") return infrastructureManager.preview(command.serviceId, command.actionId)
   if (command.type === "infrastructure.action.confirm") return infrastructureManager.confirm(command.confirmationToken)
+  if (command.type === "infrastructure.database.backups") return databaseRecoveryManager.list()
+  if (command.type === "infrastructure.database.recovery.preview") return databaseRecoveryManager.preview(command.actionId, command.backupId)
+  if (command.type === "infrastructure.database.recovery.confirm") return databaseRecoveryManager.confirm(command.confirmationToken)
   if (command.type === "project.host.list") return projectViews()
   if (command.type === "project.pick-root") { const result = await projectHost.pickAndRegister(); send({ type: "project.updated", projects: await projectViews() }); return result }
   if (command.type === "project.inspect") { const result = await projectHost.inspect(command.projectId); send({ type: "project.updated", projects: await projectViews() }); return result }

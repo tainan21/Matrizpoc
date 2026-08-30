@@ -7,6 +7,7 @@ import type { ProjectRegistration } from "../modules/projects/domain/project"
 import type { ProjectPreparationPreview } from "../modules/projects/application/project-preparation-service"
 import type { ProjectViewModel } from "../modules/projects/presentation/project-presenter"
 import type { InfrastructureActionPreview, InfrastructureSnapshot } from "../modules/infrastructure/domain/infrastructure"
+import type { DatabaseBackupSnapshot, DatabaseRecoveryPreview } from "../modules/infrastructure/application/database-recovery-manager"
 
 export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
 export type DesktopUpdateSnapshot = {
@@ -66,8 +67,11 @@ export type DesktopCommand = BrowserCommand
   | { type: "infrastructure.logs"; serviceId: "postgres" | "garnet" | "nats" }
   | { type: "infrastructure.action.preview"; serviceId: "stack" | "postgres" | "garnet" | "nats"; actionId: "install" | "start" | "stop" | "restart" }
   | { type: "infrastructure.action.confirm"; confirmationToken: string }
+  | { type: "infrastructure.database.backups" }
+  | { type: "infrastructure.database.recovery.preview"; actionId: "backup" | "restore" | "recreate"; backupId: string | null }
+  | { type: "infrastructure.database.recovery.confirm"; confirmationToken: string }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | InfrastructureSnapshot | InfrastructureActionPreview | readonly string[] | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | InfrastructureSnapshot | InfrastructureActionPreview | DatabaseRecoveryPreview | readonly DatabaseBackupSnapshot[] | readonly string[] | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -111,6 +115,15 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
   if (type === "infrastructure.logs") { assertOnlyKeys(command, ["type", "serviceId"], "Infrastructure command payload is invalid"); return { type, serviceId: choice(command.serviceId, ["postgres", "garnet", "nats"]) } }
   if (type === "infrastructure.action.preview") { assertOnlyKeys(command, ["type", "serviceId", "actionId"], "Infrastructure command payload is invalid"); return { type, serviceId: choice(command.serviceId, ["stack", "postgres", "garnet", "nats"]), actionId: choice(command.actionId, ["install", "start", "stop", "restart"]) } }
   if (type === "infrastructure.action.confirm") { assertOnlyKeys(command, ["type", "confirmationToken"], "Infrastructure command payload is invalid"); return { type, confirmationToken: text(command.confirmationToken, "confirmationToken", 256) } }
+  if (type === "infrastructure.database.backups") { assertOnlyKeys(command, ["type"], "Infrastructure database command payload is invalid"); return { type } }
+  if (type === "infrastructure.database.recovery.preview") {
+    assertOnlyKeys(command, ["type", "actionId", "backupId"], "Infrastructure database command payload is invalid")
+    const actionId = choice(command.actionId, ["backup", "restore", "recreate"])
+    const backupId = command.backupId === undefined || command.backupId === null ? null : text(command.backupId, "backupId", 64)
+    if (backupId !== null && !/^backup_\d{8}_[a-z0-9]{6,32}$/.test(backupId)) throw new Error("Invalid backupId")
+    return { type, actionId, backupId }
+  }
+  if (type === "infrastructure.database.recovery.confirm") { assertOnlyKeys(command, ["type", "confirmationToken"], "Infrastructure database command payload is invalid"); return { type, confirmationToken: text(command.confirmationToken, "confirmationToken", 256) } }
   if (noPayload.has(type)) return { type } as DesktopCommand
   if (tabOnly.has(type)) return { type, tabId: text(command.tabId, "tabId", 128) } as DesktopCommand
   if (type === "capsule.create") return { type, name: text(command.name, "name", 80), kind: choice(command.kind, ["human", "agent"]), policy: choice(command.policy, ["human", "agent-safe", "agent-full"]) }

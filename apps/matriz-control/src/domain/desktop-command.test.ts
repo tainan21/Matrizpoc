@@ -85,4 +85,15 @@ describe("parseDesktopCommand", () => {
     expect(() => assertAgentDesktopCommand({ type: "infrastructure.logs", serviceId: "nats" })).toThrow(/human interface/i)
   })
 
+  it("accepts database recovery only by catalog id", () => {
+    expect(parseDesktopCommand({ type: "infrastructure.database.backups" })).toEqual({ type: "infrastructure.database.backups" })
+    expect(parseDesktopCommand({ type: "infrastructure.database.recovery.preview", actionId: "backup" }))
+      .toEqual({ type: "infrastructure.database.recovery.preview", actionId: "backup", backupId: null })
+    expect(parseDesktopCommand({ type: "infrastructure.database.recovery.preview", actionId: "restore", backupId: "backup_20260830_ab12cd" }))
+      .toEqual({ type: "infrastructure.database.recovery.preview", actionId: "restore", backupId: "backup_20260830_ab12cd" })
+    expect(() => parseDesktopCommand({ type: "infrastructure.database.recovery.preview", actionId: "restore", backupId: "C:\\attacker.dump" })).toThrow(/backupId/i)
+    expect(() => parseDesktopCommand({ type: "infrastructure.database.recovery.preview", actionId: "restore", backupId: "backup_20260830_ab12cd", path: "C:\\attacker.dump" })).toThrow(/payload/i)
+    expect(() => assertAgentDesktopCommand({ type: "infrastructure.database.backups" })).toThrow(/human interface/i)
+  })
+
 })

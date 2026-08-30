@@ -139,7 +139,9 @@ try {
   $garnetLogs = Join-Path $managedRoot 'garnet\logs'
   $natsData = Join-Path $managedRoot 'nats\data'
   $natsLogs = Join-Path $managedRoot 'nats\logs'
-  New-Item -ItemType Directory -Force -Path $postgresLogs, $garnetData, $garnetLogs, $natsData, $natsLogs | Out-Null
+  $backupRoot = Join-Path $managedRoot 'backups'
+  $controlRoot = Join-Path $managedRoot 'control'
+  New-Item -ItemType Directory -Force -Path $postgresLogs, $garnetData, $garnetLogs, $natsData, $natsLogs, $backupRoot, $controlRoot | Out-Null
 
   $vaultRoot = Join-Path $env:LOCALAPPDATA 'Matriz\Control\vault'
   $bootstrapSecretPath = Join-Path $vaultRoot 'bootstrap-postgres.dpapi'
@@ -184,6 +186,17 @@ try {
   & icacls.exe (Join-Path $managedRoot 'postgres') /grant "NT SERVICE\MatrizPostgres17:(OI)(CI)(M)" | Out-Null
   & icacls.exe (Join-Path $managedRoot 'garnet') /grant "NT SERVICE\MatrizGarnet:(OI)(CI)(M)" | Out-Null
   & icacls.exe (Join-Path $managedRoot 'nats') /grant "NT SERVICE\MatrizNats:(OI)(CI)(M)" | Out-Null
+
+  $installerAccount = "$env:USERDOMAIN\$env:USERNAME"
+  & icacls.exe $backupRoot /inheritance:r /grant:r "${installerAccount}:(OI)(CI)(F)" "SYSTEM:(OI)(CI)(F)" | Out-Null
+  $recoveryHelperSource = Join-Path $PSScriptRoot 'database-recovery-helper.ps1'
+  $recoveryHelperTarget = Join-Path $controlRoot 'database-recovery-helper.ps1'
+  if (-not (Test-Path -LiteralPath $recoveryHelperSource)) { throw "Database recovery helper is missing from the signed application resources." }
+  Copy-Item -LiteralPath $recoveryHelperSource -Destination $recoveryHelperTarget -Force
+  $dailyAction = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument ('-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{0}" -Action DailyBackup' -f $recoveryHelperTarget)
+  $dailyTrigger = New-ScheduledTaskTrigger -Daily -At '03:00'
+  $dailyPrincipal = New-ScheduledTaskPrincipal -UserId $installerAccount -LogonType Interactive -RunLevel Limited
+  Register-ScheduledTask -TaskName 'MatrizDatabaseDailyBackup' -Action $dailyAction -Trigger $dailyTrigger -Principal $dailyPrincipal -Description 'Daily logical backup of the managed Matriz database.' -Force | Out-Null
 
   $installerSid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
   foreach ($name in @('MatrizPostgres17', 'MatrizGarnet', 'MatrizNats')) { Grant-ServiceControl $name $installerSid }
