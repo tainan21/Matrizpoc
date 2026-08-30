@@ -8,6 +8,7 @@ import type { ProjectPreparationPreview } from "../modules/projects/application/
 import type { ProjectViewModel } from "../modules/projects/presentation/project-presenter"
 import type { InfrastructureActionPreview, InfrastructureSnapshot } from "../modules/infrastructure/domain/infrastructure"
 import type { DatabaseBackupSnapshot, DatabaseRecoveryPreview } from "../modules/infrastructure/application/database-recovery-manager"
+import type { MigrationGateStatus } from "../modules/infrastructure/application/database-migration-gate"
 
 export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
 export type DesktopUpdateSnapshot = {
@@ -70,8 +71,9 @@ export type DesktopCommand = BrowserCommand
   | { type: "infrastructure.database.backups" }
   | { type: "infrastructure.database.recovery.preview"; actionId: "backup" | "restore" | "recreate"; backupId: string | null }
   | { type: "infrastructure.database.recovery.confirm"; confirmationToken: string }
+  | { type: "infrastructure.database.migrations" }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | InfrastructureSnapshot | InfrastructureActionPreview | DatabaseRecoveryPreview | readonly DatabaseBackupSnapshot[] | readonly string[] | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | InfrastructureSnapshot | InfrastructureActionPreview | DatabaseRecoveryPreview | readonly DatabaseBackupSnapshot[] | readonly MigrationGateStatus[] | readonly string[] | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -124,6 +126,7 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
     return { type, actionId, backupId }
   }
   if (type === "infrastructure.database.recovery.confirm") { assertOnlyKeys(command, ["type", "confirmationToken"], "Infrastructure database command payload is invalid"); return { type, confirmationToken: text(command.confirmationToken, "confirmationToken", 256) } }
+  if (type === "infrastructure.database.migrations") { assertOnlyKeys(command, ["type"], "Infrastructure database command payload is invalid"); return { type } }
   if (noPayload.has(type)) return { type } as DesktopCommand
   if (tabOnly.has(type)) return { type, tabId: text(command.tabId, "tabId", 128) } as DesktopCommand
   if (type === "capsule.create") return { type, name: text(command.name, "name", 80), kind: choice(command.kind, ["human", "agent"]), policy: choice(command.policy, ["human", "agent-safe", "agent-full"]) }

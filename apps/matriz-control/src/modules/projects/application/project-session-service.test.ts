@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { afterEach, describe, expect, it } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { approveRecipe, createProjectRegistration } from "../domain/project"
 import { computeRecipeRevision, type ProjectRecipeMaterial } from "../domain/recipe"
 import { AtomicProjectStore } from "../integration/atomic-project-store"
@@ -42,6 +42,16 @@ describe("ProjectSessionService", () => {
     const context = await setup()
     const service = new ProjectSessionService({ store: context.store, supervisor: { start: async () => { throw new Error("must not start") }, get: () => undefined, stop: async () => undefined, restart: async () => { throw new Error("unused") } }, portAvailable: async () => false, readiness: { wait: async () => ({ state: "ready" as const }) }, now: () => "now" })
     await expect(service.start("project_1", "run.dev", context.revision)).rejects.toThrow("Expected port 4100 is already occupied by an external process")
+  })
+
+  it("refuses to start before ports or processes when the migration gate is not clean", async () => {
+    const context = await setup()
+    const portAvailable = vi.fn(async () => true)
+    const start = vi.fn(async () => ({ id: "never", pid: 1, status: "running" }))
+    const service = new ProjectSessionService({ store: context.store, supervisor: { start, get: () => undefined, stop: async () => undefined, restart: async () => { throw new Error("unused") } }, portAvailable, readiness: { wait: async () => ({ state: "ready" as const }) }, now: () => "now", dependencyGate: { assertProjectReady: async () => { throw new Error("Migration gate blocked spot: pending") } } })
+    await expect(service.start("project_1", "run.dev", context.revision)).rejects.toThrow(/migration gate/i)
+    expect(portAvailable).not.toHaveBeenCalled()
+    expect(start).not.toHaveBeenCalled()
   })
 
   it("reconciles a disappeared persisted session to stopped", async () => {

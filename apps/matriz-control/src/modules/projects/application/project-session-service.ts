@@ -11,7 +11,7 @@ type Supervisor = {
 }
 type Readiness = { wait(probe: NonNullable<import("../domain/recipe").ReadinessProbe>, port: number, isAlive: () => boolean): Promise<ReadinessResult> }
 
-type Options = { store: AtomicProjectStore; supervisor: Supervisor; portAvailable(port: number): Promise<boolean>; readiness: Readiness; now(): string }
+type Options = { store: AtomicProjectStore; supervisor: Supervisor; portAvailable(port: number): Promise<boolean>; readiness: Readiness; now(): string; dependencyGate?: { assertProjectReady(projectRoot: string): Promise<void> } }
 
 export class ProjectSessionService {
   constructor(private readonly options: Options) {}
@@ -22,6 +22,7 @@ export class ProjectSessionService {
     if (record.registration.trust !== "reviewed") throw new Error("Recipe requires review")
     const action = record.recipe.runActions.find((item) => item.id === actionId)
     if (!action) throw new Error("Unknown approved action")
+    await this.options.dependencyGate?.assertProjectReady(record.canonicalPath)
     const ports = action.requestedPorts.map((item) => item.port)
     await assertExpectedPortsAvailable(ports, this.options.portAvailable)
     const session = await this.options.supervisor.start(projectId, actionId)

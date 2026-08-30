@@ -87,6 +87,7 @@ describe("parseDesktopCommand", () => {
 
   it("accepts database recovery only by catalog id", () => {
     expect(parseDesktopCommand({ type: "infrastructure.database.backups" })).toEqual({ type: "infrastructure.database.backups" })
+    expect(parseDesktopCommand({ type: "infrastructure.database.migrations" })).toEqual({ type: "infrastructure.database.migrations" })
     expect(parseDesktopCommand({ type: "infrastructure.database.recovery.preview", actionId: "backup" }))
       .toEqual({ type: "infrastructure.database.recovery.preview", actionId: "backup", backupId: null })
     expect(parseDesktopCommand({ type: "infrastructure.database.recovery.preview", actionId: "restore", backupId: "backup_20260830_ab12cd" }))

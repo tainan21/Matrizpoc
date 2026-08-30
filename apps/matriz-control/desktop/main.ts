@@ -35,6 +35,8 @@ import { InfrastructureServiceManager } from "../src/modules/infrastructure/appl
 import { WindowsInfrastructureHost } from "./windows-infrastructure-host"
 import { DatabaseRecoveryManager } from "../src/modules/infrastructure/application/database-recovery-manager"
 import { WindowsDatabaseRecoveryHost } from "./windows-database-recovery-host"
+import { DatabaseMigrationGate } from "../src/modules/infrastructure/application/database-migration-gate"
+import { WindowsAppliedMigrationReader } from "./windows-applied-migration-reader"
 
 app.enableSandbox()
 
@@ -104,7 +106,10 @@ const projectTerminal = new TerminalSupervisor({
 })
 const projectReadiness = new ProjectReadinessProbe({ fetch: async (url) => fetch(url), delay: (ms) => new Promise((resolve) => setTimeout(resolve, ms)), now: Date.now })
 const projectPreparation = new ProjectPreparationService({ store: projectStore, now: Date.now, token: () => `confirm_${randomUUID()}`, execute: async (projectId, action) => { const session = await projectTerminal.start(projectId, action.id); const completed = await projectTerminal.waitForExit(session.id); return { exitCode: completed.exitCode ?? -1 } } })
-const projectSessions = new ProjectSessionService({ store: projectStore, supervisor: projectTerminal, portAvailable, readiness: projectReadiness, now: () => new Date().toISOString() })
+const migrationStatusHelper = app.isPackaged ? join(process.resourcesPath, "database-migration-status-helper.ps1") : join(__dirname, "../../desktop/database-migration-status-helper.ps1")
+const migrationsRoot = app.isPackaged ? join(process.resourcesPath, "prisma") : join(rootDir, "prisma")
+const databaseMigrationGate = new DatabaseMigrationGate({ reader: new WindowsAppliedMigrationReader(migrationStatusHelper), migrationsRoot })
+const projectSessions = new ProjectSessionService({ store: projectStore, supervisor: projectTerminal, portAvailable, readiness: projectReadiness, now: () => new Date().toISOString(), dependencyGate: databaseMigrationGate })
 const projectHost = new ProjectHostFacade({ roots: projectRoots, host: projectHostService, preparation: projectPreparation, sessions: projectSessions })
 const projectSurfaceHost = new ProjectSurfaceHost()
 const infrastructureHelper = app.isPackaged ? join(process.resourcesPath, "infrastructure-helper.ps1") : join(__dirname, "../../desktop/infrastructure-helper.ps1")
@@ -240,6 +245,7 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
   if (command.type === "infrastructure.database.backups") return databaseRecoveryManager.list()
   if (command.type === "infrastructure.database.recovery.preview") return databaseRecoveryManager.preview(command.actionId, command.backupId)
   if (command.type === "infrastructure.database.recovery.confirm") return databaseRecoveryManager.confirm(command.confirmationToken)
+  if (command.type === "infrastructure.database.migrations") return Promise.all((["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] as const).map((schema) => databaseMigrationGate.status(schema)))
   if (command.type === "project.host.list") return projectViews()
   if (command.type === "project.pick-root") { const result = await projectHost.pickAndRegister(); send({ type: "project.updated", projects: await projectViews() }); return result }
   if (command.type === "project.inspect") { const result = await projectHost.inspect(command.projectId); send({ type: "project.updated", projects: await projectViews() }); return result }

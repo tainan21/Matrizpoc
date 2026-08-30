@@ -101,3 +101,18 @@ em `5432` permaneceram inalterados.
   `matriz` e o valor alterado somente na quarentena.
 - O cluster temporário e os artefatos de teste foram removidos. `55432` voltou
   a zero listeners e os dois listeners externos em `5432` ficaram inalterados.
+
+## Incremento 5 — gate de migrations no lifecycle
+
+- O Desktop empacota os SQLs de migrations e lê `_prisma_migrations` dos oito
+  schemas por helper fechado, usando somente `127.0.0.1:55432/matriz` e a
+  autoridade DPAPI local.
+- O cockpit exibe `clean`, `pending`, `drifted` e `failed`, com contagens de
+  migrations pendentes, alteradas, inesperadas e falhas, sem retornar URLs ou
+  credenciais ao renderer.
+- Um projeto com `database.required=true` passa pelo gate antes da inspeção de
+  portas ou criação de processo. Qualquer estado diferente de `clean` bloqueia
+  o start; tooling sem database ou projeto externo sem contrato não é afetado.
+- O start continua incapaz de executar migration automaticamente. A execução
+  privilegiada permanece uma operação explícita pelo runner Prisma do workspace
+  até o bundle do runner ser incorporado ao instalador.
