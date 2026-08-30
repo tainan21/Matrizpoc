@@ -17,6 +17,21 @@ type Options = {
 export class WindowsLocalEnvironmentResolver {
   constructor(private readonly options: Options) {}
 
+  async resolveMany(projectRoots: readonly string[]): Promise<ResolvedLocalEnvironment> {
+    const values: Record<string, string> = {}
+    const redactions = new Set<string>()
+    for (const projectRoot of projectRoots) {
+      const resolved = await this.resolve(projectRoot)
+      for (const [name, value] of Object.entries(resolved.values)) {
+        const existing = values[name]
+        if (existing !== undefined && existing !== value) throw new Error(`Conflicting local environment value for ${name}`)
+        values[name] = value
+      }
+      for (const value of resolved.redactions) redactions.add(value)
+    }
+    return { values, redactions: [...redactions] }
+  }
+
   async resolve(projectRoot: string): Promise<ResolvedLocalEnvironment> {
     const contractPath = win32.join(projectRoot, "infrastructure.json")
     const exists = this.options.fileExists

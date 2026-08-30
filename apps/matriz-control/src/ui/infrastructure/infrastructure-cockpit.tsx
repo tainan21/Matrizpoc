@@ -6,6 +6,7 @@ import type { InfrastructureActionId, InfrastructureActionPreview, Infrastructur
 import type { InfrastructureInventoryViewModel } from "./infrastructure-presenter"
 import type { DatabaseBackupSnapshot, DatabaseRecoveryAction, DatabaseRecoveryPreview } from "../../modules/infrastructure/application/database-recovery-manager"
 import type { MigrationGateStatus } from "../../modules/infrastructure/application/database-migration-gate"
+import type { LocalDevelopmentSeedPreview, LocalDevelopmentSeedResult } from "../../modules/infrastructure/application/local-development-seed-manager"
 
 const tabs = ["Overview", "Database", "Cache", "Events", "Backups", "Migrations", "Contracts", "Logs"] as const
 type Tab = typeof tabs[number]
@@ -17,6 +18,7 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
   const [recoveryPreview, setRecoveryPreview] = useState<DatabaseRecoveryPreview | null>(null)
   const [backups, setBackups] = useState<readonly DatabaseBackupSnapshot[]>([])
   const [migrations, setMigrations] = useState<readonly MigrationGateStatus[]>([])
+  const [seedPreview, setSeedPreview] = useState<LocalDevelopmentSeedPreview | null>(null)
   const [logs, setLogs] = useState<readonly string[]>([])
   const [message, setMessage] = useState<string | null>(null)
   const [bridge, setBridge] = useState<{ invoke(command: DesktopCommand): Promise<unknown> } | undefined>()
@@ -47,6 +49,20 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
     try { setBackups(await bridge.invoke({ type: "infrastructure.database.recovery.confirm", confirmationToken: recoveryPreview.confirmationToken }) as readonly DatabaseBackupSnapshot[]); setRecoveryPreview(null); setMessage("Operação de recuperação concluída e catálogo validado novamente.") }
     catch (error) { setRecoveryPreview(null); setMessage(error instanceof Error ? error.message : "Operação de recuperação recusada") }
   }
+  async function requestSeed() {
+    if (!bridge) return
+    try { setSeedPreview(await bridge.invoke({ type: "infrastructure.local.seed.preview" }) as LocalDevelopmentSeedPreview); setMessage(null) }
+    catch (error) { setMessage(error instanceof Error ? error.message : "Seed local recusado") }
+  }
+  async function confirmSeed() {
+    if (!bridge || !seedPreview) return
+    try {
+      const result = await bridge.invoke({ type: "infrastructure.local.seed.confirm", confirmationToken: seedPreview.confirmationToken }) as LocalDevelopmentSeedResult
+      setSeedPreview(null)
+      setMessage(result.message)
+    }
+    catch (error) { setSeedPreview(null); setMessage(error instanceof Error ? error.message : "Seed local recusado") }
+  }
 
   return <>
     <nav className="infra-tabs" aria-label="Áreas da infraestrutura">{tabs.map((item) => <button type="button" key={item} className={tab === item ? "active" : ""} onClick={() => setTab(item)}>{item}</button>)}</nav>
@@ -57,7 +73,7 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
       {bridge && (!snapshot || snapshot.services.every((service) => service.state === "not_installed")) ? <button className="infra-primary" onClick={() => request("stack", "install")}>Instalar stack Matriz</button> : null}
       {bridge && snapshot ? <div className="infra-stack-actions"><button onClick={() => request("stack", "start")}>Iniciar stack</button><button onClick={() => request("stack", "stop")}>Parar stack</button><button onClick={() => request("stack", "restart")}>Reiniciar stack</button><button onClick={refresh}>Atualizar status</button></div> : null}
     </> : null}
-    {tab === "Database" ? <Panel title="Database"><p>PostgreSQL 17 dedicado em <code>127.0.0.1:55432</code>. O listener externo em <code>5432</code> é sempre não gerenciado.</p></Panel> : null}
+    {tab === "Database" ? <Panel title="Database"><p>PostgreSQL 17 dedicado em <code>127.0.0.1:55432</code>. O listener externo em <code>5432</code> é sempre não gerenciado.</p>{bridge ? <button className="infra-primary" onClick={requestSeed}>Popular ambiente local</button> : null}</Panel> : null}
     {tab === "Cache" ? <Panel title="Cache"><p>Garnet 2.1.5 em <code>127.0.0.1:46379</code>. Credenciais e namespaces entram no gate de Identity/Secrets.</p></Panel> : null}
     {tab === "Events" ? <Panel title="Events"><p>NATS 2.14.5 com JetStream em <code>54222</code> e monitoramento local em <code>58222</code>.</p></Panel> : null}
     {tab === "Backups" ? <Panel title="Backups e recuperação"><p>Backups lógicos validados do database <code>matriz</code>. Restore usa database temporário e mantém a base anterior em quarentena.</p>{bridge ? <button className="infra-primary" onClick={() => requestRecovery("backup")}>Criar backup de guarda</button> : null}<div className="operation-table" aria-label="Catálogo de backups">{backups.map((backup) => <article key={backup.id}><span><b>{backup.id}</b><small>{backup.kind} · {new Date(backup.createdAt).toLocaleString("pt-BR")}</small></span><span><code>{backup.valid ? "válido" : "inválido"}</code><small>{backup.bytes.toLocaleString("pt-BR")} bytes · SHA-256 {backup.sha256.slice(0, 12)}…</small></span>{bridge && backup.valid ? <span className="infra-actions"><button onClick={() => requestRecovery("restore", backup.id)}>Restaurar</button><button className="danger-button" onClick={() => requestRecovery("recreate", backup.id)}>Recriar</button></span> : null}</article>)}</div>{!backups.length ? <p className="muted">Nenhum backup catalogado.</p> : null}</Panel> : null}
@@ -66,6 +82,7 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
     {tab === "Logs" ? <Panel title="Logs sanitizados"><pre className="infra-logs">{logs.length ? logs.join("\n") : "Selecione Logs em um serviço. No máximo 200 linhas são exibidas."}</pre></Panel> : null}
     {preview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar operação de infraestrutura"><div><span>CONFIRMAÇÃO DE USO ÚNICO</span><h2>{preview.title}</h2>{preview.impact.map((line) => <p key={line}>{line}</p>)}<div className="infra-actions"><button onClick={() => setPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirm}>Confirmar agora</button></div></div></div> : null}
     {recoveryPreview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar recuperação do database"><div><span>RECUPERAÇÃO · TOKEN DE USO ÚNICO</span><h2>{recoveryPreview.title}</h2>{recoveryPreview.impact.map((line) => <p key={line}>{line}</p>)}<div className="infra-actions"><button onClick={() => setRecoveryPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirmRecovery}>Confirmar agora</button></div></div></div> : null}
+    {seedPreview ? <div className="infra-confirm" role="dialog" aria-modal="true" aria-label="Confirmar seed local"><div><span>SEED LOCAL · TOKEN DE USO ÚNICO</span><h2>{seedPreview.title}</h2>{seedPreview.impact.map((line) => <p key={line}>{line}</p>)}<div className="infra-actions"><button onClick={() => setSeedPreview(null)}>Cancelar</button><button className="danger-button" onClick={confirmSeed}>Popular agora</button></div></div></div> : null}
   </>
 }
 

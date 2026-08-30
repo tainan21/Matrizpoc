@@ -44,4 +44,47 @@ describe("WindowsLocalEnvironmentResolver", () => {
     const invalid = new WindowsLocalEnvironmentResolver({ helperPath: "helper.ps1", readFile: async () => contract, fileExists: async () => true, execute: async () => "not-json" })
     await expect(invalid.resolve("C:/repo/apps/matriz-identity")).rejects.toThrow(/invalid environment response/i)
   })
+
+  it("merges environments for a workspace seed without allowing conflicting values", async () => {
+    const contracts = new Map([
+      ["C:\\repo\\apps\\matriz-identity\\infrastructure.json", contract],
+      ["C:\\repo\\apps\\matriz-hub\\infrastructure.json", JSON.stringify({
+        ...JSON.parse(contract),
+        appId: "matriz-hub",
+        environment: { keys: [
+          { name: "MATRIZ_RUNTIME_PROFILE", secret: false, required: true, source: "generated" },
+          { name: "HUB_DATABASE_URL", secret: true, required: true, source: "control-vault" },
+        ] },
+      })],
+    ])
+    const resolver = new WindowsLocalEnvironmentResolver({
+      helperPath: "helper.ps1",
+      fileExists: async (path) => contracts.has(path),
+      readFile: async (path) => contracts.get(path) ?? "",
+      execute: async (_file, args) => args.includes("matriz-identity")
+        ? JSON.stringify({ IDENTITY_ISSUER: "http://127.0.0.1:8080", IDENTITY_CSRF_SECRET: "i".repeat(32) })
+        : JSON.stringify({ MATRIZ_RUNTIME_PROFILE: "local", HUB_DATABASE_URL: "postgresql://hub:secret@127.0.0.1:55432/matriz?schema=hub" }),
+    })
+
+    await expect(resolver.resolveMany(["C:/repo/apps/matriz-identity", "C:/repo/apps/matriz-hub"])).resolves.toEqual({
+      values: {
+        IDENTITY_ISSUER: "http://127.0.0.1:8080",
+        IDENTITY_CSRF_SECRET: "i".repeat(32),
+        MATRIZ_RUNTIME_PROFILE: "local",
+        HUB_DATABASE_URL: "postgresql://hub:secret@127.0.0.1:55432/matriz?schema=hub",
+      },
+      redactions: ["i".repeat(32), "postgresql://hub:secret@127.0.0.1:55432/matriz?schema=hub"],
+    })
+
+    const conflict = new WindowsLocalEnvironmentResolver({
+      helperPath: "helper.ps1",
+      fileExists: async () => true,
+      readFile: async () => contract,
+      execute: async (_file, args) => JSON.stringify({
+        IDENTITY_ISSUER: args.some((value) => value.includes("first")) ? "http://127.0.0.1:8080" : "http://127.0.0.1:9999",
+        IDENTITY_CSRF_SECRET: "s".repeat(32),
+      }),
+    })
+    await expect(conflict.resolveMany(["C:/first", "C:/second"])).rejects.toThrow(/conflicting local environment value/i)
+  })
 })

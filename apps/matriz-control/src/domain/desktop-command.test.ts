@@ -97,4 +97,13 @@ describe("parseDesktopCommand", () => {
     expect(() => assertAgentDesktopCommand({ type: "infrastructure.database.backups" })).toThrow(/human interface/i)
   })
 
+  it("accepts local seed only through preview and a confirmation token", () => {
+    expect(parseDesktopCommand({ type: "infrastructure.local.seed.preview" })).toEqual({ type: "infrastructure.local.seed.preview" })
+    expect(parseDesktopCommand({ type: "infrastructure.local.seed.confirm", confirmationToken: "seed_confirm_1" }))
+      .toEqual({ type: "infrastructure.local.seed.confirm", confirmationToken: "seed_confirm_1" })
+    expect(() => parseDesktopCommand({ type: "infrastructure.local.seed.preview", environment: { SECRET: "leak" } })).toThrow(/payload/i)
+    expect(() => parseDesktopCommand({ type: "infrastructure.local.seed.confirm", confirmationToken: "seed_confirm_1", command: "whoami" })).toThrow(/payload/i)
+    expect(() => assertAgentDesktopCommand({ type: "infrastructure.local.seed.preview" })).toThrow(/human interface/i)
+  })
+
 })

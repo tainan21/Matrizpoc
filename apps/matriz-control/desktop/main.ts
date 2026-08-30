@@ -38,6 +38,8 @@ import { WindowsDatabaseRecoveryHost } from "./windows-database-recovery-host"
 import { DatabaseMigrationGate } from "../src/modules/infrastructure/application/database-migration-gate"
 import { WindowsAppliedMigrationReader } from "./windows-applied-migration-reader"
 import { WindowsLocalEnvironmentResolver } from "./windows-local-environment-resolver"
+import { LocalDevelopmentSeedManager } from "../src/modules/infrastructure/application/local-development-seed-manager"
+import { WindowsLocalDevelopmentSeedHost } from "./windows-local-development-seed-host"
 
 app.enableSandbox()
 
@@ -134,6 +136,17 @@ const databaseRecoveryManager = new DatabaseRecoveryManager({
   host: new WindowsDatabaseRecoveryHost(databaseRecoveryHelper),
   now: Date.now,
   token: () => `recovery_confirm_${randomUUID()}`,
+})
+const managedSchemas = ["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] as const
+const localDevelopmentSeedManager = new LocalDevelopmentSeedManager({
+  host: new WindowsLocalDevelopmentSeedHost({
+    workspaceRoot: rootDir,
+    resolveEnvironment: (projectRoots) => localEnvironment.resolveMany(projectRoots),
+    infrastructureStatus: () => infrastructureManager.status(),
+    migrationStatus: () => Promise.all(managedSchemas.map((schema) => databaseMigrationGate.status(schema))),
+  }),
+  now: Date.now,
+  token: () => `seed_confirm_${randomUUID()}`,
 })
 async function projectViews() { return (await projectStore.listNative()).map(presentProject) }
 
@@ -255,7 +268,9 @@ async function dispatch(command: DesktopCommand): Promise<DesktopResult> {
   if (command.type === "infrastructure.database.backups") return databaseRecoveryManager.list()
   if (command.type === "infrastructure.database.recovery.preview") return databaseRecoveryManager.preview(command.actionId, command.backupId)
   if (command.type === "infrastructure.database.recovery.confirm") return databaseRecoveryManager.confirm(command.confirmationToken)
-  if (command.type === "infrastructure.database.migrations") return Promise.all((["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] as const).map((schema) => databaseMigrationGate.status(schema)))
+  if (command.type === "infrastructure.database.migrations") return Promise.all(managedSchemas.map((schema) => databaseMigrationGate.status(schema)))
+  if (command.type === "infrastructure.local.seed.preview") return localDevelopmentSeedManager.preview()
+  if (command.type === "infrastructure.local.seed.confirm") return localDevelopmentSeedManager.confirm(command.confirmationToken)
   if (command.type === "project.host.list") return projectViews()
   if (command.type === "project.pick-root") { const result = await projectHost.pickAndRegister(); send({ type: "project.updated", projects: await projectViews() }); return result }
   if (command.type === "project.inspect") { const result = await projectHost.inspect(command.projectId); send({ type: "project.updated", projects: await projectViews() }); return result }

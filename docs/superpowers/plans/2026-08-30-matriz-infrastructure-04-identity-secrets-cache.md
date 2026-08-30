@@ -52,3 +52,15 @@ autenticam somente nos apps autorizados e cache funciona entre processos.
 - Ordem explícita: migrations; seed de domínio e registros OIDC; seed de
   credenciais Identity; start Identity; start dos BFFs. Runtime não migra nem
   cria registros privilegiados durante o start.
+
+## Incremento 3 — seed orquestrado pelo Control
+
+- A aba Database oferece o seed somente no Desktop, com preview e token de
+  confirmação de uso único válido por cinco minutos.
+- Preview e confirmação exigem novamente os três serviços `healthy`, os oito
+  ledgers `clean` e um workspace local válido; nenhum runtime executa migration.
+- O resolver agrega somente variáveis declaradas nos oito contracts envolvidos,
+  recusa valores conflitantes e mantém todas as credenciais fora do renderer.
+- A confirmação executa o seed idempotente de domínio e depois o seed scrypt do
+  Identity. O ambiente existe apenas na memória dos processos filhos e erros
+  passam pela mesma lista de redaction do terminal.
