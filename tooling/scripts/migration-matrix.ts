@@ -1,6 +1,6 @@
 import { cpSync, mkdtempSync, rmSync } from "node:fs"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 import { spawnSync } from "node:child_process"
 
 const schemas = ["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] as const
@@ -8,13 +8,17 @@ type SchemaName = (typeof schemas)[number]
 type Mode = "deploy" | "test" | "drift"
 
 function run(args: string[], env: NodeJS.ProcessEnv = process.env, input?: string) {
-  const command = process.platform === "win32" ? "pnpm.cmd" : "pnpm"
-  const result = spawnSync(command, ["exec", "prisma", ...args], {
+  const command = process.platform === "win32" ? process.execPath : "corepack"
+  const commandArgs = process.platform === "win32"
+    ? [join(dirname(process.execPath), "node_modules", "corepack", "dist", "pnpm.js"), "exec", "prisma", ...args]
+    : ["pnpm", "exec", "prisma", ...args]
+  const result = spawnSync(command, commandArgs, {
     env,
     shell: false,
     stdio: input === undefined ? "inherit" : ["pipe", "inherit", "inherit"],
     input,
   })
+  if (result.error) throw new Error(`Prisma command could not start (${result.error.message})`)
   if (result.status !== 0) throw new Error(`Prisma command failed (${args[0] ?? "unknown"})`)
 }
 

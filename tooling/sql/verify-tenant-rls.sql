@@ -4,15 +4,25 @@ DO $$
 DECLARE actual integer;
 BEGIN
   SELECT count(*) INTO actual
-  FROM pg_class table_object JOIN pg_namespace namespace ON namespace.oid = table_object.relnamespace
-  WHERE namespace.nspname IN ('core', 'hub', 'spot', 'seumei', 'contracts', 'willdash')
-    AND table_object.relrowsecurity AND table_object.relforcerowsecurity;
-  IF actual <> 79 THEN RAISE EXCEPTION 'Expected 79 forced-RLS tenant tables, got %', actual; END IF;
+  FROM information_schema.columns tenant_column
+  JOIN pg_namespace namespace ON namespace.nspname = tenant_column.table_schema
+  JOIN pg_class table_object ON table_object.relnamespace = namespace.oid AND table_object.relname = tenant_column.table_name
+  WHERE tenant_column.table_schema IN ('core', 'hub', 'spot', 'seumei', 'contracts', 'willdash')
+    AND tenant_column.column_name = 'tenantId'
+    AND NOT (table_object.relrowsecurity AND table_object.relforcerowsecurity);
+  IF actual <> 0 THEN RAISE EXCEPTION 'Found % tenantId tables without forced RLS', actual; END IF;
+
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_class table_object JOIN pg_namespace namespace ON namespace.oid = table_object.relnamespace
+    WHERE namespace.nspname = 'core' AND table_object.relname = 'tenants'
+      AND table_object.relrowsecurity AND table_object.relforcerowsecurity
+  ) THEN RAISE EXCEPTION 'core.tenants root is missing forced RLS'; END IF;
 
   IF EXISTS (
     SELECT 1 FROM pg_roles WHERE rolname = ANY (ARRAY[
       'matriz_core_runtime', 'matriz_hub_runtime', 'matriz_spot_runtime',
-      'matriz_seumei_runtime', 'matriz_contracts_runtime', 'matriz_willdash_runtime'
+      'matriz_seumei_runtime', 'matriz_contracts_runtime', 'matriz_willdash_runtime',
+      'matriz_ops_runtime', 'matriz_pay_runtime'
     ]) AND (rolsuper OR rolcreatedb OR rolcreaterole OR rolinherit OR rolreplication OR rolbypassrls)
   ) THEN RAISE EXCEPTION 'Runtime role has unsafe attributes'; END IF;
 
@@ -22,8 +32,8 @@ BEGIN
   ) THEN RAISE EXCEPTION 'Runtime role must not inherit membership'; END IF;
 
   IF EXISTS (
-    SELECT 1 FROM unnest(ARRAY['core','hub','spot','seumei','contracts','willdash']) own_schema
-    CROSS JOIN unnest(ARRAY['core','hub','spot','seumei','contracts','willdash']) candidate_schema
+    SELECT 1 FROM unnest(ARRAY['core','hub','spot','seumei','contracts','willdash','ops','pay']) own_schema
+    CROSS JOIN unnest(ARRAY['core','hub','spot','seumei','contracts','willdash','ops','pay']) candidate_schema
     WHERE (candidate_schema = own_schema) <> has_schema_privilege('matriz_' || own_schema || '_runtime', candidate_schema, 'USAGE')
   ) THEN RAISE EXCEPTION 'Runtime schema ACL is not exact'; END IF;
 END $$;

@@ -61,6 +61,30 @@ function Grant-ServiceControl([string]$Name, [string]$Sid) {
   Invoke-Sc @('sdset', $Name, $updated)
 }
 
+function Unprotect-LocalSecret([string]$Path) {
+  $secure = Get-Content -LiteralPath $Path -Raw | ConvertTo-SecureString
+  $pointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+  try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($pointer) }
+  finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer) }
+}
+
+function Protect-LocalSecret([string]$Value, [string]$Path) {
+  $encrypted = ConvertTo-SecureString $Value -AsPlainText -Force | ConvertFrom-SecureString
+  [IO.File]::WriteAllText($Path, $encrypted, [Text.UTF8Encoding]::new($false))
+}
+
+function New-DatabaseSecret { return [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48)) }
+
+function Invoke-Psql([string]$Psql, [string]$Database, [string]$Password, [string]$Sql) {
+  $previous = $env:PGPASSWORD
+  try {
+    $env:PGPASSWORD = $Password
+    $Sql | & $Psql --host 127.0.0.1 --port 55432 --username matriz_provisioner --dbname $Database --no-password --set ON_ERROR_STOP=1
+    if ($LASTEXITCODE -ne 0) { throw "PostgreSQL topology operation failed." }
+  }
+  finally { $env:PGPASSWORD = $previous }
+}
+
 Assert-Administrator
 $expectedProgramData = [IO.Path]::GetFullPath($env:ProgramData).TrimEnd('\')
 $requestedProgramData = [IO.Path]::GetFullPath($ProgramDataRoot).TrimEnd('\')
@@ -86,7 +110,8 @@ try {
   $postgresExe = Join-Path $postgresRoot 'bin\postgres.exe'
   $pgCtl = Join-Path $postgresRoot 'bin\pg_ctl.exe'
   $initDb = Join-Path $postgresRoot 'bin\initdb.exe'
-  if (-not (Test-Path -LiteralPath $postgresExe) -or -not (Test-Path -LiteralPath $pgCtl) -or -not (Test-Path -LiteralPath $initDb)) {
+  $psql = Join-Path $postgresRoot 'bin\psql.exe'
+  if (-not (Test-Path -LiteralPath $postgresExe) -or -not (Test-Path -LiteralPath $pgCtl) -or -not (Test-Path -LiteralPath $initDb) -or -not (Test-Path -LiteralPath $psql)) {
     throw "PostgreSQL major 17 was not found under Program Files."
   }
   $version = (& $postgresExe --version 2>&1 | Out-String)
@@ -116,21 +141,23 @@ try {
   $natsLogs = Join-Path $managedRoot 'nats\logs'
   New-Item -ItemType Directory -Force -Path $postgresLogs, $garnetData, $garnetLogs, $natsData, $natsLogs | Out-Null
 
+  $vaultRoot = Join-Path $env:LOCALAPPDATA 'Matriz\Control\vault'
+  $bootstrapSecretPath = Join-Path $vaultRoot 'bootstrap-postgres.dpapi'
+  New-Item -ItemType Directory -Force -Path $vaultRoot | Out-Null
   if (-not (Test-Path -LiteralPath (Join-Path $postgresData 'PG_VERSION'))) {
-    $bootstrapPassword = [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
+    $bootstrapPassword = New-DatabaseSecret
     $passwordFile = Join-Path $stagingRoot 'postgres-password.txt'
     [IO.File]::WriteAllText($passwordFile, $bootstrapPassword, [Text.UTF8Encoding]::new($false))
-    & $initDb -D $postgresData -U matriz_provisioner --auth-host=scram-sha-256 --auth-local=scram-sha-256 --pwfile=$passwordFile --encoding=UTF8 --locale=C
+    & $initDb -D $postgresData -U matriz_provisioner --auth-host=scram-sha-256 --auth-local=scram-sha-256 "--pwfile=$passwordFile" --encoding=UTF8 --locale=C
     if ($LASTEXITCODE -ne 0) { throw "PostgreSQL cluster initialization failed." }
     Add-Content -LiteralPath (Join-Path $postgresData 'postgresql.conf') -Value "`nlisten_addresses = '127.0.0.1'`nport = 55432`npassword_encryption = 'scram-sha-256'`nmax_connections = 80`n"
     [IO.File]::WriteAllText((Join-Path $postgresData 'pg_hba.conf'), "local all all scram-sha-256`r`nhost all all 127.0.0.1/32 scram-sha-256`r`nhost all all ::1/128 reject`r`n", [Text.UTF8Encoding]::new($false))
 
-    $vaultRoot = Join-Path $env:LOCALAPPDATA 'Matriz\Control\vault'
-    New-Item -ItemType Directory -Force -Path $vaultRoot | Out-Null
-    $encrypted = ConvertTo-SecureString $bootstrapPassword -AsPlainText -Force | ConvertFrom-SecureString
-    [IO.File]::WriteAllText((Join-Path $vaultRoot 'bootstrap-postgres.dpapi'), $encrypted, [Text.UTF8Encoding]::new($false))
+    Protect-LocalSecret $bootstrapPassword $bootstrapSecretPath
     & icacls.exe $vaultRoot /inheritance:r /grant:r "$env:USERDOMAIN\$env:USERNAME:(OI)(CI)(F)" | Out-Null
   }
+  elseif (Test-Path -LiteralPath $bootstrapSecretPath) { $bootstrapPassword = Unprotect-LocalSecret $bootstrapSecretPath }
+  else { throw "The managed PostgreSQL cluster exists but its local bootstrap authority is unavailable." }
 
   if ($null -eq (Get-ServiceRecord 'MatrizPostgres17')) {
     & $pgCtl register -N MatrizPostgres17 -D $postgresData -S auto -o '-p 55432'
@@ -172,7 +199,47 @@ try {
   } | ConvertTo-Json -Depth 3
   [IO.File]::WriteAllText((Join-Path $managedRoot 'installation-receipt.json'), $receipt, [Text.UTF8Encoding]::new($false))
 
-  foreach ($name in @('MatrizPostgres17', 'MatrizGarnet', 'MatrizNats')) { Invoke-Sc @('start', $name) }
+  Invoke-Sc @('start', 'MatrizPostgres17')
+  $postgresReady = $false
+  for ($attempt = 0; $attempt -lt 60; $attempt++) {
+    & $pgCtl status -D $postgresData | Out-Null
+    if ($LASTEXITCODE -eq 0) { $postgresReady = $true; break }
+    Start-Sleep -Milliseconds 500
+  }
+  if (-not $postgresReady) { throw "Managed PostgreSQL did not become ready." }
+
+  $databaseExists = "SELECT 1 FROM pg_database WHERE datname = 'matriz';"
+  $previousPgPassword = $env:PGPASSWORD
+  try {
+    $env:PGPASSWORD = $bootstrapPassword
+    $result = $databaseExists | & $psql --host 127.0.0.1 --port 55432 --username matriz_provisioner --dbname postgres --no-password --tuples-only --no-align
+    if ($LASTEXITCODE -ne 0) { throw "Could not inspect the managed PostgreSQL database." }
+  }
+  finally { $env:PGPASSWORD = $previousPgPassword }
+  if (($result | Out-String).Trim() -ne '1') { Invoke-Psql $psql 'postgres' $bootstrapPassword 'CREATE DATABASE matriz OWNER matriz_provisioner;' }
+
+  $roleSecretPath = Join-Path $vaultRoot 'database-roles.dpapi'
+  if (Test-Path -LiteralPath $roleSecretPath) { $roleSecrets = Unprotect-LocalSecret $roleSecretPath | ConvertFrom-Json -AsHashtable }
+  else {
+    $roleSecrets = @{}
+    foreach ($schema in @('core','hub','spot','seumei','contracts','willdash','ops','pay')) {
+      $roleSecrets["matriz_${schema}_migration"] = New-DatabaseSecret
+      $roleSecrets["matriz_${schema}_runtime"] = New-DatabaseSecret
+    }
+    Protect-LocalSecret ($roleSecrets | ConvertTo-Json -Compress) $roleSecretPath
+  }
+  $topologySql = "REVOKE ALL ON DATABASE matriz FROM PUBLIC; REVOKE CREATE ON SCHEMA public FROM PUBLIC;"
+  foreach ($schema in @('core','hub','spot','seumei','contracts','willdash','ops','pay')) {
+    $migrationRole = "matriz_${schema}_migration"
+    $runtimeRole = "matriz_${schema}_runtime"
+    $migrationSecret = $roleSecrets[$migrationRole].Replace("'", "''")
+    $runtimeSecret = $roleSecrets[$runtimeRole].Replace("'", "''")
+    $topologySql += " DO `$`$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='$migrationRole') THEN CREATE ROLE $migrationRole LOGIN PASSWORD '$migrationSecret' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='$runtimeRole') THEN CREATE ROLE $runtimeRole LOGIN PASSWORD '$runtimeSecret' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS; END IF; END `$`$; GRANT CONNECT ON DATABASE matriz TO $migrationRole, $runtimeRole; CREATE SCHEMA IF NOT EXISTS $schema AUTHORIZATION $migrationRole; ALTER SCHEMA $schema OWNER TO $migrationRole; REVOKE ALL ON SCHEMA $schema FROM PUBLIC; GRANT USAGE ON SCHEMA $schema TO $runtimeRole;"
+  }
+  Invoke-Psql $psql 'matriz' $bootstrapPassword $topologySql
+
+  Invoke-Sc @('start', 'MatrizGarnet')
+  Invoke-Sc @('start', 'MatrizNats')
 }
 finally {
   if (Test-Path -LiteralPath $stagingRoot) { Remove-Item -LiteralPath $stagingRoot -Recurse -Force }
