@@ -60,4 +60,29 @@ describe("parseDesktopCommand", () => {
     expect(() => assertAgentDesktopCommand({ type: "project.start", projectId: "project_1", actionId: "run.dev", recipeRevision: "rev_1" })).toThrow(/human interface/i)
   })
 
+  it("accepts only catalog-backed infrastructure intents", () => {
+    expect(parseDesktopCommand({ type: "infrastructure.status" })).toEqual({ type: "infrastructure.status" })
+    expect(parseDesktopCommand({ type: "infrastructure.logs", serviceId: "postgres" })).toEqual({ type: "infrastructure.logs", serviceId: "postgres" })
+    expect(parseDesktopCommand({ type: "infrastructure.action.preview", serviceId: "stack", actionId: "install" }))
+      .toEqual({ type: "infrastructure.action.preview", serviceId: "stack", actionId: "install" })
+    expect(parseDesktopCommand({ type: "infrastructure.action.confirm", confirmationToken: "confirm_1" }))
+      .toEqual({ type: "infrastructure.action.confirm", confirmationToken: "confirm_1" })
+
+    for (const forbidden of ["path", "command", "args", "url", "port", "serviceName"]) {
+      expect(() => parseDesktopCommand({
+        type: "infrastructure.action.preview",
+        serviceId: "postgres",
+        actionId: "start",
+        [forbidden]: "attacker",
+      })).toThrow(/payload/i)
+    }
+    expect(() => parseDesktopCommand({ type: "infrastructure.action.preview", serviceId: "external", actionId: "stop" })).toThrow(/choice/i)
+    expect(() => parseDesktopCommand({ type: "infrastructure.action.preview", serviceId: "postgres", actionId: "destroy" })).toThrow(/choice/i)
+  })
+
+  it("keeps every infrastructure command out of the agent command surface", () => {
+    expect(() => assertAgentDesktopCommand({ type: "infrastructure.status" })).toThrow(/human interface/i)
+    expect(() => assertAgentDesktopCommand({ type: "infrastructure.logs", serviceId: "nats" })).toThrow(/human interface/i)
+  })
+
 })

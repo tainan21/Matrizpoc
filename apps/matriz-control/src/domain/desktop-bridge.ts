@@ -6,6 +6,7 @@ import type { ControlHostHealthSnapshot } from "../application/host-health-snaps
 import type { ProjectRegistration } from "../modules/projects/domain/project"
 import type { ProjectPreparationPreview } from "../modules/projects/application/project-preparation-service"
 import type { ProjectViewModel } from "../modules/projects/presentation/project-presenter"
+import type { InfrastructureActionPreview, InfrastructureSnapshot } from "../modules/infrastructure/domain/infrastructure"
 
 export type DesktopUpdateState = "unavailable" | "idle" | "checking" | "available" | "downloading" | "downloaded" | "current" | "error"
 export type DesktopUpdateSnapshot = {
@@ -61,8 +62,12 @@ export type DesktopCommand = BrowserCommand
   | { type: "project.stop" | "project.restart"; projectId: string; sessionId: string }
   | { type: "project.open"; projectId: string; surfaceId: string }
   | { type: "project.remove"; projectId: string }
+  | { type: "infrastructure.status" }
+  | { type: "infrastructure.logs"; serviceId: "postgres" | "garnet" | "nats" }
+  | { type: "infrastructure.action.preview"; serviceId: "stack" | "postgres" | "garnet" | "nats"; actionId: "install" | "start" | "stop" | "restart" }
+  | { type: "infrastructure.action.confirm"; confirmationToken: string }
 
-export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
+export type DesktopResult = Capsule | Capsule[] | BrowserTab | BrowserTab[] | VaultStatus | WorkspaceFileSnapshot | ControlHostHealthSnapshot | DesktopUpdateSnapshot | StoreAppSnapshot | readonly StoreAppSnapshot[] | ProjectRegistration | readonly ProjectRegistration[] | ProjectViewModel | readonly ProjectViewModel[] | ProjectPreparationPreview | InfrastructureSnapshot | InfrastructureActionPreview | readonly string[] | { candidateId: string } | { state: string; sessionId?: string; readinessUrl?: string } | { available: true; version: string } | { id: string; name: string }[] | Array<{ kind: "bookmark" | "note"; title: string; url: string | null }> | { ok: true } | string | null
 
 export type BrowserEvent =
   | { type: "tab.updated"; tab: BrowserTab }
@@ -102,6 +107,10 @@ export function parseDesktopCommand(value: unknown): DesktopCommand {
   if (type === "project.start") { assertOnlyKeys(command, ["type", "projectId", "actionId", "recipeRevision"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), actionId: text(command.actionId, "actionId", 128), recipeRevision: text(command.recipeRevision, "recipeRevision", 128) } }
   if (type === "project.stop" || type === "project.restart") { assertOnlyKeys(command, ["type", "projectId", "sessionId"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), sessionId: text(command.sessionId, "sessionId", 128) } }
   if (type === "project.open") { assertOnlyKeys(command, ["type", "projectId", "surfaceId"], "Project command payload is invalid"); return { type, projectId: text(command.projectId, "projectId", 128), surfaceId: text(command.surfaceId, "surfaceId", 128) } }
+  if (type === "infrastructure.status") { assertOnlyKeys(command, ["type"], "Infrastructure command payload is invalid"); return { type } }
+  if (type === "infrastructure.logs") { assertOnlyKeys(command, ["type", "serviceId"], "Infrastructure command payload is invalid"); return { type, serviceId: choice(command.serviceId, ["postgres", "garnet", "nats"]) } }
+  if (type === "infrastructure.action.preview") { assertOnlyKeys(command, ["type", "serviceId", "actionId"], "Infrastructure command payload is invalid"); return { type, serviceId: choice(command.serviceId, ["stack", "postgres", "garnet", "nats"]), actionId: choice(command.actionId, ["install", "start", "stop", "restart"]) } }
+  if (type === "infrastructure.action.confirm") { assertOnlyKeys(command, ["type", "confirmationToken"], "Infrastructure command payload is invalid"); return { type, confirmationToken: text(command.confirmationToken, "confirmationToken", 256) } }
   if (noPayload.has(type)) return { type } as DesktopCommand
   if (tabOnly.has(type)) return { type, tabId: text(command.tabId, "tabId", 128) } as DesktopCommand
   if (type === "capsule.create") return { type, name: text(command.name, "name", 80), kind: choice(command.kind, ["human", "agent"]), policy: choice(command.policy, ["human", "agent-safe", "agent-full"]) }
@@ -124,6 +133,7 @@ export function assertAgentDesktopCommand(command: DesktopCommand): void {
   if (command.type.startsWith("update.")) throw new Error("Updater commands require the human interface")
   if (command.type.startsWith("store.")) throw new Error("Store commands require the human interface")
   if (command.type.startsWith("project.") && command.type !== "project.list" && command.type !== "project.host.list") throw new Error("Project Host mutations require the human interface")
+  if (command.type.startsWith("infrastructure.")) throw new Error("Infrastructure commands require the human interface")
 }
 
 function text(value: unknown, field: string, max: number, allowEmpty = false): string {

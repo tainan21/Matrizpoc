@@ -49,6 +49,10 @@
       {
         "from": "desktop/vault-helper.ps1",
         "to": "vault-helper.ps1"
+      },
+      {
+        "from": "desktop/infrastructure-helper.ps1",
+        "to": "infrastructure-helper.ps1"
       }
     ],
     "win": {
