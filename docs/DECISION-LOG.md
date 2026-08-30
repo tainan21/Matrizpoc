@@ -368,3 +368,18 @@ próximos do app responsável.
 - **Motivo:** o download 0.1.0 iniciava diretamente na rota de navegador nativo e não apresentava as novas áreas operacionais 0.2.0; a distribuição precisa conservar o updater seguro sem registrar segredos no repositório.
 - **Impacto:** a paridade de navegação web/desktop passa a vir do mesmo build. O pipeline falha antes de publicar se o certificado Authenticode não estiver configurado; ausências de canal continuam `unavailable` no aplicativo.
 - **Revisar quando:** houver migração aprovada para Tauri, canais beta/rollback assinados ou distribuição fora do GitHub Releases.
+
+## 2026-08-30 — Infraestrutura local Matriz usa cluster dedicado e contratos declarativos
+
+- **Decisão:** PostgreSQL 17 em `127.0.0.1:55432`, Garnet em `56379` e NATS em
+  `54222`/`58222` são serviços locais exclusivos da Matriz, administrados pelo
+  Control. Um database `matriz` contém oito schemas com roles exclusivas. Todo
+  app publica `infrastructure.json`; SQL cross-schema é proibido.
+- **Motivo:** permitir desenvolvimento local restaurável, com custo previsível,
+  isolamento verificável e caminho para futura separação física sem duplicar
+  fontes autoritativas.
+- **Impacto:** o serviço externo em `5432` fica fora da autoridade do Control;
+  migrations são explícitas; RLS usa contexto server-side transacional; secrets
+  ficam no vault; cloud não é provisionada pela V1.
+- **Revisar quando:** a primeira separação física de domínio, múltiplos usuários
+  Windows administradores ou um pooler forem requisitos concretos.

@@ -46,6 +46,18 @@ function templateFiles(blueprint: ApplicationBlueprintV1): Record<string, string
   return {
     "AGENTS.md": `# ${displayName}\n\nRead docs/AGENT-START-HERE.md before editing. Keep domain logic app-local and never import another app's src/** or app/**.\n`,
     "README.md": `# ${displayName}\n\n- **Responsibility:** ${boundedContext}\n- **Exposes:** public-contract.ts -> { manifest } only.\n- **Does not expose:** src/** or app/** internals.\n- **May import:** stable @matriz/* packages.\n- **Must not import:** another app's src/** or app/**.\n`,
+    "infrastructure.json": json({
+      schemaVersion: "v1",
+      appId: slug,
+      classification: "product",
+      runtime: { kind: "web", port: preferredPort, healthPath: "/api/health" },
+      database: { required: false, tenancy: "none" },
+      identity: { required: false },
+      cache: { required: false, namespaces: [] },
+      events: { transport: "none", outbox: false, inbox: false },
+      environment: { keys: [] },
+      filesystem: { required: false },
+    }),
     "docs/AGENT-START-HERE.md": `# ${displayName} — Agent Start Here\n\nRead src/manifest/manifest.ts, then src/bootstrap/index.ts. Ownership: ${owner}.\n`,
     "package.json": json({
       name: `@matriz/app-${slug}`,

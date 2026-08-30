@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "v1",
+  "appId": "seumei",
+  "classification": "product",
+  "runtime": { "kind": "web", "port": 3008, "healthPath": "/api/health" },
+  "database": { "required": true, "schema": "seumei", "tenancy": "tenant", "runtimeRole": "matriz_seumei_runtime", "migrationRole": "matriz_seumei_migration", "prismaSchema": "prisma/seumei/schema.prisma" },
+  "identity": { "required": true, "oidcClientId": "seumei", "callbackPath": "/api/auth/oidc/callback" },
+  "cache": { "required": false, "namespaces": [] },
+  "events": { "transport": "nats-jetstream", "outbox": true, "inbox": false },
+  "environment": { "keys": [
+    { "name": "DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "SEUMEI_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "SEUMEI_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" }
+  ] },
+  "filesystem": { "required": false }
+}

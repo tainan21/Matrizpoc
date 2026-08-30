@@ -25,7 +25,7 @@ de menor escopo.
 | App isolado | checks do app afetado (`pnpm --filter <app> lint` e `typecheck`) e teste focado existente |
 | Package compartilhado ou manifest | checks dos consumidores afetados, `pnpm test:smoke` e `pnpm tsx tooling/scripts/verify-app-boundaries.ts` |
 | Contratos ou eventos | `pnpm test:smoke`, boundary check, compatibilidade de produtor/consumidor e plano de versão/depreciação |
-| Prisma schema ou migration | `pnpm prisma:validate`, geração e consistência dos seis clients, teste de migration/rollback aplicável, validação de tenant/RLS/roles, smoke dos apps afetados e worktree limpo após a geração |
+| Prisma schema ou migration | `pnpm prisma:validate`, geração e consistência dos oito clients, teste de migration/rollback aplicável, validação de tenant/RLS/roles, smoke dos apps afetados e worktree limpo após a geração |
 | Root, workspace, lock, tsconfig ou tooling | `pnpm lint`, `pnpm typecheck`, `pnpm test:smoke`, `pnpm tsx tooling/scripts/verify-app-boundaries.ts`, e geração/consistência dos seis clients se Prisma ou seus scripts forem afetados |
 | Leis ou outros docs de governança | paths/links citados, coerência entre os documentos canônicos e `git diff --check` |
 
@@ -37,13 +37,13 @@ removido de forma segura antes da entrega, sem apagar mudanças alheias.
 ### Consistência de clients Prisma
 
 Ao tocar um schema Prisma, migration, client ou script raiz relacionado, valide
-os seis schemas e gere/inspecione os clients de `core`, `hub`, `spot`, `seumei`,
-`contracts` e `willdash`. A geração deve corresponder ao schema tocado e o
+os oito schemas e gere/inspecione os clients de `core`, `hub`, `spot`, `seumei`,
+`contracts`, `willdash`, `ops` e `pay`. A geração deve corresponder ao schema tocado e o
 worktree deve ser revisado depois; nenhum client gerado pode ficar omitido por
 estar fora do script agregado.
 
 O script agregado `pnpm prisma:generate` cobre `core`, `hub`, `spot`, `seumei`,
-`contracts` e `willdash`, usando as fontes em
+`contracts`, `willdash`, `ops` e `pay`, usando as fontes em
 `prisma/<schema>/schema.prisma`. Sempre confira o estado do worktree depois da
 geração e investigue qualquer saída inesperada.
 

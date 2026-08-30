@@ -51,6 +51,7 @@
     "test:smoke:watch": "vitest --config vitest.config.ts",
     "audit:prod": "tsx tooling/scripts/audit-production.ts",
     "verify:boundaries": "tsx tooling/scripts/verify-app-boundaries.ts",
+    "verify:infrastructure": "tsx tooling/scripts/verify-infrastructure-contracts.ts",
     "verify:tracked-artifacts": "tsx tooling/scripts/verify-tracked-artifacts.ts",
     "build:affected": "turbo run build --affected --concurrency=4",
     "check:clean": "git diff --exit-code && git diff --cached --exit-code",

@@ -18,6 +18,10 @@ Matriz/
 │  ├─ matriz-control/    # cockpit operacional web
 │  ├─ matriz-desktop/    # cockpit nativo Tauri/Windows
 │  ├─ matriz-admin/      # administração operacional
+│  ├─ matriz-ops/        # operação global; fonte Prisma `ops`
+│  ├─ matriz-pay/        # wallets globais por usuário; fonte Prisma `pay`
+│  ├─ matriz-uninstall/  # desinstalação nativa
+│  ├─ health/            # observabilidade local
 │  ├─ matrizlib/         # design system e playground
 │  ├─ spot/              # bandas, artistas, gigs e bookings
 │  ├─ seumeiapp/         # produto Seumei assimilado
@@ -41,7 +45,7 @@ Matriz/
 └─ emails/
 ```
 
-Os seis arquivos Prisma são fontes presentes no repositório; eles não provam
+Os oito arquivos Prisma são fontes presentes no repositório; eles não provam
 que Neon, migrations por schema, roles de runtime ou RLS já estejam
 implantados. Essas entregas pertencem à Onda 2.
 
@@ -61,6 +65,10 @@ implantados. Essas entregas pertencem à Onda 2.
 | `matriz-desktop` | atual | autoridade nativa Windows app-local |
 | `matriz-admin` | atual | administração e operação local |
 | `matrizlib` | atual | catálogo visual e design system |
+| `matriz-ops` | atual | operação global; fonte Prisma `ops` |
+| `matriz-pay` | atual | ledger e wallet global por usuário; fonte Prisma `pay` |
+| `matriz-uninstall` | atual | tooling nativo; sem PostgreSQL de produto |
+| `health` | atual | observabilidade; sem PostgreSQL de produto |
 
 O schema `core` é a fronteira planejada para identidade e serviços Core
 centrais/compartilhados, incluindo o serviço tenant-aware de ExternalLinks.
@@ -68,11 +76,12 @@ Os registros operacionais desse serviço são tenant-owned e não ampliam a
 whitelist global fechada. O Core não autoriza repositories de produto em package
 central.
 
-## Alvo aprovado de persistência — Onda 2
+## Alvo aprovado de persistência — Matriz Local Infrastructure V1
 
-Uma única instância física PostgreSQL no Neon conterá seis schemas lógicos:
-`core`, `hub`, `spot`, `seumei`, `contracts` e `willdash`. Cada app com banco é
-dono de schema, migrations e role de runtime. Workbench continua
+Um cluster PostgreSQL 17 local dedicado em `127.0.0.1:55432` contém um database
+`matriz` com oito schemas lógicos: `core`, `hub`, `spot`, `seumei`, `contracts`,
+`willdash`, `ops` e `pay`. Cada app com banco é dono de schema, migrations e
+roles separadas de runtime/migration. Workbench continua
 `.matriz/**`/Git-backed e Sites continua file/config-backed.
 
 O package `packages/platform/db` existe hoje e ainda expõe clients e

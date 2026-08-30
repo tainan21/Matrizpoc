@@ -5,6 +5,8 @@ export const MATRIZ_SCHEMAS = [
   "seumei",
   "contracts",
   "willdash",
+  "ops",
+  "pay",
 ] as const
 
 export type MatrizSchema = (typeof MATRIZ_SCHEMAS)[number]

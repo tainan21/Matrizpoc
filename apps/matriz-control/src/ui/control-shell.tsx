@@ -13,7 +13,7 @@ import { UpdateCenter } from "./updates/update-center"
 import { ProjectHostProvider } from "./projects/project-host-context"
 import { ThemeProvider, useControlTheme } from "./theme/theme-provider"
 
-const links = [["/home", "Início"], ["/pulse", "Pulso"], ["/apps", "Apps"], ["/workspace", "Workspace"], ["/agents", "Agentes"], ["/environments", "Ambientes"], ["/ports", "Portas"], ["/git", "Git"], ["/terminal", "Terminal"], ["/browser", "Navegador"], ["/actions", "Ações"], ["/store", "Store"], ["/doctor", "Doctor"], ["/settings", "Ajustes"]] as const
+const links = [["/home", "Início"], ["/pulse", "Pulso"], ["/apps", "Apps"], ["/workspace", "Workspace"], ["/agents", "Agentes"], ["/environments", "Ambientes"], ["/infrastructure", "Infra"], ["/ports", "Portas"], ["/git", "Git"], ["/terminal", "Terminal"], ["/browser", "Navegador"], ["/actions", "Ações"], ["/store", "Store"], ["/doctor", "Doctor"], ["/settings", "Ajustes"]] as const
 
 function Shell({ children }: { children: ReactNode }) {
   const pathname = usePathname()

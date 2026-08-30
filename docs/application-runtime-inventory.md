@@ -35,7 +35,7 @@
 
 ## Drift conhecido
 
-- `docs/architecture-overview.md` ainda descreve sete apps e métricas antigas.
+- `docs/architecture-overview.md` deve ser validado contra os 16 Infrastructure Contracts antes de mudanças de runtime.
 - `docs/architectural-laws.md` contém trechos históricos que ainda dizem que
   `matriz-identity` não existe.
 - documentos anteriores alternam `seumei`, `apps/seumei` e `seumeiapp`; o

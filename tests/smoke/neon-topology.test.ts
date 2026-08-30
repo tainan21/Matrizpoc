@@ -9,11 +9,11 @@ import {
 const options = { projectId: "project", apiKey: "secret", ownerName: "neondb_owner", provisioningBranchId: "primary" }
 
 describe("Neon central topology contract", () => {
-  it("fixes six schemas, distinct roles and two phased database identities", () => {
+  it("fixes eight schemas, distinct roles and two phased database identities", () => {
     const plan = buildTopologyPlan()
-    expect(plan.schemas.map((item) => item.name)).toEqual(["core", "hub", "spot", "seumei", "contracts", "willdash"])
+    expect(plan.schemas.map((item) => item.name)).toEqual(["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"])
     expect(plan.ciBranch.name).toBe("matriz-ci")
-    expect(new Set(plan.schemas.flatMap((item) => [item.migrationRole, item.runtimeRole])).size).toBe(12)
+    expect(new Set(plan.schemas.flatMap((item) => [item.migrationRole, item.runtimeRole])).size).toBe(16)
   })
 
   it("fails closed for missing/unsafe environment and ambiguous CLI modes", () => {

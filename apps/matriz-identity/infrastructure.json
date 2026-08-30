@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "v1",
+  "appId": "matriz-identity",
+  "classification": "platform",
+  "runtime": { "kind": "service", "port": 8080, "healthPath": "/healthz" },
+  "database": { "required": true, "schema": "core", "tenancy": "mixed", "runtimeRole": "matriz_core_runtime", "migrationRole": "matriz_core_migration", "prismaSchema": "prisma/core/schema.prisma" },
+  "identity": { "required": false },
+  "cache": { "required": false, "namespaces": [] },
+  "events": { "transport": "nats-jetstream", "outbox": true, "inbox": true },
+  "environment": { "keys": [
+    { "name": "DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_ISSUER", "secret": false, "required": true, "source": "generated" },
+    { "name": "OIDC_JWKS", "secret": true, "required": true, "source": "control-vault" }
+  ] },
+  "filesystem": { "required": false }
+}

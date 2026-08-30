@@ -11,7 +11,7 @@
 - **Alvo aprovado** descreve a arquitetura a ser entregue pelas ondas do
   programa Matriz. Não deve ser apresentado como funcionalidade disponível.
 
-As 12 leis da V1 continuam válidas. Os detalhes de banco, identidade,
+As 16 leis da V1 continuam válidas. Os detalhes de banco, identidade,
 autorização e integração distribuída abaixo fixam o alvo aprovado sem antecipar
 sua implementação.
 
@@ -21,19 +21,16 @@ sua implementação.
 
 ### Estado atual
 
-Existem sete apps no monorepo:
+Existem 16 apps manifestados no monorepo:
 
-- `matriz-hub`
-- `matriz-workbench`
-- `spot`
-- `seumei`
-- `contracts`
-- `willdash`
-- `sites`
+- `matriz-identity`, `matriz-hub`, `matriz-desktop`, `matrizlib`;
+- `matriz-workbench`, `matriz-control`, `matriz-uninstall`, `health`;
+- `sites`, `spot`, `matriz-admin`, `matriz-ops`, `matriz-pay`;
+- `seumei`, `contracts` e `willdash`.
 
-O repositório contém seis fontes Prisma independentes em
+O repositório contém oito fontes Prisma independentes em
 `prisma/<schema>/schema.prisma`, para `core`, `hub`, `spot`, `seumei`,
-`contracts` e `willdash`, cada qual com migrations versionadas ao lado. A
+`contracts`, `willdash`, `ops` e `pay`, cada qual com migrations versionadas ao lado. A
 presença desses arquivos não significa que a topologia
 central, as migrations independentes, os roles ou o RLS já estejam entregues.
 
@@ -41,26 +38,36 @@ O Matriz Workbench permanece file-backed, com estado canônico em `.matriz/**`
 versionado pelo Git. Matriz Sites permanece file/config-backed. Nenhum dos dois
 recebe schema vazio apenas para uniformizar o monorepo.
 
-### Alvo aprovado — Onda 2
+### Alvo aprovado — Matriz Local Infrastructure V1
 
-- Uma única instância física de PostgreSQL gerenciado no Neon abrigará os
-  schemas lógicos `core`, `hub`, `spot`, `seumei`, `contracts` e `willdash`.
+- Um cluster PostgreSQL 17 dedicado à Matriz em `127.0.0.1:55432`, sem
+  autoridade sobre qualquer serviço em `5432`, abriga um database `matriz` e
+  exatamente os schemas `core`, `hub`, `spot`, `seumei`, `contracts`,
+  `willdash`, `ops` e `pay`. A futura separação física/cloud muda endpoints e
+  credenciais, não duplica fontes autoritativas.
 - Cada app com banco será dono de seu schema, de suas migrations e de seu role
   de runtime. Credenciais/roles de migration e de runtime serão separados e
   terão privilégio mínimo.
-- `matriz-identity` será o oitavo serviço/app. Ele ainda não existe. Será dono
+- `matriz-identity` é o dono
   do provedor OIDC e dos dados centrais de identidade em `core`. Serviços Core
   centrais/compartilhados, como ExternalLinks, terão owner e contrato públicos
   próprios. Seus registros operacionais permanecem tenant-owned; isso não os
   adiciona à whitelist global nem desloca domínio de produto para o Core.
-- `matriz-hub`, `spot`, `seumei`, `contracts` e `willdash` serão donos dos
-  schemas homônimos. Nenhum app acessará tabelas internas de outro schema.
+- `matriz-hub`, `spot`, `seumei`, `contracts`, `willdash`, `matriz-ops` e
+  `matriz-pay` são donos dos schemas `hub`, `spot`, `seumei`, `contracts`,
+  `willdash`, `ops` e `pay`, respectivamente. Nenhum app acessa tabelas
+  internas de outro schema.
 - Integridade multi-tenant nascerá na primeira entrega de banco: chaves e
   índices tenant-first, unicidades compostas por tenant e FKs compostas como
   `[tenantId, parentId]`. RLS e roles restritivos são obrigatórios desde essa
   baseline; não são endurecimento opcional posterior.
 - FKs entre schemas de apps são proibidas. Integrações usam IDs opacos,
   contratos públicos, APIs e eventos.
+- Toda tabela tenant-owned usa RLS forçada e contexto transacional
+  `SET LOCAL matriz.tenant_id`. `SET` sem `LOCAL` é proibido. Poolers futuros
+  usam Transaction Mode; Statement Mode é incompatível.
+- Pay é formalmente `global-user` e não recebe falsa RLS tenant. Ops é
+  `operator-global`, registrando tenant afetado como dado quando aplicável.
 
 ### Ownership global e por tenant — alvo aprovado
 
@@ -312,3 +319,48 @@ Rejeitado em `packages/*`:
 não é implementação de regra. Extração compartilhada só ocorre depois de dois
 consumidores reais, superfície estável e sem domínio forte, e redução mensurável
 de manutenção. A implementação nasce app-local e é extraída depois.
+
+---
+
+## L13. Domain ownership é obrigatório
+
+Cada tabela declara um único domínio, schema, app owner, migration authority,
+runtime role e política de recuperação. Nenhum app cria tabela ou migration no
+schema de outro domínio. Runtime nunca executa migration, e migration authority
+não é usada para atender requests.
+
+O mapa canônico está em `docs/infrastructure/domain-ownership-matrix.md`.
+
+---
+
+## L14. Schema access matrix é deny-by-default
+
+Roles de runtime e migration acessam exclusivamente o próprio schema. Não há
+FK, grant SQL ou client Prisma cross-schema. Leitura de identidade, tenancy,
+membership e grants ocorre pela API interna autenticada do Matriz Identity;
+comunicação de domínio ocorre por APIs ou eventos.
+
+`tenantId` em body, query string ou header público é sempre dado não confiável.
+O servidor deriva o tenant da sessão/token, abre uma transação e aplica
+`SET LOCAL matriz.tenant_id` antes de executar repositories tenant-owned.
+
+---
+
+## L15. Domain events usam outbox/inbox durável
+
+Evento autoritativo e mudança de domínio são gravados na mesma transação no
+schema produtor. A entrega por NATS JetStream é pelo menos uma vez; publisher
+só marca publicação após ACK, consumidores registram inbox idempotente na mesma
+transação do efeito e só então confirmam. Outbox e inbox pertencem aos domínios,
+nunca a um schema genérico.
+
+---
+
+## L16. Infrastructure Contract é a descoberta operacional
+
+Todo app manifestado declara `apps/<app>/infrastructure.json`, validado pelo
+package técnico `@matriz/integration-infrastructure-contracts`. O contrato
+declara necessidades, nunca valores, URLs secretas, comandos ou caminhos
+absolutos. Event names continuam no `AppManifestDTO`; scripts e catálogos de
+runtimes permanecem server-side. Control, CI e project factory consomem o
+contrato sem importar internals de apps.

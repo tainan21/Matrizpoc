@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://matriz.dev/schemas/infrastructure-contract-v1.schema.json",
+  "title": "Matriz Infrastructure Contract V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "appId", "classification", "runtime", "database", "identity", "cache", "events", "environment", "filesystem"],
+  "properties": {
+    "schemaVersion": { "const": "v1" },
+    "appId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "classification": { "enum": ["product", "platform", "tooling", "library", "site"] },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["web", "service", "desktop", "library"] },
+        "port": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+        "healthPath": { "type": "string", "pattern": "^/(?!/)[^?#]*$" }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "tenancy"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "schema": { "enum": ["core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay"] },
+        "tenancy": { "enum": ["tenant", "mixed", "global-user", "operator-global", "none"] },
+        "runtimeRole": { "type": "string", "pattern": "^matriz_(core|hub|spot|seumei|contracts|willdash|ops|pay)_runtime$" },
+        "migrationRole": { "type": "string", "pattern": "^matriz_(core|hub|spot|seumei|contracts|willdash|ops|pay)_migration$" },
+        "prismaSchema": { "type": "string", "pattern": "^prisma/(core|hub|spot|seumei|contracts|willdash|ops|pay)/schema\\.prisma$" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
+          "then": { "required": ["schema", "runtimeRole", "migrationRole", "prismaSchema"], "properties": { "tenancy": { "not": { "const": "none" } } } },
+          "else": { "properties": { "tenancy": { "const": "none" } }, "not": { "anyOf": [{ "required": ["schema"] }, { "required": ["runtimeRole"] }, { "required": ["migrationRole"] }, { "required": ["prismaSchema"] }] } }
+        }
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "oidcClientId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "callbackPath": { "type": "string", "pattern": "^/(?!/)[^?#]*$" }
+      },
+      "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
+      "then": { "required": ["oidcClientId", "callbackPath"] },
+      "else": { "not": { "anyOf": [{ "required": ["oidcClientId"] }, { "required": ["callbackPath"] }] } }
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "namespaces"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "namespaces": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" } },
+        "defaultTtlSeconds": { "type": "integer", "minimum": 1, "maximum": 2592000 }
+      }
+    },
+    "events": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transport", "outbox", "inbox"],
+      "properties": {
+        "transport": { "enum": ["nats-jetstream", "none"] },
+        "outbox": { "type": "boolean" },
+        "inbox": { "type": "boolean" }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["keys"],
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "secret", "required", "source"],
+            "properties": {
+              "name": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+              "secret": { "type": "boolean" },
+              "required": { "type": "boolean" },
+              "source": { "enum": ["generated", "control-vault", "operator"] }
+            }
+          }
+        }
+      }
+    },
+    "filesystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "roots": { "type": "array", "items": { "type": "string", "pattern": "^(?![A-Za-z]:[\\\\/])(?![\\\\/])(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+$" } }
+      }
+    }
+  }
+}

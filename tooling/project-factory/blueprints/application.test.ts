@@ -4,6 +4,7 @@ import path from "node:path"
 import { afterEach, describe, expect, it } from "vitest"
 import { planApplicationScaffold } from "./plan"
 import { applyScaffoldPlan } from "./apply"
+import { infrastructureContractV1Schema } from "../../../packages/integration/infrastructure-contracts/src/index"
 
 const roots: string[] = []
 async function tempRoot(): Promise<string> {
@@ -30,6 +31,7 @@ describe("application scaffold", () => {
     const plan = await planApplicationScaffold(root, blueprint)
 
     expect(plan.operations.map((operation) => operation.path)).toContain("apps/sample/src/manifest/manifest.ts")
+    expect(plan.operations.map((operation) => operation.path)).toContain("apps/sample/infrastructure.json")
     await expect(readFile(path.join(root, "apps/sample/package.json"), "utf8")).rejects.toThrow()
   })
 
@@ -43,6 +45,12 @@ describe("application scaffold", () => {
     expect(first.created.length).toBeGreaterThan(5)
     expect(second.created).toEqual([])
     expect(second.skipped).toHaveLength(first.created.length)
+    const infrastructure = JSON.parse(await readFile(path.join(root, "apps/sample/infrastructure.json"), "utf8"))
+    expect(infrastructureContractV1Schema.parse(infrastructure)).toMatchObject({
+      appId: "sample",
+      runtime: { kind: "web", port: 3010 },
+      database: { required: false, tenancy: "none" },
+    })
   })
 
   it("blocks all writes when any target conflicts", async () => {

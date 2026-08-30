@@ -4,13 +4,13 @@ import path from "node:path"
 import { loadLocalAppCatalog, validateCatalogEntries } from "./catalog-loader"
 
 describe("project factory runtime catalog", () => {
-  it("describes the seven current apps with unique ports", () => {
+  it("describes the thirteen managed web runtimes with unique ports", () => {
     const result = validateCatalogEntries(localAppCatalog)
 
     expect(result.issues).toEqual([])
-    expect(result.apps).toHaveLength(7)
+    expect(result.apps).toHaveLength(13)
     expect(result.apps.map((app) => app.preferredPort)).toEqual([
-      3000, 3001, 3002, 3003, 3004, 3005, 3006,
+      3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009, 3010, 3011, 3012,
     ])
   })
 

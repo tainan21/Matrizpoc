@@ -199,3 +199,18 @@ outro processo enquanto não há conectividade fica explicitamente em
 - replay manual que apaga DLQ ou altera o envelope original;
 - tratar timeout, ausência de rede ou fila local como sucesso concluído;
 - descrever transports em memória atuais como integração distribuída.
+
+## Baseline local V1
+
+- Apps consultam identidade, tenancy, memberships e grants somente pela API
+  interna autenticada do Matriz Identity. Acesso SQL ao schema `core` por outro
+  app é proibido, inclusive para leitura.
+- Subjects duráveis seguem `matriz.v1.<domain>.<event>`. O manifest do app é a
+  fonte dos event names; `infrastructure.json` declara apenas transporte,
+  outbox e inbox.
+- Publisher usa `Nats-Msg-Id = outbox.id` e marca `publishedAt` somente após
+  ACK do JetStream. Consumidor grava inbox e efeito na mesma transação antes do
+  ACK.
+- Outbox publicada e inbox processada podem ser podadas após sete dias. Item
+  pendente nunca é removido. Dead letters são retidas por 30 dias.
+- Cache compartilhado não é canal de autoridade nem transporte de eventos.

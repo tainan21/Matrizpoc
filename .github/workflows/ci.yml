@@ -50,6 +50,8 @@ jobs:
       SEUMEI_MIGRATION_DATABASE_URL: postgresql://matriz_seumei_migration:ci-seumei-migration@127.0.0.1:5432/matriz_migrations_zero?schema=seumei
       CONTRACTS_MIGRATION_DATABASE_URL: postgresql://matriz_contracts_migration:ci-contracts-migration@127.0.0.1:5432/matriz_migrations_zero?schema=contracts
       WILLDASH_MIGRATION_DATABASE_URL: postgresql://matriz_willdash_migration:ci-willdash-migration@127.0.0.1:5432/matriz_migrations_zero?schema=willdash
+      OPS_MIGRATION_DATABASE_URL: postgresql://matriz_ops_migration:ci-ops-migration@127.0.0.1:5432/matriz_migrations_zero?schema=ops
+      PAY_MIGRATION_DATABASE_URL: postgresql://matriz_pay_migration:ci-pay-migration@127.0.0.1:5432/matriz_migrations_zero?schema=pay
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,6 +69,8 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Reject generated artifacts tracked by Git
         run: pnpm verify:tracked-artifacts
+      - name: Verify Infrastructure Contracts
+        run: pnpm verify:infrastructure
       - name: Audit production dependencies
         run: pnpm audit:prod
       - name: Create disposable migration databases
@@ -80,7 +84,7 @@ jobs:
       - name: Verify runtime roles and tenant RLS
         run: |
           PGPASSWORD=prisma psql -h 127.0.0.1 -U prisma -d matriz_migrations_zero -f tooling/sql/verify-tenant-rls.sql
-          for app in core hub spot seumei contracts willdash; do
+          for app in core hub spot seumei contracts willdash ops pay; do
             role="matriz_${app}_runtime"
             PGPASSWORD="ci-${app}-runtime" psql -h 127.0.0.1 -U "$role" -d matriz_migrations_zero -v expected_role="$role" -f tooling/sql/verify-runtime-login.sql
           done

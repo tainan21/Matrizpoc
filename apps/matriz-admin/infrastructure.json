@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "v1",
+  "appId": "matriz-admin",
+  "classification": "platform",
+  "runtime": { "kind": "web", "port": 3002, "healthPath": "/api/health" },
+  "database": { "required": false, "tenancy": "none" },
+  "identity": { "required": true, "oidcClientId": "matriz-admin", "callbackPath": "/api/auth/oidc/callback" },
+  "cache": { "required": false, "namespaces": [] },
+  "events": { "transport": "nats-jetstream", "outbox": false, "inbox": true },
+  "environment": { "keys": [
+    { "name": "ADMIN_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "ADMIN_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" }
+  ] },
+  "filesystem": { "required": false }
+}

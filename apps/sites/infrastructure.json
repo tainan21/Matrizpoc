@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "v1",
+  "appId": "sites",
+  "classification": "site",
+  "runtime": { "kind": "web", "port": 3006, "healthPath": "/api/health" },
+  "database": { "required": false, "tenancy": "none" },
+  "identity": { "required": false },
+  "cache": { "required": false, "namespaces": [] },
+  "events": { "transport": "none", "outbox": false, "inbox": false },
+  "environment": { "keys": [] },
+  "filesystem": { "required": true, "roots": ["apps/sites"] }
+}

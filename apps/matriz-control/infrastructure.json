@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "v1",
+  "appId": "matriz-control",
+  "classification": "tooling",
+  "runtime": { "kind": "web", "port": 3009, "healthPath": "/api/health" },
+  "database": { "required": false, "tenancy": "none" },
+  "identity": { "required": false },
+  "cache": { "required": false, "namespaces": [] },
+  "events": { "transport": "none", "outbox": false, "inbox": false },
+  "environment": { "keys": [
+    { "name": "MATRIZ_WORKSPACE_ROOT", "secret": false, "required": true, "source": "operator" }
+  ] },
+  "filesystem": { "required": false }
+}

@@ -70,6 +70,7 @@
     "@matriz/design-system": "workspace:^",
     "@matriz/design-ui": "workspace:^",
     "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-infrastructure-contracts": "workspace:^",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",
     "@modelcontextprotocol/sdk": "1.30.0",
