@@ -8,7 +8,7 @@ Control, sem tocar no PostgreSQL externo em `5432` e sem criar recursos cloud.
 ```text
 Matriz Control Desktop
 ├── MatrizPostgres17  127.0.0.1:55432 → matriz/{core,hub,spot,seumei,contracts,willdash,ops,pay}
-├── MatrizGarnet      127.0.0.1:56379
+├── MatrizGarnet      127.0.0.1:46379
 └── MatrizNats        127.0.0.1:54222
     └── monitoring    127.0.0.1:58222
 ```

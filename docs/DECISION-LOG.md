@@ -371,7 +371,7 @@ próximos do app responsável.
 
 ## 2026-08-30 — Infraestrutura local Matriz usa cluster dedicado e contratos declarativos
 
-- **Decisão:** PostgreSQL 17 em `127.0.0.1:55432`, Garnet em `56379` e NATS em
+- **Decisão:** PostgreSQL 17 em `127.0.0.1:55432`, Garnet em `46379` e NATS em
   `54222`/`58222` são serviços locais exclusivos da Matriz, administrados pelo
   Control. Um database `matriz` contém oito schemas com roles exclusivas. Todo
   app publica `infrastructure.json`; SQL cross-schema é proibido.
@@ -381,5 +381,8 @@ próximos do app responsável.
 - **Impacto:** o serviço externo em `5432` fica fora da autoridade do Control;
   migrations são explícitas; RLS usa contexto server-side transacional; secrets
   ficam no vault; cloud não é provisionada pela V1.
+- **Correção de implementação:** `56379` foi substituída por `46379` porque a
+  faixa efêmera/reservada do Windows de estações pode incluir `56379`, impedindo
+  o bind mesmo sem listener. O Control não altera reservas globais do sistema.
 - **Revisar quando:** a primeira separação física de domínio, múltiplos usuários
   Windows administradores ou um pooler forem requisitos concretos.

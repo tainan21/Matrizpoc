@@ -26,4 +26,16 @@ describe("Windows infrastructure installer contract", () => {
     expect(helper).not.toMatch(/\b5432\b/)
     expect(helper).not.toContain("Invoke-Expression")
   })
+
+  it("configures Garnet ACLs without putting cache passwords in service arguments", async () => {
+    const helper = await readFile(resolve(process.cwd(), "desktop/infrastructure-helper.ps1"), "utf8")
+    expect(helper).toContain("--auth ACL")
+    expect(helper).toContain("--acl-file")
+    expect(helper).toContain("--storage-tier --aof --recover --logdir")
+    expect(helper).toContain("user default off")
+    expect(helper).toContain("-@all +get +set +del +expire +ping")
+    expect(helper).not.toContain("~matriz:v1:matriz-hub:*")
+    expect(helper).toContain("cache-roles.dpapi")
+    expect(helper).not.toMatch(/--password\s/)
+  })
 })

@@ -19,7 +19,7 @@ describe("Matriz infrastructure service manager", () => {
   it("owns exactly the fixed loopback service topology", () => {
     expect(MATRIZ_SERVICE_CATALOG.map(({ id, serviceName, ports }) => ({ id, serviceName, ports }))).toEqual([
       { id: "postgres", serviceName: "MatrizPostgres17", ports: [55432] },
-      { id: "garnet", serviceName: "MatrizGarnet", ports: [56379] },
+      { id: "garnet", serviceName: "MatrizGarnet", ports: [46379] },
       { id: "nats", serviceName: "MatrizNats", ports: [54222, 58222] },
     ])
     expect(MATRIZ_SERVICE_CATALOG.flatMap((service) => service.ports)).not.toContain(5432)

@@ -9,6 +9,10 @@
   "events": { "transport": "nats-jetstream", "outbox": true, "inbox": true },
   "environment": { "keys": [
     { "name": "DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "CACHE_URL", "secret": false, "required": true, "source": "generated" },
+    { "name": "HUB_CACHE_USERNAME", "secret": false, "required": true, "source": "generated" },
+    { "name": "HUB_CACHE_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "HUB_CACHE_DEFAULT_TTL_SECONDS", "secret": false, "required": true, "source": "generated" },
     { "name": "HUB_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
     { "name": "HUB_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" }
   ] },

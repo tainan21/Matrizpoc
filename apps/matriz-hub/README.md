@@ -18,3 +18,13 @@ The architecture and guardrails for workspace utilities are documented in
 `docs/PRACTICIES.md`. The Hub also owns the persistent Capability Platform
 projections and exposes their versioned HTTP contract; theme definitions remain
 CSS-first in `@matriz/design-system`.
+
+The shared ecosystem cache endpoint is backed by the managed Garnet service at
+`127.0.0.1:46379`. Hub keys are restricted to
+`matriz:v1:matriz-hub:<tenant>:<namespace>:<key>`, always carry a TTL, and are
+never an authorization or persistence authority. Credentials come only from
+the Control vault.
+Garnet 2.1.5 ACLs restrict credentials to the portable cache command set, but
+do not support Redis key-pattern ACLs. Prefix isolation is therefore enforced
+by this app-local adapter; cache must never hold authoritative identity,
+authorization, or domain state.

@@ -18,7 +18,7 @@ não pertence ao catálogo.
 
 ## Instalação
 
-1. Registre `Get-Service` e os listeners de `5432`, `55432`, `56379`, `54222`
+1. Registre `Get-Service` e os listeners de `5432`, `55432`, `46379`, `54222`
    e `58222` antes da operação.
 2. Abra **Infrastructure → Overview → Instalar stack Matriz**.
 3. Revise o preview e confirme dentro de 30 segundos.

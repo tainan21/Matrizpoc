@@ -80,6 +80,12 @@ function New-DatabaseSecret {
   finally { $generator.Dispose() }
 }
 
+function Get-Sha256Hex([string]$Value) {
+  $sha = [Security.Cryptography.SHA256]::Create()
+  try { return ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($Value)))).Replace('-', '').ToLowerInvariant() }
+  finally { $sha.Dispose() }
+}
+
 function Invoke-Psql([string]$Psql, [string]$Database, [string]$Password, [string]$Sql) {
   $previous = $env:PGPASSWORD
   try {
@@ -173,7 +179,19 @@ try {
 
   $garnetExe = Join-Path $garnetTarget 'Service\Garnet.worker.exe'
   $garnetLog = Join-Path $garnetLogs 'service.log'
-  $garnetBinPath = ('"{0}" --bind 127.0.0.1 --port 56379 --memory 256m --index 16m --aof --recover --logdir "{1}" --checkpointdir "{1}" --file-logger "{2}"' -f $garnetExe, $garnetData, $garnetLog)
+  $cacheSecretPath = Join-Path $vaultRoot 'cache-roles.dpapi'
+  if (Test-Path -LiteralPath $cacheSecretPath) { $cacheSecrets = Unprotect-LocalSecret $cacheSecretPath | ConvertFrom-Json }
+  else {
+    $cacheSecrets = @{ matriz_hub = New-DatabaseSecret }
+    Protect-LocalSecret ($cacheSecrets | ConvertTo-Json -Compress) $cacheSecretPath
+  }
+  $hubCachePassword = [string]$cacheSecrets.matriz_hub
+  if ($hubCachePassword.Length -lt 32) { throw "The Hub cache credential is invalid." }
+  $garnetAcl = Join-Path $managedRoot 'garnet\users.acl'
+  $hubCacheHash = Get-Sha256Hex $hubCachePassword
+  $aclText = "user default off`r`nuser matriz_hub on #$hubCacheHash -@all +get +set +del +expire +ping`r`n"
+  [IO.File]::WriteAllText($garnetAcl, $aclText, [Text.UTF8Encoding]::new($false))
+  $garnetBinPath = ('"{0}" --bind 127.0.0.1 --port 46379 --memory 256m --index 16m --storage-tier --aof --recover --logdir "{1}" --checkpointdir "{1}" --file-logger "{2}" --auth ACL --acl-file "{3}"' -f $garnetExe, $garnetData, $garnetLog, $garnetAcl)
   if ($null -eq (Get-ServiceRecord 'MatrizGarnet')) { Invoke-Sc @('create', 'MatrizGarnet', "binPath= $garnetBinPath", 'start= delayed-auto', 'DisplayName= Matriz Garnet') }
 
   $natsConfig = Join-Path $managedRoot 'nats\nats.conf'
@@ -211,7 +229,7 @@ try {
     installedAt = [DateTime]::UtcNow.ToString('o')
     installerSid = $installerSid
     services = @('MatrizPostgres17', 'MatrizGarnet', 'MatrizNats')
-    ports = @(55432, 56379, 54222, 58222)
+    ports = @(55432, 46379, 54222, 58222)
     garnetSha256 = $artifacts[0].Sha256
     natsSha256 = $artifacts[1].Sha256
   } | ConvertTo-Json -Depth 3

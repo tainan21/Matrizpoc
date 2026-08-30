@@ -21,7 +21,7 @@ export const MATRIZ_SERVICE_CATALOG: readonly MatrizServiceDefinition[] = [
     relativeExecutable: "postgres/bin/pg_ctl.exe", artifact: null,
   },
   {
-    id: "garnet", displayName: "Garnet", serviceName: "MatrizGarnet", version: "2.1.5", host: "127.0.0.1", ports: [56379],
+    id: "garnet", displayName: "Garnet", serviceName: "MatrizGarnet", version: "2.1.5", host: "127.0.0.1", ports: [46379],
     relativeExecutable: "garnet/2.1.5/net8.0/Service/Garnet.worker.exe",
     artifact: { url: "https://github.com/microsoft/garnet/releases/download/v2.1.5/win-x64-based-readytorun.zip", bytes: 49_762_902, sha256: "7d1d40254ef11dbb12bf59c07b6543a04f2b51049f515cfc9745f556f96c7466" },
   },

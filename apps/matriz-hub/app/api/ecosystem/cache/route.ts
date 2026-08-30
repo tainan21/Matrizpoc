@@ -2,20 +2,16 @@ import { NextResponse } from "next/server"
 import { isSharedCacheOriginAllowed, parseSharedCacheWrite, sharedCacheHeaders } from "../../../../src/ecosystem/shared-cache-contract"
 import { getDurableHubRequestContext, HubAuthError, requireSameOrigin } from "../../../../src/auth/hub-session"
 import { readBoundedText, RequestBodyTooLargeError } from "../../../../src/http/bounded-body"
+import { GarnetHubCacheRepository, loadGarnetCacheConfiguration, type HubCacheRepository } from "../../../../src/ecosystem/garnet-cache-repository"
 
 const MAX_CACHE_WRITE_BYTES = 8 * 1024
 
-interface CacheRecord {
-  key: string
-  value: unknown
-  updatedAt: string
-  updatedBy: string
-}
-
 const globalCache = globalThis as typeof globalThis & {
-  __matrizSharedCache?: Map<string, CacheRecord>
+  __matrizSharedCacheRepository?: HubCacheRepository
 }
-const store = globalCache.__matrizSharedCache ??= new Map<string, CacheRecord>()
+function repository(): HubCacheRepository {
+  return globalCache.__matrizSharedCacheRepository ??= new GarnetHubCacheRepository(loadGarnetCacheConfiguration(process.env))
+}
 
 export function OPTIONS(request: Request) {
   const origin = request.headers.get("origin")
@@ -31,7 +27,9 @@ export async function GET(request: Request) {
   const headers = sharedCacheHeaders(request.headers.get("origin"))
   if (!isSharedCacheOriginAllowed(request.headers.get("origin"))) return NextResponse.json({ error: "origin not allowed" }, { status: 403 })
   if (!key || key.length > 64) return NextResponse.json({ error: "valid key is required" }, { status: 400, headers })
-  const entry = store.get(tenantCacheKey(context.session.activeTenantId, key))
+  let entry
+  try { entry = await repository().read(context.session.activeTenantId, "ecosystem", key) }
+  catch { return NextResponse.json({ error: "cache unavailable" }, { status: 503, headers }) }
   if (!entry) return NextResponse.json({ error: "not found" }, { status: 404, headers })
   return NextResponse.json(entry, { headers: { ...headers, "cache-control": "private, no-store" } })
 }
@@ -48,20 +46,17 @@ export async function PUT(request: Request) {
   }
   const body = parseSharedCacheWrite(tryParseJson(text))
   if (!body) return NextResponse.json({ error: "invalid cache payload" }, { status: 400, headers })
-  const entry: CacheRecord = {
+  const entry = {
     key: body.key.trim(),
     value: body.value,
     updatedBy: context.session.identity.user.id,
     updatedAt: new Date().toISOString(),
   }
-  store.set(tenantCacheKey(context.session.activeTenantId, entry.key), entry)
+  try { await repository().write(context.session.activeTenantId, "ecosystem", entry) }
+  catch { return NextResponse.json({ error: "cache unavailable" }, { status: 503, headers }) }
   return NextResponse.json(entry, { headers })
 }
 
 function tryParseJson(text: string): unknown {
   try { return JSON.parse(text) } catch { return null }
-}
-
-function tenantCacheKey(tenantId: string, key: string): string {
-  return `${tenantId}:${key}`
 }
