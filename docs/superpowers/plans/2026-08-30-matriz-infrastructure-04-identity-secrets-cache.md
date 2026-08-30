@@ -33,3 +33,22 @@ autenticam somente nos apps autorizados e cache funciona entre processos.
 - A API `/api/ecosystem/cache` deixou de usar `Map`; mantém autenticação e
   isolamento tenant existentes, persiste no Garnet e responde `503` sanitizado
   quando o cache obrigatório está indisponível.
+
+## Incremento 2 — vault local e Identity executável
+
+- O helper Windows resolve apenas `infrastructure.json` validado, gera segredos
+  aleatórios e JWKS RSA, protege o store com DPAPI CurrentUser, escreve
+  atomicamente e restringe a ACL ao usuário instalador.
+- O renderer, recipes e snapshots nunca recebem valores. O processo principal
+  filtra a resposta pelas chaves declaradas, injeta secrets apenas em ações de
+  runtime e redige valores literais capturados no terminal.
+- Contratos agora usam os nomes reais de runtime por schema e declaram issuer,
+  client ID e callback locais. Identity recebe os mesmos client secrets que os
+  BFFs; `core.oidc_clients` persiste somente SHA-256.
+- Admin deixou de reutilizar identidade/variáveis de Seumei e usa
+  `appId/clientId` próprios.
+- Identity local aceita HTTP somente em `127.0.0.1:8080`, faz bind no loopback
+  e possui seed app-local scrypt para owner, operador e usuário sem acesso.
+- Ordem explícita: migrations; seed de domínio e registros OIDC; seed de
+  credenciais Identity; start Identity; start dos BFFs. Runtime não migra nem
+  cria registros privilegiados durante o start.

@@ -8,9 +8,26 @@
   "cache": { "required": false, "namespaces": [] },
   "events": { "transport": "nats-jetstream", "outbox": true, "inbox": true },
   "environment": { "keys": [
-    { "name": "DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
-    { "name": "OIDC_ISSUER", "secret": false, "required": true, "source": "generated" },
-    { "name": "OIDC_JWKS", "secret": true, "required": true, "source": "control-vault" }
+    { "name": "PORT", "secret": false, "required": true, "source": "generated" },
+    { "name": "MATRIZ_RUNTIME_PROFILE", "secret": false, "required": true, "source": "generated" },
+    { "name": "CORE_RUNTIME_DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_ISSUER", "secret": false, "required": true, "source": "generated" },
+    { "name": "IDENTITY_SIGNING_JWKS", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_CSRF_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_COOKIE_KEYS", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_MFA_ENCRYPTION_KEY", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_AUTHENTICATOR_MODULE", "secret": false, "required": true, "source": "generated" },
+    { "name": "IDENTITY_LOCAL_OWNER_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_LOCAL_OPERATOR_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_LOCAL_DENIED_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_MATRIZ_HUB", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_SPOT", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_SEUMEI", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_CONTRACTS", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_WILLDASH", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_MATRIZ_OPS", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_MATRIZ_PAY", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_MATRIZ_ADMIN", "secret": true, "required": true, "source": "control-vault" }
   ] },
   "filesystem": { "required": false }
 }

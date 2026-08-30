@@ -37,6 +37,7 @@ import { DatabaseRecoveryManager } from "../src/modules/infrastructure/applicati
 import { WindowsDatabaseRecoveryHost } from "./windows-database-recovery-host"
 import { DatabaseMigrationGate } from "../src/modules/infrastructure/application/database-migration-gate"
 import { WindowsAppliedMigrationReader } from "./windows-applied-migration-reader"
+import { WindowsLocalEnvironmentResolver } from "./windows-local-environment-resolver"
 
 app.enableSandbox()
 
@@ -92,16 +93,25 @@ const projectRoots = new ElectronProjectRootAdapter({
 })
 const projectReader = new BoundedProjectReader({ resolveRoot: (rootRef) => projectRoots.resolve(rootRef) })
 const projectHostService = new ProjectHostService({ roots: projectRoots, reader: projectReader, store: projectStore, id: () => `project_${randomUUID()}`, now: () => new Date().toISOString(), desktop: true })
+const localEnvironmentHelper = app.isPackaged ? join(process.resourcesPath, "local-environment-helper.ps1") : join(__dirname, "../../desktop/local-environment-helper.ps1")
+const localEnvironment = new WindowsLocalEnvironmentResolver({ helperPath: localEnvironmentHelper })
 const projectTerminal = new TerminalSupervisor({
   rootDir,
   resolveAction: async (workspaceRoot, projectId, actionId) => {
     const record = await projectStore.findNative(projectId)
-    if (!record) return resolveTerminalAction(workspaceRoot, projectId, actionId)
+    if (!record) {
+      const action = await resolveTerminalAction(workspaceRoot, projectId, actionId)
+      if (actionId !== "dev") return action
+      const environment = await localEnvironment.resolve(action.cwd)
+      return { ...action, environment: environment.values, redactions: environment.redactions }
+    }
     if (record.registration.trust !== "reviewed") throw new Error("Recipe requires review")
     const action = [...record.recipe.prepareActions, ...record.recipe.runActions].find((item) => item.id === actionId)
     if (!action) throw new Error("Unknown approved action")
     const cwd = await projectRoots.resolve(record.registration.canonicalRootRef)
-    return { projectId, projectName: record.registration.displayName, actionId, label: action.label, command: action.executable, args: [...action.args], cwd, route: `project/${projectId}`, port: action.requestedPorts[0]?.port ?? null }
+    const runAction = record.recipe.runActions.some((item) => item.id === actionId)
+    const environment = runAction ? await localEnvironment.resolve(cwd) : { values: {}, redactions: [] }
+    return { projectId, projectName: record.registration.displayName, actionId, label: action.label, command: action.executable, args: [...action.args], cwd, route: `project/${projectId}`, port: action.requestedPorts[0]?.port ?? null, environment: environment.values, redactions: environment.redactions }
   },
 })
 const projectReadiness = new ProjectReadinessProbe({ fetch: async (url) => fetch(url), delay: (ms) => new Promise((resolve) => setTimeout(resolve, ms)), now: Date.now })

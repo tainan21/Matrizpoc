@@ -63,6 +63,10 @@
         "to": "database-migration-status-helper.ps1"
       },
       {
+        "from": "desktop/local-environment-helper.ps1",
+        "to": "local-environment-helper.ps1"
+      },
+      {
         "from": "../../prisma",
         "to": "prisma",
         "filter": ["**/migrations/**/migration.sql"]

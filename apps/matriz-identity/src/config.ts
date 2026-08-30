@@ -1,5 +1,6 @@
 export type IdentityEnvironment = {
   issuer: string
+  bindHost: "127.0.0.1" | "0.0.0.0"
   databaseUrl: string
   csrfSecret?: string
   cookieKeys?: string[]
@@ -39,9 +40,12 @@ export function loadIdentityEnvironment(env: NodeJS.ProcessEnv): IdentityEnviron
   const rawJwks = required(env, "IDENTITY_SIGNING_JWKS")
   const production = env.NODE_ENV === "production"
   const parsedIssuer = new URL(issuer)
+  if (parsedIssuer.username || parsedIssuer.password || parsedIssuer.search || parsedIssuer.hash || parsedIssuer.pathname !== "/") throw new Error("IDENTITY_ISSUER must be an exact origin")
   if (production && parsedIssuer.protocol !== "https:") {
     throw new Error("IDENTITY_ISSUER must use https in production")
   }
+  const localLoopback = parsedIssuer.protocol === "http:" && parsedIssuer.hostname === "127.0.0.1"
+  if (!production && parsedIssuer.protocol !== "https:" && !localLoopback) throw new Error("HTTP Identity is allowed only on 127.0.0.1 in local development")
 
   let parsed: unknown
   try {
@@ -68,7 +72,7 @@ export function loadIdentityEnvironment(env: NodeJS.ProcessEnv): IdentityEnviron
   if (cookieKeys.length < 2 || cookieKeys.some((key) => key.length < 32)) throw new Error("IDENTITY_COOKIE_KEYS requires at least two 32-character keys")
   const mfaEncryptionKey = required(env, "IDENTITY_MFA_ENCRYPTION_KEY")
   if (Buffer.from(mfaEncryptionKey, "base64url").length !== 32) throw new Error("IDENTITY_MFA_ENCRYPTION_KEY must encode exactly 32 bytes")
-  return { issuer: parsedIssuer.toString().replace(/\/$/, ""), databaseUrl, jwks: { keys }, trustProxy, trustedProxyHops, port, csrfSecret, cookieKeys, mfaEncryptionKey }
+  return { issuer: parsedIssuer.toString().replace(/\/$/, ""), bindHost: localLoopback ? "127.0.0.1" : "0.0.0.0", databaseUrl, jwks: { keys }, trustProxy, trustedProxyHops, port, csrfSecret, cookieKeys, mfaEncryptionKey }
 }
 
 export function buildProviderConfiguration(environment: IdentityEnvironment): ProviderConfiguration {

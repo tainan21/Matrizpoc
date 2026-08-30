@@ -5,7 +5,8 @@ import { resolveSpawnSpec, terminalEnvironment, TerminalSupervisor, type Process
 class FakeRuntime implements ProcessRuntime {
   inputs: string[] = []
   handle = Object.assign(new EventEmitter(), { pid: 42, write: (input: string) => { this.inputs.push(input) }, stop: async () => {} }) as ProcessHandle
-  start(): ProcessHandle { return this.handle }
+  action: Parameters<ProcessRuntime["start"]>[0] | undefined
+  start(action: Parameters<ProcessRuntime["start"]>[0]): ProcessHandle { this.action = action; return this.handle }
 }
 
 describe("TerminalSupervisor", () => {
@@ -23,6 +24,16 @@ describe("TerminalSupervisor", () => {
   })
   it("does not pass Control credentials to child projects", () => {
     expect(terminalEnvironment({ NODE_ENV: "test", PATH: "bin", MATRIZ_CONTROL_LOCAL_TOKEN: "secret", MATRIZ_CONTROL_COOKIE_SECURE: "true" })).toEqual({ NODE_ENV: "test", PATH: "bin" })
+  })
+  it("injects only the resolved app environment and redacts secret values from output", async () => {
+    const runtime = new FakeRuntime()
+    const secret = "identity-secret-value-0123456789"
+    const supervisor = new TerminalSupervisor({ rootDir: "C:/repo", runtime, resolveAction: async () => ({ projectId: "identity", projectName: "Identity", actionId: "dev", label: "Run", command: "pnpm", args: ["dev"], cwd: "C:/repo/apps/matriz-identity", environment: { PORT: "8080", IDENTITY_CSRF_SECRET: secret }, redactions: [secret] }) })
+    const session = await supervisor.start("identity", "dev")
+    runtime.handle.emit("output", `started with ${secret}\n`)
+    expect(runtime.action?.environment).toEqual({ PORT: "8080", IDENTITY_CSRF_SECRET: secret })
+    expect(supervisor.get(session.id)?.lines).toEqual(["started with [redacted]"])
+    expect(supervisor.get(session.id)).not.toHaveProperty("environment")
   })
   it("reuses an active project action and captures bounded output", async () => {
     const runtime = new FakeRuntime()

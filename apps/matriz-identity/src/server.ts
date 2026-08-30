@@ -66,7 +66,7 @@ async function handleRequest(request: Parameters<typeof interactions>[0], respon
   provider.callback()(request, response)
 }
 
-server.listen(environment.port, "0.0.0.0")
+server.listen(environment.port, environment.bindHost)
 
 function shutdown(): void {
   server.close((error) => {

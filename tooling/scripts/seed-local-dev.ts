@@ -7,12 +7,27 @@ import { getSeumeiDb } from "@matriz/platform-db/seumei"
 import { getSpotDb } from "@matriz/platform-db/spot"
 import { getWilldashDb } from "@matriz/platform-db/willdash"
 import { assertLocalSeedEnvironment } from "../local-infrastructure/local-seed-policy"
+import { infrastructureContractV1Schema, type InfrastructureContractV1 } from "../../packages/integration/infrastructure-contracts/src/index"
+import { readdir, readFile } from "node:fs/promises"
+import { resolve } from "node:path"
+import { buildLocalOidcClientRegistrations } from "../local-infrastructure/local-oidc-clients"
 
 const tenantId = "tenant-local-dev"
 const ownerId = "user-local-owner"
 const operatorId = "user-local-operator"
 const deniedId = "user-local-denied"
-const productApps = ["matriz-hub", "spot", "seumei", "contracts", "willdash", "matriz-ops", "matriz-pay"] as const
+const productApps = ["matriz-hub", "spot", "seumei", "contracts", "willdash", "matriz-ops", "matriz-pay", "matriz-admin"] as const
+
+async function localContracts(): Promise<InfrastructureContractV1[]> {
+  const appsRoot = resolve(import.meta.dirname, "../../apps")
+  const contracts: InfrastructureContractV1[] = []
+  for (const entry of await readdir(appsRoot, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue
+    try { contracts.push(infrastructureContractV1Schema.parse(JSON.parse(await readFile(resolve(appsRoot, entry.name, "infrastructure.json"), "utf8")))) }
+    catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error }
+  }
+  return contracts
+}
 
 async function seedCore() {
   const core = getCoreDb()
@@ -39,6 +54,11 @@ async function seedCore() {
     })
   }
   for (const appId of productApps) await core.appRegistration.upsert({ where: { tenantId_appId: { tenantId, appId } }, update: { enabled: true }, create: { tenantId, appId, enabled: true, manifestVersion: "0.1.0" } })
+  for (const client of buildLocalOidcClientRegistrations(await localContracts(), process.env)) await core.oidcClient.upsert({
+    where: { clientId: client.clientId },
+    update: client,
+    create: client,
+  })
 }
 
 async function seedDomains() {

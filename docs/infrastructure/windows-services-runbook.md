@@ -33,6 +33,13 @@ forma protegida por DPAPI em
 `%LOCALAPPDATA%\Matriz\Control\vault\bootstrap-postgres.dpapi`. O texto
 temporário fica no staging e é removido no `finally`.
 
+Credenciais de roles, cache e aplicações ficam no mesmo vault do usuário em
+arquivos DPAPI separados. Para desenvolvimento, o Control resolve os valores a
+partir de cada `infrastructure.json` e os injeta somente no processo iniciado.
+A sequência de dados é: migrations explícitas, `matriz:seed:dev`,
+`@matriz/app-matriz-identity seed:local`, Identity e então os demais apps.
+Não copie valores do vault para documentação ou logs.
+
 ## Operação cotidiana
 
 Start, stop e restart são pedidos por IDs fechados e usam o SCM. O SID que fez

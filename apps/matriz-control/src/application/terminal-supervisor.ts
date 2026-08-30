@@ -15,15 +15,15 @@ export function resolveSpawnSpec(action: ResolvedTerminalAction, platform: NodeJ
   return { command: action.command, args: action.args }
 }
 
-export function terminalEnvironment(environment: NodeJS.ProcessEnv = process.env) {
+export function terminalEnvironment(environment: NodeJS.ProcessEnv = process.env, injected: Readonly<Record<string, string>> = {}) {
   const { MATRIZ_CONTROL_LOCAL_TOKEN: _token, MATRIZ_CONTROL_COOKIE_SECURE: _cookieSetting, ...safeEnvironment } = environment
-  return safeEnvironment
+  return { ...safeEnvironment, ...injected }
 }
 
 class NodeProcessRuntime implements ProcessRuntime {
   start(action: ResolvedTerminalAction): ProcessHandle {
     const spec = resolveSpawnSpec(action)
-    const child = spawn(spec.command, spec.args, { cwd: action.cwd, env: terminalEnvironment(), windowsHide: true, shell: false })
+    const child = spawn(spec.command, spec.args, { cwd: action.cwd, env: terminalEnvironment(process.env, action.environment), windowsHide: true, shell: false })
     const handle = new EventEmitter() as ProcessHandle
     handle.pid = child.pid ?? null
     handle.write = (input) => child.stdin?.writable && child.stdin.write(input)
@@ -43,8 +43,8 @@ class NodeProcessRuntime implements ProcessRuntime {
 }
 
 interface SupervisorOptions { rootDir: string; runtime?: ProcessRuntime; maxLines?: number; resolveAction?: (rootDir: string, projectId: string, actionId: string) => Promise<ResolvedTerminalAction>; onEligibleFailure?: (diagnostic: ControlDiagnosticInput) => Promise<void> }
-interface ManagedSession { snapshot: TerminalSession; handle: ProcessHandle; partial: string; currentDirectory: string }
-const redact = (line: string) => line
+interface ManagedSession { snapshot: TerminalSession; handle: ProcessHandle; partial: string; currentDirectory: string; redactions: readonly string[] }
+const redact = (line: string, values: readonly string[] = []) => values.reduce((output, value) => value.length >= 8 ? output.replaceAll(value, "[redacted]") : output, line)
   .replace(/\u001B\[[0-?]*[ -/]*[@-~]/g, "")
   .replace(/((?:token|secret|password|api[_-]?key)\s*[=:]\s*)\S+/gi, "$1[redacted]")
 
@@ -66,7 +66,7 @@ export class TerminalSupervisor {
     const action = await this.resolver(this.options.rootDir, projectId, actionId)
     const id = `term_${randomUUID()}`
     const handle = this.runtime.start(action)
-    const managed: ManagedSession = { handle, partial: "", currentDirectory: action.cwd, snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, route: action.route ?? terminalRoute(this.options.rootDir, action.cwd), port: action.port ?? null, status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
+    const managed: ManagedSession = { handle, partial: "", currentDirectory: action.cwd, redactions: action.redactions ?? [], snapshot: { id, projectId, projectName: action.projectName, actionId: action.actionId, label: action.label, route: action.route ?? terminalRoute(this.options.rootDir, action.cwd), port: action.port ?? null, status: "starting", pid: handle.pid, lines: [], startedAt: new Date().toISOString(), exitCode: null, error: null } }
     this.sessions.set(id, managed)
     handle.on("running", () => { managed.snapshot.status = "running" })
     handle.on("output", (chunk: string) => this.append(managed, chunk))
@@ -79,7 +79,7 @@ export class TerminalSupervisor {
   private append(managed: ManagedSession, chunk: string) {
     const parts = `${managed.partial}${chunk}`.split(/\r?\n/)
     managed.partial = parts.pop() ?? ""
-    managed.snapshot.lines.push(...parts.map(redact))
+    managed.snapshot.lines.push(...parts.map((line) => redact(line, managed.redactions)))
     if (managed.snapshot.lines.length > this.maxLines) managed.snapshot.lines.splice(0, managed.snapshot.lines.length - this.maxLines)
   }
 

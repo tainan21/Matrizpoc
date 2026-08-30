@@ -40,6 +40,7 @@ describe("identity configuration", () => {
   it("enforces code flow, S256 PKCE, short tokens and refresh rotation", () => {
     const configuration = buildProviderConfiguration({
       issuer: "https://identity.example.test",
+      bindHost: "0.0.0.0",
       databaseUrl: "postgresql://runtime@example.test/matriz",
       jwks: { keys: [JSON.parse(signingKey)] },
       trustProxy: true,
@@ -55,5 +56,12 @@ describe("identity configuration", () => {
     expect(configuration.ttl?.AccessToken).toBeLessThanOrEqual(600)
     expect(configuration.ttl?.IdToken).toBeLessThanOrEqual(600)
     expect(configuration.rotateRefreshToken).toBe(true)
+  })
+
+  it("binds local HTTP only to the exact IPv4 loopback origin", () => {
+    const base = { NODE_ENV: "development", CORE_RUNTIME_DATABASE_URL: "postgresql://runtime@127.0.0.1:55432/matriz", IDENTITY_SIGNING_JWKS: signingKey, IDENTITY_CSRF_SECRET: "x".repeat(32), IDENTITY_COOKIE_KEYS: `${"a".repeat(32)},${"b".repeat(32)}`, IDENTITY_MFA_ENCRYPTION_KEY: Buffer.alloc(32, 1).toString("base64url") }
+    expect(loadIdentityEnvironment({ ...base, IDENTITY_ISSUER: "http://127.0.0.1:8080" })).toMatchObject({ bindHost: "127.0.0.1", port: 8080 })
+    expect(() => loadIdentityEnvironment({ ...base, IDENTITY_ISSUER: "http://0.0.0.0:8080" })).toThrow(/127\.0\.0\.1/)
+    expect(() => loadIdentityEnvironment({ ...base, IDENTITY_ISSUER: "http://localhost:8080" })).toThrow(/127\.0\.0\.1/)
   })
 })

@@ -8,6 +8,9 @@
   "cache": { "required": false, "namespaces": [] },
   "events": { "transport": "nats-jetstream", "outbox": false, "inbox": true },
   "environment": { "keys": [
+    { "name": "MATRIZ_IDENTITY_ISSUER", "secret": false, "required": true, "source": "generated" },
+    { "name": "ADMIN_OIDC_CLIENT_ID", "secret": false, "required": true, "source": "generated" },
+    { "name": "ADMIN_OIDC_CALLBACK_URL", "secret": false, "required": true, "source": "generated" },
     { "name": "ADMIN_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
     { "name": "ADMIN_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" }
   ] },

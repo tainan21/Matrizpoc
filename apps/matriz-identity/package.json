@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "seed:local": "tsx src/local-development-seed-cli.ts",
     "start": "node dist/server.js",
     "build": "tsc --noEmit",
     "lint": "eslint src public-contract.ts --max-warnings 0",

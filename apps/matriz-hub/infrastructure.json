@@ -8,7 +8,10 @@
   "cache": { "required": true, "namespaces": ["ecosystem", "docs"], "defaultTtlSeconds": 300 },
   "events": { "transport": "nats-jetstream", "outbox": true, "inbox": true },
   "environment": { "keys": [
-    { "name": "DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "HUB_DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "MATRIZ_IDENTITY_ISSUER", "secret": false, "required": true, "source": "generated" },
+    { "name": "HUB_OIDC_CLIENT_ID", "secret": false, "required": true, "source": "generated" },
+    { "name": "HUB_OIDC_CALLBACK_URL", "secret": false, "required": true, "source": "generated" },
     { "name": "CACHE_URL", "secret": false, "required": true, "source": "generated" },
     { "name": "HUB_CACHE_USERNAME", "secret": false, "required": true, "source": "generated" },
     { "name": "HUB_CACHE_PASSWORD", "secret": true, "required": true, "source": "control-vault" },

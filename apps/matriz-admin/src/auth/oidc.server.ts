@@ -1,8 +1,8 @@
 import "server-only"
-import { createOidcCallbackRoute, createOidcLoginRoute, createOidcLogoutRoute, createOidcSessionRoute, createOidcTenantSwitchRoute, type OidcBffConfig } from "@matriz/platform-auth/server"
+import { createOidcCallbackRoute, createOidcLoginRoute, createOidcLogoutRoute, createOidcSessionRoute, createOidcTenantSwitchRoute } from "@matriz/platform-auth/server"
+import { oidcConfig } from "./oidc-config"
 
-function required(name: string) { const value = process.env[name]?.trim(); if (!value) throw new Error(`Missing ${name}`); return value }
-export function oidcConfig(): OidcBffConfig { return { issuer: required("MATRIZ_IDENTITY_ISSUER"), clientId: required("SEUMEI_OIDC_CLIENT_ID"), clientSecret: required("SEUMEI_OIDC_CLIENT_SECRET"), appId: "seumei", callbackUrl: required("SEUMEI_OIDC_CALLBACK_URL"), sessionSecret: required("SEUMEI_SESSION_SECRET") } }
+export { oidcConfig }
 export const login = (request: Request) => createOidcLoginRoute(oidcConfig())(request)
 export const callback = (request: Request) => createOidcCallbackRoute(oidcConfig())(request)
 export const session = (request: Request) => createOidcSessionRoute(oidcConfig())(request)
