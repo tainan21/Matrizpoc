@@ -2,7 +2,7 @@ import { execFile } from "node:child_process"
 import { promisify } from "node:util"
 import type {
   DatabaseBackupSnapshot,
-  DatabaseRecoveryAction,
+  DatabaseRecoveryHostAction,
   DatabaseRecoveryHost,
 } from "../src/modules/infrastructure/application/database-recovery-manager"
 
@@ -18,12 +18,12 @@ export class WindowsDatabaseRecoveryHost implements DatabaseRecoveryHost {
     return this.run("List", null)
   }
 
-  async execute(action: DatabaseRecoveryAction, backupId: string | null): Promise<void> {
-    const nativeAction = action === "backup" ? "Backup" : action === "restore" ? "Restore" : "Recreate"
+  async execute(action: DatabaseRecoveryHostAction, backupId: string | null): Promise<void> {
+    const nativeAction = action === "backup" ? "Backup" : action === "daily" ? "DailyBackup" : action === "restore" ? "Restore" : "Recreate"
     await this.run(nativeAction, backupId)
   }
 
-  private async run(action: "List" | "Backup" | "Restore" | "Recreate", backupId: string | null): Promise<readonly DatabaseBackupSnapshot[]> {
+  private async run(action: "List" | "Backup" | "DailyBackup" | "Restore" | "Recreate", backupId: string | null): Promise<readonly DatabaseBackupSnapshot[]> {
     if (backupId !== null && !BACKUP_ID_PATTERN.test(backupId)) throw new Error("Invalid backup id")
     const args = ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", this.helperPath, "-Action", action]
     if (backupId) args.push("-BackupId", backupId)

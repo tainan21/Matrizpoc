@@ -73,7 +73,12 @@ function Protect-LocalSecret([string]$Value, [string]$Path) {
   [IO.File]::WriteAllText($Path, $encrypted, [Text.UTF8Encoding]::new($false))
 }
 
-function New-DatabaseSecret { return [Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48)) }
+function New-DatabaseSecret {
+  $bytes = New-Object byte[] 48
+  $generator = [Security.Cryptography.RandomNumberGenerator]::Create()
+  try { $generator.GetBytes($bytes); return [Convert]::ToBase64String($bytes) }
+  finally { $generator.Dispose() }
+}
 
 function Invoke-Psql([string]$Psql, [string]$Database, [string]$Password, [string]$Sql) {
   $previous = $env:PGPASSWORD

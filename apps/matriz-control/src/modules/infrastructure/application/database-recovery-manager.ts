@@ -1,4 +1,5 @@
 export type DatabaseRecoveryAction = "backup" | "restore" | "recreate"
+export type DatabaseRecoveryHostAction = DatabaseRecoveryAction | "daily"
 
 export interface DatabaseBackupSnapshot {
   readonly id: string
@@ -21,7 +22,7 @@ export interface DatabaseRecoveryPreview {
 
 export interface DatabaseRecoveryHost {
   list(): Promise<readonly DatabaseBackupSnapshot[]>
-  execute(action: DatabaseRecoveryAction, backupId: string | null): Promise<void>
+  execute(action: DatabaseRecoveryHostAction, backupId: string | null): Promise<void>
 }
 
 interface PendingRecovery {
@@ -39,6 +40,14 @@ export class DatabaseRecoveryManager {
 
   list(): Promise<readonly DatabaseBackupSnapshot[]> {
     return this.deps.host.list()
+  }
+
+  async compensateMissedDailyBackup(): Promise<boolean> {
+    const today = new Date(this.deps.now()).toISOString().slice(0, 10)
+    const hasToday = (await this.list()).some((backup) => backup.kind === "daily" && backup.valid && backup.createdAt.slice(0, 10) === today)
+    if (hasToday) return false
+    await this.deps.host.execute("daily", null)
+    return true
   }
 
   async preview(action: DatabaseRecoveryAction, backupId: string | null = null): Promise<DatabaseRecoveryPreview> {

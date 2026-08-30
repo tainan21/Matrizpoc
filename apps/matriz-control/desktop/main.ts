@@ -481,7 +481,10 @@ async function auditAgent(action: string, capsuleId: string | null, origin: stri
 ipcMain.handle("matriz:browser:invoke", async (event, value: unknown) => { assertTrusted(event); return dispatch(parseDesktopCommand(value)) })
 ipcMain.on("matriz:browser:viewport", (event, value: typeof viewport) => { if (event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) return; const origin = new URL(event.senderFrame.url).origin; if (origin !== "http://127.0.0.1:3009" && origin !== "http://localhost:3009") return; if (!value || ![value.x, value.y, value.width, value.height].every(Number.isFinite)) return; viewport = { ...value, visible: Boolean(value.visible) }; layoutActiveView() })
 
-app.whenReady().then(createWindow).catch((error) => { console.error(error instanceof Error ? error.message : "Desktop startup failed"); app.quit() })
+app.whenReady().then(async () => {
+  await databaseRecoveryManager.compensateMissedDailyBackup().catch(() => undefined)
+  await createWindow()
+}).catch((error) => { console.error(error instanceof Error ? error.message : "Desktop startup failed"); app.quit() })
 let quitLockComplete = false
 app.on("before-quit", (event) => {
   if (quitLockComplete) return

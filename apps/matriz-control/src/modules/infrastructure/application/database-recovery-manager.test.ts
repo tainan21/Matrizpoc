@@ -3,7 +3,7 @@ import { DatabaseRecoveryManager, type DatabaseRecoveryHost } from "./database-r
 
 const backup = {
   id: "backup_20260830_ab12cd",
-  kind: "daily" as const,
+  kind: "guard" as const,
   createdAt: "2026-08-30T12:00:00.000Z",
   pinned: false,
   valid: true,
@@ -42,5 +42,17 @@ describe("database recovery manager", () => {
     const preview = await manager.preview("backup")
     await manager.confirm(preview.confirmationToken)
     expect(native.execute).toHaveBeenCalledWith("backup", null)
+  })
+
+  it("compensates one missed daily backup and does not duplicate today's run", async () => {
+    const native = host()
+    const now = Date.parse("2026-08-30T18:00:00.000Z")
+    const manager = new DatabaseRecoveryManager({ host: native, now: () => now, token: () => "backup" })
+    expect(await manager.compensateMissedDailyBackup()).toBe(true)
+    expect(native.execute).toHaveBeenCalledWith("daily", null)
+
+    native.list = vi.fn(async () => [{ ...backup, kind: "daily" as const, createdAt: "2026-08-30T03:00:00.000Z" }])
+    expect(await manager.compensateMissedDailyBackup()).toBe(false)
+    expect(native.execute).toHaveBeenCalledTimes(1)
   })
 })

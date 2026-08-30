@@ -84,3 +84,20 @@ migrations e o seed rodou duas vezes. As contagens permaneceram estáveis:
 3 usuários, 3 wallets e uma fixture em Hub, Spot, Seumei, Contracts, WillDash e
 Ops. O cluster temporário foi parado e removido; os dois listeners preexistentes
 em `5432` permaneceram inalterados.
+
+## Incremento 4 — restore comprovado e compensação diária
+
+- Os helpers passaram a usar a API criptográfica compatível com Windows
+  PowerShell 5.1; uma regressão impede reintroduzir a chamada estática
+  incompatível encontrada no teste real.
+- Ao abrir o Desktop, o Control verifica o catálogo e executa no máximo um
+  backup diário compensatório quando não existe diário válido na data UTC.
+- Em cluster PostgreSQL 17 descartável, um dump `-Fc` com 478.791 bytes foi
+  criado e catalogado. Após adulteração, checksum divergente marcou a evidência
+  inválida e pinned; o arquivo original permaneceu restaurável.
+- Depois de alterar o tenant após o backup, o restore promoveu a cópia original,
+  validou os oito schemas e moveu a base alterada para
+  `matriz_quarantine_20260830t191515768z`. O valor original apareceu em
+  `matriz` e o valor alterado somente na quarentena.
+- O cluster temporário e os artefatos de teste foram removidos. `55432` voltou
+  a zero listeners e os dois listeners externos em `5432` ficaram inalterados.

@@ -40,6 +40,13 @@ function Unprotect-LocalSecret([string]$SecretFile) {
   finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($pointer) }
 }
 
+function New-RandomBytes([int]$Count) {
+  $bytes = New-Object byte[] $Count
+  $generator = [Security.Cryptography.RandomNumberGenerator]::Create()
+  try { $generator.GetBytes($bytes); return $bytes }
+  finally { $generator.Dispose() }
+}
+
 function Invoke-Psql([string]$Database, [string]$Sql, [switch]$TuplesOnly) {
   $arguments = @('--host','127.0.0.1','--port','55432','--username','matriz_provisioner','--dbname',$Database,'--no-password','--set','ON_ERROR_STOP=1')
   if ($TuplesOnly) { $arguments += @('--tuples-only','--no-align') }
@@ -88,7 +95,7 @@ function Get-BackupCatalog {
 
 function New-ManagedBackup([string]$Kind) {
   New-Item -ItemType Directory -Force -Path $backupRoot | Out-Null
-  $suffix = [Convert]::ToHexString([Security.Cryptography.RandomNumberGenerator]::GetBytes(6)).ToLowerInvariant()
+  $suffix = ([BitConverter]::ToString((New-RandomBytes 6))).Replace('-', '').ToLowerInvariant()
   $id = 'backup_' + [DateTime]::UtcNow.ToString('yyyyMMdd') + '_' + $suffix
   $paths = Get-BackupPaths $id
   $temporary = $paths.Dump + '.tmp'
