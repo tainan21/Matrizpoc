@@ -1,4 +1,4 @@
-# SEUMEI — assimilação autônoma dentro do Matriz-Hub
+SEUMEI — assimilação autônoma dentro do Matriz-Hub
 
 > Cole este documento como a primeira mensagem de um novo espaço de trabalho.
 
