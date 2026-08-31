@@ -3,7 +3,7 @@
   "appId": "willdash",
   "classification": "product",
   "runtime": { "kind": "web", "port": 3004, "healthPath": "/api/health" },
-  "database": { "required": true, "schema": "willdash", "tenancy": "tenant", "runtimeRole": "matriz_willdash_runtime", "migrationRole": "matriz_willdash_migration", "prismaSchema": "prisma/willdash/schema.prisma" },
+  "database": { "required": true, "schema": "willdash", "tenancy": "tenant", "runtimeRole": "matriz_willdash_runtime", "migrationRole": "matriz_willdash_migration", "workerRole": "matriz_willdash_worker", "prismaSchema": "prisma/willdash/schema.prisma" },
   "identity": { "required": true, "oidcClientId": "willdash", "callbackPath": "/api/auth/oidc/callback" },
   "cache": { "required": false, "namespaces": [] },
   "events": { "transport": "nats-jetstream", "outbox": true, "inbox": true },

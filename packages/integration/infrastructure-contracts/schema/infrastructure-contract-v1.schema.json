@@ -29,13 +29,14 @@
         "tenancy": { "enum": ["tenant", "mixed", "global-user", "operator-global", "none"] },
         "runtimeRole": { "type": "string", "pattern": "^matriz_(core|hub|spot|seumei|contracts|willdash|ops|pay)_runtime$" },
         "migrationRole": { "type": "string", "pattern": "^matriz_(core|hub|spot|seumei|contracts|willdash|ops|pay)_migration$" },
+        "workerRole": { "type": "string", "pattern": "^matriz_(core|hub|spot|seumei|contracts|willdash|ops|pay)_worker$" },
         "prismaSchema": { "type": "string", "pattern": "^prisma/(core|hub|spot|seumei|contracts|willdash|ops|pay)/schema\\.prisma$" }
       },
       "allOf": [
         {
           "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
           "then": { "required": ["schema", "runtimeRole", "migrationRole", "prismaSchema"], "properties": { "tenancy": { "not": { "const": "none" } } } },
-          "else": { "properties": { "tenancy": { "const": "none" } }, "not": { "anyOf": [{ "required": ["schema"] }, { "required": ["runtimeRole"] }, { "required": ["migrationRole"] }, { "required": ["prismaSchema"] }] } }
+          "else": { "properties": { "tenancy": { "const": "none" } }, "not": { "anyOf": [{ "required": ["schema"] }, { "required": ["runtimeRole"] }, { "required": ["migrationRole"] }, { "required": ["workerRole"] }, { "required": ["prismaSchema"] }] } }
         }
       ]
     },
@@ -102,5 +103,18 @@
         "roots": { "type": "array", "items": { "type": "string", "pattern": "^(?![A-Za-z]:[\\\\/])(?![\\\\/])(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+$" } }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "database": { "properties": { "required": { "const": true } }, "required": ["required"] },
+          "events": { "anyOf": [{ "properties": { "outbox": { "const": true } }, "required": ["outbox"] }, { "properties": { "inbox": { "const": true } }, "required": ["inbox"] }] }
+        },
+        "required": ["database", "events"]
+      },
+      "then": { "properties": { "database": { "required": ["workerRole"] } } },
+      "else": { "properties": { "database": { "not": { "required": ["workerRole"] } } } }
+    }
+  ]
 }

@@ -32,7 +32,9 @@ export function presentInfrastructureInventory(inventory: ControlInfrastructureI
       appId: app.appId,
       classification: app.classification,
       runtime: app.port === null ? app.runtimeKind : `${app.runtimeKind} · 127.0.0.1:${app.port}`,
-      database: app.schema === null ? "sem PostgreSQL" : `${app.schema} · ${app.tenancy}`,
+      database: app.schema === null
+        ? "sem PostgreSQL"
+        : `${app.schema} · ${app.tenancy} · runtime ${app.runtimeRole} · migration ${app.migrationRole}${app.workerRole ? ` · worker ${app.workerRole}` : ""}`,
       identity: app.identityRequired ? `OIDC · ${app.oidcClientId}` : "não requerido",
       cache: app.cacheRequired ? `obrigatório · ${app.cacheNamespaces.join(", ")}` : app.cacheNamespaces.length ? `opcional · ${app.cacheNamespaces.join(", ")}` : "não requerido",
       events: app.eventTransport === "none" ? "sem transporte" : `JetStream · ${app.outbox ? "outbox" : "—"} / ${app.inbox ? "inbox" : "—"}`,

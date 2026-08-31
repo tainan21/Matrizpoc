@@ -16,6 +16,7 @@ export interface ControlInfrastructureApp {
   readonly tenancy: InfrastructureContractV1["database"]["tenancy"]
   readonly runtimeRole: string | null
   readonly migrationRole: string | null
+  readonly workerRole: string | null
   readonly identityRequired: boolean
   readonly oidcClientId: string | null
   readonly cacheRequired: boolean
@@ -51,6 +52,7 @@ function presentContract(contract: InfrastructureContractV1): ControlInfrastruct
     tenancy: contract.database.tenancy,
     runtimeRole: contract.database.runtimeRole ?? null,
     migrationRole: contract.database.migrationRole ?? null,
+    workerRole: contract.database.workerRole ?? null,
     identityRequired: contract.identity.required,
     oidcClientId: contract.identity.oidcClientId ?? null,
     cacheRequired: contract.cache.required,

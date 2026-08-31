@@ -18,6 +18,7 @@ const validTenantApp = {
     tenancy: "tenant",
     runtimeRole: "matriz_seumei_runtime",
     migrationRole: "matriz_seumei_migration",
+    workerRole: "matriz_seumei_worker",
     prismaSchema: "prisma/seumei/schema.prisma",
   },
   identity: { required: true, oidcClientId: "seumei", callbackPath: "/api/auth/oidc/callback" },
@@ -44,6 +45,9 @@ describe("InfrastructureContractV1", () => {
     expect(jsonSchema.properties.database.properties.schema.enum).toEqual([
       "core", "hub", "spot", "seumei", "contracts", "willdash", "ops", "pay",
     ])
+    expect(jsonSchema.properties.database.properties.workerRole.pattern).toBe(
+      "^matriz_(core|hub|spot|seumei|contracts|willdash|ops|pay)_worker$",
+    )
   })
 
   it("accepts a complete tenant-owned app declaration", () => {
@@ -53,6 +57,7 @@ describe("InfrastructureContractV1", () => {
   it.each([
     ["wrong runtime role", { database: { ...validTenantApp.database, runtimeRole: "postgres" } }],
     ["wrong migration role", { database: { ...validTenantApp.database, migrationRole: "matriz_core_migration" } }],
+    ["wrong worker role", { database: { ...validTenantApp.database, workerRole: "matriz_core_worker" } }],
     ["absolute prisma path", { database: { ...validTenantApp.database, prismaSchema: "C:/data/schema.prisma" } }],
     ["missing TTL", { cache: { required: true, namespaces: ["catalog"] } }],
     ["secret value", { environment: { keys: [{ name: "TOKEN", secret: true, required: true, source: "operator", value: "leak" }] } }],
@@ -67,6 +72,32 @@ describe("InfrastructureContractV1", () => {
       database: { required: false, tenancy: "none", schema: "seumei" },
     }
     expect(infrastructureContractV1Schema.safeParse(candidate).success).toBe(false)
+  })
+
+  it("requires a worker role exactly when a database-backed app owns an outbox or inbox", () => {
+    const withoutWorker = {
+      ...validTenantApp,
+      database: { ...validTenantApp.database, workerRole: undefined },
+    }
+    const withoutEvents = {
+      ...validTenantApp,
+      database: { ...validTenantApp.database },
+      events: { transport: "none", outbox: false, inbox: false },
+    }
+
+    expect(infrastructureContractV1Schema.safeParse(withoutWorker).success).toBe(false)
+    expect(infrastructureContractV1Schema.safeParse(withoutEvents).success).toBe(false)
+  })
+
+  it("allows a database-less consumer to use only NATS credentials", () => {
+    const consumer = {
+      ...validTenantApp,
+      appId: "matriz-admin",
+      database: { required: false, tenancy: "none" },
+      events: { transport: "nats-jetstream", outbox: false, inbox: true },
+    }
+
+    expect(infrastructureContractV1Schema.safeParse(consumer).success).toBe(true)
   })
 
   it("rejects duplicate environment keys and unsafe filesystem roots", () => {

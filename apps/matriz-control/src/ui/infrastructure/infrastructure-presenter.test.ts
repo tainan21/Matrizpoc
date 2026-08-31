@@ -14,6 +14,7 @@ describe("infrastructure inventory presenter", () => {
         tenancy: "tenant",
         runtimeRole: "matriz_seumei_runtime",
         migrationRole: "matriz_seumei_migration",
+        workerRole: "matriz_seumei_worker",
         identityRequired: true,
         oidcClientId: "seumei",
         cacheRequired: false,
@@ -36,7 +37,11 @@ describe("infrastructure inventory presenter", () => {
       { label: "OIDC", value: "1" },
       { label: "Eventos", value: "1" },
     ])
-    expect(view.apps[0]).toMatchObject({ runtime: "web · 127.0.0.1:3008", database: "seumei · tenant", secrets: "2 protegidos de 3 chaves" })
+    expect(view.apps[0]).toMatchObject({
+      runtime: "web · 127.0.0.1:3008",
+      database: "seumei · tenant · runtime matriz_seumei_runtime · migration matriz_seumei_migration · worker matriz_seumei_worker",
+      secrets: "2 protegidos de 3 chaves",
+    })
     expect(JSON.stringify(view)).not.toContain("DATABASE_URL")
   })
 })

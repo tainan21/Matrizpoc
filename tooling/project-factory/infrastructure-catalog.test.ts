@@ -24,7 +24,7 @@ describe("Infrastructure Contract repository catalog", () => {
   it("rejects a schema claimed by the wrong app", async () => {
     const catalog = await loadInfrastructureCatalog(path.resolve("."))
     const changed = catalog.contracts.map((contract) => contract.appId === "spot"
-      ? { ...contract, database: { ...contract.database, schema: "pay" as const, runtimeRole: "matriz_pay_runtime", migrationRole: "matriz_pay_migration", prismaSchema: "prisma/pay/schema.prisma" } }
+      ? { ...contract, database: { ...contract.database, schema: "pay" as const, runtimeRole: "matriz_pay_runtime", migrationRole: "matriz_pay_migration", workerRole: "matriz_pay_worker", prismaSchema: "prisma/pay/schema.prisma" } }
       : contract)
 
     expect(validateInfrastructureBaseline(changed)).toContain('Schema "spot" must be owned by "spot".')

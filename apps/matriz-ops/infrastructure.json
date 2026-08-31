@@ -3,7 +3,7 @@
   "appId": "matriz-ops",
   "classification": "platform",
   "runtime": { "kind": "web", "port": 3011, "healthPath": "/api/health" },
-  "database": { "required": true, "schema": "ops", "tenancy": "operator-global", "runtimeRole": "matriz_ops_runtime", "migrationRole": "matriz_ops_migration", "prismaSchema": "prisma/ops/schema.prisma" },
+  "database": { "required": true, "schema": "ops", "tenancy": "operator-global", "runtimeRole": "matriz_ops_runtime", "migrationRole": "matriz_ops_migration", "workerRole": "matriz_ops_worker", "prismaSchema": "prisma/ops/schema.prisma" },
   "identity": { "required": true, "oidcClientId": "matriz-ops", "callbackPath": "/api/auth/oidc/callback" },
   "cache": { "required": false, "namespaces": [] },
   "events": { "transport": "nats-jetstream", "outbox": false, "inbox": true },

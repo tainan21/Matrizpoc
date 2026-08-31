@@ -39,9 +39,10 @@ const databaseSchema = z.object({
   tenancy: z.enum(["tenant", "mixed", "global-user", "operator-global", "none"]),
   runtimeRole: z.string().optional(),
   migrationRole: z.string().optional(),
+  workerRole: z.string().optional(),
   prismaSchema: relativePathSchema.optional(),
 }).strict().superRefine((database, context) => {
-  const operationalKeys = ["schema", "runtimeRole", "migrationRole", "prismaSchema"] as const
+  const operationalKeys = ["schema", "runtimeRole", "migrationRole", "workerRole", "prismaSchema"] as const
   if (!database.required) {
     if (database.tenancy !== "none") {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ["tenancy"], message: "Apps without a database must use tenancy none." })
@@ -69,6 +70,9 @@ const databaseSchema = z.object({
   }
   if (database.migrationRole !== expectedMigrationRole) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["migrationRole"], message: `Expected ${expectedMigrationRole}.` })
+  }
+  if (database.workerRole !== undefined && database.workerRole !== `matriz_${database.schema}_worker`) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ["workerRole"], message: `Expected matriz_${database.schema}_worker.` })
   }
   if (database.prismaSchema !== expectedPrismaSchema) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ["prismaSchema"], message: `Expected ${expectedPrismaSchema}.` })
@@ -148,7 +152,23 @@ export const infrastructureContractV1Schema = z.object({
   events: eventsSchema,
   environment: environmentSchema,
   filesystem: filesystemSchema,
-}).strict()
+}).strict().superRefine((contract, context) => {
+  const needsDatabaseWorker = contract.database.required && (contract.events.outbox || contract.events.inbox)
+  if (needsDatabaseWorker && contract.database.workerRole === undefined) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["database", "workerRole"],
+      message: "Database-backed outbox or inbox processing requires a worker role.",
+    })
+  }
+  if (!needsDatabaseWorker && contract.database.workerRole !== undefined) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["database", "workerRole"],
+      message: "Worker roles are reserved for database-backed outbox or inbox processing.",
+    })
+  }
+})
 
 export type InfrastructureContractV1 = z.infer<typeof infrastructureContractV1Schema>
 export type InfrastructureSchemaName = z.infer<typeof infrastructureSchemaNameSchema>

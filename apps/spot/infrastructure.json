@@ -3,7 +3,7 @@
   "appId": "spot",
   "classification": "product",
   "runtime": { "kind": "web", "port": 3001, "healthPath": "/api/health" },
-  "database": { "required": true, "schema": "spot", "tenancy": "tenant", "runtimeRole": "matriz_spot_runtime", "migrationRole": "matriz_spot_migration", "prismaSchema": "prisma/spot/schema.prisma" },
+  "database": { "required": true, "schema": "spot", "tenancy": "tenant", "runtimeRole": "matriz_spot_runtime", "migrationRole": "matriz_spot_migration", "workerRole": "matriz_spot_worker", "prismaSchema": "prisma/spot/schema.prisma" },
   "identity": { "required": true, "oidcClientId": "spot", "callbackPath": "/api/auth/oidc/callback" },
   "cache": { "required": false, "namespaces": [] },
   "events": { "transport": "nats-jetstream", "outbox": true, "inbox": true },

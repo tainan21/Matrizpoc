@@ -3,7 +3,7 @@
   "appId": "contracts",
   "classification": "product",
   "runtime": { "kind": "web", "port": 3003, "healthPath": "/api/health" },
-  "database": { "required": true, "schema": "contracts", "tenancy": "tenant", "runtimeRole": "matriz_contracts_runtime", "migrationRole": "matriz_contracts_migration", "prismaSchema": "prisma/contracts/schema.prisma" },
+  "database": { "required": true, "schema": "contracts", "tenancy": "tenant", "runtimeRole": "matriz_contracts_runtime", "migrationRole": "matriz_contracts_migration", "workerRole": "matriz_contracts_worker", "prismaSchema": "prisma/contracts/schema.prisma" },
   "identity": { "required": true, "oidcClientId": "contracts", "callbackPath": "/api/auth/oidc/callback" },
   "cache": { "required": false, "namespaces": [] },
   "events": { "transport": "nats-jetstream", "outbox": true, "inbox": true },

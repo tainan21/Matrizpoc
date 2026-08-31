@@ -6,7 +6,7 @@ const contract = JSON.stringify({
   appId: "matriz-identity",
   classification: "platform",
   runtime: { kind: "service", port: 8080, healthPath: "/healthz" },
-  database: { required: true, schema: "core", tenancy: "mixed", runtimeRole: "matriz_core_runtime", migrationRole: "matriz_core_migration", prismaSchema: "prisma/core/schema.prisma" },
+  database: { required: true, schema: "core", tenancy: "mixed", runtimeRole: "matriz_core_runtime", migrationRole: "matriz_core_migration", workerRole: "matriz_core_worker", prismaSchema: "prisma/core/schema.prisma" },
   identity: { required: false },
   cache: { required: false, namespaces: [] },
   events: { transport: "nats-jetstream", outbox: true, inbox: true },
