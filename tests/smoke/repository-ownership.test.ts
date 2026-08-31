@@ -14,7 +14,7 @@ describe("repository ownership boundaries", () => {
 
   it.each([
     ["matriz-hub", "src/integration/prisma/repositories/index.ts"],
-    ["seumeiapp", "src/infrastructure/core-access.repository.ts"],
+    ["seumeiapp", "src/infrastructure/identity-core-access.gateway.ts"],
     ["contracts", "src/integration/prisma/repositories/index.ts"],
   ])("keeps %s repositories app-local", (app, repositoryEntry) => {
     expect(existsSync(path.join(root, "apps", app, repositoryEntry))).toBe(true)
@@ -29,10 +29,10 @@ describe("repository ownership boundaries", () => {
     }
   })
 
-  it("keeps Seumei tenant access on its app-local Core repository", () => {
-    const source = readFileSync(path.join(root, "apps/seumeiapp/src/infrastructure/core-access.repository.ts"), "utf8")
-    expect(source).toContain("tenantId_userId_appId")
-    expect(source).toContain('appId: "seumei"')
+  it("keeps Seumei tenant access behind its app-local authenticated Identity gateway", () => {
+    const source = readFileSync(path.join(root, "apps/seumeiapp/src/infrastructure/identity-core-access.gateway.ts"), "utf8")
+    expect(source).toContain('"x-matriz-app-id": "seumei"')
+    expect(source).not.toContain("@matriz/platform-db/core")
   })
 
   it("composes the Contracts entrypoint with the tenant on its aggregate root", async () => {

@@ -55,6 +55,17 @@ function tenantRequest(path: string, token: string, init: RequestInit = {}): Req
   })
 }
 
+function transactional<T extends Record<string, unknown>>(source: T): T {
+  const client = {
+    ...source,
+    $executeRawUnsafe: async () => 0,
+    docTimelineEvent: source.docTimelineEvent ?? { create: async () => ({}) },
+    hubOutboxEvent: source.hubOutboxEvent ?? { create: async () => ({}) },
+  } as T & { $transaction?: (callback: (tx: unknown) => unknown) => unknown }
+  client.$transaction = async (callback) => callback(client)
+  return client
+}
+
 describe("Hub tenant isolation", () => {
   it("RED: projects only the authenticated tenant's external links, events, and telemetry", async () => {
     const tokenA = issueSession(tenantA, "user-a")
@@ -108,7 +119,7 @@ describe("Hub tenant isolation", () => {
         update: async () => { writes += 1; foreign.status = "accepted"; return foreign },
       },
     }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     await expect(repository.reviewSuggestion({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, foreign.id, "accepted")).rejects.toThrow(/target not found|tenant boundary/i)
     expect(writes).toBe(0)
     expect(foreign.status).toBe("suggested")
@@ -135,7 +146,7 @@ describe("Hub tenant isolation", () => {
       },
       docTimelineEvent: { create: async () => ({}) },
     }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     const updated = await repository.reviewSuggestion({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, owned.id, "rejected")
     expect(writes).toBe(1)
     expect(updated).toMatchObject({ id: owned.id, tenantId: tenantA, status: "rejected", reviewedByActorId: "user-a" })
@@ -154,7 +165,7 @@ describe("Hub tenant isolation", () => {
       $transaction: async (callback: (client: typeof tx) => unknown) => callback(tx),
       docTimelineEvent: { create: async () => ({}) },
     }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     await expect(repository.createKnowledgeEdge({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, {
       sourceNodeId: "node-a", targetNodeId: "node-b", relationType: "mentions",
     })).rejects.toThrow(/tenant|node|relation/i)
@@ -174,7 +185,7 @@ describe("Hub tenant isolation", () => {
       $transaction: async (callback: (client: typeof tx) => unknown) => callback(tx),
       docTimelineEvent: { create: async () => ({}) },
     }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     const created = await repository.createKnowledgeEdge({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, {
       sourceNodeId: "node-a", targetNodeId: "node-c", relationType: "mentions",
     })
@@ -190,7 +201,7 @@ describe("Hub tenant isolation", () => {
       docSuggestion: { create: async () => { creates += 1; return suggestion } },
     }
     const db = { ...tx, $transaction: async (callback: (client: typeof tx) => unknown) => callback(tx), docTimelineEvent: { create: async () => ({}) } }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     await expect(repository.createSuggestion({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, {
       type: "task", title: "Task", description: "Task", targetType: "document", targetId: "doc-b",
     })).rejects.toThrow(/document|tenant|target/i)
@@ -206,7 +217,7 @@ describe("Hub tenant isolation", () => {
       docSuggestion: { create: async () => { creates += 1; return suggestion } },
     }
     const db = { ...tx, $transaction: async (callback: (client: typeof tx) => unknown) => callback(tx), docTimelineEvent: { create: async () => ({}) } }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     const created = await repository.createSuggestion({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, {
       type: "task", title: "Task", description: "Task", targetType: "document", targetId: "doc-a",
     })
@@ -223,7 +234,7 @@ describe("Hub tenant isolation", () => {
       docContextPackageItem: { create: async () => ({}) },
     }
     const db = { ...tx, $transaction: async (callback: (client: typeof tx) => unknown) => callback(tx), docTimelineEvent: { create: async () => ({}) } }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     await expect(repository.createContextPackage({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, {
       title: "Context", documentIds: ["doc-b"],
     })).rejects.toThrow(/document|tenant|context/i)
@@ -241,7 +252,7 @@ describe("Hub tenant isolation", () => {
       docContextPackageItem: { create: async () => { items += 1; return {} } },
     }
     const db = { ...tx, $transaction: async (callback: (client: typeof tx) => unknown) => callback(tx), docTimelineEvent: { create: async () => ({}) } }
-    const repository = new DocsPrismaRepository(db as never)
+    const repository = new DocsPrismaRepository(transactional(db) as never)
     const created = await repository.createContextPackage({ tenantId: tenantA, actorId: "user-a", actorType: "human_user" }, {
       title: "Context", documentIds: ["doc-a"],
     })

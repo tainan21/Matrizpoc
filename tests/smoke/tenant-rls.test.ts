@@ -18,7 +18,7 @@ const expectedTenantTables: Record<(typeof schemas)[number], readonly string[]> 
     "capability_accessibility_preferences", "capability_dashboard_layouts", "capability_events",
     "capability_marketplace_demo_orders", "capability_practicy_installations", "capability_practicy_usage",
     "capability_recent_items", "capability_tenant_theme_recommendations", "capability_theme_entitlements",
-    "capability_theme_preferences",
+    "capability_theme_preferences", "outbox_events",
   ],
   spot: ["bands", "artist_profiles", "gigs", "gig_bookings", "spot_preferences"],
   seumei: [
@@ -27,7 +27,7 @@ const expectedTenantTables: Record<(typeof schemas)[number], readonly string[]> 
     "financial_entry_events", "ingredient_inventory", "ingredient_stock_movements", "ingredients",
     "order_items", "order_stock_consumptions", "order_timeline_events", "product_categories",
     "product_images", "product_variants", "products", "recipe_ingredients", "recipes",
-    "store_publication_versions", "store_publications",
+    "store_publication_versions", "store_publications", "company_selections", "outbox_events",
   ],
   contracts: ["contracts", "contract_parties", "contract_versions", "contract_events", "contract_templates"],
   willdash: ["goals", "reward_rules", "activity_records", "willdash_preferences"],
