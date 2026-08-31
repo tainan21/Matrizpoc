@@ -988,9 +988,9 @@ importers:
       '@matriz/integration-api-contracts':
         specifier: workspace:*
         version: link:../../packages/integration/api-contracts
-      '@matriz/integration-events':
+      '@matriz/integration-event-delivery':
         specifier: workspace:*
-        version: link:../../packages/integration/events
+        version: link:../../packages/integration/event-delivery
       '@matriz/integration-manifests':
         specifier: workspace:*
         version: link:../../packages/integration/manifests

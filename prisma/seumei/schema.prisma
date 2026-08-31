@@ -698,3 +698,35 @@ model MatrizSchemaRelease {
 
   @@map("__matriz_schema_releases")
 }
+
+model SeumeiCompanySelection {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  companyId String
+  selectedAt DateTime @default(now())
+
+  @@unique([tenantId, userId])
+  @@index([tenantId, companyId])
+  @@map("company_selections")
+}
+
+model SeumeiOutboxEvent {
+  id               String   @id @default(cuid())
+  tenantId         String
+  eventName        String
+  eventVersion     String   @default("v1")
+  deduplicationKey String   @unique
+  payloadJson      Json
+  occurredAt       DateTime @default(now())
+  attempts         Int      @default(0)
+  nextAttemptAt    DateTime?
+  lockedUntil      DateTime?
+  publishedAt      DateTime?
+  deadLetteredAt   DateTime?
+  lastErrorCode    String?
+
+  @@index([deadLetteredAt, nextAttemptAt, lockedUntil, occurredAt])
+  @@index([tenantId, publishedAt, occurredAt])
+  @@map("outbox_events")
+}

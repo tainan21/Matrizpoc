@@ -10,5 +10,9 @@ export function getSeumeiDb(): PrismaClient {
   return getOrCreateSchemaClient({ Client: PrismaClient, environmentName: "SEUMEI_DATABASE_URL", globalKey: "__matrizSeumeiDb__" })
 }
 
+export function getSeumeiWorkerDb(): PrismaClient {
+  return getOrCreateSchemaClient({ Client: PrismaClient, environmentName: "SEUMEI_WORKER_DATABASE_URL", globalKey: "__matrizSeumeiWorkerDb__" })
+}
+
 export type { PrismaClient as SeumeiPrismaClient } from "../../../../node_modules/.prisma/seumei/index.js"
 export { EstablishmentType } from "../../../../node_modules/.prisma/seumei/index.js"

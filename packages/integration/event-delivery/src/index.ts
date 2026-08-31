@@ -106,8 +106,11 @@ export class DurableOutboxPublisher {
   }
 
   private eventMessage(event: ClaimedOutboxEvent): JetStreamMessage {
+    const eventSubject = event.eventName.startsWith(`${this.options.domain}.`)
+      ? event.eventName.slice(this.options.domain.length + 1)
+      : event.eventName
     return {
-      subject: `matriz.v1.${this.options.domain}.${event.eventName}`,
+      subject: `matriz.v1.${this.options.domain}.${eventSubject}`,
       messageId: event.id,
       data: {
         id: event.id,

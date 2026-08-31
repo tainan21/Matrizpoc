@@ -25,6 +25,7 @@ function services(overrides: Partial<CompanyHttpServices> = {}): CompanyHttpServ
       listVisibleByTenantIds: vi.fn().mockResolvedValue([company]),
       findByIdForTenantIds: vi.fn().mockResolvedValue(company),
     } as unknown as CompanyRepository,
+    selections: { record: vi.fn().mockResolvedValue(company) },
     ids: { tenantId: () => "tenant_new" },
     ...overrides,
   }
@@ -57,11 +58,11 @@ describe("company HTTP boundaries", () => {
     await expect(selectCompanyHandler(actor, { companyId: "company_b" }, svc)).resolves.toEqual({ status: 403, body: { error: "company_forbidden" } })
   })
 
-  it("preserves the public selection event only after authorization", async () => {
-    const companySelected = vi.fn()
-    const result = await selectCompanyHandler(actor, { companyId: "company_a" }, services({ events: { companySelected } }))
+  it("records the durable selection only after authorization", async () => {
+    const record = vi.fn().mockResolvedValue(company)
+    const result = await selectCompanyHandler(actor, { companyId: "company_a" }, services({ selections: { record } }))
     expect(result.status).toBe(200)
-    expect(companySelected).toHaveBeenCalledWith(company)
+    expect(record).toHaveBeenCalledWith({ tenantId: "tenant_a", userId: "user_a", companyId: "company_a" })
   })
 
   it("maps optimistic onboarding conflicts to 409", async () => {

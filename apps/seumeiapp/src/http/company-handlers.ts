@@ -22,9 +22,10 @@ import {
   type IdGenerator,
 } from "../application/provision-company"
 import { resolveActiveCompanyContext } from "../application/active-company"
-import { InvalidCompanyInputError, type Company } from "../domain/company"
+import { InvalidCompanyInputError } from "../domain/company"
 import type { SessionActor } from "../types/session-actor"
 import type { CompanyRepository } from "../domain/repositories/company-repository"
+import type { CompanySelectionRepository } from "../infrastructure/company-selection.repository"
 import type { CompleteCoreAccessRepository } from "../domain/repositories/core-access-repository"
 import {
   toCompanyChoiceViewModel,
@@ -36,8 +37,8 @@ import type { SeumeiSessionResolution } from "../auth/server-session"
 export interface CompanyHttpServices {
   readonly core: CompleteCoreAccessRepository
   readonly companies: CompanyRepository
+  readonly selections: CompanySelectionRepository
   readonly ids: IdGenerator
-  readonly events?: { companySelected(company: Company): void }
 }
 
 export interface HttpResult {
@@ -144,8 +145,8 @@ export async function selectCompanyHandler(
       services.core,
       services.companies,
     )
-    services.events?.companySelected(selected.company)
-    return { status: 200, body: { company: toCompanyChoiceViewModel(selected.company) } }
+    const recorded = await services.selections.record({ tenantId: selected.company.tenantId, userId: user.id, companyId: selected.company.id })
+    return { status: 200, body: { company: toCompanyChoiceViewModel(recorded) } }
   } catch (error) {
     return mappedError(error)
   }
