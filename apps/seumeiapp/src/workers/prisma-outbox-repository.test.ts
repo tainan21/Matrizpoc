@@ -7,8 +7,8 @@ describe("PrismaSeumeiOutboxRepository", () => {
     const client = { $queryRawUnsafe: query, seumeiOutboxEvent: { updateMany: vi.fn(), deleteMany: vi.fn() } }
     const repository = new PrismaSeumeiOutboxRepository(client as never)
     await expect(repository.claim({ limit: 50, now: new Date(0), lockUntil: new Date(30_000) })).resolves.toEqual([expect.objectContaining({ tenantId: "tenant-a", payload: { ok: true } })])
-    expect(query.mock.calls[0]?.[0]).toMatch(/FOR UPDATE SKIP LOCKED/)
-    expect(query.mock.calls[0]?.[0]).toMatch(/attempts = candidate\.attempts \+ 1/)
+    expect(String(query.mock.calls[0]?.at(0))).toMatch(/FOR UPDATE SKIP LOCKED/)
+    expect(String(query.mock.calls[0]?.at(0))).toMatch(/attempts = candidate\.attempts \+ 1/)
   })
 
   it("prunes only published or dead-lettered records", async () => {

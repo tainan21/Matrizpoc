@@ -1,21 +1,19 @@
-import { getCoreDb } from "@matriz/platform-db/core"
 import { getSeumeiDb } from "@matriz/platform-db/seumei"
 import { provisionDemoFederation } from "../src/application/provision-demo-federation"
 import { provisionDemoRestaurantData, reconcileDemoOrderReceipts } from "../src/application/provision-demo-restaurant"
 import { createCatalogRepository } from "../src/infrastructure/catalog.repository"
 import { createCompanyRepository } from "../src/infrastructure/company.repository"
-import { createCoreAccessRepository } from "../src/infrastructure/core-access.repository"
+import { createIdentityCoreAccessGateway } from "../src/infrastructure/identity-core-access.gateway"
 import { createRestaurantRepository } from "../src/infrastructure/restaurant.repository"
 import { createCommerceRepository } from "../src/infrastructure/commerce.repository"
 import { createFinanceRepository } from "../src/infrastructure/finance.repository"
 
-const coreDb = getCoreDb()
 const seumeiDb = getSeumeiDb()
 
 try {
   const result = await provisionDemoFederation(
     process.env,
-    createCoreAccessRepository(coreDb),
+    createIdentityCoreAccessGateway(process.env),
     createCompanyRepository(seumeiDb),
   )
   const catalog = createCatalogRepository(seumeiDb)
@@ -45,5 +43,5 @@ try {
   }
   process.stdout.write(`${JSON.stringify({ companies: result.companies.map(({ id, tenantId, name, slug, status }) => ({ id, tenantId, name, slug, status })) }, null, 2)}\n`)
 } finally {
-  await Promise.all([coreDb.$disconnect(), seumeiDb.$disconnect()])
+  await seumeiDb.$disconnect()
 }

@@ -15,6 +15,7 @@
     { "name": "SEUMEI_NATS_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
     { "name": "SEUMEI_OUTBOX_WORKER_ENABLED", "secret": false, "required": true, "source": "generated" },
     { "name": "MATRIZ_IDENTITY_ISSUER", "secret": false, "required": true, "source": "generated" },
+    { "name": "SEUMEI_IDENTITY_SERVICE_TOKEN", "secret": true, "required": true, "source": "control-vault" },
     { "name": "SEUMEI_OIDC_CLIENT_ID", "secret": false, "required": true, "source": "generated" },
     { "name": "SEUMEI_OIDC_CALLBACK_URL", "secret": false, "required": true, "source": "generated" },
     { "name": "SEUMEI_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },

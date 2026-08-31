@@ -9,6 +9,8 @@ import { createAccessApiRepository, createAppSessionClientAuthenticator, createA
 import { createAccessApiHandler } from "./access-api.js"
 import { createMfaApiHandler } from "./mfa-api.js"
 import { createAppSessionVaultHandler } from "./app-session-vault.js"
+import { createSeumeiInternalApiHandler } from "./seumei-internal-api.js"
+import { createSeumeiInternalAccess } from "./seumei-internal-access.js"
 
 const environment = loadIdentityEnvironment(process.env)
 const provider = await createIdentityProvider(environment)
@@ -42,6 +44,7 @@ const mfaApi = createMfaApiHandler({ encryptionKey: environment.mfaEncryptionKey
   },
 }, rateLimits: createCoreRateLimitStore(getIdentityDb()) })
 const appSessionVault = createAppSessionVaultHandler({ encryptionKey: environment.mfaEncryptionKey, repository: createAppSessionVaultRepository(getIdentityDb()), authenticate: createAppSessionClientAuthenticator(getIdentityDb()) })
+const seumeiInternalApi = createSeumeiInternalApiHandler({ serviceToken: process.env.IDENTITY_SEUMEI_SERVICE_TOKEN ?? "", access: createSeumeiInternalAccess(getIdentityDb()) })
 
 const server = createServer((request, response) => { void handleRequest(request, response).catch((error: unknown) => {
   if (response.headersSent) { response.destroy(); return }
@@ -63,6 +66,7 @@ async function handleRequest(request: Parameters<typeof interactions>[0], respon
   if (await accessApi(request, response)) return
   if (await mfaApi(request, response)) return
   if (await appSessionVault(request, response)) return
+  if (await seumeiInternalApi(request, response)) return
   provider.callback()(request, response)
 }
 

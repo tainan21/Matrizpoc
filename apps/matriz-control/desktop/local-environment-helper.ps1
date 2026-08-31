@@ -112,6 +112,7 @@ foreach ($declaration in $contract.environment.keys) {
   elseif ($name -eq 'HUB_OUTBOX_WORKER_ENABLED') { $value = 'true' }
   elseif ($name -eq 'MATRIZ_PAY_INTERNAL_URL') { $value = 'http://127.0.0.1:3012' }
   elseif ($name -eq 'MATRIZ_OPS_SERVICE_TOKEN') { $value = Get-OrCreateSecret $applicationSecrets 'service::matriz-ops::matriz-pay' { New-RandomSecret } }
+  elseif ($name -eq 'IDENTITY_SEUMEI_SERVICE_TOKEN' -or $name -eq 'SEUMEI_IDENTITY_SERVICE_TOKEN') { $value = Get-OrCreateSecret $applicationSecrets 'service::matriz-identity::seumei' { New-RandomSecret } }
   elseif ($name -match '_CACHE_USERNAME$') { $value = 'matriz_' + $AppId.Replace('matriz-','').Replace('-','_') }
   elseif ($name -match '_CACHE_DEFAULT_TTL_SECONDS$') { $value = [string]$contract.cache.defaultTtlSeconds }
   elseif ($name -match '_OIDC_CLIENT_ID$') { $value = [string]$contract.identity.oidcClientId }

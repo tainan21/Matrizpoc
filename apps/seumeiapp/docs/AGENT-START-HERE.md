@@ -24,7 +24,7 @@ An invited identity follows `/invite/[token]` → `/login?returnTo=...` when sig
 
 ## Ownership and layers
 
-- Core owns user, tenant, app registration, membership and invitation persistence. Read access uses `CoreAccessRepository`; team mutations use the segregated `CoreMembershipRepository` through `@matriz/platform-db/core`.
+- Core owns user, tenant, app registration, membership and invitation persistence. Seumei implements `CoreAccessRepository` and `CoreMembershipRepository` through its authenticated Identity internal-API gateway; direct Core database access is forbidden.
 - `prisma/schemas/seumei.prisma` owns company, onboarding, catalog, ingredients, recipes, stock, store publication, customers, commerce and essential finance. Access it through app-local repositories and `@matriz/platform-db/seumei`.
 - Domain and application rules stay under `src/domain` and `src/application`.
 - Prisma implementations stay under `src/infrastructure`; never add an unscoped company lookup.

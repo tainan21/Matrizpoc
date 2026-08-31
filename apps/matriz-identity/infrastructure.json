@@ -16,6 +16,7 @@
     { "name": "IDENTITY_CSRF_SECRET", "secret": true, "required": true, "source": "control-vault" },
     { "name": "IDENTITY_COOKIE_KEYS", "secret": true, "required": true, "source": "control-vault" },
     { "name": "IDENTITY_MFA_ENCRYPTION_KEY", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "IDENTITY_SEUMEI_SERVICE_TOKEN", "secret": true, "required": true, "source": "control-vault" },
     { "name": "IDENTITY_AUTHENTICATOR_MODULE", "secret": false, "required": true, "source": "generated" },
     { "name": "IDENTITY_LOCAL_OWNER_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
     { "name": "IDENTITY_LOCAL_OPERATOR_PASSWORD", "secret": true, "required": true, "source": "control-vault" },

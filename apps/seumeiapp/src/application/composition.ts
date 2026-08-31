@@ -1,8 +1,7 @@
 import { randomUUID } from "node:crypto"
-import { getCoreDb } from "@matriz/platform-db/core"
 import { getSeumeiDb } from "@matriz/platform-db/seumei"
 import { createCompanyRepository } from "../infrastructure/company.repository"
-import { createCoreAccessRepository } from "../infrastructure/core-access.repository"
+import { createIdentityCoreAccessGateway } from "../infrastructure/identity-core-access.gateway"
 import { createCatalogRepository } from "../infrastructure/catalog.repository"
 import { createPortfolioRepository } from "../infrastructure/portfolio.repository"
 import { createRestaurantRepository } from "../infrastructure/restaurant.repository"
@@ -32,7 +31,7 @@ export function createCompanyServices(
   return {
     kind: "ready",
     services: {
-      core: createCoreAccessRepository(getCoreDb()),
+      core: createIdentityCoreAccessGateway(env),
       companies: createCompanyRepository(getSeumeiDb()),
       selections: createCompanySelectionRepository(getSeumeiDb()),
       catalog: createCatalogRepository(getSeumeiDb()),
