@@ -86,7 +86,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/docs/suggestions` | `apps/matriz-hub/app/api/docs/suggestions/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/tasks` | `apps/matriz-hub/app/api/docs/tasks/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/timeline` | `apps/matriz-hub/app/api/docs/timeline/route.ts:9` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:27` | `GET` | R | `H-CACHE` |
+| `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:23` | `GET` | R | `H-CACHE` |
 | `HTTP:matriz-hub:GET:/api/ecosystem/health` | `apps/matriz-hub/app/api/ecosystem/health/route.ts:6` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/events` | `apps/matriz-hub/app/api/events/route.ts:7` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/external-links` | `apps/matriz-hub/app/api/external-links/route.ts:7` | `GET` | R | `H-R` |
@@ -110,7 +110,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
 | `HTTP:matriz-hub:OPTIONS:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:12` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:7` | `OPTIONS` | R | `APP-R` |
-| `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:20` | `OPTIONS` | R | `H-CACHE` |
+| `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:16` | `OPTIONS` | R | `H-CACHE` |
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:PATCH:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:8` | `PATCH` | M | `H-M` |
@@ -146,7 +146,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:POST:/api/v1/telemetry/maintenance` | `apps/matriz-hub/app/api/v1/telemetry/maintenance/route.ts:3` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:21` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:12` | `PUT` | M | `APP-M` |
-| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:39` | `PUT` | M | `H-CACHE` |
+| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:37` | `PUT` | M | `H-CACHE` |
 | `HTTP:matriz-hub:PUT:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-ops:DELETE:/api/v1/users/[userId]/sessions/[sessionId]` | `apps/matriz-ops/app/api/v1/users/[userId]/sessions/[sessionId]/route.ts:5` | `DELETE` | M | `APP-M` |

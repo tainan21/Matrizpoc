@@ -8,16 +8,30 @@ import { GET as getEvents } from "../../apps/matriz-hub/app/api/events/route"
 import { GET as getExternalLinks } from "../../apps/matriz-hub/app/api/external-links/route"
 import { createTelemetryGet } from "../../apps/matriz-hub/app/api/telemetry/route"
 import { GET as getSharedCache, PUT as putSharedCache } from "../../apps/matriz-hub/app/api/ecosystem/cache/route"
+import type { CacheRecord, HubCacheRepository } from "../../apps/matriz-hub/src/ecosystem/garnet-cache-repository"
 
 const now = new Date(Date.now() + 60_000).toISOString()
 const tenantA = "tenant-a"
 const tenantB = "tenant-b"
 
 const previousAuthAdapter = process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER
-beforeAll(() => { process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER = "mock" })
+const globalCache = globalThis as typeof globalThis & { __matrizSharedCacheRepository?: HubCacheRepository }
+const previousCacheRepository = globalCache.__matrizSharedCacheRepository
+
+beforeAll(() => {
+  process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER = "mock"
+  const entries = new Map<string, CacheRecord>()
+  globalCache.__matrizSharedCacheRepository = {
+    read: async (tenantId, namespace, key) => entries.get(`${tenantId}:${namespace}:${key}`),
+    write: async (tenantId, namespace, record) => { entries.set(`${tenantId}:${namespace}:${record.key}`, record) },
+    delete: async (tenantId, namespace, key) => { entries.delete(`${tenantId}:${namespace}:${key}`) },
+  }
+})
 afterAll(() => {
   if (previousAuthAdapter === undefined) delete process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER
   else process.env.NEXT_PUBLIC_MATRIZ_AUTH_ADAPTER = previousAuthAdapter
+  if (previousCacheRepository === undefined) delete globalCache.__matrizSharedCacheRepository
+  else globalCache.__matrizSharedCacheRepository = previousCacheRepository
 })
 
 function issueSession(tenantId: string, userId: string): string {

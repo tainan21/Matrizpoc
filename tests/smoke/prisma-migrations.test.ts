@@ -104,8 +104,8 @@ describe("independent Prisma migration roots", () => {
   it("keeps the CI forced-RLS inventory aligned with the consolidated schemas", () => {
     const verification = readFileSync(join(root, "tooling", "sql", "verify-tenant-rls.sql"), "utf8")
 
-    expect(verification).toContain("actual <> 79")
-    expect(verification).toContain("Expected 79 forced-RLS tenant tables")
+    expect(verification).toContain("AND NOT (table_object.relrowsecurity AND table_object.relforcerowsecurity)")
+    expect(verification).toContain("IF actual <> 0 THEN RAISE EXCEPTION 'Found % tenantId tables without forced RLS'")
     expect(verification.match(/ON CONFLICT \("tenantId"\) DO UPDATE SET id=EXCLUDED\.id/g)).toHaveLength(3)
   })
 })

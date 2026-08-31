@@ -13,7 +13,7 @@ describe("Matriz Control signed release contract", () => {
 
     expect(packageJson).toContain('"desktop:release"')
     expect(packageJson).toContain('"provider": "github"')
-    expect(packageJson).toContain('"artifactName": "matriz-control-${version}-windows-x64-setup.${ext}"')
+    expect(packageJson).toContain('"artifactName": "matriz-control-electron-${version}-windows-x64-setup.${ext}"')
     expect(workflow).toContain('tags: ["control-v*"]')
     expect(workflow).toContain('contents: write')
     expect(workflow).toContain('MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE')
