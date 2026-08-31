@@ -1,6 +1,8 @@
 param(
   [Parameter(Mandatory = $true)][ValidateSet("Install")][string]$Action,
-  [Parameter(Mandatory = $true)][string]$ProgramDataRoot
+  [Parameter(Mandatory = $true)][string]$ProgramDataRoot,
+  [Parameter(Mandatory = $true)][ValidatePattern('^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$')][string]$PayNatsPasswordHash,
+  [Parameter(Mandatory = $true)][ValidatePattern('^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$')][string]$ControlNatsPasswordHash
 )
 
 $ErrorActionPreference = "Stop"
@@ -196,7 +198,7 @@ try {
 
   $natsConfig = Join-Path $managedRoot 'nats\nats.conf'
   $natsLog = Join-Path $natsLogs 'service.log'
-  $natsConfigText = "server_name: MatrizNats`r`nhost: 127.0.0.1`r`nport: 54222`r`nhttp: 127.0.0.1:58222`r`njetstream { store_dir: `"$($natsData.Replace('\','/'))`" }`r`nlog_file: `"$($natsLog.Replace('\','/'))`"`r`n"
+  $natsConfigText = "server_name: MatrizNats`r`nhost: 127.0.0.1`r`nport: 54222`r`nhttp: 127.0.0.1:58222`r`njetstream { store_dir: `"$($natsData.Replace('\','/'))`" }`r`nauthorization {`r`n  users: [`r`n    { user: `"matriz_control`", password: `"$ControlNatsPasswordHash`", permissions: { publish: [`"`$JS.API.>`"], subscribe: [`"_INBOX.>`"] } },`r`n    { user: `"matriz_pay`", password: `"$PayNatsPasswordHash`", permissions: { publish: [`"matriz.v1.pay.>`"], subscribe: [`"_INBOX.>`"] }`r`n  ]`r`n}`r`nlog_file: `"$($natsLog.Replace('\','/'))`"`r`n"
   [IO.File]::WriteAllText($natsConfig, $natsConfigText, [Text.UTF8Encoding]::new($false))
   $natsExe = Join-Path $natsTarget 'nats-server.exe'
   $natsBinPath = ('"{0}" -c "{1}"' -f $natsExe, $natsConfig)

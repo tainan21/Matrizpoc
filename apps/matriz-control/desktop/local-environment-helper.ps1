@@ -90,6 +90,7 @@ $vaultRoot = Join-Path $env:LOCALAPPDATA 'Matriz\Control\vault'
 $applicationSecretPath = Join-Path $vaultRoot 'application-secrets.dpapi'
 $databaseSecrets = Read-SecretMap (Join-Path $vaultRoot 'database-roles.dpapi')
 $cacheSecrets = Read-SecretMap (Join-Path $vaultRoot 'cache-roles.dpapi')
+$natsSecrets = Read-SecretMap (Join-Path $vaultRoot 'nats-roles.dpapi')
 $applicationSecrets = Read-SecretMap $applicationSecretPath
 $result = [ordered]@{}
 $result['MATRIZ_RUNTIME_PROFILE'] = 'local'
@@ -102,6 +103,9 @@ foreach ($declaration in $contract.environment.keys) {
   elseif ($name -eq 'IDENTITY_ISSUER' -or $name -eq 'MATRIZ_IDENTITY_ISSUER') { $value = 'http://127.0.0.1:8080' }
   elseif ($name -eq 'IDENTITY_AUTHENTICATOR_MODULE') { $value = './credential-authenticator.js' }
   elseif ($name -eq 'CACHE_URL') { $value = 'redis://127.0.0.1:46379' }
+  elseif ($name -eq 'NATS_URL') { $value = 'nats://127.0.0.1:54222' }
+  elseif ($name -eq 'PAY_NATS_USERNAME') { $value = 'matriz_pay' }
+  elseif ($name -eq 'PAY_OUTBOX_WORKER_ENABLED') { $value = 'true' }
   elseif ($name -eq 'MATRIZ_PAY_INTERNAL_URL') { $value = 'http://127.0.0.1:3012' }
   elseif ($name -eq 'MATRIZ_OPS_SERVICE_TOKEN') { $value = Get-OrCreateSecret $applicationSecrets 'service::matriz-ops::matriz-pay' { New-RandomSecret } }
   elseif ($name -match '_CACHE_USERNAME$') { $value = 'matriz_' + $AppId.Replace('matriz-','').Replace('-','_') }
@@ -130,6 +134,7 @@ foreach ($declaration in $contract.environment.keys) {
     $cacheRole = 'matriz_' + $AppId.Replace('matriz-','').Replace('-','_')
     $value = Get-RequiredMapValue $cacheSecrets $cacheRole "Cache credential $cacheRole"
   }
+  elseif ($name -eq 'PAY_NATS_PASSWORD') { $value = Get-RequiredMapValue $natsSecrets 'matriz_pay' 'NATS credential matriz_pay' }
   elseif ($declaration.source -eq 'control-vault') { $value = Get-OrCreateSecret $applicationSecrets "$AppId::$name" { New-RandomSecret } }
   elseif ($declaration.required) { throw "No local generator exists for required key $name." }
   if (-not [string]::IsNullOrWhiteSpace([string]$value)) { $result[$name] = [string]$value }

@@ -8,6 +8,14 @@ integration("Pay on real Postgres", () => {
   beforeEach(async () => {
     const db=getPayDb(); await db.payOutboxEvent.deleteMany(); await db.providerEvent.deleteMany(); await db.reconciliationDiscrepancy.deleteMany(); await db.reconciliationRun.deleteMany(); await db.providerAccountLink.deleteMany(); await db.ledgerPosting.deleteMany(); await db.ledgerTransaction.deleteMany(); await db.walletAccount.deleteMany(); await db.wallet.deleteMany()
   })
+  it("creates one durable wallet.created event in the wallet transaction", async () => {
+    const first = await ensureWallet("user-wallet-created-integration")
+    const second = await ensureWallet("user-wallet-created-integration")
+    expect(second.id).toBe(first.id)
+    const events = await getPayDb().payOutboxEvent.findMany({ where: { deduplicationKey: `wallet.created:${first.id}` } })
+    expect(events).toHaveLength(1)
+    expect(events[0]).toMatchObject({ eventName: "wallet.created", payloadJson: { contractVersion: "v1", walletId: first.id, userId: "user-wallet-created-integration" } })
+  })
   it("serializes concurrent MTRZ debits and preserves zero-sum postings", async () => {
     const wallet=await ensureWallet("user-integration")
     await postMtrzAdjustment({walletId:wallet.id,payload:{amount:{currency:"MTRZ",amountMinor:"100"},direction:"CREDIT",reason:"Crédito de integração autorizado",correlationId:"corr-integration-seed"},idempotencyKey:"idem-integration-seed",actorId:"owner-integration"})

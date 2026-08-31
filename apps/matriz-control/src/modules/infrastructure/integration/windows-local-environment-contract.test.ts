@@ -13,6 +13,8 @@ describe("Windows local environment helper contract", () => {
     expect(helper).toContain("http://127.0.0.1:8080")
     expect(helper).toContain("http://127.0.0.1:3012")
     expect(helper).toContain("service::matriz-ops::matriz-pay")
+    expect(helper).toContain("nats://127.0.0.1:54222")
+    expect(helper).toContain("nats-roles.dpapi")
     expect(helper).toContain("New-TotpSecret")
     expect(helper).toContain("identity::local-owner-totp")
     expect(helper).not.toContain("Invoke-Expression")

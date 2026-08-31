@@ -16,6 +16,8 @@
     "@matriz/integration-wallet-contracts": "workspace:*",
     "@matriz/platform-config": "workspace:*",
     "@matriz/platform-db": "workspace:*",
+    "@nats-io/jetstream": "3.4.0",
+    "@nats-io/transport-node": "3.4.0",
     "next": "16.2.12",
     "react": "19.2.5",
     "react-dom": "19.2.5",

@@ -32,6 +32,15 @@ export async function ensureWallet(userId: string): Promise<WalletWithAccounts> 
     })
     await tx.walletAccount.upsert({ where: { walletId_currency: { walletId: wallet.id, currency: "MTRZ" } }, update: {}, create: { walletId: wallet.id, currency: "MTRZ" } })
     await tx.walletAccount.upsert({ where: { walletId_currency: { walletId: wallet.id, currency: "BRL" } }, update: {}, create: { walletId: wallet.id, currency: "BRL" } })
+    await tx.payOutboxEvent.upsert({
+      where: { deduplicationKey: `wallet.created:${wallet.id}` },
+      update: {},
+      create: {
+        deduplicationKey: `wallet.created:${wallet.id}`,
+        eventName: "wallet.created",
+        payloadJson: { contractVersion: "v1", walletId: wallet.id, userId: wallet.userId },
+      },
+    })
     const systemWallet = await tx.wallet.upsert({
       where: { userId: "system:mtrz-issuance" },
       update: {},

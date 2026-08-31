@@ -119,6 +119,7 @@ model LedgerTransaction {
 
 model PayOutboxEvent {
   id            String            @id @default(cuid())
+  deduplicationKey String?         @unique
   transactionId String?
   eventName     String
   eventVersion  String            @default("v1")
@@ -126,9 +127,14 @@ model PayOutboxEvent {
   occurredAt    DateTime          @default(now())
   publishedAt   DateTime?
   attempts      Int               @default(0)
+  lockedUntil   DateTime?
+  nextAttemptAt DateTime?
+  lastErrorCode String?
+  deadLetteredAt DateTime?
   transaction   LedgerTransaction? @relation(fields: [transactionId], references: [id], onDelete: Restrict)
 
   @@index([publishedAt, occurredAt])
+  @@index([deadLetteredAt, nextAttemptAt, lockedUntil, occurredAt], map: "outbox_delivery_claim_idx")
   @@map("outbox_events")
 }
 

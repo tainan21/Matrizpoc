@@ -33,6 +33,7 @@ import { ProjectSurfaceHost } from "./project-surface-host"
 import { presentProject } from "../src/modules/projects/presentation/project-presenter"
 import { InfrastructureServiceManager } from "../src/modules/infrastructure/application/infrastructure-service-manager"
 import { WindowsInfrastructureHost } from "./windows-infrastructure-host"
+import { WindowsNatsCredentialProvisioner } from "./nats-credential-provisioner"
 import { DatabaseRecoveryManager } from "../src/modules/infrastructure/application/database-recovery-manager"
 import { WindowsDatabaseRecoveryHost } from "./windows-database-recovery-host"
 import { DatabaseMigrationGate } from "../src/modules/infrastructure/application/database-migration-gate"
@@ -129,8 +130,13 @@ const projectSessions = new ProjectSessionService({ store: projectStore, supervi
 const projectHost = new ProjectHostFacade({ roots: projectRoots, host: projectHostService, preparation: projectPreparation, sessions: projectSessions })
 const projectSurfaceHost = new ProjectSurfaceHost()
 const infrastructureHelper = app.isPackaged ? join(process.resourcesPath, "infrastructure-helper.ps1") : join(__dirname, "../../desktop/infrastructure-helper.ps1")
+const natsCredentialHelper = app.isPackaged ? join(process.resourcesPath, "nats-credential-helper.ps1") : join(__dirname, "../../desktop/nats-credential-helper.ps1")
 const infrastructureManager = new InfrastructureServiceManager({
-  host: new WindowsInfrastructureHost({ programData: process.env.ProgramData ?? "C:\\ProgramData", helperPath: infrastructureHelper }),
+  host: new WindowsInfrastructureHost({
+    programData: process.env.ProgramData ?? "C:\\ProgramData",
+    helperPath: infrastructureHelper,
+    natsCredentials: new WindowsNatsCredentialProvisioner({ helperPath: natsCredentialHelper }),
+  }),
   programData: process.env.ProgramData ?? "C:\\ProgramData",
   now: Date.now,
   token: () => `infra_confirm_${randomUUID()}`,

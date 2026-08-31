@@ -14,7 +14,11 @@
     { "name": "PAY_OIDC_CALLBACK_URL", "secret": false, "required": true, "source": "generated" },
     { "name": "PAY_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
     { "name": "PAY_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" },
-    { "name": "MATRIZ_OPS_SERVICE_TOKEN", "secret": true, "required": true, "source": "control-vault" }
+    { "name": "MATRIZ_OPS_SERVICE_TOKEN", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "NATS_URL", "secret": false, "required": true, "source": "generated" },
+    { "name": "PAY_NATS_USERNAME", "secret": false, "required": true, "source": "generated" },
+    { "name": "PAY_NATS_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "PAY_OUTBOX_WORKER_ENABLED", "secret": false, "required": true, "source": "generated" }
   ] },
   "filesystem": { "required": false }
 }

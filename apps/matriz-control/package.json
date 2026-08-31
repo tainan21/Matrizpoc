@@ -55,6 +55,10 @@
         "to": "infrastructure-helper.ps1"
       },
       {
+        "from": "desktop/nats-credential-helper.ps1",
+        "to": "nats-credential-helper.ps1"
+      },
+      {
         "from": "desktop/database-recovery-helper.ps1",
         "to": "database-recovery-helper.ps1"
       },
@@ -98,8 +102,11 @@
     "@matriz/integration-infrastructure-contracts": "workspace:^",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",
+    "@nats-io/jetstream": "3.4.0",
+    "@nats-io/transport-node": "3.4.0",
     "@modelcontextprotocol/sdk": "1.30.0",
     "@uiw/react-codemirror": "4.25.4",
+    "bcryptjs": "3.0.3",
     "electron-updater": "6.8.9",
     "next": "16.2.12",
     "react": "19.2.5",
