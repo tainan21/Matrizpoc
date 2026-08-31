@@ -5,6 +5,7 @@ const event: ClaimedOutboxEvent = {
   id: "outbox-1",
   eventName: "wallet.entry.posted",
   eventVersion: "v1",
+  tenantId: null,
   payload: { transactionId: "txn-1", walletId: "wallet-1", currency: "MTRZ", amountMinor: "10", correlationId: "corr-1" },
   occurredAt: new Date("2026-08-30T12:00:00.000Z"),
   attempts: 1,

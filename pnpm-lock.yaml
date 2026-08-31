@@ -135,7 +135,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -175,7 +175,7 @@ importers:
         version: link:../../packages/platform/config
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -263,7 +263,7 @@ importers:
         version: 2.11.1
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -366,7 +366,7 @@ importers:
         version: 6.8.9
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -575,7 +575,7 @@ importers:
         version: 9.7.0(@types/react@19.2.14)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(three@0.185.1)
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -658,7 +658,7 @@ importers:
         version: link:../../packages/platform/db
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -699,6 +699,9 @@ importers:
       '@matriz/integration-api-contracts':
         specifier: workspace:*
         version: link:../../packages/integration/api-contracts
+      '@matriz/integration-event-delivery':
+        specifier: workspace:*
+        version: link:../../packages/integration/event-delivery
       '@matriz/integration-registry-core':
         specifier: workspace:*
         version: link:../../packages/integration/registry-core
@@ -711,15 +714,9 @@ importers:
       '@matriz/platform-db':
         specifier: workspace:*
         version: link:../../packages/platform/db
-      '@nats-io/jetstream':
-        specifier: 3.4.0
-        version: 3.4.0
-      '@nats-io/transport-node':
-        specifier: 3.4.0
-        version: 3.4.0
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -730,6 +727,12 @@ importers:
         specifier: 3.23.8
         version: 3.23.8
     devDependencies:
+      '@nats-io/jetstream':
+        specifier: 3.4.0
+        version: 3.4.0
+      '@nats-io/transport-node':
+        specifier: 3.4.0
+        version: 3.4.0
       '@types/node':
         specifier: 22.7.5
         version: 22.7.5
@@ -850,7 +853,7 @@ importers:
         version: 6.8.9
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -926,7 +929,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -1008,7 +1011,7 @@ importers:
         version: 6.8.9
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -1072,7 +1075,7 @@ importers:
         version: link:../../packages/platform/config
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -1160,7 +1163,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -1251,7 +1254,7 @@ importers:
         version: link:../../packages/platform/telemetry
       next:
         specifier: 16.2.12
-        version: 16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -1553,6 +1556,22 @@ importers:
       typescript:
         specifier: 5.6.3
         version: 5.6.3
+
+  packages/integration/event-delivery:
+    dependencies:
+      '@nats-io/jetstream':
+        specifier: 3.4.0
+        version: 3.4.0
+      '@nats-io/transport-node':
+        specifier: 3.4.0
+        version: 3.4.0
+    devDependencies:
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@24.13.3)(jsdom@30.0.1(@noble/hashes@2.3.0))
 
   packages/integration/events:
     dependencies:
@@ -14162,7 +14181,7 @@ snapshots:
 
   netmask@2.1.1: {}
 
-  next@16.2.12(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+  next@16.2.12(@babel/core@7.29.7)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       '@next/env': 16.2.12
       '@swc/helpers': 0.5.15
@@ -14171,7 +14190,7 @@ snapshots:
       postcss: 8.5.26
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
-      styled-jsx: 5.1.6(react@19.2.0)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.0)
     optionalDependencies:
       '@next/swc-darwin-arm64': 16.2.12
       '@next/swc-darwin-x64': 16.2.12
@@ -15335,10 +15354,12 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-jsx@5.1.6(react@19.2.0):
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.0):
     dependencies:
       client-only: 0.0.1
       react: 19.2.0
+    optionalDependencies:
+      '@babel/core': 7.29.7
 
   styled-jsx@5.1.6(react@19.2.5):
     dependencies:

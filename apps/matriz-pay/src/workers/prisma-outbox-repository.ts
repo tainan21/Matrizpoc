@@ -35,7 +35,7 @@ export class PrismaPayOutboxRepository implements PayOutboxRepository {
       WHERE event.id = candidate.id
       RETURNING event.id, event."eventName", event."eventVersion", event."payloadJson", event."occurredAt", event.attempts
     `, limit, input.now, input.lockUntil)
-    return rows.map((row) => ({ id: row.id, eventName: row.eventName, eventVersion: row.eventVersion, payload: asPayload(row.payloadJson), occurredAt: row.occurredAt, attempts: row.attempts }))
+    return rows.map((row) => ({ id: row.id, eventName: row.eventName, eventVersion: row.eventVersion, tenantId: null, payload: asPayload(row.payloadJson), occurredAt: row.occurredAt, attempts: row.attempts }))
   }
 
   async markPublished(id: string, publishedAt: Date): Promise<void> {
