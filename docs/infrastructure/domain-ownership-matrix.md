@@ -17,3 +17,9 @@ schema de produto.
 
 Lei: nenhum owner cria tabela, migration, FK ou grant SQL fora do próprio
 schema. Runtime não executa migration.
+
+Cada domínio database-backed participante de eventos declara também
+`matriz_<schema>_worker`. Pay, Seumei e Hub estão ativos neste gate; as demais
+roles permanecem declarativas. Worker não é migration/runtime: possui somente
+ACL operacional explícita em `outbox_events`/`inbox_events`, sempre
+`NOINHERIT` e `NOBYPASSRLS`.

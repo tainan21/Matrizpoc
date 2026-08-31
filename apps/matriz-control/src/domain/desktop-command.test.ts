@@ -62,6 +62,7 @@ describe("parseDesktopCommand", () => {
 
   it("accepts only catalog-backed infrastructure intents", () => {
     expect(parseDesktopCommand({ type: "infrastructure.status" })).toEqual({ type: "infrastructure.status" })
+    expect(parseDesktopCommand({ type: "infrastructure.events.outbox-diagnostics" })).toEqual({ type: "infrastructure.events.outbox-diagnostics" })
     expect(parseDesktopCommand({ type: "infrastructure.logs", serviceId: "postgres" })).toEqual({ type: "infrastructure.logs", serviceId: "postgres" })
     expect(parseDesktopCommand({ type: "infrastructure.action.preview", serviceId: "stack", actionId: "install" }))
       .toEqual({ type: "infrastructure.action.preview", serviceId: "stack", actionId: "install" })

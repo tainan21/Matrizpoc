@@ -71,6 +71,10 @@
         "to": "database-migration-apply-helper.ps1"
       },
       {
+        "from": "desktop/outbox-diagnostics-helper.ps1",
+        "to": "outbox-diagnostics-helper.ps1"
+      },
+      {
         "from": "desktop/local-environment-helper.ps1",
         "to": "local-environment-helper.ps1"
       },

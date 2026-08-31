@@ -386,3 +386,14 @@ próximos do app responsável.
   o bind mesmo sem listener. O Control não altera reservas globais do sistema.
 - **Revisar quando:** a primeira separação física de domínio, múltiplos usuários
   Windows administradores ou um pooler forem requisitos concretos.
+
+## 2026-08-30 — Worker operacional de outbox sem `BYPASSRLS`
+
+- **Decisão:** apps database-backed com outbox/inbox declaram
+  `matriz_<schema>_worker`; a role acessa somente tabelas operacionais do próprio
+  schema e o tenant do envelope nunca é autoridade.
+- **Motivo:** permitir claim multi-tenant sem entregar ao worker acesso às
+  tabelas protegidas de negócio.
+- **Impacto:** Pay, Seumei e Hub usam uma máquina técnica comum; repositories
+  Prisma, manifests e inicialização permanecem app-local.
+- **Revisar quando:** inbox/projeções forem adotadas ou clusters forem separados.

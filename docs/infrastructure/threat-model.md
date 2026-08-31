@@ -20,6 +20,8 @@ Control ↔ Windows SCM, app ↔ Identity API e role ↔ schema PostgreSQL.
 | secret em Git/log/renderer | vault Windows, exportação explícita, redaction e `.env.example` sem valores |
 | cache virar autoridade | TTL obrigatório, namespace/ACL por app, PostgreSQL permanece fonte |
 | evento perdido/duplicado | transação + outbox, ACK JetStream, `Nats-Msg-Id`, inbox idempotente e DLQ |
+| worker multi-tenant virar super-role | policy explícita só na tabela operacional, `NOBYPASSRLS`, zero grants de negócio e auditoria de ACL |
+| tenant do envelope virar autoridade | consumidor valida sessão/serviço e abre nova transação tenant-local; envelope é somente roteamento |
 | supply chain de runtime | catálogo fixo, HTTPS/origem, tamanho, SHA-256 e assinatura quando disponível |
 
 ## Exclusões conscientes

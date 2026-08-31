@@ -344,6 +344,12 @@ comunicação de domínio ocorre por APIs ou eventos.
 O servidor deriva o tenant da sessão/token, abre uma transação e aplica
 `SET LOCAL matriz.tenant_id` antes de executar repositories tenant-owned.
 
+Uma role operacional `matriz_<schema>_worker` é permitida somente quando o
+Infrastructure Contract declara outbox ou inbox. Ela é `NOINHERIT` e
+`NOBYPASSRLS`, recebe acesso apenas às tabelas operacionais `outbox_events` e
+`inbox_events` do próprio schema e jamais lê tabelas de negócio. O tenant do
+envelope serve para roteamento; não concede autoridade ao consumidor.
+
 ---
 
 ## L15. Domain events usam outbox/inbox durável
@@ -353,6 +359,10 @@ schema produtor. A entrega por NATS JetStream é pelo menos uma vez; publisher
 só marca publicação após ACK, consumidores registram inbox idempotente na mesma
 transação do efeito e só então confirmam. Outbox e inbox pertencem aos domínios,
 nunca a um schema genérico.
+
+O publisher usa batch 50, lock de 30 segundos, até 10 tentativas e backoff de
+1–60 segundos. `publishedAt` só existe depois do ACK. Falha da DLQ mantém o
+registro autoritativo pendente.
 
 ---
 
