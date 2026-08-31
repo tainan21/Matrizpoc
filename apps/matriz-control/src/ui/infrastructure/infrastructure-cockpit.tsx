@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState, type ReactNode } from "react"
-import type { DesktopCommand } from "../../domain/desktop-bridge"
+import type { DesktopCommand, OutboxDiagnostic } from "../../domain/desktop-bridge"
 import type { InfrastructureActionId, InfrastructureActionPreview, InfrastructureServiceId, InfrastructureSnapshot } from "../../modules/infrastructure/domain/infrastructure"
 import type { InfrastructureInventoryViewModel } from "./infrastructure-presenter"
 import type { DatabaseBackupSnapshot, DatabaseRecoveryAction, DatabaseRecoveryPreview } from "../../modules/infrastructure/application/database-recovery-manager"
@@ -20,6 +20,7 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
   const [recoveryPreview, setRecoveryPreview] = useState<DatabaseRecoveryPreview | null>(null)
   const [backups, setBackups] = useState<readonly DatabaseBackupSnapshot[]>([])
   const [migrations, setMigrations] = useState<readonly MigrationGateStatus[]>([])
+  const [outboxDiagnostics, setOutboxDiagnostics] = useState<readonly OutboxDiagnostic[]>([])
   const [seedPreview, setSeedPreview] = useState<LocalDevelopmentSeedPreview | null>(null)
   const [environmentPreview, setEnvironmentPreview] = useState<LocalEnvironmentExportPreview | null>(null)
   const [migrationPreview, setMigrationPreview] = useState<DatabaseMigrationPreview | null>(null)
@@ -31,6 +32,7 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
   useEffect(() => { void refresh() }, [refresh])
   useEffect(() => { if (bridge && tab === "Backups") void bridge.invoke({ type: "infrastructure.database.backups" }).then((value) => setBackups(value as readonly DatabaseBackupSnapshot[])).catch(() => setMessage("Não foi possível ler o catálogo de backups.")) }, [bridge, tab])
   useEffect(() => { if (bridge && tab === "Migrations") void bridge.invoke({ type: "infrastructure.database.migrations" }).then((value) => setMigrations(value as readonly MigrationGateStatus[])).catch(() => setMessage("Não foi possível ler os ledgers de migrations.")) }, [bridge, tab])
+  useEffect(() => { if (bridge && tab === "Events") void bridge.invoke({ type: "infrastructure.events.outbox-diagnostics" }).then((value) => setOutboxDiagnostics(value as readonly OutboxDiagnostic[])).catch(() => setMessage("Não foi possível ler o diagnóstico de eventos.")) }, [bridge, tab])
 
   async function request(serviceId: "stack" | InfrastructureServiceId, actionId: InfrastructureActionId) {
     if (!bridge) return
@@ -108,7 +110,7 @@ export function InfrastructureCockpit({ inventory }: { inventory: Infrastructure
     </> : null}
     {tab === "Database" ? <Panel title="Database"><p>PostgreSQL 17 dedicado em <code>127.0.0.1:55432</code>. O listener externo em <code>5432</code> é sempre não gerenciado.</p>{bridge ? <button className="infra-primary" onClick={requestSeed}>Popular ambiente local</button> : null}</Panel> : null}
     {tab === "Cache" ? <Panel title="Cache"><p>Garnet 2.1.5 em <code>127.0.0.1:46379</code>. Credenciais e namespaces entram no gate de Identity/Secrets.</p></Panel> : null}
-    {tab === "Events" ? <Panel title="Events"><p>NATS 2.14.5 com JetStream em <code>54222</code> e monitoramento local em <code>58222</code>.</p></Panel> : null}
+    {tab === "Events" ? <Panel title="Events"><p>NATS 2.14.5 com JetStream em <code>54222</code> e monitoramento local em <code>58222</code>.</p><div className="operation-table" aria-label="Diagnóstico de outbox">{outboxDiagnostics.map((row) => <article key={row.domain}><span><b>{row.domain}</b><small>worker {row.workerConfigured ? "configurado" : "desabilitado"}</small></span><span><code>{row.pending} pendentes</code><small>{row.retries} retries · {row.deadLetters} dead letters</small></span><span><small>mais antigo: {row.oldestOccurredAt ? new Date(row.oldestOccurredAt).toLocaleString("pt-BR") : "nenhum"}</small></span></article>)}</div>{bridge && !outboxDiagnostics.length ? <p className="muted">Nenhum evento pendente ou diagnóstico indisponível.</p> : null}</Panel> : null}
     {tab === "Backups" ? <Panel title="Backups e recuperação"><p>Backups lógicos validados do database <code>matriz</code>. Restore usa database temporário e mantém a base anterior em quarentena.</p>{bridge ? <button className="infra-primary" onClick={() => requestRecovery("backup")}>Criar backup de guarda</button> : null}<div className="operation-table" aria-label="Catálogo de backups">{backups.map((backup) => <article key={backup.id}><span><b>{backup.id}</b><small>{backup.kind} · {new Date(backup.createdAt).toLocaleString("pt-BR")}</small></span><span><code>{backup.valid ? "válido" : "inválido"}</code><small>{backup.bytes.toLocaleString("pt-BR")} bytes · SHA-256 {backup.sha256.slice(0, 12)}…</small></span>{bridge && backup.valid ? <span className="infra-actions"><button onClick={() => requestRecovery("restore", backup.id)}>Restaurar</button><button className="danger-button" onClick={() => requestRecovery("recreate", backup.id)}>Recriar</button></span> : null}</article>)}</div>{!backups.length ? <p className="muted">Nenhum backup catalogado.</p> : null}</Panel> : null}
     {tab === "Migrations" ? <Panel title="Migrations"><p>Runtime nunca executa migration. Qualquer estado diferente de <code>clean</code> bloqueia o start do app antes de abrir portas ou processos.</p>{bridge && migrations.some((ledger) => ledger.state === "pending") ? <button className="infra-primary" onClick={requestMigrations}>Aplicar migrations pendentes</button> : null}<div className="operation-table" aria-label="Ledgers de migrations">{migrations.map((ledger) => <article key={ledger.schema}><span><b>{ledger.schema}</b><small>{ledger.state}</small></span><span><code>{ledger.pending.length} pendentes</code><small>{ledger.altered.length} alteradas · {ledger.unexpected.length} inesperadas · {ledger.failed.length} falhas</small></span></article>)}</div>{!migrations.length ? <p className="muted">Nenhum ledger disponível.</p> : null}</Panel> : null}
     {tab === "Contracts" ? <section className="operation-table" aria-label="Infrastructure Contracts">{inventory.apps.map((app) => <article key={app.appId}><span><b>{app.appId}</b><small>{app.classification} · {app.runtime}</small></span><span><code>{app.database}</code><small>{app.identity} · {app.cache}</small></span><span><small>{app.events}</small><small>{app.secrets}</small>{bridge ? <button onClick={() => requestEnvironmentExport(app.appId)}>Exportar env local</button> : null}</span></article>)}</section> : null}
