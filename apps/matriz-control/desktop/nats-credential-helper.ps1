@@ -1,5 +1,5 @@
 param(
-  [Parameter(Mandatory=$true)][ValidateSet('ProvisionPay')][string]$Action
+  [Parameter(Mandatory=$true)][ValidateSet('ProvisionDomains')][string]$Action
 )
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
@@ -36,13 +36,17 @@ if (Test-Path -LiteralPath $secretPath) {
 }
 else { $secrets = @{} }
 if (-not $secrets.ContainsKey('matriz_pay')) { $secrets['matriz_pay'] = New-RandomSecret; $changed = $true }
+if (-not $secrets.ContainsKey('matriz_seumei')) { $secrets['matriz_seumei'] = New-RandomSecret; $changed = $true }
+if (-not $secrets.ContainsKey('matriz_hub')) { $secrets['matriz_hub'] = New-RandomSecret; $changed = $true }
 if (-not $secrets.ContainsKey('matriz_control')) { $secrets['matriz_control'] = New-RandomSecret; $changed = $true }
 if ($changed) { Protect-LocalSecret ($secrets | ConvertTo-Json -Compress) $secretPath }
 $payPassword = [string]$secrets.matriz_pay
 $controlPassword = [string]$secrets.matriz_control
-if ($payPassword.Length -lt 32 -or $controlPassword.Length -lt 32) { throw 'The NATS credentials are invalid.' }
+$seumeiPassword = [string]$secrets.matriz_seumei
+$hubPassword = [string]$secrets.matriz_hub
+if ($payPassword.Length -lt 32 -or $seumeiPassword.Length -lt 32 -or $hubPassword.Length -lt 32 -or $controlPassword.Length -lt 32) { throw 'The NATS credentials are invalid.' }
 $account = "$env:USERDOMAIN\$env:USERNAME"
 if ($account -notmatch '^[\w .-]+\\[\w .-]+$') { throw 'The current Windows account cannot secure the Control vault.' }
 & icacls.exe $vaultRoot /inheritance:r /grant:r "${account}:(OI)(CI)(F)" | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Control vault ACL setup failed.' }
-[Console]::Out.Write((@{ payPassword=$payPassword; controlPassword=$controlPassword } | ConvertTo-Json -Compress))
+[Console]::Out.Write((@{ payPassword=$payPassword; seumeiPassword=$seumeiPassword; hubPassword=$hubPassword; controlPassword=$controlPassword } | ConvertTo-Json -Compress))

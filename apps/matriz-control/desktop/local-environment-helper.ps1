@@ -106,6 +106,10 @@ foreach ($declaration in $contract.environment.keys) {
   elseif ($name -eq 'NATS_URL') { $value = 'nats://127.0.0.1:54222' }
   elseif ($name -eq 'PAY_NATS_USERNAME') { $value = 'matriz_pay' }
   elseif ($name -eq 'PAY_OUTBOX_WORKER_ENABLED') { $value = 'true' }
+  elseif ($name -eq 'SEUMEI_NATS_USERNAME') { $value = 'matriz_seumei' }
+  elseif ($name -eq 'SEUMEI_OUTBOX_WORKER_ENABLED') { $value = 'true' }
+  elseif ($name -eq 'HUB_NATS_USERNAME') { $value = 'matriz_hub' }
+  elseif ($name -eq 'HUB_OUTBOX_WORKER_ENABLED') { $value = 'true' }
   elseif ($name -eq 'MATRIZ_PAY_INTERNAL_URL') { $value = 'http://127.0.0.1:3012' }
   elseif ($name -eq 'MATRIZ_OPS_SERVICE_TOKEN') { $value = Get-OrCreateSecret $applicationSecrets 'service::matriz-ops::matriz-pay' { New-RandomSecret } }
   elseif ($name -match '_CACHE_USERNAME$') { $value = 'matriz_' + $AppId.Replace('matriz-','').Replace('-','_') }
@@ -123,10 +127,10 @@ foreach ($declaration in $contract.environment.keys) {
   }
   elseif ($name -match '_OIDC_CLIENT_SECRET$') { $value = Get-OrCreateSecret $applicationSecrets "oidc::$($contract.identity.oidcClientId)" { New-RandomSecret } }
   elseif ($name -match '_SESSION_SECRET$' -or $name -eq 'IDENTITY_CSRF_SECRET') { $value = Get-OrCreateSecret $applicationSecrets "$AppId::$name" { New-RandomSecret } }
-  elseif ($name -match '(_RUNTIME)?_DATABASE_URL$') {
+  elseif ($name -match '(_RUNTIME|_WORKER)?_DATABASE_URL$') {
     if (-not $contract.database.required) { throw "$name cannot be generated for an app without a database." }
-    $role = [string]$contract.database.runtimeRole
-    $password = Get-RequiredMapValue $databaseSecrets $role "Database runtime credential $role"
+    $role = if ($name -match '_WORKER_DATABASE_URL$') { [string]$contract.database.workerRole } else { [string]$contract.database.runtimeRole }
+    $password = Get-RequiredMapValue $databaseSecrets $role "Database credential $role"
     $encoded = [Uri]::EscapeDataString($password)
     $value = "postgresql://$role`:$encoded@127.0.0.1:55432/matriz?schema=$($contract.database.schema)"
   }
@@ -135,6 +139,8 @@ foreach ($declaration in $contract.environment.keys) {
     $value = Get-RequiredMapValue $cacheSecrets $cacheRole "Cache credential $cacheRole"
   }
   elseif ($name -eq 'PAY_NATS_PASSWORD') { $value = Get-RequiredMapValue $natsSecrets 'matriz_pay' 'NATS credential matriz_pay' }
+  elseif ($name -eq 'SEUMEI_NATS_PASSWORD') { $value = Get-RequiredMapValue $natsSecrets 'matriz_seumei' 'NATS credential matriz_seumei' }
+  elseif ($name -eq 'HUB_NATS_PASSWORD') { $value = Get-RequiredMapValue $natsSecrets 'matriz_hub' 'NATS credential matriz_hub' }
   elseif ($declaration.source -eq 'control-vault') { $value = Get-OrCreateSecret $applicationSecrets "$AppId::$name" { New-RandomSecret } }
   elseif ($declaration.required) { throw "No local generator exists for required key $name." }
   if (-not [string]::IsNullOrWhiteSpace([string]$value)) { $result[$name] = [string]$value }

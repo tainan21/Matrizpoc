@@ -12,7 +12,7 @@ const execFileAsync = promisify(execFile)
 export class WindowsInfrastructureHost implements InfrastructureHost {
   private readonly root: string
 
-  constructor(private readonly options: { programData: string; helperPath: string; natsCredentials: { prepare(): Promise<Readonly<{ payPasswordHash: string; controlPasswordHash: string; provisionStreams(): Promise<void> }>> } }) {
+  constructor(private readonly options: { programData: string; helperPath: string; natsCredentials: { prepare(): Promise<Readonly<{ payPasswordHash: string; seumeiPasswordHash: string; hubPasswordHash: string; controlPasswordHash: string; provisionStreams(): Promise<void> }>> } }) {
     if (process.platform !== "win32") throw new Error("Matriz infrastructure services require Windows")
     this.root = resolve(options.programData, "Matriz", "Infrastructure")
   }
@@ -62,10 +62,10 @@ export class WindowsInfrastructureHost implements InfrastructureHost {
 
   private async installStack() {
     const credentials = await this.options.natsCredentials.prepare()
-    const launcher = "$p=Start-Process powershell.exe -Verb RunAs -WindowStyle Hidden -Wait -PassThru -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$env:MATRIZ_HELPER,'-Action','Install','-ProgramDataRoot',$env:MATRIZ_PROGRAM_DATA,'-PayNatsPasswordHash',$env:MATRIZ_NATS_PAY_HASH,'-ControlNatsPasswordHash',$env:MATRIZ_NATS_CONTROL_HASH);exit $p.ExitCode"
+    const launcher = "$p=Start-Process powershell.exe -Verb RunAs -WindowStyle Hidden -Wait -PassThru -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',$env:MATRIZ_HELPER,'-Action','Install','-ProgramDataRoot',$env:MATRIZ_PROGRAM_DATA,'-PayNatsPasswordHash',$env:MATRIZ_NATS_PAY_HASH,'-SeumeiNatsPasswordHash',$env:MATRIZ_NATS_SEUMEI_HASH,'-HubNatsPasswordHash',$env:MATRIZ_NATS_HUB_HASH,'-ControlNatsPasswordHash',$env:MATRIZ_NATS_CONTROL_HASH);exit $p.ExitCode"
     await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", launcher], {
       windowsHide: true,
-      env: { ...process.env, MATRIZ_HELPER: this.options.helperPath, MATRIZ_PROGRAM_DATA: this.options.programData, MATRIZ_NATS_PAY_HASH: credentials.payPasswordHash, MATRIZ_NATS_CONTROL_HASH: credentials.controlPasswordHash },
+      env: { ...process.env, MATRIZ_HELPER: this.options.helperPath, MATRIZ_PROGRAM_DATA: this.options.programData, MATRIZ_NATS_PAY_HASH: credentials.payPasswordHash, MATRIZ_NATS_SEUMEI_HASH: credentials.seumeiPasswordHash, MATRIZ_NATS_HUB_HASH: credentials.hubPasswordHash, MATRIZ_NATS_CONTROL_HASH: credentials.controlPasswordHash },
       maxBuffer: 128 * 1024,
     })
     await credentials.provisionStreams()

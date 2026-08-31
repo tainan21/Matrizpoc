@@ -53,4 +53,23 @@ describe("Windows infrastructure installer contract", () => {
     expect(helper).not.toContain("$payNatsPassword")
     expect(helper).not.toContain("authorization: { token:")
   })
+
+  it("creates restricted database workers and grants only domain operational tables", async () => {
+    const helper = await readFile(resolve(process.cwd(), "desktop/infrastructure-helper.ps1"), "utf8")
+    const migrationHelper = await readFile(resolve(process.cwd(), "desktop/database-migration-apply-helper.ps1"), "utf8")
+    expect(helper).toContain('"matriz_${schema}_worker"')
+    expect(helper).toContain("NOINHERIT NOREPLICATION NOBYPASSRLS")
+    expect(migrationHelper).toContain("GRANT SELECT, UPDATE, DELETE ON TABLE")
+    expect(migrationHelper).toContain("outbox_events")
+    expect(migrationHelper).toContain("inbox_events")
+    expect(migrationHelper).not.toMatch(/GRANT\s+(?:ALL|SELECT).*ALL TABLES IN SCHEMA[^;]*worker/i)
+  })
+
+  it("scopes Seumei and Hub publishers independently from Pay", async () => {
+    const helper = await readFile(resolve(process.cwd(), "desktop/infrastructure-helper.ps1"), "utf8")
+    expect(helper).toContain('user: `"matriz_seumei`"')
+    expect(helper).toContain('publish: [`"matriz.v1.seumei.>`"]')
+    expect(helper).toContain('user: `"matriz_hub`"')
+    expect(helper).toContain('publish: [`"matriz.v1.hub.>`"]')
+  })
 })

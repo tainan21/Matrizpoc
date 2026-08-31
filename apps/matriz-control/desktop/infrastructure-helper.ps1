@@ -2,6 +2,8 @@ param(
   [Parameter(Mandatory = $true)][ValidateSet("Install")][string]$Action,
   [Parameter(Mandatory = $true)][string]$ProgramDataRoot,
   [Parameter(Mandatory = $true)][ValidatePattern('^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$')][string]$PayNatsPasswordHash,
+  [Parameter(Mandatory = $true)][ValidatePattern('^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$')][string]$SeumeiNatsPasswordHash,
+  [Parameter(Mandatory = $true)][ValidatePattern('^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$')][string]$HubNatsPasswordHash,
   [Parameter(Mandatory = $true)][ValidatePattern('^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$')][string]$ControlNatsPasswordHash
 )
 
@@ -198,7 +200,7 @@ try {
 
   $natsConfig = Join-Path $managedRoot 'nats\nats.conf'
   $natsLog = Join-Path $natsLogs 'service.log'
-  $natsConfigText = "server_name: MatrizNats`r`nhost: 127.0.0.1`r`nport: 54222`r`nhttp: 127.0.0.1:58222`r`njetstream { store_dir: `"$($natsData.Replace('\','/'))`" }`r`nauthorization {`r`n  users: [`r`n    { user: `"matriz_control`", password: `"$ControlNatsPasswordHash`", permissions: { publish: [`"`$JS.API.>`"], subscribe: [`"_INBOX.>`"] } },`r`n    { user: `"matriz_pay`", password: `"$PayNatsPasswordHash`", permissions: { publish: [`"matriz.v1.pay.>`"], subscribe: [`"_INBOX.>`"] }`r`n  ]`r`n}`r`nlog_file: `"$($natsLog.Replace('\','/'))`"`r`n"
+  $natsConfigText = "server_name: MatrizNats`r`nhost: 127.0.0.1`r`nport: 54222`r`nhttp: 127.0.0.1:58222`r`njetstream { store_dir: `"$($natsData.Replace('\','/'))`" }`r`nauthorization {`r`n  users: [`r`n    { user: `"matriz_control`", password: `"$ControlNatsPasswordHash`", permissions: { publish: [`"`$JS.API.>`"], subscribe: [`"_INBOX.>`"] } },`r`n    { user: `"matriz_pay`", password: `"$PayNatsPasswordHash`", permissions: { publish: [`"matriz.v1.pay.>`"], subscribe: [`"_INBOX.>`"] } },`r`n    { user: `"matriz_seumei`", password: `"$SeumeiNatsPasswordHash`", permissions: { publish: [`"matriz.v1.seumei.>`"], subscribe: [`"_INBOX.>`"] } },`r`n    { user: `"matriz_hub`", password: `"$HubNatsPasswordHash`", permissions: { publish: [`"matriz.v1.hub.>`"], subscribe: [`"_INBOX.>`",`"matriz.v1.core.onboarding.completed`",`"matriz.v1.spot.gig.created`",`"matriz.v1.seumei.establishment.selected`",`"matriz.v1.contracts.contract.created`",`"matriz.v1.contracts.contract.linked`"] } }`r`n  ]`r`n}`r`nlog_file: `"$($natsLog.Replace('\','/'))`"`r`n"
   [IO.File]::WriteAllText($natsConfig, $natsConfigText, [Text.UTF8Encoding]::new($false))
   $natsExe = Join-Path $natsTarget 'nats-server.exe'
   $natsBinPath = ('"{0}" -c "{1}"' -f $natsExe, $natsConfig)
@@ -258,21 +260,23 @@ try {
 
   $roleSecretPath = Join-Path $vaultRoot 'database-roles.dpapi'
   if (Test-Path -LiteralPath $roleSecretPath) { $roleSecrets = Unprotect-LocalSecret $roleSecretPath | ConvertFrom-Json -AsHashtable }
-  else {
-    $roleSecrets = @{}
-    foreach ($schema in @('core','hub','spot','seumei','contracts','willdash','ops','pay')) {
-      $roleSecrets["matriz_${schema}_migration"] = New-DatabaseSecret
-      $roleSecrets["matriz_${schema}_runtime"] = New-DatabaseSecret
+  else { $roleSecrets = @{} }
+  $roleSecretsChanged = $false
+  foreach ($schema in @('core','hub','spot','seumei','contracts','willdash','ops','pay')) {
+    foreach ($roleName in @("matriz_${schema}_migration", "matriz_${schema}_runtime", "matriz_${schema}_worker")) {
+      if (-not $roleSecrets.ContainsKey($roleName)) { $roleSecrets[$roleName] = New-DatabaseSecret; $roleSecretsChanged = $true }
     }
-    Protect-LocalSecret ($roleSecrets | ConvertTo-Json -Compress) $roleSecretPath
   }
+  if ($roleSecretsChanged) { Protect-LocalSecret ($roleSecrets | ConvertTo-Json -Compress) $roleSecretPath }
   $topologySql = "REVOKE ALL ON DATABASE matriz FROM PUBLIC; REVOKE CREATE ON SCHEMA public FROM PUBLIC;"
   foreach ($schema in @('core','hub','spot','seumei','contracts','willdash','ops','pay')) {
     $migrationRole = "matriz_${schema}_migration"
     $runtimeRole = "matriz_${schema}_runtime"
+    $workerRole = "matriz_${schema}_worker"
     $migrationSecret = $roleSecrets[$migrationRole].Replace("'", "''")
     $runtimeSecret = $roleSecrets[$runtimeRole].Replace("'", "''")
-    $topologySql += " DO `$`$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='$migrationRole') THEN CREATE ROLE $migrationRole LOGIN PASSWORD '$migrationSecret' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='$runtimeRole') THEN CREATE ROLE $runtimeRole LOGIN PASSWORD '$runtimeSecret' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS; END IF; END `$`$; GRANT CONNECT ON DATABASE matriz TO $migrationRole, $runtimeRole; CREATE SCHEMA IF NOT EXISTS $schema AUTHORIZATION $migrationRole; ALTER SCHEMA $schema OWNER TO $migrationRole; REVOKE ALL ON SCHEMA $schema FROM PUBLIC; GRANT USAGE ON SCHEMA $schema TO $runtimeRole;"
+    $workerSecret = $roleSecrets[$workerRole].Replace("'", "''")
+    $topologySql += " DO `$`$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='$migrationRole') THEN CREATE ROLE $migrationRole LOGIN PASSWORD '$migrationSecret' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='$runtimeRole') THEN CREATE ROLE $runtimeRole LOGIN PASSWORD '$runtimeSecret' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='$workerRole') THEN CREATE ROLE $workerRole LOGIN PASSWORD '$workerSecret' NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOREPLICATION NOBYPASSRLS; END IF; END `$`$; GRANT CONNECT ON DATABASE matriz TO $migrationRole, $runtimeRole, $workerRole; CREATE SCHEMA IF NOT EXISTS $schema AUTHORIZATION $migrationRole; ALTER SCHEMA $schema OWNER TO $migrationRole; REVOKE ALL ON SCHEMA $schema FROM PUBLIC; GRANT USAGE ON SCHEMA $schema TO $runtimeRole, $workerRole;"
   }
   Invoke-Psql $psql 'matriz' $bootstrapPassword $topologySql
 

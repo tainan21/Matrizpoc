@@ -81,6 +81,23 @@ CREATE TABLE IF NOT EXISTS "$Schema"."_prisma_migrations" (
     Remove-Item -LiteralPath $temporary -Force
     $temporary = $null
   }
+  $workerRole = "matriz_${Schema}_worker"
+  $runtimeRole = "matriz_${Schema}_runtime"
+  $operationalGrants = @"
+REVOKE ALL ON ALL TABLES IN SCHEMA "$Schema" FROM "$workerRole";
+DO `$`$
+BEGIN
+  IF to_regclass('"$Schema"."outbox_events"') IS NOT NULL THEN
+    EXECUTE 'GRANT SELECT, UPDATE, DELETE ON TABLE "$Schema"."outbox_events" TO "$workerRole"';
+    EXECUTE 'GRANT INSERT ON TABLE "$Schema"."outbox_events" TO "$runtimeRole"';
+  END IF;
+  IF to_regclass('"$Schema"."inbox_events"') IS NOT NULL THEN
+    EXECUTE 'GRANT SELECT, UPDATE, DELETE ON TABLE "$Schema"."inbox_events" TO "$workerRole"';
+  END IF;
+END
+`$`$;
+"@
+  Invoke-LedgerSql $operationalGrants | Out-Null
   @{ schema=$Schema; state='applied' } | ConvertTo-Json -Compress
 }
 finally {
