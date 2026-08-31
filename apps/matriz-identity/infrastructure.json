@@ -29,7 +29,8 @@
     { "name": "OIDC_CLIENT_SECRET_WILLDASH", "secret": true, "required": true, "source": "control-vault" },
     { "name": "OIDC_CLIENT_SECRET_MATRIZ_OPS", "secret": true, "required": true, "source": "control-vault" },
     { "name": "OIDC_CLIENT_SECRET_MATRIZ_PAY", "secret": true, "required": true, "source": "control-vault" },
-    { "name": "OIDC_CLIENT_SECRET_MATRIZ_ADMIN", "secret": true, "required": true, "source": "control-vault" }
+    { "name": "OIDC_CLIENT_SECRET_MATRIZ_ADMIN", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OIDC_CLIENT_SECRET_MATRIZ_CLIENT_ADMIN", "secret": true, "required": true, "source": "control-vault" }
   ] },
   "filesystem": { "required": false }
 }

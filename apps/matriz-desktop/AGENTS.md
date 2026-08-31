@@ -17,6 +17,8 @@ console with bounded resources.
 
 ## Validation
 
+Distribution identity: principal `matriz-control-tauri`, Windows `com.matriz.control`, tag `control-v*`. Read `../../docs/release-distribution.md` first.
+
 - `pnpm --filter @matriz/app-matriz-desktop test`
 - `pnpm --filter @matriz/app-matriz-desktop typecheck`
 - `pnpm --filter @matriz/app-matriz-desktop lint`

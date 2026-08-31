@@ -59,4 +59,47 @@ describe("DistributionService", () => {
       service.createProduct({ userId: "viewer", capabilities: [] }, product, "denied-request"),
     ).toThrow("distribution.catalog.manage")
   })
+
+  it("rejects prerelease versions in the stable channel", async () => {
+    const service = new DistributionService(createMemoryDistributionRepository())
+    await service.createProduct(actor, product, "product-prerelease")
+
+    expect(() =>
+      service.createRelease(
+        actor,
+        product.productId,
+        { ...release, version: "1.3.0-beta.1" },
+        "release-prerelease",
+      ),
+    ).toThrow("Stable releases cannot use prerelease versions")
+  })
+
+  it("keeps beta out of the public catalog and blocks a stable downgrade", async () => {
+    const service = new DistributionService(
+      createMemoryDistributionRepository(),
+      () => new Date("2026-08-28T13:00:00.000Z"),
+    )
+    await service.createProduct(actor, product, "product-channels")
+    const stable = await service.createRelease(actor, product.productId, release, "release-stable")
+    await service.publishRelease(actor, stable.releaseId, "publish-stable")
+    const beta = await service.createRelease(
+      actor,
+      product.productId,
+      { ...release, version: "1.3.0-beta.1", channel: "beta" },
+      "release-beta",
+    )
+    await service.publishRelease(actor, beta.releaseId, "publish-beta")
+
+    expect((await service.catalog()).products[0]?.release?.version).toBe("1.2.0")
+
+    const downgrade = await service.createRelease(
+      actor,
+      product.productId,
+      { ...release, version: "1.1.0" },
+      "release-downgrade",
+    )
+    await expect(
+      service.publishRelease(actor, downgrade.releaseId, "publish-downgrade"),
+    ).rejects.toThrow("Stable release cannot downgrade")
+  })
 })

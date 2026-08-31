@@ -17,7 +17,12 @@
     { "name": "HUB_CACHE_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
     { "name": "HUB_CACHE_DEFAULT_TTL_SECONDS", "secret": false, "required": true, "source": "generated" },
     { "name": "HUB_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
-    { "name": "HUB_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" }
+    { "name": "HUB_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "CLIENT_ADMIN_VERCEL_TOKEN", "secret": true, "required": false, "source": "control-vault" },
+    { "name": "CLIENT_ADMIN_VERCEL_TEAM_ID", "secret": false, "required": false, "source": "operator" },
+    { "name": "CLIENT_ADMIN_VERCEL_PROJECT_IDS", "secret": false, "required": false, "source": "operator" },
+    { "name": "CLIENT_ADMIN_GA4_PROPERTY_ID", "secret": false, "required": false, "source": "operator" },
+    { "name": "CLIENT_ADMIN_GA4_ACCESS_TOKEN", "secret": true, "required": false, "source": "control-vault" }
   ] },
   "filesystem": { "required": false }
 }

@@ -1,0 +1,42 @@
+{
+  "name": "@matriz/app-client-admin",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3013",
+    "build": "next build",
+    "start": "next start -p 3013",
+    "test": "vitest run --config vitest.config.ts",
+    "lint": "eslint . --max-warnings 0",
+    "typecheck": "tsc --noEmit",
+    "dev:desktop": "tauri dev --config desktop/src-tauri/tauri.conf.json",
+    "dev:desktop:web": "vite --config desktop/vite.config.ts",
+    "build:desktop:web": "vite build --config desktop/vite.config.ts",
+    "package:desktop": "tauri build --config desktop/src-tauri/tauri.conf.json --bundles nsis"
+  },
+  "dependencies": {
+    "@matriz/foundation-types": "workspace:*",
+    "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-registry-core": "workspace:*",
+    "@matriz/platform-auth": "workspace:*",
+    "@matriz/platform-config": "workspace:*",
+    "@tauri-apps/api": "2.11.1",
+    "next": "16.2.12",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.11.4",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
+    "@types/node": "22.7.5",
+    "@types/react": "19.0.0",
+    "@types/react-dom": "19.0.0",
+    "@vitejs/plugin-react": "4.3.4",
+    "jsdom": "30.0.1",
+    "typescript": "5.6.3",
+    "vite": "5.4.21",
+    "vitest": "2.1.2"
+  }
+}

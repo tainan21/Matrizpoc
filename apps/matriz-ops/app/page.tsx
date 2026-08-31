@@ -2,24 +2,27 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { loadOpsOverview } from "../src/application/user-directory"
 import { loadOperationalPulse } from "../src/application/operational-pulse"
-import { requireOpsPagePrincipal } from "../src/server/ops-session"
+import { getOpsPageAccess } from "../src/server/ops-session"
 import { localE2eBootstrapPath } from "../src/server/local-e2e-bootstrap"
 import { AppShell } from "../src/ui/AppShell"
+import { OpsLogoutButton } from "../src/ui/OpsLogoutButton"
 export const dynamic = "force-dynamic"
 function number(value: number | string | bigint) { return new Intl.NumberFormat("pt-BR").format(typeof value === "number" ? value : BigInt(value)) }
 function money(value: string) { const amount = BigInt(value); return `R$ ${number(amount / 100n)},${(amount % 100n).toString().padStart(2, "0")}` }
 function since(value: string | null) { if (!value) return "sem sinal"; const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000)); return seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.round(seconds / 60)}min` : `${Math.round(seconds / 3600)}h` }
 export default async function Overview() {
-  const principal = await requireOpsPagePrincipal()
-  if (!principal) {
+  const access = await getOpsPageAccess()
+  if (access.state === "anonymous") {
     const bootstrapPath = localE2eBootstrapPath({
       MATRIZ_RUNTIME_PROFILE: process.env.MATRIZ_RUNTIME_PROFILE,
       OPS_E2E_ENABLED: process.env.OPS_E2E_ENABLED,
       OPS_E2E_SESSION_TOKEN: process.env.OPS_E2E_SESSION_TOKEN,
     })
     if (bootstrapPath) redirect(bootstrapPath)
-    return <div className="access-card"><h1>Matriz Ops</h1><p>Entre pelo Matriz Identity com uma conta que possua papel global de operador. Nenhum dado administrativo é carregado antes da validação da sessão.</p></div>
+    return <div className="access-card"><h1>Matriz Ops</h1><p>Entre pelo Matriz Identity com uma conta que possua papel global de operador. Nenhum dado administrativo é carregado antes da validação da sessão.</p><a className="auth-button" href="/api/auth/oidc/login?returnTo=/">Entrar com Matriz Identity</a></div>
   }
+  if (access.state === "denied") return <div className="access-card"><h1>Acesso negado</h1><p>Sua identidade foi validada, mas não possui um PlatformOperator ativo para o Matriz Ops. Solicite acesso a um administrador.</p><OpsLogoutButton /></div>
+  const principal = access.principal
   const [identity, pulse] = await Promise.all([loadOpsOverview(), loadOperationalPulse()])
   const metrics = [["Usuários", identity.users, "base registrada"], ["Ativos", identity.activeUsers, "identidades liberadas"], ["Suspensos", identity.suspendedUsers, "acesso bloqueado"], ["Sessões", identity.activeSessions, "sessões válidas"], ["Operadores", identity.operators, "equipe interna"], ["Plataformas", identity.platforms, "registros ativos"]] as const
   const critical = pulse.services.filter((service) => service.status === "critical")

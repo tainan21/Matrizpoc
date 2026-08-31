@@ -14,6 +14,8 @@ Operate users, access, platform health, telemetry and wallet workflows through r
 
 ## Validation
 
+Distribution: `matriz-ops-tauri`, Windows `com.matriz.ops`, tag `ops-v*`. Read `../../docs/release-distribution.md` first.
+
 - `corepack pnpm --filter @matriz/app-matriz-ops test`
 - `corepack pnpm --filter @matriz/app-matriz-ops lint`
 - `corepack pnpm --filter @matriz/app-matriz-ops typecheck`

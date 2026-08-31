@@ -17,4 +17,10 @@ export const tauriGateway: DesktopGateway = {
   cleanup: (productId, candidateIds) =>
     invoke<OperationResult>("cleanup_product", { productId, candidateIds }),
   selfUninstall: () => invoke<OperationResult>("self_uninstall"),
+  chooseLocalInstallerFolder: () => invoke("choose_local_installer_folder"),
+  scanLocalInstallers: (folderId) => invoke("scan_local_installers", { folderId }),
+  prepareInstaller: (source, action) => invoke("prepare_installer", { source, action }),
+  confirmInstaller: (operationId, acknowledgements) => invoke("confirm_installer", { operationId, acknowledgements }),
+  cancelInstaller: (operationId) => invoke("cancel_installer", { operationId }),
+  installerOperation: (operationId) => invoke("installer_operation", { operationId }),
 }

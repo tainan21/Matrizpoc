@@ -14,7 +14,7 @@ async function bootstrap() {
   )
   createRoot(root).render(
     <StrictMode>
-      <UninstallApp gateway={gateway} loadCatalog={() => catalog.load()} />
+      <UninstallApp gateway={gateway} loadCatalog={() => catalog.loadSnapshot()} />
     </StrictMode>,
   )
 }

@@ -8,6 +8,8 @@ import {
   appManifestSchema,
   appIdSchema,
   storePackageManifestV1Schema,
+  clientAdminSectionSchema,
+  clientAdminDashboardSchema,
 } from "@matriz/integration-api-contracts"
 import { monorepoConfig } from "@matriz/platform-config"
 
@@ -15,6 +17,23 @@ import { monorepoConfig } from "@matriz/platform-config"
  * Smoke test — DTOs publicos (L7 + L8)
  */
 describe("smoke: dtos", () => {
+  it("Client Admin distinguishes empty and unavailable data without inventing metrics", () => {
+    expect(clientAdminSectionSchema.parse({ state: "empty", asOf: null, lastSuccessAt: null, error: null, data: [] }).state).toBe("empty")
+    expect(clientAdminSectionSchema.safeParse({ state: "fresh", asOf: null, lastSuccessAt: null, error: null, data: [] }).success).toBe(false)
+    expect(clientAdminDashboardSchema.parse({
+      tenant: { id: "tenant-laudate", name: "Laudate" },
+      generatedAt: "2026-08-31T12:00:00.000Z",
+      metrics: [],
+      attention: [],
+      sections: {
+        systems: { state: "empty", asOf: null, lastSuccessAt: null, error: null, data: [] },
+        site: { state: "not_configured", asOf: null, lastSuccessAt: null, error: null, data: null },
+        payments: { state: "empty", asOf: null, lastSuccessAt: null, error: null, data: [] },
+        integrations: { state: "not_configured", asOf: null, lastSuccessAt: null, error: null, data: [] },
+      },
+    }).metrics).toEqual([])
+  })
+
   it("registers Matriz Admin and keeps Seumei on its dedicated port", () => {
     expect(appIdSchema.parse("matriz-admin")).toBe("matriz-admin")
     expect(monorepoConfig.baseUrls["matriz-admin"]).toBe("http://127.0.0.1:3002")

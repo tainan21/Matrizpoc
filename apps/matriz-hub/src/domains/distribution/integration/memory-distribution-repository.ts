@@ -76,9 +76,16 @@ export function createMemoryDistributionRepository(): DistributionRepository {
       if (!current) throw new Error("Distribution product was not found")
       const draft = releases.get(releaseId)
       if (!draft) throw new Error("Distribution release was not found")
+      const currentStable = current.release?.channel === "stable" ? current.release : null
+      if (
+        draft.channel === "stable" &&
+        currentStable &&
+        compareSemver(draft.version, currentStable.version) < 0
+      )
+        throw new Error("Stable release cannot downgrade")
       const published = { ...draft, status: "published" as const, publishedAt }
       releases.set(releaseId, published)
-      products.set(productId, { ...current, release: published })
+      if (draft.channel === "stable") products.set(productId, { ...current, release: published })
       return record(key, published, actorId, "release.published", releaseId)
     },
     async retireRelease(releaseId, actorId, key) {
@@ -104,4 +111,11 @@ export function createMemoryDistributionRepository(): DistributionRepository {
       return [...audits]
     },
   }
+}
+
+function compareSemver(left: string, right: string) {
+  const parts = (value: string) => value.split("-")[0].split(".").map(Number)
+  const [leftMajor = 0, leftMinor = 0, leftPatch = 0] = parts(left)
+  const [rightMajor = 0, rightMinor = 0, rightPatch = 0] = parts(right)
+  return leftMajor - rightMajor || leftMinor - rightMinor || leftPatch - rightPatch
 }

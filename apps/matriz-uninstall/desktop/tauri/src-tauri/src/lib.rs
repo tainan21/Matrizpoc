@@ -2,7 +2,7 @@ use base64::Engine;
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, fs, process::Command, sync::Mutex};
+use std::{collections::HashMap, fs, path::{Path, PathBuf}, process::Command, sync::Mutex};
 use tauri::{AppHandle, Manager, State};
 use uuid::Uuid;
 const MAX_INSTALLER_BYTES: u64 = 512 * 1024 * 1024;
@@ -34,6 +34,30 @@ struct CleanupCandidate {
     category: String,
     display_path: String,
     estimated_bytes: u64,
+}
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LocalInstallerViewModel {
+    installer_id: String, product_id: String, display_name: String, version: String,
+    size_bytes: u64, sha256: String, trust: String, is_latest_for_product: bool,
+    is_downgrade: bool, message: String,
+}
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+struct InstallerOperationSnapshot {
+    operation_id: String, product_id: String, version: String, phase: String,
+    bytes_downloaded: u64, total_bytes: Option<u64>, required_acknowledgements: Vec<String>, message: String,
+}
+#[derive(Deserialize)]
+#[serde(tag = "kind", rename_all = "lowercase")]
+enum InstallerSource { Remote { product_id: String }, Local { installer_id: String } }
+#[derive(Clone)]
+struct LocalInstallerRecord { path: PathBuf, view: LocalInstallerViewModel }
+#[derive(Default)]
+struct LocalInstallerState {
+    folders: Mutex<HashMap<String, PathBuf>>,
+    installers: Mutex<HashMap<String, LocalInstallerRecord>>,
+    operations: Mutex<HashMap<String, InstallerOperationSnapshot>>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -85,6 +109,130 @@ fn powershell(script: &str) -> Result<String, String> {
         return Err(String::from_utf8_lossy(&output.stderr).into());
     }
     Ok(String::from_utf8_lossy(&output.stdout).into())
+}
+
+#[tauri::command]
+fn choose_local_installer_folder(state: State<LocalInstallerState>) -> Result<Option<serde_json::Value>, String> {
+    let script = r#"Add-Type -AssemblyName System.Windows.Forms; $d=New-Object System.Windows.Forms.FolderBrowserDialog; $d.Description='Selecione uma pasta com instaladores Matriz'; if($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){$d.SelectedPath}"#;
+    let raw = powershell(script)?;
+    let value = raw.trim();
+    if value.is_empty() { return Ok(None); }
+    let path = PathBuf::from(value);
+    if !path.is_absolute() || !path.is_dir() { return Err("Pasta local inválida".into()); }
+    let folder_id = Uuid::new_v4().to_string();
+    state.folders.lock().map_err(|_| "Catálogo local indisponível")?.insert(folder_id.clone(), path.clone());
+    Ok(Some(serde_json::json!({ "folderId": folder_id, "label": path.file_name().and_then(|v|v.to_str()).unwrap_or("Pasta local") })))
+}
+
+#[tauri::command]
+fn scan_local_installers(folder_id: String, state: State<LocalInstallerState>) -> Result<Vec<LocalInstallerViewModel>, String> {
+    let folder = state.folders.lock().map_err(|_| "Catálogo local indisponível")?.get(&folder_id).cloned().ok_or("Pasta local não pertence à sessão atual")?;
+    let mut views = Vec::new();
+    for entry in fs::read_dir(folder).map_err(|e| e.to_string())? {
+        let entry = entry.map_err(|e| e.to_string())?;
+        let path = entry.path();
+        if !entry.file_type().map_err(|e| e.to_string())?.is_file() || path.extension().and_then(|v|v.to_str()).map(|v|!v.eq_ignore_ascii_case("exe")).unwrap_or(true) { continue; }
+        let size = entry.metadata().map_err(|e| e.to_string())?.len();
+        if size == 0 || size > MAX_INSTALLER_BYTES { continue; }
+        let bytes = fs::read(&path).map_err(|e| e.to_string())?;
+        let sha256 = format!("{:x}", Sha256::digest(&bytes));
+        let installer_id = sha256[..24].to_string();
+        let signed = authenticode_is_matriz(&path);
+        let view = classify_local_file(path.file_name().and_then(|v|v.to_str()).unwrap_or(""), &installer_id, size, &sha256, signed);
+        state.installers.lock().map_err(|_| "Catálogo local indisponível")?.insert(installer_id, LocalInstallerRecord { path, view: view.clone() });
+        views.push(view);
+    }
+    mark_latest(&mut views);
+    Ok(views)
+}
+
+#[tauri::command]
+fn prepare_installer(source: InstallerSource, action: String, state: State<LocalInstallerState>) -> Result<InstallerOperationSnapshot, String> {
+    let (product_id, version, total_bytes, required) = match source {
+        InstallerSource::Local { installer_id } => {
+            let record = state.installers.lock().map_err(|_| "Catálogo local indisponível")?.get(&installer_id).cloned().ok_or("Instalador local expirou")?;
+            let required = if record.view.trust == "unsigned-development" { vec!["unsigned-development".into()] } else { vec![] };
+            (record.view.product_id, record.view.version, Some(record.view.size_bytes), required)
+        },
+        InstallerSource::Remote { product_id } => (product_id, "0.0.0".into(), None, vec![]),
+    };
+    let snapshot = InstallerOperationSnapshot { operation_id: Uuid::new_v4().to_string(), product_id, version, phase: "awaiting_confirmation".into(), bytes_downloaded: 0, total_bytes, required_acknowledgements: required, message: format!("Pronto para {action}.") };
+    state.operations.lock().map_err(|_| "Operações indisponíveis")?.insert(snapshot.operation_id.clone(), snapshot.clone());
+    Ok(snapshot)
+}
+
+#[tauri::command]
+fn confirm_installer(operation_id: String, acknowledgements: Vec<String>, state: State<LocalInstallerState>) -> Result<InstallerOperationSnapshot, String> {
+    let operation = state.operations.lock().map_err(|_| "Operações indisponíveis")?.get(&operation_id).cloned().ok_or("Operação expirada")?;
+    if operation.required_acknowledgements.iter().any(|item| !acknowledgements.contains(item)) { return Err("Confirmação adicional obrigatória".into()); }
+    let record = state.installers.lock().map_err(|_| "Catálogo local indisponível")?.values().find(|item| item.view.product_id == operation.product_id && item.view.version == operation.version).cloned().ok_or("Instalador local expirou")?;
+    let bytes = fs::read(&record.path).map_err(|e| e.to_string())?;
+    if format!("{:x}", Sha256::digest(&bytes)) != record.view.sha256 { return Err("Arquivo local mudou após a inspeção".into()); }
+    if record.view.trust == "signed-matriz" && !authenticode_is_matriz(&record.path) { return Err("Assinatura local mudou após a inspeção".into()); }
+    let status = Command::new(&record.path).arg("/S").status().map_err(|e| e.to_string())?;
+    if !status.success() { return Err(format!("Instalador terminou com {status}")); }
+    let completed = InstallerOperationSnapshot { phase: "completed".into(), message: "Instalação concluída e validada.".into(), ..operation };
+    state.operations.lock().map_err(|_| "Operações indisponíveis")?.insert(operation_id, completed.clone());
+    Ok(completed)
+}
+
+#[tauri::command]
+fn cancel_installer(operation_id: String, state: State<LocalInstallerState>) -> Result<InstallerOperationSnapshot, String> {
+    let current = state.operations.lock().map_err(|_| "Operações indisponíveis")?.get(&operation_id).cloned().ok_or("Operação expirada")?;
+    if current.phase == "installing" { return Err("Instalador já foi iniciado".into()); }
+    let cancelled = InstallerOperationSnapshot { phase: "cancelled".into(), message: "Operação cancelada.".into(), ..current };
+    state.operations.lock().map_err(|_| "Operações indisponíveis")?.insert(operation_id, cancelled.clone());
+    Ok(cancelled)
+}
+
+#[tauri::command]
+fn installer_operation(operation_id: String, state: State<LocalInstallerState>) -> Result<InstallerOperationSnapshot, String> {
+    state.operations.lock().map_err(|_| "Operações indisponíveis")?.get(&operation_id).cloned().ok_or("Operação expirada".into())
+}
+
+fn classify_local_file(file_name: &str, installer_id: &str, size_bytes: u64, sha256: &str, signed: bool) -> LocalInstallerViewModel {
+    let lower = file_name.to_ascii_lowercase();
+    let definitions = [
+        ("matriz-control-tauri", "matriz-control-", "Matriz Control"),
+        ("matriz-control-electron", "matriz-control-electron-", "Matriz Control Electron"),
+        ("matriz-admin-tauri", "matriz-admin-", "Matriz Admin"),
+        ("matriz-ops-tauri", "matriz-ops-", "Matriz Ops"),
+        ("matriz-uninstall-tauri", "matriz-uninstall-", "Matriz Uninstall"),
+        ("matriz-uninstall-electron", "matriz-uninstall-electron-", "Matriz Uninstall Electron"),
+        ("matriz-workbench-electron", "matriz-workbench-", "Matriz Workbench"),
+        ("seumei-electron", "seumei-", "Seumei"),
+    ];
+    let matched = definitions.iter().find_map(|(product, prefix, display)| {
+        let suffix = lower.strip_prefix(prefix)?.strip_suffix("-windows-x64-setup.exe")?;
+        if valid_semver(suffix) { Some((*product, *display, suffix.to_string())) } else { None }
+    });
+    match matched {
+        Some((product_id, display_name, version)) => LocalInstallerViewModel {
+            installer_id: installer_id.into(), product_id: product_id.into(), display_name: display_name.into(), version,
+            size_bytes, sha256: sha256.into(), trust: if signed { "signed-matriz".into() } else { "unsigned-development".into() },
+            is_latest_for_product: false, is_downgrade: false,
+            message: if signed { "Assinatura Matriz válida.".into() } else { "Build local de desenvolvimento não assinado.".into() },
+        },
+        None => LocalInstallerViewModel { installer_id: installer_id.into(), product_id: "unknown".into(), display_name: file_name.into(), version: "0.0.0".into(), size_bytes, sha256: sha256.into(), trust: "blocked".into(), is_latest_for_product: false, is_downgrade: false, message: "Arquivo não corresponde a um produto Matriz permitido.".into() },
+    }
+}
+
+fn valid_semver(value: &str) -> bool {
+    let parts: Vec<_> = value.split('.').collect();
+    parts.len() == 3 && parts.iter().all(|part| !part.is_empty() && part.chars().all(|c| c.is_ascii_digit()))
+}
+fn version_parts(value: &str) -> (u64, u64, u64) { let mut p=value.split('.').map(|v|v.parse().unwrap_or(0)); (p.next().unwrap_or(0),p.next().unwrap_or(0),p.next().unwrap_or(0)) }
+fn mark_latest(items: &mut [LocalInstallerViewModel]) {
+    let mut latest: HashMap<String, (u64,u64,u64)> = HashMap::new();
+    for item in items.iter().filter(|item| item.trust != "blocked") { let version=version_parts(&item.version); if latest.get(&item.product_id).map(|v|version>*v).unwrap_or(true) { latest.insert(item.product_id.clone(),version); } }
+    for item in items.iter_mut() { item.is_latest_for_product = item.trust != "blocked" && latest.get(&item.product_id) == Some(&version_parts(&item.version)); }
+    items.sort_by(|a,b| a.product_id.cmp(&b.product_id).then_with(|| version_parts(&b.version).cmp(&version_parts(&a.version))));
+}
+fn authenticode_is_matriz(path: &Path) -> bool {
+    let escaped = path.to_string_lossy().replace('\'', "''");
+    powershell(&format!("Get-AuthenticodeSignature -LiteralPath '{escaped}' | Select-Object Status,@{{n='Subject';e={{$_.SignerCertificate.Subject}}}} | ConvertTo-Json -Compress"))
+        .ok().and_then(|raw| serde_json::from_str::<serde_json::Value>(raw.trim()).ok())
+        .map(|value| value["Status"] == "Valid" && value["Subject"].as_str().unwrap_or("").split(',').any(|part| matches!(part.trim(), "CN=Matriz" | "O=Matriz"))).unwrap_or(false)
 }
 
 #[tauri::command]
@@ -361,6 +509,7 @@ fn self_uninstall(app: AppHandle, state: State<Inspection>) -> OperationResult {
 pub fn run() {
     tauri::Builder::default()
         .manage(Inspection::default())
+        .manage(LocalInstallerState::default())
         .invoke_handler(tauri::generate_handler![
             list_installed,
             install_product,
@@ -369,7 +518,13 @@ pub fn run() {
             uninstall_product,
             cleanup_preview,
             cleanup_product,
-            self_uninstall
+            self_uninstall,
+            choose_local_installer_folder,
+            scan_local_installers,
+            prepare_installer,
+            confirm_installer,
+            cancel_installer,
+            installer_operation
         ])
         .run(tauri::generate_context!())
         .expect("erro ao iniciar Matriz Uninstall Tauri");
@@ -386,5 +541,12 @@ mod tests {
     fn parses_nsis() {
         let parsed = safe_command(r#""C:\Program Files\Matriz\uninstall.exe" /S"#).unwrap();
         assert_eq!(parsed.1, vec!["/S"]);
+    }
+    #[test]
+    fn classifies_local_versions_without_exposing_paths() {
+        let item = classify_local_file("matriz-control-1.0.0-windows-x64-setup.exe", "opaque", 10, &"a".repeat(64), false);
+        assert_eq!(item.product_id, "matriz-control-tauri");
+        assert_eq!(item.version, "1.0.0");
+        assert_eq!(item.trust, "unsigned-development");
     }
 }

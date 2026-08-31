@@ -5,6 +5,7 @@ import {
   agentRequestSchema,
   backlogItemSchema,
   backlogStatusSchema,
+  persistedWorkItemSchema,
   roadmapInitiativeSchema,
   roadmapSchema,
   workItemV2Schema,
@@ -150,6 +151,32 @@ describe("Workbench schemas", () => {
     expect(parsed.markers).toEqual([])
   })
 
+  it("reads legacy roadmap identifiers that predate UUID-backed IDs", () => {
+    const parsed = roadmapSchema.parse({
+      schemaVersion: 1,
+      projectId: "sample",
+      phases: [{
+        id: "phase_capability_platform_v1",
+        title: "Capability platform",
+        outcome: "",
+        status: "active",
+        initiatives: [{
+          id: "ini_capability_platform_foundation",
+          title: "Foundation",
+          outcome: "",
+          status: "active",
+          backlogIds: ["wi_capability_platform_v1"],
+        }],
+      }],
+      goals: [],
+      scorecards: [],
+      updatedAt: "2026-08-01T00:00:00.000Z",
+      revision: "revision1",
+    })
+
+    expect(parsed.phases[0]?.initiatives[0]?.backlogIds).toEqual(["wi_capability_platform_v1"])
+  })
+
   it("rejects a marker whose initiative is outside its phase", () => {
     const phaseId = "phase_11111111-1111-4111-8111-111111111111"
     const parsed = roadmapSchema.safeParse({
@@ -193,6 +220,33 @@ describe("Workbench schemas", () => {
         workScope: { kind: "site", id: "../outside" },
       }).success,
     ).toBe(false)
+  })
+
+  it("normalizes string references only when reading persisted V1 backlog items", () => {
+    const legacy = {
+      schemaVersion: 1 as const,
+      id: "tsk_00000000-0000-4000-8000-000000000000",
+      projectId: "matriz-workbench",
+      title: "Legacy reference",
+      description: "",
+      status: "review" as const,
+      priority: "medium" as const,
+      tags: [],
+      acceptanceCriteria: [],
+      dependencyIds: [],
+      references: ["apps/matriz-workbench/docs/PRACTICIES.md"],
+      createdAt: "2026-08-12T05:10:00.000Z",
+      updatedAt: "2026-08-12T05:10:00.000Z",
+      revision: "8edcfabca630bc80",
+    }
+
+    expect(persistedWorkItemSchema.parse(legacy).references).toEqual([
+      {
+        kind: "repository_file",
+        path: "apps/matriz-workbench/docs/PRACTICIES.md",
+      },
+    ])
+    expect(backlogItemSchema.safeParse(legacy).success).toBe(false)
   })
 
   it("accepts the independent governance states of a V2 work item", () => {

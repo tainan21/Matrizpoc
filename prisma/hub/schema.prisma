@@ -901,3 +901,81 @@ model MatrizSchemaRelease {
 
   @@map("__matriz_schema_releases")
 }
+
+// ---------------------------------------------------------------------------
+// Client Admin — Hub-owned tenant projections, never source-of-truth ledgers.
+// ---------------------------------------------------------------------------
+
+model ClientPortalSystem {
+  id        String   @default(cuid())
+  tenantId  String
+  name      String
+  purpose   String
+  category  String
+  publicUrl String?
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sources   ClientPortalDataSource[]
+
+  @@id([tenantId, id])
+  @@unique([tenantId, id])
+  @@index([tenantId, category, enabled])
+  @@map("client_portal_systems")
+}
+
+model ClientPortalDataSource {
+  id            String   @default(cuid())
+  tenantId      String
+  systemId      String?
+  provider      String
+  label         String
+  state         String   @default("not_configured")
+  lastAttemptAt DateTime?
+  lastSuccessAt DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  system        ClientPortalSystem? @relation(fields: [tenantId, systemId], references: [tenantId, id], onDelete: Cascade)
+  snapshots     ClientPortalSnapshot[]
+
+  @@id([tenantId, id])
+  @@unique([tenantId, id])
+  @@index([tenantId, provider, state])
+  @@index([tenantId, systemId])
+  @@map("client_portal_data_sources")
+}
+
+model ClientPortalSnapshot {
+  id         String   @default(cuid())
+  tenantId   String
+  sourceId   String
+  kind       String
+  state      String
+  capturedAt DateTime @default(now())
+  payload    Json
+  source     ClientPortalDataSource @relation(fields: [tenantId, sourceId], references: [tenantId, id], onDelete: Cascade)
+
+  @@id([tenantId, id])
+  @@index([tenantId, sourceId, capturedAt])
+  @@index([tenantId, kind, capturedAt])
+  @@map("client_portal_snapshots")
+}
+
+model ClientPortalPaymentProjection {
+  id                String   @default(cuid())
+  tenantId          String
+  description       String
+  amountCents       Int
+  currency          String   @default("BRL")
+  status            String
+  dueAt             DateTime
+  paidAt            DateTime?
+  externalReference String?
+  lastSyncedAt      DateTime
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@id([tenantId, id])
+  @@index([tenantId, status, dueAt])
+  @@map("client_portal_payment_projections")
+}

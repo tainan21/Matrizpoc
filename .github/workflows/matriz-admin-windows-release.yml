@@ -1,0 +1,64 @@
+name: matriz-admin-windows-release
+
+on:
+  push:
+    tags: ["admin-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: pnpm }
+      - uses: dtolnay/rust-toolchain@stable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @matriz/app-matriz-admin test
+      - run: pnpm --filter @matriz/app-matriz-admin lint
+      - run: pnpm --filter @matriz/app-matriz-admin typecheck
+      - run: pnpm --filter @matriz/app-matriz-admin package:desktop
+      - name: Require signing and Hub credentials
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.MATRIZ_WINDOWS_SIGNING_CERTIFICATE }}
+          MANIFEST_KEY: ${{ secrets.MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY }}
+          HUB_URL: ${{ vars.MATRIZ_DISTRIBUTION_HUB_URL }}
+          HUB_TOKEN: ${{ secrets.MATRIZ_DISTRIBUTION_ADMIN_TOKEN }}
+        run: |
+          foreach ($value in @($env:WINDOWS_CERTIFICATE,$env:MANIFEST_KEY,$env:HUB_URL,$env:HUB_TOKEN)) { if ([string]::IsNullOrWhiteSpace($value)) { throw "Release trust configuration is required" } }
+      - name: Normalize, sign and verify installer
+        id: artifact
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.MATRIZ_WINDOWS_SIGNING_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.MATRIZ_WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+        run: |
+          $source = Get-ChildItem 'apps/matriz-admin/desktop/src-tauri/target/release/bundle/nsis/*.exe' | Select-Object -First 1
+          if (-not $source) { throw "Installer was not generated" }
+          $version = node -p "require('./apps/matriz-admin/package.json').version"
+          $name = "matriz-admin-$version-windows-x64-setup.exe"
+          New-Item release-output -ItemType Directory -Force | Out-Null
+          Copy-Item $source.FullName "release-output/$name"
+          $pfx = Join-Path $env:RUNNER_TEMP 'matriz-signing.pfx'
+          [IO.File]::WriteAllBytes($pfx,[Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          $password = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $password
+          Set-AuthenticodeSignature -FilePath "release-output/$name" -Certificate $cert -TimestampServer 'http://timestamp.digicert.com' | Out-Null
+          if ((Get-AuthenticodeSignature "release-output/$name").Status -ne 'Valid') { throw "Authenticode validation failed" }
+          "file=$name" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Register signed stable release in Hub
+        env:
+          MATRIZ_DISTRIBUTION_HUB_URL: ${{ vars.MATRIZ_DISTRIBUTION_HUB_URL }}
+          MATRIZ_DISTRIBUTION_ADMIN_TOKEN: ${{ secrets.MATRIZ_DISTRIBUTION_ADMIN_TOKEN }}
+          MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY: ${{ secrets.MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY }}
+        run: corepack pnpm exec tsx tooling/scripts/publish-distribution-release.ts matriz-admin-tauri ${{ steps.artifact.outputs.version }} release-output/${{ steps.artifact.outputs.file }} https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.artifact.outputs.file }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-output/*

@@ -6,7 +6,7 @@ const root = process.cwd()
 const schemaNames = ["core", "hub", "spot", "seumei", "contracts", "willdash"] as const
 const expectedRelationCounts: Record<(typeof schemaNames)[number], number> = {
   core: 1,
-  hub: 29,
+  hub: 31,
   spot: 3,
   seumei: 19,
   contracts: 4,

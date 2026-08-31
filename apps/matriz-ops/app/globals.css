@@ -12,3 +12,4 @@
 
 /* Ops owns its dark-surface contrast instead of inheriting light-theme heading tokens. */
 .ops-shell{color:#f4f1fb}.ops-shell h1,.ops-shell h2,.ops-shell h3,.ops-shell strong,.ops-shell dd{color:#f4f1fb}.ops-shell p,.ops-shell td{color:#d7d0df}.ops-brand strong{color:#fff}.ops-brand small,.ops-sidebar-foot{color:#aaa2b6}.ops-sidebar nav a{color:#c4bbce}.hero h2,.panel h2,.metric strong{color:#fff}.hero p{color:#c4bbce}.metric span,.metric small,.data-table th{color:#aaa2b6}.data-table td,.data-table td a{color:#d7d0df}.data-table td strong{color:#fff}.pill{color:#c9b8ff}.pulse-intro h2,.section-head h2,.panel-title h2,.summary-card h2,.activity-list strong,.health-strip strong{color:#fff}
+.header-actions{display:flex;align-items:center;gap:10px}.ops-logout,.auth-button{border:1px solid #53416c;background:#241936;color:#f4f1fb;border-radius:9px;padding:10px 14px;cursor:pointer;font:inherit;font-size:13px}.auth-button{display:inline-block;margin-top:12px}

@@ -1,6 +1,7 @@
 import type { AppManifestDTO } from "@matriz/integration-api-contracts"
 import { localAppRuntimes, monorepoConfig } from "@matriz/platform-config"
 import { manifest as healthManifest } from "@apps/health/public-contract"
+import { manifest as opsManifest } from "@apps/matriz-ops/public-contract"
 import { manifest as workbenchManifest } from "@apps/matriz-workbench/public-contract"
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as uninstallManifest } from "@apps/matriz-uninstall/public-contract"
@@ -10,7 +11,7 @@ export interface InstallableAppDefinition {
   readonly projectId: string
   readonly baseUrl: string
   readonly glyph: string
-  readonly accent: "health" | "workbench" | "seumei" | "uninstall"
+  readonly accent: "health" | "ops" | "workbench" | "seumei" | "uninstall"
   readonly kind: "activation" | "windows_installer"
   readonly mutationId: "control.smart-app-rail" | null
   readonly releaseId: string | null
@@ -22,8 +23,10 @@ export interface InstallableAppDefinition {
 }
 
 const healthRuntime = localAppRuntimes.find((runtime) => runtime.appId === healthManifest.appId)
+const opsRuntime = localAppRuntimes.find((runtime) => runtime.appId === opsManifest.appId)
 
 if (!healthRuntime) throw new Error("Health runtime is not registered")
+if (!opsRuntime) throw new Error("Matriz Ops runtime is not registered")
 
 export const INSTALLABLE_APPS: readonly InstallableAppDefinition[] = [{
   manifest: healthManifest,
@@ -31,6 +34,16 @@ export const INSTALLABLE_APPS: readonly InstallableAppDefinition[] = [{
   baseUrl: monorepoConfig.baseUrls[healthManifest.appId],
   glyph: "✚",
   accent: "health",
+  kind: "activation",
+  mutationId: "control.smart-app-rail",
+  releaseId: null,
+  windows: null,
+}, {
+  manifest: opsManifest,
+  projectId: opsRuntime.slug,
+  baseUrl: monorepoConfig.baseUrls[opsManifest.appId],
+  glyph: "O",
+  accent: "ops",
   kind: "activation",
   mutationId: "control.smart-app-rail",
   releaseId: null,

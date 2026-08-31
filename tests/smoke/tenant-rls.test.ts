@@ -18,7 +18,8 @@ const expectedTenantTables: Record<(typeof schemas)[number], readonly string[]> 
     "capability_accessibility_preferences", "capability_dashboard_layouts", "capability_events",
     "capability_marketplace_demo_orders", "capability_practicy_installations", "capability_practicy_usage",
     "capability_recent_items", "capability_tenant_theme_recommendations", "capability_theme_entitlements",
-    "capability_theme_preferences",
+    "capability_theme_preferences", "client_portal_systems", "client_portal_data_sources",
+    "client_portal_snapshots", "client_portal_payment_projections",
   ],
   spot: ["bands", "artist_profiles", "gigs", "gig_bookings", "spot_preferences"],
   seumei: [

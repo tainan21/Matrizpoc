@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ["127.0.0.1"],
   transpilePackages: ["@matriz/design-system", "@matriz/design-ui", "@matriz/integration-api-contracts", "@matriz/integration-registry-core", "@matriz/integration-wallet-contracts", "@matriz/platform-auth", "@matriz/platform-config", "@matriz/platform-db"],
   reactStrictMode: true,
   poweredByHeader: false,

@@ -12,6 +12,7 @@ const labels: Record<MatrizAppId, string> = {
   "matriz-control": "Matriz Control · 3009",
   "matriz-uninstall": "Matriz Uninstall · native",
   "matriz-admin": "Matriz Admin · 3002", "matriz-ops": "Matriz Ops · 3009", "matriz-pay": "Matriz Pay · 3010", seumei: "Seumei · 3008",
+  "matriz-client-admin": "Client Admin · 3013",
   contracts: "Contracts · 3003", willdash: "WillDash · 3004",
   "matriz-workbench": "Workbench · 3005", sites: "Sites · 3006", matrizlib: "MatrizLib · 3007",
   health: "Health · 3010",

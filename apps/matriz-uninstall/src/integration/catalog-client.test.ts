@@ -19,6 +19,19 @@ describe("DistributionCatalogClient", () => {
     expect(await offline.load()).toEqual(catalog)
   })
 
+  it("labels cached catalogs with freshness and never calls them latest", async () => {
+    localStorage.clear()
+    const now = new Date("2026-08-30T12:00:00.000Z")
+    const online = new DistributionCatalogClient("http://hub.test", async () => Response.json(catalog), () => now)
+    await online.loadSnapshot()
+    const offline = new DistributionCatalogClient("http://hub.test", async () => { throw new Error("offline") }, () => new Date("2026-08-31T13:00:00.000Z"))
+
+    const snapshot = await offline.loadSnapshot()
+    expect(snapshot.source).toBe("cache")
+    expect(snapshot.freshness).toBe("stale")
+    expect(snapshot.message).toContain("última versão conhecida")
+  })
+
   it("fails closed when neither network nor a valid cache is available", async () => {
     localStorage.clear()
     const client = new DistributionCatalogClient("http://hub.test", async () => {

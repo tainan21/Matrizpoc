@@ -11,10 +11,12 @@ Before changing anything, read in this order:
 3. `docs/app-communication.md`
 4. `docs/desktop-application-architecture.md` when desktop runtime, packaging,
    distribution or migration is in scope
-5. the target app `docs/AGENT-START-HERE.md`
-6. the target app `README.md`
-7. the target app `src/manifest/manifest.ts`
-8. the target app `src/bootstrap/index.ts`
+5. `docs/release-distribution.md` whenever downloads, installers, versions,
+   packaging, updates or releases are in scope
+6. the target app `docs/AGENT-START-HERE.md`
+7. the target app `README.md`
+8. the target app `src/manifest/manifest.ts`
+9. the target app `src/bootstrap/index.ts`
 
 ## Scope rule
 Always work in the smallest possible scope.

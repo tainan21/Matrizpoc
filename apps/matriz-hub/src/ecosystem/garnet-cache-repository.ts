@@ -40,7 +40,7 @@ export function loadGarnetCacheConfiguration(environment: Readonly<Record<string
   const password = environment.HUB_CACHE_PASSWORD ?? ""
   if (password.length < 32) throw new Error("HUB_CACHE_PASSWORD must contain at least 32 characters")
   const defaultTtlSeconds = Number(environment.HUB_CACHE_DEFAULT_TTL_SECONDS ?? "300")
-  if (!Number.isSafeInteger(defaultTtlSeconds) || defaultTtlSeconds < 1 || defaultTtlSeconds > 86_400) throw new Error("Cache TTL must be between 1 and 86400 seconds")
+  if (!Number.isSafeInteger(defaultTtlSeconds) || defaultTtlSeconds < 1 || defaultTtlSeconds > 604_800) throw new Error("Cache TTL must be between 1 and 604800 seconds")
   return { host: "127.0.0.1", port: 46379, username: "matriz_hub", password, defaultTtlSeconds }
 }
 
@@ -61,7 +61,7 @@ export class GarnetHubCacheRepository implements HubCacheRepository {
   }
 
   async write(tenantId: string, namespace: "ecosystem" | "docs", record: CacheRecord, ttlSeconds = this.config.defaultTtlSeconds): Promise<void> {
-    if (!Number.isSafeInteger(ttlSeconds) || ttlSeconds < 1 || ttlSeconds > 86_400) throw new Error("Cache TTL must be between 1 and 86400 seconds")
+    if (!Number.isSafeInteger(ttlSeconds) || ttlSeconds < 1 || ttlSeconds > 604_800) throw new Error("Cache TTL must be between 1 and 604800 seconds")
     const payload = JSON.stringify(record)
     if (Buffer.byteLength(payload) > 8 * 1024) throw new Error("Cache value exceeds 8192 bytes")
     const result = await this.execute(this.config, ["SET", createCacheKey(tenantId, namespace, record.key), payload, "EX", String(ttlSeconds)])

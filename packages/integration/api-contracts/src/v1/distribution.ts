@@ -35,7 +35,7 @@ export const distributionInstallerV1Schema = z.object({
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
 })
 
-export const distributionReleaseInputV1Schema = z.object({
+const distributionReleaseInputV1BaseSchema = z.object({
   version: semver,
   channel: z.enum(["stable", "beta"]),
   releasedAt: z.string().datetime(),
@@ -44,11 +44,23 @@ export const distributionReleaseInputV1Schema = z.object({
   signature: z.string().min(16).max(16_384),
 })
 
-export const distributionReleaseV1Schema = distributionReleaseInputV1Schema.extend({
+const stableVersionRefinement = (release: { channel: "stable" | "beta"; version: string }, context: z.RefinementCtx) => {
+  if (release.channel === "stable" && release.version.includes("-")) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["version"],
+      message: "Stable releases cannot use prerelease versions",
+    })
+  }
+}
+
+export const distributionReleaseInputV1Schema = distributionReleaseInputV1BaseSchema.superRefine(stableVersionRefinement)
+
+export const distributionReleaseV1Schema = distributionReleaseInputV1BaseSchema.extend({
   releaseId: z.string().uuid(),
   status: z.enum(["draft", "published", "retired"]),
   publishedAt: z.string().datetime().nullable(),
-})
+}).superRefine(stableVersionRefinement)
 
 export const distributionProductV1Schema = distributionProductInputV1Schema.extend({
   state: z.enum(["active", "unavailable", "retired"]),

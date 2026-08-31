@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "v1", "appId": "matriz-client-admin", "classification": "product",
+  "runtime": { "kind": "web", "port": 3013, "healthPath": "/api/health" },
+  "database": { "required": false, "tenancy": "none" },
+  "identity": { "required": true, "oidcClientId": "matriz-client-admin", "callbackPath": "/api/auth/oidc/callback" },
+  "cache": { "required": false, "namespaces": [] }, "events": { "transport": "none", "outbox": false, "inbox": false },
+  "environment": { "keys": [
+    { "name": "MATRIZ_HUB_URL", "secret": false, "required": false, "source": "operator" },
+    { "name": "MATRIZ_IDENTITY_ISSUER", "secret": false, "required": true, "source": "generated" },
+    { "name": "CLIENT_ADMIN_OIDC_CLIENT_ID", "secret": false, "required": true, "source": "generated" },
+    { "name": "CLIENT_ADMIN_OIDC_CALLBACK_URL", "secret": false, "required": true, "source": "generated" },
+    { "name": "CLIENT_ADMIN_OIDC_CLIENT_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "CLIENT_ADMIN_SESSION_SECRET", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "CLIENT_ADMIN_FALLBACK_TENANT_ID", "secret": false, "required": false, "source": "operator" },
+    { "name": "CLIENT_ADMIN_FALLBACK_TENANT_NAME", "secret": false, "required": false, "source": "operator" }
+  ] }, "filesystem": { "required": false }
+}

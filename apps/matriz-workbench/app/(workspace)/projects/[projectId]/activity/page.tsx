@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import type { ActivityEvent } from "../../../../../src/domain/schemas"
 import { WorkspaceRepository } from "../../../../../src/integration/filesystem/workspace-repository"
 import { ProjectHeader } from "../../../../../src/ui/components/project-header"
-import { toActivityEventViewModel } from "../../../../../src/ui/presenters/activity-presenter"
+import { groupActivityEventsByDay, toActivityEventViewModel } from "../../../../../src/ui/presenters/activity-presenter"
 
 const ACTORS: ActivityEvent["actor"][] = ["human", "codex", "agent", "system"]
 const ENTITY_TYPES: ActivityEvent["entityType"][] = [
@@ -57,6 +57,7 @@ export default async function ActivityPage({
     actor || entityType || filters.q || filters.since || filters.until,
   )
   const activityView = activity.map(toActivityEventViewModel)
+  const activityDays = groupActivityEventsByDay(activityView)
 
   return (
     <main className="workspace-page">
@@ -106,16 +107,22 @@ export default async function ActivityPage({
         <button className="button primary" type="submit">Filtrar</button>
         {hasFilters ? <Link className="button" href={`/projects/${projectId}/activity`}>Limpar</Link> : null}
       </form>
-      <section className="activity-log">
-        {activityView.map((event) => (
-          <article key={event.id}>
-            <time>{new Date(event.occurredAt).toLocaleString("pt-BR")}</time>
-            <span className={`actor ${event.actor}`}>{event.actor}</span>
-            <span className="row-main">
-              <strong>{event.summary}</strong>
-              <small>{event.action} · {event.entityType}/{event.entityId}</small>
-            </span>
-          </article>
+      <section className="activity-log" aria-label="Timeline de atividade">
+        {activityDays.map((day) => (
+          <section className="activity-day" key={day.date}>
+            <header><h2>{day.label}</h2><span>{day.events.length} eventos</span></header>
+            {day.events.map((event) => (
+              <article key={event.id}>
+                <time>{new Date(event.occurredAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</time>
+                <span className={`actor ${event.actor}`}>{event.actor}</span>
+                <span className="activity-marker" aria-hidden="true" />
+                <span className="row-main">
+                  <strong>{event.summary}</strong>
+                  <small>{event.action} · {event.entityType}/{event.entityId}</small>
+                </span>
+              </article>
+            ))}
+          </section>
         ))}
         {!activity.length ? (
           <div className="empty-inline">

@@ -55,6 +55,7 @@
     "verify:boundaries": "tsx tooling/scripts/verify-app-boundaries.ts",
     "verify:infrastructure": "tsx tooling/scripts/verify-infrastructure-contracts.ts",
     "verify:tracked-artifacts": "tsx tooling/scripts/verify-tracked-artifacts.ts",
+    "verify:desktop-releases": "tsx tooling/scripts/verify-desktop-releases.ts",
     "build:affected": "turbo run build --affected --concurrency=4",
     "check:clean": "git diff --exit-code && git diff --cached --exit-code",
     "demo:flows": "tsx scripts/demo-flows.ts",

@@ -37,7 +37,7 @@ model, not as an endpoint profile. The closed global whitelist remains User,
 authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
-## HTTP Route Handlers — 220 entries
+## HTTP Route Handlers — 237 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
@@ -50,6 +50,13 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:health:GET:/api/health` | `apps/health/app/api/health/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:health:GET:/api/system/snapshot` | `apps/health/app/api/system/snapshot/route.ts:31` | `GET` | R | `APP-R` |
 | `HTTP:matriz-admin:GET:/api/health` | `apps/matriz-admin/app/api/health/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-client-admin:GET:/api/auth/oidc/callback` | `apps/matriz-client-admin/app/api/auth/oidc/callback/route.ts:2` | `GET` | R | `APP-R` |
+| `HTTP:matriz-client-admin:GET:/api/auth/oidc/login` | `apps/matriz-client-admin/app/api/auth/oidc/login/route.ts:2` | `GET` | R | `APP-R` |
+| `HTTP:matriz-client-admin:GET:/api/auth/oidc/session` | `apps/matriz-client-admin/app/api/auth/oidc/session/route.ts:2` | `GET` | R | `APP-R` |
+| `HTTP:matriz-client-admin:GET:/api/health` | `apps/matriz-client-admin/app/api/health/route.ts:2` | `GET` | R | `APP-R` |
+| `HTTP:matriz-client-admin:POST:/api/auth/oidc/logout` | `apps/matriz-client-admin/app/api/auth/oidc/logout/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-client-admin:POST:/api/auth/oidc/tenant` | `apps/matriz-client-admin/app/api/auth/oidc/tenant/route.ts:2` | `POST` | M | `APP-M` |
+| `HTTP:matriz-client-admin:POST:/api/refresh` | `apps/matriz-client-admin/app/api/refresh/route.ts:6` | `POST` | M | `APP-M` |
 | `HTTP:matriz-control:DELETE:/api/terminal/sessions/[sessionId]` | `apps/matriz-control/app/api/terminal/sessions/[sessionId]/route.ts:6` | `DELETE` | M | `APP-M` |
 | `HTTP:matriz-control:GET:/api/apps/readiness` | `apps/matriz-control/app/api/apps/readiness/route.ts:7` | `GET` | R | `APP-R` |
 | `HTTP:matriz-control:GET:/api/doctor` | `apps/matriz-control/app/api/doctor/route.ts:4` | `GET` | R | `APP-R` |
@@ -74,6 +81,11 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:15` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:8` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/capabilities/themes` | `apps/matriz-hub/app/api/capabilities/themes/route.ts:8` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/client-admin/v1/integrations` | `apps/matriz-hub/app/api/client-admin/v1/integrations/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/client-admin/v1/overview` | `apps/matriz-hub/app/api/client-admin/v1/overview/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/client-admin/v1/payments` | `apps/matriz-hub/app/api/client-admin/v1/payments/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/client-admin/v1/site` | `apps/matriz-hub/app/api/client-admin/v1/site/route.ts:3` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/client-admin/v1/systems` | `apps/matriz-hub/app/api/client-admin/v1/systems/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/documents` | `apps/matriz-hub/app/api/docs/documents/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:7` | `GET` | R | `H-R` |
@@ -86,7 +98,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/docs/suggestions` | `apps/matriz-hub/app/api/docs/suggestions/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/tasks` | `apps/matriz-hub/app/api/docs/tasks/route.ts:9` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/docs/timeline` | `apps/matriz-hub/app/api/docs/timeline/route.ts:9` | `GET` | R | `H-R` |
-| `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:27` | `GET` | R | `H-CACHE` |
+| `HTTP:matriz-hub:GET:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:23` | `GET` | R | `H-CACHE` |
 | `HTTP:matriz-hub:GET:/api/ecosystem/health` | `apps/matriz-hub/app/api/ecosystem/health/route.ts:6` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/events` | `apps/matriz-hub/app/api/events/route.ts:7` | `GET` | R | `H-R` |
 | `HTTP:matriz-hub:GET:/api/external-links` | `apps/matriz-hub/app/api/external-links/route.ts:7` | `GET` | R | `H-R` |
@@ -110,7 +122,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
 | `HTTP:matriz-hub:OPTIONS:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:12` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:7` | `OPTIONS` | R | `APP-R` |
-| `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:20` | `OPTIONS` | R | `H-CACHE` |
+| `HTTP:matriz-hub:OPTIONS:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:16` | `OPTIONS` | R | `H-CACHE` |
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `OPTIONS` | R | `APP-R` |
 | `HTTP:matriz-hub:PATCH:/api/docs/documents/[docId]` | `apps/matriz-hub/app/api/docs/documents/[docId]/route.ts:8` | `PATCH` | M | `H-M` |
@@ -122,6 +134,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:POST:/api/auth/mock/verify` | `apps/matriz-hub/app/api/auth/mock/verify/route.ts:7` | `POST` | M | `H-MOCK` |
 | `HTTP:matriz-hub:POST:/api/auth/oidc/tenant` | `apps/matriz-hub/app/api/auth/oidc/tenant/route.ts:1` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/capabilities/themes/checkout` | `apps/matriz-hub/app/api/capabilities/themes/checkout/route.ts:6` | `POST` | M | `APP-M` |
+| `HTTP:matriz-hub:POST:/api/client-admin/v1/refresh` | `apps/matriz-hub/app/api/client-admin/v1/refresh/route.ts:3` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:POST:/api/docs/context-packages` | `apps/matriz-hub/app/api/docs/context-packages/route.ts:19` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/context-packages/[id]/publish` | `apps/matriz-hub/app/api/docs/context-packages/[id]/publish/route.ts:7` | `POST` | M | `H-M` |
 | `HTTP:matriz-hub:POST:/api/docs/conversions` | `apps/matriz-hub/app/api/docs/conversions/route.ts:9` | `POST` | M | `H-M` |
@@ -146,10 +159,14 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:POST:/api/v1/telemetry/maintenance` | `apps/matriz-hub/app/api/v1/telemetry/maintenance/route.ts:3` | `POST` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/capabilities/appearance` | `apps/matriz-hub/app/api/capabilities/appearance/route.ts:21` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/capabilities/praticies` | `apps/matriz-hub/app/api/capabilities/praticies/route.ts:12` | `PUT` | M | `APP-M` |
-| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:39` | `PUT` | M | `H-CACHE` |
+| `HTTP:matriz-hub:PUT:/api/ecosystem/cache` | `apps/matriz-hub/app/api/ecosystem/cache/route.ts:37` | `PUT` | M | `H-CACHE` |
 | `HTTP:matriz-hub:PUT:/api/v1/capabilities/appearance` | `apps/matriz-hub/app/api/v1/capabilities/appearance/route.ts:1` | `PUT` | M | `APP-M` |
 | `HTTP:matriz-hub:PUT:/api/v1/capabilities/praticies` | `apps/matriz-hub/app/api/v1/capabilities/praticies/route.ts:1` | `PUT` | M | `APP-M` |
+| `HTTP:matriz-ops:DELETE:/api/auth/oidc/session` | `apps/matriz-ops/app/api/auth/oidc/session/route.ts:1` | `DELETE` | M | `APP-M` |
 | `HTTP:matriz-ops:DELETE:/api/v1/users/[userId]/sessions/[sessionId]` | `apps/matriz-ops/app/api/v1/users/[userId]/sessions/[sessionId]/route.ts:5` | `DELETE` | M | `APP-M` |
+| `HTTP:matriz-ops:GET:/api/auth/oidc/callback` | `apps/matriz-ops/app/api/auth/oidc/callback/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/auth/oidc/login` | `apps/matriz-ops/app/api/auth/oidc/login/route.ts:1` | `GET` | R | `APP-R` |
+| `HTTP:matriz-ops:GET:/api/auth/oidc/session` | `apps/matriz-ops/app/api/auth/oidc/session/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:matriz-ops:GET:/api/e2e/session` | `apps/matriz-ops/app/api/e2e/session/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:matriz-ops:GET:/api/health` | `apps/matriz-ops/app/api/health/route.ts:4` | `GET` | R | `APP-R` |
 | `HTTP:matriz-ops:GET:/api/v1/audit` | `apps/matriz-ops/app/api/v1/audit/route.ts:3` | `GET` | R | `APP-R` |
@@ -381,4 +398,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-Current tracked-source count: **327** = 220 HTTP methods, 56 Server Actions, and 51 MCP tools.
+Current tracked-source count: **344** = 237 HTTP methods, 56 Server Actions, and 51 MCP tools.

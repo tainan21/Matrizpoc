@@ -1,17 +1,19 @@
 import { useEffect, useMemo, useState } from "react"
 import symbolUrl from "../../assets/brand/symbol.svg?url"
 import { presentProducts } from "../application/product-presenter"
-import type { CleanupCandidate, DesktopGateway, DistributionCatalogV1, InstalledProduct, ProductAction, ProductStatus, ProductViewModel } from "../domain/types"
+import type { CleanupCandidate, DesktopGateway, DistributionCatalogV1, InstalledProduct, LocalInstallerViewModel, ProductAction, ProductStatus, ProductViewModel } from "../domain/types"
+import type { DistributionCatalogSnapshot } from "../integration/catalog-client"
 import "./styles.css"
 
-interface Props { readonly gateway: DesktopGateway; readonly loadCatalog: () => Promise<DistributionCatalogV1> }
-type Tab = "products" | "updates" | "cleanup" | "activity"
+interface Props { readonly gateway: DesktopGateway; readonly loadCatalog: () => Promise<DistributionCatalogV1 | DistributionCatalogSnapshot> }
+type Tab = "products" | "updates" | "local" | "cleanup" | "activity"
 type Theme = "dark" | "light" | "contrast"
 type Confirmation = { product: ProductViewModel; action: "uninstall" | "reinstall" } | null
 type JournalEntry = { id: string; title: string; detail: string; status: "ok" | "working" | "error" }
 
 const tabs: readonly { id: Tab; label: string }[] = [
   { id: "products", label: "Produtos" }, { id: "updates", label: "Atualizações" },
+  { id: "local", label: "Instaladores locais" },
   { id: "cleanup", label: "Limpeza" }, { id: "activity", label: "Atividade" },
 ]
 const actionLabels: Record<ProductAction, string> = { install: "Instalar", update: "Atualizar", reinstall: "Reinstalar", uninstall: "Desinstalar", cleanup: "Limpar" }
@@ -29,6 +31,9 @@ export function UninstallApp({ gateway, loadCatalog }: Props) {
   const [confirmation, setConfirmation] = useState<Confirmation>(null)
   const [cleanup, setCleanup] = useState<{ product: ProductViewModel; candidates: readonly CleanupCandidate[] } | null>(null)
   const [journal, setJournal] = useState<readonly JournalEntry[]>([])
+  const [localInstallers, setLocalInstallers] = useState<readonly LocalInstallerViewModel[]>([])
+  const [localFolderLabel, setLocalFolderLabel] = useState<string | null>(null)
+  const [catalogState, setCatalogState] = useState<{ source: "hub" | "cache"; freshness: "fresh" | "stale"; message: string } | null>(null)
   const products = useMemo(() => catalog ? presentProducts(catalog.products, installed) : [], [catalog, installed])
   const visible = useMemo(() => products.filter((product) => {
     if (tab === "updates" && product.status !== "outdated") return false
@@ -39,10 +44,12 @@ export function UninstallApp({ gateway, loadCatalog }: Props) {
 
   async function refresh() {
     try {
-      const [nextCatalog, nextInstalled] = await Promise.all([loadCatalog(), gateway.listInstalled()])
+      const [loaded, nextInstalled] = await Promise.all([loadCatalog(), gateway.listInstalled()])
+      const nextCatalog = "catalog" in loaded ? loaded.catalog : loaded
+      setCatalogState("catalog" in loaded ? { source: loaded.source, freshness: loaded.freshness, message: loaded.message } : { source: "hub", freshness: "fresh", message: "Hub conectado; versões stable confirmadas." })
       setCatalog(nextCatalog); setInstalled(nextInstalled)
       setSelectedId((current) => current ?? nextCatalog.products[0]?.productId ?? null)
-      setMessage(`${nextInstalled.length} instalações Windows observadas.`)
+      setMessage("catalog" in loaded && loaded.source === "cache" ? loaded.message : `${nextInstalled.length} instalações Windows observadas.`)
     } catch (error) { setMessage(error instanceof Error ? error.message : "Falha ao inspecionar a máquina.") }
   }
   useEffect(() => { void refresh() }, [])
@@ -79,6 +86,41 @@ export function UninstallApp({ gateway, loadCatalog }: Props) {
     finally { setBusy(null) }
   }
 
+  async function chooseLocalFolder() {
+    try {
+      const folder = await gateway.chooseLocalInstallerFolder()
+      if (!folder) return
+      setLocalFolderLabel(folder.label)
+      const installers = await gateway.scanLocalInstallers(folder.folderId)
+      setLocalInstallers(installers)
+      setMessage(`${installers.length} instaladores locais inspecionados.`)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Falha ao inspecionar a pasta local.")
+    }
+  }
+
+  async function installLocal(installer: LocalInstallerViewModel) {
+    if (installer.trust !== "signed-matriz") {
+      setMessage("Build não assinado exige confirmação reforçada no runtime desktop.")
+      return
+    }
+    setBusy(installer.productId)
+    try {
+      const prepared = await gateway.prepareInstaller({ kind: "local", installerId: installer.installerId }, "install")
+      const result = await gateway.confirmInstaller(prepared.operationId, [])
+      setMessage(result.message)
+      await refresh()
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Falha ao instalar o arquivo local.")
+    } finally { setBusy(null) }
+  }
+
+  async function updateAll() {
+    const outdated = products.filter((product) => product.status === "outdated")
+      .sort((left, right) => Number(left.productId === "matriz-uninstall-tauri") - Number(right.productId === "matriz-uninstall-tauri"))
+    for (const product of outdated) await execute(product, "update")
+  }
+
   const heading = tab === "products" ? "Produtos Matriz" : tabs.find((item) => item.id === tab)?.label ?? "Produtos Matriz"
   return <main className="app-shell" data-theme={theme} data-testid="uninstall-shell">
     <header className="product-bar">
@@ -88,16 +130,16 @@ export function UninstallApp({ gateway, loadCatalog }: Props) {
     </header>
 
     <div className="workspace">
-      <aside className="filter-rail" aria-label="Filtros"><p>VISÃO</p>{Object.entries(statusLabels).map(([id, label]) => <button key={id} className={filter === id ? "active" : ""} onClick={() => setFilter(id as ProductStatus | "all")}><span>{label}</span><b>{id === "all" ? products.length : products.filter((product) => product.status === id).length}</b></button>)}<div className="safety-note"><span>◆</span><strong>Dados protegidos</strong><small>Limpezas nunca removem documentos, projetos ou dados de negócio.</small></div></aside>
+      <aside className="filter-rail" aria-label="Filtros"><p>VISÃO</p>{tab === "local" ? <><button className="active" onClick={() => void chooseLocalFolder()}><span>Escolher pasta</span><b>+</b></button>{localFolderLabel && <small>{localFolderLabel}</small>}</> : Object.entries(statusLabels).map(([id, label]) => <button key={id} className={filter === id ? "active" : ""} onClick={() => setFilter(id as ProductStatus | "all")}><span>{label}</span><b>{id === "all" ? products.length : products.filter((product) => product.status === id).length}</b></button>)}<div className="safety-note"><span>◆</span><strong>Dados protegidos</strong><small>Limpezas nunca removem documentos, projetos ou dados de negócio.</small></div></aside>
 
       <section className="product-stage">
-        <div className="stage-heading"><div><span className="eyebrow">BIBLIOTECA LOCAL</span><h1>{heading}</h1><p>{tab === "activity" ? "Histórico desta sessão, sem telemetria externa." : "Instale, recupere e remova produtos com operações verificáveis."}</p></div><div className="summary"><strong>{installed.length}</strong><span>instalados</span><i /><strong>{products.filter((product) => product.status === "outdated").length}</strong><span>atualizações</span></div></div>
-        {tab === "activity" ? <Activity entries={journal} /> : visible.length ? <div className="product-list">{visible.map((product) => <ProductRow key={product.productId} product={product} selected={selected?.productId === product.productId} busy={busy === product.productId} onSelect={() => setSelectedId(product.productId)} onAction={run} />)}</div> : <div className="empty-state"><span>✓</span><h2>Nada exige sua atenção</h2><p>Altere o filtro ou faça uma nova inspeção.</p></div>}
+        <div className="stage-heading"><div><span className="eyebrow">BIBLIOTECA LOCAL</span><h1>{heading}</h1><p>{tab === "activity" ? "Histórico desta sessão, sem telemetria externa." : tab === "local" ? "Use builds locais compatíveis sem expor caminhos à interface." : tab === "updates" ? catalogState?.message ?? "Consultando o Hub…" : "Instale, recupere e remova produtos com operações verificáveis."}</p></div><div className="summary"><strong>{installed.length}</strong><span>instalados</span><i /><strong>{products.filter((product) => product.status === "outdated").length}</strong><span>atualizações</span>{tab === "updates" && <button className="primary" disabled={catalogState?.source !== "hub" || !products.some((product) => product.status === "outdated")} onClick={() => void updateAll()}>Atualizar tudo</button>}</div></div>
+        {tab === "activity" ? <Activity entries={journal} /> : tab === "local" ? <LocalInstallers installers={localInstallers} busy={busy} onInstall={installLocal} onChoose={chooseLocalFolder} /> : visible.length ? <div className="product-list">{visible.map((product) => <ProductRow key={product.productId} product={product} selected={selected?.productId === product.productId} busy={busy === product.productId} onSelect={() => setSelectedId(product.productId)} onAction={run} />)}</div> : <div className="empty-state"><span>✓</span><h2>Nada exige sua atenção</h2><p>Altere o filtro ou faça uma nova inspeção.</p></div>}
       </section>
 
-      <aside className="inspector" aria-label="Detalhes do produto">{selected ? <><div className="inspector-mark"><img src={symbolUrl} alt="" /></div><span className={`state state-${selected.status}`}>{selected.statusLabel}</span><h2>{selected.title}</h2><p>{selected.runtime === "tauri" ? "Edição nativa recomendada: leve, rápida e integrada ao Windows." : "Edição de compatibilidade para casos específicos do navegador."}</p><dl><div><dt>Instalada</dt><dd>{selected.installedVersion ?? "—"}</dd></div><div><dt>Disponível</dt><dd>{selected.availableVersion ?? "—"}</dd></div><div><dt>Confiança</dt><dd>{selected.trust === "stable-signed" ? "Assinada" : selected.trust === "local-development" ? "Desenvolvimento" : "Não publicada"}</dd></div><div><dt>Espaço</dt><dd>{formatBytes(selected.estimatedBytes)}</dd></div></dl><div className="path-block"><small>LOCAL DE INSTALAÇÃO</small><code>{selected.installLocation ?? "Ainda não instalado"}</code></div><div className="inspector-actions">{selected.actions.map((action) => <button key={action} className={action === "uninstall" ? "danger" : action === "install" || action === "update" ? "primary" : ""} disabled={busy === selected.productId} onClick={() => void run(selected, action)} aria-label={`${actionLabels[action]} ${selected.title}`}>{actionLabels[action]}</button>)}</div></> : <div className="inspector-empty">Selecione um produto para ver os detalhes.</div>}</aside>
+      <aside className="inspector" aria-label="Detalhes do produto">{tab === "local" ? <div className="inspector-empty">O caminho da pasta permanece protegido no runtime nativo. A interface recebe somente identidade, versão, hash e confiança.</div> : selected ? <><div className="inspector-mark"><img src={symbolUrl} alt="" /></div><span className={`state state-${selected.status}`}>{selected.statusLabel}</span><h2>{selected.title}</h2><p>{selected.runtime === "tauri" ? "Edição nativa recomendada: leve, rápida e integrada ao Windows." : "Edição de compatibilidade para casos específicos do navegador."}</p><dl><div><dt>Instalada</dt><dd>{selected.installedVersion ?? "—"}</dd></div><div><dt>Disponível</dt><dd>{selected.availableVersion ?? "—"}</dd></div><div><dt>Confiança</dt><dd>{selected.trust === "stable-signed" ? "Assinada" : selected.trust === "local-development" ? "Desenvolvimento" : "Não publicada"}</dd></div><div><dt>Espaço</dt><dd>{formatBytes(selected.estimatedBytes)}</dd></div></dl><div className="path-block"><small>LOCAL DE INSTALAÇÃO</small><code>{selected.installLocation ?? "Ainda não instalado"}</code></div><div className="inspector-actions">{selected.actions.map((action) => <button key={action} className={action === "uninstall" ? "danger" : action === "install" || action === "update" ? "primary" : ""} disabled={busy === selected.productId} onClick={() => void run(selected, action)} aria-label={`${actionLabels[action]} ${selected.title}`}>{actionLabels[action]}</button>)}</div></> : <div className="inspector-empty">Selecione um produto para ver os detalhes.</div>}</aside>
     </div>
-    <footer className="status-strip"><span className="status-dot" /> <p>{message}</p><span>Catálogo {catalog?.schemaVersion ?? "—"}</span><span>Windows x64</span></footer>
+    <footer className="status-strip"><span className="status-dot" /> <p>{message}</p><span>{catalogState?.source === "hub" ? "Hub conectado" : catalogState ? `Cache ${catalogState.freshness === "fresh" ? "recente" : "antigo"}` : "Hub indisponível"}</span><span>Catálogo {catalog?.schemaVersion ?? "—"}</span><span>Windows x64</span></footer>
 
     {confirmation && <div className="modal-backdrop"><section className="modal" role="dialog" aria-modal="true" aria-label={confirmation.action === "uninstall" ? "Confirmar desinstalação" : "Confirmar reinstalação"}><span className="modal-symbol">!</span><p className="eyebrow">AÇÃO PROTEGIDA</p><h2>{confirmation.action === "uninstall" ? "Confirmar desinstalação" : "Confirmar reinstalação"}</h2><p>Você escolheu <strong>{confirmation.product.title}</strong>. Os dados pessoais e de negócio serão preservados.</p><div className="modal-actions"><button onClick={() => setConfirmation(null)}>Cancelar</button><button className="danger" aria-label={confirmation.action === "uninstall" ? "Confirmar desinstalação" : "Confirmar reinstalação"} onClick={() => void execute(confirmation.product, confirmation.action)}>{confirmation.action === "uninstall" ? "Desinstalar com segurança" : "Reinstalar agora"}</button></div></section></div>}
     {cleanup && <div className="modal-backdrop"><section className="modal" role="dialog" aria-modal="true" aria-label="Confirmar limpeza"><p className="eyebrow">PRÉ-VISUALIZAÇÃO</p><h2>Limpeza segura</h2><p>Somente itens permitidos para <strong>{cleanup.product.title}</strong>.</p><div className="cleanup-list">{cleanup.candidates.length ? cleanup.candidates.map((candidate) => <div className="cleanup-row" key={candidate.id}><span><strong>{candidate.category}</strong><small>{candidate.displayPath}</small></span><b>{formatBytes(candidate.estimatedBytes)}</b></div>) : <p>Nenhum resíduo seguro foi encontrado.</p>}</div><div className="modal-actions"><button onClick={() => setCleanup(null)}>Cancelar</button><button className="primary" disabled={!cleanup.candidates.length} onClick={() => void cleanSelected()}>Limpar {formatBytes(cleanup.candidates.reduce((sum, item) => sum + item.estimatedBytes, 0))}</button></div></section></div>}
@@ -110,4 +152,5 @@ function ProductRow({ product, selected, busy, onSelect, onAction }: { product: 
 }
 
 function Activity({ entries }: { entries: readonly JournalEntry[] }) { return entries.length ? <div className="activity-list">{entries.map((entry) => <article key={entry.id}><i className={`activity-${entry.status}`} /><span><strong>{entry.title}</strong><small>{entry.detail}</small></span></article>)}</div> : <div className="empty-state"><span>◎</span><h2>Nenhuma operação nesta sessão</h2><p>As próximas ações verificadas aparecerão aqui.</p></div> }
+function LocalInstallers({ installers, busy, onInstall, onChoose }: { installers: readonly LocalInstallerViewModel[]; busy: string | null; onInstall: (installer: LocalInstallerViewModel) => void; onChoose: () => void }) { return installers.length ? <div className="product-list">{installers.map((installer) => <article className="product-row" key={installer.installerId}><div className="product-glyph">{installer.displayName.slice(0, 1)}</div><div className="product-copy"><div><h2>{installer.displayName} {installer.version}</h2>{installer.isLatestForProduct && <span className="runtime">Mais recente local</span>}</div><p>{installer.message} · {formatBytes(installer.sizeBytes)}</p></div><span className={`state state-${installer.trust === "blocked" ? "inconsistent" : installer.trust === "signed-matriz" ? "installed" : "available"}`}>{installer.trust === "signed-matriz" ? "Assinado" : installer.trust === "unsigned-development" ? "Desenvolvimento" : "Bloqueado"}</span>{installer.trust !== "blocked" && <button className="row-action" disabled={busy === installer.productId} onClick={() => onInstall(installer)}>Instalar</button>}</article>)}</div> : <div className="empty-state"><span>＋</span><h2>Nenhuma pasta selecionada</h2><p>Escolha uma pasta para inspecionar instaladores compatíveis.</p><button className="primary" onClick={onChoose}>Escolher pasta</button></div> }
 function formatBytes(bytes: number) { if (!bytes) return "—"; const mb = bytes / 1024 / 1024; return mb >= 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${Math.max(1, Math.round(mb))} MB` }

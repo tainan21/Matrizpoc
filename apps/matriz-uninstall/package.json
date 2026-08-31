@@ -69,6 +69,6 @@
       "installerIcon": "desktop/tauri/src-tauri/icons/icon.ico",
       "uninstallerIcon": "desktop/tauri/src-tauri/icons/icon.ico"
     },
-    "artifactName": "Matriz-Uninstall-Electron-Setup-${version}.${ext}"
+    "artifactName": "matriz-uninstall-electron-${version}-windows-x64-setup.${ext}"
   }
 }
