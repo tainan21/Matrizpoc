@@ -537,6 +537,9 @@ importers:
       '@matriz/integration-api-contracts':
         specifier: workspace:*
         version: link:../../packages/integration/api-contracts
+      '@matriz/integration-event-delivery':
+        specifier: workspace:*
+        version: link:../../packages/integration/event-delivery
       '@matriz/integration-events':
         specifier: workspace:*
         version: link:../../packages/integration/events

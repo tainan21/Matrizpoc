@@ -26,6 +26,7 @@
     "@matriz/foundation-types": "workspace:*",
     "@matriz/foundation-utils": "workspace:*",
     "@matriz/integration-api-contracts": "workspace:*",
+    "@matriz/integration-event-delivery": "workspace:*",
     "@matriz/integration-events": "workspace:*",
     "@matriz/integration-external-links": "workspace:*",
     "@matriz/integration-ingestion": "workspace:*",

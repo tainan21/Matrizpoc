@@ -12,4 +12,8 @@ export function getHubDb(): PrismaClient {
   return getOrCreateSchemaClient({ Client: PrismaClient, environmentName: "HUB_DATABASE_URL", globalKey: "__matrizHubDb__" })
 }
 
+export function getHubWorkerDb(): PrismaClient {
+  return getOrCreateSchemaClient({ Client: PrismaClient, environmentName: "HUB_WORKER_DATABASE_URL", globalKey: "__matrizHubWorkerDb__" })
+}
+
 export type { PrismaClient as HubPrismaClient } from "../../../../node_modules/.prisma/hub/index.js"

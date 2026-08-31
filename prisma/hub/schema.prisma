@@ -901,3 +901,23 @@ model MatrizSchemaRelease {
 
   @@map("__matriz_schema_releases")
 }
+
+model HubOutboxEvent {
+  id               String   @id @default(cuid())
+  tenantId         String
+  eventName        String
+  eventVersion     String   @default("v1")
+  deduplicationKey String   @unique
+  payloadJson      Json
+  occurredAt       DateTime @default(now())
+  attempts         Int      @default(0)
+  nextAttemptAt    DateTime?
+  lockedUntil      DateTime?
+  publishedAt      DateTime?
+  deadLetteredAt   DateTime?
+  lastErrorCode    String?
+
+  @@index([deadLetteredAt, nextAttemptAt, lockedUntil, occurredAt])
+  @@index([tenantId, publishedAt, occurredAt])
+  @@map("outbox_events")
+}

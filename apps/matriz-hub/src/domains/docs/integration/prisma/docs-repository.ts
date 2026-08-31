@@ -1,4 +1,6 @@
 import { getHubDb, type HubPrismaClient } from "@matriz/platform-db/hub"
+import { withTenantContext } from "@matriz/platform-db/tenant-context"
+import { randomUUID } from "node:crypto"
 import type {
   ContextPackageDTO,
   DocDocumentStatus,
@@ -36,9 +38,25 @@ import {
 import { assertTenantScoped, canReadDocsTarget } from "../../application/access"
 
 type Db = HubPrismaClient
+type ExportArtifactRow = NonNullable<Awaited<ReturnType<Db["docExportArtifact"]["findFirst"]>>>
+type TaskCandidateRow = NonNullable<Awaited<ReturnType<Db["docTaskCandidate"]["findFirst"]>>>
+type GovernanceCandidateRow = NonNullable<Awaited<ReturnType<Db["docGovernanceCandidate"]["findFirst"]>>>
 
 export class DocsPrismaRepository {
-  constructor(private readonly db: Db = getHubDb()) {}
+  constructor(private readonly db: Db = getHubDb(), private readonly transactional = false) {}
+
+  private atomic<T>(actor: DocsActorContext, work: (repository: DocsPrismaRepository) => Promise<T>): Promise<T> {
+    if (this.transactional) return work(this)
+    return withTenantContext(this.db, actor.tenantId, async (transaction) => {
+      const proxy = new Proxy(transaction as object, {
+        get(target, property, receiver) {
+          if (property === "$transaction") return async (nested: (client: unknown) => Promise<unknown>) => nested(proxy)
+          return Reflect.get(target, property, receiver)
+        },
+      }) as Db
+      return work(new DocsPrismaRepository(proxy, true))
+    })
+  }
 
   async listDocuments(actor: DocsActorContext, opts: { query?: string; status?: string; type?: string } = {}): Promise<DocumentSummaryDTO[]> {
     const rows = await this.db.docDocument.findMany({
@@ -117,6 +135,7 @@ export class DocsPrismaRepository {
   }
 
   async createDocument(actor: DocsActorContext, input: CreateDocumentInput): Promise<DocumentDetailDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.createDocument(actor, input))
     const type = input.type ?? "institutional"
     const status = input.status ?? "draft"
     const visibility = input.visibility ?? "internal"
@@ -190,6 +209,7 @@ export class DocsPrismaRepository {
   }
 
   async importDocument(actor: DocsActorContext, input: ImportDocumentInput): Promise<DocumentDetailDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.importDocument(actor, input))
     const detail = await this.createDocument(actor, {
       ...input,
       status: input.status ?? "raw",
@@ -242,6 +262,7 @@ export class DocsPrismaRepository {
   }
 
   async updateDocumentDraft(actor: DocsActorContext, input: UpdateDocumentDraftInput): Promise<DocumentDetailDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.updateDocumentDraft(actor, input))
     const doc = await this.db.docDocument.findFirst({ where: { id: input.documentId, tenantId: actor.tenantId }, include: { versions: true } })
     if (!doc) throw new Error("Document not found")
     assertTenantScoped(doc, actor)
@@ -288,6 +309,7 @@ export class DocsPrismaRepository {
   }
 
   async publishDocumentVersion(actor: DocsActorContext, documentId: string): Promise<DocumentDetailDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.publishDocumentVersion(actor, documentId))
     const doc = await this.db.docDocument.findFirst({ where: { id: documentId, tenantId: actor.tenantId } })
     if (!doc) throw new Error("Document not found")
     assertTenantScoped(doc, actor)
@@ -318,6 +340,7 @@ export class DocsPrismaRepository {
   }
 
   async createKnowledgeNode(actor: DocsActorContext, input: CreateKnowledgeNodeInput): Promise<KnowledgeNodeDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.createKnowledgeNode(actor, input))
     const slug = slugify(input.name)
     const node = await this.db.knowledgeNode.upsert({
       where: { tenantId_slug: { tenantId: actor.tenantId, slug } },
@@ -375,6 +398,7 @@ export class DocsPrismaRepository {
   }
 
   async createKnowledgeEdge(actor: DocsActorContext, input: CreateKnowledgeEdgeInput): Promise<KnowledgeEdgeDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.createKnowledgeEdge(actor, input))
     if (!input.sourceNodeId || !input.targetNodeId || input.sourceNodeId === input.targetNodeId) {
       throw new Error("Knowledge relation requires two distinct tenant nodes")
     }
@@ -416,6 +440,7 @@ export class DocsPrismaRepository {
   }
 
   async createSuggestion(actor: DocsActorContext, input: CreateSuggestionInput): Promise<SuggestionDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.createSuggestion(actor, input))
     if (input.targetType !== "document" || !input.targetId) throw new Error("Suggestions require a tenant-owned document target")
     const suggestion = await this.db.$transaction(async (tx) => {
       const target = await tx.docDocument.findFirst({ where: { id: input.targetId, tenantId: actor.tenantId }, select: { id: true } })
@@ -455,6 +480,7 @@ export class DocsPrismaRepository {
   }
 
   async reviewSuggestion(actor: DocsActorContext, suggestionId: string, status: "accepted" | "rejected"): Promise<SuggestionDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.reviewSuggestion(actor, suggestionId, status))
     const target = await this.db.docSuggestion.findFirst({
       where: { id: suggestionId, tenantId: actor.tenantId },
     })
@@ -490,6 +516,7 @@ export class DocsPrismaRepository {
   }
 
   async createContextPackage(actor: DocsActorContext, input: CreateContextPackageInput): Promise<ContextPackageDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.createContextPackage(actor, input))
     const slug = await this.uniqueContextSlug(actor.tenantId, slugify(input.slug ?? input.title))
     const documentIds = input.documentIds ?? []
     if (new Set(documentIds).size !== documentIds.length) throw new Error("Context package document IDs must be distinct")
@@ -565,6 +592,7 @@ export class DocsPrismaRepository {
   }
 
   async publishContextPackage(actor: DocsActorContext, idOrSlug: string): Promise<ContextPackageDTO> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.publishContextPackage(actor, idOrSlug))
     const row = await this.db.docContextPackage.findFirst({ where: { tenantId: actor.tenantId, OR: [{ id: idOrSlug }, { slug: idOrSlug }] } })
     if (!row) throw new Error("Context package not found")
     assertTenantScoped(row, actor)
@@ -623,6 +651,7 @@ export class DocsPrismaRepository {
   }
 
   async recordMcpRead(actor: DocsActorContext, uri: string, targetType: string, targetId: string): Promise<void> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.recordMcpRead(actor, uri, targetType, targetId))
     await this.db.docMcpResourceSnapshot.upsert({
       where: { tenantId_uri: { tenantId: actor.tenantId, uri } },
       create: {
@@ -668,7 +697,8 @@ export class DocsPrismaRepository {
     return { conversionRuns, actorRuns }
   }
 
-  async generateExport(actor: DocsActorContext, input: GenerateExportInput) {
+  async generateExport(actor: DocsActorContext, input: GenerateExportInput): Promise<ExportArtifactRow> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.generateExport(actor, input))
     if (input.targetType === "document") {
       const doc = await this.getDocument(actor, input.targetId)
       if (!doc) throw new Error("Document not found")
@@ -765,7 +795,8 @@ export class DocsPrismaRepository {
     }
   }
 
-  async createTaskCandidate(actor: DocsActorContext, documentId: string, title: string, description: string, evidence: Record<string, unknown>) {
+  async createTaskCandidate(actor: DocsActorContext, documentId: string, title: string, description: string, evidence: Record<string, unknown>): Promise<TaskCandidateRow> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.createTaskCandidate(actor, documentId, title, description, evidence))
     const candidate = await this.db.docTaskCandidate.create({
       data: {
         tenantId: actor.tenantId,
@@ -791,7 +822,8 @@ export class DocsPrismaRepository {
     return this.db.docTaskCandidate.findMany({ where: { tenantId: actor.tenantId }, orderBy: { updatedAt: "desc" } })
   }
 
-  async createGovernanceCandidate(actor: DocsActorContext, documentId: string, reason: string, sensitivity: string, evidence: Record<string, unknown>) {
+  async createGovernanceCandidate(actor: DocsActorContext, documentId: string, reason: string, sensitivity: string, evidence: Record<string, unknown>): Promise<GovernanceCandidateRow> {
+    if (!this.transactional) return this.atomic(actor, (repository) => repository.createGovernanceCandidate(actor, documentId, reason, sensitivity, evidence))
     const candidate = await this.db.docGovernanceCandidate.create({
       data: {
         tenantId: actor.tenantId,
@@ -932,7 +964,8 @@ export class DocsPrismaRepository {
   }
 
   private async recordTimeline(actor: DocsActorContext, input: { name: string; targetType: string; targetId: string; payload: Record<string, unknown>; metadata?: Record<string, unknown> }) {
-    return this.db.docTimelineEvent.create({
+    const occurredAt = new Date()
+    const timeline = await this.db.docTimelineEvent.create({
       data: {
         tenantId: actor.tenantId,
         name: input.name,
@@ -942,11 +975,24 @@ export class DocsPrismaRepository {
         actorType: actor.actorType,
         targetType: input.targetType,
         targetId: input.targetId,
-        occurredAt: new Date(),
+        occurredAt,
         payload: input.payload as never,
         metadata: (input.metadata ?? {}) as never,
       },
     })
+    const deduplicationKey = `timeline:${timeline.id}`
+    await this.db.hubOutboxEvent.create({
+      data: {
+        id: randomUUID(),
+        tenantId: actor.tenantId,
+        eventName: input.name,
+        eventVersion: "v1",
+        deduplicationKey,
+        occurredAt,
+        payloadJson: { targetType: input.targetType, targetId: input.targetId, ...input.payload } as never,
+      },
+    })
+    return timeline
   }
 
   private async refreshMcpSnapshot(actor: DocsActorContext, input: { uri: string; resourceType: string; targetType: string; targetId: string; version: number; payload: Record<string, unknown> }) {
