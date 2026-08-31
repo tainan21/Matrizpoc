@@ -24,6 +24,9 @@ export default async function AdaptiveBacklogPage({ searchParams }: { searchPara
     const key = query.group === "outcome" ? item.parentTitle ?? "Sem Outcome" : query.group === "domain" ? item.domain : query.group === "status" ? item.status : item.projectName
     grouped.set(key, [...(grouped.get(key) ?? []), item])
   }
+  const readyCount = filtered.filter((item) => item.status === "ready").length
+  const activeCount = filtered.filter((item) => item.status === "in_progress").length
+  const blockedCount = filtered.filter((item) => item.readinessGaps.includes("bloqueio")).length
   return (
     <>
       <header className="page-header compact-header"><div><p className="eyebrow">Trabalho organizado</p><h1>Backlog</h1><p>Uma visão multi-projeto por prontidão, relação e intenção — o Board operacional continua em cada projeto.</p></div><Link className="button primary" href="/work/inbox">Capturar entrada</Link></header>
@@ -36,22 +39,22 @@ export default async function AdaptiveBacklogPage({ searchParams }: { searchPara
       </form>
       {query.bulk ? <div className="bulk-notice" role="status">{query.bulk === "empty" ? "Selecione ao menos um item." : "Ação em massa concluída."}</div> : null}
       <form action={bulkWorkItemsAction} className="structured-backlog">
-        <div className="bulk-bar" aria-label="Ações em massa">
-          <span>Selecione linhas e aplique somente mudanças operacionais.</span>
+        <section className="backlog-overview" aria-label="Resumo do backlog"><div><strong>{filtered.length}</strong><span>no recorte</span></div><div><strong>{readyCount}</strong><span>prontos</span></div><div><strong>{activeCount}</strong><span>em execução</span></div><div className={blockedCount ? "danger" : ""}><strong>{blockedCount}</strong><span>bloqueados</span></div></section>
+        <details className="bulk-actions"><summary>Ações em massa <span>Prioridade, domínio, sprint ou arquivamento</span></summary><div className="bulk-bar" aria-label="Ações em massa">
           <select defaultValue="medium" name="bulkPriority"><option value="critical">Crítica</option><option value="high">Alta</option><option value="medium">Média</option><option value="low">Baixa</option></select>
           <button className="button" name="operation" type="submit" value="priority">Prioridade</button>
           <input name="bulkDomain" placeholder="Domínio" /><button className="button" name="operation" type="submit" value="domain">Definir domínio</button>
           <select name="sprintCommitment"><option value="">Outcome da sprint</option>{sprints.flatMap((sprint) => sprint.outcomes.map((outcome) => <option key={outcome.id} value={`${sprint.id}:${outcome.id}`}>{sprint.name} · {outcome.title}</option>))}</select><button className="button" name="operation" type="submit" value="promote">Promover</button>
           <input name="bulkArchiveReason" placeholder="Motivo do arquivamento" /><button className="button" name="operation" type="submit" value="archive">Arquivar</button>
-        </div>
-        {[...grouped.entries()].map(([group, items]) => (
-          <section className="backlog-group" key={group}><header><h2>{group}</h2><span>{items.length} itens</span></header>{items.map((item) => (
+        </div></details>
+        {[...grouped.entries()].map(([group, items], groupIndex) => (
+          <details className="backlog-group" key={group} open={groupIndex === 0}><summary><span><strong>{group}</strong><small>{items.filter((item) => item.readinessGaps.includes("bloqueio")).length ? `${items.filter((item) => item.readinessGaps.includes("bloqueio")).length} bloqueados` : "sem bloqueios"}</small></span><span>{items.length} itens</span></summary>{items.map((item) => (
             <div className="structured-row" key={`${item.projectId}:${item.id}`}>
               <input aria-label={`Selecionar ${item.title}`} name="workRef" type="checkbox" value={`${item.projectId}:${item.id}:${item.revision}`} />
               <span className={`priority-bar ${item.priority}`} /><Link className="row-main" href={item.href}><strong>{item.title}</strong><small>{item.kind} · {item.projectName}{item.parentTitle ? ` · ${item.parentTitle}` : ""}</small></Link>
               <span>{item.domain}</span><span>{item.responsible}</span><span className={item.readinessGaps.length ? "readiness warn" : "readiness ready"}>{item.readinessLabel}</span><span className={`status-chip ${item.status}`}><i />{item.status}</span>
             </div>
-          ))}</section>
+          ))}</details>
         ))}
         {!filtered.length ? <div className="empty-state"><strong>Nenhum trabalho encontrado.</strong><span>Ajuste os filtros ou classifique uma entrada da Inbox.</span></div> : null}
       </form>

@@ -47,6 +47,8 @@ evidence, and never hide a regression to preserve the total.
 
 ## Validation
 
+Distribution: `matriz-workbench-electron`, Windows `com.matriz.workbench`, tag `workbench-v*`. Read `../../docs/release-distribution.md` first.
+
 - `pnpm --filter @matriz/app-matriz-workbench lint`
 - `pnpm --filter @matriz/app-matriz-workbench typecheck`
 - `pnpm --filter @matriz/app-matriz-workbench test`

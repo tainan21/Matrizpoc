@@ -266,7 +266,11 @@ export function createPrismaDistributionRepository(
 }
 
 const publishedRelease = {
-  releases: { where: { status: "published" }, orderBy: { publishedAt: "desc" as const }, take: 1 },
+  releases: {
+    where: { status: "published", channel: "stable" },
+    orderBy: { publishedAt: "desc" as const },
+    take: 1,
+  },
 }
 
 async function changeRelease(
@@ -286,6 +290,14 @@ async function changeRelease(
   if (previous) return distributionReleaseV1Schema.parse(previous)
   return db.$transaction(async (tx) => {
     const before = await tx.distributionRelease.findUniqueOrThrow({ where: { id: releaseId } })
+    if (status === "published" && before.channel === "stable") {
+      const current = await tx.distributionRelease.findFirst({
+        where: { productId: before.productId, channel: "stable", status: "published" },
+        orderBy: { publishedAt: "desc" },
+      })
+      if (current && compareSemver(before.version, current.version) < 0)
+        throw new Error("Stable release cannot downgrade")
+    }
     if (status === "published")
       await tx.distributionRelease.updateMany({
         where: { productId: before.productId, channel: before.channel, status: "published" },
@@ -311,4 +323,11 @@ async function changeRelease(
     })
     return result
   })
+}
+
+function compareSemver(left: string, right: string) {
+  const parts = (value: string) => value.split("-")[0].split(".").map(Number)
+  const [leftMajor = 0, leftMinor = 0, leftPatch = 0] = parts(left)
+  const [rightMajor = 0, rightMinor = 0, rightPatch = 0] = parts(right)
+  return leftMajor - rightMajor || leftMinor - rightMinor || leftPatch - rightPatch
 }

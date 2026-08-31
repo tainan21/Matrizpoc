@@ -1,0 +1,9 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Matriz Client Admin",
+  "version": "0.1.0",
+  "identifier": "com.matriz.clientadmin",
+  "build": { "beforeDevCommand": "corepack pnpm --filter @matriz/app-client-admin dev:desktop:web", "devUrl": "http://127.0.0.1:14213", "beforeBuildCommand": "corepack pnpm --filter @matriz/app-client-admin build:desktop:web", "frontendDist": "../dist" },
+  "app": { "windows": [{ "label": "main", "title": "Matriz Client Admin", "width": 1280, "height": 820, "minWidth": 860, "minHeight": 600, "center": true, "resizable": true }], "security": { "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" } },
+  "bundle": { "active": true, "targets": ["nsis"], "publisher": "Matriz", "copyright": "Copyright © 2026 Matriz", "category": "Business", "shortDescription": "Admin de acompanhamento para clientes Matriz", "windows": { "webviewInstallMode": { "type": "downloadBootstrapper", "silent": true }, "nsis": { "installMode": "currentUser", "displayLanguageSelector": false } } }
+}

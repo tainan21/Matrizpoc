@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": { "jsx": "preserve", "plugins": [{ "name": "next" }], "noEmit": true, "types": ["node", "vite/client", "vitest/globals"] },
+  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "src/**/*.ts", "src/**/*.tsx", "desktop/src/**/*.ts", "desktop/src/**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "desktop/src-tauri"]
+}

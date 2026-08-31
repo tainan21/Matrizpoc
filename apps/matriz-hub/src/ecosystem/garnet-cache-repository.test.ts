@@ -15,6 +15,7 @@ describe("Hub Garnet cache repository", () => {
     for (const invalid of ["redis://localhost:46379", "redis://127.0.0.1:6379", "redis://user:secret@127.0.0.1:46379", "rediss://127.0.0.1:46379"]) expect(() => loadGarnetCacheConfiguration({ ...base, CACHE_URL: invalid })).toThrow(/CACHE_URL/)
     expect(() => loadGarnetCacheConfiguration({ ...base, HUB_CACHE_DEFAULT_TTL_SECONDS: "0" })).toThrow(/TTL/i)
     expect(() => loadGarnetCacheConfiguration({ ...base, HUB_CACHE_PASSWORD: "short" })).toThrow(/password/i)
+    expect(loadGarnetCacheConfiguration({ ...base, HUB_CACHE_DEFAULT_TTL_SECONDS: "604800" }).defaultTtlSeconds).toBe(604800)
   })
 
   it("uses SET with mandatory EX and reads the same tenant-scoped JSON entry", async () => {

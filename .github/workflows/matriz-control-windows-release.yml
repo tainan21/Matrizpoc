@@ -2,7 +2,7 @@ name: matriz-control-windows-release
 
 on:
   push:
-    tags: ["control-v*"]
+    tags: ["control-electron-v*"]
   workflow_dispatch:
     inputs:
       release_tag:
@@ -31,7 +31,7 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
         run: |
           $version = node -p "require('./apps/matriz-control/package.json').version"
-          if ($env:RELEASE_TAG -ne "control-v$version") { throw "Release tag must equal control-v$version" }
+          if ($env:RELEASE_TAG -ne "control-electron-v$version") { throw "Release tag must equal control-electron-v$version" }
       - run: pnpm --filter @matriz/app-matriz-control test
       - run: pnpm --filter @matriz/app-matriz-control lint
       - run: pnpm --filter @matriz/app-matriz-control typecheck
@@ -50,7 +50,7 @@ jobs:
         shell: pwsh
         run: |
           $release = "apps/matriz-control/release"
-          $installer = Get-ChildItem "$release/matriz-control-*-windows-x64-setup.exe" | Select-Object -First 1
+          $installer = Get-ChildItem "$release/matriz-control-electron-*-windows-x64-setup.exe" | Select-Object -First 1
           if (-not $installer) { throw "NSIS installer was not generated" }
           if (-not (Test-Path "$($installer.FullName).blockmap")) { throw "Installer blockmap was not generated" }
           if (-not (Test-Path "$release/latest.yml")) { throw "Updater metadata was not generated" }
@@ -61,7 +61,7 @@ jobs:
         with:
           tag_name: ${{ inputs.release_tag || github.ref_name }}
           files: |
-            apps/matriz-control/release/matriz-control-*-windows-x64-setup.exe
-            apps/matriz-control/release/matriz-control-*-windows-x64-setup.exe.blockmap
+            apps/matriz-control/release/matriz-control-electron-*-windows-x64-setup.exe
+            apps/matriz-control/release/matriz-control-electron-*-windows-x64-setup.exe.blockmap
             apps/matriz-control/release/latest.yml
             apps/matriz-control/release/SHA256SUMS.txt

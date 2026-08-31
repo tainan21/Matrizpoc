@@ -17,8 +17,7 @@ export function ControlPage({ snapshot }: { snapshot: ControlSnapshot }) {
     return () => window.removeEventListener("keydown", onKey)
   }, [])
   const projects = snapshot.projects
-  const selected = projects[0]
-  const visibleProjects = snapshot.selectedProjectId ? projects.slice(0, 1) : projects
+  const selected = snapshot.selectedProjectId ? projects[0] : undefined
   return (
     <main className="workspace-page control-page">
       <header className="page-header control-header">
@@ -28,20 +27,43 @@ export function ControlPage({ snapshot }: { snapshot: ControlSnapshot }) {
       <ControlSummary snapshot={snapshot} onHelp={() => setHelpOpen(true)} />
       <div className="control-grid">
         <div className="control-main-column">
-          {visibleProjects.length ? visibleProjects.map((project) => <ScorecardHealthGrid project={project} key={project.projectId} />) : <EmptyControl />}
+          {selected ? <ScorecardHealthGrid project={selected} /> : projects.length ? <ControlProjectOverview projects={projects} /> : <EmptyControl />}
           {selected ? <ApprovalQueue project={selected} onToast={setToast} /> : null}
-          {visibleProjects.map((project) => <ControlActivityTimeline project={project} key={`activity-${project.projectId}`} />)}
+          {selected ? <ControlActivityTimeline project={selected} /> : null}
         </div>
         <aside className="control-inspector">
           {selected ? <EntityPresenceList project={selected} /> : null}
           {selected ? <ControlNotificationList project={selected} /> : null}
           {selected ? <SnippetPicker project={selected} onToast={setToast} /> : null}
+          {!selected ? <PortfolioGuide projects={projects} /> : null}
         </aside>
       </div>
       <ShortcutHelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
       <ToastRegion message={toast} onClose={() => setToast(null)} />
     </main>
   )
+}
+
+export function ControlProjectOverview({ projects }: { projects: ControlProjectSnapshot[] }) {
+  const ordered = [...projects].sort((a, b) => a.summary.aggregate - b.summary.aggregate)
+  return <section className="control-section control-portfolio"><div className="section-heading"><div><span className="score-kicker">Portfólio</span><h2>Projetos que pedem atenção</h2></div><span>{projects.length} projetos</span></div><div className="control-project-list">
+    {ordered.map((project) => {
+      const proposed = project.evidence.filter((item) => item.status === "proposed").length
+      const unread = project.notifications.filter((item) => !item.read).length
+      return <Link href={`/control?project=${encodeURIComponent(project.projectId)}`} className="control-project-row" key={project.projectId}>
+        <span className={`control-project-score ${project.summary.aggregate >= 70 ? "good" : project.summary.aggregate >= 35 ? "warn" : "danger"}`}><strong>{project.summary.aggregate}</strong><small>/100</small></span>
+        <span className="row-main"><strong>{project.displayName}</strong><small>{project.projectId}</small></span>
+        <span className="control-project-signal"><strong>{proposed}</strong><small>revisões</small></span>
+        <span className="control-project-signal"><strong>{unread}</strong><small>alertas</small></span>
+        <span className="control-project-arrow">→</span>
+      </Link>
+    })}
+  </div></section>
+}
+
+function PortfolioGuide({ projects }: { projects: ControlProjectSnapshot[] }) {
+  const critical = projects.filter((project) => project.summary.aggregate < 35).length
+  return <section className="control-section inspector-section portfolio-guide"><span className="score-kicker">Como operar</span><h2>Comece pelos sinais</h2><p>{critical ? `${critical} projetos estão abaixo de 35/100.` : "Nenhum projeto está na faixa crítica."} Abra um projeto para revisar trilhas, evidências e atividade sem perder o panorama.</p><ol><li>Priorize o menor score.</li><li>Revise evidências pendentes.</li><li>Confirme o impacto no roadmap.</li></ol></section>
 }
 
 export function ControlSummary({ snapshot, onHelp }: { snapshot: ControlSnapshot; onHelp: () => void }) {

@@ -397,3 +397,17 @@ próximos do app responsável.
 - **Impacto:** Pay, Seumei e Hub usam uma máquina técnica comum; repositories
   Prisma, manifests e inicialização permanecem app-local.
 - **Revisar quando:** inbox/projeções forem adotadas ou clusters forem separados.
+
+## 2026-08-30 — Hub governa stable e Control Tauri é principal
+
+- **Decisão:** o Hub local é a autoridade das releases stable; o Matriz Uninstall continua útil offline e aceita instaladores locais validados. O Control Tauri `1.0.0` usa `com.matriz.control`; o Electron `0.2.0` usa `com.matriz.control.electron` como compatibilidade.
+- **Motivo:** instalar a versão correta sem confundir edições, sem transformar ausência do Hub em bloqueio de manutenção local.
+- **Impacto:** cache é apenas última versão conhecida; stable não rebaixa; paths locais permanecem nativos; tags e artefatos seguem `docs/release-distribution.md`.
+- **Revisar quando:** existir Hub remoto confiável, beta assinado, rollback automatizado ou conclusão da migração Electron→Tauri.
+
+## 2026-08-31 — Client Admin é web-first com acabamento Tauri deliberado
+
+- **Decisão:** o `matriz-client-admin` atende integralmente pela web; o shell Tauri `0.1.0` é publicado uma vez para validar instalação e uso reais e depois entra em congelamento de manutenção.
+- **Motivo:** validar a experiência Windows sem duplicar produto, dados ou regras e sem converter um experimento simples em duas aplicações independentes.
+- **Impacto:** o Tauri abre somente a origem HTTPS fixada no build, não contém credenciais e usa o mesmo backend tenant-scoped do web. Após `0.1.0`, recebe apenas correções críticas, de segurança ou publicação até surgirem dados reais.
+- **Revisar quando:** os cinco sistemas Laudate fornecerem dados reais ou um requisito desktop concreto não puder ser atendido pela web.

@@ -4,6 +4,12 @@ const isoDate = z.string().datetime()
 const calendarDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/)
 const revision = z.string().min(8)
 const id = (prefix: string) => z.string().regex(new RegExp(`^${prefix}_[0-9a-f-]{36}$`))
+const legacyRoadmapId = (prefix: string) => z.string().regex(
+  new RegExp(`^${prefix}_(?:[0-9a-f-]{36}|[a-z0-9][a-z0-9_-]{2,99})$`),
+)
+const roadmapBacklogIdSchema = z.string().regex(
+  /^(?:tsk|wi)_(?:[0-9a-f-]{36}|[a-z0-9][a-z0-9_-]{2,99})$/,
+)
 
 export const backlogStatusSchema = z.enum([
   "idea",
@@ -116,7 +122,7 @@ export const projectWorkspaceSchema = z.object({
 
 export const roadmapInitiativeSchema = z
   .object({
-    id: id("ini"),
+    id: legacyRoadmapId("ini"),
     title: z.string().trim().min(1).max(160),
     outcome: z.string().trim().max(500).default(""),
     status: roadmapStatusSchema,
@@ -124,7 +130,7 @@ export const roadmapInitiativeSchema = z
     responsible: z.string().trim().min(1).max(120).optional(),
     startDate: calendarDate.optional(),
     targetDate: calendarDate.optional(),
-    backlogIds: z.array(workItemIdSchema).max(100).default([]),
+    backlogIds: z.array(roadmapBacklogIdSchema).max(100).default([]),
   })
   .superRefine((initiative, context) => {
     if (initiative.startDate && initiative.targetDate && initiative.startDate > initiative.targetDate) {
@@ -137,7 +143,7 @@ export const roadmapInitiativeSchema = z
   })
 
 export const roadmapPhaseSchema = z.object({
-  id: id("phase"),
+  id: legacyRoadmapId("phase"),
   title: z.string().trim().min(1).max(120),
   outcome: z.string().trim().max(500).default(""),
   status: roadmapStatusSchema,
@@ -339,7 +345,21 @@ export const workItemV2Schema = z.object({
   revision,
 })
 
-export const persistedWorkItemSchema = z.union([backlogItemSchema, workItemV2Schema])
+const persistedLegacyBacklogItemSchema = z.preprocess((value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value
+  const item = value as Record<string, unknown>
+  if (item.schemaVersion !== 1 || !Array.isArray(item.references)) return value
+  return {
+    ...item,
+    references: item.references.map((reference) =>
+      typeof reference === "string"
+        ? { kind: "repository_file", path: reference }
+        : reference,
+    ),
+  }
+}, backlogItemSchema)
+
+export const persistedWorkItemSchema = z.union([persistedLegacyBacklogItemSchema, workItemV2Schema])
 
 export const agentExecutionReviewSchema = z.object({
   status: z.enum(["approved", "changes_requested"]),

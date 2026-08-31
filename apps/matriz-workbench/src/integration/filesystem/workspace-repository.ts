@@ -373,7 +373,10 @@ export class WorkspaceRepository {
     segments: string[],
     parser: { parse(value: unknown): T },
   ): Promise<T> {
-    const target = await this.safeMatrixPath(projectId, segments)
+    const target = await this.safeMatrixPath(projectId, segments).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") throw new WorkspaceError("Registro não encontrado.", "NOT_FOUND")
+      throw error
+    })
     const fileStat = await stat(target).catch(() => {
       throw new WorkspaceError("Registro não encontrado.", "NOT_FOUND")
     })
@@ -1419,7 +1422,10 @@ export class WorkspaceRepository {
 
   async listWorkItems(projectId: string): Promise<WorkItem[]> {
     const folder = await this.safeMatrixPath(projectId, ["backlog"])
-    const files = (await readdir(folder)).filter((name) => /^(?:tsk|wi)_[0-9a-f-]{36}\.json$/.test(name))
+    const files = (await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return [] as string[]
+      throw error
+    })).filter((name) => /^(?:tsk|wi)_[0-9a-f-]{36}\.json$/.test(name))
     const items = await Promise.all(
       files.map(async (name) => {
         const value = await this.readJson(projectId, ["backlog", name], persistedWorkItemSchema)
@@ -2368,9 +2374,17 @@ export class WorkspaceRepository {
     for (const kind of DOC_KINDS) {
       const folderName = documentFolder(kind)
       const folder = await this.safeMatrixPath(projectId, ["docs", folderName])
-      for (const name of (await readdir(folder)).filter((item) => item.endsWith(".md"))) {
-        const parsed = await this.readDocument(projectId, kind, name.slice(0, -3))
-        docs.push(parsed)
+      const names = await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+        if (error.code === "ENOENT") return [] as string[]
+        throw error
+      })
+      for (const name of names.filter((item) => item.endsWith(".md"))) {
+        try {
+          docs.push(await this.readDocument(projectId, kind, name.slice(0, -3)))
+        } catch (error) {
+          if (error instanceof WorkspaceError && error.code === "INVALID_DATA") continue
+          throw error
+        }
       }
     }
     return docs.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
@@ -2392,7 +2406,7 @@ export class WorkspaceRepository {
       throw new WorkspaceError("Documento excede 100 KB.", "LIMIT_EXCEEDED")
     }
     const source = await readFile(target, "utf8")
-    const match = source.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/)
+    const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/)
     if (!match) throw new WorkspaceError("Frontmatter do documento inválido.", "INVALID_DATA")
     const metadata = JSON.parse(match[1] ?? "{}") as unknown
     return workbenchDocumentSchema.parse({ ...(metadata as object), content: match[2] ?? "" })
@@ -2486,7 +2500,10 @@ export class WorkspaceRepository {
     query: ActivityQuery = {},
   ): Promise<ActivityEvent[]> {
     const folder = await this.safeMatrixPath(projectId, ["activity"])
-    const files = (await readdir(folder))
+    const files = (await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+      if (error.code === "ENOENT") return [] as string[]
+      throw error
+    }))
       .filter((name) => /^\d{4}-\d{2}\.jsonl$/.test(name))
       .sort()
       .reverse()

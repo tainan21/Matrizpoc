@@ -3,7 +3,7 @@ import { localAppRuntimes, monorepoConfig } from "@matriz/platform-config"
 
 describe("local app runtime catalog", () => {
   it("derives every preferred base URL from one catalog", () => {
-    expect(localAppRuntimes).toHaveLength(13)
+    expect(localAppRuntimes).toHaveLength(14)
     for (const app of localAppRuntimes) {
       expect(monorepoConfig.baseUrls[app.appId]).toBe(
         `http://${app.host}:${app.preferredPort}`,

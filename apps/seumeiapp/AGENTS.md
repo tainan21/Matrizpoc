@@ -5,3 +5,5 @@ Never import another app's internals. UI consumes app-local view models. Keep te
 
 Read `docs/AGENT-START-HERE.md`, `README.md`, `src/manifest/manifest.ts`, `src/bootstrap/index.ts`.
 Validate with `pnpm --filter @matriz/app-seumei test`, `typecheck`, `lint`, and `build`.
+
+Distribution: `seumei-electron`, Windows `com.matriz.seumei`, tag `seumei-v*`. Read `../../docs/release-distribution.md` first.

@@ -9,7 +9,7 @@ const HTTP_METHODS = new Set(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "
 
 type Surface = { id: string; path: string; line: number; name: string }
 function trackedAppFiles(): string[] {
-  return execFileSync("git", ["ls-files", "apps"], { cwd: ROOT, encoding: "utf8" })
+  return execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "apps"], { cwd: ROOT, encoding: "utf8" })
     .split(/\r?\n/)
     .filter(Boolean)
 }

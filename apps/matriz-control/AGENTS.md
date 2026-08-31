@@ -18,6 +18,8 @@ Operate known local processes without exposing a generic remote shell.
 
 ## Validation
 
+Distribution identity: `matriz-control-electron`, Windows `com.matriz.control.electron`, tag `control-electron-v*`. Read `../../docs/release-distribution.md`; this is a compatibility edition.
+
 - `corepack pnpm --filter @matriz/app-matriz-control test`
 - `corepack pnpm --filter @matriz/app-matriz-control lint`
 - `corepack pnpm --filter @matriz/app-matriz-control typecheck`

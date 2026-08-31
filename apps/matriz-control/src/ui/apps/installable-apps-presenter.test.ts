@@ -20,6 +20,6 @@ describe("installable apps presenter", () => {
       appId: "matriz-workbench", kind: "windows_installer", state: "downloaded", version: null, availableVersion: "0.1.0", bytesDownloaded: 4, totalBytes: 4, message: "Instalador verificado e pronto.",
     }])
 
-    expect(apps[1]).toMatchObject({ appId: "matriz-workbench", kind: "windows_installer", nativeState: "downloaded", installed: false, availableVersion: "0.1.0" })
+    expect(apps.find((app) => app.appId === "matriz-workbench")).toMatchObject({ appId: "matriz-workbench", kind: "windows_installer", nativeState: "downloaded", installed: false, availableVersion: "0.1.0" })
   })
 })

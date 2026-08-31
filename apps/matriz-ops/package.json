@@ -16,6 +16,7 @@
     "package:desktop": "tauri build --config desktop/src-tauri/tauri.conf.json --bundles nsis"
   },
   "dependencies": {
+    "@tauri-apps/api": "2.11.1",
     "@matriz/design-system": "workspace:*",
     "@matriz/design-ui": "workspace:*",
     "@matriz/integration-api-contracts": "workspace:*",

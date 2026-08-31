@@ -80,6 +80,9 @@ describe("Matriz Uninstall UI", () => {
       cleanupPreview: vi.fn().mockResolvedValue([]),
       cleanup: vi.fn(),
       selfUninstall: vi.fn(),
+      chooseLocalInstallerFolder: vi.fn().mockResolvedValue(null),
+      scanLocalInstallers: vi.fn().mockResolvedValue([]),
+      prepareInstaller: vi.fn(), confirmInstaller: vi.fn(), cancelInstaller: vi.fn(), installerOperation: vi.fn(),
     } satisfies DesktopGateway
     render(<UninstallApp gateway={gateway} loadCatalog={async () => catalog} />)
 
@@ -101,6 +104,9 @@ describe("Matriz Uninstall UI", () => {
       listInstalled: vi.fn().mockResolvedValue([]),
       uninstall: vi.fn(), install: vi.fn(), update: vi.fn(), reinstall: vi.fn(),
       cleanupPreview: vi.fn().mockResolvedValue([]), cleanup: vi.fn(), selfUninstall: vi.fn(),
+      chooseLocalInstallerFolder: vi.fn().mockResolvedValue(null),
+      scanLocalInstallers: vi.fn().mockResolvedValue([]),
+      prepareInstaller: vi.fn(), confirmInstaller: vi.fn(), cancelInstaller: vi.fn(), installerOperation: vi.fn(),
     } satisfies DesktopGateway
     render(<UninstallApp gateway={gateway} loadCatalog={async () => catalog} />)
 
@@ -109,5 +115,29 @@ describe("Matriz Uninstall UI", () => {
     expect(screen.getByTestId("uninstall-shell")).toHaveAttribute("data-theme", "light")
     fireEvent.click(screen.getByRole("tab", { name: "Atualizações" }))
     expect(screen.getByRole("heading", { name: "Atualizações" })).toBeVisible()
+  })
+
+  it("selects a native folder and renders sanitized local installers", async () => {
+    const chooseLocalInstallerFolder = vi.fn().mockResolvedValue({ folderId: "folder-1", label: "Builds locais" })
+    const scanLocalInstallers = vi.fn().mockResolvedValue([{
+      installerId: "installer-1", productId: "matriz-control-tauri", displayName: "Matriz Control",
+      version: "1.0.0", sizeBytes: 1024, sha256: "a".repeat(64), trust: "signed-matriz",
+      isLatestForProduct: true, isDowngrade: false, message: "Assinatura Matriz válida.",
+    }])
+    const gateway = {
+      shell: "tauri", listInstalled: vi.fn().mockResolvedValue([]), uninstall: vi.fn(), install: vi.fn(), update: vi.fn(), reinstall: vi.fn(),
+      cleanupPreview: vi.fn().mockResolvedValue([]), cleanup: vi.fn(), selfUninstall: vi.fn(),
+      chooseLocalInstallerFolder, scanLocalInstallers,
+      prepareInstaller: vi.fn(), confirmInstaller: vi.fn(), cancelInstaller: vi.fn(), installerOperation: vi.fn(),
+    } satisfies DesktopGateway
+    render(<UninstallApp gateway={gateway} loadCatalog={async () => catalog} />)
+    await screen.findByRole("heading", { name: "Produtos Matriz" })
+
+    fireEvent.click(screen.getByRole("tab", { name: "Instaladores locais" }))
+    fireEvent.click(screen.getByRole("button", { name: "Escolher pasta" }))
+
+    expect(await screen.findByText("Matriz Control 1.0.0")).toBeVisible()
+    expect(screen.getByText("Mais recente local")).toBeVisible()
+    expect(scanLocalInstallers).toHaveBeenCalledWith("folder-1")
   })
 })

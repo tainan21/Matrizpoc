@@ -23,6 +23,7 @@ import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
 import { manifest as healthManifest } from "@apps/health/public-contract"
+import { manifest as clientAdminManifest } from "@apps/matriz-client-admin/public-contract"
 
 const allManifests = [
   { appId: "matriz-identity", manifest: identityManifest },
@@ -41,10 +42,11 @@ const allManifests = [
   { appId: "contracts", manifest: contractsManifest },
   { appId: "willdash", manifest: willdashManifest },
   { appId: "health", manifest: healthManifest },
+  { appId: "matriz-client-admin", manifest: clientAdminManifest },
 ] as const
 
 describe("manifests", () => {
-  it("todos os 16 manifests satisfazem AppManifestDTO (Zod)", () => {
+  it("todos os 17 manifests satisfazem AppManifestDTO (Zod)", () => {
     for (const { appId, manifest } of allManifests) {
       const result = appManifestSchema.safeParse(manifest)
       if (!result.success) {

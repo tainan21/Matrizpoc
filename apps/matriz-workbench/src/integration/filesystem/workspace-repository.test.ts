@@ -25,6 +25,69 @@ afterEach(async () => {
 })
 
 describe("WorkspaceRepository", () => {
+  it("returns no work items when an initialized workspace has no backlog directory", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    await rm(path.join(root, "apps", "sample", ".matriz", "backlog"), { recursive: true, force: true })
+
+    await expect(repository.listWorkItems("sample")).resolves.toEqual([])
+  })
+
+  it("returns no activity when an initialized workspace has no activity directory", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    await rm(path.join(root, "apps", "sample", ".matriz", "activity"), { recursive: true, force: true })
+
+    await expect(repository.queryActivity("sample", { limit: 20 })).resolves.toEqual([])
+  })
+
+  it("returns no reconciliation snapshot when its optional directory does not exist", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    await rm(path.join(root, "apps", "sample", ".matriz", "agents", "reconciliation"), { recursive: true, force: true })
+
+    await expect(repository.getReconciliationSnapshot(
+      "sample",
+      "req_00000000-0000-4000-8000-000000000001",
+    )).resolves.toBeUndefined()
+  })
+
+  it("isolates a malformed Markdown document instead of breaking the document list", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    await writeFile(
+      path.join(root, "apps", "sample", ".matriz", "docs", "technical", "legacy-notes.md"),
+      "# Legacy notes without frontmatter\n",
+    )
+
+    await expect(repository.listDocuments("sample")).resolves.toEqual([])
+  })
+
+  it("reads persisted Markdown documents with Windows line endings", async () => {
+    const { root, repository } = await fixture()
+    await repository.initializeProject("sample")
+    const metadata = {
+      schemaVersion: 1,
+      id: "doc_00000000-0000-4000-8000-000000000001",
+      projectId: "sample",
+      kind: "decision",
+      slug: "windows-line-endings",
+      title: "Windows line endings",
+      tags: [],
+      createdAt: "2026-08-29T12:00:00.000Z",
+      updatedAt: "2026-08-29T12:00:00.000Z",
+      revision: "revision1",
+    }
+    await writeFile(
+      path.join(root, "apps", "sample", ".matriz", "docs", "decisions", "windows-line-endings.md"),
+      `---\r\n${JSON.stringify(metadata)}\r\n---\r\n# Decision\r\n`,
+    )
+
+    await expect(repository.listDocuments("sample")).resolves.toEqual([
+      expect.objectContaining({ slug: "windows-line-endings", content: "# Decision\r\n" }),
+    ])
+  })
+
   it("initializes atomic team records without overwriting edited Nilo or Zara profiles", async () => {
     const { root, repository } = await fixture()
     await repository.initializeProject("sample")

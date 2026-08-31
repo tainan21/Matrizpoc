@@ -68,6 +68,7 @@ export default defineConfig({
       "@apps/contracts/public-contract": resolve(__dirname, "./apps/contracts/public-contract.ts"),
       "@apps/willdash/public-contract": resolve(__dirname, "./apps/willdash/public-contract.ts"),
       "@apps/health/public-contract": resolve(__dirname, "./apps/health/public-contract.ts"),
+      "@apps/matriz-client-admin/public-contract": resolve(__dirname, "./apps/matriz-client-admin/public-contract.ts"),
     },
   },
 })

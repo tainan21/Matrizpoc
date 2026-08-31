@@ -56,6 +56,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#6d4aff", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17131d", muted: "#f4f1fb", mutedFg: "#625a70", border: "#ddd5e8",
   },
+  "matriz-client-admin": {
+    appId: "matriz-client-admin", label: "Matriz Client Admin", brandAccent: "#b88a2b", brandAccentFg: "#1f1708",
+    surface: "#fffdf8", surfaceFg: "#28231a", muted: "#f7f1e5", mutedFg: "#6f6554", border: "#e6dcc8",
+  },
   "matriz-ops": {
     appId: "matriz-ops", label: "Matriz Ops", brandAccent: "#6d4aff", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17131d", muted: "#f4f1fb", mutedFg: "#625a70", border: "#ddd5e8",
@@ -122,6 +126,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   "matriz-admin": {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#a98cff", brandAccentFg: "#0b0712",
     surface: "#0f0c16", surfaceFg: "#f5f1fb", muted: "#18121f", mutedFg: "#aaa0b7", border: "#362a42",
+  },
+  "matriz-client-admin": {
+    appId: "matriz-client-admin", label: "Matriz Client Admin", brandAccent: "#d9ad52", brandAccentFg: "#211704",
+    surface: "#17140e", surfaceFg: "#fbf5e8", muted: "#211c13", mutedFg: "#c8bda8", border: "#423722",
   },
   "matriz-ops": {
     appId: "matriz-ops", label: "Matriz Ops", brandAccent: "#a98cff", brandAccentFg: "#0b0712",
@@ -222,7 +230,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "matriz-uninstall", "sites", "spot", "matriz-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash", "health",
+  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "matriz-uninstall", "sites", "spot", "matriz-admin", "matriz-client-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash", "health",
 ]
 
 export const themeRegistry = [

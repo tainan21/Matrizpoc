@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@apps/health/public-contract": ["../health/public-contract.ts"],
+      "@apps/matriz-ops/public-contract": ["../matriz-ops/public-contract.ts"],
       "@apps/matriz-workbench/public-contract": ["../matriz-workbench/public-contract.ts"],
       "@apps/seumei/public-contract": ["../seumeiapp/public-contract.ts"],
       "@apps/matriz-uninstall/public-contract": ["../matriz-uninstall/public-contract.ts"]

@@ -26,9 +26,7 @@ export const initialDistributionProducts: readonly DistributionProductInputV1[] 
     runtime: "tauri",
     platform: "win32",
     arch: "x64",
-    windows: windows("Matriz Control", "Matriz Control", "matriz-control.exe", [
-      "Matriz Control 0.1.0",
-    ]),
+    windows: windows("com.matriz.control", "Matriz Control", "matriz-control.exe"),
   },
   {
     productId: "matriz-control-electron",
@@ -38,10 +36,10 @@ export const initialDistributionProducts: readonly DistributionProductInputV1[] 
     platform: "win32",
     arch: "x64",
     windows: windows(
-      "9b8c8dfd-77ee-5d4b-b4b3-34afd8c1a76d",
-      "Matriz Control 0.1.0",
+      "com.matriz.control.electron",
+      "Matriz Control Electron",
       "Matriz Control.exe",
-      ["Matriz Control"],
+      ["Matriz Control", "Matriz Control 0.1.0", "Matriz Control 0.2.0"],
     ),
   },
   {
@@ -61,6 +59,15 @@ export const initialDistributionProducts: readonly DistributionProductInputV1[] 
     platform: "win32",
     arch: "x64",
     windows: windows("Matriz Ops", "Matriz Ops", "matriz-ops-desktop.exe"),
+  },
+  {
+    productId: "matriz-client-admin-tauri",
+    displayName: "Matriz Client Admin",
+    edition: "Tauri",
+    runtime: "tauri",
+    platform: "win32",
+    arch: "x64",
+    windows: windows("Matriz Client Admin", "Matriz Client Admin", "matriz-client-admin.exe"),
   },
   {
     productId: "seumei-electron",

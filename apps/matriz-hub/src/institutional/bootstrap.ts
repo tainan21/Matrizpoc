@@ -23,6 +23,7 @@ import { manifest as matrizAdminManifest } from "@apps/matriz-admin/public-contr
 import { manifest as seumeiManifest } from "@apps/seumei/public-contract"
 import { manifest as contractsManifest } from "@apps/contracts/public-contract"
 import { manifest as willdashManifest } from "@apps/willdash/public-contract"
+import { manifest as clientAdminManifest } from "@apps/matriz-client-admin/public-contract"
 import { getGlobalInstitutionalRegistry } from "@matriz/integration-registry-core/institutional"
 import {
   createIngestionPipeline,
@@ -53,6 +54,7 @@ const INTERNAL_MANIFESTS: readonly AppManifestDTO[] = [
   seumeiManifest,
   contractsManifest,
   willdashManifest,
+  clientAdminManifest,
 ]
 
 /**

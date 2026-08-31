@@ -22,3 +22,27 @@ export function toActivityEventViewModel(event: ActivityEvent): ActivityEventVie
     occurredAt: event.occurredAt,
   }
 }
+
+export interface ActivityDayGroup {
+  date: string
+  label: string
+  events: ActivityEventViewModel[]
+}
+
+export function groupActivityEventsByDay(events: ActivityEventViewModel[]): ActivityDayGroup[] {
+  const groups = new Map<string, ActivityEventViewModel[]>()
+  for (const event of events) {
+    const date = event.occurredAt.slice(0, 10)
+    groups.set(date, [...(groups.get(date) ?? []), event])
+  }
+  return [...groups.entries()].map(([date, groupedEvents]) => ({
+    date,
+    label: new Date(`${date}T12:00:00.000Z`).toLocaleDateString("pt-BR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    }),
+    events: groupedEvents,
+  }))
+}

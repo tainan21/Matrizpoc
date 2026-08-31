@@ -16,6 +16,7 @@ export * from "./seumei-portfolio"
 export * from "./host-health"
 export * from "./store-package"
 export * from "./distribution"
+export * from "./client-admin"
 
 export const API_CONTRACTS_DEFAULT_VERSION = "v1" as const
 export type ApiContractsVersion = typeof API_CONTRACTS_DEFAULT_VERSION

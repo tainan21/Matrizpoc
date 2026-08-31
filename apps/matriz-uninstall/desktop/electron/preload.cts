@@ -11,4 +11,10 @@ contextBridge.exposeInMainWorld("matrizUninstall", {
   cleanupPreview: (productId: string) => invoke("matriz:cleanup-preview", productId),
   cleanup: (productId: string, candidateIds: readonly string[]) => invoke("matriz:cleanup", productId, candidateIds),
   selfUninstall: () => invoke("matriz:self-uninstall"),
+  chooseLocalInstallerFolder: () => invoke("matriz:local-folder:choose"),
+  scanLocalInstallers: (folderId: string) => invoke("matriz:local-folder:scan", folderId),
+  prepareInstaller: (source: unknown, action: string) => invoke("matriz:installer:prepare", source, action),
+  confirmInstaller: (operationId: string, acknowledgements: readonly string[]) => invoke("matriz:installer:confirm", operationId, acknowledgements),
+  cancelInstaller: (operationId: string) => invoke("matriz:installer:cancel", operationId),
+  installerOperation: (operationId: string) => invoke("matriz:installer:status", operationId),
 })

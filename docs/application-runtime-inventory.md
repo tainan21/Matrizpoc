@@ -19,8 +19,9 @@
 | `contracts` | Contratos e histórico | Web | Next.js | web/serviço | Permanecer web | Baixo: nenhum shell desktop | P3 | `apps/contracts/package.json` | Reavaliar somente com requisito desktop aprovado |
 | `health` | Saúde e telemetria local | Web/serviço | Next.js | web/serviço | Permanecer web/serviço | Baixo: nenhuma configuração desktop | P3 | `apps/health/package.json` | Reavaliar somente com requisito desktop aprovado |
 | `matriz-admin` | Administração operacional | Web + desktop | Tauri 2 | Tauri confirmado | Manter Tauri | Baixo: runtime alinhado | P2 | `apps/matriz-admin/package.json`; `apps/matriz-admin/desktop/src-tauri/tauri.conf.json` | Validar pacote e rollback quando o app for alterado |
-| `matriz-control` | Supervisão local, terminal e Project Host | Web + desktop | Electron | Electron provisório | Investigar sobreposição e requisitos privilegiados antes de decidir | Alto: overlap com `matriz-desktop` e superfície nativa ampla | P1 | `apps/matriz-control/package.json`; `apps/matriz-control/desktop/main.ts` | Comparar responsabilidades, WebView2, terminal, browser e updater |
-| `matriz-desktop` | Cockpit nativo Windows | Desktop | Tauri 2 | Tauri confirmado | Manter como referência Tauri do Control | Médio: nome de produto coincide com `matriz-control` | P1 | `apps/matriz-desktop/package.json`; `apps/matriz-desktop/src-tauri/tauri.conf.json` | Delimitar ownership frente ao Control Electron |
+| `matriz-client-admin` | Monitoramento client-facing | Web + desktop experimental | Next.js + Tauri 2 | Web principal; Tauri congelado após 0.1.0 | Manter web; desktop somente manutenção crítica | Baixo: shell não contém domínio | P2 | `apps/matriz-client-admin/package.json`; `apps/matriz-client-admin/desktop/src-tauri/tauri.conf.json` | Revisar quando houver dados reais dos sistemas Laudate |
+| `matriz-control` | Supervisão local, terminal e Project Host | Web + desktop | Electron | Electron compatibilidade | Preservar capacidades específicas enquanto migram ou recebem exceção | Médio: edição separada por identidade e canal próprios | P1 | `apps/matriz-control/package.json`; `apps/matriz-control/desktop/main.ts` | Revisar capacidades restantes antes de encerrar compatibilidade |
+| `matriz-desktop` | Cockpit nativo Windows | Desktop | Tauri 2 | Tauri confirmado; Control principal 1.0.0 | Evoluir como edição principal | Médio: migração incremental do Electron permanece | P1 | `apps/matriz-desktop/package.json`; `apps/matriz-desktop/src-tauri/tauri.conf.json` | Validar release instalada e migração assistida |
 | `matriz-hub` | Control plane e MatrizDocs | Web | Next.js | web/serviço | Permanecer web | Baixo: nenhuma configuração desktop | P3 | `apps/matriz-hub/package.json` | Reavaliar somente com requisito desktop aprovado |
 | `matriz-identity` | OIDC e identidade central | Serviço | Node/TypeScript | web/serviço | Permanecer serviço | Baixo: desktop não pertence ao papel do app | P3 | `apps/matriz-identity/package.json` | Manter runtime de serviço separado de shells locais |
 | `matriz-ops` | Operações | Web + desktop | Tauri 2 | Tauri confirmado | Manter Tauri | Baixo: runtime alinhado | P2 | `apps/matriz-ops/package.json`; `apps/matriz-ops/desktop/src-tauri/tauri.conf.json` | Validar pacote e rollback quando o app for alterado |
@@ -35,7 +36,7 @@
 
 ## Drift conhecido
 
-- `docs/architecture-overview.md` deve ser validado contra os 16 Infrastructure Contracts antes de mudanças de runtime.
+- `docs/architecture-overview.md` deve ser validado contra os 17 Infrastructure Contracts antes de mudanças de runtime.
 - `docs/architectural-laws.md` contém trechos históricos que ainda dizem que
   `matriz-identity` não existe.
 - documentos anteriores alternam `seumei`, `apps/seumei` e `seumeiapp`; o

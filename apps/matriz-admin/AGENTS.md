@@ -8,3 +8,4 @@ Read `docs/AGENT-START-HERE.md`, `README.md`, `src/manifest/manifest.ts`, `src/b
 - Use public contracts or explicit gateways.
 - Keep the desktop runtime app-local.
 - Validate with `pnpm --filter @matriz/app-matriz-admin test`, `typecheck`, `lint`, `build`, and `package:desktop` when native code changes.
+- Distribution: `matriz-admin-tauri`, Windows `com.matriz.admin`, tag `admin-v*`; read `../../docs/release-distribution.md`.

@@ -16,7 +16,7 @@ const tenantId = "tenant-local-dev"
 const ownerId = "user-local-owner"
 const operatorId = "user-local-operator"
 const deniedId = "user-local-denied"
-const productApps = ["matriz-hub", "spot", "seumei", "contracts", "willdash", "matriz-ops", "matriz-pay", "matriz-admin"] as const
+const productApps = ["matriz-hub", "spot", "seumei", "contracts", "willdash", "matriz-ops", "matriz-pay", "matriz-admin", "matriz-client-admin"] as const
 
 async function localContracts(): Promise<InfrastructureContractV1[]> {
   const appsRoot = resolve(import.meta.dirname, "../../apps")
@@ -49,8 +49,8 @@ async function seedCore() {
     })
     if (userId !== deniedId) for (const appId of productApps) await core.appGrant.upsert({
       where: { tenantId_membershipId_appId: { tenantId, membershipId: membership.id, appId } },
-      update: { appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], revokedAt: null },
-      create: { tenantId, membershipId: membership.id, appId, appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], capabilities: [] },
+      update: { appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], capabilities: appId === "matriz-client-admin" ? ["client-admin.dashboard.read", "client-admin.refresh"] : [], revokedAt: null },
+      create: { tenantId, membershipId: membership.id, appId, appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], capabilities: appId === "matriz-client-admin" ? ["client-admin.dashboard.read", "client-admin.refresh"] : [] },
     })
   }
   for (const appId of productApps) await core.appRegistration.upsert({ where: { tenantId_appId: { tenantId, appId } }, update: { enabled: true }, create: { tenantId, appId, enabled: true, manifestVersion: "0.1.0" } })

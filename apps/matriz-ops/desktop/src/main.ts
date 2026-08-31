@@ -1,5 +1,22 @@
 import "./styles.css"
-const target = import.meta.env.VITE_MATRIZ_OPS_URL || "http://127.0.0.1:3011"
-const url = new URL(target)
-if (url.protocol !== "https:" && url.hostname !== "127.0.0.1" && url.hostname !== "localhost") throw new Error("Matriz Ops desktop requires HTTPS outside loopback")
-window.location.replace(url.toString())
+import { invoke } from "@tauri-apps/api/core"
+import { connectToOps } from "./connection"
+
+const status = document.querySelector<HTMLParagraphElement>("#status")
+const retry = document.querySelector<HTMLButtonElement>("#retry")
+
+async function connect() {
+  if (!status || !retry) return
+  retry.hidden = true
+  retry.disabled = true
+  status.textContent = "Conectando ao centro de controle…"
+  const state = await connectToOps(() => invoke<void>("connect_ops"))
+  if (state === "unavailable") {
+    status.textContent = "Serviço indisponível. Verifique a conexão e tente novamente."
+    retry.hidden = false
+    retry.disabled = false
+  }
+}
+
+retry?.addEventListener("click", () => void connect())
+void connect()
