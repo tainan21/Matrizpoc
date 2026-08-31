@@ -11,6 +11,12 @@ function secureEqual(left: string, right: string): boolean {
   return a.length === b.length && timingSafeEqual(a, b)
 }
 
+export function authorizeSeumeiService(headers: Readonly<Record<string, string | string[] | undefined>>, serviceToken: string): boolean {
+  const authorization = headers.authorization
+  const token = typeof authorization === "string" && authorization.startsWith("Bearer ") ? authorization.slice(7) : ""
+  return headers["x-matriz-app-id"] === "seumei" && secureEqual(token, serviceToken)
+}
+
 async function readJson(request: IncomingMessage): Promise<unknown> {
   const chunks: Buffer[] = []
   let size = 0
@@ -36,10 +42,7 @@ export function createSeumeiInternalApiHandler(options: {
       response.end(JSON.stringify({ error: "method_not_allowed" }))
       return true
     }
-    const authorization = request.headers.authorization
-    const appId = request.headers["x-matriz-app-id"]
-    const token = authorization?.startsWith("Bearer ") ? authorization.slice(7) : ""
-    if (appId !== "seumei" || !secureEqual(token, options.serviceToken)) {
+    if (!authorizeSeumeiService(request.headers, options.serviceToken)) {
       response.writeHead(401, { "content-type": "application/json" })
       response.end(JSON.stringify({ error: "unauthorized_service" }))
       return true
