@@ -1,7 +1,7 @@
 use std::{
     collections::HashMap,
     io::{Read, Write},
-    path::Path,
+    path::{Path, PathBuf},
     process::Command,
     sync::{Arc, Mutex},
     thread,
@@ -67,6 +67,9 @@ pub enum TerminalEvent {
         data: String,
     },
     State(TerminalSession),
+    Closed {
+        session_id: String,
+    },
 }
 
 struct SessionRecord {
@@ -164,7 +167,7 @@ impl TerminalManager {
             .map_err(|error| format!("Unable to create Windows terminal: {error}"))?;
         let mut command = CommandBuilder::new(program);
         command.args(args);
-        command.cwd(root);
+        command.cwd(external_process_cwd(root));
         let mut child = pair
             .slave
             .spawn_command(command)
@@ -243,6 +246,9 @@ impl TerminalManager {
                     Ok(session) => session,
                     Err(_) => return,
                 };
+                if session.metadata.status == "closing" {
+                    return;
+                }
                 match status {
                     Ok(status) => {
                         session.metadata.exit_code = Some(status.exit_code());
@@ -366,6 +372,7 @@ impl TerminalManager {
             let mut session = session
                 .lock()
                 .map_err(|_| "Terminal session lock poisoned".to_owned())?;
+            session.metadata.status = "closing";
             (session.writer.take(), session.master.take())
         };
         drop(writer);
@@ -374,6 +381,12 @@ impl TerminalManager {
             .lock()
             .map_err(|_| "Terminal lock poisoned")?
             .remove(session_id);
+        send_event(
+            &self.subscriber,
+            TerminalEvent::Closed {
+                session_id: session_id.to_owned(),
+            },
+        );
         Ok(())
     }
 
@@ -418,6 +431,17 @@ impl TerminalManager {
             .cloned()
             .ok_or_else(|| "Unknown terminal session".to_owned())
     }
+}
+
+pub fn external_process_cwd(path: &Path) -> PathBuf {
+    let value = path.to_string_lossy();
+    if let Some(network_path) = value.strip_prefix(r"\\?\UNC\") {
+        return PathBuf::from(format!(r"\\{network_path}"));
+    }
+    if let Some(drive_path) = value.strip_prefix(r"\\?\") {
+        return PathBuf::from(drive_path);
+    }
+    path.to_path_buf()
 }
 
 fn operation_app_id(operation_id: Option<&str>) -> Option<&str> {

@@ -7,9 +7,10 @@ The release contract validates the installed product, not only source code.
 1. Run `corepack pnpm --filter @matriz/app-matriz-desktop test`, `typecheck`, and `lint`.
 2. Run Rust format, tests, and Clippy with warnings denied.
 3. Run `corepack pnpm --filter @matriz/app-matriz-desktop package` once.
-4. Run `acceptance:installed` twice with distinct `MATRIZ_ACCEPTANCE_RUN_ID` values.
-5. Confirm both lifecycle records say `pass` and `uninstalled: true`, with the same installer SHA-256.
-6. Generate the canonical Markdown report with `node apps/matriz-desktop/acceptance/generate-report.mjs`.
+4. Run the Playwright WebView2 gate with `corepack pnpm --filter @matriz/app-matriz-desktop e2e`.
+5. Run `acceptance:installed` twice with distinct `MATRIZ_ACCEPTANCE_RUN_ID` values.
+6. Confirm both lifecycle records say `pass` and `uninstalled: true`, with the same installer SHA-256.
+7. Generate the canonical Markdown report with `node apps/matriz-desktop/acceptance/generate-report.mjs`.
 
 Evidence is written below `output/matriz-control-acceptance/` and remains
 ignored. The tracked report contains no machine-specific user path.
@@ -20,7 +21,8 @@ ignored. The tracked report contains no machine-specific user path.
 - six bounded PowerShell/ConPTY tabs, Unicode, Ctrl+C, streaming, and cleanup;
 - installed-product exit, settings persistence, Doctor, Git pulse, and command deck;
 - Matriz Admin native build, verified install, start, and stop;
-- 18 screenshots per cycle at compact, standard, and wide sizes;
+- Playwright connects directly to the owned WebView2 process over an ephemeral CDP port; no registry change or EdgeDriver is used;
+- 27 screenshots per cycle at compact, standard, and wide sizes;
 - accessible names, keyboard focus, overflow, reduced motion, idle CPU/RAM, and startup upper bound;
 - installer verification, install, product execution, and uninstall.
 

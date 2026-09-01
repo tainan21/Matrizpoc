@@ -1,6 +1,6 @@
 use matriz_desktop_native::terminal::{
-    bounded_chunk, bounded_tail, normalize_size, validate_session_action, TerminalEvent,
-    TerminalLimits, TerminalManager, TerminalSession,
+    bounded_chunk, bounded_tail, external_process_cwd, normalize_size, validate_session_action,
+    TerminalEvent, TerminalLimits, TerminalManager, TerminalSession,
 };
 
 #[test]
@@ -61,6 +61,29 @@ fn state_events_expose_the_session_directly_as_camel_case_data() {
     assert_eq!(json["data"]["id"], "term-1");
     assert_eq!(json["data"]["exitCode"], serde_json::Value::Null);
     assert!(json["data"].get("session").is_none());
+}
+
+#[cfg(windows)]
+#[test]
+fn canonical_workspace_paths_are_made_compatible_with_legacy_child_processes() {
+    assert_eq!(
+        external_process_cwd(std::path::Path::new(r"\\?\C:\Apps\matriz-infra-hub")),
+        std::path::PathBuf::from(r"C:\Apps\matriz-infra-hub")
+    );
+    assert_eq!(
+        external_process_cwd(std::path::Path::new(r"C:\Apps\matriz-infra-hub")),
+        std::path::PathBuf::from(r"C:\Apps\matriz-infra-hub")
+    );
+}
+
+#[test]
+fn closed_events_identify_the_backend_removed_session() {
+    let json = serde_json::to_value(TerminalEvent::Closed {
+        session_id: "managed-1".into(),
+    })
+    .expect("serialized closed event");
+    assert_eq!(json["event"], "closed");
+    assert_eq!(json["data"]["sessionId"], "managed-1");
 }
 
 #[cfg(windows)]

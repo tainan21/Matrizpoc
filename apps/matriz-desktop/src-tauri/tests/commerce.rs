@@ -302,6 +302,25 @@ fn hub_utilities_are_builtin_and_open_control_without_commerce_mutation() {
 }
 
 #[test]
+fn hub_activation_serializes_the_renderer_contract_in_camel_case() {
+    let target = PackageActivationTarget::Control {
+        package_id: "matriz.node-sweep".into(),
+        view: "hub".into(),
+        feature_id: "node-sweep".into(),
+    };
+
+    assert_eq!(
+        serde_json::to_value(target).expect("activation JSON"),
+        serde_json::json!({
+            "kind": "control",
+            "packageId": "matriz.node-sweep",
+            "view": "hub",
+            "featureId": "node-sweep"
+        })
+    );
+}
+
+#[test]
 fn changed_installed_version_is_not_trusted_or_activatable() {
     let temp = tempfile::tempdir().expect("temp commerce");
     let path = temp.path().join("commerce.json");

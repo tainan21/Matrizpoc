@@ -3,12 +3,12 @@
   "compilerOptions": {
     "types": [
       "node",
-      "@wdio/globals/types",
-      "@wdio/mocha-framework"
+      "@playwright/test"
     ]
   },
   "include": [
     "acceptance/e2e/**/*.ts",
-    "wdio.conf.ts"
+    "acceptance/playwright/**/*.ts",
+    "playwright.config.ts"
   ]
 }

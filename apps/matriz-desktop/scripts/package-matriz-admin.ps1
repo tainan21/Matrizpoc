@@ -1,6 +1,6 @@
 $ErrorActionPreference = 'Stop'
-$workspaceRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\..'))
-$installer = [IO.Path]::GetFullPath((Join-Path $workspaceRoot 'apps\matriz-admin\desktop\src-tauri\target\release\bundle\nsis\Matriz Admin_0.1.0_x64-setup.exe'))
+$workspaceRoot = [IO.Path]::GetFullPath([IO.Path]::Combine($PSScriptRoot, '..\..\..'))
+$installer = [IO.Path]::GetFullPath([IO.Path]::Combine($workspaceRoot, 'apps\matriz-admin\desktop\src-tauri\target\release\bundle\nsis\Matriz Admin_0.1.0_x64-setup.exe'))
 $allowedRoot = $workspaceRoot.TrimEnd('\') + '\'
 
 if (-not $installer.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase)) {

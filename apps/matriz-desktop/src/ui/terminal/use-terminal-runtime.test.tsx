@@ -39,4 +39,18 @@ describe("terminal lifecycle", () => {
 
     expect(result.current.state.sessions).toEqual([])
   })
+
+  it("removes a managed session closed by a runtime action", async () => {
+    let listener: ((event: TerminalEvent) => void) | undefined
+    const gateway = {
+      listTerminals: vi.fn().mockResolvedValue([{ ...runningSession, id: "managed-a", kind: "managed" }]),
+      subscribeTerminal: vi.fn(async (next) => { listener = next }),
+    } as unknown as DesktopGateway
+    const { result } = renderHook(() => useTerminalRuntime(gateway))
+
+    await act(async () => Promise.resolve())
+    await act(async () => listener?.({ event: "closed", data: { sessionId: "managed-a" } }))
+
+    expect(result.current.state.sessions).toEqual([])
+  })
 })

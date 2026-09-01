@@ -24,7 +24,10 @@ mod tasks;
 pub mod terminal;
 mod workspace;
 
-use std::fmt;
+use std::{
+    fmt,
+    path::{Path, PathBuf},
+};
 
 use activity::{ActivityEnvelope, ActivityHub};
 use awake::AwakeManager;
@@ -57,6 +60,35 @@ pub use runtime::{
 };
 pub use settings::{DesktopSettings, SettingsStore};
 pub use workspace::validate_workspace;
+
+pub fn resolve_acceptance_config_dir(
+    default: &Path,
+    temporary_root: &Path,
+    acceptance_enabled: Option<&str>,
+    requested: Option<&str>,
+) -> PathBuf {
+    if acceptance_enabled != Some("1") {
+        return default.to_path_buf();
+    }
+    let Some(requested) = requested else {
+        return default.to_path_buf();
+    };
+    let Ok(temporary_root) = temporary_root.canonicalize() else {
+        return default.to_path_buf();
+    };
+    let Ok(requested) = PathBuf::from(requested).canonicalize() else {
+        return default.to_path_buf();
+    };
+    if requested.starts_with(temporary_root) {
+        requested
+    } else {
+        default.to_path_buf()
+    }
+}
+
+fn acceptance_mode() -> bool {
+    std::env::var("MATRIZ_CONTROL_ACCEPTANCE").as_deref() == Ok("1")
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -800,14 +832,14 @@ fn write_settings(
 ) -> Result<DesktopSettings, String> {
     let settings = settings.normalized();
     store.write(&settings)?;
-    if settings.start_with_windows {
-        app.autolaunch()
-            .enable()
-            .map_err(|error| error.to_string())?;
-    } else {
-        app.autolaunch()
-            .disable()
-            .map_err(|error| error.to_string())?;
+    if !acceptance_mode() {
+        let autostart = app.autolaunch();
+        let enabled = autostart.is_enabled().map_err(|error| error.to_string())?;
+        if settings.start_with_windows && !enabled {
+            autostart.enable().map_err(|error| error.to_string())?;
+        } else if !settings.start_with_windows && enabled {
+            autostart.disable().map_err(|error| error.to_string())?;
+        }
     }
     Ok(settings)
 }
@@ -1245,12 +1277,16 @@ fn subscribe_terminal(
 pub fn run() {
     let activity = ActivityHub::default();
     let terminals = TerminalManager::with_activity(activity.clone());
-    tauri::Builder::default()
-        .plugin(shell::shortcut_plugin())
-        .plugin(tauri_plugin_autostart::init(
-            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            None,
-        ))
+    let builder = tauri::Builder::default().plugin(tauri_plugin_autostart::init(
+        tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+        None,
+    ));
+    let builder = if acceptance_mode() {
+        builder
+    } else {
+        builder.plugin(shell::shortcut_plugin())
+    };
+    builder
         .manage(NativeState::new())
         .manage(OperationsState::discover())
         .manage(terminals)
@@ -1260,18 +1296,23 @@ pub fn run() {
         .manage(SystemPulseService::new())
         .manage(NodeSweepService::default())
         .setup(|app| {
-            let settings_path = app.path().app_config_dir()?.join("settings.json");
+            let default_config_dir = app.path().app_config_dir()?;
+            let config_dir = resolve_acceptance_config_dir(
+                &default_config_dir,
+                &std::env::temp_dir(),
+                std::env::var("MATRIZ_CONTROL_ACCEPTANCE").ok().as_deref(),
+                std::env::var("MATRIZ_CONTROL_ACCEPTANCE_CONFIG_DIR")
+                    .ok()
+                    .as_deref(),
+            );
+            let settings_path = config_dir.join("settings.json");
             let settings = SettingsStore::at(settings_path);
             let saved = settings.read().unwrap_or_default();
             app.state::<OperationsState>()
                 .restore_workspace(saved.workspace_path.as_deref());
             app.manage(settings);
-            app.manage(HubStateStore::at(
-                app.path().app_config_dir()?.join("hub-state.json"),
-            ));
-            app.manage(CommerceStore::new(
-                app.path().app_config_dir()?.join("commerce.json"),
-            ));
+            app.manage(HubStateStore::at(config_dir.join("hub-state.json")));
+            app.manage(CommerceStore::new(config_dir.join("commerce.json")));
             shell::install_tray(app.handle())?;
             Ok(())
         })

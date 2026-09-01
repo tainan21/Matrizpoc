@@ -20,6 +20,13 @@ export function useTerminalRuntime(gateway: DesktopGateway) {
     })
     void gateway.subscribeTerminal((event) => {
       if (!active) return
+      if (event.event === "closed") {
+        closedSessions.current.add(event.data.sessionId)
+        sinks.current.delete(event.data.sessionId)
+        sequences.current.delete(event.data.sessionId)
+        dispatch({ type: "remove", sessionId: event.data.sessionId })
+        return
+      }
       if (event.event === "state") {
         if (closedSessions.current.has(event.data.id)) return
         dispatch({ type: "upsert", session: event.data })

@@ -172,6 +172,7 @@ export interface TerminalSession {
 export type TerminalEvent =
   | { readonly event: "output"; readonly data: TerminalChunk }
   | { readonly event: "state"; readonly data: TerminalSession }
+  | { readonly event: "closed"; readonly data: { readonly sessionId: string } }
 
 export interface TerminalChunk {
   readonly sessionId: string

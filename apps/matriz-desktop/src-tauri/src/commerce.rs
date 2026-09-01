@@ -26,7 +26,11 @@ pub struct CommerceSnapshot {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-#[serde(tag = "kind", rename_all = "camelCase")]
+#[serde(
+    tag = "kind",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum PackageActivationTarget {
     Runtime {
         package_id: String,
