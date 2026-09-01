@@ -11,7 +11,7 @@ const STATUS_LABEL: Record<TerminalSession["status"], string> = {
   exited: "encerrado",
 }
 
-interface TerminalViewProps {
+export interface TerminalViewProps {
   readonly state: TerminalState
   readonly create: () => void
   readonly activate: (sessionId: string) => void

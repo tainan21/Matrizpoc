@@ -51,6 +51,8 @@ export interface DesktopSettings {
   readonly soundsEnabled: boolean
   readonly volume: number
   readonly startWithWindows: boolean
+  readonly terminalDockOpen: boolean
+  readonly terminalDockHeight: number
   readonly workspacePath?: string
 }
 

@@ -17,6 +17,8 @@ describe("desktop operational feedback", () => {
         soundsEnabled: false,
         volume: 0.45,
         startWithWindows: false,
+        terminalDockOpen: false,
+        terminalDockHeight: 280,
       }),
     } as unknown as DesktopGateway
     const { result } = renderHook(() => useDesktop(gateway))

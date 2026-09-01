@@ -48,6 +48,39 @@ test.afterEach(async ({ tauriPage: page }) => {
   await closeEveryShell(page)
 })
 
+test("keeps the global bottom dock idle, resizable and persisted", async ({ tauriPage: page }) => {
+  await chooseMode(page, "Início")
+  await page.getByRole("button", { name: "Abrir terminal inferior" }).click()
+
+  await expect(page.locator(".terminal-dock")).toHaveClass(/is-open/)
+  await expect(page.locator(".terminal-tabs [role='tab']")).toHaveCount(0)
+  const separator = page.getByRole("separator", { name: "Redimensionar terminal inferior" })
+  await expect(separator).toHaveAttribute("aria-valuenow", "280")
+  await separator.press("ArrowUp")
+  await expect(separator).toHaveAttribute("aria-valuenow", "304")
+  await expect.poll(async () => page.evaluate(async () => {
+    const tauri = window as unknown as {
+      __TAURI_INTERNALS__: { invoke<T>(command: string): Promise<T> }
+    }
+    const settings = await tauri.__TAURI_INTERNALS__.invoke<{ terminalDockHeight: number }>("read_settings")
+    return settings.terminalDockHeight
+  })).toBe(304)
+
+  await page.getByRole("button", { name: "Recolher terminal inferior" }).click()
+  await expect(page.getByRole("button", { name: "Abrir terminal inferior" })).toBeVisible()
+  await expect.poll(async () => page.evaluate(async () => {
+    const tauri = window as unknown as {
+      __TAURI_INTERNALS__: { invoke<T>(command: string): Promise<T> }
+    }
+    const settings = await tauri.__TAURI_INTERNALS__.invoke<{ terminalDockOpen: boolean }>("read_settings")
+    return settings.terminalDockOpen
+  })).toBe(false)
+  await page.getByRole("button", { name: "Abrir terminal inferior" }).click()
+
+  await expect(page.getByRole("separator", { name: "Redimensionar terminal inferior" })).toHaveAttribute("aria-valuenow", "304")
+  await expect(page.locator(".terminal-tabs [role='tab']")).toHaveCount(0)
+})
+
 test("streams cwd and Unicode output, then remains interactive after Ctrl+C", async ({ tauriPage: page }) => {
   const marker = `MATRIZ_ACCEPTANCE_${Date.now()}`
   await openTerminal(page)

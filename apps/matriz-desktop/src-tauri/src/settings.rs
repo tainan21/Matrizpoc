@@ -34,6 +34,10 @@ pub struct DesktopSettings {
     pub volume: f64,
     pub start_with_windows: bool,
     #[serde(default)]
+    pub terminal_dock_open: bool,
+    #[serde(default = "default_terminal_dock_height")]
+    pub terminal_dock_height: u16,
+    #[serde(default)]
     pub workspace_path: Option<String>,
 }
 
@@ -45,6 +49,8 @@ impl Default for DesktopSettings {
             sounds_enabled: true,
             volume: 0.45,
             start_with_windows: false,
+            terminal_dock_open: false,
+            terminal_dock_height: default_terminal_dock_height(),
             workspace_path: None,
         }
     }
@@ -57,8 +63,13 @@ impl DesktopSettings {
         } else {
             Self::default().volume
         };
+        self.terminal_dock_height = self.terminal_dock_height.clamp(180, 520);
         self
     }
+}
+
+const fn default_terminal_dock_height() -> u16 {
+    280
 }
 
 #[derive(Deserialize, Serialize)]
@@ -145,6 +156,8 @@ mod tests {
         .expect("legacy settings remain readable");
 
         assert_eq!(document.settings.theme, DesktopTheme::Matriz);
+        assert!(!document.settings.terminal_dock_open);
+        assert_eq!(document.settings.terminal_dock_height, 280);
     }
 
     #[test]

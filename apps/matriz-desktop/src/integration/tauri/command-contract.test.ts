@@ -94,6 +94,8 @@ describe("Tauri command contract", () => {
       soundsEnabled: false,
       volume: 0.25,
       startWithWindows: false,
+      terminalDockOpen: false,
+      terminalDockHeight: 280,
     }
 
     await gateway.snapshot()

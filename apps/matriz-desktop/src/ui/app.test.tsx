@@ -65,6 +65,8 @@ function gateway(): DesktopGateway {
       soundsEnabled: false,
       volume: 0.45,
       startWithWindows: false,
+      terminalDockOpen: false,
+      terminalDockHeight: 280,
       workspacePath: "C:\\Apps\\matriz-infra-hub",
     }),
     writeSettings: vi.fn().mockImplementation(async (settings) => settings),
@@ -166,6 +168,38 @@ describe("Matriz Control", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Hub" }))
     expect(screen.getByRole("heading", { name: "MATRIZ HUB" })).toBeVisible()
+  })
+
+  it("keeps a global collapsed terminal bar without creating a shell automatically", async () => {
+    const desktop = gateway()
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir terminal inferior" }))
+
+    expect(screen.getByRole("button", { name: "Recolher terminal inferior" })).toBeVisible()
+    expect(screen.getByRole("separator", { name: "Redimensionar terminal inferior" })).toBeVisible()
+    expect(desktop.createTerminal).not.toHaveBeenCalled()
+    await waitFor(() => expect(desktop.writeSettings).toHaveBeenCalledWith(expect.objectContaining({ terminalDockOpen: true })))
+  })
+
+  it("restores the persisted terminal dock without creating a shell", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.readSettings).mockResolvedValue({
+      theme: "matriz",
+      closeToTray: true,
+      soundsEnabled: false,
+      volume: 0.45,
+      startWithWindows: false,
+      terminalDockOpen: true,
+      terminalDockHeight: 360,
+      workspacePath: "C:\\Apps\\matriz-infra-hub",
+    })
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+
+    expect(await screen.findByRole("button", { name: "Recolher terminal inferior" })).toBeVisible()
+    expect(screen.getByRole("separator", { name: "Redimensionar terminal inferior" })).toHaveAttribute("aria-valuenow", "360")
+    expect(desktop.createTerminal).not.toHaveBeenCalled()
   })
 
   it("keeps Início operable when one status source is unavailable", async () => {

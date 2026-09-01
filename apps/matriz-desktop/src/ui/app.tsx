@@ -26,6 +26,7 @@ import { HomeView, type HomeTarget } from "./home/home-view"
 import { filterPorts, presentPorts } from "./presenters"
 import { useDesktop } from "./use-desktop"
 import { TerminalPane } from "./terminal/terminal-pane"
+import { TerminalDock, clampTerminalDockHeight } from "./terminal/terminal-dock"
 import { TerminalView } from "./terminal/terminal-view"
 import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
 import { RuntimeWorkspace } from "./runtime/runtime-workspace"
@@ -87,9 +88,12 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
     initialize: feedback.initialize ? () => ignoreFeedbackFailure(() => feedback.initialize?.()) : undefined,
   }), [feedback])
   const desktop = useDesktop(gateway)
-  const terminal = useTerminalRuntime(gateway)
   const settingsSnapshot = useRef<DesktopSettings | undefined>(undefined)
   const settingsWrites = useRef<Promise<void>>(Promise.resolve())
+  const persistSettings = useRef<((patch: Partial<DesktopSettings>) => void) | undefined>(undefined)
+  const terminal = useTerminalRuntime(gateway, (open) => {
+    persistSettings.current?.({ terminalDockOpen: open })
+  })
   const feedbackInitialized = useRef(false)
   const [view, setView] = useState<View>("home")
   const [query, setQuery] = useState("")
@@ -102,6 +106,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
   const [workspacePath, setWorkspacePath] = useState("")
   const [hubFeature, setHubFeature] = useState<HubFeatureId>()
   const [activeAppId, setActiveAppId] = useState<DesktopAppId>()
+  const [terminalDockHeight, setTerminalDockHeight] = useState(280)
 
   const ports = useMemo(
     () => filterPorts(presentPorts(desktop.snapshot.ports), query),
@@ -120,13 +125,15 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
     if (!desktop.settings) return
     settingsSnapshot.current = desktop.settings
     setWorkspacePath(desktop.settings.workspacePath ?? "")
+    setTerminalDockHeight(clampTerminalDockHeight(desktop.settings.terminalDockHeight))
+    terminal.restoreDockOpen(desktop.settings.terminalDockOpen)
     applyControlTheme(desktop.settings.theme)
     safeFeedback.configure?.(desktop.settings)
     if (!feedbackInitialized.current) {
       feedbackInitialized.current = true
       safeFeedback.initialize?.()
     }
-  }, [desktop.settings, safeFeedback])
+  }, [desktop.settings, safeFeedback, terminal.restoreDockOpen])
 
   useEffect(() => {
     let refreshInterval: number | undefined
@@ -203,7 +210,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
     }
   }
 
-  const saveSettings = async (patch: Partial<DesktopSettings>) => {
+  const saveSettings = async (patch: Partial<DesktopSettings>, audible = true) => {
     if (!desktop.settings) return
     const previous = settingsSnapshot.current ?? desktop.settings
     const next = { ...previous, ...patch }
@@ -220,7 +227,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
     settingsWrites.current = write.catch(() => undefined)
     try {
       await write
-      void safeFeedback.play("interaction")
+      if (audible) void safeFeedback.play("interaction")
     } catch {
       if (settingsSnapshot.current === next) {
         settingsSnapshot.current = previous
@@ -229,6 +236,13 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
       void safeFeedback.play("error")
     }
   }
+  persistSettings.current = (patch) => { void saveSettings(patch, false) }
+
+  const commitTerminalDockHeight = useCallback((height: number) => {
+    const next = clampTerminalDockHeight(height)
+    setTerminalDockHeight(next)
+    persistSettings.current?.({ terminalDockHeight: next })
+  }, [])
 
   const executeDeck = async (id: string) => {
     if (id === "terminal:new") {
@@ -250,7 +264,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
   }
 
   return (
-    <div className={`control-shell${terminal.state.sessions.length && view !== "terminal" ? " has-terminal-dock" : ""}`} data-matrizlib="0.1.0" data-theme={desktop.settings?.theme ?? initialTheme}>
+    <div className={`control-shell${view !== "terminal" ? " has-terminal-dock" : ""}`} data-matrizlib="0.1.0" data-theme={desktop.settings?.theme ?? initialTheme}>
       <header className="titlebar" data-tauri-drag-region>
         <span className="mark" aria-hidden="true">M</span>
         <strong data-tauri-drag-region>MATRIZ / CONTROL</strong>
@@ -298,14 +312,20 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
         {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void safeFeedback.play("success") }} quit={() => { void safeFeedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>
 
-      {terminal.state.sessions.length && view !== "terminal" ? (
-        <aside className={`terminal-dock${terminal.state.dockOpen ? " is-open" : ""}`}>
-          {terminal.state.dockOpen ? (
-            <><button className="terminal-dock-toggle" onClick={() => terminal.setDockOpen(false)}>TERMINAL ↓</button><TerminalView compact state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /></>
-          ) : (
-            <button className="terminal-dock-summary" onClick={() => terminal.setDockOpen(true)}><span className={`terminal-state terminal-state--${terminal.state.sessions.some(({ status }) => status === "failed") ? "failed" : "running"}`} /><strong>TERMINAL</strong><span>{terminal.state.sessions.length.toString().padStart(2, "0")}</span><small>{terminal.state.sessions.find(({ id }) => id === terminal.state.activeId)?.title}</small><b>↑</b></button>
-          )}
-        </aside>
+      {view !== "terminal" ? (
+        <TerminalDock
+          open={terminal.state.dockOpen}
+          height={terminalDockHeight}
+          state={terminal.state}
+          setOpen={terminal.setDockOpen}
+          resize={setTerminalDockHeight}
+          commitResize={commitTerminalDockHeight}
+          create={() => void createTerminal()}
+          activate={terminal.activate}
+          interrupt={(id) => void terminal.interrupt(id)}
+          close={(id) => void terminal.close(id)}
+          renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />}
+        />
       ) : null}
 
       <footer><span className={desktop.message.includes("não") ? "error" : ""} role="status" aria-live="polite">{desktop.message}</span><kbd>Ctrl K</kbd></footer>

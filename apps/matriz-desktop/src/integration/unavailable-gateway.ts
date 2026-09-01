@@ -28,6 +28,8 @@ const DEFAULT_SETTINGS: DesktopSettings = Object.freeze({
   soundsEnabled: true,
   volume: 0.45,
   startWithWindows: false,
+  terminalDockOpen: false,
+  terminalDockHeight: 280,
 })
 
 function unavailable(): never {

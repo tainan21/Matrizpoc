@@ -5,6 +5,8 @@ use matriz_desktop_native::{DesktopSettings, DesktopTheme, SettingsStore};
 #[test]
 fn settings_defaults_and_volume_are_normalized() {
     assert_eq!(DesktopSettings::default().volume, 0.45);
+    assert!(!DesktopSettings::default().terminal_dock_open);
+    assert_eq!(DesktopSettings::default().terminal_dock_height, 280);
     assert_eq!(
         DesktopSettings {
             volume: 4.0,
@@ -13,6 +15,15 @@ fn settings_defaults_and_volume_are_normalized() {
         .normalized()
         .volume,
         1.0
+    );
+    assert_eq!(
+        DesktopSettings {
+            terminal_dock_height: 900,
+            ..DesktopSettings::default()
+        }
+        .normalized()
+        .terminal_dock_height,
+        520
     );
 }
 
@@ -40,6 +51,8 @@ fn settings_write_is_readable_as_a_complete_document() {
         sounds_enabled: false,
         volume: 0.7,
         start_with_windows: true,
+        terminal_dock_open: true,
+        terminal_dock_height: 360,
         workspace_path: Some("C:\\Apps\\matriz-infra-hub".into()),
     };
     store.write(&desired).expect("atomic settings write");
@@ -71,4 +84,6 @@ fn version_one_settings_without_workspace_remain_compatible() {
     assert!(restored.start_with_windows);
     assert_eq!(restored.workspace_path, None);
     assert_eq!(restored.theme, DesktopTheme::Matriz);
+    assert!(!restored.terminal_dock_open);
+    assert_eq!(restored.terminal_dock_height, 280);
 }

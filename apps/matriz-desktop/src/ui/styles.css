@@ -342,9 +342,11 @@ footer .error { color: #ff8296; }
 .terminal-state--succeeded { background: #9a66ff; }
 .terminal-state--failed { background: #ff718a; box-shadow: 0 0 9px rgba(255,113,138,.45); }
 .terminal-dock { min-height: 34px; border-top: 1px solid var(--line); background: rgba(8,7,13,.98); overflow: hidden; }
-.terminal-dock.is-open { height: min(38vh, 290px); padding: 0 8px 8px; }
+.terminal-dock.is-open { min-height: 180px; max-height: min(520px, calc(100vh - 166px)); padding: 0 8px 8px; }
+.terminal-dock-resizer { height: 8px; margin: 0 -8px; cursor: row-resize; touch-action: none; background: linear-gradient(90deg, transparent 0 42%, rgba(154,102,255,.38) 42% 58%, transparent 58%); background-position: center; background-size: 100% 1px; background-repeat: no-repeat; }
+.terminal-dock-resizer:hover, .terminal-dock-resizer:focus-visible { background-color: rgba(154,102,255,.08); outline: 0; }
 .terminal-dock-toggle { height: 28px; border: 0; background: transparent; color: #796f84; font: 800 8px var(--matriz-font-mono); letter-spacing: .14em; cursor: pointer; }
-.terminal-dock .terminal-view { height: calc(100% - 28px); }
+.terminal-dock .terminal-view { height: calc(100% - 36px); }
 .terminal-dock-summary { width: 100%; min-height: 34px; display: grid; grid-template-columns: 8px auto 24px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 0 14px; border: 0; background: transparent; color: #8e8599; cursor: pointer; font: 8px var(--matriz-font-mono); letter-spacing: .1em; }
 .terminal-dock-summary small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; color: #665e70; }
 .terminal-dock-summary b { color: var(--violet-hot); }
@@ -371,15 +373,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 1100px) { .mode-rail { gap:2px; padding-inline:6px; } .mode-rail button { gap:2px; } .mode-rail button > span { font-size:0; } .mode-rail svg { width:18px; height:18px; } }
 @media (max-width: 760px) { .home-heading { align-items:flex-start; flex-direction:column; } .home-status-strip { grid-template-columns:1fr 1fr; } .home-status:nth-child(3) { border-left:0; } .home-status:nth-child(n+3) { border-top:1px solid var(--line); } .home-workspace-grid { grid-template-columns:1fr; } }
 @media (max-width: 520px) { .control-main { padding-inline: 15px; } .app-grid { grid-template-columns: 1fr; } .home-quick-actions { width:100%; display:grid; grid-template-columns:repeat(3,1fr); } .home-quick-actions button { padding-inline:6px; } }
-@media (min-width: 1100px) {
-  .control-shell.has-terminal-dock { grid-template-columns: minmax(0, 1fr) minmax(430px, 42vw); grid-template-rows: 46px 60px minmax(0, 1fr) 30px; }
-  .control-shell.has-terminal-dock .titlebar, .control-shell.has-terminal-dock .mode-rail, .control-shell.has-terminal-dock footer { grid-column: 1 / 3; }
-  .control-shell.has-terminal-dock .control-main { grid-column: 1; grid-row: 3; }
-  .control-shell.has-terminal-dock .terminal-dock { grid-column: 2; grid-row: 3; height: auto; min-height: 0; border-top: 0; border-left: 1px solid var(--line); padding: 8px; }
-  .control-shell.has-terminal-dock .terminal-dock-summary { height: 100%; grid-template-columns: 8px auto 24px; place-content: center; }
-  .control-shell.has-terminal-dock .terminal-dock-summary small, .control-shell.has-terminal-dock .terminal-dock-summary b { display: none; }
-  .control-shell.has-terminal-dock .terminal-dock.is-open { height: auto; }
-}
 @media (prefers-reduced-motion: no-preference) { button, .port-row, .app-tile { transition: color 100ms ease, background 100ms ease, border-color 100ms ease, padding 100ms ease; } }
 
 .runtime-workspace { height: calc(100vh - 136px); margin: -21px -22px -26px; display: grid; grid-template-columns: minmax(220px, 28%) minmax(390px, 1fr) minmax(180px, 22%); overflow: hidden; }
