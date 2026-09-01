@@ -22,7 +22,7 @@ ignored. The tracked report contains no machine-specific user path.
 - installed-product exit, settings persistence, Doctor, Git pulse, and command deck;
 - Matriz Admin native build, verified install, start, and stop;
 - Playwright connects directly to the owned WebView2 process over an ephemeral CDP port; no registry change or EdgeDriver is used;
-- 27 screenshots per cycle at compact, standard, and wide sizes;
+- 42 screenshots per cycle, covering all 14 primary areas at compact, standard, and wide sizes;
 - accessible names, keyboard focus, overflow, reduced motion, idle CPU/RAM, and startup upper bound;
 - installer verification, install, product execution, and uninstall.
 

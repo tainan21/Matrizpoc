@@ -22,6 +22,7 @@ import { Icons } from "./icons"
 import { CommandDeck } from "./command-deck/command-deck"
 import { FpsIndicator } from "./hub/fps-indicator"
 import { HubView } from "./hub/hub-view"
+import { HomeView, type HomeTarget } from "./home/home-view"
 import { filterPorts, presentPorts } from "./presenters"
 import { useDesktop } from "./use-desktop"
 import { TerminalPane } from "./terminal/terminal-pane"
@@ -33,7 +34,7 @@ import { WorkspaceView } from "./workspace/workspace-view"
 import { StoreView } from "./store/store-view"
 import { requestWorkspaceNavigation } from "./workspace/navigation-guard"
 
-type View = "ports" | "apps" | "workspace" | "hub" | "terminal" | "actions" | "store" | "doctor" | "settings"
+type View = "home" | "ports" | "apps" | "workspace" | "hub" | "agents" | "environments" | "infra" | "git" | "terminal" | "actions" | "store" | "doctor" | "settings"
 type SoundId =
   | "system.start"
   | "system.end"
@@ -51,10 +52,15 @@ export interface Feedback {
 type ExecuteAction = <T>(action: () => Promise<T>, success: string) => Promise<T>
 
 const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = [
+  { id: "home", label: "Início", icon: "home" },
   { id: "ports", label: "Portas", icon: "ports" },
   { id: "apps", label: "Apps", icon: "apps" },
   { id: "workspace", label: "Workspace", icon: "workspace" },
   { id: "hub", label: "Hub", icon: "hub" },
+  { id: "agents", label: "Agentes", icon: "agents" },
+  { id: "environments", label: "Ambientes", icon: "environments" },
+  { id: "infra", label: "Infra", icon: "infra" },
+  { id: "git", label: "Git", icon: "git" },
   { id: "terminal", label: "Terminal", icon: "terminal" },
   { id: "actions", label: "Ações", icon: "actions" },
   { id: "store", label: "Store", icon: "store" },
@@ -67,7 +73,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   const terminal = useTerminalRuntime(gateway)
   const settingsSnapshot = useRef<DesktopSettings | undefined>(undefined)
   const settingsWrites = useRef<Promise<void>>(Promise.resolve())
-  const [view, setView] = useState<View>("ports")
+  const [view, setView] = useState<View>("home")
   const [query, setQuery] = useState("")
   const [confirmAll, setConfirmAll] = useState(false)
   const [runtimes, setRuntimes] = useState<readonly import("../domain/types").RuntimeInstance[]>([])
@@ -102,13 +108,13 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
 
   useEffect(() => {
     let refreshInterval: number | undefined
-    if (view === "apps" || view === "workspace" || view === "actions") {
+    if (view === "apps" || view === "workspace" || view === "environments" || view === "agents" || view === "infra" || view === "actions") {
       const refreshApps = () => void gateway.runtimeSnapshot().then(setRuntimes).catch(() => setRuntimes([]))
       refreshApps()
       refreshInterval = window.setInterval(refreshApps, 1_000)
     }
     if (view === "doctor") void gateway.doctor().then(setChecks).catch(() => setChecks([]))
-    if (view === "actions") void gateway.workspacePulse().then(setPulse).catch(() => setPulse(undefined))
+    if (view === "actions" || view === "git") void gateway.workspacePulse().then(setPulse).catch(() => setPulse(undefined))
     return () => { if (refreshInterval !== undefined) window.clearInterval(refreshInterval) }
   }, [gateway, view])
 
@@ -235,11 +241,12 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
           const label = terminalCount
             ? `Terminal · ${terminalCount} ${terminalCount === 1 ? "ativa" : "ativas"}`
             : item.label
-          return <button key={item.id} aria-label={label} aria-current={view === item.id ? "page" : undefined} onClick={() => chooseView(item.id)}><ViewIcon /><span>{item.label}</span>{terminalCount ? <i className="mode-activity" aria-hidden="true">{terminalCount}</i> : null}</button>
+          return <button key={item.id} title={item.label} aria-label={label} aria-current={view === item.id ? "page" : undefined} onClick={() => chooseView(item.id)}><ViewIcon /><span>{item.label}</span>{terminalCount ? <i className="mode-activity" aria-hidden="true">{terminalCount}</i> : null}</button>
         })}
       </nav>
 
       <main className="control-main">
+        {view === "home" ? <HomeView gateway={gateway} ports={desktop.snapshot.ports} open={(target: HomeTarget) => chooseView(target)} /> : null}
         {view === "ports" ? (
           <section aria-labelledby="ports-title">
             <div className="section-head"><div><span className="eyebrow">P0 / LIVE</span><h1 id="ports-title">PORTAS</h1></div><Badge tone={ports.length ? "success" : "neutral"}>{ports.length} ON</Badge></div>
@@ -254,6 +261,10 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} selectedAppId={activeAppId} onSelectApp={(appId) => { setActiveAppId(appId); recordContext("apps", appId) }} /> : null}
         {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "hub" ? <HubView gateway={gateway} focusFeature={hubFeature} onResume={(session) => { setHubFeature(undefined); setActiveAppId(session.appId); setView(session.area) }} /> : null}
+        {view === "agents" ? <OperationalArea title="AGENTES" eyebrow="COWORKING / WORKBENCH" description="Tarefas e execuções permanecem sob autoridade do Workbench." action="Abrir Workbench em Apps" onAction={() => { setActiveAppId("matriz-workbench"); chooseView("apps") }} /> : null}
+        {view === "environments" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
+        {view === "infra" ? <OperationalArea title="INFRA" eyebrow="LOCAL / SERVIÇOS" description="O cockpit local será habilitado serviço por serviço, com prévia e confirmação." /> : null}
+        {view === "git" ? <GitSummary pulse={pulse} refresh={() => gateway.workspacePulse().then(setPulse)} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} runtimes={runtimes} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} openControl={(featureId) => { setHubFeature(featureId); setView("hub") }} /> : null}
@@ -310,6 +321,14 @@ function ActionsView({ pulse, gateway, runtimes, activeGate, setActiveGate, feed
 
 function DoctorView({ checks, refresh }: { checks: readonly DoctorCheck[]; refresh(): Promise<unknown> }) {
   return <section aria-labelledby="doctor-title"><div className="section-head"><div><span className="eyebrow">LOCAL / DIAGNÓSTICO</span><h1 id="doctor-title">DOCTOR</h1></div><button className="round-action" aria-label="Executar diagnóstico" onClick={() => void refresh()}><Icons.refresh /></button></div><div className="check-list">{checks.map((check) => <div key={check.id}><span className={`status-dot ${check.ok ? "ready" : "degraded"}`} /><strong>{check.id.toUpperCase()}</strong><small>{check.value}</small></div>)}</div></section>
+}
+
+function GitSummary({ pulse, refresh }: { pulse?: WorkspacePulse; refresh(): Promise<unknown> }) {
+  return <section className="git-summary" aria-labelledby="git-title"><div className="section-head"><div><span className="eyebrow">WORKSPACE / VERSIONAMENTO</span><h1 id="git-title">GIT</h1></div><button className="round-action" aria-label="Atualizar Git" onClick={() => void refresh()}><Icons.refresh /></button></div><div className="git-branch"><span className={`status-dot ${pulse?.clean ? "ready" : "degraded"}`} /><div><small>BRANCH ATUAL</small><strong>{pulse?.branch ?? "Verificando…"}</strong></div><b>{pulse ? `${pulse.changedFiles} mudanças` : "—"}</b></div><p className="area-note">Operações mutáveis serão liberadas somente com snapshot e revisão nativos.</p></section>
+}
+
+function OperationalArea({ title, eyebrow, description, action, onAction }: { title: string; eyebrow: string; description: string; action?: string; onAction?(): void }) {
+  return <section className="operational-area" aria-labelledby={`${title.toLowerCase()}-title`}><div className="section-head"><div><span className="eyebrow">{eyebrow}</span><h1 id={`${title.toLowerCase()}-title`}>{title}</h1><p>{description}</p></div></div>{action && onAction ? <button aria-label={action} onClick={onAction}>{action}<span>→</span></button> : <p className="area-note">Nenhuma operação é executada automaticamente.</p>}</section>
 }
 
 function SettingsView({ settings, workspacePath, setWorkspacePath, save, selectWorkspace, quit }: { settings: DesktopSettings; workspacePath: string; setWorkspacePath(value: string): void; save(patch: Partial<DesktopSettings>): Promise<void>; selectWorkspace(): Promise<void>; quit(): void }) {

@@ -117,7 +117,7 @@ export interface WorkspacePulse {
   readonly clean: boolean
 }
 
-export type HubArea = "ports" | "apps" | "workspace" | "terminal" | "actions" | "doctor" | "settings"
+export type HubArea = "home" | "ports" | "apps" | "workspace" | "agents" | "environments" | "infra" | "git" | "terminal" | "actions" | "doctor" | "settings"
 export type HubFeatureId = "node-sweep" | "system-pulse" | "matriz-awake" | "resume-session"
 
 export interface SystemPulse {

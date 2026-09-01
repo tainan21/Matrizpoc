@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest"
 
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 
 import type { DesktopGateway } from "../application/desktop-gateway"
@@ -147,6 +147,7 @@ describe("Matriz Control", () => {
     render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
 
     expect(await screen.findByText("3000")).toBeVisible()
+    fireEvent.click(screen.getByRole("button", { name: "Portas" }))
     fireEvent.click(screen.getByRole("button", { name: "Encerrar PID 3210" }))
 
     await waitFor(() =>
@@ -154,15 +155,32 @@ describe("Matriz Control", () => {
     )
   })
 
-  it("keeps all primary modes keyboard reachable", async () => {
+  it("keeps every approved primary mode keyboard reachable in product order", async () => {
     render(<ControlApp gateway={gateway()} feedback={{ play: vi.fn() }} />)
     await screen.findByText("3000")
-    for (const label of ["Portas", "Apps", "Workspace", "Hub", "Terminal", "Ações", "Store", "Doctor", "Ajustes"]) {
-      expect(screen.getByRole("button", { name: label })).toBeVisible()
-    }
+    expect(within(screen.getByRole("navigation", { name: "Modos" })).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
+      "Início", "Portas", "Apps", "Workspace", "Hub", "Agentes", "Ambientes", "Infra", "Git", "Terminal", "Ações", "Store", "Doctor", "Ajustes",
+    ])
+    expect(screen.getByRole("heading", { name: "INÍCIO" })).toBeVisible()
 
     fireEvent.click(screen.getByRole("button", { name: "Hub" }))
     expect(screen.getByRole("heading", { name: "MATRIZ HUB" })).toBeVisible()
+  })
+
+  it("keeps Início operable when one status source is unavailable", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.runtimeSnapshot).mockRejectedValue(new Error("runtime offline"))
+    vi.mocked(desktop.workspacePulse).mockResolvedValue({ branch: "main", changedFiles: 2, clean: false })
+    vi.mocked(desktop.doctor).mockResolvedValue([{ id: "git", ok: true, value: "2.51.0" }])
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+
+    expect(await screen.findByRole("heading", { name: "INÍCIO" })).toBeVisible()
+    expect(await screen.findByText("main")).toBeVisible()
+    expect(screen.getByText("Apps indisponíveis")).toBeVisible()
+    expect(screen.getByText("1/1 checks prontos")).toBeVisible()
+
+    fireEvent.click(screen.getByRole("button", { name: "Abrir Git" }))
+    expect(screen.getByRole("heading", { name: "GIT" })).toBeVisible()
   })
 
   it("blocks workspace and primary navigation while an environment draft is dirty", async () => {

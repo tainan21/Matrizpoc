@@ -2,10 +2,15 @@ import { chooseMode } from "../playwright/actions"
 import { expect, test } from "../playwright/fixtures"
 
 const destinations = [
+  ["Início", "main h1", "INÍCIO"],
   ["Portas", "main h1", "PORTAS"],
   ["Apps", "main h1", "APPS"],
   ["Workspace", "main h1", ".ENV MANAGER"],
   ["Hub", "main h1", "MATRIZ HUB"],
+  ["Agentes", "main h1", "AGENTES"],
+  ["Ambientes", "main h1", ".ENV MANAGER"],
+  ["Infra", "main h1", "INFRA"],
+  ["Git", "main h1", "GIT"],
   ["Terminal", "main section[aria-label='Terminal']", undefined],
   ["Ações", "main h1", "AÇÕES"],
   ["Store", "main h1", "MATRIZ STORE"],
@@ -16,9 +21,8 @@ const destinations = [
 test("renders the Matriz identity and exposes every primary mode", async ({ tauriPage: page }) => {
   await expect(page.locator("[data-matrizlib='0.1.0']")).toBeAttached()
   await expect(page.locator("header strong")).toHaveText("MATRIZ / CONTROL")
-  for (const [label] of destinations) {
-    await expect(page.getByRole("button", { name: new RegExp(`^${label}`) })).toBeEnabled()
-  }
+  await expect(page.locator("nav[aria-label='Modos'] > button")).toHaveCount(destinations.length)
+  expect(await page.locator("nav[aria-label='Modos'] > button").evaluateAll((buttons) => buttons.map((button) => button.getAttribute("aria-label")))).toEqual(destinations.map(([label]) => label))
 })
 
 test("navigates through the compact shell in one native window", async ({ tauriPage: page }) => {

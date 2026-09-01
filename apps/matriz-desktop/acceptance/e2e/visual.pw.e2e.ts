@@ -14,7 +14,7 @@ const viewports = [
   { id: "wide", width: 1440, height: 900 },
 ] as const
 
-const views = ["Portas", "Apps", "Workspace", "Hub", "Terminal", "Ações", "Store", "Doctor", "Ajustes"] as const
+const views = ["Início", "Portas", "Apps", "Workspace", "Hub", "Agentes", "Ambientes", "Infra", "Git", "Terminal", "Ações", "Store", "Doctor", "Ajustes"] as const
 
 type VisualResult = {
   viewport: string
@@ -72,6 +72,9 @@ test("keeps every primary surface usable across supported window sizes", async (
       await chooseMode(page, view)
       const destination = page.getByRole("button", { name: new RegExp(`^${view}`) })
       await expect(destination).toHaveAttribute("aria-current", "page")
+      if (view === "Início") {
+        await expect(page.locator(".home-status-strip")).not.toContainText("Verificando…", { timeout: 20_000 })
+      }
       const inspection = await inspectSurface(page)
       const focusVisible = await proveKeyboardFocus(page)
       const directory = `${screenshotRoot}/${viewport.id}`

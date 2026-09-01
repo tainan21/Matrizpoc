@@ -9,6 +9,9 @@ function Icon({ children, ...props }: SVGProps<SVGSVGElement>) {
 }
 
 export const Icons = {
+  home: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><path d="m4 11 8-7 8 7v9h-6v-6h-4v6H4v-9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/></Icon>
+  ),
   ports: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><path d="M5 7h14M7 12h10M9 17h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><circle cx="5" cy="7" r="1.5" fill="currentColor"/><circle cx="19" cy="7" r="1.5" fill="currentColor"/></Icon>
   ),
@@ -20,6 +23,18 @@ export const Icons = {
   ),
   hub: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><rect x="4" y="4" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><rect x="14" y="4" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><rect x="4" y="14" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><path d="M15 14h5v6h-6v-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></Icon>
+  ),
+  agents: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><circle cx="9" cy="9" r="3" stroke="currentColor" strokeWidth="1.7"/><circle cx="17" cy="8" r="2" stroke="currentColor" strokeWidth="1.5"/><path d="M3.5 20c.5-4 2.3-6 5.5-6s5 2 5.5 6M14 14c3.6-.5 5.7 1.5 6.2 5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></Icon>
+  ),
+  environments: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><path d="M5 5h14M5 12h14M5 19h14" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/><circle cx="9" cy="5" r="2" fill="currentColor"/><circle cx="15" cy="12" r="2" fill="currentColor"/><circle cx="11" cy="19" r="2" fill="currentColor"/></Icon>
+  ),
+  infra: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><rect x="4" y="4" width="16" height="6" rx="2" stroke="currentColor" strokeWidth="1.6"/><rect x="4" y="14" width="16" height="6" rx="2" stroke="currentColor" strokeWidth="1.6"/><circle cx="8" cy="7" r="1" fill="currentColor"/><circle cx="8" cy="17" r="1" fill="currentColor"/></Icon>
+  ),
+  git: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><circle cx="7" cy="5" r="2" stroke="currentColor" strokeWidth="1.7"/><circle cx="17" cy="19" r="2" stroke="currentColor" strokeWidth="1.7"/><circle cx="7" cy="19" r="2" stroke="currentColor" strokeWidth="1.7"/><path d="M7 7v10m0-5c6 0 10-1 10-5v10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></Icon>
   ),
   store: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><path d="M5 9h14l-1 11H6L5 9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></Icon>
