@@ -10,8 +10,25 @@ use windows_sys::Win32::Storage::FileSystem::{
 };
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum DesktopTheme {
+    Matriz,
+    ReactorAcid,
+    AuroraLiquid,
+    IndustrialEmber,
+}
+
+impl Default for DesktopTheme {
+    fn default() -> Self {
+        Self::Matriz
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DesktopSettings {
+    #[serde(default)]
+    pub theme: DesktopTheme,
     pub close_to_tray: bool,
     pub sounds_enabled: bool,
     pub volume: f64,
@@ -23,6 +40,7 @@ pub struct DesktopSettings {
 impl Default for DesktopSettings {
     fn default() -> Self {
         Self {
+            theme: DesktopTheme::default(),
             close_to_tray: true,
             sounds_enabled: true,
             volume: 0.45,
@@ -113,4 +131,24 @@ fn replace_file(source: &std::path::Path, destination: &std::path::Path) -> Resu
 #[cfg(not(windows))]
 fn replace_file(source: &std::path::Path, destination: &std::path::Path) -> Result<(), String> {
     fs::rename(source, destination).map_err(|error| error.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{DesktopSettings, DesktopTheme, SettingsDocument};
+
+    #[test]
+    fn legacy_settings_default_to_the_matriz_theme() {
+        let document: SettingsDocument = serde_json::from_str(
+            r#"{"version":1,"settings":{"closeToTray":true,"soundsEnabled":true,"volume":0.45,"startWithWindows":false}}"#,
+        )
+        .expect("legacy settings remain readable");
+
+        assert_eq!(document.settings.theme, DesktopTheme::Matriz);
+    }
+
+    #[test]
+    fn default_settings_start_with_the_matriz_theme() {
+        assert_eq!(DesktopSettings::default().theme, DesktopTheme::Matriz);
+    }
 }

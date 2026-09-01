@@ -1,6 +1,6 @@
 use std::fs;
 
-use matriz_desktop_native::{DesktopSettings, SettingsStore};
+use matriz_desktop_native::{DesktopSettings, DesktopTheme, SettingsStore};
 
 #[test]
 fn settings_defaults_and_volume_are_normalized() {
@@ -35,6 +35,7 @@ fn settings_write_is_readable_as_a_complete_document() {
     let directory = tempfile::tempdir().expect("settings fixture");
     let store = SettingsStore::at(directory.path().join("settings.json"));
     let desired = DesktopSettings {
+        theme: DesktopTheme::AuroraLiquid,
         close_to_tray: false,
         sounds_enabled: false,
         volume: 0.7,
@@ -69,4 +70,5 @@ fn version_one_settings_without_workspace_remain_compatible() {
     assert_eq!(restored.volume, 0.7);
     assert!(restored.start_with_windows);
     assert_eq!(restored.workspace_path, None);
+    assert_eq!(restored.theme, DesktopTheme::Matriz);
 }

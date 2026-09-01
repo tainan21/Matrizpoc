@@ -7,6 +7,7 @@ import {
   darkAppThemes,
   semanticFeedbackColors,
   semanticTokenNames,
+  operationalThemes,
   themeDefinitionToCssVars,
   themeRegistry,
 } from "./index"
@@ -40,6 +41,42 @@ function cssValue(source: string, name: string): string {
 }
 
 describe("MatrizLib token contract", () => {
+  it("publishes the four operational themes as semantic token sets", () => {
+    expect(operationalThemes.map(({ id }) => id)).toEqual([
+      "matriz",
+      "reactor-acid",
+      "aurora-liquid",
+      "industrial-ember",
+    ])
+    for (const theme of operationalThemes) {
+      const section = tokensCss.match(new RegExp(`\\[data-matrizlib\\]\\[data-theme="${theme.id}"\\]\\s*\\{([\\s\\S]*?)\\n\\}`))
+      expect(section, `missing ${theme.id} CSS tokens`).not.toBeNull()
+      for (const token of semanticTokenNames) {
+        expect(cssValue(section?.[1] ?? "", token)).toBe(theme.tokens[token])
+      }
+    }
+  })
+
+  it("keeps operational theme text and status colors readable", () => {
+    for (const theme of operationalThemes) {
+      for (const foreground of [
+        "--matriz-color-text",
+        "--matriz-color-text-muted",
+        "--matriz-color-success",
+        "--matriz-color-warning",
+        "--matriz-color-danger",
+        "--matriz-color-info",
+      ] as const) {
+        for (const background of ["--matriz-color-canvas", "--matriz-color-surface"] as const) {
+          expect(
+            contrastRatio(theme.tokens[foreground], theme.tokens[background]),
+            `${theme.id} ${foreground} on ${background}`,
+          ).toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    }
+  })
+
   it("publishes the same stable version from package and code", () => {
     expect(packageJson.version).toBe("0.1.0")
     expect(DESIGN_SYSTEM_VERSION).toBe("0.1.0")

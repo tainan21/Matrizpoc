@@ -65,6 +65,9 @@ test("keeps every primary surface usable across supported window sizes", async (
   const results: VisualResult[] = []
   const screenshotRoot = `${outputRoot}/screenshots`
   await mkdir(screenshotRoot, { recursive: true })
+  await chooseMode(page, "Ajustes")
+  await page.getByRole("button", { name: "Matriz", exact: true }).click()
+  await expect(page.locator(".control-shell")).toHaveAttribute("data-theme", "matriz")
 
   for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height })

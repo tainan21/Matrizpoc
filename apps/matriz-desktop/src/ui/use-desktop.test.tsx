@@ -12,6 +12,7 @@ describe("desktop operational feedback", () => {
     const gateway = {
       snapshot: vi.fn().mockResolvedValue({ snapshotId: "observed", ports: [] }),
       readSettings: vi.fn().mockResolvedValue({
+        theme: "matriz",
         closeToTray: true,
         soundsEnabled: false,
         volume: 0.45,

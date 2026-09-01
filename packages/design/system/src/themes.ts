@@ -1,6 +1,42 @@
 import type { MatrizAppId } from "@matriz/foundation-constants"
 import { semanticFeedbackColors, type SemanticTokenName } from "./tokens"
 
+export interface OperationalTheme {
+  readonly id: "matriz" | "reactor-acid" | "aurora-liquid" | "industrial-ember"
+  readonly label: string
+  readonly description: string
+  readonly tokens: Readonly<Record<SemanticTokenName, string>>
+}
+
+export const operationalThemes = [
+  {
+    id: "matriz", label: "Matriz", description: "Roxo operacional, o tema padrão.",
+    tokens: {
+      "--matriz-color-canvas": "#08060e", "--matriz-color-surface": "#0d0915", "--matriz-color-text": "#f4effb", "--matriz-color-text-muted": "#82778f", "--matriz-color-border": "#2a1c3d", "--matriz-color-action": "#9a55ff", "--matriz-color-action-text": "#08060e", "--matriz-color-focus": "#b98aff", "--matriz-color-success": "#51e2a8", "--matriz-color-warning": "#efb563", "--matriz-color-danger": "#ed6b7a", "--matriz-color-info": "#b98aff",
+    },
+  },
+  {
+    id: "reactor-acid", label: "Reator Ácido", description: "Preto, verde elétrico e âmbar.",
+    tokens: {
+      "--matriz-color-canvas": "#050806", "--matriz-color-surface": "#0b120c", "--matriz-color-text": "#efffe8", "--matriz-color-text-muted": "#99a993", "--matriz-color-border": "#2d4c29", "--matriz-color-action": "#b7ff21", "--matriz-color-action-text": "#050806", "--matriz-color-focus": "#b7ff21", "--matriz-color-success": "#b7ff21", "--matriz-color-warning": "#ffb02e", "--matriz-color-danger": "#ff7768", "--matriz-color-info": "#9ee7ff",
+    },
+  },
+  {
+    id: "aurora-liquid", label: "Aurora Líquida", description: "Azul-ciano e magenta em contraste.",
+    tokens: {
+      "--matriz-color-canvas": "#070819", "--matriz-color-surface": "#0b0c21", "--matriz-color-text": "#f7f5ff", "--matriz-color-text-muted": "#a19bbd", "--matriz-color-border": "#2d2c61", "--matriz-color-action": "#e34eff", "--matriz-color-action-text": "#070819", "--matriz-color-focus": "#42e8ff", "--matriz-color-success": "#42e8ff", "--matriz-color-warning": "#ffc862", "--matriz-color-danger": "#ff719e", "--matriz-color-info": "#42e8ff",
+    },
+  },
+  {
+    id: "industrial-ember", label: "Brasa Industrial", description: "Grafite, laranja e vermelho.",
+    tokens: {
+      "--matriz-color-canvas": "#0d0c0b", "--matriz-color-surface": "#151211", "--matriz-color-text": "#fff4eb", "--matriz-color-text-muted": "#b3a096", "--matriz-color-border": "#4a342a", "--matriz-color-action": "#ff842e", "--matriz-color-action-text": "#130700", "--matriz-color-focus": "#ffc14d", "--matriz-color-success": "#8ce6a2", "--matriz-color-warning": "#ffc14d", "--matriz-color-danger": "#ff6a5e", "--matriz-color-info": "#8dc9ff",
+    },
+  },
+] as const satisfies readonly OperationalTheme[]
+
+export type OperationalThemeId = (typeof operationalThemes)[number]["id"]
+
 export type MatrizColorMode = "light" | "dark"
 
 export interface AppThemeTokens {

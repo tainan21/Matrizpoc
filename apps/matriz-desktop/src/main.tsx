@@ -9,6 +9,7 @@ import { bootstrapMatrizDesktop } from "./bootstrap"
 import { createTauriGateway } from "./integration/tauri/tauri-gateway"
 import { unavailableGateway } from "./integration/unavailable-gateway"
 import { ControlApp, type Feedback } from "./ui/app"
+import { applyControlTheme, readCachedTheme } from "./ui/theme/control-theme"
 import "./ui/styles.css"
 
 bootstrapMatrizDesktop()
@@ -29,11 +30,15 @@ const feedback: Feedback = {
   },
 }
 
+const initialTheme = readCachedTheme()
+applyControlTheme(initialTheme)
+
 createRoot(root).render(
   <StrictMode>
     <ControlApp
       gateway={"__TAURI_INTERNALS__" in window ? createTauriGateway() : unavailableGateway}
       feedback={feedback}
+      initialTheme={initialTheme}
     />
   </StrictMode>,
 )

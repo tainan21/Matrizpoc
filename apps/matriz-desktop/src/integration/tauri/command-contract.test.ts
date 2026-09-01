@@ -89,6 +89,7 @@ describe("Tauri command contract", () => {
     })
     const gateway = createTauriGateway(invoke, () => "acceptance-channel", () => "activity-channel")
     const settings = {
+      theme: "matriz" as const,
       closeToTray: true,
       soundsEnabled: false,
       volume: 0.25,

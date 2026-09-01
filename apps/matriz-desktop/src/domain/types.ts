@@ -1,3 +1,5 @@
+import type { OperationalThemeId } from "@matriz/design-system"
+
 export type DesktopAppId =
   | "matriz-hub"
   | "spot"
@@ -44,6 +46,7 @@ export interface KillManyRequest {
 }
 
 export interface DesktopSettings {
+  readonly theme: OperationalThemeId
   readonly closeToTray: boolean
   readonly soundsEnabled: boolean
   readonly volume: number

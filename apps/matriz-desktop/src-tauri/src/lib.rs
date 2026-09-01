@@ -58,7 +58,7 @@ pub use runtime::{
     ensure_preview_ready, preview_navigation_allowed, runtime_url, snapshot as runtime_snapshot,
     validate_route_path, RuntimeInstance,
 };
-pub use settings::{DesktopSettings, SettingsStore};
+pub use settings::{DesktopSettings, DesktopTheme, SettingsStore};
 pub use workspace::validate_workspace;
 
 pub fn resolve_acceptance_config_dir(

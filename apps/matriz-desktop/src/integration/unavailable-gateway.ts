@@ -23,6 +23,7 @@ const DEMO_ACTIVITY: readonly ActivityEnvelope[] = [
 ]
 
 const DEFAULT_SETTINGS: DesktopSettings = Object.freeze({
+  theme: "matriz",
   closeToTray: true,
   soundsEnabled: true,
   volume: 0.45,

@@ -19,7 +19,7 @@ const destinations = [
 ] as const
 
 test("renders the Matriz identity and exposes every primary mode", async ({ tauriPage: page }) => {
-  await expect(page.locator("[data-matrizlib='0.1.0']")).toBeAttached()
+  await expect(page.locator(".control-shell[data-matrizlib='0.1.0']")).toBeAttached()
   await expect(page.locator("header strong")).toHaveText("MATRIZ / CONTROL")
   await expect(page.locator("nav[aria-label='Modos'] > button")).toHaveCount(destinations.length)
   expect(await page.locator("nav[aria-label='Modos'] > button").evaluateAll((buttons) => buttons.map((button) => button.getAttribute("aria-label")))).toEqual(destinations.map(([label]) => label))

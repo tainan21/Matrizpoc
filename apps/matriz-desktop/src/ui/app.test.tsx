@@ -60,6 +60,7 @@ function gateway(): DesktopGateway {
     readResumeSession: vi.fn().mockResolvedValue({ workspacePath: "C:\\Apps\\matriz-infra-hub", lastUsedAt: {} }),
     recordSessionContext: vi.fn().mockResolvedValue({ workspacePath: "C:\\Apps\\matriz-infra-hub", lastUsedAt: {} }),
     readSettings: vi.fn().mockResolvedValue({
+      theme: "matriz",
       closeToTray: true,
       soundsEnabled: false,
       volume: 0.45,
@@ -232,6 +233,22 @@ describe("Matriz Control", () => {
     resolvers.shift()?.()
     await waitFor(() => expect(desktop.writeSettings).toHaveBeenCalledTimes(2))
     expect(desktop.writeSettings).toHaveBeenNthCalledWith(2, expect.objectContaining({ soundsEnabled: true, volume: 0.65 }))
+  })
+
+  it("offers every operational theme and applies the selected theme immediately", async () => {
+    const desktop = gateway()
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+    fireEvent.click(screen.getByRole("button", { name: "Ajustes" }))
+
+    expect(screen.getByRole("button", { name: "Matriz" })).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getByRole("button", { name: "Reator Ácido" })).toBeVisible()
+    expect(screen.getByRole("button", { name: "Aurora Líquida" })).toBeVisible()
+    expect(screen.getByRole("button", { name: "Brasa Industrial" })).toBeVisible()
+
+    fireEvent.click(screen.getByRole("button", { name: "Aurora Líquida" }))
+    await waitFor(() => expect(desktop.writeSettings).toHaveBeenCalledWith(expect.objectContaining({ theme: "aurora-liquid" })))
+    expect(document.querySelector(".control-shell")).toHaveAttribute("data-theme", "aurora-liquid")
   })
 
   it("starts Seumei Web in an observable terminal and keeps activity in the rail", async () => {

@@ -33,6 +33,8 @@ import { RunbookPanel } from "./runbooks/runbook-panel"
 import { WorkspaceView } from "./workspace/workspace-view"
 import { StoreView } from "./store/store-view"
 import { requestWorkspaceNavigation } from "./workspace/navigation-guard"
+import { applyControlTheme } from "./theme/control-theme"
+import { ThemePicker } from "./theme/theme-picker"
 
 type View = "home" | "ports" | "apps" | "workspace" | "hub" | "agents" | "environments" | "infra" | "git" | "terminal" | "actions" | "store" | "doctor" | "settings"
 type SoundId =
@@ -68,7 +70,7 @@ const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = 
   { id: "settings", label: "Ajustes", icon: "settings" },
 ]
 
-export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; feedback: Feedback }) {
+export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gateway: DesktopGateway; feedback: Feedback; initialTheme?: DesktopSettings["theme"] }) {
   const desktop = useDesktop(gateway)
   const terminal = useTerminalRuntime(gateway)
   const settingsSnapshot = useRef<DesktopSettings | undefined>(undefined)
@@ -102,6 +104,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
     if (!desktop.settings) return
     settingsSnapshot.current = desktop.settings
     setWorkspacePath(desktop.settings.workspacePath ?? "")
+    applyControlTheme(desktop.settings.theme)
     feedback.configure?.(desktop.settings)
     feedback.initialize?.()
   }, [desktop.settings, feedback])
@@ -224,7 +227,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   }
 
   return (
-    <div className={`control-shell${terminal.state.sessions.length && view !== "terminal" ? " has-terminal-dock" : ""}`} data-matrizlib="0.1.0" data-theme="dark">
+    <div className={`control-shell${terminal.state.sessions.length && view !== "terminal" ? " has-terminal-dock" : ""}`} data-matrizlib="0.1.0" data-theme={desktop.settings?.theme ?? initialTheme}>
       <header className="titlebar" data-tauri-drag-region>
         <span className="mark" aria-hidden="true">M</span>
         <strong data-tauri-drag-region>MATRIZ / CONTROL</strong>
@@ -332,5 +335,5 @@ function OperationalArea({ title, eyebrow, description, action, onAction }: { ti
 }
 
 function SettingsView({ settings, workspacePath, setWorkspacePath, save, selectWorkspace, quit }: { settings: DesktopSettings; workspacePath: string; setWorkspacePath(value: string): void; save(patch: Partial<DesktopSettings>): Promise<void>; selectWorkspace(): Promise<void>; quit(): void }) {
-  return <section aria-labelledby="settings-title"><div className="section-head"><div><span className="eyebrow">LOCAL / PREFERÊNCIAS</span><h1 id="settings-title">AJUSTES</h1></div></div><div className="settings-list"><label><span>Sons</span><input type="checkbox" checked={settings.soundsEnabled} onChange={(event) => void save({ soundsEnabled: event.target.checked })} /></label><label><span>Volume</span><input aria-label="Volume" type="range" min="0" max="1" step="0.05" value={settings.volume} onChange={(event) => void save({ volume: Number(event.target.value) })} /></label><label><span>Tray ao fechar</span><input type="checkbox" checked={settings.closeToTray} onChange={(event) => void save({ closeToTray: event.target.checked })} /></label><label><span>Iniciar com Windows</span><input type="checkbox" checked={settings.startWithWindows} onChange={(event) => void save({ startWithWindows: event.target.checked })} /></label></div><div className="workspace-field"><Input aria-label="Workspace" placeholder="C:\Apps\matriz-infra-hub" value={workspacePath} onChange={(event) => setWorkspacePath(event.target.value)} /><Button variant="secondary" onClick={() => void selectWorkspace()}>USAR</Button></div><Button className="quit-button" variant="ghost" onClick={quit}>SAIR DO CONTROL</Button></section>
+  return <section aria-labelledby="settings-title"><div className="section-head"><div><span className="eyebrow">LOCAL / PREFERÊNCIAS</span><h1 id="settings-title">AJUSTES</h1></div></div><ThemePicker theme={settings.theme} select={(theme) => void save({ theme })} /><div className="settings-list"><label><span>Sons</span><input type="checkbox" checked={settings.soundsEnabled} onChange={(event) => void save({ soundsEnabled: event.target.checked })} /></label><label><span>Volume</span><input aria-label="Volume" type="range" min="0" max="1" step="0.05" value={settings.volume} onChange={(event) => void save({ volume: Number(event.target.value) })} /></label><label><span>Tray ao fechar</span><input type="checkbox" checked={settings.closeToTray} onChange={(event) => void save({ closeToTray: event.target.checked })} /></label><label><span>Iniciar com Windows</span><input type="checkbox" checked={settings.startWithWindows} onChange={(event) => void save({ startWithWindows: event.target.checked })} /></label></div><div className="workspace-field"><Input aria-label="Workspace" placeholder="C:\Apps\matriz-infra-hub" value={workspacePath} onChange={(event) => setWorkspacePath(event.target.value)} /><Button variant="secondary" onClick={() => void selectWorkspace()}>USAR</Button></div><Button className="quit-button" variant="ghost" onClick={quit}>SAIR DO CONTROL</Button></section>
 }
