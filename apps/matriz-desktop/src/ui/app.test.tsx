@@ -186,6 +186,7 @@ describe("Matriz Control", () => {
 
   it("blocks workspace and primary navigation while an environment draft is dirty", async () => {
     const desktop = gateway()
+    const feedback = { play: vi.fn() }
     vi.mocked(desktop.readEnvironment).mockResolvedValue({
       appId: "matriz-admin",
       fileName: ".env.local",
@@ -194,7 +195,7 @@ describe("Matriz Control", () => {
       variables: [{ key: "PORT", value: "3002", sensitive: false, source: ".env.local" }],
     })
     const confirm = vi.spyOn(window, "confirm").mockReturnValue(false)
-    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    render(<ControlApp gateway={desktop} feedback={feedback} />)
     await screen.findByText("3000")
 
     fireEvent.click(screen.getByRole("button", { name: "Workspace" }))
@@ -212,6 +213,7 @@ describe("Matriz Control", () => {
     expect(desktop.createTerminal).not.toHaveBeenCalled()
     expect(screen.getByRole("heading", { name: ".ENV MANAGER" })).toBeVisible()
     expect(confirm).toHaveBeenCalledTimes(3)
+    expect(feedback.play).toHaveBeenCalledWith("warning")
     confirm.mockRestore()
   })
 
@@ -249,6 +251,28 @@ describe("Matriz Control", () => {
     fireEvent.click(screen.getByRole("button", { name: "Aurora Líquida" }))
     await waitFor(() => expect(desktop.writeSettings).toHaveBeenCalledWith(expect.objectContaining({ theme: "aurora-liquid" })))
     expect(document.querySelector(".control-shell")).toHaveAttribute("data-theme", "aurora-liquid")
+  })
+
+  it("initializes audio once while reconfiguring persisted preferences", async () => {
+    const desktop = gateway()
+    const feedback = { play: vi.fn(), configure: vi.fn(), initialize: vi.fn() }
+    render(<ControlApp gateway={desktop} feedback={feedback} />)
+    await screen.findByText("3000")
+    await waitFor(() => expect(feedback.initialize).toHaveBeenCalledTimes(1))
+
+    fireEvent.click(screen.getByRole("button", { name: "Ajustes" }))
+    fireEvent.click(screen.getByRole("button", { name: "Brasa Industrial" }))
+
+    await waitFor(() => expect(feedback.configure).toHaveBeenLastCalledWith(expect.objectContaining({ theme: "industrial-ember" })))
+    expect(feedback.initialize).toHaveBeenCalledTimes(1)
+  })
+
+  it("never lets an audio failure block navigation", async () => {
+    render(<ControlApp gateway={gateway()} feedback={{ play: () => { throw new Error("audio device unavailable") } }} />)
+    await screen.findByText("3000")
+
+    expect(() => fireEvent.click(screen.getByRole("button", { name: "Apps" }))).not.toThrow()
+    expect(await screen.findByRole("heading", { name: "APPS" })).toBeVisible()
   })
 
   it("starts Seumei Web in an observable terminal and keeps activity in the rail", async () => {

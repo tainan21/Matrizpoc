@@ -186,6 +186,17 @@ describe("sound system", () => {
     expect(activationTarget.count("keydown")).toBe(0)
   })
 
+  it("does not replay startup when persisted settings reconfigure an initialized system", async () => {
+    const driver = createDriver()
+    const system = createSoundSystem({ driver, preferences: createMemorySoundPreferenceStore() })
+
+    await system.initialize({ startup: true })
+    system.setVolume(0.4)
+    await system.initialize({ startup: true })
+
+    expect(driver.plays).toHaveLength(1)
+  })
+
   it("is inert without an audio driver and never blocks system end", async () => {
     const system = createSoundSystem({ preferences: createMemorySoundPreferenceStore() })
 

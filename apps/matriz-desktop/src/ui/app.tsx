@@ -43,6 +43,7 @@ type SoundId =
   | "interaction"
   | "navigation"
   | "success"
+  | "warning"
   | "error"
 
 export interface Feedback {
@@ -52,6 +53,15 @@ export interface Feedback {
 }
 
 type ExecuteAction = <T>(action: () => Promise<T>, success: string) => Promise<T>
+
+function ignoreFeedbackFailure(action: () => unknown): void {
+  try {
+    const result = action()
+    if (result instanceof Promise) void result.catch(() => undefined)
+  } catch {
+    // Audio feedback is optional and must never block product behavior.
+  }
+}
 
 const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = [
   { id: "home", label: "Início", icon: "home" },
@@ -71,10 +81,16 @@ const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = 
 ]
 
 export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gateway: DesktopGateway; feedback: Feedback; initialTheme?: DesktopSettings["theme"] }) {
+  const safeFeedback = useMemo<Feedback>(() => ({
+    play: (id) => ignoreFeedbackFailure(() => feedback.play(id)),
+    configure: feedback.configure ? (settings) => ignoreFeedbackFailure(() => feedback.configure?.(settings)) : undefined,
+    initialize: feedback.initialize ? () => ignoreFeedbackFailure(() => feedback.initialize?.()) : undefined,
+  }), [feedback])
   const desktop = useDesktop(gateway)
   const terminal = useTerminalRuntime(gateway)
   const settingsSnapshot = useRef<DesktopSettings | undefined>(undefined)
   const settingsWrites = useRef<Promise<void>>(Promise.resolve())
+  const feedbackInitialized = useRef(false)
   const [view, setView] = useState<View>("home")
   const [query, setQuery] = useState("")
   const [confirmAll, setConfirmAll] = useState(false)
@@ -105,9 +121,12 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
     settingsSnapshot.current = desktop.settings
     setWorkspacePath(desktop.settings.workspacePath ?? "")
     applyControlTheme(desktop.settings.theme)
-    feedback.configure?.(desktop.settings)
-    feedback.initialize?.()
-  }, [desktop.settings, feedback])
+    safeFeedback.configure?.(desktop.settings)
+    if (!feedbackInitialized.current) {
+      feedbackInitialized.current = true
+      safeFeedback.initialize?.()
+    }
+  }, [desktop.settings, safeFeedback])
 
   useEffect(() => {
     let refreshInterval: number | undefined
@@ -128,21 +147,25 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
   }, [activeAppId, gateway, terminal.state.activeId, terminal.state.sessions])
 
   const chooseView = (next: View) => {
-    if (next === view || !requestWorkspaceNavigation()) return
+    if (next === view) return
+    if (!requestWorkspaceNavigation()) {
+      void safeFeedback.play("warning")
+      return
+    }
     setView(next)
     if (next !== "hub" && next !== "store") recordContext(next)
-    void feedback.play("navigation")
+    void safeFeedback.play("navigation")
   }
 
   const openRuntimeTerminal = useCallback(() => setView("terminal"), [])
-  const runtimeSignal = useCallback((kind: "navigation" | "success" | "error") => { void feedback.play(kind) }, [feedback])
+  const runtimeSignal = useCallback((kind: "navigation" | "success" | "error") => { void safeFeedback.play(kind) }, [safeFeedback])
 
   const createTerminal = async () => {
     try {
       await desktop.execute(terminal.create, "Terminal iniciado")
-      void feedback.play("success")
+      void safeFeedback.play("success")
     } catch {
-      void feedback.play("error")
+      void safeFeedback.play("error")
     }
   }
 
@@ -153,9 +176,9 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
         `PID ${pid} encerrado`,
       )
       if (snapshot) desktop.setSnapshot(snapshot)
-      void feedback.play("success")
+      void safeFeedback.play("success")
     } catch {
-      void feedback.play("error")
+      void safeFeedback.play("error")
     }
   }
 
@@ -174,9 +197,9 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
       )
       if (snapshot) desktop.setSnapshot(snapshot)
       setConfirmAll(false)
-      void feedback.play("success")
+      void safeFeedback.play("success")
     } catch {
-      void feedback.play("error")
+      void safeFeedback.play("error")
     }
   }
 
@@ -191,19 +214,19 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
       if (settingsSnapshot.current === next) {
         settingsSnapshot.current = saved
         desktop.setSettings(saved)
-        feedback.configure?.(saved)
+        safeFeedback.configure?.(saved)
       }
     })
     settingsWrites.current = write.catch(() => undefined)
     try {
       await write
-      void feedback.play("interaction")
+      void safeFeedback.play("interaction")
     } catch {
       if (settingsSnapshot.current === next) {
         settingsSnapshot.current = previous
         desktop.setSettings(previous)
       }
-      void feedback.play("error")
+      void safeFeedback.play("error")
     }
   }
 
@@ -223,7 +246,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
       else if (process) await kill(process.pid)
       else throw new Error("Ação não disponível")
     }
-    void feedback.play("interaction")
+    void safeFeedback.play("interaction")
   }
 
   return (
@@ -269,10 +292,10 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
         {view === "infra" ? <OperationalArea title="INFRA" eyebrow="LOCAL / SERVIÇOS" description="O cockpit local será habilitado serviço por serviço, com prévia e confirmação." /> : null}
         {view === "git" ? <GitSummary pulse={pulse} refresh={() => gateway.workspacePulse().then(setPulse)} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
-        {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} runtimes={runtimes} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
+        {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} runtimes={runtimes} activeGate={activeGate} setActiveGate={setActiveGate} feedback={safeFeedback} startOperation={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} openControl={(featureId) => { setHubFeature(featureId); setView("hub") }} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
-        {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
+        {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void safeFeedback.play("success") }} quit={() => { void safeFeedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>
 
       {terminal.state.sessions.length && view !== "terminal" ? (

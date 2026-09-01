@@ -144,14 +144,15 @@ export function createSoundSystem(dependencies: CreateSoundSystemDependencies = 
 
   const system: SoundSystem = {
     async initialize(options) {
-      if (!state.initialized) {
+      const firstInitialization = !state.initialized
+      if (firstInitialization) {
         const persisted = preferenceStore.read()
         const packId = registry.getPack(persisted.packId)
           ? persisted.packId
           : DEFAULT_SOUND_PREFERENCES.packId
         update({ ...persisted, packId, initialized: true }, false)
       }
-      return options?.startup ? attemptPlay("system.start", true) : undefined
+      return options?.startup && firstInitialization ? attemptPlay("system.start", true) : undefined
     },
     async play(id) {
       if (!state.initialized) await system.initialize()
