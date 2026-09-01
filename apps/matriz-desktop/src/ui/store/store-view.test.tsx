@@ -14,6 +14,24 @@ function snapshot(owned = false, installed = false): CommerceSnapshot {
 }
 
 describe("StoreView", () => {
+  it("opens a built-in utility in Hub without commerce or runtime actions", async () => {
+    const builtIn: CommerceSnapshot = { wallet: { balance: 1250, currency: "M", transactions: [] }, packages: [{ id: "matriz.node-sweep", name: "Node Sweep", description: "Limpeza segura.", developer: "Matriz", version: "1.0.0", category: "Core Utility", appId: "matriz-desktop", price: 0, permissions: [], compatibility: "Matriz Control 1.0+", owned: true, installed: true, trustStatus: "verified", builtIn: true, status: "Built-in / Enabled" }] }
+    const gateway = {
+      commerceSnapshot: vi.fn().mockResolvedValue(builtIn),
+      activatePackage: vi.fn().mockResolvedValue({ kind: "control", packageId: "matriz.node-sweep", view: "hub", featureId: "node-sweep" }),
+      runtimeSnapshot: vi.fn(),
+      startManagedOperation: vi.fn(),
+      uninstallPackage: vi.fn(),
+    } as unknown as DesktopGateway
+    const openControl = vi.fn()
+    render(<StoreView gateway={gateway} signal={vi.fn()} openControl={openControl} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Abrir Node Sweep" }))
+    await waitFor(() => expect(openControl).toHaveBeenCalledWith("node-sweep"))
+    expect(gateway.runtimeSnapshot).not.toHaveBeenCalled()
+    expect(gateway.startManagedOperation).not.toHaveBeenCalled()
+    expect(screen.queryByRole("button", { name: "Desinstalar Node Sweep" })).not.toBeInTheDocument()
+  })
+
   it("keeps acquisition and installation as separate working transitions", async () => {
     const gateway = {
       commerceSnapshot: vi.fn().mockResolvedValue(snapshot()),
@@ -55,7 +73,7 @@ describe("StoreView", () => {
   it("starts an installed package runtime before opening it", async () => {
     const gateway = {
       commerceSnapshot: vi.fn().mockResolvedValue(snapshot(true, true)),
-      activatePackage: vi.fn().mockResolvedValue({ packageId: "matriz.analytics", appId: "willdash", operationId: "app.willdash.web", routePath: "/" }),
+      activatePackage: vi.fn().mockResolvedValue({ kind: "runtime", packageId: "matriz.analytics", appId: "willdash", operationId: "app.willdash.web", routePath: "/" }),
       runtimeSnapshot: vi.fn()
         .mockResolvedValueOnce([{ id: "willdash", status: "stopped", ownership: "none" }])
         .mockResolvedValueOnce([{ id: "willdash", status: "ready", ownership: "managed" }]),
@@ -73,7 +91,7 @@ describe("StoreView", () => {
   })
 
   it("serializes package actions while native activation is pending", async () => {
-    const target = { packageId: "matriz.analytics", appId: "willdash" as const, operationId: "app.willdash.web" as const, routePath: "/" }
+    const target = { kind: "runtime" as const, packageId: "matriz.analytics", appId: "willdash" as const, operationId: "app.willdash.web" as const, routePath: "/" }
     let releaseActivation!: (value: typeof target) => void
     const activation = new Promise<typeof target>((resolve) => { releaseActivation = resolve })
     const gateway = {

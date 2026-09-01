@@ -2,9 +2,9 @@ import { Badge, Button } from "@matriz/design-ui/primitives"
 import { useEffect, useMemo, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { CommerceSnapshot, StorePackage } from "../../domain/types"
+import type { CommerceSnapshot, DesktopAppId, HubFeatureId, StorePackage } from "../../domain/types"
 
-export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal(kind: "success" | "error"): void }) {
+export function StoreView({ gateway, signal, openControl }: { gateway: DesktopGateway; signal(kind: "success" | "error"): void; openControl?(featureId: HubFeatureId): void }) {
   const [snapshot, setSnapshot] = useState<CommerceSnapshot>()
   const [selectedId, setSelectedId] = useState<string>()
   const [query, setQuery] = useState("")
@@ -30,6 +30,11 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
     setBusy(item.id); setError("")
     try {
       const target = await gateway.activatePackage(item.id)
+      if (target.kind === "control") {
+        openControl?.(target.featureId)
+        signal("success")
+        return
+      }
       const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === target.appId)
       if (!runtime || runtime.ownership === "none" || runtime.status === "stopped") {
         await gateway.startManagedOperation(target.operationId)
@@ -40,6 +45,7 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
       }
       await waitForRuntime(gateway, target.appId, item.name)
       const verifiedTarget = await gateway.activatePackage(item.id)
+      if (verifiedTarget.kind !== "runtime") throw new Error("O alvo do pacote mudou durante a ativação.")
       await gateway.openRuntimeTarget({ appId: verifiedTarget.appId, routePath: verifiedTarget.routePath })
       signal("success")
     } catch (cause) { setError(String(cause)); signal("error") }
@@ -59,7 +65,7 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
         {!packages.length ? <div className="store-empty">Nenhuma capacidade encontrada.</div> : null}
       </div>
       <aside className="store-side">
-        {selected ? <div className="package-detail"><div className="package-icon package-icon--large">{monogram(selected.name)}</div><span>{selected.category}</span><h2>{selected.name}</h2><p>{selected.description}</p><dl><div><dt>VERSÃO</dt><dd>{selected.version}</dd></div><div><dt>DEV</dt><dd>{selected.developer}</dd></div><div><dt>COMPATIBILIDADE</dt><dd>{selected.compatibility}</dd></div></dl>{selected.installed ? <div className={`package-trust package-trust--${selected.trustStatus}`}><span>TRUST CENTER</span><strong>{selected.trustStatus === "verified" ? "VERIFICADO" : selected.trustStatus === "changed" ? "MANIFESTO ALTERADO" : "RECIBO AUSENTE"}</strong>{selected.receipt ? <small>SHA-256 · {selected.receipt.manifestDigest.slice(0, 12)}…</small> : null}{selected.trustStatus !== "verified" ? <Button variant="secondary" aria-label={`Reparar ${selected.name}`} disabled={busy === selected.id} onClick={() => void transition(selected.id, () => gateway.repairPackage(selected.id))}>REPARAR</Button> : null}</div> : null}<h3>PERMISSÕES</h3>{selected.permissions.map((permission) => <code key={permission}>{permission}</code>)}</div> : <div className="package-detail package-detail--empty"><span>SELECIONE UM PACOTE</span><p>Inspecione compatibilidade e permissões antes de adquirir.</p></div>}
+        {selected ? <div className="package-detail"><div className="package-icon package-icon--large">{monogram(selected.name)}</div><span>{selected.category}</span><h2>{selected.name}</h2><p>{selected.description}</p><dl><div><dt>VERSÃO</dt><dd>{selected.version}</dd></div><div><dt>DEV</dt><dd>{selected.developer}</dd></div><div><dt>COMPATIBILIDADE</dt><dd>{selected.compatibility}</dd></div>{selected.status ? <div><dt>STATUS</dt><dd>{selected.status}</dd></div> : null}</dl>{selected.installed && !selected.builtIn ? <div className={`package-trust package-trust--${selected.trustStatus}`}><span>TRUST CENTER</span><strong>{selected.trustStatus === "verified" ? "VERIFICADO" : selected.trustStatus === "changed" ? "MANIFESTO ALTERADO" : "RECIBO AUSENTE"}</strong>{selected.receipt ? <small>SHA-256 · {selected.receipt.manifestDigest.slice(0, 12)}…</small> : null}{selected.trustStatus !== "verified" ? <Button variant="secondary" aria-label={`Reparar ${selected.name}`} disabled={busy === selected.id} onClick={() => void transition(selected.id, () => gateway.repairPackage(selected.id))}>REPARAR</Button> : null}</div> : null}<h3>PERMISSÕES</h3>{selected.permissions.length ? selected.permissions.map((permission) => <code key={permission}>{permission}</code>) : <code>CORE UTILITY</code>}</div> : <div className="package-detail package-detail--empty"><span>SELECIONE UM PACOTE</span><p>Inspecione compatibilidade e permissões antes de adquirir.</p></div>}
         <div className="wallet-ledger"><div><span>HISTÓRICO DA WALLET</span><Badge tone="neutral">AUDITÁVEL</Badge></div>{snapshot?.wallet.transactions.slice(0, 6).map((transaction) => <div className="ledger-row" key={transaction.id}><i className={transaction.amount >= 0 ? "credit" : "debit"}>{transaction.amount >= 0 ? "+" : ""}{transaction.amount} M</i><strong>{transaction.title}</strong><small>{new Date(transaction.occurredAt).toLocaleDateString("pt-BR")}</small></div>)}</div>
       </aside>
     </div>
@@ -67,7 +73,7 @@ export function StoreView({ gateway, signal }: { gateway: DesktopGateway; signal
   </section>
 }
 
-async function waitForRuntime(gateway: DesktopGateway, appId: StorePackage["appId"], packageName: string) {
+async function waitForRuntime(gateway: DesktopGateway, appId: DesktopAppId, packageName: string) {
   for (let attempt = 0; attempt < 40; attempt += 1) {
     const runtime = (await gateway.runtimeSnapshot()).find(({ id }) => id === appId)
     if (runtime?.status === "ready") return runtime
@@ -82,11 +88,11 @@ function delay(milliseconds: number) { return new Promise((resolve) => window.se
 function PackageCard({ item, busy, selected, inspect, acquire, install, open, uninstall }: { item: StorePackage; busy: boolean; selected: boolean; inspect(): void; acquire(): void; install(): void; open(): void; uninstall(): void }) {
   return <article className={`package-card${selected ? " is-selected" : ""}`}>
     <div className="package-icon">{monogram(item.name)}</div><div className="package-copy"><span>{item.category} · v{item.version}</span><h2><button aria-label={`Inspecionar ${item.name}`} onClick={inspect}>{item.name}</button></h2><p>{item.description}</p></div>
-    <div className="package-state">{item.installed ? <Badge tone="success">INSTALADO</Badge> : item.owned ? <Badge tone="neutral">ADQUIRIDO</Badge> : <strong>{item.price ? `${item.price} M` : "GRÁTIS"}</strong>}</div>
+    <div className="package-state">{item.builtIn ? <Badge tone="success">BUILT-IN</Badge> : item.installed ? <Badge tone="success">INSTALADO</Badge> : item.owned ? <Badge tone="neutral">ADQUIRIDO</Badge> : <strong>{item.price ? `${item.price} M` : "GRÁTIS"}</strong>}</div>
     <div className="package-actions" onClick={(event) => event.stopPropagation()}>
       {!item.owned ? <Button disabled={busy} aria-label={item.price ? `Adquirir ${item.name} por ${item.price} M` : `Adquirir ${item.name} grátis`} onClick={acquire}>ADQUIRIR</Button> : null}
       {item.owned && !item.installed ? <Button disabled={busy} aria-label={`Instalar ${item.name}`} onClick={install}>INSTALAR</Button> : null}
-      {item.installed ? <><Button disabled={busy} aria-label={`Abrir ${item.name}`} onClick={open}>ABRIR</Button><button disabled={busy} className="package-remove" aria-label={`Desinstalar ${item.name}`} onClick={uninstall}>REMOVER</button></> : null}
+      {item.installed ? <><Button disabled={busy} aria-label={`Abrir ${item.name}`} onClick={open}>ABRIR</Button>{!item.builtIn ? <button disabled={busy} className="package-remove" aria-label={`Desinstalar ${item.name}`} onClick={uninstall}>REMOVER</button> : null}</> : null}
     </div>
   </article>
 }

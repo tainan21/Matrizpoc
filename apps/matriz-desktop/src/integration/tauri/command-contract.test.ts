@@ -30,6 +30,13 @@ describe("Tauri command contract", () => {
       selectWorkspace: "select_workspace",
       doctor: "run_doctor",
       workspacePulse: "get_workspace_pulse",
+      systemPulse: "get_system_pulse",
+      getAwakeState: "get_awake_state",
+      setAwake: "set_awake",
+      scanNodeModules: "scan_node_modules",
+      deleteNodeModules: "delete_node_modules",
+      readResumeSession: "read_resume_session",
+      recordSessionContext: "record_session_context",
       readSettings: "read_settings",
       writeSettings: "write_settings",
       hide: "hide_window",
@@ -113,6 +120,15 @@ describe("Tauri command contract", () => {
     await gateway.selectWorkspace("C:\\Apps\\matriz-infra-hub")
     await gateway.doctor()
     await gateway.workspacePulse()
+    await gateway.systemPulse()
+    await gateway.getAwakeState()
+    await gateway.setAwake(true)
+    await gateway.scanNodeModules()
+    const deleteRequest = { scanId: "scan-1", appIds: ["matriz-hub" as const] }
+    await gateway.deleteNodeModules(deleteRequest)
+    await gateway.readResumeSession()
+    const sessionContext = { area: "apps" as const, appId: "matriz-hub" as const, terminalCwd: "C:\\Apps\\matriz-infra-hub" }
+    await gateway.recordSessionContext(sessionContext)
     await gateway.readSettings()
     await gateway.writeSettings(settings)
     await gateway.hide()
@@ -184,6 +200,13 @@ describe("Tauri command contract", () => {
       { command: "select_workspace", args: { path: "C:\\Apps\\matriz-infra-hub" } },
       { command: "run_doctor", args: undefined },
       { command: "get_workspace_pulse", args: undefined },
+      { command: "get_system_pulse", args: undefined },
+      { command: "get_awake_state", args: undefined },
+      { command: "set_awake", args: { enabled: true } },
+      { command: "scan_node_modules", args: undefined },
+      { command: "delete_node_modules", args: { request: deleteRequest } },
+      { command: "read_resume_session", args: undefined },
+      { command: "record_session_context", args: { context: sessionContext } },
       { command: "read_settings", args: undefined },
       { command: "write_settings", args: { settings } },
       { command: "hide_window", args: undefined },

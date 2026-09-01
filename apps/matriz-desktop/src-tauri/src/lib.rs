@@ -1,11 +1,14 @@
 pub mod activity;
+pub mod awake;
 mod catalog;
 pub mod command_contract;
 pub mod commerce;
 mod doctor;
 pub mod environment;
 pub mod explorer;
+pub mod hub_state;
 mod native_apps;
+pub mod node_sweep;
 mod ports;
 mod preview;
 mod processes;
@@ -16,6 +19,7 @@ pub mod runtime;
 mod settings;
 mod shell;
 mod state;
+pub mod system_pulse;
 mod tasks;
 pub mod terminal;
 mod workspace;
@@ -23,17 +27,21 @@ mod workspace;
 use std::fmt;
 
 use activity::{ActivityEnvelope, ActivityHub};
+use awake::AwakeManager;
 use commerce::{CommerceSnapshot, CommerceStore, PackageActivationTarget};
 use environment::{
     EnvironmentComparison, EnvironmentDocument, EnvironmentFile, EnvironmentPromotionRequest,
     EnvironmentSaveRequest, EnvironmentService,
 };
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
+use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
+use node_sweep::{NodeSweepDeletion, NodeSweepScan, NodeSweepService};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
 use recovery::{recovery_action, RecoveryAction, RecoveryResult};
 use runbooks::{RunbookDefinition, RunbookExecution, RunbookStepResult, RunbookTarget};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
+use system_pulse::{SystemPulse, SystemPulseService};
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
 use terminal::{TerminalEvent, TerminalManager, TerminalSession};
@@ -216,6 +224,8 @@ fn get_runtime_snapshot(
 #[tauri::command(rename_all = "camelCase")]
 fn open_runtime_target(
     activity: tauri::State<'_, ActivityHub>,
+    operations: tauri::State<'_, OperationsState>,
+    hub_state: tauri::State<'_, HubStateStore>,
     app_id: String,
     route_path: String,
 ) -> Result<(), String> {
@@ -231,6 +241,7 @@ fn open_runtime_target(
         Some(&route_path),
         Some(&app_id),
     );
+    hub_state.mark_used(operations.root()?, &app_id)?;
     Ok(())
 }
 
@@ -239,6 +250,7 @@ async fn restart_runtime(
     terminals: tauri::State<'_, TerminalManager>,
     operations: tauri::State<'_, OperationsState>,
     activity: tauri::State<'_, ActivityHub>,
+    hub_state: tauri::State<'_, HubStateStore>,
     app_id: String,
 ) -> Result<TerminalSession, String> {
     let operation_id = format!("app.{app_id}.web");
@@ -273,6 +285,7 @@ async fn restart_runtime(
         None,
         Some(&app_id),
     );
+    hub_state.mark_used(operations.root()?, &app_id)?;
     Ok(session)
 }
 
@@ -693,6 +706,88 @@ fn get_workspace_pulse(
 }
 
 #[tauri::command]
+async fn get_system_pulse(
+    state: tauri::State<'_, OperationsState>,
+    pulse: tauri::State<'_, SystemPulseService>,
+) -> Result<SystemPulse, String> {
+    let workspace = state.root().ok();
+    let pulse = pulse.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || pulse.snapshot(workspace.as_deref()))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+fn get_awake_state(awake: tauri::State<'_, AwakeManager>) -> bool {
+    awake.enabled()
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn set_awake(awake: tauri::State<'_, AwakeManager>, enabled: bool) -> Result<bool, String> {
+    awake.set_enabled(enabled)
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct NodeSweepDeleteRequest {
+    scan_id: String,
+    app_ids: Vec<String>,
+}
+
+#[tauri::command]
+async fn scan_node_modules(
+    operations: tauri::State<'_, OperationsState>,
+    store: tauri::State<'_, HubStateStore>,
+    sweep: tauri::State<'_, NodeSweepService>,
+) -> Result<NodeSweepScan, String> {
+    let workspace = operations.root()?;
+    let store = store.inner().clone();
+    let sweep = sweep.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || sweep.scan(&workspace, &store))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn delete_node_modules(
+    operations: tauri::State<'_, OperationsState>,
+    store: tauri::State<'_, HubStateStore>,
+    sweep: tauri::State<'_, NodeSweepService>,
+    request: NodeSweepDeleteRequest,
+) -> Result<NodeSweepDeletion, String> {
+    let workspace = operations.root()?;
+    let store = store.inner().clone();
+    let sweep = sweep.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        sweep.delete(&workspace, &store, &request.scan_id, &request.app_ids)
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+fn read_resume_session(
+    operations: tauri::State<'_, OperationsState>,
+    store: tauri::State<'_, HubStateStore>,
+) -> Result<HubStateSnapshot, String> {
+    store.read(operations.root()?)
+}
+
+#[tauri::command]
+fn record_session_context(
+    operations: tauri::State<'_, OperationsState>,
+    store: tauri::State<'_, HubStateStore>,
+    context: SessionContext,
+) -> Result<HubStateSnapshot, String> {
+    if let Some(app_id) = context.app_id.as_deref() {
+        app_definition(app_id)?;
+    }
+    let workspace = operations.root()?;
+    store.record(&workspace, context)?;
+    store.read(workspace)
+}
+
+#[tauri::command]
 fn read_settings(store: tauri::State<'_, SettingsStore>) -> Result<DesktopSettings, String> {
     store.read()
 }
@@ -727,6 +822,7 @@ fn hide_window(app: tauri::AppHandle, preview: tauri::State<'_, PreviewManager>)
 
 #[tauri::command]
 fn quit_app(app: tauri::AppHandle) {
+    app.state::<AwakeManager>().shutdown();
     app.state::<TerminalManager>().shutdown();
     app.exit(0);
 }
@@ -743,10 +839,19 @@ fn create_terminal(
 fn start_managed_operation(
     terminals: tauri::State<'_, TerminalManager>,
     operations: tauri::State<'_, OperationsState>,
+    hub_state: tauri::State<'_, HubStateStore>,
     operation_id: String,
 ) -> Result<TerminalSession, String> {
     let operation = managed_operation(&operation_id)?;
-    terminals.start_managed(&operations.root()?, &operation)
+    let workspace = operations.root()?;
+    let session = terminals.start_managed(&workspace, &operation)?;
+    if let Some(app_id) = operation_id
+        .strip_prefix("app.")
+        .and_then(|value| value.strip_suffix(".web"))
+    {
+        hub_state.mark_used(&workspace, app_id)?;
+    }
+    Ok(session)
 }
 
 #[tauri::command]
@@ -1073,12 +1178,16 @@ fn activate_package(
     package_id: String,
 ) -> Result<PackageActivationTarget, String> {
     let target = commerce.activate(&package_id)?;
+    let app_id = match &target {
+        PackageActivationTarget::Runtime { app_id, .. } => Some(app_id.as_str()),
+        PackageActivationTarget::Control { .. } => None,
+    };
     activity.publish(
         "store.package.target.validated",
         "info",
         "Alvo do pacote validado",
         Some(&package_id),
-        Some(&target.app_id),
+        app_id,
     );
     Ok(target)
 }
@@ -1147,6 +1256,9 @@ pub fn run() {
         .manage(terminals)
         .manage(PreviewManager::default())
         .manage(activity)
+        .manage(AwakeManager::new())
+        .manage(SystemPulseService::new())
+        .manage(NodeSweepService::default())
         .setup(|app| {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
             let settings = SettingsStore::at(settings_path);
@@ -1154,6 +1266,9 @@ pub fn run() {
             app.state::<OperationsState>()
                 .restore_workspace(saved.workspace_path.as_deref());
             app.manage(settings);
+            app.manage(HubStateStore::at(
+                app.path().app_config_dir()?.join("hub-state.json"),
+            ));
             app.manage(CommerceStore::new(
                 app.path().app_config_dir()?.join("commerce.json"),
             ));
@@ -1177,6 +1292,8 @@ pub fn run() {
                 if close_to_tray {
                     api.prevent_close();
                     let _ = window.hide();
+                } else {
+                    window.app_handle().state::<AwakeManager>().shutdown();
                 }
             }
         })
@@ -1208,6 +1325,13 @@ pub fn run() {
             open_target,
             run_doctor,
             get_workspace_pulse,
+            get_system_pulse,
+            get_awake_state,
+            set_awake,
+            scan_node_modules,
+            delete_node_modules,
+            read_resume_session,
+            record_session_context,
             read_settings,
             write_settings,
             hide_window,

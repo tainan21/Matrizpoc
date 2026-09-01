@@ -52,6 +52,13 @@ function gateway(): DesktopGateway {
     selectWorkspace: vi.fn().mockResolvedValue("C:\\Apps\\matriz-infra-hub"),
     doctor: vi.fn().mockResolvedValue([]),
     workspacePulse: vi.fn().mockResolvedValue({ branch: "main", changedFiles: 0, clean: true }),
+    systemPulse: vi.fn().mockResolvedValue({ cpuUsage: 0, cpuModel: "Test CPU", usedMemoryBytes: 0, totalMemoryBytes: 1, availableMemoryBytes: 1, uptimeSeconds: 0, windowsVersion: "Windows", processCount: 0 }),
+    getAwakeState: vi.fn().mockResolvedValue(false),
+    setAwake: vi.fn().mockImplementation(async (enabled) => enabled),
+    scanNodeModules: vi.fn().mockResolvedValue({ scanId: "scan", candidates: [], potentialBytes: 0 }),
+    deleteNodeModules: vi.fn().mockResolvedValue({ results: [], recoveredBytes: 0 }),
+    readResumeSession: vi.fn().mockResolvedValue({ workspacePath: "C:\\Apps\\matriz-infra-hub", lastUsedAt: {} }),
+    recordSessionContext: vi.fn().mockResolvedValue({ workspacePath: "C:\\Apps\\matriz-infra-hub", lastUsedAt: {} }),
     readSettings: vi.fn().mockResolvedValue({
       closeToTray: true,
       soundsEnabled: false,
@@ -150,9 +157,12 @@ describe("Matriz Control", () => {
   it("keeps all primary modes keyboard reachable", async () => {
     render(<ControlApp gateway={gateway()} feedback={{ play: vi.fn() }} />)
     await screen.findByText("3000")
-    for (const label of ["Portas", "Apps", "Terminal", "Ações", "Doctor", "Ajustes"]) {
+    for (const label of ["Portas", "Apps", "Workspace", "Hub", "Terminal", "Ações", "Store", "Doctor", "Ajustes"]) {
       expect(screen.getByRole("button", { name: label })).toBeVisible()
     }
+
+    fireEvent.click(screen.getByRole("button", { name: "Hub" }))
+    expect(screen.getByRole("heading", { name: "MATRIZ HUB" })).toBeVisible()
   })
 
   it("blocks workspace and primary navigation while an environment draft is dirty", async () => {

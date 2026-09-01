@@ -32,6 +32,12 @@ import type {
   RecoveryResult,
   RunbookDefinition,
   RunbookExecution,
+  SystemPulse,
+  NodeSweepScan,
+  NodeSweepDeleteRequest,
+  NodeSweepDeletion,
+  HubStateSnapshot,
+  SessionContext,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -59,6 +65,13 @@ export interface DesktopGateway {
   selectWorkspace(path: string): Promise<string>
   doctor(): Promise<readonly DoctorCheck[]>
   workspacePulse(): Promise<WorkspacePulse>
+  systemPulse(): Promise<SystemPulse>
+  getAwakeState(): Promise<boolean>
+  setAwake(enabled: boolean): Promise<boolean>
+  scanNodeModules(): Promise<NodeSweepScan>
+  deleteNodeModules(request: NodeSweepDeleteRequest): Promise<NodeSweepDeletion>
+  readResumeSession(): Promise<HubStateSnapshot>
+  recordSessionContext(context: SessionContext): Promise<HubStateSnapshot>
   readSettings(): Promise<DesktopSettings>
   writeSettings(settings: DesktopSettings): Promise<DesktopSettings>
   hide(): Promise<void>

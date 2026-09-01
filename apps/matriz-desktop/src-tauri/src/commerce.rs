@@ -26,12 +26,19 @@ pub struct CommerceSnapshot {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct PackageActivationTarget {
-    pub package_id: String,
-    pub app_id: String,
-    pub operation_id: String,
-    pub route_path: String,
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum PackageActivationTarget {
+    Runtime {
+        package_id: String,
+        app_id: String,
+        operation_id: String,
+        route_path: String,
+    },
+    Control {
+        package_id: String,
+        view: String,
+        feature_id: String,
+    },
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -58,6 +65,8 @@ pub struct PackageView {
     pub owned: bool,
     pub installed: bool,
     pub trust_status: &'static str,
+    pub built_in: bool,
+    pub status: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub receipt: Option<InstallReceipt>,
 }
@@ -146,6 +155,46 @@ const CATALOG: &[CatalogPackage] = &[
         price: 250,
         permissions: &["runtime:start", "workspace:read"],
     },
+    CatalogPackage {
+        id: "matriz.node-sweep",
+        name: "Node Sweep",
+        description: "Limpeza segura de dependências antigas em apps registrados.",
+        version: "1.0.0",
+        category: "Core Utility",
+        app_id: "matriz-desktop",
+        price: 0,
+        permissions: &[],
+    },
+    CatalogPackage {
+        id: "matriz.system-pulse",
+        name: "System Pulse",
+        description: "Telemetria leve de CPU, memória, disco e Windows.",
+        version: "1.0.0",
+        category: "Core Utility",
+        app_id: "matriz-desktop",
+        price: 0,
+        permissions: &[],
+    },
+    CatalogPackage {
+        id: "matriz.awake",
+        name: "Matriz Awake",
+        description: "Mantém o PC acordado enquanto o Control permanece ativo.",
+        version: "1.0.0",
+        category: "Core Utility",
+        app_id: "matriz-desktop",
+        price: 0,
+        permissions: &[],
+    },
+    CatalogPackage {
+        id: "matriz.resume-session",
+        name: "Resume Session",
+        description: "Retoma o último contexto leve da interface local.",
+        version: "1.0.0",
+        category: "Core Utility",
+        app_id: "matriz-desktop",
+        price: 0,
+        permissions: &[],
+    },
 ];
 
 impl CommerceStore {
@@ -164,6 +213,7 @@ impl CommerceStore {
     pub fn acquire(&self, package_id: &str) -> Result<CommerceSnapshot, String> {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
         let package = catalog(package_id)?;
+        reject_builtin(package)?;
         let mut state = self.read()?;
         if state.owned.iter().any(|id| id == package_id) {
             return Err("Package is already owned".into());
@@ -194,6 +244,7 @@ impl CommerceStore {
     ) -> Result<CommerceSnapshot, String> {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
         let package = catalog(package_id)?;
+        reject_builtin(package)?;
         validate_permissions(package, granted_permissions)?;
         let mut state = self.read()?;
         if !state.owned.iter().any(|id| id == package_id) {
@@ -212,6 +263,7 @@ impl CommerceStore {
     pub fn repair(&self, package_id: &str) -> Result<CommerceSnapshot, String> {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
         let package = catalog(package_id)?;
+        reject_builtin(package)?;
         let mut state = self.read()?;
         if !state.owned.iter().any(|id| id == package_id)
             || !state.installed.contains_key(package_id)
@@ -230,7 +282,8 @@ impl CommerceStore {
 
     pub fn uninstall(&self, package_id: &str) -> Result<CommerceSnapshot, String> {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
-        catalog(package_id)?;
+        let package = catalog(package_id)?;
+        reject_builtin(package)?;
         let mut state = self.read()?;
         if state.installed.remove(package_id).is_none() {
             return Err("Package is not installed".into());
@@ -243,6 +296,13 @@ impl CommerceStore {
     pub fn activate(&self, package_id: &str) -> Result<PackageActivationTarget, String> {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
         let package = catalog(package_id)?;
+        if let Some(feature_id) = builtin_feature(package) {
+            return Ok(PackageActivationTarget::Control {
+                package_id: package.id.into(),
+                view: "hub".into(),
+                feature_id: feature_id.into(),
+            });
+        }
         let state = self.read()?;
         if !state.installed.contains_key(package_id) {
             return Err("Package must be installed before activation".into());
@@ -252,7 +312,7 @@ impl CommerceStore {
         }
         let operation_id = format!("app.{}.web", package.app_id);
         crate::catalog::managed_operation(&operation_id)?;
-        Ok(PackageActivationTarget {
+        Ok(PackageActivationTarget::Runtime {
             package_id: package.id.into(),
             app_id: package.app_id.into(),
             operation_id,
@@ -321,6 +381,22 @@ fn catalog(id: &str) -> Result<CatalogPackage, String> {
         .copied()
         .find(|package| package.id == id)
         .ok_or_else(|| "Package is not in the trusted Matriz catalog".into())
+}
+fn builtin_feature(package: CatalogPackage) -> Option<&'static str> {
+    match package.id {
+        "matriz.node-sweep" => Some("node-sweep"),
+        "matriz.system-pulse" => Some("system-pulse"),
+        "matriz.awake" => Some("matriz-awake"),
+        "matriz.resume-session" => Some("resume-session"),
+        _ => None,
+    }
+}
+fn reject_builtin(package: CatalogPackage) -> Result<(), String> {
+    if builtin_feature(package).is_some() {
+        Err("Built-in utilities are managed by Matriz Control".into())
+    } else {
+        Ok(())
+    }
 }
 fn validate_state(state: &State) -> Result<i64, String> {
     let mut transaction_ids = HashSet::new();
@@ -392,8 +468,15 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
     let packages = CATALOG
         .iter()
         .map(|package| {
-            let receipt = state.receipts.get(package.id).cloned();
-            let trust_status = if !state.installed.contains_key(package.id) {
+            let built_in = builtin_feature(*package).is_some();
+            let receipt = if built_in {
+                None
+            } else {
+                state.receipts.get(package.id).cloned()
+            };
+            let trust_status = if built_in {
+                "verified"
+            } else if !state.installed.contains_key(package.id) {
                 "missing"
             } else if installation_is_verified(*package, &state) {
                 "verified"
@@ -406,16 +489,22 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
                 id: package.id,
                 name: package.name,
                 description: package.description,
-                developer: "Matriz Team",
+                developer: if built_in { "Matriz" } else { "Matriz Team" },
                 version: package.version,
                 category: package.category,
                 app_id: package.app_id,
                 price: package.price,
                 permissions: package.permissions,
                 compatibility: "Matriz Control 0.1+ · Windows 10/11",
-                owned: state.owned.iter().any(|id| id == package.id),
-                installed: state.installed.contains_key(package.id),
+                owned: built_in || state.owned.iter().any(|id| id == package.id),
+                installed: built_in || state.installed.contains_key(package.id),
                 trust_status,
+                built_in,
+                status: if built_in {
+                    "Built-in / Enabled"
+                } else {
+                    "Catalog"
+                },
                 receipt,
             }
         })

@@ -1,4 +1,4 @@
-use matriz_desktop_native::commerce::CommerceStore;
+use matriz_desktop_native::commerce::{CommerceStore, PackageActivationTarget};
 use std::fs;
 
 #[test]
@@ -233,10 +233,15 @@ fn activation_requires_a_verified_install_and_returns_a_cataloged_runtime_target
     let target = store
         .activate("matriz.components")
         .expect("activation target");
-    assert_eq!(target.package_id, "matriz.components");
-    assert_eq!(target.app_id, "matrizlib");
-    assert_eq!(target.operation_id, "app.matrizlib.web");
-    assert_eq!(target.route_path, "/");
+    assert_eq!(
+        target,
+        PackageActivationTarget::Runtime {
+            package_id: "matriz.components".into(),
+            app_id: "matrizlib".into(),
+            operation_id: "app.matrizlib.web".into(),
+            route_path: "/".into(),
+        }
+    );
 
     let mut state: serde_json::Value =
         serde_json::from_slice(&fs::read(&path).expect("state bytes")).expect("state json");
@@ -252,6 +257,48 @@ fn activation_requires_a_verified_install_and_returns_a_cataloged_runtime_target
         CommerceStore::new(path).activate("matriz.components"),
         Err("Package trust must be repaired before activation".into())
     );
+}
+
+#[test]
+fn hub_utilities_are_builtin_and_open_control_without_commerce_mutation() {
+    let temp = tempfile::tempdir().expect("temp commerce");
+    let store = CommerceStore::new(temp.path().join("commerce.json"));
+    let snapshot = store.snapshot().expect("snapshot");
+    let node_sweep = snapshot
+        .packages
+        .iter()
+        .find(|item| item.id == "matriz.node-sweep")
+        .expect("built-in utility");
+    assert!(node_sweep.built_in && node_sweep.owned && node_sweep.installed);
+    assert_eq!(node_sweep.developer, "Matriz");
+    assert_eq!(node_sweep.category, "Core Utility");
+    assert_eq!(node_sweep.status, "Built-in / Enabled");
+    assert_eq!(
+        store.activate(node_sweep.id),
+        Ok(PackageActivationTarget::Control {
+            package_id: node_sweep.id.into(),
+            view: "hub".into(),
+            feature_id: "node-sweep".into(),
+        })
+    );
+    assert!(store.acquire(node_sweep.id).is_err());
+    assert!(store.install(node_sweep.id, &[]).is_err());
+    assert!(store.repair(node_sweep.id).is_err());
+    assert!(store.uninstall(node_sweep.id).is_err());
+    for (package_id, feature_id) in [
+        ("matriz.system-pulse", "system-pulse"),
+        ("matriz.awake", "matriz-awake"),
+        ("matriz.resume-session", "resume-session"),
+    ] {
+        assert_eq!(
+            store.activate(package_id),
+            Ok(PackageActivationTarget::Control {
+                package_id: package_id.into(),
+                view: "hub".into(),
+                feature_id: feature_id.into(),
+            })
+        );
+    }
 }
 
 #[test]

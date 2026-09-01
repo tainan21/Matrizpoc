@@ -7,6 +7,7 @@ import type { DesktopGateway } from "../application/desktop-gateway"
 import type {
   AppRuntime,
   DesktopSettings,
+  DesktopAppId,
   DoctorCheck,
   GateId,
   ManagedOperationId,
@@ -14,9 +15,13 @@ import type {
   RuntimeInstance,
   TerminalSession,
   WorkspacePulse,
+  HubArea,
+  HubFeatureId,
 } from "../domain/types"
 import { Icons } from "./icons"
 import { CommandDeck } from "./command-deck/command-deck"
+import { FpsIndicator } from "./hub/fps-indicator"
+import { HubView } from "./hub/hub-view"
 import { filterPorts, presentPorts } from "./presenters"
 import { useDesktop } from "./use-desktop"
 import { TerminalPane } from "./terminal/terminal-pane"
@@ -28,7 +33,7 @@ import { WorkspaceView } from "./workspace/workspace-view"
 import { StoreView } from "./store/store-view"
 import { requestWorkspaceNavigation } from "./workspace/navigation-guard"
 
-type View = "ports" | "apps" | "workspace" | "terminal" | "actions" | "store" | "doctor" | "settings"
+type View = "ports" | "apps" | "workspace" | "hub" | "terminal" | "actions" | "store" | "doctor" | "settings"
 type SoundId =
   | "system.start"
   | "system.end"
@@ -49,6 +54,7 @@ const VIEWS: readonly { id: View; label: string; icon: keyof typeof Icons }[] = 
   { id: "ports", label: "Portas", icon: "ports" },
   { id: "apps", label: "Apps", icon: "apps" },
   { id: "workspace", label: "Workspace", icon: "workspace" },
+  { id: "hub", label: "Hub", icon: "hub" },
   { id: "terminal", label: "Terminal", icon: "terminal" },
   { id: "actions", label: "Ações", icon: "actions" },
   { id: "store", label: "Store", icon: "store" },
@@ -70,6 +76,8 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
   const [pulse, setPulse] = useState<WorkspacePulse>()
   const [activeGate, setActiveGate] = useState<GateId>()
   const [workspacePath, setWorkspacePath] = useState("")
+  const [hubFeature, setHubFeature] = useState<HubFeatureId>()
+  const [activeAppId, setActiveAppId] = useState<DesktopAppId>()
 
   const ports = useMemo(
     () => filterPorts(presentPorts(desktop.snapshot.ports), query),
@@ -104,9 +112,16 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
     return () => { if (refreshInterval !== undefined) window.clearInterval(refreshInterval) }
   }, [gateway, view])
 
+  const recordContext = useCallback((area: HubArea, appId = activeAppId) => {
+    if (!gateway.recordSessionContext) return
+    const activeTerminal = terminal.state.sessions.find(({ id }) => id === terminal.state.activeId)
+    void gateway.recordSessionContext({ area, appId, terminalCwd: activeTerminal?.cwd }).catch(() => undefined)
+  }, [activeAppId, gateway, terminal.state.activeId, terminal.state.sessions])
+
   const chooseView = (next: View) => {
     if (next === view || !requestWorkspaceNavigation()) return
     setView(next)
+    if (next !== "hub" && next !== "store") recordContext(next)
     void feedback.play("navigation")
   }
 
@@ -208,6 +223,7 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
         <span className="mark" aria-hidden="true">M</span>
         <strong data-tauri-drag-region>MATRIZ / CONTROL</strong>
         <span className="live-count" title="Listeners ativos">{desktop.snapshot.ports.length.toString().padStart(2, "0")}</span>
+        <FpsIndicator />
         <button className="window-action" aria-label="Atualizar" onClick={() => void desktop.refresh()}><Icons.refresh /></button>
         <button className="window-action" aria-label="Ocultar" onClick={() => void gateway.hide()}><Icons.close /></button>
       </header>
@@ -235,11 +251,12 @@ export function ControlApp({ gateway, feedback }: { gateway: DesktopGateway; fee
           </section>
         ) : null}
 
-        {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} /> : null}
+        {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} selectedAppId={activeAppId} onSelectApp={(appId) => { setActiveAppId(appId); recordContext("apps", appId) }} /> : null}
         {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
+        {view === "hub" ? <HubView gateway={gateway} focusFeature={hubFeature} onResume={(session) => { setHubFeature(undefined); setActiveAppId(session.appId); setView(session.area) }} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} runtimes={runtimes} activeGate={activeGate} setActiveGate={setActiveGate} feedback={feedback} startOperation={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
-        {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} /> : null}
+        {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} openControl={(featureId) => { setHubFeature(featureId); setView("hub") }} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
         {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void feedback.play("success") }} quit={() => { void feedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>

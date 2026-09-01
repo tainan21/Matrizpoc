@@ -18,6 +18,9 @@ export const Icons = {
   workspace: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><path d="M3.5 7.5h6l2-2h9v13h-17v-11Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M4 9.5h16" stroke="currentColor" strokeWidth="1.5"/></Icon>
   ),
+  hub: (props: SVGProps<SVGSVGElement>) => (
+    <Icon {...props}><rect x="4" y="4" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><rect x="14" y="4" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><rect x="4" y="14" width="6" height="6" rx="1.5" stroke="currentColor" strokeWidth="1.7"/><path d="M15 14h5v6h-6v-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"/></Icon>
+  ),
   store: (props: SVGProps<SVGSVGElement>) => (
     <Icon {...props}><path d="M5 9h14l-1 11H6L5 9Z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round"/><path d="M9 10V7a3 3 0 0 1 6 0v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/></Icon>
   ),

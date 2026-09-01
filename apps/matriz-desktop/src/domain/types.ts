@@ -117,6 +117,47 @@ export interface WorkspacePulse {
   readonly clean: boolean
 }
 
+export type HubArea = "ports" | "apps" | "workspace" | "terminal" | "actions" | "doctor" | "settings"
+export type HubFeatureId = "node-sweep" | "system-pulse" | "matriz-awake" | "resume-session"
+
+export interface SystemPulse {
+  readonly cpuUsage: number
+  readonly cpuModel: string
+  readonly usedMemoryBytes: number
+  readonly totalMemoryBytes: number
+  readonly availableMemoryBytes: number
+  readonly uptimeSeconds: number
+  readonly windowsVersion: string
+  readonly hostname?: string
+  readonly diskFreeBytes?: number
+  readonly diskUsedBytes?: number
+  readonly processCount: number
+  readonly temperatureCelsius: number | null
+}
+
+export interface NodeSweepCandidate {
+  readonly appId: DesktopAppId
+  readonly projectName: string
+  readonly path: string
+  readonly lastUsedAt: number
+  readonly packageManager?: string
+  readonly sizeBytes: number
+}
+
+export interface NodeSweepScan {
+  readonly scanId: string
+  readonly candidates: readonly NodeSweepCandidate[]
+  readonly potentialBytes: number
+}
+
+export interface NodeSweepDeleteRequest { readonly scanId: string; readonly appIds: readonly DesktopAppId[] }
+export interface NodeSweepDeleteResult { readonly appId: DesktopAppId; readonly deleted: boolean; readonly recoveredBytes: number; readonly error?: string }
+export interface NodeSweepDeletion { readonly results: readonly NodeSweepDeleteResult[]; readonly recoveredBytes: number }
+
+export interface SessionContext { readonly area: HubArea; readonly appId?: DesktopAppId; readonly terminalCwd?: string }
+export interface ResumeSession extends SessionContext { readonly updatedAt: number }
+export interface HubStateSnapshot { readonly workspacePath: string; readonly resume?: ResumeSession; readonly lastUsedAt: Readonly<Record<string, number>> }
+
 export interface TerminalSession {
   readonly id: string
   readonly title: string
@@ -249,7 +290,7 @@ export interface StorePackage {
   readonly developer: string
   readonly version: string
   readonly category: string
-  readonly appId: DesktopAppId
+  readonly appId: DesktopAppId | "matriz-desktop"
   readonly price: number
   readonly permissions: readonly string[]
   readonly compatibility: string
@@ -257,6 +298,8 @@ export interface StorePackage {
   readonly installed: boolean
   readonly trustStatus?: "verified" | "changed" | "missing"
   readonly receipt?: PackageReceipt
+  readonly builtIn?: boolean
+  readonly status?: string
 }
 
 export interface PackageReceipt {
@@ -272,10 +315,20 @@ export interface CommerceSnapshot {
   readonly packages: readonly StorePackage[]
 }
 
-export interface PackageActivationTarget extends RuntimeTarget {
+export interface RuntimePackageActivationTarget extends RuntimeTarget {
+  readonly kind: "runtime"
   readonly packageId: string
   readonly operationId: `app.${DesktopAppId}.web`
 }
+
+export interface ControlPackageActivationTarget {
+  readonly kind: "control"
+  readonly packageId: string
+  readonly view: "hub"
+  readonly featureId: HubFeatureId
+}
+
+export type PackageActivationTarget = RuntimePackageActivationTarget | ControlPackageActivationTarget
 
 export interface RecoveryResult {
   readonly appId: DesktopAppId

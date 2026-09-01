@@ -76,6 +76,13 @@ export const unavailableGateway: DesktopGateway = {
   selectWorkspace: async () => unavailable(),
   doctor: async () => [],
   workspacePulse: async () => ({ branch: "preview", changedFiles: 0, clean: true }),
+  systemPulse: async () => ({ cpuUsage: 0, cpuModel: "Browser preview", usedMemoryBytes: 0, totalMemoryBytes: 0, availableMemoryBytes: 0, uptimeSeconds: 0, windowsVersion: "Unavailable", temperatureCelsius: null, processCount: 0 }),
+  getAwakeState: async () => false,
+  setAwake: async () => unavailable(),
+  scanNodeModules: async () => ({ scanId: "preview", candidates: [], potentialBytes: 0 }),
+  deleteNodeModules: async () => unavailable(),
+  readResumeSession: async () => ({ workspacePath: "", lastUsedAt: {} }),
+  recordSessionContext: async () => ({ workspacePath: "", lastUsedAt: {} }),
   readSettings: async () => DEFAULT_SETTINGS,
   writeSettings: async () => unavailable(),
   hide: async () => unavailable(),
@@ -138,7 +145,8 @@ export const unavailableGateway: DesktopGateway = {
   activatePackage: async (packageId) => {
     const item = demoCommerce(packageId, true).packages.find(({ id }) => id === packageId)
     if (!item) throw new Error("Package is not in the trusted Matriz catalog")
-    return { packageId, appId: item.appId, operationId: `app.${item.appId}.web`, routePath: "/" }
+    if (item.appId === "matriz-desktop") throw new Error("Built-in utility unavailable in browser preview")
+    return { kind: "runtime", packageId, appId: item.appId, operationId: `app.${item.appId}.web`, routePath: "/" }
   },
   recoverRuntime: async (appId) => ({ appId, status: "ready", sessionId: `demo-${appId}` }),
   runbookCatalog: async () => [

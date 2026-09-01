@@ -3,11 +3,11 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { executeRuntimeAction, getRuntimeActions, type ActionServices, type RuntimeActionId } from "../../application/action-registry"
 import { APP_MANIFESTS } from "../../application/app-manifests"
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { ActivityEnvelope, ManagedOperationId, NativeAppRuntime, RuntimeInstance, StorePackage } from "../../domain/types"
+import type { ActivityEnvelope, DesktopAppId, ManagedOperationId, NativeAppRuntime, RuntimeInstance, StorePackage } from "../../domain/types"
 
 type Surface = "terminal" | "preview" | "logs"
 
-export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, openTerminal, signal, executeAction }: {
+export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, openTerminal, signal, executeAction, selectedAppId: resumedAppId, onSelectApp }: {
   gateway: DesktopGateway
   runtimes: readonly RuntimeInstance[]
   refresh(): Promise<unknown>
@@ -15,6 +15,8 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
   openTerminal(): void
   signal(kind: "navigation" | "success" | "error"): void
   executeAction<T>(action: () => Promise<T>, success: string): Promise<T>
+  selectedAppId?: DesktopAppId
+  onSelectApp?(appId: DesktopAppId): void
 }) {
   const [selectedId, setSelectedId] = useState<RuntimeInstance["id"]>("matriz-admin")
   const [surface, setSurface] = useState<Surface>("terminal")
@@ -27,6 +29,8 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
   const [recovering, setRecovering] = useState(false)
   const [capabilities, setCapabilities] = useState<readonly StorePackage[]>([])
   const previewHost = useRef<HTMLDivElement>(null)
+
+  useEffect(() => { if (resumedAppId) setSelectedId(resumedAppId) }, [resumedAppId])
 
   useEffect(() => {
     void gateway.activityHistory().then((history) => setActivities((current) => {
@@ -122,7 +126,7 @@ export function RuntimeWorkspace({ gateway, runtimes, refresh, startOperation, o
     <div className="runtime-catalog">
       <div className="section-head"><div><span className="eyebrow">ECOSSISTEMA / 09</span><h1 id="apps-title">APPS</h1></div></div>
       <div className="runtime-list">
-        {runtimes.map((runtime) => <button key={runtime.id} className="runtime-row" aria-pressed={runtime.id === selected?.id} onClick={() => { if (surface === "preview") setSurface("terminal"); setSelectedId(runtime.id); signal("navigation") }}>
+        {runtimes.map((runtime) => <button key={runtime.id} className="runtime-row" aria-pressed={runtime.id === selected?.id} onClick={() => { if (surface === "preview") setSurface("terminal"); setSelectedId(runtime.id); onSelectApp?.(runtime.id); signal("navigation") }}>
           <span className={`status-dot ${runtime.status}`} /><span><strong>{runtime.label}</strong><small>:{runtime.port} · {runtime.ownership === "external" ? "EXTERNO" : runtime.status.toUpperCase()}</small></span><b>›</b>
         </button>)}
       </div>
