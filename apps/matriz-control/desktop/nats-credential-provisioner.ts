@@ -8,7 +8,8 @@ const execFileAsync = promisify(execFile)
 
 type Options = Readonly<{
   helperPath: string
-  execute?(file: string, args: readonly string[]): Promise<string>
+  execute?(file: string, args: readonly string[], environment: NodeJS.ProcessEnv): Promise<string>
+  environment?: NodeJS.ProcessEnv
   hash?(password: string): Promise<string>
   provision?(controlPassword: string): Promise<void>
 }>
@@ -19,7 +20,7 @@ export class WindowsNatsCredentialProvisioner {
   async prepare(): Promise<Readonly<{ payPasswordHash: string; seumeiPasswordHash: string; hubPasswordHash: string; controlPasswordHash: string; provisionStreams(): Promise<void> }>> {
     const output = (await (this.options.execute ?? execute)("powershell.exe", [
       "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", this.options.helperPath, "-Action", "ProvisionDomains",
-    ])).trim()
+    ], windowsPowerShellEnvironment(this.options.environment ?? process.env))).trim()
     let credentials: { payPassword?: unknown; seumeiPassword?: unknown; hubPassword?: unknown; controlPassword?: unknown }
     try { credentials = JSON.parse(output) as typeof credentials } catch { throw new Error("NATS credential helper returned an invalid credential") }
     const payPassword = validPassword(credentials.payPassword)
@@ -62,7 +63,16 @@ async function provisionDomainStreams(password: string): Promise<void> {
   throw new Error("Matriz domain JetStream provisioning failed", { cause: lastError })
 }
 
-async function execute(file: string, args: readonly string[]): Promise<string> {
-  const result = await execFileAsync(file, [...args], { windowsHide: true, timeout: 15_000, maxBuffer: 8 * 1024, encoding: "utf8" })
+function windowsPowerShellEnvironment(environment: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  const modulePath = environment.PSModulePath
+  if (!modulePath) return { ...environment }
+  return {
+    ...environment,
+    PSModulePath: modulePath.split(";").filter((entry) => !/[\\/]PowerShell[\\/]Modules$/i.test(entry) || /[\\/]WindowsPowerShell[\\/]Modules$/i.test(entry)).join(";"),
+  }
+}
+
+async function execute(file: string, args: readonly string[], environment: NodeJS.ProcessEnv): Promise<string> {
+  const result = await execFileAsync(file, [...args], { windowsHide: true, timeout: 15_000, maxBuffer: 8 * 1024, encoding: "utf8", env: environment })
   return result.stdout
 }
