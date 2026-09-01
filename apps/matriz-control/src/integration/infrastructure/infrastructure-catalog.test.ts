@@ -13,11 +13,11 @@ describe("Control infrastructure inventory", () => {
     const inventory = await loadControlInfrastructureInventory(repositoryRoot())
 
     expect(inventory.issues).toEqual([])
-    expect(inventory.apps).toHaveLength(16)
+    expect(inventory.apps).toHaveLength(17)
     expect(inventory.summary).toEqual({
-      apps: 16,
+      apps: 17,
       databaseOwners: 8,
-      identityClients: 8,
+      identityClients: 9,
       cacheUsers: 1,
       eventParticipants: 9,
     })
