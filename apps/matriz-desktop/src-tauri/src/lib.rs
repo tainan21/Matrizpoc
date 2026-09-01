@@ -726,8 +726,13 @@ fn open_target(state: tauri::State<'_, OperationsState>, target_id: String) -> R
 }
 
 #[tauri::command]
-fn run_doctor(state: tauri::State<'_, OperationsState>) -> Vec<doctor::DoctorCheck> {
-    doctor::run_doctor(&state)
+async fn run_doctor(
+    state: tauri::State<'_, OperationsState>,
+) -> Result<Vec<doctor::DoctorCheck>, String> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || doctor::run_doctor(&state))
+        .await
+        .map_err(|error| error.to_string())
 }
 
 #[tauri::command]

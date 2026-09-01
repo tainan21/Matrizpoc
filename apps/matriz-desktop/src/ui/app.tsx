@@ -20,6 +20,7 @@ import type {
 } from "../domain/types"
 import { Icons } from "./icons"
 import { CommandDeck } from "./command-deck/command-deck"
+import { DoctorView } from "./doctor/doctor-view"
 import { FpsIndicator } from "./hub/fps-indicator"
 import { HubView } from "./hub/hub-view"
 import { HomeView, type HomeTarget } from "./home/home-view"
@@ -363,10 +364,6 @@ export function AppsView({ apps, sessions, nativeApp, setNativeApp, gateway, ref
 function ActionsView({ pulse, gateway, runtimes, activeGate, setActiveGate, feedback, startOperation, signal }: { pulse?: WorkspacePulse; gateway: DesktopGateway; runtimes: readonly RuntimeInstance[]; activeGate?: GateId; setActiveGate(value?: GateId): void; feedback: Feedback; startOperation(id: ManagedOperationId): Promise<unknown>; signal(kind: "success" | "error"): void }) {
   const run = async (id: GateId) => { setActiveGate(id); try { await startOperation(`gate.${id}`); void feedback.play("navigation") } catch { void feedback.play("error") } finally { setActiveGate(undefined) } }
   return <section aria-labelledby="actions-title"><div className="section-head"><div><span className="eyebrow">WORKSPACE / {pulse?.clean ? "CLEAN" : `${pulse?.changedFiles ?? "—"} Δ`}</span><h1 id="actions-title">AÇÕES</h1></div><Badge tone={pulse?.clean ? "success" : "warning"}>{pulse?.branch ?? "—"}</Badge></div><h2>GATES</h2><div className="action-grid">{GATES.map((gate) => <Button variant="secondary" key={gate.id} disabled={Boolean(activeGate)} onClick={() => void run(gate.id)}>{activeGate === gate.id ? "•••" : gate.label}</Button>)}</div><h2>JUMP</h2><div className="jump-list">{QUICK_TARGETS.map((target) => <button key={target.id} onClick={() => void gateway.openTarget(target.id)}><span>{target.label}</span><Icons.external /></button>)}</div><RunbookPanel gateway={gateway} runtimes={runtimes} signal={signal} /></section>
-}
-
-function DoctorView({ checks, refresh }: { checks: readonly DoctorCheck[]; refresh(): Promise<unknown> }) {
-  return <section aria-labelledby="doctor-title"><div className="section-head"><div><span className="eyebrow">LOCAL / DIAGNÓSTICO</span><h1 id="doctor-title">DOCTOR</h1></div><button className="round-action" aria-label="Executar diagnóstico" onClick={() => void refresh()}><Icons.refresh /></button></div><div className="check-list">{checks.map((check) => <div key={check.id}><span className={`status-dot ${check.ok ? "ready" : "degraded"}`} /><strong>{check.id.toUpperCase()}</strong><small>{check.value}</small></div>)}</div></section>
 }
 
 function GitSummary({ pulse, refresh }: { pulse?: WorkspacePulse; refresh(): Promise<unknown> }) {

@@ -95,9 +95,18 @@ h2 { margin: 22px 0 8px; color: #8e849c; font-size: 9px; letter-spacing: .18em; 
 .jump-list svg { width: 15px; color: var(--violet); }
 .round-action { width: 40px; height: 40px; border: 1px solid var(--line); color: var(--violet-hot); }
 .check-list { border-top: 1px solid var(--line); }
-.check-list > div { display: grid; grid-template-columns: 8px 90px 1fr; align-items: center; gap: 12px; min-height: 58px; border-bottom: 1px solid var(--line); }
-.check-list strong { font-size: 10px; letter-spacing: .1em; }
-.check-list small { text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.check-list > div { display: grid; grid-template-columns: 8px minmax(120px,.65fr) minmax(220px,1.5fr) minmax(140px,.75fr); align-items: center; gap: 14px; min-height: 76px; border-bottom: 1px solid var(--line); }
+.check-list strong { font-size: 10px; letter-spacing: .04em; }
+.check-list small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doctor-view .section-head > div:first-child p { margin:5px 0 0; color:var(--muted); font-size:10px; }
+.doctor-summary { display:flex; align-items:center; gap:12px; color:var(--text-dim); font:700 9px var(--matriz-font-mono); }
+.doctor-check-name, .doctor-check-detail, .doctor-check-policy { min-width:0; display:grid; gap:4px; }
+.doctor-check-name small, .doctor-check-policy small { color:var(--muted); font:700 7px var(--matriz-font-mono); letter-spacing:.12em; text-transform:uppercase; }
+.doctor-check-detail strong { overflow:hidden; color:var(--text); text-overflow:ellipsis; white-space:nowrap; }
+.doctor-check-detail small { color:var(--muted); }
+.doctor-check-policy span { color:var(--text-dim); font:700 8px var(--matriz-font-mono); }
+.doctor-check-policy em { color:#f0b864; font:700 7px var(--matriz-font-mono); font-style:normal; }
+@media (max-width:760px) { .check-list > div { grid-template-columns:8px minmax(110px,.7fr) 1fr; } .doctor-check-policy { grid-column:2 / 4; padding-bottom:10px; } }
 .settings-list { border-top: 1px solid var(--line); margin-bottom: 18px; }
 .control-theme-picker { display:grid; grid-template-columns:minmax(190px,.65fr) minmax(0,1.35fr); gap:22px; margin-bottom:22px; padding:16px; border:1px solid var(--line); border-radius:10px; background:color-mix(in srgb,var(--matriz-color-surface) 62%,transparent); }
 .control-theme-picker h2 { margin:7px 0; color:var(--matriz-color-text); }

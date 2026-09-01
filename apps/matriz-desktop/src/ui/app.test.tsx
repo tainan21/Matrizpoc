@@ -206,7 +206,16 @@ describe("Matriz Control", () => {
     const desktop = gateway()
     vi.mocked(desktop.runtimeSnapshot).mockRejectedValue(new Error("runtime offline"))
     vi.mocked(desktop.workspacePulse).mockResolvedValue({ branch: "main", changedFiles: 2, clean: false })
-    vi.mocked(desktop.doctor).mockResolvedValue([{ id: "git", ok: true, value: "2.51.0" }])
+    vi.mocked(desktop.doctor).mockResolvedValue([{
+      id: "git",
+      group: "Toolchain",
+      label: "Git",
+      ok: true,
+      severity: "success",
+      value: "git version 2.51.0",
+      description: "Ferramenta de versionamento.",
+      expected: "Major 2",
+    }])
     render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
 
     expect(await screen.findByRole("heading", { name: "INÍCIO" })).toBeVisible()

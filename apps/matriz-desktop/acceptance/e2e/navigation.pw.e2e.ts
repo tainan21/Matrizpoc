@@ -69,14 +69,18 @@ test("persists compact settings across navigation", async ({ tauriPage: page }) 
 test("reports the real workspace, toolchain, and Git pulse", async ({ tauriPage: page }) => {
   await chooseMode(page, "Doctor")
   const checkRows = page.locator(".check-list > div")
-  await expect(checkRows).toHaveCount(4)
+  await expect(checkRows).toHaveCount(11)
   const checks = await checkRows.evaluateAll((rows) => rows.map((element) => ({
+    id: element.querySelector(".doctor-check-name strong")?.textContent ?? "",
     text: element.textContent ?? "",
     ready: Boolean(element.querySelector(".status-dot.ready")),
   })))
-  expect(checks).toHaveLength(4)
+  expect(checks.map(({ id }) => id)).toEqual([
+    "Matriz Control", "Windows", "WebView2", "Workspace Matriz", "Node.js",
+    "Corepack / pnpm", "Rust", "Git", "Terminal / ConPTY", "Matriz Workbench", "Codex App Server",
+  ])
   if (!checks.every((check) => check.ready)) throw new Error(`Doctor degraded: ${JSON.stringify(checks)}`)
-  expect(checks.map((check) => check.text).join(" ")).not.toMatch(/failed|timed out/i)
+  expect(checks.map((check) => check.text).join(" ")).not.toMatch(/failed|timed out|não encontrado/i)
 
   await chooseMode(page, "Ações")
   await expect(page.locator("main .section-head")).toContainText("main")

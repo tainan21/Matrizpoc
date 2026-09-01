@@ -450,7 +450,7 @@ fn operation_app_id(operation_id: Option<&str>) -> Option<&str> {
         .and_then(|id| id.strip_suffix(".web"))
 }
 
-fn preferred_shell() -> String {
+pub(crate) fn preferred_shell() -> String {
     ["pwsh.exe", "powershell.exe"]
         .into_iter()
         .find_map(resolve_executable)

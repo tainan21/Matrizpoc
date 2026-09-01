@@ -111,9 +111,15 @@ export interface GateResult {
 }
 
 export interface DoctorCheck {
-  readonly id: "workspace" | "node" | "pnpm" | "git"
+  readonly id: string
+  readonly group: string
+  readonly label: string
   readonly ok: boolean
+  readonly severity: "success" | "warning" | "error"
   readonly value: string
+  readonly description: string
+  readonly expected?: string
+  readonly remedyId?: string
 }
 
 export interface WorkspacePulse {
