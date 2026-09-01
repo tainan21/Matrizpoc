@@ -6,15 +6,21 @@ const repositoryRoot = fileURLToPath(new URL("../../..", import.meta.url))
 
 describe("Matriz Control signed release contract", () => {
   it("keeps deterministic updater assets and a tag-gated release workflow", async () => {
-    const [packageJson, workflow] = await Promise.all([
+    const [packageJsonText, workflow] = await Promise.all([
       readFile(new URL("apps/matriz-control/package.json", `file://${repositoryRoot.replace(/\\/g, "/")}/`), "utf8"),
       readFile(new URL(".github/workflows/matriz-control-windows-release.yml", `file://${repositoryRoot.replace(/\\/g, "/")}/`), "utf8"),
     ])
 
-    expect(packageJson).toContain('"desktop:release"')
-    expect(packageJson).toContain('"provider": "github"')
-    expect(packageJson).toContain('"appId": "com.matriz.control.electron"')
-    expect(packageJson).toContain('"artifactName": "matriz-control-electron-${version}-windows-x64-setup.${ext}"')
+    const packageJson = JSON.parse(packageJsonText) as { scripts: Record<string, string>; build: { appId: string; artifactName: string; publish: { provider: string }[] } }
+
+    expect(packageJson.scripts["desktop:release"]).toBe("pnpm run desktop:build")
+    expect(packageJson.scripts["desktop:prepare-runtime"]).toBe("tsx desktop/prepare-packaged-runtime.ts")
+    expect(packageJson.scripts["desktop:compile"]).toContain("esbuild desktop/windows-local-environment-resolver.ts")
+    expect(packageJson.scripts["desktop:compile"]).toContain("--bundle --platform=node --format=cjs")
+    expect(packageJson.scripts["desktop:build"]).toBe("pnpm run build && pnpm run desktop:prepare-runtime && pnpm run desktop:compile && electron-builder --win nsis --publish never")
+    expect(packageJson.build.publish).toEqual(expect.arrayContaining([expect.objectContaining({ provider: "github" })]))
+    expect(packageJson.build.appId).toBe("com.matriz.control.electron")
+    expect(packageJson.build.artifactName).toBe("matriz-control-electron-${version}-windows-x64-setup.${ext}")
     expect(workflow).toContain('tags: ["control-electron-v*"]')
     expect(workflow).toContain('contents: write')
     expect(workflow).toContain('MATRIZ_CONTROL_WINDOWS_SIGNING_CERTIFICATE')

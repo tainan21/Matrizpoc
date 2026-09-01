@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, session, WebContentsView, type DownloadItem, type IpcMainInvokeEvent, type WebContents } from "electron"
+import { app, BrowserWindow, dialog, ipcMain, session, utilityProcess, WebContentsView, type DownloadItem, type IpcMainInvokeEvent, type WebContents } from "electron"
 import { autoUpdater } from "electron-updater"
 import { randomBytes, randomUUID } from "node:crypto"
 import { spawn, type ChildProcess } from "node:child_process"
@@ -21,6 +21,7 @@ import { DesktopUpdateCoordinator } from "../src/application/desktop-update-coor
 import { ElectronUpdateAdapter } from "../src/integration/desktop/electron-update-adapter"
 import { StorePackageService, type StorePackageDefinition } from "../src/application/store-package-service"
 import { ElectronStorePackageAdapters } from "./electron-store-adapters"
+import { startPackagedRenderer, type RendererServerProcess } from "./renderer-server-process"
 import { AtomicProjectStore } from "../src/modules/projects/integration/atomic-project-store"
 import { BoundedProjectReader } from "../src/modules/projects/integration/bounded-project-reader"
 import { ProjectHostService } from "../src/modules/projects/application/project-host-service"
@@ -60,7 +61,7 @@ let sqlite: SqliteBrowserRepository | undefined
 let runtime: BrowserRuntime
 let commandServer: Server | undefined
 let agentKilled = false
-let rendererServer: ChildProcess | undefined
+let rendererServer: RendererServerProcess | undefined
 let vaultRoot: string | undefined
 let vault: VaultBackend | undefined
 let windowCloseAuthorized = false
@@ -226,11 +227,11 @@ async function createWindow() {
 async function ensureRendererServer() {
   if (!app.isPackaged || process.env.MATRIZ_CONTROL_DESKTOP_URL) return
   const server = join(process.resourcesPath, "next", "apps", "matriz-control", "server.js")
-  rendererServer = spawn(process.execPath, [server], {
+  rendererServer = startPackagedRenderer({
+    fork: utilityProcess.fork,
+    serverPath: server,
     cwd: join(process.resourcesPath, "next", "apps", "matriz-control"),
-    env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", MATRIZ_CONTROL_RUNTIME: "desktop-packaged", HOSTNAME: "127.0.0.1", PORT: "3009" },
-    stdio: "ignore",
-    windowsHide: true,
+    baseEnv: process.env,
   })
   for (let attempt = 0; attempt < 100; attempt += 1) {
     try { const response = await fetch("http://127.0.0.1:3009/home"); if (response.ok) return } catch { /* renderer is still starting */ }

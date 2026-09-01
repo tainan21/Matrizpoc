@@ -6,9 +6,10 @@
   "scripts": {
     "dev": "next dev -p 3009",
     "dev:web": "next dev -p 3009",
-    "desktop:compile": "tsc -p tsconfig.desktop.json",
+    "desktop:compile": "tsc -p tsconfig.desktop.json && esbuild desktop/windows-local-environment-resolver.ts --bundle --platform=node --format=cjs --outfile=dist-desktop/desktop/windows-local-environment-resolver.js",
     "desktop:dev": "pnpm run desktop:compile && node desktop/launch.mjs",
-    "desktop:build": "pnpm run build && pnpm run desktop:compile && electron-builder --win nsis --publish never",
+    "desktop:prepare-runtime": "tsx desktop/prepare-packaged-runtime.ts",
+    "desktop:build": "pnpm run build && pnpm run desktop:prepare-runtime && pnpm run desktop:compile && electron-builder --win nsis --publish never",
     "desktop:release": "pnpm run desktop:build",
     "mcp:start": "node dist-desktop/mcp/server.js",
     "build": "next build --webpack",
@@ -81,7 +82,9 @@
       {
         "from": "../../prisma",
         "to": "prisma",
-        "filter": ["**/migrations/**/migration.sql"]
+        "filter": [
+          "**/migrations/**/migration.sql"
+        ]
       }
     ],
     "win": {
@@ -106,9 +109,9 @@
     "@matriz/integration-infrastructure-contracts": "workspace:^",
     "@matriz/integration-registry-core": "workspace:*",
     "@matriz/platform-config": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.30.0",
     "@nats-io/jetstream": "3.4.0",
     "@nats-io/transport-node": "3.4.0",
-    "@modelcontextprotocol/sdk": "1.30.0",
     "@uiw/react-codemirror": "4.25.4",
     "bcryptjs": "3.0.3",
     "electron-updater": "6.8.9",
@@ -123,6 +126,7 @@
     "@types/react-dom": "19.2.3",
     "electron": "44.0.0",
     "electron-builder": "26.15.3",
+    "esbuild": "0.23.1",
     "tsx": "4.19.1",
     "typescript": "5.6.3",
     "vitest": "2.1.2"
