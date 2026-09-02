@@ -60,6 +60,7 @@ function gateway(): DesktopGateway {
     gitUnstage: vi.fn().mockResolvedValue({ revision: "rev", branch: "main", ahead: 0, behind: 0, changes: [], recent: [], branches: [], reflog: [] }),
     gitCommit: vi.fn().mockResolvedValue({ revision: "rev", branch: "main", ahead: 0, behind: 0, changes: [], recent: [], branches: [], reflog: [] }),
     gitRemote: vi.fn().mockResolvedValue({ revision: "rev", branch: "main", ahead: 0, behind: 0, changes: [], recent: [], branches: [], reflog: [] }),
+    gitBranch: vi.fn().mockResolvedValue({ revision: "rev", branch: "main", ahead: 0, behind: 0, changes: [], recent: [], branches: [], reflog: [] }),
     systemPulse: vi.fn().mockResolvedValue({ cpuUsage: 0, cpuModel: "Test CPU", usedMemoryBytes: 0, totalMemoryBytes: 1, availableMemoryBytes: 1, uptimeSeconds: 0, windowsVersion: "Windows", processCount: 0 }),
     getAwakeState: vi.fn().mockResolvedValue(false),
     setAwake: vi.fn().mockImplementation(async (enabled) => enabled),

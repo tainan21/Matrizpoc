@@ -96,6 +96,21 @@ pub struct GitCommitRequest {
     pub message: String,
 }
 
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum GitBranchAction {
+    Create,
+    Switch,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub struct GitBranchRequest {
+    pub revision: String,
+    pub action: GitBranchAction,
+    pub name: String,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct GitDiff {
@@ -211,6 +226,20 @@ impl GitService {
             GitRemoteAction::Fetch => vec!["fetch".into(), "--prune".into()],
             GitRemoteAction::Pull => vec!["pull".into(), "--ff-only".into()],
             GitRemoteAction::Push => vec!["push".into()],
+        };
+        git_output(root, &args)?;
+        self.snapshot(root)
+    }
+
+    pub fn branch(&self, root: &Path, request: &GitBranchRequest) -> Result<GitSnapshot, String> {
+        self.verify_revision(root, &request.revision)?;
+        if !observe(root)?.snapshot.changes.is_empty() {
+            return Err("Branch changes require a clean worktree".into());
+        }
+        validate_branch_name(root, &request.name)?;
+        let args = match request.action {
+            GitBranchAction::Create => vec!["switch".into(), "-c".into(), request.name.clone()],
+            GitBranchAction::Switch => vec!["switch".into(), "--".into(), request.name.clone()],
         };
         git_output(root, &args)?;
         self.snapshot(root)
@@ -464,6 +493,22 @@ fn canonical_repository(root: &Path) -> Result<PathBuf, String> {
         return Err("Git root does not match the validated Matriz workspace".into());
     }
     Ok(root)
+}
+
+fn validate_branch_name(root: &Path, name: &str) -> Result<(), String> {
+    if name.is_empty() || name.len() > 120 || name.starts_with('-') || !name.is_ascii() {
+        return Err("Branch name is invalid".into());
+    }
+    git_output(
+        root,
+        &[
+            "check-ref-format".into(),
+            "--branch".into(),
+            name.to_owned(),
+        ],
+    )
+    .map(|_| ())
+    .map_err(|_| "Branch name is invalid".into())
 }
 
 fn git_output(root: &Path, args: &[String]) -> Result<String, String> {

@@ -84,6 +84,7 @@ export function createTauriGateway(
     gitUnstage: (request) => invoke(commands.gitUnstage, { request }),
     gitCommit: (request) => invoke(commands.gitCommit, { request }),
     gitRemote: (request) => invoke(commands.gitRemote, { request }),
+    gitBranch: (request) => invoke(commands.gitBranch, { request }),
     systemPulse: () => invoke(commands.systemPulse),
     getAwakeState: () => invoke(commands.getAwakeState),
     setAwake: (enabled) => invoke(commands.setAwake, { enabled }),

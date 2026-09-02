@@ -44,8 +44,8 @@ use environment::{
 };
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
 use git::{
-    GitCommitRequest, GitDiff, GitDiffRequest, GitRemoteAction, GitSelectionRequest, GitService,
-    GitSnapshot,
+    GitBranchRequest, GitCommitRequest, GitDiff, GitDiffRequest, GitRemoteAction,
+    GitSelectionRequest, GitService, GitSnapshot,
 };
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
 use infrastructure::{
@@ -856,6 +856,19 @@ async fn run_git_remote(
     })
     .await
     .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn run_git_branch(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    request: GitBranchRequest,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || git.branch(&root, &request))
+        .await
+        .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
@@ -1684,6 +1697,7 @@ pub fn run() {
             unstage_git_changes,
             commit_git_changes,
             run_git_remote,
+            run_git_branch,
             get_system_pulse,
             get_awake_state,
             set_awake,

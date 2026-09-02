@@ -62,4 +62,17 @@ describe("GitView", () => {
     await waitFor(() => expect(gateway.gitRemote).toHaveBeenCalledWith({ revision: "rev-remote", action: "push" }))
     expect(confirm).toHaveBeenCalled()
   })
+
+  it("creates and switches local branches using the observed revision", async () => {
+    const snapshot = { revision: "rev-branch", branch: "main", ahead: 0, behind: 0, changes: [], recent: [], branches: [{ name: "main", current: true }], reflog: [] }
+    const gateway = {
+      gitSnapshot: vi.fn().mockResolvedValue(snapshot),
+      gitBranch: vi.fn().mockResolvedValue({ ...snapshot, revision: "rev-next", branch: "feature/safe", branches: [{ name: "feature/safe", current: true }] }),
+    } as unknown as DesktopGateway
+    render(<GitView gateway={gateway} />)
+
+    fireEvent.change(await screen.findByRole("textbox", { name: "Nova branch local" }), { target: { value: "feature/safe" } })
+    fireEvent.click(screen.getByRole("button", { name: "Criar branch" }))
+    await waitFor(() => expect(gateway.gitBranch).toHaveBeenCalledWith({ revision: "rev-branch", action: "create", name: "feature/safe" }))
+  })
 })

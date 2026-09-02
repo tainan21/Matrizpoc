@@ -9,6 +9,7 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set())
   const [diff, setDiff] = useState<GitDiff>()
   const [message, setMessage] = useState("")
+  const [branchName, setBranchName] = useState("")
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -105,6 +106,23 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
     }
   }
 
+  const branch = async (action: "create" | "switch", name: string) => {
+    if (!snapshot || busy || !name.trim()) return
+    if (action === "switch" && !window.confirm(`Trocar para a branch local ${name}?`)) return
+    setBusy(true)
+    setError(undefined)
+    try {
+      setSnapshot(await gateway.gitBranch({ revision: snapshot.revision, action, name: name.trim() }))
+      if (action === "create") setBranchName("")
+      setSelected(new Set())
+      setDiff(undefined)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Operação de branch falhou")
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section className="git-view" aria-labelledby="git-title">
       <div className="section-head">
@@ -167,7 +185,8 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
       <div className="git-reference-grid">
         <section aria-label="Branches locais">
           <strong>BRANCHES LOCAIS</strong>
-          {snapshot?.branches.map((branch) => <div key={branch.name}><code>{branch.current ? "●" : "○"}</code><span>{branch.name}</span><small>{branch.upstream ?? "local"}</small></div>)}
+          <div><input aria-label="Nova branch local" value={branchName} maxLength={120} onChange={(event) => setBranchName(event.target.value)} /><button aria-label="Criar branch" disabled={busy || !!snapshot?.changes.length || !branchName.trim()} onClick={() => void branch("create", branchName)}>CRIAR</button></div>
+          {snapshot?.branches.map((item) => <div key={item.name}><code>{item.current ? "●" : "○"}</code><button disabled={busy || item.current || !!snapshot.changes.length} aria-label={`Trocar para ${item.name}`} onClick={() => void branch("switch", item.name)}>{item.name}</button><small>{item.upstream ?? "local"}</small></div>)}
         </section>
         <section aria-label="Reflog recente">
           <strong>REFLOG RECENTE</strong>

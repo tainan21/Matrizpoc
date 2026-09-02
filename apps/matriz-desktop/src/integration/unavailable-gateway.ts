@@ -87,6 +87,7 @@ export const unavailableGateway: DesktopGateway = {
   gitUnstage: async () => unavailable(),
   gitCommit: async () => unavailable(),
   gitRemote: async () => unavailable(),
+  gitBranch: async () => unavailable(),
   systemPulse: async () => ({ cpuUsage: 0, cpuModel: "Browser preview", usedMemoryBytes: 0, totalMemoryBytes: 0, availableMemoryBytes: 0, uptimeSeconds: 0, windowsVersion: "Unavailable", temperatureCelsius: null, processCount: 0 }),
   getAwakeState: async () => false,
   setAwake: async () => unavailable(),

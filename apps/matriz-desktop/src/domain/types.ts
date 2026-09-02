@@ -204,6 +204,12 @@ export interface GitRemoteRequest {
   readonly action: "fetch" | "pull" | "push"
 }
 
+export interface GitBranchRequest {
+  readonly revision: string
+  readonly action: "create" | "switch"
+  readonly name: string
+}
+
 export interface GitDiff {
   readonly changeId: string
   readonly staged: boolean

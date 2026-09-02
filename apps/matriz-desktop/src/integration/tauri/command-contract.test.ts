@@ -38,6 +38,7 @@ describe("Tauri command contract", () => {
       gitUnstage: "unstage_git_changes",
       gitCommit: "commit_git_changes",
       gitRemote: "run_git_remote",
+      gitBranch: "run_git_branch",
       systemPulse: "get_system_pulse",
       getAwakeState: "get_awake_state",
       setAwake: "set_awake",

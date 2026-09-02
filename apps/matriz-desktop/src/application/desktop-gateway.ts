@@ -47,6 +47,7 @@ import type {
   GitCommitRequest,
   GitDiff,
   GitRemoteRequest,
+  GitBranchRequest,
   UpdateInfo,
   UpdateProgress,
   InfrastructureSnapshot,
@@ -93,6 +94,7 @@ export interface DesktopGateway {
   gitUnstage(request: GitSelectionRequest): Promise<GitSnapshot>
   gitCommit(request: GitCommitRequest): Promise<GitSnapshot>
   gitRemote(request: GitRemoteRequest): Promise<GitSnapshot>
+  gitBranch(request: GitBranchRequest): Promise<GitSnapshot>
   systemPulse(): Promise<SystemPulse>
   getAwakeState(): Promise<boolean>
   setAwake(enabled: boolean): Promise<boolean>
