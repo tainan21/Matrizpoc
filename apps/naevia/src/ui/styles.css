@@ -30,6 +30,14 @@ button { color: inherit; }
 .side-panel h2 { margin: 14px 0 8px; font-size: 24px; }
 .side-panel p { color: #898290; line-height: 1.6; font-size: 13px; }
 .side-panel button, .terminal-drawer button { border: 1px solid #41334f; background: #17121d; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.store-products { display: grid; gap: 6px; max-height: calc(100vh - 350px); margin: 14px 0; overflow: auto; }
+.store-products article { min-width: 0; padding: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px; border: 1px solid #292233; border-radius: 8px; background: #0a0810; }
+.store-products article div { min-width: 0; display: grid; gap: 3px; }
+.store-products strong { overflow: hidden; color: #ddd7e6; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.store-products small, .panel-note { color: #7f7788; font-size: 10px; }
+.store-products i { padding: 3px 5px; border-radius: 5px; background: #17131e; color: #9a90a6; font: 8px ui-monospace, monospace; font-style: normal; text-transform: uppercase; }
+.store-products i.active { color: #69d5bc; }
+.panel-note { display: block; margin: 13px 0; line-height: 1.5; }
 .terminal-drawer { position: fixed; z-index: 4; left: 52px; right: 0; bottom: 0; height: 260px; border-top: 1px solid #49315f; background: #09070d; animation: terminal-in .2s ease-out; }
 .terminal-drawer header { height: 40px; padding: 0 14px; border-bottom: 1px solid #27202f; display: flex; align-items: center; gap: 12px; justify-content: space-between; }
 .terminal-drawer header nav { display: flex; align-items: center; gap: 4px; margin-right: auto; }

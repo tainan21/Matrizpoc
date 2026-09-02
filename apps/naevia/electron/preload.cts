@@ -15,6 +15,7 @@ interface BrowserSnapshot {
   readonly activeTabId: string
 }
 interface TerminalSessionView { readonly id: string; readonly pid: number; readonly status: "running" | "exited"; readonly lines: readonly string[]; readonly exitCode: number | null }
+interface StoreProductView { readonly productId: string; readonly name: string; readonly edition: string; readonly state: "active" | "unavailable" | "retired"; readonly version: string | null }
 
 interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
@@ -30,6 +31,7 @@ interface NaeviaBridge {
   interruptTerminal(sessionId: string): Promise<void>
   closeTerminal(sessionId: string): Promise<readonly TerminalSessionView[]>
   subscribeTerminals(listener: (sessions: readonly TerminalSessionView[]) => void): () => void
+  storeCatalog(): Promise<readonly StoreProductView[]>
   subscribe(listener: (snapshot: BrowserSnapshot) => void): () => void
 }
 
@@ -51,6 +53,7 @@ const bridge: NaeviaBridge = {
     ipcRenderer.on("naevia:terminal:sessions", handler)
     return () => ipcRenderer.off("naevia:terminal:sessions", handler)
   },
+  storeCatalog: () => ipcRenderer.invoke("naevia:store:catalog"),
   subscribe: (listener) => {
     const handler = (_event: Electron.IpcRendererEvent, snapshot: BrowserSnapshot) => listener(snapshot)
     ipcRenderer.on("naevia:snapshot", handler)

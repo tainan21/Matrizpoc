@@ -30,6 +30,14 @@ export interface TerminalSessionView {
   readonly exitCode: number | null
 }
 
+export interface StoreProductView {
+  readonly productId: string
+  readonly name: string
+  readonly edition: string
+  readonly state: "active" | "unavailable" | "retired"
+  readonly version: string | null
+}
+
 export interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
   createCapsule(name: string, policy: AgentPolicy): Promise<BrowserSnapshot>
@@ -44,5 +52,6 @@ export interface NaeviaBridge {
   interruptTerminal(sessionId: string): Promise<void>
   closeTerminal(sessionId: string): Promise<readonly TerminalSessionView[]>
   subscribeTerminals(listener: (sessions: readonly TerminalSessionView[]) => void): () => void
+  storeCatalog(): Promise<readonly StoreProductView[]>
   subscribe(listener: (snapshot: BrowserSnapshot) => void): () => void
 }

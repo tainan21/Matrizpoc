@@ -7,6 +7,7 @@ import { app, BrowserWindow, ipcMain, session, WebContentsView } from "electron"
 
 import { navigationTarget } from "../src/navigation.js"
 import { activateCapsule } from "../src/browser-state.js"
+import { storeProducts } from "../src/store-catalog.js"
 import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./terminal-host.js"
 import type { AgentPolicy, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
@@ -17,6 +18,7 @@ let mainWindow: BrowserWindow | undefined
 let repository: BrowserRepository
 let activeViewId = ""
 let panelState = { side: "none" as "none" | "store" | "workbench", terminal: false }
+let workbenchView: WebContentsView | undefined
 const terminalHost = new TerminalHost(spawnTerminalProcess)
 
 if (process.env.NAEVIA_USER_DATA_DIR) app.setPath("userData", process.env.NAEVIA_USER_DATA_DIR)
@@ -137,6 +139,20 @@ function layout() {
   const side = panelState.side === "none" ? 0 : 340
   const bottom = panelState.terminal ? 260 : 0
   active.setBounds({ x: 52, y: 104, width: Math.max(1, width - 52 - side), height: Math.max(1, height - 104 - bottom) })
+  if (workbenchView && panelState.side === "workbench") workbenchView.setBounds({ x: Math.max(52, width - 340), y: 104, width: 340, height: Math.max(1, height - 104 - bottom) })
+}
+
+async function ensureWorkbenchView() {
+  if (workbenchView) return workbenchView
+  const view = new WebContentsView({ webPreferences: { partition: "persist:naevia-workbench", sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true } })
+  const allowed = (raw: string) => { try { const url = new URL(raw); return url.protocol === "http:" && url.hostname === "127.0.0.1" && url.port === "3005" } catch { return false } }
+  view.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
+  view.webContents.on("will-navigate", (event, url) => { if (!allowed(url)) event.preventDefault() })
+  view.webContents.on("will-attach-webview", (event) => event.preventDefault())
+  try { await view.webContents.loadURL("http://127.0.0.1:3005/control") }
+  catch (cause) { view.webContents.close(); throw cause }
+  workbenchView = view
+  return view
 }
 
 function text(value: unknown, label: string, max: number) {
@@ -224,8 +240,21 @@ function registerIpc() {
   ipcMain.handle("naevia:layout", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
     if (!['none', 'store', 'workbench'].includes(String(value?.side)) || typeof value?.terminal !== "boolean") throw new Error("Layout inválido")
+    const window = mainWindow
+    if (window && workbenchView) window.contentView.removeChildView(workbenchView)
     panelState = { side: value.side as typeof panelState.side, terminal: value.terminal }
     layout()
+    if (panelState.side === "workbench" && window && !window.isDestroyed()) {
+      try {
+        const view = await ensureWorkbenchView()
+        if (panelState.side === "workbench" && !window.isDestroyed()) { window.contentView.addChildView(view); layout() }
+      } catch { throw new Error("Workbench não está disponível em 127.0.0.1:3005") }
+    }
+  })
+  ipcMain.handle("naevia:store:catalog", async () => {
+    const response = await fetch("http://127.0.0.1:3000/api/v1/distribution/catalog", { signal: AbortSignal.timeout(2_500), cache: "no-store" })
+    if (!response.ok) throw new Error(`Matriz Hub indisponível (${response.status})`)
+    return storeProducts(await response.json())
   })
   ipcMain.handle("naevia:terminal:list", () => terminalHost.list())
   ipcMain.handle("naevia:terminal:create", () => { terminalHost.create(); return terminalHost.list() })
@@ -252,7 +281,7 @@ async function createWindow() {
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
   mainWindow.webContents.on("will-attach-webview", (event) => event.preventDefault())
   mainWindow.on("resize", layout)
-  mainWindow.on("closed", () => { for (const view of views.values()) view.webContents.close(); views.clear(); mainWindow = undefined })
+  mainWindow.on("closed", () => { for (const view of views.values()) view.webContents.close(); views.clear(); workbenchView?.webContents.close(); workbenchView = undefined; mainWindow = undefined })
   const devUrl = process.env.NAEVIA_DEV_URL
   await (devUrl ? mainWindow.loadURL(devUrl) : mainWindow.loadFile(join(here, "../../dist/index.html")))
   const snapshot = await repository.snapshot()
