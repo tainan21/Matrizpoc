@@ -21,6 +21,7 @@ pub mod runtime;
 mod settings;
 mod shell;
 mod state;
+pub mod store_release;
 pub mod system_pulse;
 mod tasks;
 pub mod terminal;
