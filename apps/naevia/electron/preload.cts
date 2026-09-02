@@ -17,6 +17,7 @@ interface BrowserSnapshot {
 }
 interface TerminalSessionView { readonly id: string; readonly pid: number; readonly status: "running" | "exited"; readonly lines: readonly string[]; readonly exitCode: number | null }
 interface StoreProductView { readonly productId: string; readonly name: string; readonly edition: string; readonly state: "active" | "unavailable" | "retired"; readonly version: string | null }
+interface DownloadView { readonly id: string; readonly name: string; readonly status: "progress" | "completed" | "cancelled" | "failed"; readonly receivedBytes: number; readonly totalBytes: number; readonly createdAt: string }
 
 interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
@@ -28,7 +29,7 @@ interface NaeviaBridge {
   browserCommand(tabId: string, command: BrowserCommand): Promise<void>
   setKillSwitch(enabled: boolean): Promise<boolean>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>
-  setPanels(state: { side: "none" | "store" | "workbench"; terminal: boolean }): Promise<void>
+  setPanels(state: { side: "none" | "store" | "workbench" | "library"; terminal: boolean }): Promise<void>
   terminalSessions(): Promise<readonly TerminalSessionView[]>
   createTerminal(): Promise<readonly TerminalSessionView[]>
   writeTerminal(sessionId: string, input: string): Promise<void>
@@ -36,6 +37,9 @@ interface NaeviaBridge {
   closeTerminal(sessionId: string): Promise<readonly TerminalSessionView[]>
   subscribeTerminals(listener: (sessions: readonly TerminalSessionView[]) => void): () => void
   storeCatalog(): Promise<readonly StoreProductView[]>
+  downloads(): Promise<readonly DownloadView[]>
+  showDownload(downloadId: string): Promise<void>
+  subscribeDownloads(listener: (downloads: readonly DownloadView[]) => void): () => void
   subscribe(listener: (snapshot: BrowserSnapshot) => void): () => void
 }
 
@@ -61,6 +65,13 @@ const bridge: NaeviaBridge = {
     return () => ipcRenderer.off("naevia:terminal:sessions", handler)
   },
   storeCatalog: () => ipcRenderer.invoke("naevia:store:catalog"),
+  downloads: () => ipcRenderer.invoke("naevia:downloads:list"),
+  showDownload: (downloadId) => ipcRenderer.invoke("naevia:downloads:show", { downloadId }),
+  subscribeDownloads: (listener) => {
+    const handler = (_event: Electron.IpcRendererEvent, downloads: readonly DownloadView[]) => listener(downloads)
+    ipcRenderer.on("naevia:downloads", handler)
+    return () => ipcRenderer.off("naevia:downloads", handler)
+  },
   subscribe: (listener) => {
     const handler = (_event: Electron.IpcRendererEvent, snapshot: BrowserSnapshot) => listener(snapshot)
     ipcRenderer.on("naevia:snapshot", handler)

@@ -1,10 +1,10 @@
 import { FormEvent, useEffect, useMemo, useState } from "react"
-import type { AgentPolicy, BrowserSnapshot, StoreProductView, TerminalSessionView } from "../shared"
+import type { AgentPolicy, BrowserSnapshot, DownloadView, StoreProductView, TerminalSessionView } from "../shared"
 
 export function App() {
   const [snapshot, setSnapshot] = useState<BrowserSnapshot>()
   const [address, setAddress] = useState("")
-  const [side, setSide] = useState<"none" | "store" | "workbench">("none")
+  const [side, setSide] = useState<"none" | "store" | "workbench" | "library">("none")
   const [terminal, setTerminal] = useState(false)
   const [error, setError] = useState("")
   const [creatingCapsule, setCreatingCapsule] = useState(false)
@@ -16,12 +16,17 @@ export function App() {
   const [store, setStore] = useState<readonly StoreProductView[]>([])
   const [storeStatus, setStoreStatus] = useState("Abra o Matriz Hub para carregar o catálogo.")
   const [killSwitch, setKillSwitch] = useState(false)
+  const [downloads, setDownloads] = useState<readonly DownloadView[]>([])
   const activeTab = useMemo(() => snapshot?.tabs.find((tab) => tab.id === snapshot.activeTabId), [snapshot])
   const activeTerminal = terminals.find(({ id }) => id === activeTerminalId) ?? terminals.at(-1)
 
   useEffect(() => {
     window.naevia.snapshot().then(setSnapshot).catch((cause) => setError(String(cause)))
     return window.naevia.subscribe(setSnapshot)
+  }, [])
+  useEffect(() => {
+    window.naevia.downloads().then(setDownloads).catch((cause) => setError(String(cause)))
+    return window.naevia.subscribeDownloads(setDownloads)
   }, [])
   useEffect(() => { if (activeTab) setAddress(activeTab.url) }, [activeTab])
   useEffect(() => {
@@ -85,13 +90,16 @@ export function App() {
         <button title="DevTools" aria-label="DevTools" onClick={() => void controlBrowser("devtools")}><span>⌘</span><em>DevTools</em></button>
         <button className={side === "workbench" ? "active" : ""} title="Coworking" aria-label="Coworking" onClick={() => void panels(side === "workbench" ? "none" : "workbench")}><span>✦</span><em>Coworking</em></button>
         <button className={side === "store" ? "active" : ""} title="Store" aria-label="Store" onClick={() => { const next = side === "store" ? "none" : "store"; void panels(next); if (next === "store") void loadStore() }}><span>◇</span><em>Store</em></button>
+        <button className={side === "library" ? "active" : ""} title="Downloads" aria-label="Downloads" onClick={() => void panels(side === "library" ? "none" : "library")}><span>↓</span><em>Downloads</em></button>
         <button className={terminal ? "active" : ""} title="Terminal" aria-label="Terminal" onClick={() => void panels(side, !terminal)}><span>›_</span><em>Terminal</em></button>
       </div>
     </nav>
 
-    {side !== "none" ? <aside className="side-panel"><span>PAINEL / {side.toUpperCase()}</span><h2>{side === "store" ? "Matriz Store" : "Coworking"}</h2>{side === "store" ? <><p>{storeStatus}</p><div className="store-products">{store.map((product) => <article key={product.productId}><div><strong>{product.name}</strong><small>{product.edition} · {product.version ?? "sem release"}</small></div><i className={product.state}>{product.state}</i></article>)}</div><button onClick={() => void loadStore()}>Atualizar catálogo</button><small className="panel-note">Instalações e atualizações permanecem sob autoridade do Matriz Control.</small></> : <><p>Carregando a superfície <code>workbench-control-v1</code> do runtime local confiável.</p><small className="panel-note">Inicie o Workbench no Control caso a superfície esteja indisponível.</small></>}<button onClick={() => void panels("none")}>Fechar</button></aside> : null}
+    {side !== "none" ? <aside className="side-panel"><span>PAINEL / {side.toUpperCase()}</span><h2>{side === "store" ? "Matriz Store" : side === "library" ? "Downloads" : "Coworking"}</h2>{side === "store" ? <><p>{storeStatus}</p><div className="store-products">{store.map((product) => <article key={product.productId}><div><strong>{product.name}</strong><small>{product.edition} · {product.version ?? "sem release"}</small></div><i className={product.state}>{product.state}</i></article>)}</div><button onClick={() => void loadStore()}>Atualizar catálogo</button><small className="panel-note">Instalações e atualizações permanecem sob autoridade do Matriz Control.</small></> : side === "library" ? <><p>{downloads.length ? `${downloads.length} downloads desta sessão.` : "Nenhum download nesta sessão."}</p><div className="store-products">{downloads.map((download) => <article key={download.id}><div><strong>{download.name}</strong><small>{formatBytes(download.receivedBytes)} / {download.totalBytes ? formatBytes(download.totalBytes) : "tamanho desconhecido"}</small></div>{download.status === "completed" ? <button onClick={() => void window.naevia.showDownload(download.id).catch((cause) => setError(String(cause)))}>Mostrar</button> : <i className={download.status}>{download.status}</i>}</article>)}</div><small className="panel-note">Arquivos nunca são executados automaticamente. Limite por download: 512 MiB.</small></> : <><p>Carregando a superfície <code>workbench-control-v1</code> do runtime local confiável.</p><small className="panel-note">Inicie o Workbench no Control caso a superfície esteja indisponível.</small></>}<button onClick={() => void panels("none")}>Fechar</button></aside> : null}
     {terminal ? <section className="terminal-drawer"><header><span>TERMINAL</span><nav>{terminals.map((session, index) => <button className={session.id === activeTerminal?.id ? "active" : ""} key={session.id} onClick={() => setActiveTerminalId(session.id)}>PS {index + 1}<i>{session.status}</i></button>)}<button aria-label="Nova sessão" onClick={() => void createTerminal()}>＋</button></nav><button onClick={() => void panels(side, false)}>Fechar</button></header>{activeTerminal ? <div className="terminal-session"><div className="terminal-meta"><span>PowerShell · pid {activeTerminal.pid} · {activeTerminal.status}</span><span>{activeTerminal.status === "running" ? <button onClick={() => void window.naevia.interruptTerminal(activeTerminal.id).catch((cause) => setError(String(cause)))}>Interromper</button> : null}<button onClick={() => void window.naevia.closeTerminal(activeTerminal.id).then(setTerminals).catch((cause) => setError(String(cause)))}>Encerrar</button></span></div><pre>{activeTerminal.lines.join("\n") || "PowerShell pronto."}</pre><form onSubmit={sendTerminal}><span>›</span><input aria-label="Entrada do terminal" value={terminalInput} onChange={(event) => setTerminalInput(event.target.value)} disabled={activeTerminal.status !== "running"} autoComplete="off" /><button disabled={activeTerminal.status !== "running"}>Enviar</button></form></div> : <div className="terminal-empty"><i>›_</i><p>Nenhuma sessão aberta.</p><small>O NAEVIA nunca cria ou executa comandos automaticamente.</small><button onClick={() => void createTerminal()}>Nova sessão PowerShell</button></div>}</section> : null}
     {creatingCapsule ? <div className="dialog-backdrop" role="presentation"><form className="capsule-dialog" aria-label="Criar cápsula" onSubmit={createCapsule}><span>CÁPSULA / NOVA</span><h2>Novo espaço isolado</h2><label>Nome<input autoFocus value={capsuleName} maxLength={50} onChange={(event) => setCapsuleName(event.target.value)} /></label><label>Política<select value={capsulePolicy} onChange={(event) => setCapsulePolicy(event.target.value as AgentPolicy)}><option value="human">Humana</option><option value="agent-safe">Agente seguro</option><option value="agent-full">Agente completo</option></select></label><small>Cada cápsula usa uma partição persistente separada.</small><footer><button type="button" onClick={() => setCreatingCapsule(false)}>Cancelar</button><button type="submit">Criar cápsula</button></footer></form></div> : null}
     {error ? <div className="error" role="alert">{error}</div> : null}
   </main>
 }
+
+function formatBytes(value: number) { return value < 1_000_000 ? `${Math.round(value / 1_000)} KB` : `${(value / 1_000_000).toFixed(1)} MB` }

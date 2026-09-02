@@ -3,11 +3,12 @@ import { spawn } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
-import { app, BrowserWindow, ipcMain, session, WebContentsView } from "electron"
+import { app, BrowserWindow, ipcMain, session, shell, WebContentsView, type Session } from "electron"
 
 import { navigationTarget } from "../src/navigation.js"
 import { activateCapsule, closeTab } from "../src/browser-state.js"
 import { storeProducts } from "../src/store-catalog.js"
+import { MAX_DOWNLOAD_BYTES, safeDownloadName, validDownloadUrl } from "../src/downloads.js"
 import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./terminal-host.js"
 import type { AgentPolicy, BrowserCommand, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
@@ -17,10 +18,13 @@ const views = new Map<string, WebContentsView>()
 let mainWindow: BrowserWindow | undefined
 let repository: BrowserRepository
 let activeViewId = ""
-let panelState = { side: "none" as "none" | "store" | "workbench", terminal: false }
+let panelState = { side: "none" as "none" | "store" | "workbench" | "library", terminal: false }
 let workbenchView: WebContentsView | undefined
 let killSwitchEnabled = false
 const terminalHost = new TerminalHost(spawnTerminalProcess)
+const configuredDownloadSessions = new WeakSet<Session>()
+const downloads = new Map<string, { view: import("../src/shared.js").DownloadView; path: string }>()
+let downloadDirectory = ""
 
 if (process.env.NAEVIA_USER_DATA_DIR) app.setPath("userData", process.env.NAEVIA_USER_DATA_DIR)
 
@@ -85,7 +89,43 @@ function secureSession(partitionName: string) {
   isolated.setPermissionRequestHandler((_contents, _permission, callback) => callback(false))
   isolated.setDevicePermissionHandler(() => false)
   isolated.enableNetworkEmulation({ offline: killSwitchEnabled })
+  configureDownloads(isolated)
   return isolated
+}
+
+function configureDownloads(isolated: Session) {
+  if (configuredDownloadSessions.has(isolated)) return
+  configuredDownloadSessions.add(isolated)
+  isolated.on("will-download", (_event, item) => {
+    const source = item.getURL()
+    const total = item.getTotalBytes()
+    if (!validDownloadUrl(source) || total > MAX_DOWNLOAD_BYTES) { item.cancel(); return }
+    const id = randomUUID()
+    const name = safeDownloadName(item.getFilename())
+    const path = join(downloadDirectory, `${id.slice(0, 8)}-${name}`)
+    const view = { id, name, status: "progress" as const, receivedBytes: 0, totalBytes: Math.max(0, total), createdAt: new Date().toISOString() }
+    downloads.set(id, { view, path })
+    item.setSavePath(path)
+    item.on("updated", () => {
+      const receivedBytes = item.getReceivedBytes()
+      if (receivedBytes > MAX_DOWNLOAD_BYTES) item.cancel()
+      updateDownload(id, { receivedBytes, totalBytes: Math.max(0, item.getTotalBytes()) })
+    })
+    item.once("done", (_doneEvent, state) => updateDownload(id, { status: state === "completed" ? "completed" : state === "cancelled" ? "cancelled" : "failed", receivedBytes: item.getReceivedBytes() }))
+    publishDownloads()
+  })
+}
+
+function updateDownload(id: string, values: Partial<import("../src/shared.js").DownloadView>) {
+  const current = downloads.get(id)
+  if (!current) return
+  downloads.set(id, { ...current, view: { ...current.view, ...values } })
+  publishDownloads()
+}
+
+function publishDownloads() {
+  const window = mainWindow
+  if (window && !window.isDestroyed()) window.webContents.send("naevia:downloads", [...downloads.values()].map(({ view }) => view))
 }
 
 async function ensureView(tab: TabView) {
@@ -277,7 +317,7 @@ function registerIpc() {
   })
   ipcMain.handle("naevia:layout", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
-    if (!['none', 'store', 'workbench'].includes(String(value?.side)) || typeof value?.terminal !== "boolean") throw new Error("Layout inválido")
+    if (!['none', 'store', 'workbench', 'library'].includes(String(value?.side)) || typeof value?.terminal !== "boolean") throw new Error("Layout inválido")
     const window = mainWindow
     if (window && workbenchView) window.contentView.removeChildView(workbenchView)
     panelState = { side: value.side as typeof panelState.side, terminal: value.terminal }
@@ -293,6 +333,13 @@ function registerIpc() {
     const response = await fetch("http://127.0.0.1:3000/api/v1/distribution/catalog", { signal: AbortSignal.timeout(2_500), cache: "no-store" })
     if (!response.ok) throw new Error(`Matriz Hub indisponível (${response.status})`)
     return storeProducts(await response.json())
+  })
+  ipcMain.handle("naevia:downloads:list", () => [...downloads.values()].map(({ view }) => view))
+  ipcMain.handle("naevia:downloads:show", (_event, input: unknown) => {
+    const id = text((input as Record<string, unknown>)?.downloadId, "Download", 36)
+    const download = downloads.get(id)
+    if (!download || download.view.status !== "completed") throw new Error("Download indisponível")
+    shell.showItemInFolder(download.path)
   })
   ipcMain.handle("naevia:terminal:list", () => terminalHost.list())
   ipcMain.handle("naevia:terminal:create", () => { terminalHost.create(); return terminalHost.list() })
@@ -311,6 +358,8 @@ function registerIpc() {
 }
 
 async function createWindow() {
+  downloadDirectory = process.env.NAEVIA_DOWNLOAD_DIR || join(app.getPath("downloads"), "NAEVIA")
+  await mkdir(downloadDirectory, { recursive: true })
   repository = new BrowserRepository(join(app.getPath("userData"), "browser-state.json"))
   mainWindow = new BrowserWindow({
     width: 1440, height: 900, minWidth: 900, minHeight: 640, backgroundColor: "#08070c", title: "NAEVIA",

@@ -39,6 +39,15 @@ export interface StoreProductView {
   readonly version: string | null
 }
 
+export interface DownloadView {
+  readonly id: string
+  readonly name: string
+  readonly status: "progress" | "completed" | "cancelled" | "failed"
+  readonly receivedBytes: number
+  readonly totalBytes: number
+  readonly createdAt: string
+}
+
 export interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
   createCapsule(name: string, policy: AgentPolicy): Promise<BrowserSnapshot>
@@ -49,7 +58,7 @@ export interface NaeviaBridge {
   browserCommand(tabId: string, command: BrowserCommand): Promise<void>
   setKillSwitch(enabled: boolean): Promise<boolean>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>
-  setPanels(state: { side: "none" | "store" | "workbench"; terminal: boolean }): Promise<void>
+  setPanels(state: { side: "none" | "store" | "workbench" | "library"; terminal: boolean }): Promise<void>
   terminalSessions(): Promise<readonly TerminalSessionView[]>
   createTerminal(): Promise<readonly TerminalSessionView[]>
   writeTerminal(sessionId: string, input: string): Promise<void>
@@ -57,5 +66,8 @@ export interface NaeviaBridge {
   closeTerminal(sessionId: string): Promise<readonly TerminalSessionView[]>
   subscribeTerminals(listener: (sessions: readonly TerminalSessionView[]) => void): () => void
   storeCatalog(): Promise<readonly StoreProductView[]>
+  downloads(): Promise<readonly DownloadView[]>
+  showDownload(downloadId: string): Promise<void>
+  subscribeDownloads(listener: (downloads: readonly DownloadView[]) => void): () => void
   subscribe(listener: (snapshot: BrowserSnapshot) => void): () => void
 }
