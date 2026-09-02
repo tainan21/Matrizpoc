@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url"
 import { app, BrowserWindow, ipcMain, session, WebContentsView } from "electron"
 
 import { navigationTarget } from "../src/navigation.js"
+import { activateCapsule } from "../src/browser-state.js"
 import type { AgentPolicy, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -152,7 +153,21 @@ function registerIpc() {
     const name = text(value?.name, "Nome", 50)
     const selectedPolicy = policy(value?.policy)
     const capsule: CapsuleView = { id: randomUUID(), name, policy: selectedPolicy }
-    return repository.mutate((state) => { state.capsules.push(capsule) })
+    const tab: TabView = { id: randomUUID(), capsuleId: capsule.id, title: "Nova aba", url: "https://duckduckgo.com/", active: true, loading: false }
+    const changed = await repository.mutate((state) => {
+      state.capsules.push(capsule)
+      state.tabs = state.tabs.map((item) => ({ ...item, active: false }))
+      state.tabs.push(tab)
+      state.activeCapsuleId = capsule.id
+      state.activeTabId = tab.id
+    })
+    await showActive(changed); publish(changed); return changed
+  })
+  ipcMain.handle("naevia:capsule:activate", async (_event, input: unknown) => {
+    const capsuleId = text((input as Record<string, unknown>)?.capsuleId, "Cápsula", 36)
+    const selected = activateCapsule(await repository.snapshot(), capsuleId)
+    const changed = await repository.mutate((state) => Object.assign(state, selected))
+    await showActive(changed); publish(changed); return changed
   })
   ipcMain.handle("naevia:tab:create", async (_event, input: unknown) => {
     const capsuleId = text((input as Record<string, unknown>)?.capsuleId, "Cápsula", 36)

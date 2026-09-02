@@ -38,6 +38,17 @@ button { color: inherit; }
 .terminal-drawer p { margin: 12px 0 5px; color: #c9c2d1; }
 .terminal-drawer small { font-size: 11px; }
 .error { position: fixed; z-index: 8; right: 18px; top: 115px; max-width: 440px; padding: 11px 14px; border: 1px solid #9b3d66; border-radius: 9px; background: #28101d; color: #ffc2d4; font-size: 12px; }
+.dialog-backdrop { position: fixed; inset: 0; z-index: 9; display: grid; place-items: center; background: #050308b8; backdrop-filter: blur(5px); }
+.capsule-dialog { width: min(390px, calc(100vw - 32px)); padding: 24px; display: grid; gap: 15px; border: 1px solid #48355e; border-radius: 14px; background: #100c17; box-shadow: 0 24px 90px #000a; }
+.capsule-dialog > span { color: #a77adb; font: 700 10px ui-monospace, monospace; letter-spacing: .14em; }
+.capsule-dialog h2 { margin: 0 0 4px; font-size: 21px; }
+.capsule-dialog label { display: grid; gap: 7px; color: #9991a4; font-size: 11px; }
+.capsule-dialog input, .capsule-dialog select { height: 39px; padding: 0 11px; border: 1px solid #382b48; border-radius: 8px; outline: 0; background: #0b0810; color: #f2edfa; }
+.capsule-dialog input:focus, .capsule-dialog select:focus { border-color: #8d61d0; box-shadow: 0 0 0 3px #865fc21c; }
+.capsule-dialog small { color: #777080; font-size: 11px; }
+.capsule-dialog footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.capsule-dialog footer button { padding: 8px 12px; border: 1px solid #40324f; border-radius: 8px; background: #18121f; cursor: pointer; }
+.capsule-dialog footer button[type="submit"] { border-color: #8059b6; background: #7f56bc; color: white; }
 @keyframes panel-in { from { transform: translateX(18px); opacity: 0; } }
 @keyframes terminal-in { from { transform: translateY(18px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

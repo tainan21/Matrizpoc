@@ -6,6 +6,7 @@ describe("CSS-first theme registry", () => {
     expect(getThemeDefinition("matriz-base")?.compatibleApps).toContain("willdash")
     expect(getThemeDefinition("matriz-base")?.compatibleApps).toContain("matriz-control")
     expect(getThemeDefinition("matriz-base")?.compatibleApps).toContain("health")
+    expect(getThemeDefinition("matriz-base")?.compatibleApps).toContain("naevia")
     const hubBase = themeDefinitionToCssVars("matriz-base", "matriz-hub")
     expect(hubBase["--matriz-theme-key"]).toBe("matriz-base")
     expect(hubBase["--matriz-theme-surface"]).toBe("#0b111b")

@@ -25,6 +25,7 @@ export interface BrowserSnapshot {
 export interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
   createCapsule(name: string, policy: AgentPolicy): Promise<BrowserSnapshot>
+  activateCapsule(capsuleId: string): Promise<BrowserSnapshot>
   createTab(capsuleId: string): Promise<BrowserSnapshot>
   activateTab(tabId: string): Promise<BrowserSnapshot>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>

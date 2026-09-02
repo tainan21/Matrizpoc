@@ -88,6 +88,10 @@ export const appThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
     appId: "matriz-control", label: "Matriz Control Web", brandAccent: "#7143a0", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#28202f", muted: "#f6f2f8", mutedFg: "#72677c", border: "#d8cfdd",
   },
+  naevia: {
+    appId: "naevia", label: "NAEVIA", brandAccent: "#7c5cff", brandAccentFg: "#ffffff",
+    surface: "#faf9ff", surfaceFg: "#17131f", muted: "#f0edfa", mutedFg: "#686176", border: "#dcd5ea",
+  },
   "matriz-admin": {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#6d4aff", brandAccentFg: "#ffffff",
     surface: "#ffffff", surfaceFg: "#17131d", muted: "#f4f1fb", mutedFg: "#625a70", border: "#ddd5e8",
@@ -158,6 +162,10 @@ export const darkAppThemes: Readonly<Record<MatrizAppId, AppThemeTokens>> = {
   "matriz-control": {
     appId: "matriz-control", label: "Matriz Control Web", brandAccent: "#9a55ff", brandAccentFg: "#ffffff",
     surface: "#08060e", surfaceFg: "#f4effb", muted: "#130c20", mutedFg: "#82778f", border: "#2a1c3d",
+  },
+  naevia: {
+    appId: "naevia", label: "NAEVIA", brandAccent: "#9b7bff", brandAccentFg: "#0b0714",
+    surface: "#0b0911", surfaceFg: "#f5f1ff", muted: "#141020", mutedFg: "#9990a8", border: "#302640",
   },
   "matriz-admin": {
     appId: "matriz-admin", label: "Matriz Admin", brandAccent: "#a98cff", brandAccentFg: "#0b0712",
@@ -266,7 +274,7 @@ export interface ThemeDefinition {
 }
 
 const ALL_MATRIZ_APPS: readonly MatrizAppId[] = [
-  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "matriz-uninstall", "sites", "spot", "matriz-admin", "matriz-client-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash", "health",
+  "matriz-identity", "matriz-hub", "matriz-desktop", "matrizlib", "matriz-workbench", "matriz-control", "naevia", "matriz-uninstall", "sites", "spot", "matriz-admin", "matriz-client-admin", "matriz-ops", "matriz-pay", "seumei", "contracts", "willdash", "health",
 ]
 
 export const themeRegistry = [
@@ -276,7 +284,7 @@ export const themeRegistry = [
   },
   {
     key: "midnight-graphite", version: 1, label: "Midnight Graphite",
-    description: "Grafite profundo, violeta frio e contraste editorial.", compatibleApps: ["matriz-hub", "matriz-desktop", "matriz-workbench", "sites"],
+    description: "Grafite profundo, violeta frio e contraste editorial.", compatibleApps: ["matriz-hub", "matriz-desktop", "matriz-workbench", "naevia", "sites"],
     overrides: { brandAccent: "#8b5cf6", brandAccentFg: "#070b13", surface: "#0b111b", surfaceFg: "#f4f6fb", muted: "#101824", mutedFg: "#aeb7c7", border: "#283246" },
   },
   {

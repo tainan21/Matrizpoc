@@ -43,6 +43,15 @@ export const initialDistributionProducts: readonly DistributionProductInputV1[] 
     ),
   },
   {
+    productId: "naevia-electron",
+    displayName: "NAEVIA",
+    edition: "Electron",
+    runtime: "electron",
+    platform: "win32",
+    arch: "x64",
+    windows: windows("com.matriz.naevia", "NAEVIA", "NAEVIA.exe"),
+  },
+  {
     productId: "matriz-admin-tauri",
     displayName: "Matriz Admin",
     edition: "Tauri",

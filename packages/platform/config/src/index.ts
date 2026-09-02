@@ -68,6 +68,7 @@ export const monorepoConfig: MonorepoConfig = {
     baseUrls: {
       "matriz-identity": "http://127.0.0.1:8080",
       "matriz-desktop": "matriz://control",
+      naevia: "naevia://browser",
       "matriz-uninstall": "matriz://uninstall",
       ...preferredBaseUrls,
   } as Readonly<Record<MatrizAppId, string>>,

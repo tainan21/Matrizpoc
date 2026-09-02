@@ -13,6 +13,7 @@ describe("initial distribution catalog", () => {
       expect.arrayContaining([
         "matriz-control-tauri",
         "matriz-control-electron",
+        "naevia-electron",
         "matriz-admin-tauri",
         "matriz-ops-tauri",
         "seumei-electron",

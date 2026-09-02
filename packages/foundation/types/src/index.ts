@@ -34,6 +34,7 @@ export type AppIdLiteral =
   | "matrizlib"
   | "matriz-workbench"
   | "matriz-control"
+  | "naevia"
   | "matriz-uninstall"
   | "sites"
   | "spot"
