@@ -23,6 +23,7 @@ import { CommandDeck } from "./command-deck/command-deck"
 import { DoctorView } from "./doctor/doctor-view"
 import { FpsIndicator } from "./hub/fps-indicator"
 import { GitView } from "./git/git-view"
+import { InfrastructureView } from "./infrastructure/infrastructure-view"
 import { AgentsView } from "./agents/agents-view"
 import { HubView } from "./hub/hub-view"
 import { HomeView, type HomeTarget } from "./home/home-view"
@@ -307,7 +308,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
         {view === "hub" ? <HubView gateway={gateway} focusFeature={hubFeature} onResume={(session) => { setHubFeature(undefined); setActiveAppId(session.appId); setView(session.area) }} /> : null}
         {view === "agents" ? <AgentsView runtimes={runtimes} start={terminal.startOperation} open={() => { setActiveAppId("matriz-workbench"); chooseView("apps") }} /> : null}
         {view === "environments" ? <EnvironmentManager gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
-        {view === "infra" ? <OperationalArea title="INFRA" eyebrow="LOCAL / SERVIÇOS" description="O cockpit local será habilitado serviço por serviço, com prévia e confirmação." /> : null}
+        {view === "infra" ? <InfrastructureView gateway={gateway} /> : null}
         {view === "git" ? <GitView gateway={gateway} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} readiness={terminal.readiness} error={terminal.error} configureWorkspace={() => chooseView("settings")} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} reportError={terminal.reportError} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} runtimes={runtimes} activeGate={activeGate} setActiveGate={setActiveGate} feedback={safeFeedback} startOperation={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}

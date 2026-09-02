@@ -48,6 +48,10 @@ describe("Tauri command contract", () => {
       checkUpdate: "check_update",
       downloadUpdate: "download_update",
       installUpdate: "install_update",
+      infrastructureSnapshot: "infrastructure_snapshot",
+      previewInfrastructureAction: "preview_infrastructure_action",
+      confirmInfrastructureAction: "confirm_infrastructure_action",
+      infrastructureLogs: "infrastructure_logs",
       hide: "hide_window",
       quit: "quit_app",
       terminalReadiness: "terminal_readiness",
@@ -156,6 +160,11 @@ describe("Tauri command contract", () => {
     await gateway.checkUpdate()
     await gateway.downloadUpdate(() => undefined)
     await gateway.installUpdate()
+    const infrastructureRequest = { targetId: "nats" as const, actionId: "start" as const, revision: "infra-rev" }
+    await gateway.infrastructureSnapshot()
+    await gateway.previewInfrastructureAction(infrastructureRequest)
+    await gateway.confirmInfrastructureAction("one-use-token")
+    await gateway.infrastructureLogs("nats")
     await gateway.hide()
     await gateway.quit()
     await gateway.terminalReadiness()
@@ -244,6 +253,10 @@ describe("Tauri command contract", () => {
       { command: "check_update", args: undefined },
       { command: "download_update", args: { onEvent: "update-channel" } },
       { command: "install_update", args: undefined },
+      { command: "infrastructure_snapshot", args: undefined },
+      { command: "preview_infrastructure_action", args: { request: infrastructureRequest } },
+      { command: "confirm_infrastructure_action", args: { confirmationToken: "one-use-token" } },
+      { command: "infrastructure_logs", args: { serviceId: "nats" } },
       { command: "hide_window", args: undefined },
       { command: "quit_app", args: undefined },
       { command: "terminal_readiness", args: undefined },

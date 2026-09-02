@@ -8,6 +8,7 @@ pub mod environment;
 pub mod explorer;
 pub mod git;
 pub mod hub_state;
+pub mod infrastructure;
 mod native_apps;
 pub mod node_sweep;
 mod ports;
@@ -29,6 +30,8 @@ mod workspace;
 use std::{
     fmt,
     path::{Path, PathBuf},
+    sync::Arc,
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 use activity::{ActivityEnvelope, ActivityHub};
@@ -44,6 +47,10 @@ use git::{
     GitSnapshot,
 };
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
+use infrastructure::{
+    InfrastructureActionPreview, InfrastructureManager, InfrastructurePreviewRequest,
+    InfrastructureServiceId, InfrastructureSnapshot, PortableInfrastructureHost,
+};
 use node_sweep::{NodeSweepDeletion, NodeSweepScan, NodeSweepService};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
 use recovery::{recovery_action, RecoveryAction, RecoveryResult};
@@ -1397,6 +1404,58 @@ fn list_terminals(
     terminals.list()
 }
 
+#[tauri::command]
+async fn infrastructure_snapshot(
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+) -> Result<InfrastructureSnapshot, String> {
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.snapshot())
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn preview_infrastructure_action(
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+    request: InfrastructurePreviewRequest,
+) -> Result<InfrastructureActionPreview, String> {
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.preview(request))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn confirm_infrastructure_action(
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+    confirmation_token: String,
+) -> Result<InfrastructureSnapshot, String> {
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.confirm(&confirmation_token))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn infrastructure_logs(
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+    service_id: InfrastructureServiceId,
+) -> Result<Vec<String>, String> {
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.logs(service_id))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+fn unix_time_millis() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis()
+        .try_into()
+        .unwrap_or(u64::MAX)
+}
+
 #[tauri::command(rename_all = "camelCase")]
 fn subscribe_terminal(
     terminals: tauri::State<'_, TerminalManager>,
@@ -1448,6 +1507,16 @@ pub fn run() {
             app.manage(settings);
             app.manage(HubStateStore::at(config_dir.join("hub-state.json")));
             app.manage(CommerceStore::new(config_dir.join("commerce.json")));
+            let infrastructure_root = app
+                .path()
+                .local_data_dir()?
+                .join("Matriz")
+                .join("Infrastructure");
+            app.manage(Arc::new(InfrastructureManager::at(
+                Box::new(PortableInfrastructureHost::new(infrastructure_root.clone())),
+                infrastructure_root.to_string_lossy().into_owned(),
+                unix_time_millis,
+            )));
             shell::install_tray(app.handle())?;
             Ok(())
         })
@@ -1530,6 +1599,10 @@ pub fn run() {
             close_terminal,
             list_terminals,
             subscribe_terminal,
+            infrastructure_snapshot,
+            preview_infrastructure_action,
+            confirm_infrastructure_action,
+            infrastructure_logs,
             get_native_app_runtime,
             install_native_app,
             start_native_app,

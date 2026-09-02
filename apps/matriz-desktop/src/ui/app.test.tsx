@@ -79,6 +79,10 @@ function gateway(): DesktopGateway {
     checkUpdate: vi.fn().mockResolvedValue({ state: "current", currentVersion: "1.0.0" }),
     downloadUpdate: vi.fn().mockResolvedValue({ state: "downloaded", currentVersion: "1.0.0", version: "1.1.0" }),
     installUpdate: vi.fn().mockResolvedValue(undefined),
+    infrastructureSnapshot: vi.fn().mockResolvedValue({ revision: "infra", root: "C:\\Infra", services: [] }),
+    previewInfrastructureAction: vi.fn().mockRejectedValue(new Error("not used")),
+    confirmInfrastructureAction: vi.fn().mockRejectedValue(new Error("not used")),
+    infrastructureLogs: vi.fn().mockResolvedValue([]),
     hide: vi.fn().mockResolvedValue(undefined),
     quit: vi.fn().mockResolvedValue(undefined),
     terminalReadiness: vi.fn().mockResolvedValue({

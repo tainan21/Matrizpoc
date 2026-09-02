@@ -47,6 +47,10 @@ import type {
   GitRemoteRequest,
   UpdateInfo,
   UpdateProgress,
+  InfrastructureSnapshot,
+  InfrastructurePreviewRequest,
+  InfrastructureActionPreview,
+  InfrastructureServiceId,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -92,6 +96,10 @@ export interface DesktopGateway {
   checkUpdate(): Promise<UpdateInfo>
   downloadUpdate(listener: (event: UpdateProgress) => void): Promise<UpdateInfo>
   installUpdate(): Promise<void>
+  infrastructureSnapshot(): Promise<InfrastructureSnapshot>
+  previewInfrastructureAction(request: InfrastructurePreviewRequest): Promise<InfrastructureActionPreview>
+  confirmInfrastructureAction(confirmationToken: string): Promise<InfrastructureSnapshot>
+  infrastructureLogs(serviceId: InfrastructureServiceId): Promise<readonly string[]>
   hide(): Promise<void>
   quit(): Promise<void>
   terminalReadiness(): Promise<TerminalReadiness>

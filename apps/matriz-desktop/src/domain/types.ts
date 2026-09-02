@@ -426,6 +426,41 @@ export interface UpdateProgress {
   readonly totalBytes?: number
 }
 
+export type InfrastructureServiceId = "postgres" | "garnet" | "nats"
+export type InfrastructureTargetId = "stack" | InfrastructureServiceId
+export type InfrastructureActionId = "install" | "start" | "stop" | "restart"
+export type InfrastructureState = "not_installed" | "installing" | "stopped" | "starting" | "healthy" | "degraded" | "drifted" | "failed" | "external_unowned"
+
+export interface InfrastructureServiceSnapshot {
+  readonly id: InfrastructureServiceId
+  readonly displayName: string
+  readonly version: string
+  readonly ports: readonly number[]
+  readonly state: InfrastructureState
+  readonly message: string
+}
+
+export interface InfrastructureSnapshot {
+  readonly revision: string
+  readonly root: string
+  readonly services: readonly InfrastructureServiceSnapshot[]
+}
+
+export interface InfrastructurePreviewRequest {
+  readonly targetId: InfrastructureTargetId
+  readonly actionId: InfrastructureActionId
+  readonly revision: string
+}
+
+export interface InfrastructureActionPreview {
+  readonly confirmationToken: string
+  readonly targetId: InfrastructureTargetId
+  readonly actionId: InfrastructureActionId
+  readonly title: string
+  readonly impact: readonly string[]
+  readonly expiresAt: number
+}
+
 export interface ControlPackageActivationTarget {
   readonly kind: "control"
   readonly packageId: string

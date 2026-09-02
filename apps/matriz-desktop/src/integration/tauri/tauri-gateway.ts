@@ -95,6 +95,10 @@ export function createTauriGateway(
     downloadUpdate: (listener) =>
       invoke(commands.downloadUpdate, { onEvent: createUpdate(listener) }),
     installUpdate: () => invoke(commands.installUpdate),
+    infrastructureSnapshot: () => invoke(commands.infrastructureSnapshot),
+    previewInfrastructureAction: (request) => invoke(commands.previewInfrastructureAction, { request }),
+    confirmInfrastructureAction: (confirmationToken) => invoke(commands.confirmInfrastructureAction, { confirmationToken }),
+    infrastructureLogs: (serviceId) => invoke(commands.infrastructureLogs, { serviceId }),
     hide: () => invoke<void>(commands.hide),
     quit: () => invoke<void>(commands.quit),
     terminalReadiness: () => invoke(commands.terminalReadiness),
