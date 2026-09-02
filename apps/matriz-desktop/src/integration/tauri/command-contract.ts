@@ -48,6 +48,8 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   confirmInfrastructureAction: "confirm_infrastructure_action",
   infrastructureLogs: "infrastructure_logs",
   infrastructureMigrations: "infrastructure_migrations",
+  previewInfrastructureMigrations: "preview_infrastructure_migrations",
+  confirmInfrastructureMigrations: "confirm_infrastructure_migrations",
   infrastructureBackups: "infrastructure_backups",
   hide: "hide_window",
   quit: "quit_app",

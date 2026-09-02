@@ -48,9 +48,9 @@ use git::{
 };
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
 use infrastructure::{
-    BackupRecord, DatabaseMigrationSnapshot, InfrastructureActionPreview, InfrastructureManager,
-    InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureSnapshot,
-    PortableInfrastructureHost,
+    BackupRecord, DatabaseMigrationPreview, DatabaseMigrationSnapshot, InfrastructureActionPreview,
+    InfrastructureManager, InfrastructurePreviewRequest, InfrastructureServiceId,
+    InfrastructureSnapshot, PortableInfrastructureHost,
 };
 use node_sweep::{NodeSweepDeletion, NodeSweepScan, NodeSweepService};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
@@ -1461,6 +1461,33 @@ async fn infrastructure_migrations(
 }
 
 #[tauri::command]
+async fn preview_infrastructure_migrations(
+    operations: tauri::State<'_, OperationsState>,
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+) -> Result<DatabaseMigrationPreview, String> {
+    let workspace = operations.root()?;
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.preview_migrations(&workspace))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command(rename_all = "camelCase")]
+async fn confirm_infrastructure_migrations(
+    operations: tauri::State<'_, OperationsState>,
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+    confirmation_token: String,
+) -> Result<DatabaseMigrationSnapshot, String> {
+    let workspace = operations.root()?;
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || {
+        manager.confirm_migrations(&confirmation_token, &workspace)
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
 async fn infrastructure_backups(
     manager: tauri::State<'_, Arc<InfrastructureManager>>,
 ) -> Result<Vec<BackupRecord>, String> {
@@ -1627,6 +1654,8 @@ pub fn run() {
             confirm_infrastructure_action,
             infrastructure_logs,
             infrastructure_migrations,
+            preview_infrastructure_migrations,
+            confirm_infrastructure_migrations,
             infrastructure_backups,
             get_native_app_runtime,
             install_native_app,

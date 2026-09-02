@@ -84,6 +84,9 @@ pub trait InfrastructureHost: Send + Sync {
     fn restore_backup(&self, _backup_id: &str) -> Result<(), String> {
         Err("Restore indisponível neste host".into())
     }
+    fn apply_migrations(&self, _workspace: &Path) -> Result<(), String> {
+        Err("Aplicação de migrations indisponível neste host".into())
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -163,6 +166,16 @@ pub struct MigrationSchemaSnapshot {
 pub struct DatabaseMigrationSnapshot {
     pub state: &'static str,
     pub schemas: Vec<MigrationSchemaSnapshot>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatabaseMigrationPreview {
+    pub confirmation_token: String,
+    pub expires_at: u64,
+    pub title: String,
+    pub impact: Vec<String>,
+    pub schemas: Vec<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -270,7 +283,12 @@ pub fn read_migration_files(
                     continue;
                 }
                 let migration = entry.path().join("migration.sql");
-                if !migration.is_file() {
+                let migration_metadata = match fs::symlink_metadata(&migration) {
+                    Ok(metadata) => metadata,
+                    Err(error) if error.kind() == io::ErrorKind::NotFound => continue,
+                    Err(error) => return Err(error.to_string()),
+                };
+                if migration_metadata.file_type().is_symlink() || !migration_metadata.is_file() {
                     continue;
                 }
                 let canonical = migration
@@ -280,6 +298,9 @@ pub fn read_migration_files(
                     return Err("Migration fora do workspace canônico recusada".into());
                 }
                 let name = entry.file_name().to_string_lossy().into_owned();
+                if !valid_migration_name(&name) {
+                    return Err(format!("Nome de migration inválido em {schema}"));
+                }
                 let contents = fs::read(canonical).map_err(|error| error.to_string())?;
                 migrations.push(MigrationFileDigest {
                     name,
@@ -393,11 +414,19 @@ struct PendingAction {
     backup_id: Option<String>,
 }
 
+#[derive(Clone)]
+struct PendingMigrations {
+    workspace: PathBuf,
+    plan_digest: String,
+    expires_at: u64,
+}
+
 pub struct InfrastructureManager {
     host: Box<dyn InfrastructureHost>,
     root: String,
     now: Arc<dyn Fn() -> u64 + Send + Sync>,
     pending: Mutex<HashMap<String, PendingAction>>,
+    pending_migrations: Mutex<HashMap<String, PendingMigrations>>,
 }
 
 impl InfrastructureManager {
@@ -418,6 +447,7 @@ impl InfrastructureManager {
             root,
             now: Arc::new(now),
             pending: Mutex::new(HashMap::new()),
+            pending_migrations: Mutex::new(HashMap::new()),
         }
     }
 
@@ -559,9 +589,98 @@ impl InfrastructureManager {
         Ok(DatabaseMigrationSnapshot { state, schemas })
     }
 
+    pub fn preview_migrations(&self, workspace: &Path) -> Result<DatabaseMigrationPreview, String> {
+        let workspace = workspace
+            .canonicalize()
+            .map_err(|error| error.to_string())?;
+        let snapshot = self.migrations(&workspace)?;
+        if matches!(snapshot.state, "drifted" | "failed") {
+            return Err("Migrations alteradas ou com falha exigem resolução explícita".into());
+        }
+        let schemas: Vec<_> = snapshot
+            .schemas
+            .iter()
+            .filter(|item| !item.ledger.pending.is_empty())
+            .map(|item| item.schema.clone())
+            .collect();
+        let count: usize = snapshot
+            .schemas
+            .iter()
+            .map(|item| item.ledger.pending.len())
+            .sum();
+        if count == 0 {
+            return Err("Não há migrations pendentes".into());
+        }
+        let plan_digest = migration_plan_digest(&snapshot, &workspace)?;
+        let token = uuid::Uuid::new_v4().to_string();
+        let expires_at = (self.now)().saturating_add(300_000);
+        self.pending_migrations
+            .lock()
+            .map_err(|_| "Confirmações de migration indisponíveis".to_string())?
+            .insert(
+                token.clone(),
+                PendingMigrations {
+                    workspace,
+                    plan_digest,
+                    expires_at,
+                },
+            );
+        Ok(DatabaseMigrationPreview {
+            confirmation_token: token,
+            expires_at,
+            title: format!("Aplicar {count} migration(s) pendente(s)"),
+            impact: vec![
+                "Um backup de guarda será criado antes de qualquer alteração".into(),
+                "Checksums e ledger serão revalidados antes e depois da execução".into(),
+            ],
+            schemas,
+        })
+    }
+
+    pub fn confirm_migrations(
+        &self,
+        token: &str,
+        workspace: &Path,
+    ) -> Result<DatabaseMigrationSnapshot, String> {
+        let pending = self
+            .pending_migrations
+            .lock()
+            .map_err(|_| "Confirmações de migration indisponíveis".to_string())?
+            .remove(token)
+            .ok_or("Token de migration inválido ou já utilizado")?;
+        if (self.now)() > pending.expires_at {
+            return Err("O token de migration expirou".into());
+        }
+        let workspace = workspace
+            .canonicalize()
+            .map_err(|error| error.to_string())?;
+        if workspace != pending.workspace {
+            return Err("O workspace mudou após a prévia".into());
+        }
+        let before = self.migrations(&workspace)?;
+        if migration_plan_digest(&before, &workspace)? != pending.plan_digest {
+            return Err("O plano de migrations mudou após a prévia".into());
+        }
+        self.host.apply_migrations(&workspace)?;
+        let after = self.migrations(&workspace)?;
+        if after.state != "clean" {
+            return Err("A verificação final das migrations não produziu ledgers limpos".into());
+        }
+        Ok(after)
+    }
+
     pub fn backups(&self) -> Result<Vec<BackupRecord>, String> {
         read_backup_catalog(Path::new(&self.root))
     }
+}
+
+fn migration_plan_digest(
+    snapshot: &DatabaseMigrationSnapshot,
+    workspace: &Path,
+) -> Result<String, String> {
+    let files = read_migration_files(workspace)?;
+    let serialized = serde_json::to_vec(&(snapshot, files)).map_err(|error| error.to_string())?;
+    Ok(format!("{:x}", Sha256::digest(serialized)))
 }
 
 struct ServiceDefinition {
@@ -1057,6 +1176,145 @@ impl PortableInfrastructureHost {
         write_new_file(&backups.join(format!("{id}.json")), &receipt)
     }
 
+    fn apply_workspace_migrations(&self, workspace: &Path) -> Result<(), String> {
+        let workspace = workspace
+            .canonicalize()
+            .map_err(|error| error.to_string())?;
+        let files = read_migration_files(&workspace)?;
+        for schema in DATABASE_SCHEMAS {
+            let ledger = compare_migration_ledger(
+                files.get(*schema).map(Vec::as_slice).unwrap_or_default(),
+                &self.applied_migrations(schema)?,
+            )?;
+            if matches!(ledger.state, "drifted" | "failed") {
+                return Err(format!("O ledger {schema} está {}", ledger.state));
+            }
+        }
+        self.create_backup()?;
+        for schema in DATABASE_SCHEMAS {
+            let migration_role = format!("matriz_{schema}_migration");
+            let password = self.secret(&format!("postgres-{migration_role}"))?;
+            let ledger_sql = format!(
+                "CREATE TABLE IF NOT EXISTS \"{schema}\".\"_prisma_migrations\" (id VARCHAR(36) PRIMARY KEY NOT NULL, checksum VARCHAR(64) NOT NULL, finished_at TIMESTAMPTZ, migration_name VARCHAR(255) NOT NULL, logs TEXT, rolled_back_at TIMESTAMPTZ, started_at TIMESTAMPTZ NOT NULL DEFAULT now(), applied_steps_count INTEGER NOT NULL DEFAULT 0);"
+            );
+            self.psql_as(&migration_role, &password, &ledger_sql)?;
+            let applied = self.applied_migrations(schema)?;
+            let applied_names: std::collections::HashSet<_> =
+                applied.iter().map(|item| item.name.as_str()).collect();
+            for migration in files.get(*schema).into_iter().flatten() {
+                if applied_names.contains(migration.name.as_str()) {
+                    continue;
+                }
+                if !valid_migration_name(&migration.name) {
+                    return Err(format!("Nome de migration inválido em {schema}"));
+                }
+                let source = workspace
+                    .join("prisma/migrations")
+                    .join(schema)
+                    .join(&migration.name)
+                    .join("migration.sql")
+                    .canonicalize()
+                    .map_err(|error| error.to_string())?;
+                if !source.starts_with(&workspace) {
+                    return Err("Migration fora do workspace canônico recusada".into());
+                }
+                let mut sql = format!("SET search_path TO \"{schema}\";\n");
+                let source_sql = fs::read_to_string(&source).map_err(|error| error.to_string())?;
+                sql.push_str(&source_sql.replace(
+                    &format!("CREATE SCHEMA IF NOT EXISTS \"{schema}\";"),
+                    "-- Schema preprovisionado pelo Matriz Control.",
+                ));
+                let id = uuid::Uuid::new_v4();
+                sql.push_str(&format!(
+                    "\nINSERT INTO \"{schema}\".\"_prisma_migrations\" (id, checksum, finished_at, migration_name, applied_steps_count) VALUES ('{id}','{}',now(),'{}',1);\n",
+                    migration.checksum, migration.name
+                ));
+                let staging = self
+                    .root
+                    .join("control")
+                    .join(format!(".migration-{}.sql", uuid::Uuid::new_v4().simple()));
+                write_new_file(&staging, sql.as_bytes())?;
+                let result = self.psql_file_as(&migration_role, &password, &staging);
+                let _ = fs::remove_file(&staging);
+                if let Err(error) = result {
+                    let failed_id = uuid::Uuid::new_v4();
+                    let failed_sql = format!(
+                        "INSERT INTO \"{schema}\".\"_prisma_migrations\" (id, checksum, migration_name, logs) VALUES ('{failed_id}','{}','{}','Migration gerenciada falhou; consulte os logs sanitizados.');",
+                        migration.checksum, migration.name
+                    );
+                    let _ = self.psql_as(&migration_role, &password, &failed_sql);
+                    return Err(error);
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn psql_as(&self, username: &str, password: &str, sql: &str) -> Result<(), String> {
+        let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
+        let output = Command::new(psql)
+            .env("PGPASSWORD", password)
+            .args([
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "55432",
+                "--username",
+                username,
+                "--dbname",
+                "matriz",
+                "--no-password",
+                "--set",
+                "ON_ERROR_STOP=1",
+                "--command",
+                sql,
+            ])
+            .creation_flags(0x0800_0000)
+            .output()
+            .map_err(|error| error.to_string())?;
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(format!(
+                "Operação PostgreSQL falhou: {}",
+                redact(&String::from_utf8_lossy(&output.stderr))
+            ))
+        }
+    }
+
+    fn psql_file_as(&self, username: &str, password: &str, file: &Path) -> Result<(), String> {
+        let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
+        let output = Command::new(psql)
+            .env("PGPASSWORD", password)
+            .args([
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "55432",
+                "--username",
+                username,
+                "--dbname",
+                "matriz",
+                "--no-password",
+                "--set",
+                "ON_ERROR_STOP=1",
+                "--single-transaction",
+                "--file",
+            ])
+            .arg(file)
+            .creation_flags(0x0800_0000)
+            .output()
+            .map_err(|error| error.to_string())?;
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(format!(
+                "Migration PostgreSQL falhou: {}",
+                redact(&String::from_utf8_lossy(&output.stderr))
+            ))
+        }
+    }
+
     fn psql_output(&self, database: &str, sql: &str) -> Result<String, String> {
         let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
         if !psql.is_file() {
@@ -1401,6 +1659,20 @@ impl InfrastructureHost for PortableInfrastructureHost {
     fn restore_backup(&self, backup_id: &str) -> Result<(), String> {
         self.restore_verified_backup(backup_id)
     }
+
+    fn apply_migrations(&self, workspace: &Path) -> Result<(), String> {
+        self.apply_workspace_migrations(workspace)
+    }
+}
+
+fn valid_migration_name(name: &str) -> bool {
+    let bytes = name.as_bytes();
+    bytes.len() > 13
+        && bytes.get(12) == Some(&b'_')
+        && bytes[..12].iter().all(u8::is_ascii_digit)
+        && bytes[13..].iter().all(|character| {
+            character.is_ascii_lowercase() || character.is_ascii_digit() || *character == b'_'
+        })
 }
 
 fn download_verified(artifact: &ArtifactDefinition, destination: &Path) -> Result<(), String> {

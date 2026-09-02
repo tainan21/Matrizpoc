@@ -94,11 +94,8 @@ fn deletion_requires_current_scan_and_never_accepts_paths() {
 fn deletion_unlinks_child_symlinks_without_touching_their_targets() {
     use std::os::windows::fs::symlink_file;
     let root = workspace();
-    let external = root
-        .path()
-        .parent()
-        .expect("parent")
-        .join("matriz-node-sweep-external.txt");
+    let external_root = tempfile::tempdir().expect("external fixture root");
+    let external = external_root.path().join("preserved.txt");
     fs::write(&external, "preserve").expect("external fixture");
     let link = root
         .path()
@@ -126,5 +123,4 @@ fn deletion_unlinks_child_symlinks_without_touching_their_targets() {
         fs::read_to_string(&external).expect("external preserved"),
         "preserve"
     );
-    fs::remove_file(external).expect("cleanup external fixture");
 }

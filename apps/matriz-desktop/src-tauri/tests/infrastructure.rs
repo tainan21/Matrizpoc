@@ -1,4 +1,8 @@
-use std::{collections::HashMap, sync::Mutex};
+use std::{
+    collections::HashMap,
+    path::Path,
+    sync::{Arc, Mutex},
+};
 
 use matriz_desktop_native::infrastructure::{
     compare_migration_ledger, read_backup_catalog, read_migration_files, resolve_verified_backup,
@@ -13,6 +17,8 @@ struct FakeHost {
     states: Mutex<HashMap<InfrastructureServiceId, InfrastructureInspection>>,
     actions: Mutex<Vec<(InfrastructureTargetId, InfrastructureAction)>>,
     restores: Mutex<Vec<String>>,
+    applied: Mutex<HashMap<String, Vec<AppliedMigration>>>,
+    database_events: Arc<Mutex<Vec<&'static str>>>,
 }
 
 impl InfrastructureHost for FakeHost {
@@ -54,6 +60,40 @@ impl InfrastructureHost for FakeHost {
 
     fn restore_backup(&self, backup_id: &str) -> Result<(), String> {
         self.restores.lock().unwrap().push(backup_id.into());
+        Ok(())
+    }
+
+    fn applied_migrations(&self, schema: &str) -> Result<Vec<AppliedMigration>, String> {
+        Ok(self
+            .applied
+            .lock()
+            .unwrap()
+            .get(schema)
+            .cloned()
+            .unwrap_or_default())
+    }
+
+    fn apply_migrations(&self, workspace: &Path) -> Result<(), String> {
+        self.database_events
+            .lock()
+            .unwrap()
+            .extend(["backup", "apply"]);
+        let files = read_migration_files(workspace)?;
+        let mut applied = self.applied.lock().unwrap();
+        for (schema, migrations) in files {
+            applied.insert(
+                schema,
+                migrations
+                    .into_iter()
+                    .map(|migration| AppliedMigration {
+                        name: migration.name,
+                        checksum: migration.checksum,
+                        finished: true,
+                        rolled_back: false,
+                    })
+                    .collect(),
+            );
+        }
         Ok(())
     }
 }
@@ -238,9 +278,55 @@ fn migration_ledger_rejects_duplicate_names() {
 }
 
 #[test]
+fn migration_application_revalidates_the_plan_and_backs_up_before_apply() {
+    let workspace = tempfile::tempdir().unwrap();
+    let migration = workspace
+        .path()
+        .join("prisma/migrations/core/202609020001_base");
+    std::fs::create_dir_all(&migration).unwrap();
+    std::fs::write(migration.join("migration.sql"), "SELECT 1;\n").unwrap();
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let host = FakeHost {
+        database_events: Arc::clone(&events),
+        ..Default::default()
+    };
+    let manager = InfrastructureManager::new(Box::new(host), || 1_000);
+    let preview = manager.preview_migrations(workspace.path()).unwrap();
+    assert_eq!(preview.schemas, ["core"]);
+    let result = manager
+        .confirm_migrations(&preview.confirmation_token, workspace.path())
+        .unwrap();
+    assert_eq!(result.state, "clean");
+    assert_eq!(*events.lock().unwrap(), ["backup", "apply"]);
+    assert!(manager
+        .confirm_migrations(&preview.confirmation_token, workspace.path())
+        .unwrap_err()
+        .contains("já utilizado"));
+}
+
+#[test]
+fn migration_confirmation_rejects_a_changed_plan() {
+    let workspace = tempfile::tempdir().unwrap();
+    let migration = workspace
+        .path()
+        .join("prisma/migrations/core/202609020001_base");
+    std::fs::create_dir_all(&migration).unwrap();
+    std::fs::write(migration.join("migration.sql"), "SELECT 1;\n").unwrap();
+    let manager = InfrastructureManager::new(Box::new(FakeHost::default()), || 1_000);
+    let preview = manager.preview_migrations(workspace.path()).unwrap();
+    std::fs::write(migration.join("migration.sql"), "SELECT 2;\n").unwrap();
+    assert!(manager
+        .confirm_migrations(&preview.confirmation_token, workspace.path())
+        .unwrap_err()
+        .contains("plano"));
+}
+
+#[test]
 fn migration_files_are_read_only_from_the_eight_canonical_schema_directories() {
     let workspace = tempfile::tempdir().unwrap();
-    let migration = workspace.path().join("prisma/migrations/core/001_base");
+    let migration = workspace
+        .path()
+        .join("prisma/migrations/core/202609020001_base");
     std::fs::create_dir_all(&migration).unwrap();
     std::fs::write(
         migration.join("migration.sql"),
@@ -248,7 +334,7 @@ fn migration_files_are_read_only_from_the_eight_canonical_schema_directories() {
     )
     .unwrap();
     let files = read_migration_files(workspace.path()).expect("read migration files");
-    assert_eq!(files.get("core").unwrap()[0].name, "001_base");
+    assert_eq!(files.get("core").unwrap()[0].name, "202609020001_base");
     assert_eq!(files.get("core").unwrap()[0].checksum.len(), 64);
     assert!(files.contains_key("pay"));
 }

@@ -103,6 +103,26 @@ describe("InfrastructureView", () => {
     expect(await screen.findByText("002_rls")).toBeVisible()
   })
 
+  it("applies pending migrations only after preview and explicit confirmation", async () => {
+    const pending = {
+      state: "pending" as const,
+      schemas: [{ schema: "core", ledger: { state: "pending" as const, pending: ["002_rls"], altered: [], unexpected: [], failed: [] } }],
+    }
+    const gateway = {
+      infrastructureSnapshot: vi.fn().mockResolvedValue(snapshot),
+      infrastructureLogs: vi.fn().mockResolvedValue([]),
+      infrastructureMigrations: vi.fn().mockResolvedValueOnce(pending).mockResolvedValueOnce({ ...pending, state: "clean", schemas: [] }),
+      previewInfrastructureMigrations: vi.fn().mockResolvedValue({ confirmationToken: "migration-token", expiresAt: Date.now() + 30_000, title: "Aplicar 1 migration", impact: ["Backup obrigatório"], schemas: ["core"] }),
+      confirmInfrastructureMigrations: vi.fn().mockResolvedValue({ state: "clean", schemas: [] }),
+    } as unknown as DesktopGateway
+    render(<InfrastructureView gateway={gateway} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Inspecionar migrations" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Aplicar migrations pendentes" }))
+    expect(gateway.confirmInfrastructureMigrations).not.toHaveBeenCalled()
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar migrations" }))
+    await waitFor(() => expect(gateway.confirmInfrastructureMigrations).toHaveBeenCalledWith("migration-token"))
+  })
+
   it("creates a guard backup through the same explicit confirmation flow", async () => {
     const healthy = { ...snapshot, services: snapshot.services.map((service) => service.id === "postgres" ? { ...service, state: "healthy" as const } : service) }
     const gateway = {

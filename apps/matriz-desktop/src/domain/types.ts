@@ -475,6 +475,14 @@ export interface DatabaseMigrationSnapshot {
   readonly schemas: readonly { readonly schema: string; readonly ledger: MigrationLedgerComparison }[]
 }
 
+export interface DatabaseMigrationPreview {
+  readonly confirmationToken: string
+  readonly expiresAt: number
+  readonly title: string
+  readonly impact: readonly string[]
+  readonly schemas: readonly string[]
+}
+
 export interface InfrastructureBackupRecord {
   readonly id: string
   readonly createdAt: number

@@ -53,6 +53,8 @@ describe("Tauri command contract", () => {
       confirmInfrastructureAction: "confirm_infrastructure_action",
       infrastructureLogs: "infrastructure_logs",
       infrastructureMigrations: "infrastructure_migrations",
+      previewInfrastructureMigrations: "preview_infrastructure_migrations",
+      confirmInfrastructureMigrations: "confirm_infrastructure_migrations",
       infrastructureBackups: "infrastructure_backups",
       hide: "hide_window",
       quit: "quit_app",
@@ -168,6 +170,8 @@ describe("Tauri command contract", () => {
     await gateway.confirmInfrastructureAction("one-use-token")
     await gateway.infrastructureLogs("nats")
     await gateway.infrastructureMigrations()
+    await gateway.previewInfrastructureMigrations()
+    await gateway.confirmInfrastructureMigrations("migration-token")
     await gateway.infrastructureBackups()
     await gateway.hide()
     await gateway.quit()
@@ -262,6 +266,8 @@ describe("Tauri command contract", () => {
       { command: "confirm_infrastructure_action", args: { confirmationToken: "one-use-token" } },
       { command: "infrastructure_logs", args: { serviceId: "nats" } },
       { command: "infrastructure_migrations", args: undefined },
+      { command: "preview_infrastructure_migrations", args: undefined },
+      { command: "confirm_infrastructure_migrations", args: { confirmationToken: "migration-token" } },
       { command: "infrastructure_backups", args: undefined },
       { command: "hide_window", args: undefined },
       { command: "quit_app", args: undefined },

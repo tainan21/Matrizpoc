@@ -84,6 +84,8 @@ function gateway(): DesktopGateway {
     confirmInfrastructureAction: vi.fn().mockRejectedValue(new Error("not used")),
     infrastructureLogs: vi.fn().mockResolvedValue([]),
     infrastructureMigrations: vi.fn().mockResolvedValue({ state: "clean", schemas: [] }),
+    previewInfrastructureMigrations: vi.fn().mockRejectedValue(new Error("not used")),
+    confirmInfrastructureMigrations: vi.fn().mockRejectedValue(new Error("not used")),
     infrastructureBackups: vi.fn().mockResolvedValue([]),
     hide: vi.fn().mockResolvedValue(undefined),
     quit: vi.fn().mockResolvedValue(undefined),
