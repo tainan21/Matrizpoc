@@ -411,3 +411,10 @@ próximos do app responsável.
 - **Motivo:** validar a experiência Windows sem duplicar produto, dados ou regras e sem converter um experimento simples em duas aplicações independentes.
 - **Impacto:** o Tauri abre somente a origem HTTPS fixada no build, não contém credenciais e usa o mesmo backend tenant-scoped do web. Após `0.1.0`, recebe apenas correções críticas, de segurança ou publicação até surgirem dados reais.
 - **Revisar quando:** os cinco sistemas Laudate fornecerem dados reais ou um requisito desktop concreto não puder ser atendido pela web.
+
+## 2026-09-02 — NAEVIA usa Electron como navegador dedicado
+
+- **Decisão:** criar `apps/naevia` como navegador Windows x64 em Electron, usando `WebContentsView` e partitions persistentes isoladas por cápsula. O Matriz Control oficial permanece em Tauri e não volta a hospedar um navegador geral.
+- **Motivo:** o produto depende concretamente de Chromium controlado, múltiplas superfícies web simultâneas, downloads, permissões por sessão, automação e isolamento de cookies. Esses requisitos correspondem à exceção Electron prevista em `docs/desktop-application-architecture.md`.
+- **Impacto:** NAEVIA possui processo principal, preload mínimo e renderer próprios; não importa internals do Control legado. Páginas remotas nunca recebem bridge privilegiado. Terminal, Store e Workbench entram somente por contratos e painéis locais delimitados.
+- **Revisar quando:** WebView2/Tauri oferecer isolamento, automação e múltiplas superfícies equivalentes com menor custo operacional comprovado, ou quando a política de suporte do Electron exigir mudança de runtime.
