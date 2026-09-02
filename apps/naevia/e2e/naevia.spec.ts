@@ -18,6 +18,12 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect(window.getByRole("heading", { name: "Matriz Store" })).toBeVisible()
     await window.getByRole("button", { name: "Terminal" }).click()
     await expect(window.getByText("Nenhuma sessão aberta.")).toBeVisible()
+    await window.getByRole("button", { name: "Nova sessão PowerShell" }).click()
+    await window.getByLabel("Entrada do terminal").fill("Write-Output 'NAEVIA-UNICODE-olá'")
+    await window.getByRole("button", { name: "Enviar" }).click()
+    await expect(window.locator(".terminal-session pre")).toContainText("NAEVIA-UNICODE-olá")
+    await window.getByRole("button", { name: "Encerrar" }).click()
+    await expect(window.getByText("Nenhuma sessão aberta.")).toBeVisible()
 
     await window.getByRole("button", { name: "Nova cápsula" }).click()
     await window.getByLabel("Nome").fill("Agentes")

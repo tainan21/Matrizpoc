@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto"
+import { spawn } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -6,6 +7,7 @@ import { app, BrowserWindow, ipcMain, session, WebContentsView } from "electron"
 
 import { navigationTarget } from "../src/navigation.js"
 import { activateCapsule } from "../src/browser-state.js"
+import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./terminal-host.js"
 import type { AgentPolicy, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -15,6 +17,7 @@ let mainWindow: BrowserWindow | undefined
 let repository: BrowserRepository
 let activeViewId = ""
 let panelState = { side: "none" as "none" | "store" | "workbench", terminal: false }
+const terminalHost = new TerminalHost(spawnTerminalProcess)
 
 if (process.env.NAEVIA_USER_DATA_DIR) app.setPath("userData", process.env.NAEVIA_USER_DATA_DIR)
 
@@ -146,6 +149,24 @@ function policy(value: unknown): AgentPolicy {
   return value
 }
 
+function spawnTerminalProcess(): TerminalProcess {
+  const shell = join(process.env.SystemRoot ?? "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "powershell.exe")
+  const child = spawn(shell, ["-NoLogo", "-NoProfile", "-NoExit", "-Command", "[Console]::InputEncoding=[Console]::OutputEncoding=$OutputEncoding=[Text.UTF8Encoding]::new()"], {
+    env: terminalEnvironment(process.env),
+    shell: false,
+    windowsHide: true,
+    stdio: "pipe",
+  })
+  if (!child.pid || !child.stdin || !child.stdout || !child.stderr) throw new Error("PowerShell não pôde ser iniciado")
+  return {
+    pid: child.pid,
+    write: (input) => child.stdin.write(input),
+    kill: () => { if (!child.killed) child.kill() },
+    onOutput: (listener) => { child.stdout.on("data", (chunk: Buffer) => listener(chunk.toString("utf8"))); child.stderr.on("data", (chunk: Buffer) => listener(chunk.toString("utf8"))) },
+    onExit: (listener) => child.once("exit", listener),
+  }
+}
+
 function registerIpc() {
   ipcMain.handle("naevia:snapshot", () => repository.snapshot())
   ipcMain.handle("naevia:capsule:create", async (_event, input: unknown) => {
@@ -206,6 +227,20 @@ function registerIpc() {
     panelState = { side: value.side as typeof panelState.side, terminal: value.terminal }
     layout()
   })
+  ipcMain.handle("naevia:terminal:list", () => terminalHost.list())
+  ipcMain.handle("naevia:terminal:create", () => { terminalHost.create(); return terminalHost.list() })
+  ipcMain.handle("naevia:terminal:write", (_event, input: unknown) => {
+    const value = input as Record<string, unknown>
+    const sessionId = text(value?.sessionId, "Sessão", 36)
+    if (typeof value?.input !== "string") throw new Error("Entrada inválida")
+    terminalHost.write(sessionId, value.input)
+  })
+  ipcMain.handle("naevia:terminal:interrupt", (_event, input: unknown) => terminalHost.interrupt(text((input as Record<string, unknown>)?.sessionId, "Sessão", 36)))
+  ipcMain.handle("naevia:terminal:close", (_event, input: unknown) => { terminalHost.close(text((input as Record<string, unknown>)?.sessionId, "Sessão", 36)); return terminalHost.list() })
+  terminalHost.subscribe((sessions) => {
+    const window = mainWindow
+    if (window && !window.isDestroyed()) window.webContents.send("naevia:terminal:sessions", sessions)
+  })
 }
 
 async function createWindow() {
@@ -225,4 +260,5 @@ async function createWindow() {
 }
 
 app.whenReady().then(async () => { registerIpc(); await createWindow() })
+app.on("before-quit", () => terminalHost.closeAll())
 app.on("window-all-closed", () => app.quit())

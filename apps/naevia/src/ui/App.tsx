@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react"
-import type { AgentPolicy, BrowserSnapshot } from "../shared"
+import type { AgentPolicy, BrowserSnapshot, TerminalSessionView } from "../shared"
 
 export function App() {
   const [snapshot, setSnapshot] = useState<BrowserSnapshot>()
@@ -10,13 +10,21 @@ export function App() {
   const [creatingCapsule, setCreatingCapsule] = useState(false)
   const [capsuleName, setCapsuleName] = useState("")
   const [capsulePolicy, setCapsulePolicy] = useState<AgentPolicy>("human")
+  const [terminals, setTerminals] = useState<readonly TerminalSessionView[]>([])
+  const [activeTerminalId, setActiveTerminalId] = useState("")
+  const [terminalInput, setTerminalInput] = useState("")
   const activeTab = useMemo(() => snapshot?.tabs.find((tab) => tab.id === snapshot.activeTabId), [snapshot])
+  const activeTerminal = terminals.find(({ id }) => id === activeTerminalId) ?? terminals.at(-1)
 
   useEffect(() => {
     window.naevia.snapshot().then(setSnapshot).catch((cause) => setError(String(cause)))
     return window.naevia.subscribe(setSnapshot)
   }, [])
   useEffect(() => { if (activeTab) setAddress(activeTab.url) }, [activeTab])
+  useEffect(() => {
+    window.naevia.terminalSessions().then(setTerminals).catch((cause) => setError(String(cause)))
+    return window.naevia.subscribeTerminals(setTerminals)
+  }, [])
 
   const navigate = async (event: FormEvent) => {
     event.preventDefault(); if (!activeTab) return
@@ -32,6 +40,14 @@ export function App() {
       setSnapshot(await window.naevia.createCapsule(capsuleName, capsulePolicy))
       setCapsuleName(""); setCreatingCapsule(false)
     } catch (cause) { setError(String(cause)) }
+  }
+  const createTerminal = async () => {
+    setError("")
+    try { const next = await window.naevia.createTerminal(); setTerminals(next); setActiveTerminalId(next.at(-1)?.id ?? "") } catch (cause) { setError(String(cause)) }
+  }
+  const sendTerminal = async (event: FormEvent) => {
+    event.preventDefault(); if (!activeTerminal || !terminalInput) return
+    try { await window.naevia.writeTerminal(activeTerminal.id, `${terminalInput}\n`); setTerminalInput("") } catch (cause) { setError(String(cause)) }
   }
 
   return <main className="browser-shell">
@@ -59,7 +75,7 @@ export function App() {
     </nav>
 
     {side !== "none" ? <aside className="side-panel"><span>PAINEL / {side.toUpperCase()}</span><h2>{side === "store" ? "Matriz Store" : "Coworking"}</h2><p>{side === "store" ? "Produtos confiáveis e instalados estarão disponíveis aqui." : "O painel Workbench será conectado pelo protocolo controlado."}</p><button onClick={() => void panels("none")}>Fechar</button></aside> : null}
-    {terminal ? <section className="terminal-drawer"><header><span>TERMINAL</span><button onClick={() => void panels(side, false)}>Fechar</button></header><div><i>›_</i><p>Nenhuma sessão aberta.</p><small>O NAEVIA nunca cria ou executa comandos automaticamente.</small></div></section> : null}
+    {terminal ? <section className="terminal-drawer"><header><span>TERMINAL</span><nav>{terminals.map((session, index) => <button className={session.id === activeTerminal?.id ? "active" : ""} key={session.id} onClick={() => setActiveTerminalId(session.id)}>PS {index + 1}<i>{session.status}</i></button>)}<button aria-label="Nova sessão" onClick={() => void createTerminal()}>＋</button></nav><button onClick={() => void panels(side, false)}>Fechar</button></header>{activeTerminal ? <div className="terminal-session"><div className="terminal-meta"><span>PowerShell · pid {activeTerminal.pid} · {activeTerminal.status}</span><span>{activeTerminal.status === "running" ? <button onClick={() => void window.naevia.interruptTerminal(activeTerminal.id).catch((cause) => setError(String(cause)))}>Interromper</button> : null}<button onClick={() => void window.naevia.closeTerminal(activeTerminal.id).then(setTerminals).catch((cause) => setError(String(cause)))}>Encerrar</button></span></div><pre>{activeTerminal.lines.join("\n") || "PowerShell pronto."}</pre><form onSubmit={sendTerminal}><span>›</span><input aria-label="Entrada do terminal" value={terminalInput} onChange={(event) => setTerminalInput(event.target.value)} disabled={activeTerminal.status !== "running"} autoComplete="off" /><button disabled={activeTerminal.status !== "running"}>Enviar</button></form></div> : <div className="terminal-empty"><i>›_</i><p>Nenhuma sessão aberta.</p><small>O NAEVIA nunca cria ou executa comandos automaticamente.</small><button onClick={() => void createTerminal()}>Nova sessão PowerShell</button></div>}</section> : null}
     {creatingCapsule ? <div className="dialog-backdrop" role="presentation"><form className="capsule-dialog" aria-label="Criar cápsula" onSubmit={createCapsule}><span>CÁPSULA / NOVA</span><h2>Novo espaço isolado</h2><label>Nome<input autoFocus value={capsuleName} maxLength={50} onChange={(event) => setCapsuleName(event.target.value)} /></label><label>Política<select value={capsulePolicy} onChange={(event) => setCapsulePolicy(event.target.value as AgentPolicy)}><option value="human">Humana</option><option value="agent-safe">Agente seguro</option><option value="agent-full">Agente completo</option></select></label><small>Cada cápsula usa uma partição persistente separada.</small><footer><button type="button" onClick={() => setCreatingCapsule(false)}>Cancelar</button><button type="submit">Criar cápsula</button></footer></form></div> : null}
     {error ? <div className="error" role="alert">{error}</div> : null}
   </main>

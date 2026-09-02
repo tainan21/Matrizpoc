@@ -22,6 +22,14 @@ export interface BrowserSnapshot {
   readonly activeTabId: string
 }
 
+export interface TerminalSessionView {
+  readonly id: string
+  readonly pid: number
+  readonly status: "running" | "exited"
+  readonly lines: readonly string[]
+  readonly exitCode: number | null
+}
+
 export interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
   createCapsule(name: string, policy: AgentPolicy): Promise<BrowserSnapshot>
@@ -30,5 +38,11 @@ export interface NaeviaBridge {
   activateTab(tabId: string): Promise<BrowserSnapshot>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>
   setPanels(state: { side: "none" | "store" | "workbench"; terminal: boolean }): Promise<void>
+  terminalSessions(): Promise<readonly TerminalSessionView[]>
+  createTerminal(): Promise<readonly TerminalSessionView[]>
+  writeTerminal(sessionId: string, input: string): Promise<void>
+  interruptTerminal(sessionId: string): Promise<void>
+  closeTerminal(sessionId: string): Promise<readonly TerminalSessionView[]>
+  subscribeTerminals(listener: (sessions: readonly TerminalSessionView[]) => void): () => void
   subscribe(listener: (snapshot: BrowserSnapshot) => void): () => void
 }

@@ -14,6 +14,7 @@ interface BrowserSnapshot {
   readonly activeCapsuleId: string
   readonly activeTabId: string
 }
+interface TerminalSessionView { readonly id: string; readonly pid: number; readonly status: "running" | "exited"; readonly lines: readonly string[]; readonly exitCode: number | null }
 
 interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
@@ -23,6 +24,12 @@ interface NaeviaBridge {
   activateTab(tabId: string): Promise<BrowserSnapshot>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>
   setPanels(state: { side: "none" | "store" | "workbench"; terminal: boolean }): Promise<void>
+  terminalSessions(): Promise<readonly TerminalSessionView[]>
+  createTerminal(): Promise<readonly TerminalSessionView[]>
+  writeTerminal(sessionId: string, input: string): Promise<void>
+  interruptTerminal(sessionId: string): Promise<void>
+  closeTerminal(sessionId: string): Promise<readonly TerminalSessionView[]>
+  subscribeTerminals(listener: (sessions: readonly TerminalSessionView[]) => void): () => void
   subscribe(listener: (snapshot: BrowserSnapshot) => void): () => void
 }
 
@@ -34,6 +41,16 @@ const bridge: NaeviaBridge = {
   activateTab: (tabId) => ipcRenderer.invoke("naevia:tab:activate", { tabId }),
   navigate: (tabId, input) => ipcRenderer.invoke("naevia:tab:navigate", { tabId, input }),
   setPanels: (state) => ipcRenderer.invoke("naevia:layout", state),
+  terminalSessions: () => ipcRenderer.invoke("naevia:terminal:list"),
+  createTerminal: () => ipcRenderer.invoke("naevia:terminal:create"),
+  writeTerminal: (sessionId, input) => ipcRenderer.invoke("naevia:terminal:write", { sessionId, input }),
+  interruptTerminal: (sessionId) => ipcRenderer.invoke("naevia:terminal:interrupt", { sessionId }),
+  closeTerminal: (sessionId) => ipcRenderer.invoke("naevia:terminal:close", { sessionId }),
+  subscribeTerminals: (listener) => {
+    const handler = (_event: Electron.IpcRendererEvent, sessions: readonly TerminalSessionView[]) => listener(sessions)
+    ipcRenderer.on("naevia:terminal:sessions", handler)
+    return () => ipcRenderer.off("naevia:terminal:sessions", handler)
+  },
   subscribe: (listener) => {
     const handler = (_event: Electron.IpcRendererEvent, snapshot: BrowserSnapshot) => listener(snapshot)
     ipcRenderer.on("naevia:snapshot", handler)
