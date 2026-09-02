@@ -6,6 +6,7 @@ pub mod commerce;
 mod doctor;
 pub mod environment;
 pub mod explorer;
+pub mod git;
 pub mod hub_state;
 mod native_apps;
 pub mod node_sweep;
@@ -37,6 +38,9 @@ use environment::{
     EnvironmentSaveRequest, EnvironmentService,
 };
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
+use git::{
+    GitCommitRequest, GitDiff, GitDiffRequest, GitSelectionRequest, GitService, GitSnapshot,
+};
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
 use node_sweep::{NodeSweepDeletion, NodeSweepScan, NodeSweepService};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
@@ -736,6 +740,74 @@ async fn run_doctor(
 }
 
 #[tauri::command]
+async fn get_git_snapshot(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || git.snapshot(&root))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn get_git_diff(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    request: GitDiffRequest,
+) -> Result<GitDiff, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        git.diff(&root, &request.revision, &request.change_id)
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn stage_git_changes(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    request: GitSelectionRequest,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || git.stage(&root, &request))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn unstage_git_changes(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    request: GitSelectionRequest,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || git.unstage(&root, &request))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn commit_git_changes(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    request: GitCommitRequest,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        git.commit(&root, &request.revision, &request.message)
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
 fn get_workspace_pulse(
     state: tauri::State<'_, OperationsState>,
 ) -> Result<doctor::WorkspacePulse, String> {
@@ -1300,6 +1372,7 @@ pub fn run() {
         .manage(AwakeManager::new())
         .manage(SystemPulseService::new())
         .manage(NodeSweepService::default())
+        .manage(GitService::default())
         .setup(|app| {
             let default_config_dir = app.path().app_config_dir()?;
             let config_dir = resolve_acceptance_config_dir(
@@ -1371,6 +1444,11 @@ pub fn run() {
             open_target,
             run_doctor,
             get_workspace_pulse,
+            get_git_snapshot,
+            get_git_diff,
+            stage_git_changes,
+            unstage_git_changes,
+            commit_git_changes,
             get_system_pulse,
             get_awake_state,
             set_awake,

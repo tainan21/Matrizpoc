@@ -384,6 +384,31 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 520px) { .control-main { padding-inline: 15px; } .app-grid { grid-template-columns: 1fr; } .home-quick-actions { width:100%; display:grid; grid-template-columns:repeat(3,1fr); } .home-quick-actions button { padding-inline:6px; } }
 @media (prefers-reduced-motion: no-preference) { button, .port-row, .app-tile { transition: color 100ms ease, background 100ms ease, border-color 100ms ease, padding 100ms ease; } }
 
+.git-view .section-head p { margin:5px 0 0; color:var(--muted); font-size:10px; }
+.git-head-state { display:flex; align-items:center; gap:8px; color:var(--text-dim); font:700 8px var(--matriz-font-mono); }
+.git-workspace { min-height:280px; display:grid; grid-template-columns:minmax(280px,.85fr) minmax(360px,1.15fr); border:1px solid var(--line); border-radius:10px; overflow:hidden; background:rgba(8,7,13,.48); }
+.git-changes, .git-inspector { min-width:0; min-height:0; }
+.git-changes { border-right:1px solid var(--line); }
+.git-actions { height:38px; display:flex; align-items:center; justify-content:flex-end; gap:6px; padding:0 8px; border-bottom:1px solid var(--line); }
+.git-actions button, .git-commit button { height:27px; padding:0 12px; border:1px solid var(--line-strong); border-radius:6px; background:rgba(154,102,255,.08); color:var(--violet-hot); font:800 8px var(--matriz-font-mono); cursor:pointer; }
+.git-change { min-height:38px; display:grid; grid-template-columns:26px 30px minmax(0,1fr); align-items:center; border-bottom:1px solid rgba(182,154,232,.08); }
+.git-change input { justify-self:center; accent-color:var(--violet); }
+.git-change > span { color:#c98b68; font:800 8px var(--matriz-font-mono); }
+.git-change > span.is-staged { color:#65dda5; }
+.git-change > button { min-width:0; height:38px; overflow:hidden; border:0; background:transparent; color:var(--text-dim); font:500 9px var(--matriz-font-mono); text-align:left; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
+.git-inspector { display:grid; grid-template-rows:38px minmax(0,1fr) auto; }
+.git-inspector header { display:flex; align-items:center; justify-content:space-between; padding:0 12px; border-bottom:1px solid var(--line); font:800 8px var(--matriz-font-mono); }
+.git-inspector header small { color:var(--muted); }
+.git-inspector pre { min-height:230px; max-height:330px; margin:0; padding:12px; overflow:auto; color:#b8afc3; font:8px/1.65 var(--matriz-font-mono); white-space:pre-wrap; }
+.git-inspector > small { padding:7px 12px; color:#f0b864; font:700 7px var(--matriz-font-mono); }
+.git-commit { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:10px; }
+.git-commit input { min-width:0; height:34px; padding:0 11px; border:1px solid var(--line); border-radius:7px; outline:0; background:rgba(8,7,13,.62); color:var(--text); font:9px var(--matriz-font-mono); }
+.git-history { margin-top:12px; border-top:1px solid var(--line); }
+.git-history > div { min-height:34px; display:grid; grid-template-columns:60px minmax(0,1fr) 160px; align-items:center; gap:10px; border-bottom:1px solid rgba(182,154,232,.08); }
+.git-history code { color:var(--violet-hot); font:8px var(--matriz-font-mono); }.git-history strong { overflow:hidden; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }.git-history small { color:var(--muted); font:8px var(--matriz-font-mono); text-align:right; }
+.git-error { padding:8px 10px; border-left:2px solid #ff718a; background:rgba(255,113,138,.08); color:#ff94a6; font:8px var(--matriz-font-mono); }
+@media (max-width:760px) { .git-workspace { grid-template-columns:1fr; }.git-changes { border-right:0; border-bottom:1px solid var(--line); }.git-history > div { grid-template-columns:54px minmax(0,1fr); }.git-history small { display:none; } }
+
 .runtime-workspace { height: calc(100vh - 136px); margin: -21px -22px -26px; display: grid; grid-template-columns: minmax(220px, 28%) minmax(390px, 1fr) minmax(180px, 22%); overflow: hidden; }
 .runtime-catalog, .runtime-stage, .agent-presence { min-width: 0; min-height: 0; }
 .runtime-catalog { padding: 20px 14px; border-right: 1px solid var(--line); overflow-y: auto; }

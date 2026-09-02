@@ -85,3 +85,12 @@ test("reports the real workspace, toolchain, and Git pulse", async ({ tauriPage:
   await chooseMode(page, "Ações")
   await expect(page.locator("main .section-head")).toContainText("main")
 })
+
+test("observes the real Git workspace without mutating it", async ({ tauriPage: page }) => {
+  await chooseMode(page, "Git")
+  await expect(page.locator(".git-branch")).toContainText("main")
+  await expect(page.locator(".git-branch")).not.toContainText("Verificando")
+  await expect(page.getByRole("button", { name: "STAGE", exact: true })).toBeDisabled()
+  await expect(page.getByRole("button", { name: "UNSTAGE", exact: true })).toBeDisabled()
+  await expect(page.locator(".git-change").first()).toBeVisible()
+})

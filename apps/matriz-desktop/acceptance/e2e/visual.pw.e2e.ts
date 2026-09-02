@@ -78,6 +78,9 @@ test("keeps every primary surface usable across supported window sizes", async (
       if (view === "Início") {
         await expect(page.locator(".home-status-strip")).not.toContainText("Verificando…", { timeout: 20_000 })
       }
+      if (view === "Git") {
+        await expect(page.locator(".git-branch")).not.toContainText("Verificando…", { timeout: 20_000 })
+      }
       const inspection = await inspectSurface(page)
       const focusVisible = await proveKeyboardFocus(page)
       const directory = `${screenshotRoot}/${viewport.id}`

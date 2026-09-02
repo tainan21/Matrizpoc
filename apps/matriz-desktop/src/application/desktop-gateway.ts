@@ -38,6 +38,11 @@ import type {
   NodeSweepDeletion,
   HubStateSnapshot,
   SessionContext,
+  GitSnapshot,
+  GitSelectionRequest,
+  GitDiffRequest,
+  GitCommitRequest,
+  GitDiff,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -65,6 +70,11 @@ export interface DesktopGateway {
   selectWorkspace(path: string): Promise<string>
   doctor(): Promise<readonly DoctorCheck[]>
   workspacePulse(): Promise<WorkspacePulse>
+  gitSnapshot(): Promise<GitSnapshot>
+  gitDiff(request: GitDiffRequest): Promise<GitDiff>
+  gitStage(request: GitSelectionRequest): Promise<GitSnapshot>
+  gitUnstage(request: GitSelectionRequest): Promise<GitSnapshot>
+  gitCommit(request: GitCommitRequest): Promise<GitSnapshot>
   systemPulse(): Promise<SystemPulse>
   getAwakeState(): Promise<boolean>
   setAwake(enabled: boolean): Promise<boolean>

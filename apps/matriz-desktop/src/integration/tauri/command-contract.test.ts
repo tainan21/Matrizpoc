@@ -30,6 +30,11 @@ describe("Tauri command contract", () => {
       selectWorkspace: "select_workspace",
       doctor: "run_doctor",
       workspacePulse: "get_workspace_pulse",
+      gitSnapshot: "get_git_snapshot",
+      gitDiff: "get_git_diff",
+      gitStage: "stage_git_changes",
+      gitUnstage: "unstage_git_changes",
+      gitCommit: "commit_git_changes",
       systemPulse: "get_system_pulse",
       getAwakeState: "get_awake_state",
       setAwake: "set_awake",
@@ -123,6 +128,14 @@ describe("Tauri command contract", () => {
     await gateway.selectWorkspace("C:\\Apps\\matriz-infra-hub")
     await gateway.doctor()
     await gateway.workspacePulse()
+    const gitSelection = { revision: "git-rev", changeIds: ["change-1"] }
+    const gitDiff = { revision: "git-rev", changeId: "change-1" }
+    const gitCommit = { revision: "git-rev", message: "feat: safe commit" }
+    await gateway.gitSnapshot()
+    await gateway.gitDiff(gitDiff)
+    await gateway.gitStage(gitSelection)
+    await gateway.gitUnstage(gitSelection)
+    await gateway.gitCommit(gitCommit)
     await gateway.systemPulse()
     await gateway.getAwakeState()
     await gateway.setAwake(true)
@@ -203,6 +216,11 @@ describe("Tauri command contract", () => {
       { command: "select_workspace", args: { path: "C:\\Apps\\matriz-infra-hub" } },
       { command: "run_doctor", args: undefined },
       { command: "get_workspace_pulse", args: undefined },
+      { command: "get_git_snapshot", args: undefined },
+      { command: "get_git_diff", args: { request: gitDiff } },
+      { command: "stage_git_changes", args: { request: gitSelection } },
+      { command: "unstage_git_changes", args: { request: gitSelection } },
+      { command: "commit_git_changes", args: { request: gitCommit } },
       { command: "get_system_pulse", args: undefined },
       { command: "get_awake_state", args: undefined },
       { command: "set_awake", args: { enabled: true } },

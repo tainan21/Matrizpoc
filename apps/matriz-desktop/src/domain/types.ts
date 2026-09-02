@@ -128,6 +128,55 @@ export interface WorkspacePulse {
   readonly clean: boolean
 }
 
+export interface GitChange {
+  readonly id: string
+  readonly path: string
+  readonly indexStatus: string
+  readonly worktreeStatus: string
+  readonly staged: boolean
+  readonly hasWorktreeChanges: boolean
+}
+
+export interface GitCommitSummary {
+  readonly id: string
+  readonly shortId: string
+  readonly subject: string
+  readonly author: string
+  readonly occurredAt: number
+}
+
+export interface GitSnapshot {
+  readonly revision: string
+  readonly branch: string
+  readonly upstream?: string
+  readonly ahead: number
+  readonly behind: number
+  readonly changes: readonly GitChange[]
+  readonly recent: readonly GitCommitSummary[]
+}
+
+export interface GitSelectionRequest {
+  readonly revision: string
+  readonly changeIds: readonly string[]
+}
+
+export interface GitDiffRequest {
+  readonly revision: string
+  readonly changeId: string
+}
+
+export interface GitCommitRequest {
+  readonly revision: string
+  readonly message: string
+}
+
+export interface GitDiff {
+  readonly changeId: string
+  readonly staged: boolean
+  readonly lines: readonly string[]
+  readonly truncated: boolean
+}
+
 export type HubArea = "home" | "ports" | "apps" | "workspace" | "agents" | "environments" | "infra" | "git" | "terminal" | "actions" | "doctor" | "settings"
 export type HubFeatureId = "node-sweep" | "system-pulse" | "matriz-awake" | "resume-session"
 
