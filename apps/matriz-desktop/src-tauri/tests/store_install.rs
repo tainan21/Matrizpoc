@@ -31,8 +31,12 @@ impl StoreInstallHost for FakeHost {
             .ok_or("fixture artifact missing".into())
     }
 
-    fn install(&self, path: &std::path::Path, publisher: &str) -> Result<(), String> {
-        assert_eq!(publisher, "Matriz");
+    fn install(
+        &self,
+        path: &std::path::Path,
+        release: &matriz_desktop_native::store_release::VerifiedRelease,
+    ) -> Result<(), String> {
+        assert_eq!(release.expected_publisher, "Matriz");
         self.installed
             .lock()
             .unwrap()

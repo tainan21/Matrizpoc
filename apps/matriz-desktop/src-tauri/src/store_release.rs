@@ -1,8 +1,9 @@
 use std::{
     collections::HashMap,
     fs::{self, OpenOptions},
-    io::Write,
+    io::{Read, Write},
     path::{Path, PathBuf},
+    process::Command,
     sync::Mutex,
     time::{SystemTime, UNIX_EPOCH},
 };
@@ -18,7 +19,7 @@ const CONFIRMATION_TTL_MILLIS: u128 = 10 * 60 * 1_000;
 pub trait StoreInstallHost: Send + Sync {
     fn catalog(&self) -> Result<Vec<u8>, String>;
     fn download(&self, url: &str, limit: u64) -> Result<Vec<u8>, String>;
-    fn install(&self, path: &Path, publisher: &str) -> Result<(), String>;
+    fn install(&self, path: &Path, release: &VerifiedRelease) -> Result<(), String>;
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
@@ -58,7 +59,35 @@ pub struct StoreInstallManager {
     pending: Mutex<HashMap<String, PendingInstall>>,
 }
 
+pub struct WindowsStoreInstallHost {
+    catalog_url: String,
+    client: reqwest::blocking::Client,
+}
+
 impl StoreInstallManager {
+    pub fn production(root: PathBuf) -> Result<Self, String> {
+        let catalog_url = option_env!("MATRIZ_DISTRIBUTION_CATALOG_URL")
+            .filter(|value| !value.trim().is_empty())
+            .ok_or("Catálogo público da Store não foi configurado nesta compilação")?;
+        let public_key = option_env!("MATRIZ_DISTRIBUTION_PUBLIC_KEY")
+            .filter(|value| !value.trim().is_empty())
+            .ok_or("Chave pública da Store não foi configurada nesta compilação")?;
+        let allowed_hosts = option_env!("MATRIZ_DISTRIBUTION_RELEASE_HOSTS")
+            .unwrap_or("github.com,release-assets.githubusercontent.com")
+            .split(',')
+            .map(str::trim)
+            .filter(|value| !value.is_empty())
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        let host = WindowsStoreInstallHost::new(catalog_url, &allowed_hosts)?;
+        Ok(Self::with_host(
+            root,
+            public_key.into(),
+            allowed_hosts,
+            Box::new(host),
+        ))
+    }
+
     pub fn with_host(
         root: PathBuf,
         public_key: String,
@@ -134,7 +163,7 @@ impl StoreInstallManager {
         let installer =
             persist_verified_installer(&self.root.join("installers"), &release, &bytes)?;
         verify_installer_file(&release, &installer)?;
-        self.host.install(&installer, &release.expected_publisher)?;
+        self.host.install(&installer, &release)?;
         let receipt = StoreInstallReceipt {
             product_id: pending.package_id,
             distribution_product_id: release.product_id,
@@ -145,6 +174,91 @@ impl StoreInstallManager {
         };
         persist_receipt(&self.root.join("receipts"), &receipt)?;
         Ok(receipt)
+    }
+}
+
+impl WindowsStoreInstallHost {
+    pub fn new(catalog_url: &str, allowed_hosts: &[String]) -> Result<Self, String> {
+        let parsed =
+            reqwest::Url::parse(catalog_url).map_err(|_| "URL do catálogo da Store é inválida")?;
+        if parsed.scheme() != "https" {
+            return Err("Catálogo público da Store deve usar HTTPS".into());
+        }
+        let redirect_hosts = allowed_hosts.to_vec();
+        let client = reqwest::blocking::Client::builder()
+            .redirect(reqwest::redirect::Policy::custom(move |attempt| {
+                let url = attempt.url();
+                let allowed = url.scheme() == "https"
+                    && url.host_str().is_some_and(|host| {
+                        redirect_hosts
+                            .iter()
+                            .any(|allowed| host.eq_ignore_ascii_case(allowed))
+                    });
+                if allowed && attempt.previous().len() < 4 {
+                    attempt.follow()
+                } else {
+                    attempt.stop()
+                }
+            }))
+            .build()
+            .map_err(|error| format!("Cliente de distribuição indisponível: {error}"))?;
+        Ok(Self {
+            catalog_url: parsed.to_string(),
+            client,
+        })
+    }
+
+    fn read_limited(
+        response: reqwest::blocking::Response,
+        limit: u64,
+        label: &str,
+    ) -> Result<Vec<u8>, String> {
+        let response = response
+            .error_for_status()
+            .map_err(|error| format!("{label} indisponível: {error}"))?;
+        if response.content_length().is_some_and(|size| size > limit) {
+            return Err(format!("{label} excede o limite permitido"));
+        }
+        let mut bytes = Vec::new();
+        response
+            .take(limit.saturating_add(1))
+            .read_to_end(&mut bytes)
+            .map_err(|error| format!("Não foi possível baixar {label}: {error}"))?;
+        if bytes.len() as u64 > limit {
+            return Err(format!("{label} excede o limite permitido"));
+        }
+        Ok(bytes)
+    }
+}
+
+impl StoreInstallHost for WindowsStoreInstallHost {
+    fn catalog(&self) -> Result<Vec<u8>, String> {
+        let response = self
+            .client
+            .get(&self.catalog_url)
+            .send()
+            .map_err(|error| format!("Catálogo da Store indisponível: {error}"))?;
+        Self::read_limited(response, 4 * 1024 * 1024, "catálogo da Store")
+    }
+
+    fn download(&self, url: &str, limit: u64) -> Result<Vec<u8>, String> {
+        let response = self
+            .client
+            .get(url)
+            .send()
+            .map_err(|error| format!("Instalador indisponível: {error}"))?;
+        Self::read_limited(response, limit, "instalador")
+    }
+
+    fn install(&self, path: &Path, release: &VerifiedRelease) -> Result<(), String> {
+        verify_authenticode(path, &release.expected_publisher)?;
+        let status = Command::new(path).arg("/S").status().map_err(|error| {
+            format!("Não foi possível iniciar o instalador verificado: {error}")
+        })?;
+        if !status.success() {
+            return Err(format!("Instalador terminou com {status}"));
+        }
+        verify_installed_identity(release)
     }
 }
 
@@ -159,6 +273,8 @@ pub struct VerifiedRelease {
     pub size_bytes: u64,
     pub sha256: String,
     pub expected_publisher: String,
+    pub uninstall_key: String,
+    pub installed_display_name: String,
 }
 
 #[derive(Deserialize)]
@@ -182,6 +298,10 @@ struct Product {
 
 #[derive(Deserialize)]
 struct WindowsIdentity {
+    #[serde(rename = "uninstallKey")]
+    uninstall_key: String,
+    #[serde(rename = "displayName")]
+    display_name: String,
     publisher: String,
 }
 
@@ -252,6 +372,8 @@ pub fn verify_catalog_release(
         size_bytes: release.installer.size_bytes,
         sha256: release.installer.sha256,
         expected_publisher: product.windows.publisher,
+        uninstall_key: product.windows.uninstall_key,
+        installed_display_name: product.windows.display_name,
     })
 }
 
@@ -409,4 +531,72 @@ fn now() -> u128 {
         .duration_since(UNIX_EPOCH)
         .unwrap_or_default()
         .as_millis()
+}
+
+#[cfg(windows)]
+fn verify_authenticode(path: &Path, publisher: &str) -> Result<(), String> {
+    let escaped = path.to_string_lossy().replace('\'', "''");
+    let script = format!(
+        "Get-AuthenticodeSignature -LiteralPath '{}' | Select-Object Status,@{{n='Subject';e={{$_.SignerCertificate.Subject}}}} | ConvertTo-Json -Compress",
+        escaped
+    );
+    let output = Command::new("powershell.exe")
+        .args(["-NoProfile", "-NonInteractive", "-Command", &script])
+        .output()
+        .map_err(|error| format!("Não foi possível verificar Authenticode: {error}"))?;
+    if !output.status.success() {
+        return Err("A verificação Authenticode falhou".into());
+    }
+    let result: serde_json::Value =
+        serde_json::from_slice(&output.stdout).map_err(|_| "Resposta Authenticode inválida")?;
+    let subject = result["Subject"].as_str().unwrap_or_default();
+    if result["Status"] != "Valid"
+        || !subject
+            .to_ascii_lowercase()
+            .contains(&publisher.to_ascii_lowercase())
+    {
+        return Err("Authenticode ou publisher do instalador é inválido".into());
+    }
+    Ok(())
+}
+
+#[cfg(not(windows))]
+fn verify_authenticode(_path: &Path, _publisher: &str) -> Result<(), String> {
+    Err("Instalação da Store está disponível apenas no Windows".into())
+}
+
+#[cfg(windows)]
+fn verify_installed_identity(release: &VerifiedRelease) -> Result<(), String> {
+    use winreg::{enums::KEY_READ, HKCU, HKLM};
+
+    let relative = format!(
+        "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{}",
+        release.uninstall_key
+    );
+    for hive in [HKCU, HKLM] {
+        let Ok(key) = hive.open_subkey_with_flags(&relative, KEY_READ) else {
+            continue;
+        };
+        let display_name = key
+            .get_value::<String, _>("DisplayName")
+            .unwrap_or_default();
+        let display_version = key
+            .get_value::<String, _>("DisplayVersion")
+            .unwrap_or_default();
+        let publisher = key.get_value::<String, _>("Publisher").unwrap_or_default();
+        if display_name.eq_ignore_ascii_case(&release.installed_display_name)
+            && display_version == release.version
+            && publisher
+                .to_ascii_lowercase()
+                .contains(&release.expected_publisher.to_ascii_lowercase())
+        {
+            return Ok(());
+        }
+    }
+    Err("A identidade ou versão instalada não corresponde à release confirmada".into())
+}
+
+#[cfg(not(windows))]
+fn verify_installed_identity(_release: &VerifiedRelease) -> Result<(), String> {
+    Err("Inspeção de instalação está disponível apenas no Windows".into())
 }
