@@ -88,6 +88,23 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
     }
   }
 
+  const remote = async (action: "fetch" | "pull" | "push") => {
+    if (!snapshot || busy) return
+    const labels = { fetch: "buscar atualizações", pull: "receber via fast-forward", push: "enviar os commits locais" }
+    if (!window.confirm(`Confirmar: ${labels[action]} em ${snapshot.upstream ?? "upstream"}?`)) return
+    setBusy(true)
+    setError(undefined)
+    try {
+      setSnapshot(await gateway.gitRemote({ revision: snapshot.revision, action }))
+      setSelected(new Set())
+      setDiff(undefined)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Operação remota falhou")
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section className="git-view" aria-labelledby="git-title">
       <div className="section-head">
@@ -106,6 +123,13 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
         <span className={`status-dot ${snapshot?.changes.length ? "degraded" : "ready"}`} />
         <div><small>BRANCH ATUAL</small><strong>{snapshot?.branch ?? "Verificando…"}</strong></div>
         <b>{snapshot ? `${snapshot.changes.length} mudanças · ${stagedCount} staged` : "—"}</b>
+      </div>
+
+      <div className="git-remote-actions" aria-label="Operações remotas Git">
+        <span>{snapshot?.upstream ?? "Sem upstream configurado"}</span>
+        <button disabled={!snapshot?.upstream || busy} onClick={() => void remote("fetch")}>BUSCAR</button>
+        <button aria-label="Receber commits" disabled={!snapshot?.upstream || !!snapshot?.changes.length || busy} onClick={() => void remote("pull")}>RECEBER FF-ONLY</button>
+        <button aria-label="Enviar commits" disabled={!snapshot?.upstream || !snapshot.ahead || busy} onClick={() => void remote("push")}>ENVIAR</button>
       </div>
 
       {error ? <p className="git-error" role="alert">{error}</p> : null}
@@ -139,6 +163,16 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
 
       <div className="git-history" aria-label="Histórico Git">
         {snapshot?.recent.map((commit) => <div key={commit.id}><code>{commit.shortId}</code><strong>{commit.subject}</strong><small>{commit.author}</small></div>)}
+      </div>
+      <div className="git-reference-grid">
+        <section aria-label="Branches locais">
+          <strong>BRANCHES LOCAIS</strong>
+          {snapshot?.branches.map((branch) => <div key={branch.name}><code>{branch.current ? "●" : "○"}</code><span>{branch.name}</span><small>{branch.upstream ?? "local"}</small></div>)}
+        </section>
+        <section aria-label="Reflog recente">
+          <strong>REFLOG RECENTE</strong>
+          {snapshot?.reflog.map((entry, index) => <div key={`${entry.shortId}-${index}`}><code>{entry.shortId}</code><span>{entry.subject}</span></div>)}
+        </section>
       </div>
       <p className="area-note">Sem discard, stash, rebase, force-push ou reset destrutivo.</p>
     </section>

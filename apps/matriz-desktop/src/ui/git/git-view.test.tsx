@@ -1,10 +1,15 @@
 import "@testing-library/jest-dom/vitest"
 
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
 import { GitView } from "./git-view"
+
+afterEach(() => {
+  cleanup()
+  vi.restoreAllMocks()
+})
 
 describe("GitView", () => {
   it("uses opaque ids and the observed revision for daily actions", async () => {
@@ -15,6 +20,8 @@ describe("GitView", () => {
       behind: 0,
       changes: [{ id: "change-a", path: "src/app.ts", indexStatus: " ", worktreeStatus: "M", staged: false, hasWorktreeChanges: true }],
       recent: [],
+      branches: [{ name: "main", current: true, upstream: "origin/main" }],
+      reflog: [{ shortId: "abc1234", subject: "commit: initial", occurredAt: 1 }],
     }
     const gateway = {
       gitSnapshot: vi.fn().mockResolvedValue(snapshot),
@@ -30,5 +37,29 @@ describe("GitView", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: "Selecionar src/app.ts" }))
     fireEvent.click(screen.getByRole("button", { name: "STAGE" }))
     await waitFor(() => expect(gateway.gitStage).toHaveBeenCalledWith({ revision: "rev-1", changeIds: ["change-a"] }))
+  })
+
+  it("requires explicit confirmation before a fixed remote action", async () => {
+    const snapshot = {
+      revision: "rev-remote",
+      branch: "main",
+      upstream: "origin/main",
+      ahead: 1,
+      behind: 0,
+      changes: [],
+      recent: [],
+      branches: [{ name: "main", current: true, upstream: "origin/main" }],
+      reflog: [],
+    }
+    const gateway = {
+      gitSnapshot: vi.fn().mockResolvedValue(snapshot),
+      gitRemote: vi.fn().mockResolvedValue({ ...snapshot, ahead: 0 }),
+    } as unknown as DesktopGateway
+    const confirm = vi.spyOn(window, "confirm").mockReturnValue(true)
+    render(<GitView gateway={gateway} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Enviar commits" }))
+    await waitFor(() => expect(gateway.gitRemote).toHaveBeenCalledWith({ revision: "rev-remote", action: "push" }))
+    expect(confirm).toHaveBeenCalled()
   })
 })

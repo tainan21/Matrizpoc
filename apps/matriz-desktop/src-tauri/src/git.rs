@@ -39,6 +39,22 @@ pub struct GitCommitSummary {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct GitBranchSummary {
+    pub name: String,
+    pub current: bool,
+    pub upstream: Option<String>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GitReflogEntry {
+    pub short_id: String,
+    pub subject: String,
+    pub occurred_at: i64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct GitSnapshot {
     pub revision: String,
     pub branch: String,
@@ -47,6 +63,16 @@ pub struct GitSnapshot {
     pub behind: usize,
     pub changes: Vec<GitChange>,
     pub recent: Vec<GitCommitSummary>,
+    pub branches: Vec<GitBranchSummary>,
+    pub reflog: Vec<GitReflogEntry>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+pub enum GitRemoteAction {
+    Fetch,
+    Pull,
+    Push,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Eq)]
@@ -164,6 +190,29 @@ impl GitService {
         }
         self.verify_revision(root, revision)?;
         git_output(root, &["commit".into(), "-m".into(), message.to_owned()])?;
+        self.snapshot(root)
+    }
+
+    pub fn remote(
+        &self,
+        root: &Path,
+        revision: &str,
+        action: GitRemoteAction,
+    ) -> Result<GitSnapshot, String> {
+        self.verify_revision(root, revision)?;
+        let observed = observe(root)?;
+        if observed.snapshot.upstream.is_none() {
+            return Err("Current branch has no configured upstream".into());
+        }
+        if action == GitRemoteAction::Pull && !observed.snapshot.changes.is_empty() {
+            return Err("Pull requires a clean worktree".into());
+        }
+        let args = match action {
+            GitRemoteAction::Fetch => vec!["fetch".into(), "--prune".into()],
+            GitRemoteAction::Pull => vec!["pull".into(), "--ff-only".into()],
+            GitRemoteAction::Push => vec!["push".into()],
+        };
+        git_output(root, &args)?;
         self.snapshot(root)
     }
 
@@ -305,6 +354,8 @@ fn observe(root: &Path) -> Result<ObservedGit, String> {
         index += 1;
     }
     let recent = recent_commits(&root)?;
+    let branches = branch_summaries(&root, &branch, upstream.as_deref());
+    let reflog = reflog_entries(&root);
     Ok(ObservedGit {
         root,
         snapshot: GitSnapshot {
@@ -319,9 +370,63 @@ fn observe(root: &Path) -> Result<ObservedGit, String> {
             behind,
             changes,
             recent,
+            branches,
+            reflog,
         },
         paths,
     })
+}
+
+fn branch_summaries(
+    root: &Path,
+    current_branch: &str,
+    current_upstream: Option<&str>,
+) -> Vec<GitBranchSummary> {
+    git_output(
+        root,
+        &[
+            "for-each-ref".into(),
+            "--sort=-committerdate".into(),
+            "--format=%(refname:short)".into(),
+            "refs/heads".into(),
+        ],
+    )
+    .unwrap_or_default()
+    .lines()
+    .map(str::trim)
+    .filter(|name| !name.is_empty())
+    .map(|name| GitBranchSummary {
+        name: name.to_owned(),
+        current: name == current_branch,
+        upstream: if name == current_branch {
+            current_upstream.map(str::to_owned)
+        } else {
+            None
+        },
+    })
+    .collect()
+}
+
+fn reflog_entries(root: &Path) -> Vec<GitReflogEntry> {
+    git_output(
+        root,
+        &[
+            "reflog".into(),
+            "-10".into(),
+            "--pretty=format:%h%x1f%gs%x1f%ct".into(),
+        ],
+    )
+    .unwrap_or_default()
+    .lines()
+    .filter_map(|line| {
+        let mut fields = line.split('\u{1f}');
+        Some(GitReflogEntry {
+            short_id: fields.next()?.to_owned(),
+            subject: fields.next()?.to_owned(),
+            occurred_at: fields.next()?.parse().ok()?,
+        })
+    })
+    .collect()
 }
 
 fn recent_commits(root: &Path) -> Result<Vec<GitCommitSummary>, String> {
@@ -380,6 +485,8 @@ fn git_command(root: &Path, args: &[String]) -> Result<Output, String> {
     command
         .current_dir(root)
         .args(args)
+        .env("GIT_TERMINAL_PROMPT", "0")
+        .env("GCM_INTERACTIVE", "Never")
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());

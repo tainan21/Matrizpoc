@@ -153,6 +153,20 @@ export interface GitSnapshot {
   readonly behind: number
   readonly changes: readonly GitChange[]
   readonly recent: readonly GitCommitSummary[]
+  readonly branches: readonly GitBranchSummary[]
+  readonly reflog: readonly GitReflogEntry[]
+}
+
+export interface GitBranchSummary {
+  readonly name: string
+  readonly current: boolean
+  readonly upstream?: string
+}
+
+export interface GitReflogEntry {
+  readonly shortId: string
+  readonly subject: string
+  readonly occurredAt: number
 }
 
 export interface GitSelectionRequest {
@@ -168,6 +182,11 @@ export interface GitDiffRequest {
 export interface GitCommitRequest {
   readonly revision: string
   readonly message: string
+}
+
+export interface GitRemoteRequest {
+  readonly revision: string
+  readonly action: "fetch" | "pull" | "push"
 }
 
 export interface GitDiff {

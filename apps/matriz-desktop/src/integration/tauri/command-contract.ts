@@ -30,6 +30,7 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   gitStage: "stage_git_changes",
   gitUnstage: "unstage_git_changes",
   gitCommit: "commit_git_changes",
+  gitRemote: "run_git_remote",
   systemPulse: "get_system_pulse",
   getAwakeState: "get_awake_state",
   setAwake: "set_awake",

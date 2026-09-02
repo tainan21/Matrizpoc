@@ -390,7 +390,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .git-changes, .git-inspector { min-width:0; min-height:0; }
 .git-changes { border-right:1px solid var(--line); }
 .git-actions { height:38px; display:flex; align-items:center; justify-content:flex-end; gap:6px; padding:0 8px; border-bottom:1px solid var(--line); }
-.git-actions button, .git-commit button { height:27px; padding:0 12px; border:1px solid var(--line-strong); border-radius:6px; background:rgba(154,102,255,.08); color:var(--violet-hot); font:800 8px var(--matriz-font-mono); cursor:pointer; }
+.git-actions button, .git-commit button, .git-remote-actions button { height:27px; padding:0 12px; border:1px solid var(--line-strong); border-radius:6px; background:rgba(154,102,255,.08); color:var(--violet-hot); font:800 8px var(--matriz-font-mono); cursor:pointer; }
 .git-change { min-height:38px; display:grid; grid-template-columns:26px 30px minmax(0,1fr); align-items:center; border-bottom:1px solid rgba(182,154,232,.08); }
 .git-change input { justify-self:center; accent-color:var(--violet); }
 .git-change > span { color:#c98b68; font:800 8px var(--matriz-font-mono); }
@@ -403,6 +403,16 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .git-inspector > small { padding:7px 12px; color:#f0b864; font:700 7px var(--matriz-font-mono); }
 .git-commit { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:8px; margin-top:10px; }
 .git-commit input { min-width:0; height:34px; padding:0 11px; border:1px solid var(--line); border-radius:7px; outline:0; background:rgba(8,7,13,.62); color:var(--text); font:9px var(--matriz-font-mono); }
+.git-remote-actions { display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--line); }
+.git-remote-actions span { margin-right:auto; color:var(--text-muted); font:9px var(--matriz-font-mono); }
+.git-remote-actions button { min-height:30px; }
+.git-reference-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px; }
+.git-reference-grid section { border:1px solid var(--line); background:var(--surface-soft); }
+.git-reference-grid section > strong { display:block; padding:10px 12px; color:var(--accent-soft); font:800 9px var(--matriz-font-mono); border-bottom:1px solid var(--line); }
+.git-reference-grid section > div { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:9px; padding:7px 12px; border-bottom:1px solid var(--line-subtle); font:9px var(--matriz-font-mono); }
+.git-reference-grid section > div:last-child { border-bottom:0; }
+.git-reference-grid span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.git-reference-grid small { color:var(--text-muted); }
 .git-history { margin-top:12px; border-top:1px solid var(--line); }
 .git-history > div { min-height:34px; display:grid; grid-template-columns:60px minmax(0,1fr) 160px; align-items:center; gap:10px; border-bottom:1px solid rgba(182,154,232,.08); }
 .git-history code { color:var(--violet-hot); font:8px var(--matriz-font-mono); }.git-history strong { overflow:hidden; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }.git-history small { color:var(--muted); font:8px var(--matriz-font-mono); text-align:right; }
@@ -491,6 +501,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .agent-presence time { white-space: nowrap; }
 .agent-presence p { margin-top: 24px; text-align: center; }
 @media (max-width: 900px) { .runtime-workspace { grid-template-columns: minmax(190px, 34%) 1fr; } .agent-presence { display: none; } .route-picker { left: 34%; } }
+@media (max-width: 900px) { .git-reference-grid { grid-template-columns:1fr; } .git-remote-actions { align-items:stretch; flex-wrap:wrap; } .git-remote-actions span { width:100%; } }
 @media (max-width: 650px) { .runtime-workspace { margin-inline: -15px; grid-template-columns: 130px minmax(0,1fr); } .runtime-catalog { padding-inline: 7px; } .runtime-row { grid-template-columns: 7px minmax(0,1fr); } .runtime-row b { display: none; } .route-bar { grid-template-columns: auto 1fr auto; } .route-bar code { display: none; } .route-picker { left: 125px; width: calc(100vw - 145px); } }
 
 .hub-view { display:grid; gap:14px; max-width:1500px; margin:0 auto; }

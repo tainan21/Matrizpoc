@@ -39,7 +39,8 @@ use environment::{
 };
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
 use git::{
-    GitCommitRequest, GitDiff, GitDiffRequest, GitSelectionRequest, GitService, GitSnapshot,
+    GitCommitRequest, GitDiff, GitDiffRequest, GitRemoteAction, GitSelectionRequest, GitService,
+    GitSnapshot,
 };
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
 use node_sweep::{NodeSweepDeletion, NodeSweepScan, NodeSweepService};
@@ -807,6 +808,28 @@ async fn commit_git_changes(
     .map_err(|error| error.to_string())?
 }
 
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct GitRemoteRequest {
+    revision: String,
+    action: GitRemoteAction,
+}
+
+#[tauri::command]
+async fn run_git_remote(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    request: GitRemoteRequest,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        git.remote(&root, &request.revision, request.action)
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
 #[tauri::command]
 fn get_workspace_pulse(
     state: tauri::State<'_, OperationsState>,
@@ -1449,6 +1472,7 @@ pub fn run() {
             stage_git_changes,
             unstage_git_changes,
             commit_git_changes,
+            run_git_remote,
             get_system_pulse,
             get_awake_state,
             set_awake,

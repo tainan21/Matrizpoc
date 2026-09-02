@@ -35,6 +35,7 @@ describe("Tauri command contract", () => {
       gitStage: "stage_git_changes",
       gitUnstage: "unstage_git_changes",
       gitCommit: "commit_git_changes",
+      gitRemote: "run_git_remote",
       systemPulse: "get_system_pulse",
       getAwakeState: "get_awake_state",
       setAwake: "set_awake",
@@ -136,6 +137,7 @@ describe("Tauri command contract", () => {
     await gateway.gitStage(gitSelection)
     await gateway.gitUnstage(gitSelection)
     await gateway.gitCommit(gitCommit)
+    await gateway.gitRemote({ revision: "git-rev", action: "fetch" })
     await gateway.systemPulse()
     await gateway.getAwakeState()
     await gateway.setAwake(true)
@@ -221,6 +223,7 @@ describe("Tauri command contract", () => {
       { command: "stage_git_changes", args: { request: gitSelection } },
       { command: "unstage_git_changes", args: { request: gitSelection } },
       { command: "commit_git_changes", args: { request: gitCommit } },
+      { command: "run_git_remote", args: { request: { revision: "git-rev", action: "fetch" } } },
       { command: "get_system_pulse", args: undefined },
       { command: "get_awake_state", args: undefined },
       { command: "set_awake", args: { enabled: true } },

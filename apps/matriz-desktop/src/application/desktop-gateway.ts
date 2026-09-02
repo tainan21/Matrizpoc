@@ -43,6 +43,7 @@ import type {
   GitDiffRequest,
   GitCommitRequest,
   GitDiff,
+  GitRemoteRequest,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -75,6 +76,7 @@ export interface DesktopGateway {
   gitStage(request: GitSelectionRequest): Promise<GitSnapshot>
   gitUnstage(request: GitSelectionRequest): Promise<GitSnapshot>
   gitCommit(request: GitCommitRequest): Promise<GitSnapshot>
+  gitRemote(request: GitRemoteRequest): Promise<GitSnapshot>
   systemPulse(): Promise<SystemPulse>
   getAwakeState(): Promise<boolean>
   setAwake(enabled: boolean): Promise<boolean>

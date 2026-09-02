@@ -31,6 +31,7 @@ pub const COMMAND_NAMES: &[&str] = &[
     "stage_git_changes",
     "unstage_git_changes",
     "commit_git_changes",
+    "run_git_remote",
     "get_system_pulse",
     "get_awake_state",
     "set_awake",
