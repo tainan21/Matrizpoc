@@ -91,6 +91,9 @@ pub trait InfrastructureHost: Send + Sync {
     fn seed_local(&self, _workspace: &Path) -> Result<(), String> {
         Err("Seed local indisponível neste host".into())
     }
+    fn event_diagnostics(&self) -> Result<Vec<EventQueueDiagnostic>, String> {
+        Ok(Vec::new())
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -189,6 +192,18 @@ pub struct DatabaseSeedPreview {
     pub expires_at: u64,
     pub title: String,
     pub impact: Vec<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct EventQueueDiagnostic {
+    pub schema: String,
+    pub queue: &'static str,
+    pub available: bool,
+    pub pending: u64,
+    pub retries: u64,
+    pub dead_letters: u64,
+    pub oldest_at: Option<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -762,6 +777,10 @@ impl InfrastructureManager {
 
     pub fn backups(&self) -> Result<Vec<BackupRecord>, String> {
         read_backup_catalog(Path::new(&self.root))
+    }
+
+    pub fn event_diagnostics(&self) -> Result<Vec<EventQueueDiagnostic>, String> {
+        self.host.event_diagnostics()
     }
 }
 
@@ -1450,6 +1469,60 @@ impl PortableInfrastructureHost {
         }
     }
 
+    fn read_event_diagnostics(&self) -> Result<Vec<EventQueueDiagnostic>, String> {
+        let mut diagnostics = Vec::with_capacity(DATABASE_SCHEMAS.len() * 2);
+        for schema in DATABASE_SCHEMAS {
+            for queue in ["outbox", "inbox"] {
+                let table = format!("{queue}_events");
+                let relation = self
+                    .psql_output(
+                        "matriz",
+                        &format!("SELECT to_regclass('\"{schema}\".\"{table}\"');"),
+                    )?
+                    .trim()
+                    .to_owned();
+                if relation.is_empty() {
+                    diagnostics.push(EventQueueDiagnostic {
+                        schema: (*schema).into(),
+                        queue,
+                        available: false,
+                        pending: 0,
+                        retries: 0,
+                        dead_letters: 0,
+                        oldest_at: None,
+                    });
+                    continue;
+                }
+                let sql = if queue == "outbox" {
+                    format!("SELECT count(*) FILTER (WHERE \"publishedAt\" IS NULL AND \"deadLetteredAt\" IS NULL), count(*) FILTER (WHERE \"attempts\" > 0 AND \"publishedAt\" IS NULL AND \"deadLetteredAt\" IS NULL), count(*) FILTER (WHERE \"deadLetteredAt\" IS NOT NULL), COALESCE(to_char(min(\"occurredAt\") FILTER (WHERE \"publishedAt\" IS NULL AND \"deadLetteredAt\" IS NULL), 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"'),'') FROM \"{schema}\".\"{table}\";")
+                } else {
+                    format!("SELECT count(*), 0, 0, '' FROM \"{schema}\".\"{table}\";")
+                };
+                let output = self.psql_output("matriz", &sql)?;
+                let fields: Vec<_> = output.trim().split('|').collect();
+                if fields.len() != 4 {
+                    return Err("Diagnóstico de eventos retornou dados inválidos".into());
+                }
+                diagnostics.push(EventQueueDiagnostic {
+                    schema: (*schema).into(),
+                    queue,
+                    available: true,
+                    pending: fields[0]
+                        .parse()
+                        .map_err(|_| "Contagem de eventos inválida")?,
+                    retries: fields[1]
+                        .parse()
+                        .map_err(|_| "Contagem de retries inválida")?,
+                    dead_letters: fields[2]
+                        .parse()
+                        .map_err(|_| "Contagem de dead letters inválida")?,
+                    oldest_at: (!fields[3].is_empty()).then(|| fields[3].into()),
+                });
+            }
+        }
+        Ok(diagnostics)
+    }
+
     fn psql_file_as(&self, username: &str, password: &str, file: &Path) -> Result<(), String> {
         let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
         let output = Command::new(psql)
@@ -1834,6 +1907,10 @@ impl InfrastructureHost for PortableInfrastructureHost {
 
     fn seed_local(&self, workspace: &Path) -> Result<(), String> {
         self.run_local_seed(workspace)
+    }
+
+    fn event_diagnostics(&self) -> Result<Vec<EventQueueDiagnostic>, String> {
+        self.read_event_diagnostics()
     }
 }
 

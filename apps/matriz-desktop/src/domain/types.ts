@@ -490,6 +490,16 @@ export interface DatabaseSeedPreview {
   readonly impact: readonly string[]
 }
 
+export interface EventQueueDiagnostic {
+  readonly schema: string
+  readonly queue: "outbox" | "inbox"
+  readonly available: boolean
+  readonly pending: number
+  readonly retries: number
+  readonly deadLetters: number
+  readonly oldestAt?: string
+}
+
 export interface InfrastructureBackupRecord {
   readonly id: string
   readonly createdAt: number

@@ -6,9 +6,10 @@ use std::{
 
 use matriz_desktop_native::infrastructure::{
     compare_migration_ledger, read_backup_catalog, read_migration_files, resolve_verified_backup,
-    AppliedMigration, InfrastructureAction, InfrastructureHost, InfrastructureInspection,
-    InfrastructureManager, InfrastructurePreviewRequest, InfrastructureServiceId,
-    InfrastructureTargetId, MigrationFileDigest, PortableInfrastructureHost,
+    AppliedMigration, EventQueueDiagnostic, InfrastructureAction, InfrastructureHost,
+    InfrastructureInspection, InfrastructureManager, InfrastructurePreviewRequest,
+    InfrastructureServiceId, InfrastructureTargetId, MigrationFileDigest,
+    PortableInfrastructureHost,
 };
 use sha2::Digest;
 
@@ -19,6 +20,7 @@ struct FakeHost {
     restores: Mutex<Vec<String>>,
     applied: Mutex<HashMap<String, Vec<AppliedMigration>>>,
     database_events: Arc<Mutex<Vec<&'static str>>>,
+    diagnostics: Mutex<Vec<EventQueueDiagnostic>>,
 }
 
 impl InfrastructureHost for FakeHost {
@@ -100,6 +102,10 @@ impl InfrastructureHost for FakeHost {
     fn seed_local(&self, _workspace: &Path) -> Result<(), String> {
         self.database_events.lock().unwrap().push("seed");
         Ok(())
+    }
+
+    fn event_diagnostics(&self) -> Result<Vec<EventQueueDiagnostic>, String> {
+        Ok(self.diagnostics.lock().unwrap().clone())
     }
 }
 
@@ -392,6 +398,26 @@ fn local_seed_rejects_an_unhealthy_stack_and_a_changed_script() {
         .confirm_seed(&preview.confirmation_token, workspace.path())
         .unwrap_err()
         .contains("plano"));
+}
+
+#[test]
+fn event_diagnostics_are_read_only_view_models_without_payloads() {
+    let host = FakeHost::default();
+    host.diagnostics.lock().unwrap().push(EventQueueDiagnostic {
+        schema: "pay".into(),
+        queue: "outbox",
+        available: true,
+        pending: 3,
+        retries: 1,
+        dead_letters: 0,
+        oldest_at: Some("2026-09-02T10:00:00Z".into()),
+    });
+    let manager = InfrastructureManager::new(Box::new(host), || 1_000);
+    let rows = manager.event_diagnostics().unwrap();
+    assert_eq!(rows[0].pending, 3);
+    let json = serde_json::to_string(&rows).unwrap();
+    assert!(!json.contains("payload"));
+    assert!(!json.contains("DATABASE_URL"));
 }
 
 #[test]

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { DatabaseMigrationPreview, DatabaseMigrationSnapshot, DatabaseSeedPreview, InfrastructureActionId, InfrastructureActionPreview, InfrastructureBackupRecord, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
+import type { DatabaseMigrationPreview, DatabaseMigrationSnapshot, DatabaseSeedPreview, EventQueueDiagnostic, InfrastructureActionId, InfrastructureActionPreview, InfrastructureBackupRecord, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
 
 export function InfrastructureView({ gateway }: { readonly gateway: DesktopGateway }) {
   const [snapshot, setSnapshot] = useState<InfrastructureSnapshot>()
@@ -10,6 +10,7 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
   const [migrations, setMigrations] = useState<DatabaseMigrationSnapshot>()
   const [migrationPreview, setMigrationPreview] = useState<DatabaseMigrationPreview>()
   const [seedPreview, setSeedPreview] = useState<DatabaseSeedPreview>()
+  const [events, setEvents] = useState<readonly EventQueueDiagnostic[]>()
   const [backups, setBackups] = useState<readonly InfrastructureBackupRecord[]>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
@@ -71,6 +72,12 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
     } catch (cause) {
       setError(message(cause, "Ledger de migrations indisponível"))
     }
+  }
+
+  const inspectEvents = async () => {
+    setError(undefined)
+    try { setEvents(await gateway.infrastructureEventDiagnostics()) }
+    catch (cause) { setError(message(cause, "Diagnóstico de eventos indisponível")) }
   }
 
   const previewMigrations = async () => {
@@ -144,7 +151,7 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
         </div> : null}
       </div>
 
-      <div className="infra-database-actions"><button aria-label="Inspecionar migrations" onClick={() => void inspectMigrations()}>MIGRATIONS</button></div>
+      <div className="infra-database-actions"><button aria-label="Inspecionar migrations" onClick={() => void inspectMigrations()}>MIGRATIONS</button><button aria-label="Inspecionar eventos" onClick={() => void inspectEvents()}>EVENTOS</button></div>
 
       {error ? <p className="infra-error" role="alert">{error}</p> : null}
       <div className="infra-grid">
@@ -167,6 +174,7 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
       {migrationPreview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar aplicação de migrations"><div><small>BACKUP DE GUARDA OBRIGATÓRIO</small><h2>{migrationPreview.title}</h2>{migrationPreview.impact.map((item) => <p key={item}>{item}</p>)}</div><div><button disabled={busy} onClick={() => setMigrationPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar migrations" onClick={() => void confirmMigrations()}>CONFIRMAR</button></div></div> : null}
       {seedPreview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar seed local"><div><small>PROFILE LOCAL</small><h2>{seedPreview.title}</h2>{seedPreview.impact.map((item) => <p key={item}>{item}</p>)}</div><div><button disabled={busy} onClick={() => setSeedPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar seed local" onClick={() => void confirmSeed()}>CONFIRMAR</button></div></div> : null}
       {backups ? <section className="infra-backups" aria-label="Catálogo de backups"><header><strong>BACKUPS VERIFICADOS</strong><button aria-label="Fechar backups" onClick={() => setBackups(undefined)}>×</button></header>{backups.map((backup) => <article key={backup.id}><code>{backup.id}</code><span>{formatBytes(backup.bytes)}</span><b className={`infra-badge ${backup.integrity}`}>{backup.integrity}</b>{backup.integrity === "verified" ? <button disabled={busy} aria-label={`Restaurar ${backup.id}`} onClick={() => void request("postgres", "restore", backup.id)}>RESTAURAR</button> : null}</article>)}</section> : null}
+      {events ? <section className="infra-migrations" aria-label="Diagnóstico de eventos"><header><strong>OUTBOX / INBOX</strong><button aria-label="Fechar eventos" onClick={() => setEvents(undefined)}>×</button></header><div>{events.map((row) => <article key={`${row.schema}-${row.queue}`}><strong>{row.schema} · {row.queue}</strong><span className={`infra-badge ${row.available ? "clean" : "stopped"}`}>{row.available ? "available" : "absent"}</span>{row.available ? <code>{row.pending} pendentes · {row.retries} retries · {row.deadLetters} dead letters</code> : null}</article>)}</div></section> : null}
       <p className="area-note">Portas externas nunca são encerradas. Toda mutação exige prévia, token de uso único e nova inspeção.</p>
     </section>
   )

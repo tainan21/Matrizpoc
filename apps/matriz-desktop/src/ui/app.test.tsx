@@ -88,6 +88,7 @@ function gateway(): DesktopGateway {
     confirmInfrastructureMigrations: vi.fn().mockRejectedValue(new Error("not used")),
     previewInfrastructureSeed: vi.fn().mockRejectedValue(new Error("not used")),
     confirmInfrastructureSeed: vi.fn().mockRejectedValue(new Error("not used")),
+    infrastructureEventDiagnostics: vi.fn().mockResolvedValue([]),
     infrastructureBackups: vi.fn().mockResolvedValue([]),
     hide: vi.fn().mockResolvedValue(undefined),
     quit: vi.fn().mockResolvedValue(undefined),

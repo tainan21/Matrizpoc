@@ -49,8 +49,9 @@ use git::{
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
 use infrastructure::{
     BackupRecord, DatabaseMigrationPreview, DatabaseMigrationSnapshot, DatabaseSeedPreview,
-    InfrastructureActionPreview, InfrastructureManager, InfrastructurePreviewRequest,
-    InfrastructureServiceId, InfrastructureSnapshot, PortableInfrastructureHost,
+    EventQueueDiagnostic, InfrastructureActionPreview, InfrastructureManager,
+    InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureSnapshot,
+    PortableInfrastructureHost,
 };
 use node_sweep::{NodeSweepDeletion, NodeSweepScan, NodeSweepService};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
@@ -1515,6 +1516,16 @@ async fn confirm_infrastructure_seed(
 }
 
 #[tauri::command]
+async fn infrastructure_event_diagnostics(
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+) -> Result<Vec<EventQueueDiagnostic>, String> {
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.event_diagnostics())
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
 async fn infrastructure_backups(
     manager: tauri::State<'_, Arc<InfrastructureManager>>,
 ) -> Result<Vec<BackupRecord>, String> {
@@ -1685,6 +1696,7 @@ pub fn run() {
             confirm_infrastructure_migrations,
             preview_infrastructure_seed,
             confirm_infrastructure_seed,
+            infrastructure_event_diagnostics,
             infrastructure_backups,
             get_native_app_runtime,
             install_native_app,

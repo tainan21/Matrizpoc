@@ -139,6 +139,14 @@ describe("InfrastructureView", () => {
     await waitFor(() => expect(gateway.confirmInfrastructureSeed).toHaveBeenCalledWith("seed-token"))
   })
 
+  it("loads event diagnostics only on explicit inspection", async () => {
+    const gateway = { infrastructureSnapshot: vi.fn().mockResolvedValue(snapshot), infrastructureLogs: vi.fn().mockResolvedValue([]), infrastructureEventDiagnostics: vi.fn().mockResolvedValue([{ schema: "pay", queue: "outbox", available: true, pending: 2, retries: 1, deadLetters: 0 }]) } as unknown as DesktopGateway
+    render(<InfrastructureView gateway={gateway} />)
+    expect(gateway.infrastructureEventDiagnostics).not.toHaveBeenCalled()
+    fireEvent.click(await screen.findByRole("button", { name: "Inspecionar eventos" }))
+    expect(await screen.findByText("2 pendentes · 1 retries · 0 dead letters")).toBeVisible()
+  })
+
   it("creates a guard backup through the same explicit confirmation flow", async () => {
     const healthy = { ...snapshot, services: snapshot.services.map((service) => service.id === "postgres" ? { ...service, state: "healthy" as const } : service) }
     const gateway = {

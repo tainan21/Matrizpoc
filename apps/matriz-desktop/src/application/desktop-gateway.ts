@@ -54,6 +54,7 @@ import type {
   DatabaseMigrationSnapshot,
   DatabaseMigrationPreview,
   DatabaseSeedPreview,
+  EventQueueDiagnostic,
   InfrastructureBackupRecord,
 } from "../domain/types"
 
@@ -109,6 +110,7 @@ export interface DesktopGateway {
   confirmInfrastructureMigrations(confirmationToken: string): Promise<DatabaseMigrationSnapshot>
   previewInfrastructureSeed(): Promise<DatabaseSeedPreview>
   confirmInfrastructureSeed(confirmationToken: string): Promise<void>
+  infrastructureEventDiagnostics(): Promise<readonly EventQueueDiagnostic[]>
   infrastructureBackups(): Promise<readonly InfrastructureBackupRecord[]>
   hide(): Promise<void>
   quit(): Promise<void>
