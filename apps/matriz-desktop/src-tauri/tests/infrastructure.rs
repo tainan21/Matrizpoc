@@ -96,6 +96,35 @@ impl InfrastructureHost for FakeHost {
         }
         Ok(())
     }
+
+    fn seed_local(&self, _workspace: &Path) -> Result<(), String> {
+        self.database_events.lock().unwrap().push("seed");
+        Ok(())
+    }
+}
+
+fn healthy_host(events: Arc<Mutex<Vec<&'static str>>>) -> FakeHost {
+    let host = FakeHost {
+        database_events: events,
+        ..Default::default()
+    };
+    for service in [
+        InfrastructureServiceId::Postgres,
+        InfrastructureServiceId::Garnet,
+        InfrastructureServiceId::Nats,
+    ] {
+        host.states.lock().unwrap().insert(
+            service,
+            InfrastructureInspection {
+                installed: true,
+                running: true,
+                healthy: true,
+                owned: true,
+                observed_version: Some("test".into()),
+            },
+        );
+    }
+    host
 }
 
 #[test]
@@ -317,6 +346,50 @@ fn migration_confirmation_rejects_a_changed_plan() {
     std::fs::write(migration.join("migration.sql"), "SELECT 2;\n").unwrap();
     assert!(manager
         .confirm_migrations(&preview.confirmation_token, workspace.path())
+        .unwrap_err()
+        .contains("plano"));
+}
+
+#[test]
+fn local_seed_requires_healthy_services_clean_ledgers_and_confirmation() {
+    let workspace = tempfile::tempdir().unwrap();
+    let script = workspace.path().join("tooling/scripts/seed-local-dev.ts");
+    std::fs::create_dir_all(script.parent().unwrap()).unwrap();
+    std::fs::write(&script, "seed();\n").unwrap();
+    let events = Arc::new(Mutex::new(Vec::new()));
+    let manager = InfrastructureManager::new(Box::new(healthy_host(Arc::clone(&events))), || 1_000);
+    let preview = manager.preview_seed(workspace.path()).unwrap();
+    assert!(events.lock().unwrap().is_empty());
+    manager
+        .confirm_seed(&preview.confirmation_token, workspace.path())
+        .unwrap();
+    assert_eq!(*events.lock().unwrap(), ["seed"]);
+    assert!(manager
+        .confirm_seed(&preview.confirmation_token, workspace.path())
+        .unwrap_err()
+        .contains("já utilizado"));
+}
+
+#[test]
+fn local_seed_rejects_an_unhealthy_stack_and_a_changed_script() {
+    let workspace = tempfile::tempdir().unwrap();
+    let script = workspace.path().join("tooling/scripts/seed-local-dev.ts");
+    std::fs::create_dir_all(script.parent().unwrap()).unwrap();
+    std::fs::write(&script, "seed();\n").unwrap();
+    let blocked = InfrastructureManager::new(Box::new(FakeHost::default()), || 1_000);
+    assert!(blocked
+        .preview_seed(workspace.path())
+        .unwrap_err()
+        .contains("saudável"));
+
+    let manager = InfrastructureManager::new(
+        Box::new(healthy_host(Arc::new(Mutex::new(Vec::new())))),
+        || 1_000,
+    );
+    let preview = manager.preview_seed(workspace.path()).unwrap();
+    std::fs::write(script, "changed();\n").unwrap();
+    assert!(manager
+        .confirm_seed(&preview.confirmation_token, workspace.path())
         .unwrap_err()
         .contains("plano"));
 }

@@ -483,6 +483,13 @@ export interface DatabaseMigrationPreview {
   readonly schemas: readonly string[]
 }
 
+export interface DatabaseSeedPreview {
+  readonly confirmationToken: string
+  readonly expiresAt: number
+  readonly title: string
+  readonly impact: readonly string[]
+}
+
 export interface InfrastructureBackupRecord {
   readonly id: string
   readonly createdAt: number

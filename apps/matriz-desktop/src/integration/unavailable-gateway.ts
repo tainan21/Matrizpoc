@@ -104,6 +104,8 @@ export const unavailableGateway: DesktopGateway = {
   infrastructureMigrations: async () => ({ state: "clean", schemas: [] }),
   previewInfrastructureMigrations: unavailable,
   confirmInfrastructureMigrations: unavailable,
+  previewInfrastructureSeed: unavailable,
+  confirmInfrastructureSeed: unavailable,
   infrastructureBackups: async () => [],
   hide: async () => unavailable(),
   quit: async () => unavailable(),

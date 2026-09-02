@@ -123,6 +123,22 @@ describe("InfrastructureView", () => {
     await waitFor(() => expect(gateway.confirmInfrastructureMigrations).toHaveBeenCalledWith("migration-token"))
   })
 
+  it("runs the local seed only with clean ledgers and explicit confirmation", async () => {
+    const gateway = {
+      infrastructureSnapshot: vi.fn().mockResolvedValue(snapshot),
+      infrastructureLogs: vi.fn().mockResolvedValue([]),
+      infrastructureMigrations: vi.fn().mockResolvedValue({ state: "clean", schemas: [] }),
+      previewInfrastructureSeed: vi.fn().mockResolvedValue({ confirmationToken: "seed-token", expiresAt: Date.now() + 30_000, title: "Popular dados locais", impact: ["Somente local"] }),
+      confirmInfrastructureSeed: vi.fn().mockResolvedValue(undefined),
+    } as unknown as DesktopGateway
+    render(<InfrastructureView gateway={gateway} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Inspecionar migrations" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Preparar seed local" }))
+    expect(gateway.confirmInfrastructureSeed).not.toHaveBeenCalled()
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar seed local" }))
+    await waitFor(() => expect(gateway.confirmInfrastructureSeed).toHaveBeenCalledWith("seed-token"))
+  })
+
   it("creates a guard backup through the same explicit confirmation flow", async () => {
     const healthy = { ...snapshot, services: snapshot.services.map((service) => service.id === "postgres" ? { ...service, state: "healthy" as const } : service) }
     const gateway = {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { DatabaseMigrationPreview, DatabaseMigrationSnapshot, InfrastructureActionId, InfrastructureActionPreview, InfrastructureBackupRecord, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
+import type { DatabaseMigrationPreview, DatabaseMigrationSnapshot, DatabaseSeedPreview, InfrastructureActionId, InfrastructureActionPreview, InfrastructureBackupRecord, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
 
 export function InfrastructureView({ gateway }: { readonly gateway: DesktopGateway }) {
   const [snapshot, setSnapshot] = useState<InfrastructureSnapshot>()
@@ -9,6 +9,7 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
   const [logs, setLogs] = useState<{ name: string; lines: readonly string[] }>()
   const [migrations, setMigrations] = useState<DatabaseMigrationSnapshot>()
   const [migrationPreview, setMigrationPreview] = useState<DatabaseMigrationPreview>()
+  const [seedPreview, setSeedPreview] = useState<DatabaseSeedPreview>()
   const [backups, setBackups] = useState<readonly InfrastructureBackupRecord[]>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
@@ -100,6 +101,34 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
     }
   }
 
+  const previewSeed = async () => {
+    if (busy) return
+    setBusy(true)
+    setError(undefined)
+    try {
+      setSeedPreview(await gateway.previewInfrastructureSeed())
+    } catch (cause) {
+      setError(message(cause, "O seed local não está pronto"))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const confirmSeed = async () => {
+    if (!seedPreview || busy) return
+    setBusy(true)
+    setError(undefined)
+    try {
+      await gateway.confirmInfrastructureSeed(seedPreview.confirmationToken)
+      setSeedPreview(undefined)
+    } catch (cause) {
+      setError(message(cause, "O seed local falhou"))
+      setSeedPreview(undefined)
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
     <section className="infra-view" aria-labelledby="infra-title">
       <div className="section-head">
@@ -134,8 +163,9 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
 
       {preview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar operação de infraestrutura"><div><small>PRÉVIA OBRIGATÓRIA</small><h2>{preview.title}</h2>{preview.impact.map((item) => <p key={item}>{item}</p>)}</div><div><button disabled={busy} onClick={() => setPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar operação" onClick={() => void confirm()}>CONFIRMAR</button></div></div> : null}
       {logs ? <section className="infra-logs" aria-label={`Logs do ${logs.name}`}><header><strong>LOGS / {logs.name.toUpperCase()}</strong><button aria-label="Fechar logs" onClick={() => setLogs(undefined)}>×</button></header><pre>{logs.lines.join("\n") || "Nenhum log local disponível"}</pre></section> : null}
-      {migrations ? <section className="infra-migrations" aria-label="Ledger de migrations"><header><strong>MIGRATIONS / {migrations.state.toUpperCase()}</strong><button aria-label="Fechar migrations" onClick={() => setMigrations(undefined)}>×</button></header><div>{migrations.schemas.map(({ schema, ledger }) => <article key={schema}><strong>{schema}</strong><span className={`infra-badge ${ledger.state}`}>{ledger.state}</span>{ledger.pending.map((name) => <code key={`pending-${name}`}>{name}</code>)}{ledger.altered.map((name) => <code key={`altered-${name}`}>ALTERADA · {name}</code>)}{ledger.unexpected.map((name) => <code key={`unexpected-${name}`}>INESPERADA · {name}</code>)}{ledger.failed.map((name) => <code key={`failed-${name}`}>FALHOU · {name}</code>)}</article>)}</div>{migrations.state === "pending" ? <button disabled={busy} aria-label="Aplicar migrations pendentes" onClick={() => void previewMigrations()}>APLICAR PENDENTES</button> : null}</section> : null}
+      {migrations ? <section className="infra-migrations" aria-label="Ledger de migrations"><header><strong>MIGRATIONS / {migrations.state.toUpperCase()}</strong><button aria-label="Fechar migrations" onClick={() => setMigrations(undefined)}>×</button></header><div>{migrations.schemas.map(({ schema, ledger }) => <article key={schema}><strong>{schema}</strong><span className={`infra-badge ${ledger.state}`}>{ledger.state}</span>{ledger.pending.map((name) => <code key={`pending-${name}`}>{name}</code>)}{ledger.altered.map((name) => <code key={`altered-${name}`}>ALTERADA · {name}</code>)}{ledger.unexpected.map((name) => <code key={`unexpected-${name}`}>INESPERADA · {name}</code>)}{ledger.failed.map((name) => <code key={`failed-${name}`}>FALHOU · {name}</code>)}</article>)}</div>{migrations.state === "pending" ? <button disabled={busy} aria-label="Aplicar migrations pendentes" onClick={() => void previewMigrations()}>APLICAR PENDENTES</button> : null}{migrations.state === "clean" ? <button disabled={busy} aria-label="Preparar seed local" onClick={() => void previewSeed()}>POPULAR LOCAL</button> : null}</section> : null}
       {migrationPreview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar aplicação de migrations"><div><small>BACKUP DE GUARDA OBRIGATÓRIO</small><h2>{migrationPreview.title}</h2>{migrationPreview.impact.map((item) => <p key={item}>{item}</p>)}</div><div><button disabled={busy} onClick={() => setMigrationPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar migrations" onClick={() => void confirmMigrations()}>CONFIRMAR</button></div></div> : null}
+      {seedPreview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar seed local"><div><small>PROFILE LOCAL</small><h2>{seedPreview.title}</h2>{seedPreview.impact.map((item) => <p key={item}>{item}</p>)}</div><div><button disabled={busy} onClick={() => setSeedPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar seed local" onClick={() => void confirmSeed()}>CONFIRMAR</button></div></div> : null}
       {backups ? <section className="infra-backups" aria-label="Catálogo de backups"><header><strong>BACKUPS VERIFICADOS</strong><button aria-label="Fechar backups" onClick={() => setBackups(undefined)}>×</button></header>{backups.map((backup) => <article key={backup.id}><code>{backup.id}</code><span>{formatBytes(backup.bytes)}</span><b className={`infra-badge ${backup.integrity}`}>{backup.integrity}</b>{backup.integrity === "verified" ? <button disabled={busy} aria-label={`Restaurar ${backup.id}`} onClick={() => void request("postgres", "restore", backup.id)}>RESTAURAR</button> : null}</article>)}</section> : null}
       <p className="area-note">Portas externas nunca são encerradas. Toda mutação exige prévia, token de uso único e nova inspeção.</p>
     </section>

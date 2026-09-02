@@ -24,6 +24,7 @@ use windows_sys::Win32::{
 use crate::{
     ports,
     processes::{ProcessTerminator, WindowsProcessTerminator},
+    terminal::corepack_pnpm_command,
 };
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -86,6 +87,9 @@ pub trait InfrastructureHost: Send + Sync {
     }
     fn apply_migrations(&self, _workspace: &Path) -> Result<(), String> {
         Err("Aplicação de migrations indisponível neste host".into())
+    }
+    fn seed_local(&self, _workspace: &Path) -> Result<(), String> {
+        Err("Seed local indisponível neste host".into())
     }
 }
 
@@ -176,6 +180,15 @@ pub struct DatabaseMigrationPreview {
     pub title: String,
     pub impact: Vec<String>,
     pub schemas: Vec<String>,
+}
+
+#[derive(Clone, Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatabaseSeedPreview {
+    pub confirmation_token: String,
+    pub expires_at: u64,
+    pub title: String,
+    pub impact: Vec<String>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
@@ -421,12 +434,20 @@ struct PendingMigrations {
     expires_at: u64,
 }
 
+#[derive(Clone)]
+struct PendingSeed {
+    workspace: PathBuf,
+    plan_digest: String,
+    expires_at: u64,
+}
+
 pub struct InfrastructureManager {
     host: Box<dyn InfrastructureHost>,
     root: String,
     now: Arc<dyn Fn() -> u64 + Send + Sync>,
     pending: Mutex<HashMap<String, PendingAction>>,
     pending_migrations: Mutex<HashMap<String, PendingMigrations>>,
+    pending_seeds: Mutex<HashMap<String, PendingSeed>>,
 }
 
 impl InfrastructureManager {
@@ -448,6 +469,7 @@ impl InfrastructureManager {
             now: Arc::new(now),
             pending: Mutex::new(HashMap::new()),
             pending_migrations: Mutex::new(HashMap::new()),
+            pending_seeds: Mutex::new(HashMap::new()),
         }
     }
 
@@ -669,6 +691,75 @@ impl InfrastructureManager {
         Ok(after)
     }
 
+    pub fn preview_seed(&self, workspace: &Path) -> Result<DatabaseSeedPreview, String> {
+        let workspace = workspace
+            .canonicalize()
+            .map_err(|error| error.to_string())?;
+        self.assert_seed_ready(&workspace)?;
+        let plan_digest = seed_plan_digest(&workspace, &self.migrations(&workspace)?)?;
+        let token = uuid::Uuid::new_v4().to_string();
+        let expires_at = (self.now)().saturating_add(300_000);
+        self.pending_seeds
+            .lock()
+            .map_err(|_| "Confirmações de seed indisponíveis".to_string())?
+            .insert(
+                token.clone(),
+                PendingSeed {
+                    workspace,
+                    plan_digest,
+                    expires_at,
+                },
+            );
+        Ok(DatabaseSeedPreview {
+            confirmation_token: token,
+            expires_at,
+            title: "Popular dados locais de desenvolvimento".into(),
+            impact: vec![
+                "Disponível somente para a infraestrutura portátil local".into(),
+                "O seed é idempotente e usa apenas os oito bancos com ledger limpo".into(),
+            ],
+        })
+    }
+
+    pub fn confirm_seed(&self, token: &str, workspace: &Path) -> Result<(), String> {
+        let pending = self
+            .pending_seeds
+            .lock()
+            .map_err(|_| "Confirmações de seed indisponíveis".to_string())?
+            .remove(token)
+            .ok_or("Token de seed inválido ou já utilizado")?;
+        if (self.now)() > pending.expires_at {
+            return Err("O token de seed expirou".into());
+        }
+        let workspace = workspace
+            .canonicalize()
+            .map_err(|error| error.to_string())?;
+        if workspace != pending.workspace {
+            return Err("O workspace mudou após a prévia do seed".into());
+        }
+        self.assert_seed_ready(&workspace)?;
+        if seed_plan_digest(&workspace, &self.migrations(&workspace)?)? != pending.plan_digest {
+            return Err("O plano local mudou após a prévia do seed".into());
+        }
+        self.host.seed_local(&workspace)
+    }
+
+    fn assert_seed_ready(&self, workspace: &Path) -> Result<(), String> {
+        let snapshot = self.snapshot()?;
+        if snapshot.services.len() != CATALOG.len()
+            || snapshot
+                .services
+                .iter()
+                .any(|service| service.state != "healthy")
+        {
+            return Err("Seed exige a stack portátil integralmente saudável".into());
+        }
+        if self.migrations(workspace)?.state != "clean" {
+            return Err("Seed exige os oito ledgers de migration limpos".into());
+        }
+        Ok(())
+    }
+
     pub fn backups(&self) -> Result<Vec<BackupRecord>, String> {
         read_backup_catalog(Path::new(&self.root))
     }
@@ -681,6 +772,27 @@ fn migration_plan_digest(
     let files = read_migration_files(workspace)?;
     let serialized = serde_json::to_vec(&(snapshot, files)).map_err(|error| error.to_string())?;
     Ok(format!("{:x}", Sha256::digest(serialized)))
+}
+
+fn seed_plan_digest(
+    workspace: &Path,
+    migrations: &DatabaseMigrationSnapshot,
+) -> Result<String, String> {
+    let script = workspace
+        .join("tooling/scripts/seed-local-dev.ts")
+        .canonicalize()
+        .map_err(|_| "Script de seed local não encontrado no workspace".to_string())?;
+    if !script.starts_with(workspace) {
+        return Err("Script de seed fora do workspace canônico".into());
+    }
+    let metadata = fs::symlink_metadata(&script).map_err(|error| error.to_string())?;
+    if metadata.file_type().is_symlink() || !metadata.is_file() {
+        return Err("Script de seed local inválido".into());
+    }
+    let mut digest = Sha256::new();
+    digest.update(serde_json::to_vec(migrations).map_err(|error| error.to_string())?);
+    digest.update(fs::read(script).map_err(|error| error.to_string())?);
+    Ok(format!("{:x}", digest.finalize()))
 }
 
 struct ServiceDefinition {
@@ -1282,6 +1394,61 @@ impl PortableInfrastructureHost {
         }
     }
 
+    fn run_local_seed(&self, workspace: &Path) -> Result<(), String> {
+        let script = workspace
+            .join("tooling/scripts/seed-local-dev.ts")
+            .canonicalize()
+            .map_err(|_| "Script de seed local não encontrado".to_string())?;
+        if !script.starts_with(workspace) {
+            return Err("Script de seed fora do workspace canônico".into());
+        }
+        let args = vec![
+            "exec".to_owned(),
+            "tsx".to_owned(),
+            "tooling/scripts/seed-local-dev.ts".to_owned(),
+        ];
+        let (program, arguments) = corepack_pnpm_command(&args)?;
+        let mut command = Command::new(program);
+        command
+            .args(arguments)
+            .current_dir(workspace)
+            .env_clear()
+            .env("MATRIZ_ENVIRONMENT", "local")
+            .stdin(Stdio::null())
+            .creation_flags(0x0800_0000);
+        for key in [
+            "SystemRoot",
+            "WINDIR",
+            "TEMP",
+            "TMP",
+            "LOCALAPPDATA",
+            "APPDATA",
+            "ProgramFiles",
+            "ProgramFiles(x86)",
+        ] {
+            if let Some(value) = std::env::var_os(key) {
+                command.env(key, value);
+            }
+        }
+        for schema in DATABASE_SCHEMAS {
+            let role = format!("matriz_{schema}_runtime");
+            let password = self.secret(&format!("postgres-{role}"))?;
+            command.env(
+                format!("{}_DATABASE_URL", schema.to_ascii_uppercase()),
+                format!("postgresql://{role}:{password}@127.0.0.1:55432/matriz?schema={schema}"),
+            );
+        }
+        let output = command.output().map_err(|error| error.to_string())?;
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(format!(
+                "Seed local falhou: {}",
+                redact(&String::from_utf8_lossy(&output.stderr))
+            ))
+        }
+    }
+
     fn psql_file_as(&self, username: &str, password: &str, file: &Path) -> Result<(), String> {
         let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
         let output = Command::new(psql)
@@ -1662,6 +1829,10 @@ impl InfrastructureHost for PortableInfrastructureHost {
 
     fn apply_migrations(&self, workspace: &Path) -> Result<(), String> {
         self.apply_workspace_migrations(workspace)
+    }
+
+    fn seed_local(&self, workspace: &Path) -> Result<(), String> {
+        self.run_local_seed(workspace)
     }
 }
 

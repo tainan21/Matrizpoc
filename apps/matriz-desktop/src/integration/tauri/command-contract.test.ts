@@ -55,6 +55,8 @@ describe("Tauri command contract", () => {
       infrastructureMigrations: "infrastructure_migrations",
       previewInfrastructureMigrations: "preview_infrastructure_migrations",
       confirmInfrastructureMigrations: "confirm_infrastructure_migrations",
+      previewInfrastructureSeed: "preview_infrastructure_seed",
+      confirmInfrastructureSeed: "confirm_infrastructure_seed",
       infrastructureBackups: "infrastructure_backups",
       hide: "hide_window",
       quit: "quit_app",
@@ -172,6 +174,8 @@ describe("Tauri command contract", () => {
     await gateway.infrastructureMigrations()
     await gateway.previewInfrastructureMigrations()
     await gateway.confirmInfrastructureMigrations("migration-token")
+    await gateway.previewInfrastructureSeed()
+    await gateway.confirmInfrastructureSeed("seed-token")
     await gateway.infrastructureBackups()
     await gateway.hide()
     await gateway.quit()
@@ -268,6 +272,8 @@ describe("Tauri command contract", () => {
       { command: "infrastructure_migrations", args: undefined },
       { command: "preview_infrastructure_migrations", args: undefined },
       { command: "confirm_infrastructure_migrations", args: { confirmationToken: "migration-token" } },
+      { command: "preview_infrastructure_seed", args: undefined },
+      { command: "confirm_infrastructure_seed", args: { confirmationToken: "seed-token" } },
       { command: "infrastructure_backups", args: undefined },
       { command: "hide_window", args: undefined },
       { command: "quit_app", args: undefined },
