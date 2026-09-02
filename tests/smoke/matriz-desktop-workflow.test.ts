@@ -31,6 +31,25 @@ describe("Matriz Desktop Windows workflows", () => {
     expect(acceptanceWorkflow).toContain("if: always()")
   })
 
+  it("publishes an Authenticode and Tauri-signed Control updater", () => {
+    const releaseWorkflow = readFileSync(
+      path.join(workspaceRoot, ".github/workflows/matriz-control-tauri-windows-release.yml"),
+      "utf8",
+    )
+    const packagingScript = readFileSync(
+      path.join(workspaceRoot, "apps/matriz-desktop/scripts/package-signed-update.ps1"),
+      "utf8",
+    )
+
+    expect(releaseWorkflow).toContain("TAURI_SIGNING_PRIVATE_KEY")
+    expect(releaseWorkflow).toContain("MATRIZ_CONTROL_UPDATER_PUBLIC_KEY")
+    expect(releaseWorkflow).toContain("package:update")
+    expect(releaseWorkflow).toContain("$name.sig")
+    expect(releaseWorkflow).toContain("steps.artifact.outputs.signature")
+    expect(packagingScript).toContain("certificateThumbprint")
+    expect(packagingScript).toContain("TAURI_SIGNING_PRIVATE_KEY is required")
+  })
+
   it("keeps Workbench standalone and ships independent Windows release workflows", () => {
     const workbenchRelease = readFileSync(path.join(workspaceRoot, ".github/workflows/workbench-windows-release.yml"), "utf8")
     const seumeiRelease = readFileSync(path.join(workspaceRoot, ".github/workflows/seumei-windows-release.yml"), "utf8")

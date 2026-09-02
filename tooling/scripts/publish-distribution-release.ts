@@ -8,6 +8,10 @@ export interface ReleaseArtifact {
   version: string
   filePath: string
   downloadUrl: string
+  updater?: {
+    signaturePath: string
+    downloadUrl: string
+  }
 }
 
 export function canonicalReleasePayload(input: {
@@ -39,6 +43,7 @@ export async function publishDistributionRelease(
   const sha256 = createHash("sha256").update(bytes).digest("hex")
   const canonical = canonicalReleasePayload({ ...artifact, sizeBytes: info.size, sha256 })
   const signature = sign(null, Buffer.from(canonical), createPrivateKey(privateKey)).toString("base64")
+  const updater = artifact.updater ? await updaterMetadata(artifact.updater, info.size) : undefined
   const body = {
     version: artifact.version,
     channel: "stable",
@@ -46,6 +51,7 @@ export async function publishDistributionRelease(
     releaseNotes: null,
     installer: { fileName: basename(filePath), downloadUrl: artifact.downloadUrl, sizeBytes: info.size, sha256 },
     signature,
+    ...(updater ? { updater: { "windows-x86_64": updater } } : {}),
   }
   const headers = { authorization: `Bearer ${token}`, "content-type": "application/json" }
   const createResponse = await request(
@@ -63,6 +69,19 @@ export async function publishDistributionRelease(
   return { releaseId: draft.releaseId, sha256, signature }
 }
 
+async function updaterMetadata(
+  updater: NonNullable<ReleaseArtifact["updater"]>,
+  sizeBytes: number,
+) {
+  const url = new URL(updater.downloadUrl)
+  if (url.protocol !== "https:") throw new Error("Updater download URL must use HTTPS")
+  const signature = (await readFile(resolve(updater.signaturePath), "utf8")).trim()
+  if (signature.length < 16 || signature.length > 16_384) {
+    throw new Error("Updater signature is invalid")
+  }
+  return { url: url.toString(), signature, sizeBytes }
+}
+
 function required(environment: NodeJS.ProcessEnv, name: string) {
   const value = environment[name]?.trim()
   if (!value) throw new Error(`${name} is required`)
@@ -76,9 +95,20 @@ async function responseJson(response: Response): Promise<Record<string, unknown>
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-  const [productId, version, filePath, downloadUrl] = process.argv.slice(2)
+  const [productId, version, filePath, downloadUrl, updaterSignaturePath, updaterDownloadUrl] = process.argv.slice(2)
   if (!productId || !version || !filePath || !downloadUrl) throw new Error("Usage: publish-distribution-release <productId> <version> <file> <https-url>")
-  publishDistributionRelease({ productId, version, filePath, downloadUrl })
+  if ((updaterSignaturePath && !updaterDownloadUrl) || (!updaterSignaturePath && updaterDownloadUrl)) {
+    throw new Error("Updater signature path and download URL must be provided together")
+  }
+  publishDistributionRelease({
+    productId,
+    version,
+    filePath,
+    downloadUrl,
+    ...(updaterSignaturePath && updaterDownloadUrl
+      ? { updater: { signaturePath: updaterSignaturePath, downloadUrl: updaterDownloadUrl } }
+      : {}),
+  })
     .then(({ releaseId }) => console.log(`Published ${productId} ${version} as ${releaseId}`))
     .catch((error) => { console.error(error instanceof Error ? error.message : error); process.exitCode = 1 })
 }
