@@ -1,6 +1,8 @@
 {
   "name": "@matriz/app-naevia",
   "version": "1.0.0",
+  "description": "Navegador Matriz para exploração e coworking com agentes.",
+  "author": "Matriz",
   "private": true,
   "type": "module",
   "main": "dist-electron/electron/main.js",
@@ -37,7 +39,7 @@
     "artifactName": "naevia-${version}-windows-${arch}-setup.${ext}",
     "directories": { "output": "release" },
     "files": ["dist/**/*", "dist-electron/**/*", "package.json"],
-    "win": { "target": ["nsis"], "publisherName": "Matriz" },
+    "win": { "target": ["nsis"] },
     "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "perMachine": false }
   }
 }

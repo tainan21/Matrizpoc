@@ -1,0 +1,66 @@
+name: naevia-windows-release
+
+on:
+  push:
+    tags: ["naevia-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "22", cache: pnpm }
+      - run: pnpm install --frozen-lockfile
+      - name: Verify immutable release tag and package version
+        shell: pwsh
+        run: |
+          $version = node -p "require('./apps/naevia/package.json').version"
+          if ('${{ github.ref_name }}' -ne "naevia-v$version") { throw "Release tag must equal naevia-v$version" }
+      - run: pnpm --filter @matriz/app-naevia test
+      - run: pnpm --filter @matriz/app-naevia lint
+      - run: pnpm --filter @matriz/app-naevia typecheck
+      - run: pnpm --filter @matriz/app-naevia e2e
+      - name: Require signing and Hub credentials
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.MATRIZ_WINDOWS_SIGNING_CERTIFICATE }}
+          MANIFEST_KEY: ${{ secrets.MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY }}
+          HUB_URL: ${{ vars.MATRIZ_DISTRIBUTION_HUB_URL }}
+          HUB_TOKEN: ${{ secrets.MATRIZ_DISTRIBUTION_ADMIN_TOKEN }}
+        run: |
+          foreach ($value in @($env:WINDOWS_CERTIFICATE,$env:MANIFEST_KEY,$env:HUB_URL,$env:HUB_TOKEN)) { if ([string]::IsNullOrWhiteSpace($value)) { throw "Release trust configuration is required" } }
+      - name: Build Authenticode-signed NSIS installer
+        env:
+          CSC_LINK: ${{ secrets.MATRIZ_WINDOWS_SIGNING_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.MATRIZ_WINDOWS_SIGNING_CERTIFICATE_PASSWORD }}
+        run: pnpm --filter @matriz/app-naevia package
+      - name: Verify and normalize installer
+        id: artifact
+        shell: pwsh
+        run: |
+          $version = node -p "require('./apps/naevia/package.json').version"
+          $name = "naevia-$version-windows-x64-setup.exe"
+          $installer = Get-Item "apps/naevia/release/$name" -ErrorAction Stop
+          if ($installer.Length -lt 1 -or $installer.Length -gt 536870912) { throw "Installer size is invalid" }
+          if ((Get-AuthenticodeSignature $installer.FullName).Status -ne 'Valid') { throw "Authenticode validation failed" }
+          New-Item release-output -ItemType Directory -Force | Out-Null
+          Copy-Item $installer.FullName "release-output/$name"
+          Get-FileHash "release-output/$name" -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $name" } | Set-Content release-output/SHA256SUMS.txt
+          "file=$name" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Register signed stable release in Hub
+        env:
+          MATRIZ_DISTRIBUTION_HUB_URL: ${{ vars.MATRIZ_DISTRIBUTION_HUB_URL }}
+          MATRIZ_DISTRIBUTION_ADMIN_TOKEN: ${{ secrets.MATRIZ_DISTRIBUTION_ADMIN_TOKEN }}
+          MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY: ${{ secrets.MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY }}
+        run: corepack pnpm exec tsx tooling/scripts/publish-distribution-release.ts naevia-electron ${{ steps.artifact.outputs.version }} release-output/${{ steps.artifact.outputs.file }} https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.artifact.outputs.file }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release-output/*

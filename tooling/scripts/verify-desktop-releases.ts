@@ -6,6 +6,7 @@ interface Target { app: string; config: string; identity: string; workflow: stri
 const targets: readonly Target[] = [
   { app: "matriz-desktop", config: "apps/matriz-desktop/src-tauri/tauri.conf.json", identity: "com.matriz.control", workflow: ".github/workflows/matriz-control-tauri-windows-release.yml", tag: "control-v*" },
   { app: "matriz-control", config: "apps/matriz-control/package.json", identity: "com.matriz.control.electron", workflow: ".github/workflows/matriz-control-windows-release.yml", tag: "control-electron-v*" },
+  { app: "naevia", config: "apps/naevia/package.json", identity: "com.matriz.naevia", workflow: ".github/workflows/naevia-windows-release.yml", tag: "naevia-v*" },
   { app: "matriz-admin", config: "apps/matriz-admin/desktop/src-tauri/tauri.conf.json", identity: "com.matriz.admin", workflow: ".github/workflows/matriz-admin-windows-release.yml", tag: "admin-v*" },
   { app: "matriz-client-admin", config: "apps/matriz-client-admin/desktop/src-tauri/tauri.conf.json", identity: "com.matriz.clientadmin", workflow: ".github/workflows/matriz-client-admin-windows-release.yml", tag: "client-admin-v*" },
   { app: "matriz-ops", config: "apps/matriz-ops/desktop/src-tauri/tauri.conf.json", identity: "com.matriz.ops", workflow: ".github/workflows/matriz-ops-windows-release.yml", tag: "ops-v*" },

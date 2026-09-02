@@ -16,6 +16,7 @@ Fonte canônica para downloads, instaladores, versões e releases Windows da Mat
 | --- | --- | --- | --- | --- |
 | Control Tauri principal | `matriz-control-tauri` | `com.matriz.control` | `control-v<version>` | `matriz-control-<version>-windows-x64-setup.exe` |
 | Control Electron compatibilidade | `matriz-control-electron` | `com.matriz.control.electron` | `control-electron-v<version>` | `matriz-control-electron-<version>-windows-x64-setup.exe` |
+| NAEVIA Electron | `naevia-electron` | `com.matriz.naevia` | `naevia-v<version>` | `naevia-<version>-windows-x64-setup.exe` |
 | Admin Tauri | `matriz-admin-tauri` | `com.matriz.admin` | `admin-v<version>` | `matriz-admin-<version>-windows-x64-setup.exe` |
 | Client Admin Tauri | `matriz-client-admin-tauri` | `com.matriz.clientadmin` | `client-admin-v<version>` | `matriz-client-admin-<version>-windows-x64-setup.exe` |
 | Ops Tauri | `matriz-ops-tauri` | `com.matriz.ops` | `ops-v<version>` | `matriz-ops-<version>-windows-x64-setup.exe` |
@@ -24,7 +25,7 @@ Fonte canônica para downloads, instaladores, versões e releases Windows da Mat
 | Workbench Electron | `matriz-workbench-electron` | `com.matriz.workbench` | `workbench-v<version>` | `matriz-workbench-<version>-windows-x64-setup.exe` |
 | Seumei Electron | `seumei-electron` | `com.matriz.seumei` | `seumei-v<version>` | `seumei-<version>-windows-x64-setup.exe` |
 
-Control Tauri começa em `1.0.0`. Control Electron `0.2.0` é compatibilidade e não é atualização do Tauri.
+Control Tauri começa em `1.0.0`. NAEVIA começa em `1.0.0`. Control Electron `0.2.0` é compatibilidade e não é atualização do Tauri nem do NAEVIA.
 
 ## Pipeline confiável
 
