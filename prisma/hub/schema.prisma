@@ -855,6 +855,7 @@ model DistributionRelease {
   releaseNotes String?
   installer    Json
   signature    String
+  updater      Json?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   product      DistributionProduct @relation(fields: [productId], references: [id], onDelete: Cascade)

@@ -35,6 +35,16 @@ export const distributionInstallerV1Schema = z.object({
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
 })
 
+export const distributionUpdaterArtifactV1Schema = z.object({
+  url: z.string().url().refine((value) => new URL(value).protocol === "https:", "Updater artifacts require HTTPS"),
+  signature: z.string().min(16).max(16_384),
+  sizeBytes: z.number().int().positive().max(536_870_912),
+})
+
+export const distributionUpdaterV1Schema = z.object({
+  "windows-x86_64": distributionUpdaterArtifactV1Schema.optional(),
+}).strict()
+
 const distributionReleaseInputV1BaseSchema = z.object({
   version: semver,
   channel: z.enum(["stable", "beta"]),
@@ -42,6 +52,7 @@ const distributionReleaseInputV1BaseSchema = z.object({
   releaseNotes: z.string().max(8_000).nullable(),
   installer: distributionInstallerV1Schema,
   signature: z.string().min(16).max(16_384),
+  updater: distributionUpdaterV1Schema.optional(),
 })
 
 const stableVersionRefinement = (release: { channel: "stable" | "beta"; version: string }, context: z.RefinementCtx) => {

@@ -37,6 +37,7 @@ type ReleaseRow = {
   releaseNotes: string | null
   installer: unknown
   signature: string
+  updater: unknown | null
 }
 
 export function createPrismaDistributionRepository(
@@ -71,6 +72,7 @@ export function createPrismaDistributionRepository(
       releaseNotes: row.releaseNotes,
       installer: row.installer,
       signature: row.signature,
+      updater: row.updater ?? undefined,
     })
   const digest = (value: unknown) =>
     createHash("sha256").update(JSON.stringify(value)).digest("hex")
@@ -191,6 +193,7 @@ export function createPrismaDistributionRepository(
             releaseNotes: input.releaseNotes,
             installer: input.installer,
             signature: input.signature,
+            updater: input.updater ?? undefined,
           },
         })
         const result = releaseView(row)

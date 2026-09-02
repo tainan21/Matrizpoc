@@ -57,6 +57,38 @@ export function createDistributionHttpHandlers(
           })
         : json({ error: "Not found" }, 404, { "access-control-allow-origin": "*" })
     },
+    updater: async (
+      productId: string,
+      target: string,
+      currentVersion: string,
+    ) => {
+      await options.ready
+      const product = await service.product(productId)
+      const release = product?.state === "active" ? product.release : null
+      const artifact =
+        target === "windows-x86_64" ? release?.updater?.["windows-x86_64"] : undefined
+      const headers = {
+        "cache-control": "no-store",
+        "access-control-allow-origin": "*",
+      }
+      if (!release || release.status !== "published" || !artifact) {
+        return new Response(null, { status: 204, headers })
+      }
+      if (compareSemver(release.version, currentVersion) <= 0) {
+        return new Response(null, { status: 204, headers })
+      }
+      return json(
+        {
+          version: release.version,
+          notes: release.releaseNotes ?? "",
+          pub_date: release.releasedAt,
+          url: artifact.url,
+          signature: artifact.signature,
+        },
+        200,
+        headers,
+      )
+    },
     createProduct: (request: Request) =>
       mutate(
         request,
@@ -98,4 +130,19 @@ export function createDistributionHttpHandlers(
         service.retireRelease(actor, releaseId, idempotencyKey),
       ),
   }
+}
+
+function compareSemver(left: string, right: string) {
+  const parse = (value: string) => {
+    const match = /^v?(\d+)\.(\d+)\.(\d+)(?:-[0-9A-Za-z.-]+)?$/.exec(value)
+    return match ? match.slice(1).map(Number) : null
+  }
+  const leftParts = parse(left)
+  const rightParts = parse(right)
+  if (!leftParts || !rightParts) return -1
+  for (let index = 0; index < 3; index += 1) {
+    const difference = leftParts[index] - rightParts[index]
+    if (difference !== 0) return difference
+  }
+  return 0
 }
