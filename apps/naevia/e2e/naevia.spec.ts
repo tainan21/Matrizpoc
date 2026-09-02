@@ -89,3 +89,35 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-e2e-")) await rm(profile, { recursive: true, force: true })
   }
 })
+
+test("restores capsules and tabs after a complete restart", async () => {
+  const profile = await mkdtemp(join(tmpdir(), "naevia-restart-"))
+  try {
+    const first = await electron.launch({ args: ["."], cwd: process.cwd(), env: { ...process.env, NAEVIA_USER_DATA_DIR: profile } })
+    const firstWindow = await localWindow(first)
+    await firstWindow.getByRole("button", { name: "Nova cápsula" }).click()
+    await firstWindow.getByLabel("Nome").fill("Persistente")
+    await firstWindow.getByLabel("Política").selectOption("agent-safe")
+    await firstWindow.getByRole("button", { name: "Criar cápsula" }).click()
+    await firstWindow.getByRole("button", { name: "Nova aba", exact: true }).click()
+    await expect(firstWindow.getByRole("tab")).toHaveCount(2)
+    await first.close()
+
+    const second = await electron.launch({ args: ["."], cwd: process.cwd(), env: { ...process.env, NAEVIA_USER_DATA_DIR: profile } })
+    try {
+      const secondWindow = await localWindow(second)
+      await expect(secondWindow.getByRole("button", { name: "Persistente" })).toHaveClass(/active/)
+      await expect(secondWindow.getByRole("tab")).toHaveCount(2)
+    } finally { await second.close() }
+  } finally {
+    if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-restart-")) await rm(profile, { recursive: true, force: true })
+  }
+})
+
+async function localWindow(application: Awaited<ReturnType<typeof electron.launch>>) {
+  await application.firstWindow()
+  await expect.poll(() => application.windows().map((candidate) => candidate.url())).toContainEqual(expect.stringMatching(/\/dist\/index\.html$/))
+  const window = application.windows().find((candidate) => /\/dist\/index\.html$/.test(candidate.url()))
+  if (!window) throw new Error("Janela principal do NAEVIA não foi encontrada")
+  return window
+}
