@@ -1,6 +1,6 @@
 {
   "name": "@matriz/app-matriz-desktop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "build:native": "tauri build --no-bundle",
     "package:binary": "tauri build --bundles nsis",
     "package": "pwsh -NoProfile -File ./scripts/package-matriz-control.ps1",
+    "package:update": "pwsh -NoProfile -File ./scripts/package-signed-update.ps1",
     "acceptance:inspect": "pwsh -NoProfile -File ./acceptance/windows/matriz-control-acceptance.ps1 -Mode Inspect",
     "acceptance:plan:package": "pwsh -NoProfile -File ./acceptance/windows/matriz-control-acceptance.ps1 -Mode Package -PlanOnly",
     "acceptance:plan:installed": "pwsh -NoProfile -File ./acceptance/windows/matriz-control-acceptance.ps1 -Mode Installed -PlanOnly",

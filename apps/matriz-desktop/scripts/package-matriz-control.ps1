@@ -1,6 +1,11 @@
 $ErrorActionPreference = 'Stop'
 $workspaceRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..\..'))
-$installer = [IO.Path]::GetFullPath((Join-Path $workspaceRoot 'apps\matriz-desktop\src-tauri\target\release\bundle\nsis\Matriz Control_1.0.0_x64-setup.exe'))
+$packagePath = [IO.Path]::GetFullPath((Join-Path $workspaceRoot 'apps\matriz-desktop\package.json'))
+$desktopVersion = (Get-Content -LiteralPath $packagePath -Raw | ConvertFrom-Json).version
+if ($desktopVersion -notmatch '^\d+\.\d+\.\d+$') {
+  throw 'Invalid Matriz Control package version'
+}
+$installer = [IO.Path]::GetFullPath((Join-Path $workspaceRoot "apps\matriz-desktop\src-tauri\target\release\bundle\nsis\Matriz Control_${desktopVersion}_x64-setup.exe"))
 $allowedRoot = $workspaceRoot.TrimEnd('\') + '\'
 
 if (-not $installer.StartsWith($allowedRoot, [StringComparison]::OrdinalIgnoreCase)) {

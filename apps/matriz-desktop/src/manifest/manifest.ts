@@ -4,7 +4,7 @@ export const manifest: AppManifestDTO = {
   appId: "matriz-desktop",
   name: "Matriz Control",
   description: "Utility nativa para portas, processos e operações locais do ecossistema Matriz.",
-  version: "1.0.0",
+  version: "1.1.0",
   contractVersion: "v1",
   primaryRoute: "/",
   routes: [{ label: "Control", path: "/", order: 0 }],

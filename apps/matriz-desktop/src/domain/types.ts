@@ -412,6 +412,20 @@ export interface TerminalReadiness {
   readonly reason?: string
 }
 
+export interface UpdateInfo {
+  readonly state: "current" | "available" | "downloaded" | "unavailable"
+  readonly currentVersion: string
+  readonly version?: string
+  readonly notes?: string
+  readonly sizeBytes?: number
+  readonly reason?: string
+}
+
+export interface UpdateProgress {
+  readonly downloadedBytes: number
+  readonly totalBytes?: number
+}
+
 export interface ControlPackageActivationTarget {
   readonly kind: "control"
   readonly packageId: string

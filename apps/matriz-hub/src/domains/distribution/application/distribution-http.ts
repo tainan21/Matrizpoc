@@ -84,6 +84,7 @@ export function createDistributionHttpHandlers(
           pub_date: release.releasedAt,
           url: artifact.url,
           signature: artifact.signature,
+          size_bytes: artifact.sizeBytes,
         },
         200,
         headers,

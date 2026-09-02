@@ -106,6 +106,7 @@ describe("distribution HTTP handlers", () => {
       pub_date: "2026-09-02T12:00:00.000Z",
       url: "https://releases.matriz.local/matriz-control-updater.exe",
       signature: "dGF1cmktYXJ0aWZhY3Qtc2lnbmF0dXJl",
+      size_bytes: 2048,
     })
     expect((await handlers.updater("matriz-control", "windows-x86_64", "1.1.0")).status).toBe(204)
   })

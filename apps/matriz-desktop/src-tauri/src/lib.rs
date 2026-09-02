@@ -23,6 +23,7 @@ mod state;
 pub mod system_pulse;
 mod tasks;
 pub mod terminal;
+pub mod updater;
 mod workspace;
 
 use std::{
@@ -53,6 +54,7 @@ use system_pulse::{SystemPulse, SystemPulseService};
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
 use terminal::{TerminalEvent, TerminalManager, TerminalReadiness, TerminalSession};
+use updater::{UpdateInfo, UpdateManager, UpdateProgress};
 use workspace::OperationsState;
 
 pub use catalog::{
@@ -960,6 +962,27 @@ fn quit_app(app: tauri::AppHandle) {
 }
 
 #[tauri::command]
+async fn check_update(
+    app: tauri::AppHandle,
+    manager: tauri::State<'_, UpdateManager>,
+) -> Result<UpdateInfo, String> {
+    manager.check(&app).await
+}
+
+#[tauri::command]
+async fn download_update(
+    manager: tauri::State<'_, UpdateManager>,
+    on_event: tauri::ipc::Channel<UpdateProgress>,
+) -> Result<UpdateInfo, String> {
+    manager.download(on_event).await
+}
+
+#[tauri::command]
+fn install_update(manager: tauri::State<'_, UpdateManager>) -> Result<(), String> {
+    manager.install()
+}
+
+#[tauri::command]
 fn terminal_readiness(
     terminals: tauri::State<'_, TerminalManager>,
     operations: tauri::State<'_, OperationsState>,
@@ -1385,10 +1408,12 @@ fn subscribe_terminal(
 pub fn run() {
     let activity = ActivityHub::default();
     let terminals = TerminalManager::with_activity(activity.clone());
-    let builder = tauri::Builder::default().plugin(tauri_plugin_autostart::init(
-        tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-        None,
-    ));
+    let builder = tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ));
     let builder = if acceptance_mode() {
         builder
     } else {
@@ -1404,6 +1429,7 @@ pub fn run() {
         .manage(SystemPulseService::new())
         .manage(NodeSweepService::default())
         .manage(GitService::default())
+        .manage(UpdateManager::default())
         .setup(|app| {
             let default_config_dir = app.path().app_config_dir()?;
             let config_dir = resolve_acceptance_config_dir(
@@ -1490,6 +1516,9 @@ pub fn run() {
             record_session_context,
             read_settings,
             write_settings,
+            check_update,
+            download_update,
+            install_update,
             hide_window,
             quit_app,
             terminal_readiness,

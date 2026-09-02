@@ -76,6 +76,9 @@ function gateway(): DesktopGateway {
       workspacePath: "C:\\Apps\\matriz-infra-hub",
     }),
     writeSettings: vi.fn().mockImplementation(async (settings) => settings),
+    checkUpdate: vi.fn().mockResolvedValue({ state: "current", currentVersion: "1.0.0" }),
+    downloadUpdate: vi.fn().mockResolvedValue({ state: "downloaded", currentVersion: "1.0.0", version: "1.1.0" }),
+    installUpdate: vi.fn().mockResolvedValue(undefined),
     hide: vi.fn().mockResolvedValue(undefined),
     quit: vi.fn().mockResolvedValue(undefined),
     terminalReadiness: vi.fn().mockResolvedValue({

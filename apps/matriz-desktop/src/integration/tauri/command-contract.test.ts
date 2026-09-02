@@ -45,6 +45,9 @@ describe("Tauri command contract", () => {
       recordSessionContext: "record_session_context",
       readSettings: "read_settings",
       writeSettings: "write_settings",
+      checkUpdate: "check_update",
+      downloadUpdate: "download_update",
+      installUpdate: "install_update",
       hide: "hide_window",
       quit: "quit_app",
       terminalReadiness: "terminal_readiness",
@@ -94,7 +97,7 @@ describe("Tauri command contract", () => {
       calls.push({ command, args })
       return undefined as never
     })
-    const gateway = createTauriGateway(invoke, () => "acceptance-channel", () => "activity-channel")
+    const gateway = createTauriGateway(invoke, () => "acceptance-channel", () => "activity-channel", () => "update-channel")
     const settings = {
       theme: "matriz" as const,
       closeToTray: true,
@@ -150,6 +153,9 @@ describe("Tauri command contract", () => {
     await gateway.recordSessionContext(sessionContext)
     await gateway.readSettings()
     await gateway.writeSettings(settings)
+    await gateway.checkUpdate()
+    await gateway.downloadUpdate(() => undefined)
+    await gateway.installUpdate()
     await gateway.hide()
     await gateway.quit()
     await gateway.terminalReadiness()
@@ -235,6 +241,9 @@ describe("Tauri command contract", () => {
       { command: "record_session_context", args: { context: sessionContext } },
       { command: "read_settings", args: undefined },
       { command: "write_settings", args: { settings } },
+      { command: "check_update", args: undefined },
+      { command: "download_update", args: { onEvent: "update-channel" } },
+      { command: "install_update", args: undefined },
       { command: "hide_window", args: undefined },
       { command: "quit_app", args: undefined },
       { command: "terminal_readiness", args: undefined },

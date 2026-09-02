@@ -45,6 +45,8 @@ import type {
   GitCommitRequest,
   GitDiff,
   GitRemoteRequest,
+  UpdateInfo,
+  UpdateProgress,
 } from "../domain/types"
 
 export interface DesktopGateway {
@@ -87,6 +89,9 @@ export interface DesktopGateway {
   recordSessionContext(context: SessionContext): Promise<HubStateSnapshot>
   readSettings(): Promise<DesktopSettings>
   writeSettings(settings: DesktopSettings): Promise<DesktopSettings>
+  checkUpdate(): Promise<UpdateInfo>
+  downloadUpdate(listener: (event: UpdateProgress) => void): Promise<UpdateInfo>
+  installUpdate(): Promise<void>
   hide(): Promise<void>
   quit(): Promise<void>
   terminalReadiness(): Promise<TerminalReadiness>

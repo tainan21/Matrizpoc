@@ -18,10 +18,10 @@ describe("Matriz Control v1 release identity", () => {
       cargo: cargoVersion,
       manifest: manifest.version,
     }).toEqual({
-      package: "1.0.0",
-      tauri: "1.0.0",
-      cargo: "1.0.0",
-      manifest: "1.0.0",
+      package: "1.1.0",
+      tauri: "1.1.0",
+      cargo: "1.1.0",
+      manifest: "1.1.0",
     })
   })
 })

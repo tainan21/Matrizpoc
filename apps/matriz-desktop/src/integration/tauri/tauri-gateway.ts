@@ -14,12 +14,14 @@ import type {
   QuickTargetId,
   RuntimeInstance,
   WorkspacePulse,
+  UpdateProgress,
 } from "../../domain/types"
 import { TAURI_COMMAND_CONTRACT as commands } from "./command-contract"
 
 export type Invoke = <T>(command: string, args?: Record<string, unknown>) => Promise<T>
 export type ChannelFactory = (listener: (event: TerminalEvent) => void) => unknown
 export type ActivityChannelFactory = (listener: (event: ActivityEnvelope) => void) => unknown
+export type UpdateChannelFactory = (listener: (event: UpdateProgress) => void) => unknown
 
 function createTauriChannel(listener: (event: TerminalEvent) => void): Channel<TerminalEvent> {
   const channel = new Channel<TerminalEvent>()
@@ -33,10 +35,17 @@ function createActivityChannel(listener: (event: ActivityEnvelope) => void): Cha
   return channel
 }
 
+function createUpdateChannel(listener: (event: UpdateProgress) => void): Channel<UpdateProgress> {
+  const channel = new Channel<UpdateProgress>()
+  channel.onmessage = listener
+  return channel
+}
+
 export function createTauriGateway(
   invoke: Invoke = tauriInvoke,
   createChannel: ChannelFactory = createTauriChannel,
   createActivity: ActivityChannelFactory = createActivityChannel,
+  createUpdate: UpdateChannelFactory = createUpdateChannel,
 ): DesktopGateway {
   return {
     snapshot: () => invoke<DesktopSnapshot>(commands.snapshot),
@@ -82,6 +91,10 @@ export function createTauriGateway(
     recordSessionContext: (context) => invoke(commands.recordSessionContext, { context }),
     readSettings: () => invoke<DesktopSettings>(commands.readSettings),
     writeSettings: (settings) => invoke<DesktopSettings>(commands.writeSettings, { settings }),
+    checkUpdate: () => invoke(commands.checkUpdate),
+    downloadUpdate: (listener) =>
+      invoke(commands.downloadUpdate, { onEvent: createUpdate(listener) }),
+    installUpdate: () => invoke(commands.installUpdate),
     hide: () => invoke<void>(commands.hide),
     quit: () => invoke<void>(commands.quit),
     terminalReadiness: () => invoke(commands.terminalReadiness),

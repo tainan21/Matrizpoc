@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
 import type { DoctorCheck, PortProcess, RuntimeInstance, SystemPulse, WorkspacePulse } from "../../domain/types"
+import { UpdatePanel } from "./update-panel"
 
 export type HomeTarget = "apps" | "git" | "agents" | "infra" | "doctor" | "terminal"
 
@@ -62,6 +63,7 @@ export function HomeView({ gateway, ports, open }: {
         <button aria-label="Abrir Terminal" onClick={() => open("terminal")}><strong>Abrir terminal</strong><span>→</span></button>
       </section>
     </div>
+    <UpdatePanel gateway={gateway} />
   </section>
 }
 
