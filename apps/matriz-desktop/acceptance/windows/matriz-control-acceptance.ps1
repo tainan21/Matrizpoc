@@ -112,6 +112,7 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
   New-Item -ItemType Directory -Force -Path $runOutput | Out-Null
   $productExecutable = Join-Path $resolvedInstalledRoot 'matriz-control.exe'
   $productUninstaller = Join-Path $resolvedInstalledRoot 'uninstall.exe'
+  $uninstallDeadlineSeconds = 120
 
   function Stop-ExactControlProcesses {
     $target = $productExecutable.ToLowerInvariant()
@@ -128,7 +129,7 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
     if (Test-Path -LiteralPath $productUninstaller -PathType Leaf) {
       $uninstall = Start-Process -FilePath $productUninstaller -ArgumentList '/S' -Wait -PassThru
       if ($uninstall.ExitCode -ne 0) { throw "Uninstall failed with exit code $($uninstall.ExitCode)" }
-      $deadline = [DateTime]::UtcNow.AddSeconds(30)
+      $deadline = [DateTime]::UtcNow.AddSeconds($uninstallDeadlineSeconds)
       while ((Test-Path -LiteralPath $productExecutable -PathType Leaf) -and [DateTime]::UtcNow -lt $deadline) {
         Start-Sleep -Milliseconds 250
       }

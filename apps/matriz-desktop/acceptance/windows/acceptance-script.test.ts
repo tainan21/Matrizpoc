@@ -34,6 +34,14 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
     expect(source).toContain("$lifecycle | ConvertTo-Json -Depth 4 | Set-Content")
   })
 
+  it("waits conditionally for asynchronous NSIS cleanup before declaring uninstall failure", () => {
+    const source = readFileSync(scriptPath, "utf8")
+
+    expect(source).toContain("$uninstallDeadlineSeconds = 120")
+    expect(source).toContain("AddSeconds($uninstallDeadlineSeconds)")
+    expect(source).toContain("while ((Test-Path -LiteralPath $productExecutable -PathType Leaf)")
+  })
+
   it.runIf(existsSync(installedExecutable))("inspects the existing installation without modifying its executable", () => {
     const before = statSync(installedExecutable)
     const result = runAcceptance([
