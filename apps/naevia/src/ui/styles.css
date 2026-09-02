@@ -8,11 +8,17 @@ button { color: inherit; }
 .brand { position: absolute; left: 14px; top: 13px; width: 124px; height: 34px; display: flex; align-items: center; gap: 9px; letter-spacing: .18em; font-size: 11px; }
 .brand span { display: grid; place-items: center; width: 25px; height: 25px; border-radius: 7px; background: #9e72ff; color: #110b1c; font-weight: 900; box-shadow: 0 0 22px #8251ed77; }
 .tabs { position: absolute; left: 151px; right: 10px; top: 8px; height: 42px; display: flex; align-items: end; gap: 2px; overflow: hidden; }
-.tabs button { height: 34px; max-width: 240px; min-width: 150px; padding: 0 16px; border: 0; border-radius: 9px 9px 0 0; background: transparent; color: #8f899c; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
-.tabs button.active { background: #18131f; color: #f5f1ff; box-shadow: inset 0 1px #7653a9; }
+.tab-item { height: 34px; max-width: 240px; min-width: 150px; display: flex; align-items: center; border-radius: 9px 9px 0 0; color: #8f899c; overflow: hidden; }
+.tab-item.active { background: #18131f; color: #f5f1ff; box-shadow: inset 0 1px #7653a9; }
+.tabs .tab-main { height: 34px; min-width: 0; flex: 1; padding: 0 6px 0 16px; border: 0; background: transparent; color: inherit; display: flex; align-items: center; gap: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.tabs .tab-close { width: 28px; min-width: 28px; height: 28px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: #716a79; cursor: pointer; }
+.tabs .tab-close:hover { background: #2a2032; color: #e6dfee; }
 .tabs i { color: #65e2cf; font-size: 7px; }
 .tabs .new-tab { min-width: 34px; width: 34px; padding: 0; justify-content: center; border-radius: 8px; font-size: 18px; }
-.omnibox { position: absolute; left: 68px; right: 18px; bottom: 10px; height: 38px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px solid #292333; border-radius: 12px; background: #100d15; transition: border-color .16s, box-shadow .16s; }
+.nav-controls { position: absolute; left: 66px; bottom: 10px; height: 38px; display: flex; align-items: center; gap: 2px; }
+.nav-controls button { width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #8d8497; cursor: pointer; }
+.nav-controls button:hover { background: #1b1622; color: #eee9f5; }
+.omnibox { position: absolute; left: 168px; right: 18px; bottom: 10px; height: 38px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px solid #292333; border-radius: 12px; background: #100d15; transition: border-color .16s, box-shadow .16s; }
 .omnibox:focus-within { border-color: #8d61d0; box-shadow: 0 0 0 3px #865fc21c; }
 .omnibox span { color: #9876c8; font-size: 19px; }
 .omnibox input { flex: 1; border: 0; outline: 0; background: transparent; color: #ded9e8; font-size: 13px; }
@@ -25,6 +31,8 @@ button { color: inherit; }
 .rail button:hover, .rail button:focus-visible { width: 144px; background: #18131f; border-color: #4d386b; outline: 0; }
 .rail button.active { background: #221732; border-color: #8059b6; }
 .rail button.active span { color: #cba7ff; }
+.rail button.danger { border-color: #9b3d66; background: #2a101d; }
+.rail button.danger span { color: #ff91b2; }
 .side-panel { position: fixed; z-index: 3; top: 104px; right: 0; bottom: 0; width: 340px; padding: 28px; border-left: 1px solid #332743; background: #0d0a12; animation: panel-in .18s ease-out; }
 .side-panel span, .terminal-drawer header span { color: #a77adb; font: 700 10px ui-monospace, monospace; letter-spacing: .14em; }
 .side-panel h2 { margin: 14px 0 8px; font-size: 24px; }

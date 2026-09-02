@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { activateCapsule } from "./browser-state"
+import { activateCapsule, closeTab } from "./browser-state"
 import type { BrowserSnapshot } from "./shared"
 
 const snapshot: BrowserSnapshot = {
@@ -26,5 +26,13 @@ describe("browser state", () => {
 
   it("rejects an unknown or empty capsule", () => {
     expect(() => activateCapsule(snapshot, "missing")).toThrow("Cápsula desconhecida")
+  })
+
+  it("closes a tab and activates the remaining tab in the same capsule", () => {
+    const withTwo: BrowserSnapshot = { ...snapshot, tabs: [...snapshot.tabs, { id: "tab-a2", capsuleId: "capsule-a", title: "A2", url: "https://a2.test", active: false, loading: false }] }
+    const changed = closeTab(withTwo, "tab-a")
+    expect(changed.activeTabId).toBe("tab-a2")
+    expect(changed.tabs.find(({ id }) => id === "tab-a2")?.active).toBe(true)
+    expect(() => closeTab(snapshot, "tab-a")).toThrow("A última aba da cápsula não pode ser fechada")
   })
 })

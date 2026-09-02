@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron"
 
 type AgentPolicy = "human" | "agent-safe" | "agent-full"
+type BrowserCommand = "back" | "forward" | "reload" | "stop" | "devtools"
 interface BrowserSnapshot {
   readonly capsules: readonly { readonly id: string; readonly name: string; readonly policy: AgentPolicy }[]
   readonly tabs: readonly {
@@ -23,6 +24,9 @@ interface NaeviaBridge {
   activateCapsule(capsuleId: string): Promise<BrowserSnapshot>
   createTab(capsuleId: string): Promise<BrowserSnapshot>
   activateTab(tabId: string): Promise<BrowserSnapshot>
+  closeTab(tabId: string): Promise<BrowserSnapshot>
+  browserCommand(tabId: string, command: BrowserCommand): Promise<void>
+  setKillSwitch(enabled: boolean): Promise<boolean>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>
   setPanels(state: { side: "none" | "store" | "workbench"; terminal: boolean }): Promise<void>
   terminalSessions(): Promise<readonly TerminalSessionView[]>
@@ -41,6 +45,9 @@ const bridge: NaeviaBridge = {
   activateCapsule: (capsuleId) => ipcRenderer.invoke("naevia:capsule:activate", { capsuleId }),
   createTab: (capsuleId) => ipcRenderer.invoke("naevia:tab:create", { capsuleId }),
   activateTab: (tabId) => ipcRenderer.invoke("naevia:tab:activate", { tabId }),
+  closeTab: (tabId) => ipcRenderer.invoke("naevia:tab:close", { tabId }),
+  browserCommand: (tabId, command) => ipcRenderer.invoke("naevia:browser:command", { tabId, command }),
+  setKillSwitch: (enabled) => ipcRenderer.invoke("naevia:browser:kill-switch", { enabled }),
   navigate: (tabId, input) => ipcRenderer.invoke("naevia:tab:navigate", { tabId, input }),
   setPanels: (state) => ipcRenderer.invoke("naevia:layout", state),
   terminalSessions: () => ipcRenderer.invoke("naevia:terminal:list"),

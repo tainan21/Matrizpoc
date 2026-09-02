@@ -15,6 +15,7 @@ export function App() {
   const [terminalInput, setTerminalInput] = useState("")
   const [store, setStore] = useState<readonly StoreProductView[]>([])
   const [storeStatus, setStoreStatus] = useState("Abra o Matriz Hub para carregar o catálogo.")
+  const [killSwitch, setKillSwitch] = useState(false)
   const activeTab = useMemo(() => snapshot?.tabs.find((tab) => tab.id === snapshot.activeTabId), [snapshot])
   const activeTerminal = terminals.find(({ id }) => id === activeTerminalId) ?? terminals.at(-1)
 
@@ -56,14 +57,19 @@ export function App() {
     event.preventDefault(); if (!activeTerminal || !terminalInput) return
     try { await window.naevia.writeTerminal(activeTerminal.id, `${terminalInput}\n`); setTerminalInput("") } catch (cause) { setError(String(cause)) }
   }
+  const controlBrowser = async (command: "back" | "forward" | "reload" | "stop" | "devtools") => {
+    if (!activeTab) return
+    try { await window.naevia.browserCommand(activeTab.id, command) } catch (cause) { setError(String(cause)) }
+  }
 
   return <main className="browser-shell">
     <header className="chrome">
       <div className="brand" aria-label="NAEVIA"><span>N</span><strong>NAEVIA</strong></div>
       <div className="tabs" role="tablist" aria-label="Abas">
-        {snapshot?.tabs.filter((tab) => tab.capsuleId === snapshot.activeCapsuleId).map((tab) => <button className={tab.active ? "active" : ""} role="tab" aria-selected={tab.active} key={tab.id} onClick={() => void window.naevia.activateTab(tab.id).then(setSnapshot)}><i>{tab.loading ? "◌" : "●"}</i>{tab.title}</button>)}
+        {snapshot?.tabs.filter((tab) => tab.capsuleId === snapshot.activeCapsuleId).map((tab) => <div className={`tab-item ${tab.active ? "active" : ""}`} role="tab" aria-selected={tab.active} key={tab.id}><button className="tab-main" onClick={() => void window.naevia.activateTab(tab.id).then(setSnapshot)}><i>{tab.loading ? "◌" : "●"}</i>{tab.title}</button><button className="tab-close" aria-label={`Fechar ${tab.title}`} onClick={() => void window.naevia.closeTab(tab.id).then(setSnapshot).catch((cause) => setError(String(cause)))}>×</button></div>)}
         <button className="new-tab" aria-label="Nova aba" onClick={() => snapshot && void window.naevia.createTab(snapshot.activeCapsuleId).then(setSnapshot)}>＋</button>
       </div>
+      <div className="nav-controls"><button aria-label="Voltar" onClick={() => void controlBrowser("back")}>←</button><button aria-label="Avançar" onClick={() => void controlBrowser("forward")}>→</button><button aria-label={activeTab?.loading ? "Parar" : "Recarregar"} onClick={() => void controlBrowser(activeTab?.loading ? "stop" : "reload")}>{activeTab?.loading ? "×" : "↻"}</button></div>
       <form className="omnibox" onSubmit={navigate}>
         <span>⌕</span><input aria-label="Pesquisar ou digitar endereço" value={address} onChange={(event) => setAddress(event.target.value)} spellCheck={false} /><kbd>↵</kbd>
       </form>
@@ -75,6 +81,8 @@ export function App() {
         <button title="Nova cápsula" aria-label="Nova cápsula" onClick={() => setCreatingCapsule(true)}><span>＋</span><em>Nova cápsula</em></button>
       </div>
       <div className="tools">
+        <button className={killSwitch ? "active danger" : ""} title="Kill switch" aria-label="Kill switch" onClick={() => void window.naevia.setKillSwitch(!killSwitch).then(setKillSwitch).catch((cause) => setError(String(cause)))}><span>⊘</span><em>{killSwitch ? "Reconectar" : "Kill switch"}</em></button>
+        <button title="DevTools" aria-label="DevTools" onClick={() => void controlBrowser("devtools")}><span>⌘</span><em>DevTools</em></button>
         <button className={side === "workbench" ? "active" : ""} title="Coworking" aria-label="Coworking" onClick={() => void panels(side === "workbench" ? "none" : "workbench")}><span>✦</span><em>Coworking</em></button>
         <button className={side === "store" ? "active" : ""} title="Store" aria-label="Store" onClick={() => { const next = side === "store" ? "none" : "store"; void panels(next); if (next === "store") void loadStore() }}><span>◇</span><em>Store</em></button>
         <button className={terminal ? "active" : ""} title="Terminal" aria-label="Terminal" onClick={() => void panels(side, !terminal)}><span>›_</span><em>Terminal</em></button>

@@ -11,3 +11,13 @@ export function activateCapsule(snapshot: BrowserSnapshot, capsuleId: string): B
     tabs: snapshot.tabs.map((tab) => ({ ...tab, active: tab.id === activeTab.id })),
   }
 }
+
+export function closeTab(snapshot: BrowserSnapshot, tabId: string): BrowserSnapshot {
+  const closing = snapshot.tabs.find((tab) => tab.id === tabId)
+  if (!closing) throw new Error("Aba desconhecida")
+  const remaining = snapshot.tabs.filter((tab) => tab.id !== tabId)
+  const replacement = remaining.find((tab) => tab.capsuleId === closing.capsuleId)
+  if (!replacement) throw new Error("A última aba da cápsula não pode ser fechada")
+  if (snapshot.activeTabId !== tabId) return { ...snapshot, tabs: remaining }
+  return { ...snapshot, tabs: remaining.map((tab) => ({ ...tab, active: tab.id === replacement.id })), activeTabId: replacement.id }
+}

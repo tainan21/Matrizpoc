@@ -1,4 +1,5 @@
 export type AgentPolicy = "human" | "agent-safe" | "agent-full"
+export type BrowserCommand = "back" | "forward" | "reload" | "stop" | "devtools"
 
 export interface CapsuleView {
   readonly id: string
@@ -44,6 +45,9 @@ export interface NaeviaBridge {
   activateCapsule(capsuleId: string): Promise<BrowserSnapshot>
   createTab(capsuleId: string): Promise<BrowserSnapshot>
   activateTab(tabId: string): Promise<BrowserSnapshot>
+  closeTab(tabId: string): Promise<BrowserSnapshot>
+  browserCommand(tabId: string, command: BrowserCommand): Promise<void>
+  setKillSwitch(enabled: boolean): Promise<boolean>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>
   setPanels(state: { side: "none" | "store" | "workbench"; terminal: boolean }): Promise<void>
   terminalSessions(): Promise<readonly TerminalSessionView[]>

@@ -6,10 +6,10 @@ import { fileURLToPath } from "node:url"
 import { app, BrowserWindow, ipcMain, session, WebContentsView } from "electron"
 
 import { navigationTarget } from "../src/navigation.js"
-import { activateCapsule } from "../src/browser-state.js"
+import { activateCapsule, closeTab } from "../src/browser-state.js"
 import { storeProducts } from "../src/store-catalog.js"
 import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./terminal-host.js"
-import type { AgentPolicy, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
+import type { AgentPolicy, BrowserCommand, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const documentVersion = 1
@@ -19,6 +19,7 @@ let repository: BrowserRepository
 let activeViewId = ""
 let panelState = { side: "none" as "none" | "store" | "workbench", terminal: false }
 let workbenchView: WebContentsView | undefined
+let killSwitchEnabled = false
 const terminalHost = new TerminalHost(spawnTerminalProcess)
 
 if (process.env.NAEVIA_USER_DATA_DIR) app.setPath("userData", process.env.NAEVIA_USER_DATA_DIR)
@@ -83,6 +84,7 @@ function secureSession(partitionName: string) {
   isolated.setPermissionCheckHandler(() => false)
   isolated.setPermissionRequestHandler((_contents, _permission, callback) => callback(false))
   isolated.setDevicePermissionHandler(() => false)
+  isolated.enableNetworkEmulation({ offline: killSwitchEnabled })
   return isolated
 }
 
@@ -165,6 +167,11 @@ function policy(value: unknown): AgentPolicy {
   return value
 }
 
+function browserCommand(value: unknown): BrowserCommand {
+  if (value !== "back" && value !== "forward" && value !== "reload" && value !== "stop" && value !== "devtools") throw new Error("Comando de navegador inválido")
+  return value
+}
+
 function spawnTerminalProcess(): TerminalProcess {
   const shell = join(process.env.SystemRoot ?? "C:\\Windows", "System32", "WindowsPowerShell", "v1.0", "powershell.exe")
   const child = spawn(shell, ["-NoLogo", "-NoProfile", "-NoExit", "-Command", "[Console]::InputEncoding=[Console]::OutputEncoding=$OutputEncoding=[Text.UTF8Encoding]::new()"], {
@@ -227,6 +234,37 @@ function registerIpc() {
       state.activeTabId = tabId; state.activeCapsuleId = tab.capsuleId
     })
     await showActive(changed); publish(changed); return changed
+  })
+  ipcMain.handle("naevia:tab:close", async (_event, input: unknown) => {
+    const tabId = text((input as Record<string, unknown>)?.tabId, "Aba", 36)
+    const selected = closeTab(await repository.snapshot(), tabId)
+    const view = views.get(tabId)
+    if (view) { mainWindow?.contentView.removeChildView(view); view.webContents.close(); views.delete(tabId) }
+    const changed = await repository.mutate((state) => Object.assign(state, selected))
+    await showActive(changed); publish(changed); return changed
+  })
+  ipcMain.handle("naevia:browser:command", async (_event, input: unknown) => {
+    const value = input as Record<string, unknown>
+    const tabId = text(value?.tabId, "Aba", 36)
+    const snapshot = await repository.snapshot()
+    if (snapshot.activeTabId !== tabId) throw new Error("Somente a aba ativa pode ser controlada")
+    const contents = (await ensureView(snapshot.tabs.find((tab) => tab.id === tabId)!)).webContents
+    const command = browserCommand(value?.command)
+    if (command === "back" && contents.navigationHistory.canGoBack()) contents.navigationHistory.goBack()
+    else if (command === "forward" && contents.navigationHistory.canGoForward()) contents.navigationHistory.goForward()
+    else if (command === "reload") contents.reload()
+    else if (command === "stop") contents.stop()
+    else if (command === "devtools") contents.openDevTools({ mode: "detach" })
+  })
+  ipcMain.handle("naevia:browser:kill-switch", async (_event, input: unknown) => {
+    const enabled = (input as Record<string, unknown>)?.enabled
+    if (typeof enabled !== "boolean") throw new Error("Kill switch inválido")
+    killSwitchEnabled = enabled
+    for (const view of views.values()) {
+      view.webContents.session.enableNetworkEmulation({ offline: enabled })
+      if (enabled) view.webContents.stop()
+    }
+    return killSwitchEnabled
   })
   ipcMain.handle("naevia:tab:navigate", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
