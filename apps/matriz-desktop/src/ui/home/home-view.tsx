@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { DoctorCheck, PortProcess, RuntimeInstance, SystemPulse, WorkspacePulse } from "../../domain/types"
+import type { CommerceSnapshot, DoctorCheck, InfrastructureSnapshot, PortProcess, RuntimeInstance, SystemPulse, WorkspacePulse } from "../../domain/types"
 import { UpdatePanel } from "./update-panel"
 
-export type HomeTarget = "apps" | "git" | "agents" | "infra" | "doctor" | "terminal"
+export type HomeTarget = "apps" | "git" | "agents" | "infra" | "doctor" | "terminal" | "store"
 
 export function HomeView({ gateway, ports, open }: {
   gateway: DesktopGateway
@@ -19,6 +19,10 @@ export function HomeView({ gateway, ports, open }: {
   const [doctorError, setDoctorError] = useState(false)
   const [system, setSystem] = useState<SystemPulse>()
   const [systemError, setSystemError] = useState(false)
+  const [store, setStore] = useState<CommerceSnapshot>()
+  const [storeError, setStoreError] = useState(false)
+  const [infra, setInfra] = useState<InfrastructureSnapshot>()
+  const [infraError, setInfraError] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -26,11 +30,15 @@ export function HomeView({ gateway, ports, open }: {
     void gateway.workspacePulse().then((value) => { if (active) setGit(value) }).catch(() => { if (active) setGitError(true) })
     void gateway.doctor().then((value) => { if (active) setChecks(value) }).catch(() => { if (active) setDoctorError(true) })
     void gateway.systemPulse().then((value) => { if (active) setSystem(value) }).catch(() => { if (active) setSystemError(true) })
+    void gateway.commerceSnapshot().then((value) => { if (active) setStore(value) }).catch(() => { if (active) setStoreError(true) })
+    void gateway.infrastructureSnapshot().then((value) => { if (active) setInfra(value) }).catch(() => { if (active) setInfraError(true) })
     return () => { active = false }
   }, [gateway])
 
   const readyApps = runtimes?.filter(({ status }) => status === "ready").length ?? 0
   const readyChecks = checks?.filter(({ ok }) => ok).length ?? 0
+  const workbench = runtimes?.find(({ id }) => id === "matriz-workbench")
+  const healthyServices = infra?.services.filter(({ state }) => state === "healthy").length ?? 0
 
   return <section className="home-view" aria-labelledby="home-title">
     <div className="home-heading">
@@ -47,6 +55,9 @@ export function HomeView({ gateway, ports, open }: {
       <Status label="APPS" value={runtimeError ? "Apps indisponíveis" : runtimes ? `${readyApps}/${runtimes.length} ativos` : "Verificando…"} tone={runtimeError ? "attention" : readyApps ? "ready" : "neutral"} />
       <Status label="DOCTOR" value={doctorError ? "Doctor indisponível" : checks ? `${readyChecks}/${checks.length} checks prontos` : "Verificando…"} tone={checks?.every(({ ok }) => ok) ? "ready" : checks ? "attention" : "neutral"} />
       <Status label="SISTEMA" value={systemError ? "Pulso indisponível" : system ? `${Math.round(system.cpuUsage)}% CPU` : "Verificando…"} detail={system ? `${Math.round(system.usedMemoryBytes / 1e9)} GB RAM` : undefined} tone={system ? "ready" : systemError ? "attention" : "neutral"} />
+      <Status label="WORKBENCH" value={runtimeError ? "Coworking indisponível" : workbench?.status === "ready" ? "Coworking pronto" : workbench ? "Coworking parado" : "Verificando…"} tone={workbench?.status === "ready" ? "ready" : workbench ? "attention" : "neutral"} />
+      <Status label="INFRA" value={infraError ? "Infra indisponível" : infra ? `${healthyServices}/${infra.services.length} saudáveis` : "Verificando…"} tone={infraError ? "attention" : healthyServices ? "ready" : infra ? "neutral" : "neutral"} />
+      <Status label="STORE" value={storeError ? "Store indisponível" : store ? `${store.packages.length} capacidades` : "Verificando…"} tone={storeError ? "attention" : store ? "ready" : "neutral"} />
     </div>
 
     <div className="home-workspace-grid">
@@ -61,6 +72,7 @@ export function HomeView({ gateway, ports, open }: {
         <button aria-label="Abrir Agentes" onClick={() => open("agents")}><strong>Agentes e coworking</strong><span>→</span></button>
         <button aria-label="Abrir Infra" onClick={() => open("infra")}><strong>Infraestrutura local</strong><span>→</span></button>
         <button aria-label="Abrir Terminal" onClick={() => open("terminal")}><strong>Abrir terminal</strong><span>→</span></button>
+        <button aria-label="Abrir Store" onClick={() => open("store")}><strong>Store e atualizações</strong><span>→</span></button>
       </section>
     </div>
     <UpdatePanel gateway={gateway} />

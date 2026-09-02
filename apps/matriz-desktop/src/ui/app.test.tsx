@@ -307,6 +307,8 @@ describe("Matriz Control", () => {
     expect(await screen.findByText("main")).toBeVisible()
     expect(screen.getByText("Apps indisponíveis")).toBeVisible()
     expect(screen.getByText("1/1 checks prontos")).toBeVisible()
+    expect(await screen.findByText("0 capacidades")).toBeVisible()
+    expect(screen.getByText("0/0 saudáveis")).toBeVisible()
 
     fireEvent.click(screen.getByRole("button", { name: "Abrir Git" }))
     expect(screen.getByRole("heading", { name: "GIT" })).toBeVisible()
