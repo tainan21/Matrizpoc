@@ -1,9 +1,10 @@
 use std::{collections::HashMap, sync::Mutex};
 
 use matriz_desktop_native::infrastructure::{
-    InfrastructureAction, InfrastructureHost, InfrastructureInspection, InfrastructureManager,
+    compare_migration_ledger, read_migration_files, AppliedMigration, InfrastructureAction,
+    InfrastructureHost, InfrastructureInspection, InfrastructureManager,
     InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureTargetId,
-    PortableInfrastructureHost,
+    MigrationFileDigest, PortableInfrastructureHost,
 };
 
 #[derive(Default)]
@@ -113,6 +114,84 @@ fn database_provisioning_requires_the_healthy_postgres_catalog_target() {
         })
         .unwrap_err();
     assert!(error.contains("PostgreSQL saudável"));
+}
+
+#[test]
+fn migration_ledger_detects_pending_drift_and_failed_rows() {
+    let files = vec![
+        MigrationFileDigest {
+            name: "001_base".into(),
+            checksum: "aaa".into(),
+        },
+        MigrationFileDigest {
+            name: "002_rls".into(),
+            checksum: "bbb".into(),
+        },
+    ];
+    let applied = vec![
+        AppliedMigration {
+            name: "001_base".into(),
+            checksum: "aaa".into(),
+            finished: true,
+            rolled_back: false,
+        },
+        AppliedMigration {
+            name: "999_manual".into(),
+            checksum: "ccc".into(),
+            finished: true,
+            rolled_back: false,
+        },
+    ];
+    let comparison = compare_migration_ledger(&files, &applied).expect("compare ledger");
+    assert_eq!(comparison.state, "drifted");
+    assert_eq!(comparison.pending, ["002_rls"]);
+    assert_eq!(comparison.unexpected, ["999_manual"]);
+
+    let failed = compare_migration_ledger(
+        &files,
+        &[AppliedMigration {
+            name: "001_base".into(),
+            checksum: "aaa".into(),
+            finished: false,
+            rolled_back: false,
+        }],
+    )
+    .expect("compare failed ledger");
+    assert_eq!(failed.state, "failed");
+    assert_eq!(failed.failed, ["001_base"]);
+}
+
+#[test]
+fn migration_ledger_rejects_duplicate_names() {
+    let duplicate = vec![
+        MigrationFileDigest {
+            name: "001".into(),
+            checksum: "aaa".into(),
+        },
+        MigrationFileDigest {
+            name: "001".into(),
+            checksum: "bbb".into(),
+        },
+    ];
+    assert!(compare_migration_ledger(&duplicate, &[])
+        .unwrap_err()
+        .contains("duplicad"));
+}
+
+#[test]
+fn migration_files_are_read_only_from_the_eight_canonical_schema_directories() {
+    let workspace = tempfile::tempdir().unwrap();
+    let migration = workspace.path().join("prisma/core/migrations/001_base");
+    std::fs::create_dir_all(&migration).unwrap();
+    std::fs::write(
+        migration.join("migration.sql"),
+        "CREATE TABLE core.example(id int);\n",
+    )
+    .unwrap();
+    let files = read_migration_files(workspace.path()).expect("read migration files");
+    assert_eq!(files.get("core").unwrap()[0].name, "001_base");
+    assert_eq!(files.get("core").unwrap()[0].checksum.len(), 64);
+    assert!(files.contains_key("pay"));
 }
 
 #[test]

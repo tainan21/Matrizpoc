@@ -461,6 +461,19 @@ export interface InfrastructureActionPreview {
   readonly expiresAt: number
 }
 
+export interface MigrationLedgerComparison {
+  readonly state: "clean" | "pending" | "drifted" | "failed"
+  readonly pending: readonly string[]
+  readonly altered: readonly string[]
+  readonly unexpected: readonly string[]
+  readonly failed: readonly string[]
+}
+
+export interface DatabaseMigrationSnapshot {
+  readonly state: MigrationLedgerComparison["state"]
+  readonly schemas: readonly { readonly schema: string; readonly ledger: MigrationLedgerComparison }[]
+}
+
 export interface ControlPackageActivationTarget {
   readonly kind: "control"
   readonly packageId: string

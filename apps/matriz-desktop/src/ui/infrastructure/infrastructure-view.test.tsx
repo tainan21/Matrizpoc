@@ -87,4 +87,19 @@ describe("InfrastructureView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Preparar banco PostgreSQL" }))
     expect(gateway.previewInfrastructureAction).toHaveBeenCalledWith({ targetId: "postgres", actionId: "provision", revision: "infra-rev-1" })
   })
+
+  it("loads the native migration ledger only on explicit inspection", async () => {
+    const gateway = {
+      infrastructureSnapshot: vi.fn().mockResolvedValue(snapshot),
+      infrastructureLogs: vi.fn().mockResolvedValue([]),
+      infrastructureMigrations: vi.fn().mockResolvedValue({
+        state: "pending",
+        schemas: [{ schema: "core", ledger: { state: "pending", pending: ["002_rls"], altered: [], unexpected: [], failed: [] } }],
+      }),
+    } as unknown as DesktopGateway
+    render(<InfrastructureView gateway={gateway} />)
+    expect(gateway.infrastructureMigrations).not.toHaveBeenCalled()
+    fireEvent.click(await screen.findByRole("button", { name: "Inspecionar migrations" }))
+    expect(await screen.findByText("002_rls")).toBeVisible()
+  })
 })

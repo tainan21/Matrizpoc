@@ -99,6 +99,7 @@ export function createTauriGateway(
     previewInfrastructureAction: (request) => invoke(commands.previewInfrastructureAction, { request }),
     confirmInfrastructureAction: (confirmationToken) => invoke(commands.confirmInfrastructureAction, { confirmationToken }),
     infrastructureLogs: (serviceId) => invoke(commands.infrastructureLogs, { serviceId }),
+    infrastructureMigrations: () => invoke(commands.infrastructureMigrations),
     hide: () => invoke<void>(commands.hide),
     quit: () => invoke<void>(commands.quit),
     terminalReadiness: () => invoke(commands.terminalReadiness),

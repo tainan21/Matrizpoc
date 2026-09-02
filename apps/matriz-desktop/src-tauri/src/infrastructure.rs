@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{BTreeMap, HashMap},
     fs::{self, File, OpenOptions},
     io::{self, Read},
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream},
@@ -73,6 +73,9 @@ pub trait InfrastructureHost: Send + Sync {
         action: InfrastructureAction,
     ) -> Result<(), String>;
     fn logs(&self, service_id: InfrastructureServiceId) -> Result<Vec<String>, String>;
+    fn applied_migrations(&self, _schema: &str) -> Result<Vec<AppliedMigration>, String> {
+        Ok(Vec::new())
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -111,6 +114,152 @@ pub struct InfrastructureActionPreview {
     pub title: String,
     pub impact: Vec<String>,
     pub expires_at: u64,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MigrationFileDigest {
+    pub name: String,
+    pub checksum: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct AppliedMigration {
+    pub name: String,
+    pub checksum: String,
+    pub finished: bool,
+    pub rolled_back: bool,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MigrationLedgerComparison {
+    pub state: &'static str,
+    pub pending: Vec<String>,
+    pub altered: Vec<String>,
+    pub unexpected: Vec<String>,
+    pub failed: Vec<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MigrationSchemaSnapshot {
+    pub schema: String,
+    pub ledger: MigrationLedgerComparison,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DatabaseMigrationSnapshot {
+    pub state: &'static str,
+    pub schemas: Vec<MigrationSchemaSnapshot>,
+}
+
+pub fn compare_migration_ledger(
+    files: &[MigrationFileDigest],
+    applied: &[AppliedMigration],
+) -> Result<MigrationLedgerComparison, String> {
+    let unique_files: std::collections::HashSet<_> = files.iter().map(|item| &item.name).collect();
+    let unique_applied: std::collections::HashSet<_> =
+        applied.iter().map(|item| &item.name).collect();
+    if unique_files.len() != files.len() || unique_applied.len() != applied.len() {
+        return Err("O ledger contém nomes de migration duplicados".into());
+    }
+    let files_by_name: HashMap<_, _> = files.iter().map(|item| (&item.name, item)).collect();
+    let applied_by_name: HashMap<_, _> = applied.iter().map(|item| (&item.name, item)).collect();
+    let pending: Vec<String> = files
+        .iter()
+        .filter(|item| !applied_by_name.contains_key(&item.name))
+        .map(|item| item.name.clone())
+        .collect();
+    let altered: Vec<String> = files
+        .iter()
+        .filter(|item| {
+            applied_by_name
+                .get(&item.name)
+                .is_some_and(|row| !row.checksum.eq_ignore_ascii_case(&item.checksum))
+        })
+        .map(|item| item.name.clone())
+        .collect();
+    let unexpected: Vec<String> = applied
+        .iter()
+        .filter(|item| !item.rolled_back && !files_by_name.contains_key(&item.name))
+        .map(|item| item.name.clone())
+        .collect();
+    let failed = applied
+        .iter()
+        .filter(|item| !item.finished && !item.rolled_back)
+        .map(|item| item.name.clone())
+        .collect::<Vec<_>>();
+    let state = if !failed.is_empty() {
+        "failed"
+    } else if !altered.is_empty() || !unexpected.is_empty() {
+        "drifted"
+    } else if !pending.is_empty() {
+        "pending"
+    } else {
+        "clean"
+    };
+    Ok(MigrationLedgerComparison {
+        state,
+        pending,
+        altered,
+        unexpected,
+        failed,
+    })
+}
+
+const DATABASE_SCHEMAS: &[&str] = &[
+    "core",
+    "hub",
+    "spot",
+    "seumei",
+    "contracts",
+    "willdash",
+    "ops",
+    "pay",
+];
+
+pub fn read_migration_files(
+    workspace: &Path,
+) -> Result<BTreeMap<String, Vec<MigrationFileDigest>>, String> {
+    let workspace = workspace
+        .canonicalize()
+        .map_err(|error| error.to_string())?;
+    let mut schemas = BTreeMap::new();
+    for schema in DATABASE_SCHEMAS {
+        let root = workspace.join("prisma").join(schema).join("migrations");
+        let mut migrations = Vec::new();
+        if root.is_dir() {
+            for entry in fs::read_dir(&root).map_err(|error| error.to_string())? {
+                let entry = entry.map_err(|error| error.to_string())?;
+                let metadata =
+                    fs::symlink_metadata(entry.path()).map_err(|error| error.to_string())?;
+                if metadata.file_type().is_symlink() || !metadata.is_dir() {
+                    continue;
+                }
+                let migration = entry.path().join("migration.sql");
+                if !migration.is_file() {
+                    continue;
+                }
+                let canonical = migration
+                    .canonicalize()
+                    .map_err(|error| error.to_string())?;
+                if !canonical.starts_with(&workspace) {
+                    return Err("Migration fora do workspace canônico recusada".into());
+                }
+                let name = entry.file_name().to_string_lossy().into_owned();
+                let contents = fs::read(canonical).map_err(|error| error.to_string())?;
+                migrations.push(MigrationFileDigest {
+                    name,
+                    checksum: format!("{:x}", Sha256::digest(contents)),
+                });
+            }
+            migrations.sort_by(|left, right| left.name.cmp(&right.name));
+        }
+        schemas.insert((*schema).into(), migrations);
+    }
+    Ok(schemas)
 }
 
 #[derive(Clone)]
@@ -243,6 +392,32 @@ impl InfrastructureManager {
             .into_iter()
             .rev()
             .collect())
+    }
+
+    pub fn migrations(&self, workspace: &Path) -> Result<DatabaseMigrationSnapshot, String> {
+        let files = read_migration_files(workspace)?;
+        let mut schemas = Vec::with_capacity(DATABASE_SCHEMAS.len());
+        for schema in DATABASE_SCHEMAS {
+            let applied = self.host.applied_migrations(schema)?;
+            let ledger = compare_migration_ledger(
+                files.get(*schema).map(Vec::as_slice).unwrap_or_default(),
+                &applied,
+            )?;
+            schemas.push(MigrationSchemaSnapshot {
+                schema: (*schema).into(),
+                ledger,
+            });
+        }
+        let state = if schemas.iter().any(|item| item.ledger.state == "failed") {
+            "failed"
+        } else if schemas.iter().any(|item| item.ledger.state == "drifted") {
+            "drifted"
+        } else if schemas.iter().any(|item| item.ledger.state == "pending") {
+            "pending"
+        } else {
+            "clean"
+        };
+        Ok(DatabaseMigrationSnapshot { state, schemas })
     }
 }
 
@@ -685,6 +860,44 @@ impl PortableInfrastructureHost {
         write_new_file(&marker, br#"{"version":1,"database":"matriz","schemas":["core","hub","spot","seumei","contracts","willdash","ops","pay"]}"#)
     }
 
+    fn psql_output(&self, database: &str, sql: &str) -> Result<String, String> {
+        let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
+        if !psql.is_file() {
+            return Err("PostgreSQL não está instalado".into());
+        }
+        let output = Command::new(psql)
+            .env("PGPASSWORD", self.secret("postgres-bootstrap")?)
+            .args([
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "55432",
+                "--username",
+                "matriz_provisioner",
+                "--dbname",
+                database,
+                "--no-password",
+                "--tuples-only",
+                "--no-align",
+                "--field-separator",
+                "|",
+                "--set",
+                "ON_ERROR_STOP=1",
+                "--command",
+                sql,
+            ])
+            .creation_flags(0x0800_0000)
+            .output()
+            .map_err(|error| error.to_string())?;
+        if !output.status.success() {
+            return Err(format!(
+                "Consulta PostgreSQL falhou: {}",
+                redact(&String::from_utf8_lossy(&output.stderr))
+            ));
+        }
+        String::from_utf8(output.stdout).map_err(|_| "A resposta do PostgreSQL não é UTF-8".into())
+    }
+
     fn stop(&self, service_id: InfrastructureServiceId) -> Result<(), String> {
         let expected = self
             .executable(service_id)
@@ -812,6 +1025,35 @@ impl InfrastructureHost for PortableInfrastructureHost {
             }
             Err(error) => Err(error.to_string()),
         }
+    }
+
+    fn applied_migrations(&self, schema: &str) -> Result<Vec<AppliedMigration>, String> {
+        if !DATABASE_SCHEMAS.contains(&schema) {
+            return Err("Schema fora do catálogo nativo".into());
+        }
+        let relation = format!("SELECT to_regclass('\"{schema}\".\"_prisma_migrations\"');");
+        if self.psql_output("matriz", &relation)?.trim().is_empty() {
+            return Ok(Vec::new());
+        }
+        let query = format!(
+            "SELECT migration_name, checksum, CASE WHEN finished_at IS NULL THEN 0 ELSE 1 END, CASE WHEN rolled_back_at IS NULL THEN 0 ELSE 1 END FROM \"{schema}\".\"_prisma_migrations\" ORDER BY started_at;"
+        );
+        self.psql_output("matriz", &query)?
+            .lines()
+            .filter(|line| !line.trim().is_empty())
+            .map(|line| {
+                let fields: Vec<_> = line.split('|').collect();
+                if fields.len() != 4 {
+                    return Err("Ledger PostgreSQL retornou uma linha inválida".into());
+                }
+                Ok(AppliedMigration {
+                    name: fields[0].into(),
+                    checksum: fields[1].into(),
+                    finished: fields[2] == "1",
+                    rolled_back: fields[3] == "1",
+                })
+            })
+            .collect()
     }
 }
 

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { InfrastructureActionId, InfrastructureActionPreview, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
+import type { DatabaseMigrationSnapshot, InfrastructureActionId, InfrastructureActionPreview, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
 
 export function InfrastructureView({ gateway }: { readonly gateway: DesktopGateway }) {
   const [snapshot, setSnapshot] = useState<InfrastructureSnapshot>()
   const [preview, setPreview] = useState<InfrastructureActionPreview>()
   const [logs, setLogs] = useState<{ name: string; lines: readonly string[] }>()
+  const [migrations, setMigrations] = useState<DatabaseMigrationSnapshot>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -58,6 +59,15 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
     }
   }
 
+  const inspectMigrations = async () => {
+    setError(undefined)
+    try {
+      setMigrations(await gateway.infrastructureMigrations())
+    } catch (cause) {
+      setError(message(cause, "Ledger de migrations indisponível"))
+    }
+  }
+
   return (
     <section className="infra-view" aria-labelledby="infra-title">
       <div className="section-head">
@@ -72,6 +82,8 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
           {snapshot.services.some(({ state }) => state === "not_installed") ? <button disabled={busy} aria-label="Instalar stack portátil" onClick={() => void request("stack", "install")}>INSTALAR STACK</button> : <button disabled={busy} aria-label="Iniciar stack portátil" onClick={() => void request("stack", "start")}>INICIAR STACK</button>}
         </div> : null}
       </div>
+
+      <div className="infra-database-actions"><button aria-label="Inspecionar migrations" onClick={() => void inspectMigrations()}>MIGRATIONS</button></div>
 
       {error ? <p className="infra-error" role="alert">{error}</p> : null}
       <div className="infra-grid">
@@ -90,6 +102,7 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
 
       {preview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar operação de infraestrutura"><div><small>PRÉVIA OBRIGATÓRIA</small><h2>{preview.title}</h2>{preview.impact.map((item) => <p key={item}>{item}</p>)}</div><div><button disabled={busy} onClick={() => setPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar operação" onClick={() => void confirm()}>CONFIRMAR</button></div></div> : null}
       {logs ? <section className="infra-logs" aria-label={`Logs do ${logs.name}`}><header><strong>LOGS / {logs.name.toUpperCase()}</strong><button aria-label="Fechar logs" onClick={() => setLogs(undefined)}>×</button></header><pre>{logs.lines.join("\n") || "Nenhum log local disponível"}</pre></section> : null}
+      {migrations ? <section className="infra-migrations" aria-label="Ledger de migrations"><header><strong>MIGRATIONS / {migrations.state.toUpperCase()}</strong><button aria-label="Fechar migrations" onClick={() => setMigrations(undefined)}>×</button></header><div>{migrations.schemas.map(({ schema, ledger }) => <article key={schema}><strong>{schema}</strong><span className={`infra-badge ${ledger.state}`}>{ledger.state}</span>{ledger.pending.map((name) => <code key={`pending-${name}`}>{name}</code>)}{ledger.altered.map((name) => <code key={`altered-${name}`}>ALTERADA · {name}</code>)}{ledger.unexpected.map((name) => <code key={`unexpected-${name}`}>INESPERADA · {name}</code>)}{ledger.failed.map((name) => <code key={`failed-${name}`}>FALHOU · {name}</code>)}</article>)}</div></section> : null}
       <p className="area-note">Portas externas nunca são encerradas. Toda mutação exige prévia, token de uso único e nova inspeção.</p>
     </section>
   )

@@ -48,8 +48,9 @@ use git::{
 };
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
 use infrastructure::{
-    InfrastructureActionPreview, InfrastructureManager, InfrastructurePreviewRequest,
-    InfrastructureServiceId, InfrastructureSnapshot, PortableInfrastructureHost,
+    DatabaseMigrationSnapshot, InfrastructureActionPreview, InfrastructureManager,
+    InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureSnapshot,
+    PortableInfrastructureHost,
 };
 use node_sweep::{NodeSweepDeletion, NodeSweepScan, NodeSweepService};
 use preview::{PreviewBounds, PreviewManager, PreviewState};
@@ -1447,6 +1448,18 @@ async fn infrastructure_logs(
         .map_err(|error| error.to_string())?
 }
 
+#[tauri::command]
+async fn infrastructure_migrations(
+    operations: tauri::State<'_, OperationsState>,
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+) -> Result<DatabaseMigrationSnapshot, String> {
+    let workspace = operations.root()?;
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.migrations(&workspace))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
 fn unix_time_millis() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -1603,6 +1616,7 @@ pub fn run() {
             preview_infrastructure_action,
             confirm_infrastructure_action,
             infrastructure_logs,
+            infrastructure_migrations,
             get_native_app_runtime,
             install_native_app,
             start_native_app,
