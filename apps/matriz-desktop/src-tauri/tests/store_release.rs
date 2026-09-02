@@ -1,6 +1,9 @@
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ed25519_dalek::{Signer, SigningKey};
-use matriz_desktop_native::store_release::verify_catalog_release;
+use matriz_desktop_native::store_release::{
+    persist_verified_installer, verify_catalog_release, verify_installer_bytes,
+};
+use sha2::Digest;
 
 fn signed_catalog(download_url: &str, size_bytes: u64, sha256: &str) -> (String, String) {
     let signing_key = SigningKey::from_bytes(&[7_u8; 32]);
@@ -108,4 +111,32 @@ fn rejects_tampering_insecure_or_unapproved_release_hosts() {
         &["releases.matriz.example"],
     )
     .is_err());
+}
+
+#[test]
+fn installer_bytes_must_match_the_signed_size_and_sha256() {
+    let bytes = b"signed installer fixture";
+    let sha256 = format!("{:x}", sha2::Sha256::digest(bytes));
+    let (catalog, public_key) = signed_catalog(
+        "https://releases.matriz.example/matriz-uninstall.exe",
+        bytes.len() as u64,
+        &sha256,
+    );
+    let release = verify_catalog_release(
+        catalog.as_bytes(),
+        "matriz-uninstall-tauri",
+        &public_key,
+        &["releases.matriz.example"],
+    )
+    .expect("verified release");
+    assert!(verify_installer_bytes(&release, bytes).is_ok());
+    assert!(verify_installer_bytes(&release, b"tampered").is_err());
+    let root = tempfile::tempdir().expect("installer staging");
+    let stored = persist_verified_installer(root.path(), &release, bytes)
+        .expect("verified installer persisted");
+    assert_eq!(
+        stored.file_name().and_then(|value| value.to_str()),
+        Some(release.file_name.as_str())
+    );
+    assert_eq!(std::fs::read(stored).expect("stored bytes"), bytes);
 }

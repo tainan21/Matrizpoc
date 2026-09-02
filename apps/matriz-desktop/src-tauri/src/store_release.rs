@@ -1,8 +1,13 @@
-use std::path::Path;
+use std::{
+    fs::{self, OpenOptions},
+    io::Write,
+    path::{Path, PathBuf},
+};
 
 use base64::{engine::general_purpose::STANDARD, Engine};
 use ed25519_dalek::{Signature, Verifier, VerifyingKey};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 const MAX_INSTALLER_BYTES: u64 = 536_870_912;
 
@@ -111,6 +116,57 @@ pub fn verify_catalog_release(
         sha256: release.installer.sha256,
         expected_publisher: product.windows.publisher,
     })
+}
+
+pub fn verify_installer_bytes(release: &VerifiedRelease, bytes: &[u8]) -> Result<(), String> {
+    if bytes.len() as u64 != release.size_bytes {
+        return Err("Tamanho do instalador diverge do manifesto assinado".into());
+    }
+    let actual = format!("{:x}", Sha256::digest(bytes));
+    if actual != release.sha256 {
+        return Err("SHA-256 do instalador diverge do manifesto assinado".into());
+    }
+    Ok(())
+}
+
+pub fn persist_verified_installer(
+    root: &Path,
+    release: &VerifiedRelease,
+    bytes: &[u8],
+) -> Result<PathBuf, String> {
+    verify_installer_bytes(release, bytes)?;
+    fs::create_dir_all(root)
+        .map_err(|error| format!("Não foi possível preparar o staging da Store: {error}"))?;
+    let target = root.join(&release.file_name);
+    if target.exists() {
+        let existing = fs::read(&target)
+            .map_err(|error| format!("Não foi possível reinspecionar o instalador: {error}"))?;
+        verify_installer_bytes(release, &existing)?;
+        return Ok(target);
+    }
+    let temporary = root.join(format!(
+        ".{}.{}.tmp",
+        release.file_name,
+        uuid::Uuid::new_v4()
+    ));
+    let result = (|| {
+        let mut file = OpenOptions::new()
+            .create_new(true)
+            .write(true)
+            .open(&temporary)
+            .map_err(|error| format!("Não foi possível criar o staging da Store: {error}"))?;
+        file.write_all(bytes)
+            .and_then(|_| file.sync_all())
+            .map_err(|error| format!("Não foi possível gravar o staging da Store: {error}"))?;
+        fs::rename(&temporary, &target).map_err(|error| {
+            format!("Não foi possível promover o instalador verificado: {error}")
+        })?;
+        Ok(target.clone())
+    })();
+    if result.is_err() {
+        let _ = fs::remove_file(&temporary);
+    }
+    result
 }
 
 fn validate_installer(installer: &Installer, allowed_hosts: &[&str]) -> Result<(), String> {
