@@ -1,7 +1,8 @@
 import { z } from "zod"
 import type { WorkbenchRuntimeMode } from "../../auth/runtime-mode"
+import { WORKBENCH_CONTROL_SURFACE } from "../../../control-surface-contract"
 
-export const CONTROL_CONTRACT_VERSION = "workbench-control-v1" as const
+export const CONTROL_CONTRACT_VERSION = WORKBENCH_CONTROL_SURFACE.contractVersion
 
 export function buildControlHealth(mode: WorkbenchRuntimeMode) {
   return {

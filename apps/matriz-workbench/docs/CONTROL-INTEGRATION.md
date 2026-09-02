@@ -17,6 +17,11 @@ catalog. Workbench owns diagnostics, repair state and `.matriz/**` records.
 Neither app imports the other's internals; communication uses the versioned
 `workbench-control-v1` loopback contract.
 
+The stable embeddable descriptor is exported by `public-contract.ts` as
+`WORKBENCH_CONTROL_SURFACE`. Consumers receive only route, health, diagnostics,
+embedding mode and capability metadata. Work items, approvals, history and
+`.matriz/**` persistence remain private Workbench domain concerns.
+
 ## Automatic repair
 
 1. Control maps a failed managed action to a bounded, sanitized diagnostic.

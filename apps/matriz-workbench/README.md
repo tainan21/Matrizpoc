@@ -19,8 +19,8 @@ for repositories.
 - **Coordinator artifacts:** the repository-root `.matriz/inbox/**` and
   `.matriz/sprints/**` back the global `/work/inbox`, `/work/backlog` and
   `/work/sprints` surfaces. They reference project work without copying it.
-- **Exposes:** `public-contract.ts` → `{ manifest }` only; MCP named resources
-  and workflow tools over STDIO.
+- **Exposes:** `public-contract.ts` → manifest and the metadata-only
+  `WORKBENCH_CONTROL_SURFACE`; MCP named resources and workflow tools over STDIO.
 - **Does not expose:** filesystem primitives, source editing, shell execution or
   product-domain internals.
 - **May import:** stable `@matriz/*` infrastructure contracts.
