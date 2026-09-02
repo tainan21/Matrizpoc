@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { InfrastructureActionId, InfrastructureActionPreview, InfrastructureServiceSnapshot, InfrastructureSnapshot } from "../../domain/types"
+import type { InfrastructureActionId, InfrastructureActionPreview, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
 
 export function InfrastructureView({ gateway }: { readonly gateway: DesktopGateway }) {
   const [snapshot, setSnapshot] = useState<InfrastructureSnapshot>()
@@ -21,12 +21,12 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
 
   useEffect(() => { void refresh() }, [refresh])
 
-  const request = async (service: InfrastructureServiceSnapshot, actionId: InfrastructureActionId) => {
+  const request = async (targetId: InfrastructureTargetId, actionId: InfrastructureActionId) => {
     if (!snapshot || busy) return
     setBusy(true)
     setError(undefined)
     try {
-      setPreview(await gateway.previewInfrastructureAction({ targetId: service.id, actionId, revision: snapshot.revision }))
+      setPreview(await gateway.previewInfrastructureAction({ targetId, actionId, revision: snapshot.revision }))
     } catch (cause) {
       setError(message(cause, "Não foi possível preparar a operação"))
     } finally {
@@ -68,6 +68,9 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
       <div className="infra-summary">
         <div><small>STACK</small><strong>{snapshot ? overallState(snapshot) : "VERIFICANDO"}</strong></div>
         <div><small>DIRETÓRIO GERENCIADO</small><code>{snapshot?.root ?? "—"}</code></div>
+        {snapshot && !snapshot.services.some(({ state }) => state === "external_unowned") ? <div className="infra-stack-actions">
+          {snapshot.services.some(({ state }) => state === "not_installed") ? <button disabled={busy} aria-label="Instalar stack portátil" onClick={() => void request("stack", "install")}>INSTALAR STACK</button> : <button disabled={busy} aria-label="Iniciar stack portátil" onClick={() => void request("stack", "start")}>INICIAR STACK</button>}
+        </div> : null}
       </div>
 
       {error ? <p className="infra-error" role="alert">{error}</p> : null}
@@ -78,7 +81,7 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
             <p>{service.message}</p>
             <dl><div><dt>VERSÃO</dt><dd>{service.version}</dd></div><div><dt>PORTAS</dt><dd>{service.ports.join(" / ")}</dd></div></dl>
             <div className="infra-actions">
-              {actionsFor(service).map(({ id, label }) => <button key={id} disabled={busy} aria-label={`${label} ${service.displayName}`} onClick={() => void request(service, id)}>{label.toUpperCase()}</button>)}
+              {actionsFor(service).map(({ id, label }) => <button key={id} disabled={busy} aria-label={`${label} ${service.displayName}`} onClick={() => void request(service.id, id)}>{label.toUpperCase()}</button>)}
               <button aria-label={`Inspecionar logs do ${service.displayName}`} onClick={() => void inspectLogs(service)}>LOGS</button>
             </div>
           </article>

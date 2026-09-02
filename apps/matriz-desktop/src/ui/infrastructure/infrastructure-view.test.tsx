@@ -65,4 +65,15 @@ describe("InfrastructureView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Inspecionar logs do NATS JetStream" }))
     expect(await screen.findByText("NATS ready")).toBeVisible()
   })
+
+  it("previews stack installation as one fixed native target", async () => {
+    const gateway = {
+      infrastructureSnapshot: vi.fn().mockResolvedValue({ ...snapshot, services: snapshot.services.map((service) => ({ ...service, state: "not_installed" as const })) }),
+      previewInfrastructureAction: vi.fn().mockResolvedValue({ confirmationToken: "stack-token", targetId: "stack", actionId: "install", title: "Instalar stack Matriz", impact: [], expiresAt: Date.now() + 30_000 }),
+      infrastructureLogs: vi.fn().mockResolvedValue([]),
+    } as unknown as DesktopGateway
+    render(<InfrastructureView gateway={gateway} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Instalar stack portátil" }))
+    expect(gateway.previewInfrastructureAction).toHaveBeenCalledWith({ targetId: "stack", actionId: "install", revision: "infra-rev-1" })
+  })
 })
