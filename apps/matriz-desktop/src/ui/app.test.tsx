@@ -286,6 +286,17 @@ describe("Matriz Control", () => {
     expect(desktop.writeSettings).toHaveBeenNthCalledWith(2, expect.objectContaining({ soundsEnabled: true, volume: 0.65 }))
   })
 
+  it("promotes the existing environment authority as a direct primary area", async () => {
+    const desktop = gateway()
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Ambientes" }))
+
+    expect(await screen.findByRole("heading", { name: ".ENV MANAGER" })).toBeVisible()
+    expect(screen.queryByRole("navigation", { name: "Recursos do workspace" })).not.toBeInTheDocument()
+  })
+
   it("offers every operational theme and applies the selected theme immediately", async () => {
     const desktop = gateway()
     render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)

@@ -34,6 +34,7 @@ import { useTerminalRuntime } from "./terminal/use-terminal-runtime"
 import { RuntimeWorkspace } from "./runtime/runtime-workspace"
 import { RunbookPanel } from "./runbooks/runbook-panel"
 import { WorkspaceView } from "./workspace/workspace-view"
+import { EnvironmentManager } from "./workspace/environment-manager"
 import { StoreView } from "./store/store-view"
 import { requestWorkspaceNavigation } from "./workspace/navigation-guard"
 import { applyControlTheme } from "./theme/control-theme"
@@ -304,7 +305,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
         {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "hub" ? <HubView gateway={gateway} focusFeature={hubFeature} onResume={(session) => { setHubFeature(undefined); setActiveAppId(session.appId); setView(session.area) }} /> : null}
         {view === "agents" ? <OperationalArea title="AGENTES" eyebrow="COWORKING / WORKBENCH" description="Tarefas e execuções permanecem sob autoridade do Workbench." action="Abrir Workbench em Apps" onAction={() => { setActiveAppId("matriz-workbench"); chooseView("apps") }} /> : null}
-        {view === "environments" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
+        {view === "environments" ? <EnvironmentManager gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "infra" ? <OperationalArea title="INFRA" eyebrow="LOCAL / SERVIÇOS" description="O cockpit local será habilitado serviço por serviço, com prévia e confirmação." /> : null}
         {view === "git" ? <GitView gateway={gateway} /> : null}
         {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
