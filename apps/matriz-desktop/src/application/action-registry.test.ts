@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import type { RuntimeInstance } from "../domain/types"
 import { APP_MANIFESTS } from "./app-manifests"
 import { executeRuntimeAction, getRuntimeActions, type ActionServices } from "./action-registry"
+import { MATRIZ_DESKTOP_APPS } from "./catalog"
 
 const runtime = (overrides: Partial<RuntimeInstance> = {}): RuntimeInstance => ({
   id: "matriz-admin",
@@ -42,7 +43,7 @@ describe("runtime action registry", () => {
   })
 
   it("loads declared routes for every catalog app through public manifests", () => {
-    expect(Object.keys(APP_MANIFESTS)).toHaveLength(9)
+    expect(Object.keys(APP_MANIFESTS)).toHaveLength(MATRIZ_DESKTOP_APPS.length)
     for (const manifest of Object.values(APP_MANIFESTS)) {
       expect(manifest.routes.length).toBeGreaterThan(0)
       expect(manifest.routes[0]?.path.startsWith("/")).toBe(true)

@@ -1,6 +1,6 @@
 use matriz_desktop_native::terminal::TerminalSession;
 use matriz_desktop_native::{
-    ensure_preview_ready, preview_navigation_allowed, runtime_snapshot, runtime_url,
+    catalog_apps, ensure_preview_ready, preview_navigation_allowed, runtime_snapshot, runtime_url,
     ObservedProcess,
 };
 
@@ -128,5 +128,5 @@ fn snapshot_distinguishes_managed_external_starting_and_stopped_runtimes() {
         .find(|runtime| runtime.id == "sites")
         .unwrap();
     assert_eq!((sites.status, sites.ownership), ("stopped", "none"));
-    assert_eq!(runtimes.len(), 9);
+    assert_eq!(runtimes.len(), catalog_apps().len());
 }
