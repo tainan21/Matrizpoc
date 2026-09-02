@@ -240,7 +240,7 @@ fn migration_ledger_rejects_duplicate_names() {
 #[test]
 fn migration_files_are_read_only_from_the_eight_canonical_schema_directories() {
     let workspace = tempfile::tempdir().unwrap();
-    let migration = workspace.path().join("prisma/core/migrations/001_base");
+    let migration = workspace.path().join("prisma/migrations/core/001_base");
     std::fs::create_dir_all(&migration).unwrap();
     std::fs::write(
         migration.join("migration.sql"),
