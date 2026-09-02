@@ -18,6 +18,8 @@ interface BrowserSnapshot {
 interface TerminalSessionView { readonly id: string; readonly pid: number; readonly status: "running" | "exited"; readonly lines: readonly string[]; readonly exitCode: number | null }
 interface StoreProductView { readonly productId: string; readonly name: string; readonly edition: string; readonly state: "active" | "unavailable" | "retired"; readonly version: string | null }
 interface DownloadView { readonly id: string; readonly name: string; readonly status: "progress" | "completed" | "cancelled" | "failed"; readonly receivedBytes: number; readonly totalBytes: number; readonly createdAt: string }
+interface LegacyImportPreview { readonly available: boolean; readonly sourceLabel: string; readonly capsuleCount: number; readonly tabCount: number; readonly reason?: string; readonly confirmationToken?: string }
+interface LegacyImportStatus { readonly canRollback: boolean; readonly importedAt?: string; readonly message: string }
 
 interface NaeviaBridge {
   snapshot(): Promise<BrowserSnapshot>
@@ -29,7 +31,7 @@ interface NaeviaBridge {
   browserCommand(tabId: string, command: BrowserCommand): Promise<void>
   setKillSwitch(enabled: boolean): Promise<boolean>
   navigate(tabId: string, input: string): Promise<BrowserSnapshot>
-  setPanels(state: { side: "none" | "store" | "workbench" | "library"; terminal: boolean }): Promise<void>
+  setPanels(state: { side: "none" | "store" | "workbench" | "library" | "migration"; terminal: boolean }): Promise<void>
   terminalSessions(): Promise<readonly TerminalSessionView[]>
   createTerminal(): Promise<readonly TerminalSessionView[]>
   writeTerminal(sessionId: string, input: string): Promise<void>
@@ -40,6 +42,10 @@ interface NaeviaBridge {
   downloads(): Promise<readonly DownloadView[]>
   showDownload(downloadId: string): Promise<void>
   subscribeDownloads(listener: (downloads: readonly DownloadView[]) => void): () => void
+  legacyImportPreview(): Promise<LegacyImportPreview>
+  confirmLegacyImport(confirmationToken: string): Promise<LegacyImportStatus>
+  legacyImportStatus(): Promise<LegacyImportStatus>
+  rollbackLegacyImport(): Promise<LegacyImportStatus>
   subscribe(listener: (snapshot: BrowserSnapshot) => void): () => void
 }
 
@@ -72,6 +78,10 @@ const bridge: NaeviaBridge = {
     ipcRenderer.on("naevia:downloads", handler)
     return () => ipcRenderer.off("naevia:downloads", handler)
   },
+  legacyImportPreview: () => ipcRenderer.invoke("naevia:legacy:preview"),
+  confirmLegacyImport: (confirmationToken) => ipcRenderer.invoke("naevia:legacy:confirm", { confirmationToken }),
+  legacyImportStatus: () => ipcRenderer.invoke("naevia:legacy:status"),
+  rollbackLegacyImport: () => ipcRenderer.invoke("naevia:legacy:rollback"),
   subscribe: (listener) => {
     const handler = (_event: Electron.IpcRendererEvent, snapshot: BrowserSnapshot) => listener(snapshot)
     ipcRenderer.on("naevia:snapshot", handler)

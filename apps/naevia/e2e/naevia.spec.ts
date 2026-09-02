@@ -1,19 +1,28 @@
 import { _electron as electron, expect, test } from "@playwright/test"
-import { mkdtemp, rm } from "node:fs/promises"
+import { mkdir, mkdtemp, rm } from "node:fs/promises"
 import { createServer } from "node:http"
+import { DatabaseSync } from "node:sqlite"
 import type { AddressInfo } from "node:net"
 import { tmpdir } from "node:os"
 import { basename, dirname, join } from "node:path"
 
 test("opens the real Electron shell with secure browser chrome", async () => {
   const profile = await mkdtemp(join(tmpdir(), "naevia-e2e-"))
+  const legacyRoot = join(profile, "legacy")
+  const legacyDatabase = join(legacyRoot, "runtime", "vault", "browser.sqlite")
+  await mkdir(dirname(legacyDatabase), { recursive: true })
+  const database = new DatabaseSync(legacyDatabase)
+  database.exec("CREATE TABLE capsules (id TEXT PRIMARY KEY, name TEXT NOT NULL, policy TEXT NOT NULL); CREATE TABLE tabs (id TEXT PRIMARY KEY, capsule_id TEXT NOT NULL, title TEXT NOT NULL, url TEXT NOT NULL, active INTEGER NOT NULL);")
+  database.prepare("INSERT INTO capsules VALUES (?, ?, ?)").run("legacy-capsule", "Exploração", "human")
+  database.prepare("INSERT INTO tabs VALUES (?, ?, ?, ?, ?)").run("legacy-tab", "legacy-capsule", "Matriz", "https://example.com/", 1)
+  database.close()
   const server = createServer((request, response) => {
     if (request.url === "/proof.txt") { response.setHeader("content-disposition", "attachment; filename=proof.txt"); response.end("download seguro") }
     else { response.setHeader("content-type", "text/html"); response.end('<a download href="/proof.txt">Baixar prova</a>') }
   })
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
   const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-  const application = await electron.launch({ args: ["."], cwd: process.cwd(), env: { ...process.env, NAEVIA_USER_DATA_DIR: profile, NAEVIA_DOWNLOAD_DIR: join(profile, "downloads") } })
+  const application = await electron.launch({ args: ["."], cwd: process.cwd(), env: { ...process.env, NAEVIA_USER_DATA_DIR: profile, NAEVIA_DOWNLOAD_DIR: join(profile, "downloads"), NAEVIA_E2E: "1", NAEVIA_LEGACY_ROOT: legacyRoot } })
   try {
     await application.firstWindow()
     await expect.poll(() => application.windows().map((candidate) => candidate.url())).toContainEqual(expect.stringMatching(/\/dist\/index\.html$/))
@@ -22,6 +31,16 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect(window.getByLabel("NAEVIA")).toBeVisible()
     await expect(window.getByLabel("Pesquisar ou digitar endereço")).toHaveValue("https://duckduckgo.com/")
     await expect(window.getByRole("button", { name: "Nova aba", exact: true })).toBeVisible()
+    await window.getByRole("button", { name: "Importar legado" }).click()
+    await expect(window.getByText("1 cápsulas · 1 abas")).toBeVisible()
+    window.once("dialog", (dialog) => dialog.accept())
+    await window.getByRole("button", { name: "Revisar e importar" }).click()
+    await expect(window.getByRole("button", { name: "Exploração" })).toBeVisible()
+    await expect(window.getByText("Backup disponível")).toBeVisible()
+    window.once("dialog", (dialog) => dialog.accept())
+    await window.getByRole("button", { name: "Restaurar perfil anterior" }).click()
+    await expect(window.getByRole("button", { name: "Pessoal" })).toBeVisible()
+    await window.getByRole("button", { name: "Fechar", exact: true }).click()
     const killSwitch = window.getByRole("button", { name: "Kill switch" })
     await killSwitch.click()
     await expect(killSwitch).toHaveClass(/danger/)

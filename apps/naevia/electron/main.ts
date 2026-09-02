@@ -10,6 +10,7 @@ import { activateCapsule, closeTab } from "../src/browser-state.js"
 import { storeProducts } from "../src/store-catalog.js"
 import { MAX_DOWNLOAD_BYTES, safeDownloadName, validDownloadUrl } from "../src/downloads.js"
 import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./terminal-host.js"
+import { LegacyImportService } from "./legacy-import-service.js"
 import type { AgentPolicy, BrowserCommand, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -18,13 +19,14 @@ const views = new Map<string, WebContentsView>()
 let mainWindow: BrowserWindow | undefined
 let repository: BrowserRepository
 let activeViewId = ""
-let panelState = { side: "none" as "none" | "store" | "workbench" | "library", terminal: false }
+let panelState = { side: "none" as "none" | "store" | "workbench" | "library" | "migration", terminal: false }
 let workbenchView: WebContentsView | undefined
 let killSwitchEnabled = false
 const terminalHost = new TerminalHost(spawnTerminalProcess)
 const configuredDownloadSessions = new WeakSet<Session>()
 const downloads = new Map<string, { view: import("../src/shared.js").DownloadView; path: string }>()
 let downloadDirectory = ""
+let legacyImport: LegacyImportService
 
 if (process.env.NAEVIA_USER_DATA_DIR) app.setPath("userData", process.env.NAEVIA_USER_DATA_DIR)
 
@@ -44,6 +46,11 @@ class BrowserRepository {
     await this.write(mutable)
     this.snapshotValue = mutable
     return this.snapshot()
+  }
+
+  async replace(snapshot: BrowserSnapshot) {
+    await this.write(snapshot)
+    this.snapshotValue = structuredClone(snapshot)
   }
 
   private async read(): Promise<BrowserSnapshot> {
@@ -317,7 +324,7 @@ function registerIpc() {
   })
   ipcMain.handle("naevia:layout", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
-    if (!['none', 'store', 'workbench', 'library'].includes(String(value?.side)) || typeof value?.terminal !== "boolean") throw new Error("Layout inválido")
+    if (!['none', 'store', 'workbench', 'library', 'migration'].includes(String(value?.side)) || typeof value?.terminal !== "boolean") throw new Error("Layout inválido")
     const window = mainWindow
     if (window && workbenchView) window.contentView.removeChildView(workbenchView)
     panelState = { side: value.side as typeof panelState.side, terminal: value.terminal }
@@ -341,6 +348,19 @@ function registerIpc() {
     if (!download || download.view.status !== "completed") throw new Error("Download indisponível")
     shell.showItemInFolder(download.path)
   })
+  ipcMain.handle("naevia:legacy:preview", () => legacyImport.preview())
+  ipcMain.handle("naevia:legacy:status", () => legacyImport.status())
+  ipcMain.handle("naevia:legacy:confirm", async (_event, input: unknown) => {
+    const token = text((input as Record<string, unknown>)?.confirmationToken, "Confirmação", 36)
+    const result = await legacyImport.confirm(token)
+    await reloadBrowserViews()
+    return result
+  })
+  ipcMain.handle("naevia:legacy:rollback", async () => {
+    const result = await legacyImport.rollback()
+    await reloadBrowserViews()
+    return result
+  })
   ipcMain.handle("naevia:terminal:list", () => terminalHost.list())
   ipcMain.handle("naevia:terminal:create", () => { terminalHost.create(); return terminalHost.list() })
   ipcMain.handle("naevia:terminal:write", (_event, input: unknown) => {
@@ -357,10 +377,26 @@ function registerIpc() {
   })
 }
 
+async function reloadBrowserViews() {
+  const window = mainWindow
+  for (const view of views.values()) { window?.contentView.removeChildView(view); view.webContents.close() }
+  views.clear(); activeViewId = ""
+  const snapshot = await repository.snapshot()
+  await showActive(snapshot); publish(snapshot)
+}
+
 async function createWindow() {
   downloadDirectory = process.env.NAEVIA_DOWNLOAD_DIR || join(app.getPath("downloads"), "NAEVIA")
   await mkdir(downloadDirectory, { recursive: true })
   repository = new BrowserRepository(join(app.getPath("userData"), "browser-state.json"))
+  const appData = app.getPath("appData")
+  const testLegacyRoot = process.env.NAEVIA_E2E === "1" ? process.env.NAEVIA_LEGACY_ROOT : undefined
+  legacyImport = new LegacyImportService(
+    app.getPath("userData"),
+    [...(testLegacyRoot ? [testLegacyRoot] : []), join(appData, "Matriz Control Electron"), join(appData, "Matriz Control")],
+    (snapshot) => repository.replace(snapshot),
+    () => repository.snapshot(),
+  )
   mainWindow = new BrowserWindow({
     width: 1440, height: 900, minWidth: 900, minHeight: 640, backgroundColor: "#08070c", title: "NAEVIA",
     webPreferences: { preload: join(here, "preload.cjs"), sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true },

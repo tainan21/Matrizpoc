@@ -46,6 +46,11 @@ button { color: inherit; }
 .store-products i { padding: 3px 5px; border-radius: 5px; background: #17131e; color: #9a90a6; font: 8px ui-monospace, monospace; font-style: normal; text-transform: uppercase; }
 .store-products i.active { color: #69d5bc; }
 .panel-note { display: block; margin: 13px 0; line-height: 1.5; }
+.migration-panel { display: grid; gap: 10px; }
+.migration-panel > p { margin: 0 0 8px; }
+.migration-panel article { display: grid; gap: 9px; padding: 13px; border: 1px solid #32283d; border-radius: 9px; background: #0a0810; }
+.migration-panel article span, .migration-panel article small { color: #8c8495; font-size: 11px; }
+.migration-panel button.primary { border-color: #8059b6; background: #6f48a8; }
 .terminal-drawer { position: fixed; z-index: 4; left: 52px; right: 0; bottom: 0; height: 260px; border-top: 1px solid #49315f; background: #09070d; animation: terminal-in .2s ease-out; }
 .terminal-drawer header { height: 40px; padding: 0 14px; border-bottom: 1px solid #27202f; display: flex; align-items: center; gap: 12px; justify-content: space-between; }
 .terminal-drawer header nav { display: flex; align-items: center; gap: 4px; margin-right: auto; }
