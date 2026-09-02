@@ -413,6 +413,16 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .git-reference-grid section > div:last-child { border-bottom:0; }
 .git-reference-grid span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .git-reference-grid small { color:var(--text-muted); }
+.agents-cockpit { display:grid; gap:12px; }
+.agents-cockpit article { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:14px; padding:20px; border:1px solid var(--line); border-radius:10px; background:linear-gradient(120deg, var(--surface-soft), rgba(83,35,132,.12)); }
+.agents-cockpit article small { display:block; color:var(--accent-soft); font:800 8px var(--matriz-font-mono); letter-spacing:.12em; }
+.agents-cockpit article strong { display:block; margin:5px 0; font-size:18px; }
+.agents-cockpit article p { margin:0; color:var(--text-muted); font:9px var(--matriz-font-mono); }
+.agents-boundaries { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.agents-boundaries div { min-height:88px; padding:14px; border:1px solid var(--line); border-radius:8px; background:var(--surface-soft); }
+.agents-boundaries strong, .agents-boundaries span { display:block; }
+.agents-boundaries strong { margin-bottom:9px; color:var(--accent-soft); font:800 9px var(--matriz-font-mono); }
+.agents-boundaries span { color:var(--text-muted); font-size:11px; line-height:1.5; }
 .git-history { margin-top:12px; border-top:1px solid var(--line); }
 .git-history > div { min-height:34px; display:grid; grid-template-columns:60px minmax(0,1fr) 160px; align-items:center; gap:10px; border-bottom:1px solid rgba(182,154,232,.08); }
 .git-history code { color:var(--violet-hot); font:8px var(--matriz-font-mono); }.git-history strong { overflow:hidden; font-size:9px; text-overflow:ellipsis; white-space:nowrap; }.git-history small { color:var(--muted); font:8px var(--matriz-font-mono); text-align:right; }
@@ -502,6 +512,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .agent-presence p { margin-top: 24px; text-align: center; }
 @media (max-width: 900px) { .runtime-workspace { grid-template-columns: minmax(190px, 34%) 1fr; } .agent-presence { display: none; } .route-picker { left: 34%; } }
 @media (max-width: 900px) { .git-reference-grid { grid-template-columns:1fr; } .git-remote-actions { align-items:stretch; flex-wrap:wrap; } .git-remote-actions span { width:100%; } }
+@media (max-width: 900px) { .agents-cockpit article { grid-template-columns:auto 1fr; } .agents-cockpit article button { grid-column:1 / -1; } .agents-boundaries { grid-template-columns:1fr; } }
 @media (max-width: 650px) { .runtime-workspace { margin-inline: -15px; grid-template-columns: 130px minmax(0,1fr); } .runtime-catalog { padding-inline: 7px; } .runtime-row { grid-template-columns: 7px minmax(0,1fr); } .runtime-row b { display: none; } .route-bar { grid-template-columns: auto 1fr auto; } .route-bar code { display: none; } .route-picker { left: 125px; width: calc(100vw - 145px); } }
 
 .hub-view { display:grid; gap:14px; max-width:1500px; margin:0 auto; }

@@ -23,6 +23,7 @@ import { CommandDeck } from "./command-deck/command-deck"
 import { DoctorView } from "./doctor/doctor-view"
 import { FpsIndicator } from "./hub/fps-indicator"
 import { GitView } from "./git/git-view"
+import { AgentsView } from "./agents/agents-view"
 import { HubView } from "./hub/hub-view"
 import { HomeView, type HomeTarget } from "./home/home-view"
 import { filterPorts, presentPorts } from "./presenters"
@@ -304,7 +305,7 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
         {view === "apps" ? <RuntimeWorkspace gateway={gateway} runtimes={runtimes} refresh={() => gateway.runtimeSnapshot().then(setRuntimes)} startOperation={terminal.startOperation} openTerminal={openRuntimeTerminal} signal={runtimeSignal} executeAction={desktop.execute} selectedAppId={activeAppId} onSelectApp={(appId) => { setActiveAppId(appId); recordContext("apps", appId) }} /> : null}
         {view === "workspace" ? <WorkspaceView gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "hub" ? <HubView gateway={gateway} focusFeature={hubFeature} onResume={(session) => { setHubFeature(undefined); setActiveAppId(session.appId); setView(session.area) }} /> : null}
-        {view === "agents" ? <OperationalArea title="AGENTES" eyebrow="COWORKING / WORKBENCH" description="Tarefas e execuções permanecem sob autoridade do Workbench." action="Abrir Workbench em Apps" onAction={() => { setActiveAppId("matriz-workbench"); chooseView("apps") }} /> : null}
+        {view === "agents" ? <AgentsView runtimes={runtimes} start={terminal.startOperation} open={() => { setActiveAppId("matriz-workbench"); chooseView("apps") }} /> : null}
         {view === "environments" ? <EnvironmentManager gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "infra" ? <OperationalArea title="INFRA" eyebrow="LOCAL / SERVIÇOS" description="O cockpit local será habilitado serviço por serviço, com prévia e confirmação." /> : null}
         {view === "git" ? <GitView gateway={gateway} /> : null}
