@@ -22,6 +22,10 @@ export const MATRIZ_DESKTOP_APPS: readonly DesktopAppDefinition[] = Object.freez
   { id: "sites", label: "Sites", packageName: "@matriz/app-sites", port: 3006 },
   { id: "matrizlib", label: "MatrizLib", packageName: "@matriz/app-matrizlib", port: 3007 },
   { id: "seumei", label: "Seumei", packageName: "@matriz/app-seumei", port: 3008 },
+  { id: "health", label: "Health", packageName: "@matriz/app-health", port: 3010 },
+  { id: "matriz-ops", label: "Matriz Ops", packageName: "@matriz/app-matriz-ops", port: 3011 },
+  { id: "matriz-pay", label: "Matriz Pay", packageName: "@matriz/app-matriz-pay", port: 3012 },
+  { id: "matriz-client-admin", label: "Client Admin", packageName: "@matriz/app-client-admin", port: 3013 },
 ])
 
 export const GATES: readonly { readonly id: GateId; readonly label: string }[] = Object.freeze([

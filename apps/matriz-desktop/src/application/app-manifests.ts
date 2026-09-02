@@ -7,6 +7,10 @@ import { manifest as seumei } from "../../../seumeiapp/public-contract"
 import { manifest as sites } from "../../../sites/public-contract"
 import { manifest as spot } from "../../../spot/public-contract"
 import { manifest as willdash } from "../../../willdash/public-contract"
+import { manifest as health } from "../../../health/public-contract"
+import { manifest as ops } from "../../../matriz-ops/public-contract"
+import { manifest as pay } from "../../../matriz-pay/public-contract"
+import { manifest as clientAdmin } from "../../../matriz-client-admin/public-contract"
 
 import type { AppManifestDTO } from "@matriz/integration-api-contracts"
 
@@ -28,7 +32,8 @@ const visibleRoutes = (manifest: AppManifestDTO): readonly DeclaredRoute[] =>
     }))
 
 const manifests = { "matriz-hub": hub, spot, "matriz-admin": admin, contracts, willdash,
-  "matriz-workbench": workbench, sites, matrizlib, seumei } as const
+  "matriz-workbench": workbench, sites, matrizlib, seumei, health, "matriz-ops": ops,
+  "matriz-pay": pay, "matriz-client-admin": clientAdmin } as const
 
 export const APP_MANIFESTS: Readonly<Record<DesktopAppId, {
   readonly name: string

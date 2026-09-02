@@ -196,6 +196,56 @@ const CATALOG: &[CatalogPackage] = &[
         price: 0,
         permissions: &[],
     },
+    CatalogPackage {
+        id: "matriz.health",
+        name: "Health",
+        description: "Saúde local dos serviços e contratos Matriz.",
+        version: "0.1.0",
+        category: "Local App",
+        app_id: "health",
+        price: 0,
+        permissions: &["runtime:start"],
+    },
+    CatalogPackage {
+        id: "matriz.ops",
+        name: "Matriz Ops",
+        description: "Operações locais do ecossistema Matriz.",
+        version: "0.1.0",
+        category: "Local App",
+        app_id: "matriz-ops",
+        price: 0,
+        permissions: &["runtime:start"],
+    },
+    CatalogPackage {
+        id: "matriz.pay",
+        name: "Matriz Pay",
+        description: "Runtime local do produto Matriz Pay.",
+        version: "0.1.0",
+        category: "Local App",
+        app_id: "matriz-pay",
+        price: 0,
+        permissions: &["runtime:start"],
+    },
+    CatalogPackage {
+        id: "matriz.client-admin",
+        name: "Client Admin",
+        description: "Administração local de clientes Matriz.",
+        version: "0.1.0",
+        category: "Local App",
+        app_id: "matriz-client-admin",
+        price: 0,
+        permissions: &["runtime:start"],
+    },
+    CatalogPackage {
+        id: "matriz.uninstall",
+        name: "Matriz Uninstall",
+        description: "Produto desktop de remoção controlada do ecossistema.",
+        version: "0.2.0",
+        category: "Desktop Product",
+        app_id: "matriz-uninstall",
+        price: 0,
+        permissions: &[],
+    },
 ];
 
 impl CommerceStore {
@@ -239,6 +289,9 @@ impl CommerceStore {
     pub fn activate(&self, package_id: &str) -> Result<PackageActivationTarget, String> {
         let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
         let package = catalog(package_id)?;
+        if package.id == "matriz.uninstall" {
+            return Err("Matriz Uninstall requires a verified signed desktop release".into());
+        }
         if let Some(feature_id) = builtin_feature(package) {
             return Ok(PackageActivationTarget::Control {
                 package_id: package.id.into(),
@@ -371,7 +424,7 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
         .iter()
         .map(|package| {
             let built_in = builtin_feature(*package).is_some();
-            let local_runtime = !built_in;
+            let local_runtime = !built_in && package.id != "matriz.uninstall";
             let receipt = None;
             let trust_status = "verified";
             PackageView {

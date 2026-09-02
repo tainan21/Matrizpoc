@@ -10,6 +10,10 @@ export type DesktopAppId =
   | "matriz-workbench"
   | "sites"
   | "matrizlib"
+  | "health"
+  | "matriz-ops"
+  | "matriz-pay"
+  | "matriz-client-admin"
 
 export type GateId = "typecheck" | "lint" | "test:smoke" | "prisma:validate"
 export type QuickTargetId = "workspace" | "terminal" | "hub" | "matrizlib" | "workbench"

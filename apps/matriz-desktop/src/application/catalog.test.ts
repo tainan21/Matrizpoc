@@ -5,9 +5,9 @@ import { GATES, MANAGED_OPERATIONS, MATRIZ_DESKTOP_APPS, QUICK_TARGETS } from ".
 describe("desktop operational catalog", () => {
   it("maps every Matriz web app to one unique development port", () => {
     expect(MATRIZ_DESKTOP_APPS.map(({ port }) => port)).toEqual([
-      3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008,
+      3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3010, 3011, 3012, 3013,
     ])
-    expect(new Set(MATRIZ_DESKTOP_APPS.map(({ packageName }) => packageName)).size).toBe(9)
+    expect(new Set(MATRIZ_DESKTOP_APPS.map(({ packageName }) => packageName)).size).toBe(13)
   })
 
   it("offers only fixed root gates and quick targets", () => {
@@ -38,6 +38,10 @@ describe("desktop operational catalog", () => {
       "app.sites.web",
       "app.matrizlib.web",
       "app.seumei.web",
+      "app.health.web",
+      "app.matriz-ops.web",
+      "app.matriz-pay.web",
+      "app.matriz-client-admin.web",
       "app.matriz-admin.native.build",
       "app.matriz-admin.native.install",
       "app.matriz-admin.native.start",

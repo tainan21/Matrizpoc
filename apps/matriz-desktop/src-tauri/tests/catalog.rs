@@ -8,6 +8,13 @@ use matriz_desktop_native::{
 #[test]
 fn execution_catalog_accepts_only_known_identifiers() {
     assert_eq!(app_definition("matrizlib").expect("known app").port, 3007);
+    assert_eq!(app_definition("health").expect("health app").port, 3010);
+    assert_eq!(
+        app_definition("matriz-client-admin")
+            .expect("client admin")
+            .port,
+        3013
+    );
     assert_eq!(
         gate_definition("test:smoke").expect("known gate").script,
         "test:smoke"

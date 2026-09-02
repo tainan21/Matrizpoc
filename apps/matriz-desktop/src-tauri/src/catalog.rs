@@ -36,7 +36,7 @@ pub struct ManagedOperationDefinition {
     pub args: Vec<String>,
 }
 
-const APPS: [AppDefinition; 9] = [
+const APPS: [AppDefinition; 13] = [
     AppDefinition {
         id: "matriz-hub",
         label: "Matriz Hub",
@@ -99,6 +99,34 @@ const APPS: [AppDefinition; 9] = [
         package_name: "@matriz/app-seumei",
         directory: "apps/seumeiapp",
         port: 3008,
+    },
+    AppDefinition {
+        id: "health",
+        label: "Health",
+        package_name: "@matriz/app-health",
+        directory: "apps/health",
+        port: 3010,
+    },
+    AppDefinition {
+        id: "matriz-ops",
+        label: "Matriz Ops",
+        package_name: "@matriz/app-matriz-ops",
+        directory: "apps/matriz-ops",
+        port: 3011,
+    },
+    AppDefinition {
+        id: "matriz-pay",
+        label: "Matriz Pay",
+        package_name: "@matriz/app-matriz-pay",
+        directory: "apps/matriz-pay",
+        port: 3012,
+    },
+    AppDefinition {
+        id: "matriz-client-admin",
+        label: "Client Admin",
+        package_name: "@matriz/app-client-admin",
+        directory: "apps/matriz-client-admin",
+        port: 3013,
     },
 ];
 

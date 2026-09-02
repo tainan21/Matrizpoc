@@ -123,3 +123,35 @@ fn activation_contract_is_discriminated_and_unknown_products_fail_closed() {
         .activate("../../unknown")
         .is_err());
 }
+
+#[test]
+fn expanded_catalog_opens_web_apps_but_keeps_unsigned_desktop_products_unavailable() {
+    let temp = tempfile::tempdir().expect("temp store");
+    let store = CommerceStore::new(temp.path().join("commerce.json"));
+    let snapshot = store.snapshot().expect("snapshot");
+    for id in [
+        "matriz.health",
+        "matriz.ops",
+        "matriz.pay",
+        "matriz.client-admin",
+    ] {
+        let package = snapshot
+            .packages
+            .iter()
+            .find(|item| item.id == id)
+            .expect("web app");
+        assert!(package.installed);
+        assert!(matches!(
+            store.activate(id),
+            Ok(PackageActivationTarget::Runtime { .. })
+        ));
+    }
+    let uninstall = snapshot
+        .packages
+        .iter()
+        .find(|item| item.id == "matriz.uninstall")
+        .expect("desktop product");
+    assert!(!uninstall.installed);
+    assert_eq!(uninstall.status, "Catalog");
+    assert!(store.activate(uninstall.id).is_err());
+}
