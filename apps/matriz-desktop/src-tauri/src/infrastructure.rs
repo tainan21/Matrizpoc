@@ -285,7 +285,7 @@ pub fn read_migration_files(
         .map_err(|error| error.to_string())?;
     let mut schemas = BTreeMap::new();
     for schema in DATABASE_SCHEMAS {
-        let root = workspace.join("prisma").join("migrations").join(schema);
+        let root = workspace.join("prisma").join(schema).join("migrations");
         let mut migrations = Vec::new();
         if root.is_dir() {
             for entry in fs::read_dir(&root).map_err(|error| error.to_string())? {
@@ -1321,8 +1321,9 @@ impl PortableInfrastructureHost {
                     return Err(format!("Nome de migration inválido em {schema}"));
                 }
                 let source = workspace
-                    .join("prisma/migrations")
+                    .join("prisma")
                     .join(schema)
+                    .join("migrations")
                     .join(&migration.name)
                     .join("migration.sql")
                     .canonicalize()

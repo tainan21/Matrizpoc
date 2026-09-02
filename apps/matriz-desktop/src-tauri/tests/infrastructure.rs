@@ -311,7 +311,7 @@ fn migration_application_revalidates_the_plan_and_backs_up_before_apply() {
     let workspace = tempfile::tempdir().unwrap();
     let migration = workspace
         .path()
-        .join("prisma/migrations/core/202609020001_base");
+        .join("prisma/core/migrations/202609020001_base");
     std::fs::create_dir_all(&migration).unwrap();
     std::fs::write(migration.join("migration.sql"), "SELECT 1;\n").unwrap();
     let events = Arc::new(Mutex::new(Vec::new()));
@@ -338,7 +338,7 @@ fn migration_confirmation_rejects_a_changed_plan() {
     let workspace = tempfile::tempdir().unwrap();
     let migration = workspace
         .path()
-        .join("prisma/migrations/core/202609020001_base");
+        .join("prisma/core/migrations/202609020001_base");
     std::fs::create_dir_all(&migration).unwrap();
     std::fs::write(migration.join("migration.sql"), "SELECT 1;\n").unwrap();
     let manager = InfrastructureManager::new(Box::new(FakeHost::default()), || 1_000);
@@ -399,14 +399,20 @@ fn migration_files_are_read_only_from_the_eight_canonical_schema_directories() {
     let workspace = tempfile::tempdir().unwrap();
     let migration = workspace
         .path()
-        .join("prisma/migrations/core/202609020001_base");
+        .join("prisma/core/migrations/202609020001_base");
     std::fs::create_dir_all(&migration).unwrap();
     std::fs::write(
         migration.join("migration.sql"),
         "CREATE TABLE core.example(id int);\n",
     )
     .unwrap();
+    let legacy = workspace
+        .path()
+        .join("prisma/migrations/core/202609020002_legacy");
+    std::fs::create_dir_all(&legacy).unwrap();
+    std::fs::write(legacy.join("migration.sql"), "SELECT 'legacy';\n").unwrap();
     let files = read_migration_files(workspace.path()).expect("read migration files");
+    assert_eq!(files.get("core").unwrap().len(), 1);
     assert_eq!(files.get("core").unwrap()[0].name, "202609020001_base");
     assert_eq!(files.get("core").unwrap()[0].checksum.len(), 64);
     assert!(files.contains_key("pay"));
