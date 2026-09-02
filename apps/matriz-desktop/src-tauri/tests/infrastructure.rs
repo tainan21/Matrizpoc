@@ -1,11 +1,12 @@
 use std::{collections::HashMap, sync::Mutex};
 
 use matriz_desktop_native::infrastructure::{
-    compare_migration_ledger, read_migration_files, AppliedMigration, InfrastructureAction,
-    InfrastructureHost, InfrastructureInspection, InfrastructureManager,
+    compare_migration_ledger, read_backup_catalog, read_migration_files, AppliedMigration,
+    InfrastructureAction, InfrastructureHost, InfrastructureInspection, InfrastructureManager,
     InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureTargetId,
     MigrationFileDigest, PortableInfrastructureHost,
 };
+use sha2::Digest;
 
 #[derive(Default)]
 struct FakeHost {
@@ -192,6 +193,28 @@ fn migration_files_are_read_only_from_the_eight_canonical_schema_directories() {
     assert_eq!(files.get("core").unwrap()[0].name, "001_base");
     assert_eq!(files.get("core").unwrap()[0].checksum.len(), 64);
     assert!(files.contains_key("pay"));
+}
+
+#[test]
+fn backup_catalog_revalidates_size_and_sha_without_exposing_paths() {
+    let root = tempfile::tempdir().unwrap();
+    let backups = root.path().join("backups");
+    std::fs::create_dir_all(&backups).unwrap();
+    std::fs::write(backups.join("backup-a.dump"), b"verified dump").unwrap();
+    let checksum = format!("{:x}", sha2::Sha256::digest(b"verified dump"));
+    std::fs::write(
+        backups.join("backup-a.json"),
+        format!(r#"{{"version":1,"id":"backup-a","fileName":"backup-a.dump","createdAt":42,"bytes":13,"sha256":"{checksum}"}}"#),
+    ).unwrap();
+
+    let catalog = read_backup_catalog(root.path()).expect("read backups");
+    assert_eq!(catalog[0].id, "backup-a");
+    assert_eq!(catalog[0].integrity, "verified");
+    assert!(!serde_json::to_string(&catalog[0]).unwrap().contains("dump"));
+
+    std::fs::write(backups.join("backup-a.dump"), b"tampered").unwrap();
+    let catalog = read_backup_catalog(root.path()).expect("read tampered backup");
+    assert_eq!(catalog[0].integrity, "invalid");
 }
 
 #[test]

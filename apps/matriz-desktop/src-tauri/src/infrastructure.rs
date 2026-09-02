@@ -51,6 +51,7 @@ pub enum InfrastructureAction {
     Stop,
     Restart,
     Provision,
+    Backup,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -153,6 +154,27 @@ pub struct MigrationSchemaSnapshot {
 pub struct DatabaseMigrationSnapshot {
     pub state: &'static str,
     pub schemas: Vec<MigrationSchemaSnapshot>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BackupRecord {
+    pub id: String,
+    pub created_at: u64,
+    pub bytes: u64,
+    pub sha256: String,
+    pub integrity: &'static str,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct BackupReceipt {
+    version: u8,
+    id: String,
+    file_name: String,
+    created_at: u64,
+    bytes: u64,
+    sha256: String,
 }
 
 pub fn compare_migration_ledger(
@@ -260,6 +282,69 @@ pub fn read_migration_files(
         schemas.insert((*schema).into(), migrations);
     }
     Ok(schemas)
+}
+
+pub fn read_backup_catalog(root: &Path) -> Result<Vec<BackupRecord>, String> {
+    let root = root.canonicalize().map_err(|error| error.to_string())?;
+    let backups = root.join("backups");
+    if !backups.is_dir() {
+        return Ok(Vec::new());
+    }
+    let mut records = Vec::new();
+    for entry in fs::read_dir(&backups).map_err(|error| error.to_string())? {
+        let entry = entry.map_err(|error| error.to_string())?;
+        if entry.path().extension().and_then(|value| value.to_str()) != Some("json") {
+            continue;
+        }
+        let receipt: BackupReceipt =
+            serde_json::from_slice(&fs::read(entry.path()).map_err(|error| error.to_string())?)
+                .map_err(|error| format!("Recibo de backup inválido: {error}"))?;
+        if receipt.version != 1
+            || receipt.file_name != format!("{}.dump", receipt.id)
+            || !receipt.id.starts_with("backup-")
+        {
+            return Err("Recibo de backup fora do contrato nativo".into());
+        }
+        let dump = backups.join(&receipt.file_name);
+        let metadata = fs::symlink_metadata(&dump).map_err(|error| error.to_string())?;
+        let canonical = dump.canonicalize().map_err(|error| error.to_string())?;
+        let valid_file = metadata.is_file()
+            && !metadata.file_type().is_symlink()
+            && canonical.starts_with(&root)
+            && metadata.len() == receipt.bytes;
+        let actual_sha = if valid_file {
+            sha256_file(&canonical)?
+        } else {
+            String::new()
+        };
+        records.push(BackupRecord {
+            id: receipt.id,
+            created_at: receipt.created_at,
+            bytes: receipt.bytes,
+            sha256: receipt.sha256.clone(),
+            integrity: if valid_file && actual_sha.eq_ignore_ascii_case(&receipt.sha256) {
+                "verified"
+            } else {
+                "invalid"
+            },
+        });
+    }
+    records.sort_by(|left, right| right.created_at.cmp(&left.created_at));
+    Ok(records)
+}
+
+fn sha256_file(path: &Path) -> Result<String, String> {
+    let mut file = File::open(path).map_err(|error| error.to_string())?;
+    let mut digest = Sha256::new();
+    let mut buffer = [0_u8; 64 * 1024];
+    loop {
+        let read = file.read(&mut buffer).map_err(|error| error.to_string())?;
+        if read == 0 {
+            break;
+        }
+        digest.update(&buffer[..read]);
+    }
+    Ok(format!("{:x}", digest.finalize()))
 }
 
 #[derive(Clone)]
@@ -418,6 +503,10 @@ impl InfrastructureManager {
             "clean"
         };
         Ok(DatabaseMigrationSnapshot { state, schemas })
+    }
+
+    pub fn backups(&self) -> Result<Vec<BackupRecord>, String> {
+        read_backup_catalog(Path::new(&self.root))
     }
 }
 
@@ -860,6 +949,60 @@ impl PortableInfrastructureHost {
         write_new_file(&marker, br#"{"version":1,"database":"matriz","schemas":["core","hub","spot","seumei","contracts","willdash","ops","pay"]}"#)
     }
 
+    fn create_backup(&self) -> Result<(), String> {
+        let pg_dump = self.root.join("postgres/17.11/pgsql/bin/pg_dump.exe");
+        if !pg_dump.is_file() {
+            return Err("pg_dump portátil indisponível".into());
+        }
+        let backups = self.root.join("backups");
+        fs::create_dir_all(&backups).map_err(|error| error.to_string())?;
+        let id = format!("backup-{}", uuid::Uuid::new_v4().simple());
+        let staging = backups.join(format!(".{id}.partial"));
+        let final_dump = backups.join(format!("{id}.dump"));
+        let status = Command::new(pg_dump)
+            .env("PGPASSWORD", self.secret("postgres-bootstrap")?)
+            .args([
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "55432",
+                "--username",
+                "matriz_provisioner",
+                "--dbname",
+                "matriz",
+                "--no-password",
+                "--format",
+                "custom",
+                "--file",
+            ])
+            .arg(&staging)
+            .creation_flags(0x0800_0000)
+            .status()
+            .map_err(|error| error.to_string())?;
+        if !status.success() {
+            let _ = fs::remove_file(&staging);
+            return Err("O backup lógico do database matriz falhou".into());
+        }
+        let bytes = fs::metadata(&staging)
+            .map_err(|error| error.to_string())?
+            .len();
+        if bytes == 0 {
+            let _ = fs::remove_file(&staging);
+            return Err("O backup gerado está vazio".into());
+        }
+        let sha256 = sha256_file(&staging)?;
+        fs::rename(&staging, &final_dump).map_err(|error| error.to_string())?;
+        let receipt = serde_json::to_vec(&serde_json::json!({
+            "version": 1,
+            "id": id,
+            "fileName": final_dump.file_name().and_then(|value| value.to_str()).ok_or("Nome de backup inválido")?,
+            "createdAt": current_time_millis(),
+            "bytes": bytes,
+            "sha256": sha256,
+        })).map_err(|error| error.to_string())?;
+        write_new_file(&backups.join(format!("{id}.json")), &receipt)
+    }
+
     fn psql_output(&self, database: &str, sql: &str) -> Result<String, String> {
         let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
         if !psql.is_file() {
@@ -976,8 +1119,10 @@ impl InfrastructureHost for PortableInfrastructureHost {
         target_id: InfrastructureTargetId,
         action: InfrastructureAction,
     ) -> Result<(), String> {
-        if action == InfrastructureAction::Provision
-            && target_id != InfrastructureTargetId::Postgres
+        if matches!(
+            action,
+            InfrastructureAction::Provision | InfrastructureAction::Backup
+        ) && target_id != InfrastructureTargetId::Postgres
         {
             return Err("O provisionamento de dados só aceita o alvo PostgreSQL".into());
         }
@@ -1007,6 +1152,7 @@ impl InfrastructureHost for PortableInfrastructureHost {
                     }
                 }
                 InfrastructureAction::Provision => self.provision_database()?,
+                InfrastructureAction::Backup => self.create_backup()?,
             }
         }
         Ok(())
@@ -1146,6 +1292,15 @@ fn wait_for_port(port: u16, timeout: Duration) -> Result<(), String> {
     ))
 }
 
+fn current_time_millis() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis()
+        .try_into()
+        .unwrap_or(u64::MAX)
+}
+
 fn extract_verified_zip(archive_path: &Path, destination: &Path) -> Result<(), String> {
     fs::create_dir(destination).map_err(|error| error.to_string())?;
     let file = File::open(archive_path).map_err(|error| error.to_string())?;
@@ -1231,7 +1386,10 @@ fn authorize(
     target: InfrastructureTargetId,
     action: InfrastructureAction,
 ) -> Result<(), String> {
-    if action == InfrastructureAction::Provision {
+    if matches!(
+        action,
+        InfrastructureAction::Provision | InfrastructureAction::Backup
+    ) {
         let postgres = snapshot
             .services
             .iter()
@@ -1282,6 +1440,7 @@ fn action_label(action: InfrastructureAction) -> &'static str {
         InfrastructureAction::Stop => "Parar",
         InfrastructureAction::Restart => "Reiniciar",
         InfrastructureAction::Provision => "Preparar",
+        InfrastructureAction::Backup => "Criar backup de",
     }
 }
 

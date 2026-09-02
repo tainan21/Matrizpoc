@@ -48,7 +48,7 @@ use git::{
 };
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
 use infrastructure::{
-    DatabaseMigrationSnapshot, InfrastructureActionPreview, InfrastructureManager,
+    BackupRecord, DatabaseMigrationSnapshot, InfrastructureActionPreview, InfrastructureManager,
     InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureSnapshot,
     PortableInfrastructureHost,
 };
@@ -1460,6 +1460,16 @@ async fn infrastructure_migrations(
         .map_err(|error| error.to_string())?
 }
 
+#[tauri::command]
+async fn infrastructure_backups(
+    manager: tauri::State<'_, Arc<InfrastructureManager>>,
+) -> Result<Vec<BackupRecord>, String> {
+    let manager = Arc::clone(manager.inner());
+    tauri::async_runtime::spawn_blocking(move || manager.backups())
+        .await
+        .map_err(|error| error.to_string())?
+}
+
 fn unix_time_millis() -> u64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
@@ -1617,6 +1627,7 @@ pub fn run() {
             confirm_infrastructure_action,
             infrastructure_logs,
             infrastructure_migrations,
+            infrastructure_backups,
             get_native_app_runtime,
             install_native_app,
             start_native_app,

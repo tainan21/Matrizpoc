@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { DatabaseMigrationSnapshot, InfrastructureActionId, InfrastructureActionPreview, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
+import type { DatabaseMigrationSnapshot, InfrastructureActionId, InfrastructureActionPreview, InfrastructureBackupRecord, InfrastructureServiceSnapshot, InfrastructureSnapshot, InfrastructureTargetId } from "../../domain/types"
 
 export function InfrastructureView({ gateway }: { readonly gateway: DesktopGateway }) {
   const [snapshot, setSnapshot] = useState<InfrastructureSnapshot>()
   const [preview, setPreview] = useState<InfrastructureActionPreview>()
   const [logs, setLogs] = useState<{ name: string; lines: readonly string[] }>()
   const [migrations, setMigrations] = useState<DatabaseMigrationSnapshot>()
+  const [backups, setBackups] = useState<readonly InfrastructureBackupRecord[]>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -40,7 +41,9 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
     setBusy(true)
     setError(undefined)
     try {
+      const action = preview.actionId
       setSnapshot(await gateway.confirmInfrastructureAction(preview.confirmationToken))
+      if (action === "backup") setBackups(await gateway.infrastructureBackups())
       setPreview(undefined)
     } catch (cause) {
       setError(message(cause, "A operação de infraestrutura falhou"))
@@ -103,6 +106,7 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
       {preview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar operação de infraestrutura"><div><small>PRÉVIA OBRIGATÓRIA</small><h2>{preview.title}</h2>{preview.impact.map((item) => <p key={item}>{item}</p>)}</div><div><button disabled={busy} onClick={() => setPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar operação" onClick={() => void confirm()}>CONFIRMAR</button></div></div> : null}
       {logs ? <section className="infra-logs" aria-label={`Logs do ${logs.name}`}><header><strong>LOGS / {logs.name.toUpperCase()}</strong><button aria-label="Fechar logs" onClick={() => setLogs(undefined)}>×</button></header><pre>{logs.lines.join("\n") || "Nenhum log local disponível"}</pre></section> : null}
       {migrations ? <section className="infra-migrations" aria-label="Ledger de migrations"><header><strong>MIGRATIONS / {migrations.state.toUpperCase()}</strong><button aria-label="Fechar migrations" onClick={() => setMigrations(undefined)}>×</button></header><div>{migrations.schemas.map(({ schema, ledger }) => <article key={schema}><strong>{schema}</strong><span className={`infra-badge ${ledger.state}`}>{ledger.state}</span>{ledger.pending.map((name) => <code key={`pending-${name}`}>{name}</code>)}{ledger.altered.map((name) => <code key={`altered-${name}`}>ALTERADA · {name}</code>)}{ledger.unexpected.map((name) => <code key={`unexpected-${name}`}>INESPERADA · {name}</code>)}{ledger.failed.map((name) => <code key={`failed-${name}`}>FALHOU · {name}</code>)}</article>)}</div></section> : null}
+      {backups ? <section className="infra-backups" aria-label="Catálogo de backups"><header><strong>BACKUPS VERIFICADOS</strong><button aria-label="Fechar backups" onClick={() => setBackups(undefined)}>×</button></header>{backups.map((backup) => <article key={backup.id}><code>{backup.id}</code><span>{formatBytes(backup.bytes)}</span><b className={`infra-badge ${backup.integrity}`}>{backup.integrity}</b></article>)}</section> : null}
       <p className="area-note">Portas externas nunca são encerradas. Toda mutação exige prévia, token de uso único e nova inspeção.</p>
     </section>
   )
@@ -112,7 +116,7 @@ function actionsFor(service: InfrastructureServiceSnapshot): readonly { id: Infr
   if (service.state === "external_unowned") return []
   if (service.state === "not_installed") return [{ id: "install", label: "Instalar" }]
   if (service.state === "healthy" || service.state === "degraded") return [
-    ...(service.id === "postgres" && service.state === "healthy" ? [{ id: "provision" as const, label: "Preparar banco" }] : []),
+    ...(service.id === "postgres" && service.state === "healthy" ? [{ id: "provision" as const, label: "Preparar banco" }, { id: "backup" as const, label: "Criar backup" }] : []),
     { id: "restart", label: "Reiniciar" },
     { id: "stop", label: "Parar" },
   ]
@@ -128,4 +132,8 @@ function overallState(snapshot: InfrastructureSnapshot) {
 
 function message(cause: unknown, fallback: string) {
   return cause instanceof Error ? cause.message : fallback
+}
+
+function formatBytes(bytes: number) {
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
 }

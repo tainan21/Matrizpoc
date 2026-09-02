@@ -428,7 +428,7 @@ export interface UpdateProgress {
 
 export type InfrastructureServiceId = "postgres" | "garnet" | "nats"
 export type InfrastructureTargetId = "stack" | InfrastructureServiceId
-export type InfrastructureActionId = "install" | "start" | "stop" | "restart" | "provision"
+export type InfrastructureActionId = "install" | "start" | "stop" | "restart" | "provision" | "backup"
 export type InfrastructureState = "not_installed" | "installing" | "stopped" | "starting" | "healthy" | "degraded" | "drifted" | "failed" | "external_unowned"
 
 export interface InfrastructureServiceSnapshot {
@@ -472,6 +472,14 @@ export interface MigrationLedgerComparison {
 export interface DatabaseMigrationSnapshot {
   readonly state: MigrationLedgerComparison["state"]
   readonly schemas: readonly { readonly schema: string; readonly ledger: MigrationLedgerComparison }[]
+}
+
+export interface InfrastructureBackupRecord {
+  readonly id: string
+  readonly createdAt: number
+  readonly bytes: number
+  readonly sha256: string
+  readonly integrity: "verified" | "invalid"
 }
 
 export interface ControlPackageActivationTarget {
