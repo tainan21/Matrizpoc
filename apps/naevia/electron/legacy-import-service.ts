@@ -51,9 +51,11 @@ export class LegacyImportService {
     const importId = randomUUID()
     const backupPath = join(this.userData, "legacy-import", "backups", `${importId}.json`)
     await atomicJson(backupPath, { version: 1, snapshot: await this.currentSnapshot() })
-    await this.replaceSnapshot(imported)
     const importedAt = new Date(this.now()).toISOString()
-    await atomicJson(this.journalPath(), { version: 1, importId, importedAt, backupPath, sourceLabel: "Matriz Control Electron" })
+    const journal = { version: 1, phase: "prepared", importId, importedAt, backupPath, sourceLabel: "Matriz Control Electron" }
+    await atomicJson(this.journalPath(), journal)
+    await this.replaceSnapshot(imported)
+    await atomicJson(this.journalPath(), { ...journal, phase: "active" })
     return { canRollback: true, importedAt, message: `${imported.capsules.length} cápsulas importadas. A origem permaneceu intacta.` }
   }
 

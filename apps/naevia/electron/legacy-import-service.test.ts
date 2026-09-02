@@ -49,6 +49,18 @@ describe("LegacyImportService", () => {
     await writeFile(database, "arquivo alterado")
     await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("mudou")
   })
+
+  it("keeps the prepared backup available when state replacement fails", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naevia-import-")); roots.push(root)
+    const userData = join(root, "naevia"); const legacyRoot = join(root, "legacy")
+    const database = join(legacyRoot, "vault", "browser.sqlite")
+    await mkdir(join(legacyRoot, "vault"), { recursive: true }); await writeFile(database, "fixture")
+    const state = snapshot("Atual")
+    const service = new LegacyImportService(userData, [legacyRoot], async () => { throw new Error("write failed") }, async () => state, () => ({ capsules: [{ id: "old", name: "Legado", policy: "human" }], tabs: [] }))
+    const preview = await service.preview()
+    await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("write failed")
+    expect((await service.status()).canRollback).toBe(true)
+  })
 })
 
 function snapshot(name: string): BrowserSnapshot {
