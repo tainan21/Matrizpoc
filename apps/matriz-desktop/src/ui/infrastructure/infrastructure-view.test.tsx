@@ -76,4 +76,15 @@ describe("InfrastructureView", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Instalar stack portátil" }))
     expect(gateway.previewInfrastructureAction).toHaveBeenCalledWith({ targetId: "stack", actionId: "install", revision: "infra-rev-1" })
   })
+
+  it("offers database provisioning only for healthy PostgreSQL", async () => {
+    const gateway = {
+      infrastructureSnapshot: vi.fn().mockResolvedValue({ ...snapshot, services: snapshot.services.map((service) => service.id === "postgres" ? { ...service, state: "healthy" as const } : service) }),
+      previewInfrastructureAction: vi.fn().mockResolvedValue({ confirmationToken: "db-token", targetId: "postgres", actionId: "provision", title: "Preparar PostgreSQL", impact: [], expiresAt: Date.now() + 30_000 }),
+      infrastructureLogs: vi.fn().mockResolvedValue([]),
+    } as unknown as DesktopGateway
+    render(<InfrastructureView gateway={gateway} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Preparar banco PostgreSQL" }))
+    expect(gateway.previewInfrastructureAction).toHaveBeenCalledWith({ targetId: "postgres", actionId: "provision", revision: "infra-rev-1" })
+  })
 })

@@ -98,7 +98,11 @@ export function InfrastructureView({ gateway }: { readonly gateway: DesktopGatew
 function actionsFor(service: InfrastructureServiceSnapshot): readonly { id: InfrastructureActionId; label: string }[] {
   if (service.state === "external_unowned") return []
   if (service.state === "not_installed") return [{ id: "install", label: "Instalar" }]
-  if (service.state === "healthy" || service.state === "degraded") return [{ id: "restart", label: "Reiniciar" }, { id: "stop", label: "Parar" }]
+  if (service.state === "healthy" || service.state === "degraded") return [
+    ...(service.id === "postgres" && service.state === "healthy" ? [{ id: "provision" as const, label: "Preparar banco" }] : []),
+    { id: "restart", label: "Reiniciar" },
+    { id: "stop", label: "Parar" },
+  ]
   return [{ id: "start", label: "Iniciar" }]
 }
 

@@ -102,6 +102,20 @@ fn confirmation_is_single_use_and_revalidates_the_revision() {
 }
 
 #[test]
+fn database_provisioning_requires_the_healthy_postgres_catalog_target() {
+    let manager = InfrastructureManager::new(Box::new(FakeHost::default()), || 1_000);
+    let snapshot = manager.snapshot().unwrap();
+    let error = manager
+        .preview(InfrastructurePreviewRequest {
+            target_id: InfrastructureTargetId::Nats,
+            action_id: InfrastructureAction::Provision,
+            revision: snapshot.revision,
+        })
+        .unwrap_err();
+    assert!(error.contains("PostgreSQL saudável"));
+}
+
+#[test]
 fn logs_are_bounded_and_secrets_are_redacted() {
     let manager = InfrastructureManager::new(Box::new(FakeHost::default()), || 1_000);
     let logs = manager.logs(InfrastructureServiceId::Postgres).unwrap();

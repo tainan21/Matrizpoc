@@ -50,6 +50,7 @@ pub enum InfrastructureAction {
     Start,
     Stop,
     Restart,
+    Provision,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -613,6 +614,77 @@ impl PortableInfrastructureHost {
         Ok(())
     }
 
+    fn provision_database(&self) -> Result<(), String> {
+        let psql = self.root.join("postgres/17.11/pgsql/bin/psql.exe");
+        if !psql.is_file() {
+            return Err("PostgreSQL não está instalado".into());
+        }
+        let bootstrap = self.secret("postgres-bootstrap")?;
+        let schemas = [
+            "core",
+            "hub",
+            "spot",
+            "seumei",
+            "contracts",
+            "willdash",
+            "ops",
+            "pay",
+        ];
+        let mut sql = String::from("BEGIN;\n");
+        for schema in schemas {
+            let runtime = format!("matriz_{schema}_runtime");
+            let migration = format!("matriz_{schema}_migration");
+            let runtime_password = self.secret(&format!("postgres-{runtime}"))?;
+            let migration_password = self.secret(&format!("postgres-{migration}"))?;
+            sql.push_str(&format!(
+                "DO $matriz$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{runtime}') THEN CREATE ROLE {runtime} LOGIN PASSWORD '{runtime_password}'; ELSE ALTER ROLE {runtime} PASSWORD '{runtime_password}'; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{migration}') THEN CREATE ROLE {migration} LOGIN PASSWORD '{migration_password}'; ELSE ALTER ROLE {migration} PASSWORD '{migration_password}'; END IF; END $matriz$;\nCREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {migration};\nGRANT USAGE ON SCHEMA {schema} TO {runtime};\nALTER DEFAULT PRIVILEGES FOR ROLE {migration} IN SCHEMA {schema} GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {runtime};\nALTER DEFAULT PRIVILEGES FOR ROLE {migration} IN SCHEMA {schema} GRANT USAGE, SELECT ON SEQUENCES TO {runtime};\n"
+            ));
+        }
+        sql.push_str("COMMIT;\n");
+        let mut child = Command::new(psql)
+            .env("PGPASSWORD", bootstrap)
+            .args([
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "55432",
+                "--username",
+                "matriz_provisioner",
+                "--dbname",
+                "matriz",
+                "--no-password",
+                "--set",
+                "ON_ERROR_STOP=1",
+            ])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .creation_flags(0x0800_0000)
+            .spawn()
+            .map_err(|error| error.to_string())?;
+        use std::io::Write;
+        child
+            .stdin
+            .take()
+            .ok_or("Entrada segura do PostgreSQL indisponível")?
+            .write_all(sql.as_bytes())
+            .map_err(|error| error.to_string())?;
+        let output = child
+            .wait_with_output()
+            .map_err(|error| error.to_string())?;
+        if !output.status.success() {
+            return Err(format!(
+                "Provisionamento do banco falhou: {}",
+                redact(&String::from_utf8_lossy(&output.stderr))
+            ));
+        }
+        let marker = self.root.join("control/database-provisioned.json");
+        if marker.exists() {
+            fs::remove_file(&marker).map_err(|error| error.to_string())?;
+        }
+        write_new_file(&marker, br#"{"version":1,"database":"matriz","schemas":["core","hub","spot","seumei","contracts","willdash","ops","pay"]}"#)
+    }
+
     fn stop(&self, service_id: InfrastructureServiceId) -> Result<(), String> {
         let expected = self
             .executable(service_id)
@@ -691,6 +763,11 @@ impl InfrastructureHost for PortableInfrastructureHost {
         target_id: InfrastructureTargetId,
         action: InfrastructureAction,
     ) -> Result<(), String> {
+        if action == InfrastructureAction::Provision
+            && target_id != InfrastructureTargetId::Postgres
+        {
+            return Err("O provisionamento de dados só aceita o alvo PostgreSQL".into());
+        }
         let services: Vec<_> = match target_id.service_id() {
             Some(service) => vec![service],
             None => vec![
@@ -716,6 +793,7 @@ impl InfrastructureHost for PortableInfrastructureHost {
                         InfrastructureServiceId::Nats => self.start_nats()?,
                     }
                 }
+                InfrastructureAction::Provision => self.provision_database()?,
             }
         }
         Ok(())
@@ -911,6 +989,16 @@ fn authorize(
     target: InfrastructureTargetId,
     action: InfrastructureAction,
 ) -> Result<(), String> {
+    if action == InfrastructureAction::Provision {
+        let postgres = snapshot
+            .services
+            .iter()
+            .find(|service| service.id == InfrastructureServiceId::Postgres)
+            .ok_or("PostgreSQL não está no catálogo nativo")?;
+        if target != InfrastructureTargetId::Postgres || postgres.state != "healthy" {
+            return Err("O banco só pode ser preparado com PostgreSQL saudável".into());
+        }
+    }
     let selected: Vec<_> = snapshot
         .services
         .iter()
@@ -951,6 +1039,7 @@ fn action_label(action: InfrastructureAction) -> &'static str {
         InfrastructureAction::Start => "Iniciar",
         InfrastructureAction::Stop => "Parar",
         InfrastructureAction::Restart => "Reiniciar",
+        InfrastructureAction::Provision => "Preparar",
     }
 }
 

@@ -428,7 +428,7 @@ export interface UpdateProgress {
 
 export type InfrastructureServiceId = "postgres" | "garnet" | "nats"
 export type InfrastructureTargetId = "stack" | InfrastructureServiceId
-export type InfrastructureActionId = "install" | "start" | "stop" | "restart"
+export type InfrastructureActionId = "install" | "start" | "stop" | "restart" | "provision"
 export type InfrastructureState = "not_installed" | "installing" | "stopped" | "starting" | "healthy" | "degraded" | "drifted" | "failed" | "external_unowned"
 
 export interface InfrastructureServiceSnapshot {
