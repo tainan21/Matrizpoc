@@ -158,6 +158,8 @@ function gateway(): DesktopGateway {
     })),
     compareEnvironments: vi.fn().mockResolvedValue({ appId: "matriz-admin", sourceFile: ".env.local", targetFile: ".env.example", targetRevision: "target", entries: [] }),
     promoteEnvironment: vi.fn().mockResolvedValue({ appId: "matriz-admin", fileName: ".env.example", revision: "next", missingRequired: [], variables: [] }),
+    generateEnvironmentExport: vi.fn().mockResolvedValue({ exportId: "matriz-admin", fileName: "matriz-admin.env.generated", keyCount: 5, generatedCount: 3 }),
+    revealEnvironmentExport: vi.fn().mockResolvedValue(undefined),
     findEnvironmentReferences: vi.fn().mockResolvedValue({ appId: "matriz-admin", key: "PORT", scannedFiles: 0, truncated: false, matches: [] }),
     listDirectory: vi.fn().mockResolvedValue({ appId: "matriz-admin", relativePath: "", entries: [] }),
     previewFile: vi.fn().mockResolvedValue({ appId: "matriz-admin", relativePath: "README.md", name: "README.md", size: 0, content: { kind: "text", value: "" } }),

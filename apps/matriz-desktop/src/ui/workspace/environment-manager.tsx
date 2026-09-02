@@ -2,7 +2,7 @@ import { Badge, Button } from "@matriz/design-ui/primitives"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { DesktopAppId, EnvironmentComparison, EnvironmentDocument, EnvironmentReferenceResult, RuntimeInstance } from "../../domain/types"
+import type { DesktopAppId, EnvironmentComparison, EnvironmentDocument, EnvironmentExport, EnvironmentReferenceResult, RuntimeInstance } from "../../domain/types"
 import { useWorkspaceNavigationGuard } from "./navigation-guard"
 
 interface DraftVariable {
@@ -34,6 +34,7 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
   const [comparison, setComparison] = useState<EnvironmentComparison>()
   const [selectedKeys, setSelectedKeys] = useState<readonly string[]>([])
   const [impact, setImpact] = useState<EnvironmentReferenceResult>()
+  const [generatedExport, setGeneratedExport] = useState<EnvironmentExport>()
   const selectionGeneration = useRef(0)
   const impactGeneration = useRef(0)
   const newVariableId = useRef(0)
@@ -186,6 +187,13 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
     }
   }
 
+  const generateExport = async () => {
+    setBusy(true); setError("")
+    try { setGeneratedExport(await gateway.generateEnvironmentExport(appId)); signal("success") }
+    catch (cause) { setError(String(cause)); signal("error") }
+    finally { setBusy(false) }
+  }
+
   const update = (id: string, patch: Partial<DraftVariable>) => setDraft((items) => items.map((item) => item.id === id ? { ...item, ...patch } : item))
   const canLeaveDraft = () => !dirtyCount || window.confirm("Descartar alterações não salvas deste ambiente?")
   const leaveDraft = (change: () => void) => {
@@ -205,11 +213,12 @@ export function EnvironmentManager({ gateway, runtimes, restart, signal }: {
         <label>APLICAÇÃO<select aria-label="Aplicação" disabled={busy} value={appId} onChange={(event) => leaveDraft(() => setAppId(event.target.value as DesktopAppId))}>{runtimes.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
         <label>AMBIENTE<select aria-label="Arquivo de ambiente" disabled={busy} value={fileName} onChange={(event) => leaveDraft(() => setFileName(event.target.value))}>{files.map((file) => <option key={file.fileName} value={file.fileName}>{file.fileName}</option>)}</select></label>
         <label className="env-search">BUSCAR<input aria-label="Buscar variável" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="chave..." /></label>
-        <div className="env-toolbar-actions"><Button variant="secondary" aria-label="Comparar ambientes" disabled={busy || dirtyCount > 0 || files.length < 2} onClick={() => void compare()}>COMPARAR</Button><Button variant="secondary" onClick={() => setDraft((items) => [...items, { id: `new-${++newVariableId.current}`, key: `NEW_VARIABLE_${items.length + 1}`, originalKey: "", value: "", originalValue: undefined, sensitive: false, revealed: true, valueChanged: true, source: fileName }])}>NOVA VARIÁVEL</Button></div>
+        <div className="env-toolbar-actions"><Button variant="secondary" aria-label="Comparar ambientes" disabled={busy || dirtyCount > 0 || files.length < 2} onClick={() => void compare()}>COMPARAR</Button><Button variant="secondary" aria-label="Gerar template de infraestrutura" disabled={busy || dirtyCount > 0} onClick={() => void generateExport()}>GERAR TEMPLATE</Button><Button variant="secondary" onClick={() => setDraft((items) => [...items, { id: `new-${++newVariableId.current}`, key: `NEW_VARIABLE_${items.length + 1}`, originalKey: "", value: "", originalValue: undefined, sensitive: false, revealed: true, valueChanged: true, source: fileName }])}>NOVA VARIÁVEL</Button></div>
       </div>
 
       {document?.missingRequired.length ? <div className="env-warning"><strong>VARIÁVEIS OBRIGATÓRIAS AUSENTES</strong>{document.missingRequired.map((key) => <span key={key}>{key}</span>)}</div> : null}
       {error ? <div className="env-error" role="alert">{error}</div> : null}
+      {generatedExport ? <div className="env-warning"><strong>{generatedExport.fileName}</strong><span>{generatedExport.keyCount} chaves · {generatedExport.generatedCount} valores locais gerados</span><button aria-label="Abrir template gerado" onClick={() => void gateway.revealEnvironmentExport(generatedExport.exportId).catch((cause: unknown) => setError(String(cause)))}>ABRIR PASTA</button></div> : null}
 
       {comparison ? <section className="env-compare" aria-labelledby="env-compare-title">
         <div className="env-compare-heading"><div><span className="eyebrow">{comparison.sourceFile} → {comparison.targetFile}</span><h2 id="env-compare-title">Comparação de ambientes</h2></div><button onClick={() => setComparison(undefined)}>VOLTAR</button></div>

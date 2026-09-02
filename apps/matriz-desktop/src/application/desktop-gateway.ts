@@ -23,6 +23,7 @@ import type {
   TerminalSession,
   WorkspacePulse,
   EnvironmentFile,
+  EnvironmentExport,
   EnvironmentDocument,
   EnvironmentSaveRequest,
   DirectoryListing,
@@ -143,6 +144,8 @@ export interface DesktopGateway {
   saveEnvironment(request: EnvironmentSaveRequest): Promise<EnvironmentDocument>
   compareEnvironments(appId: DesktopAppId, sourceFile: string, targetFile: string): Promise<EnvironmentComparison>
   promoteEnvironment(request: EnvironmentPromotionRequest): Promise<EnvironmentDocument>
+  generateEnvironmentExport(appId: DesktopAppId): Promise<EnvironmentExport>
+  revealEnvironmentExport(exportId: string): Promise<void>
   findEnvironmentReferences(appId: DesktopAppId, key: string): Promise<EnvironmentReferenceResult>
   listDirectory(appId: DesktopAppId, relativePath: string): Promise<DirectoryListing>
   previewFile(appId: DesktopAppId, relativePath: string): Promise<FilePreview>

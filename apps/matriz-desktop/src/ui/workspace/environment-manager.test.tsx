@@ -57,6 +57,8 @@ function gateway() {
       ],
     }),
     promoteEnvironment: vi.fn().mockResolvedValue({ appId: "matriz-admin", fileName: ".env.example", revision: "promoted", missingRequired: [], variables: [] }),
+    generateEnvironmentExport: vi.fn().mockResolvedValue({ exportId: "matriz-admin", fileName: "matriz-admin.env.generated", keyCount: 5, generatedCount: 3 }),
+    revealEnvironmentExport: vi.fn().mockResolvedValue(undefined),
     findEnvironmentReferences: vi.fn().mockResolvedValue({ appId: "matriz-admin", key: "PORT", scannedFiles: 0, truncated: false, matches: [] }),
     openResourceInEditor: vi.fn().mockResolvedValue(undefined),
   } as unknown as DesktopGateway
@@ -170,5 +172,15 @@ describe("EnvironmentManager", () => {
     fireEvent.click(screen.getByRole("button", { name: "Abrir src/config.ts no editor" }))
 
     expect(desktop.openResourceInEditor).toHaveBeenCalledWith("matriz-admin", "src/config.ts")
+  })
+
+  it("generates a secret-free infrastructure template before revealing it", async () => {
+    const desktop = gateway()
+    render(<EnvironmentManager gateway={desktop} runtimes={[runtime]} restart={vi.fn()} signal={vi.fn()} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Gerar template de infraestrutura" }))
+    expect(await screen.findByText("5 chaves · 3 valores locais gerados")).toBeVisible()
+    expect(desktop.generateEnvironmentExport).toHaveBeenCalledWith("matriz-admin")
+    fireEvent.click(screen.getByRole("button", { name: "Abrir template gerado" }))
+    expect(desktop.revealEnvironmentExport).toHaveBeenCalledWith("matriz-admin")
   })
 })

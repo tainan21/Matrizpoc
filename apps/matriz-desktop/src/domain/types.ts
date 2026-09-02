@@ -434,6 +434,13 @@ export interface RuntimePackageActivationTarget extends RuntimeTarget {
   readonly operationId: `app.${DesktopAppId}.web`
 }
 
+export interface EnvironmentExport {
+  readonly exportId: string
+  readonly fileName: string
+  readonly keyCount: number
+  readonly generatedCount: number
+}
+
 export interface TerminalReadiness {
   readonly ready: boolean
   readonly workspacePath?: string

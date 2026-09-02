@@ -81,6 +81,8 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   saveEnvironment: "save_environment",
   compareEnvironments: "compare_environments",
   promoteEnvironment: "promote_environment",
+  generateEnvironmentExport: "generate_environment_export",
+  revealEnvironmentExport: "reveal_environment_export",
   findEnvironmentReferences: "find_environment_references",
   listDirectory: "list_directory",
   previewFile: "preview_file",

@@ -136,6 +136,8 @@ export function createTauriGateway(
     saveEnvironment: (request) => invoke(commands.saveEnvironment, { request }),
     compareEnvironments: (appId, sourceFile, targetFile) => invoke(commands.compareEnvironments, { appId, sourceFile, targetFile }),
     promoteEnvironment: (request) => invoke(commands.promoteEnvironment, { request }),
+    generateEnvironmentExport: (appId) => invoke(commands.generateEnvironmentExport, { appId }),
+    revealEnvironmentExport: (exportId) => invoke(commands.revealEnvironmentExport, { exportId }),
     findEnvironmentReferences: (appId, key) => invoke(commands.findEnvironmentReferences, { appId, key }),
     listDirectory: (appId, relativePath) => invoke(commands.listDirectory, { appId, relativePath }),
     previewFile: (appId, relativePath) => invoke(commands.previewFile, { appId, relativePath }),

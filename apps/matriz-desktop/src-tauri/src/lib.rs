@@ -39,8 +39,8 @@ use awake::AwakeManager;
 use commerce::{CommerceSnapshot, CommerceStore, PackageActivationTarget};
 use doctor::{DoctorRemedyPreview, DoctorRemedyResult, DoctorRemedyService};
 use environment::{
-    EnvironmentComparison, EnvironmentDocument, EnvironmentFile, EnvironmentPromotionRequest,
-    EnvironmentSaveRequest, EnvironmentService,
+    EnvironmentComparison, EnvironmentDocument, EnvironmentExport, EnvironmentExportStore,
+    EnvironmentFile, EnvironmentPromotionRequest, EnvironmentSaveRequest, EnvironmentService,
 };
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
 use git::{
@@ -1218,6 +1218,24 @@ fn promote_environment(
     Ok(document)
 }
 
+#[tauri::command(rename_all = "camelCase")]
+fn generate_environment_export(
+    operations: tauri::State<'_, OperationsState>,
+    exports: tauri::State<'_, EnvironmentExportStore>,
+    app_id: String,
+) -> Result<EnvironmentExport, String> {
+    let resources = resources::WorkspaceResourceService::new(operations.root()?)?;
+    exports.generate(&resources, &app_id)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn reveal_environment_export(
+    exports: tauri::State<'_, EnvironmentExportStore>,
+    export_id: String,
+) -> Result<(), String> {
+    exports.reveal(&export_id)
+}
+
 #[tauri::command]
 fn list_directory(
     state: tauri::State<'_, OperationsState>,
@@ -1666,6 +1684,7 @@ pub fn run() {
             app.manage(settings);
             app.manage(HubStateStore::at(config_dir.join("hub-state.json")));
             app.manage(CommerceStore::new(config_dir.join("commerce.json")));
+            app.manage(EnvironmentExportStore::at(config_dir.join("exports")));
             let infrastructure_root = app
                 .path()
                 .local_data_dir()?
@@ -1785,6 +1804,8 @@ pub fn run() {
             save_environment,
             compare_environments,
             promote_environment,
+            generate_environment_export,
+            reveal_environment_export,
             find_environment_references,
             list_directory,
             preview_file,

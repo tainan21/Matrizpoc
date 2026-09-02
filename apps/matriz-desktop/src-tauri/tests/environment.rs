@@ -6,8 +6,8 @@ use std::{
 
 use matriz_desktop_native::{
     environment::{
-        EnvironmentPromotionRequest, EnvironmentSaveRequest, EnvironmentService,
-        EnvironmentVariableInput,
+        EnvironmentExportStore, EnvironmentPromotionRequest, EnvironmentSaveRequest,
+        EnvironmentService, EnvironmentVariableInput,
     },
     resources::WorkspaceResourceService,
 };
@@ -221,4 +221,35 @@ fn concurrent_saves_never_both_commit_the_same_revision() {
         .collect::<Vec<_>>();
     assert_eq!(results.iter().filter(|result| result.is_ok()).count(), 1);
     assert_eq!(results.iter().filter(|result| result.is_err()).count(), 1);
+}
+
+#[test]
+fn infrastructure_export_generates_local_values_without_copying_secrets() {
+    let (root, _service) = fixture("ADMIN_OIDC_CLIENT_SECRET=must-not-export\n");
+    fs::write(
+        root.path().join("apps/matriz-admin/infrastructure.json"),
+        r#"{
+      "schemaVersion":"v1","appId":"matriz-admin",
+      "runtime":{"kind":"web","port":3002},
+      "identity":{"oidcClientId":"matriz-admin","callbackPath":"/api/auth/oidc/callback"},
+      "environment":{"keys":[
+        {"name":"ADMIN_OIDC_CALLBACK_URL","secret":false,"source":"generated"},
+        {"name":"ADMIN_OIDC_CLIENT_SECRET","secret":true,"source":"control-vault"}
+      ]}
+    }"#,
+    )
+    .expect("infrastructure manifest");
+    let resources = WorkspaceResourceService::new(root.path().to_path_buf()).unwrap();
+    let exports = tempfile::tempdir().expect("exports");
+    let store = EnvironmentExportStore::at(exports.path().to_path_buf());
+    let generated = store
+        .generate(&resources, "matriz-admin")
+        .expect("generate");
+    assert_eq!(generated.generated_count, 1);
+    let contents = fs::read_to_string(exports.path().join(generated.file_name)).expect("export");
+    assert!(
+        contents.contains("ADMIN_OIDC_CALLBACK_URL=http://127.0.0.1:3002/api/auth/oidc/callback")
+    );
+    assert!(contents.contains("ADMIN_OIDC_CLIENT_SECRET=\n"));
+    assert!(!contents.contains("must-not-export"));
 }

@@ -154,6 +154,8 @@ export const unavailableGateway: DesktopGateway = {
     { key: "EMAIL_FROM", sensitive: false, status: "missingSource", targetValue: "ops@matriz.local" },
   ] }),
   promoteEnvironment: async (request) => ({ appId: request.appId, fileName: request.targetFile, revision: "demo-promoted", missingRequired: [], variables: [] }),
+  generateEnvironmentExport: async (appId) => ({ exportId: appId, fileName: `${appId}.env.generated`, keyCount: 0, generatedCount: 0 }),
+  revealEnvironmentExport: async () => undefined,
   findEnvironmentReferences: async (appId, key) => ({ appId, key, scannedFiles: 42, truncated: false, matches: [
     { relativePath: "src/config/database.ts", line: 12, excerpt: "const database = env.DATABASE_URL" },
     { relativePath: "src/bootstrap/index.ts", line: 8, excerpt: "requireEnv(\"DATABASE_URL\")" },
