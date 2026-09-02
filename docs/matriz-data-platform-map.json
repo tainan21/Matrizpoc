@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "kind": "matriz.data-platform-map",
+  "version": 1,
+  "status": "design-approved-in-principle",
+  "asOf": "2026-09-01",
+  "decision": "modular-data-monolith-with-extraction-seams",
+  "authorities": {
+    "identity": "matriz-identity",
+    "tenantAccess": "core.TenantMembership+core.AppGrant",
+    "productData": "owning-app",
+    "crossDomainCommunication": "versioned-api-or-event",
+    "runtimeTenant": "server-built-authorization-context"
+  },
+  "concepts": {
+    "person": "global human identity",
+    "tenant": "collaboration and security boundary",
+    "legalEntity": "real-world juridical entity",
+    "businessGroup": "relationship among legal entities",
+    "productCompany": "app-local operational projection"
+  },
+  "currentContexts": [
+    { "id": "core", "owner": "matriz-identity", "tenancy": "mixed" },
+    { "id": "hub", "owner": "matriz-hub", "tenancy": "tenant-and-explicit-global-catalogs" },
+    { "id": "seumei", "owner": "seumei", "tenancy": "tenant" },
+    { "id": "contracts", "owner": "contracts", "tenancy": "tenant" },
+    { "id": "willdash", "owner": "willdash", "tenancy": "tenant" },
+    { "id": "spot", "owner": "spot", "tenancy": "tenant" },
+    { "id": "ops", "owner": "matriz-ops", "tenancy": "operator-global" },
+    { "id": "pay", "owner": "matriz-pay", "tenancy": "global-user-current-v1" }
+  ],
+  "reservedContexts": [
+    {
+      "id": "corporate",
+      "futureOwner": "matriz-corporate",
+      "activationRule": "first executable cross-app legal-entity use case"
+    },
+    {
+      "id": "equity",
+      "futureOwner": "matriz-equity",
+      "activationRule": "first executable private-participation use case"
+    }
+  ],
+  "invariants": [
+    "no-cross-app-internal-imports",
+    "no-cross-schema-runtime-query",
+    "tenant-id-is-server-derived",
+    "tenant-owned-work-runs-in-transaction-with-set-local",
+    "forced-rls-on-tenant-owned-tables",
+    "runtime-roles-have-no-bypassrls",
+    "money-never-uses-floating-point",
+    "events-do-not-grant-authority",
+    "equity-ledger-is-append-only",
+    "pix-is-external-settlement-without-custody-in-v1"
+  ],
+  "localTopology": {
+    "postgres": "127.0.0.1:55432/matriz",
+    "garnet": "127.0.0.1:46379",
+    "nats": "127.0.0.1:54222",
+    "natsMonitoring": "127.0.0.1:58222",
+    "protectedExternalPostgres": "127.0.0.1:5432"
+  },
+  "foundationGates": [
+    "managed-local-infrastructure",
+    "single-server-side-oidc-authority",
+    "tenant-transaction-executor-in-all-seumei-repositories",
+    "safe-public-store-projection",
+    "live-postgres-tenant-a-vs-tenant-b-proof",
+    "backup-restore-and-outbox-proof"
+  ],
+  "featureRoadmap": [
+    "national-nfse",
+    "mei-fiscal-cockpit",
+    "pix-cobranca",
+    "transactional-email",
+    "suppliers-and-purchases",
+    "recipe-costing-and-cmv",
+    "delivery-and-pickup",
+    "customer-360-and-loyalty",
+    "privacy-and-consent",
+    "operational-dashboard"
+  ]
+}

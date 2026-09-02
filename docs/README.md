@@ -13,9 +13,10 @@ específicos de produto permanecem dentro do respectivo `apps/<app>/docs`.
 6. [Coworking, API e MCP](./COWORKING-API-MCP.md)
 7. [Segurança de mudanças](./CHANGE-SAFETY.md)
 8. [Registro de decisões](./DECISION-LOG.md)
+9. [Cockpit da plataforma de dados](./MATRIZ-DATA-PLATFORM-COCKPIT.md)
 
-9. [Modelo de ameaças atual e alvo](./security/THREAT-MODEL.md)
-10. [Inventário drift-checked de endpoints](./security/ENDPOINT-INVENTORY.md)
+10. [Modelo de ameaças atual e alvo](./security/THREAT-MODEL.md)
+11. [Inventário drift-checked de endpoints](./security/ENDPOINT-INVENTORY.md)
 
 ## Fontes de verdade
 
