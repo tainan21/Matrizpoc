@@ -1,6 +1,8 @@
 use std::{fs, path::Path, process::Command};
 
-use matriz_desktop_native::git::{GitRemoteAction, GitSelectionRequest, GitService};
+use matriz_desktop_native::git::{
+    GitBranchAction, GitBranchRequest, GitRemoteAction, GitSelectionRequest, GitService,
+};
 
 fn git(root: &Path, args: &[&str]) {
     let status = Command::new("git.exe")
@@ -137,4 +139,50 @@ fn remote_flow_is_fixed_to_fetch_ff_only_pull_and_push() {
         .remote(repository.path(), &ahead.revision, GitRemoteAction::Push)
         .expect("fixed push");
     assert_eq!(pushed.ahead, 0);
+}
+
+#[test]
+fn local_branch_and_merge_require_observed_revisions_and_one_time_confirmation() {
+    let repository = repository();
+    let service = GitService::default();
+    let main = service.snapshot(repository.path()).expect("main snapshot");
+    service
+        .branch(
+            repository.path(),
+            &GitBranchRequest {
+                revision: main.revision,
+                action: GitBranchAction::Create,
+                name: "feature/safe".into(),
+            },
+        )
+        .expect("create branch");
+    fs::write(repository.path().join("feature.txt"), "feature\n").expect("feature fixture");
+    git(repository.path(), &["add", "feature.txt"]);
+    git(repository.path(), &["commit", "-m", "feature"]);
+    let feature = service
+        .snapshot(repository.path())
+        .expect("feature snapshot");
+    let main = service
+        .branch(
+            repository.path(),
+            &GitBranchRequest {
+                revision: feature.revision,
+                action: GitBranchAction::Switch,
+                name: "main".into(),
+            },
+        )
+        .expect("switch main");
+    let preview = service
+        .preview_merge(repository.path(), &main.revision, "feature/safe")
+        .expect("merge preview");
+    assert_eq!(preview.commits, 1);
+    assert_eq!(preview.changed_files, 1);
+    let merged = service
+        .confirm_merge(repository.path(), &preview.confirmation_token)
+        .expect("merge");
+    assert_eq!(merged.branch, "main");
+    assert!(service
+        .confirm_merge(repository.path(), &preview.confirmation_token)
+        .is_err());
+    assert!(repository.path().join("feature.txt").is_file());
 }

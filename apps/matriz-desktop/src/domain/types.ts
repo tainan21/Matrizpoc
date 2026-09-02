@@ -210,6 +210,14 @@ export interface GitBranchRequest {
   readonly name: string
 }
 
+export interface GitMergePreview {
+  readonly target: string
+  readonly commits: number
+  readonly changedFiles: number
+  readonly confirmationToken: string
+  readonly expiresAt: number
+}
+
 export interface GitDiff {
   readonly changeId: string
   readonly staged: boolean

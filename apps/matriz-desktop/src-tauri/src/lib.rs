@@ -44,7 +44,7 @@ use environment::{
 };
 use explorer::{DirectoryListing, EnvironmentReferenceResult, ExplorerService, FilePreview};
 use git::{
-    GitBranchRequest, GitCommitRequest, GitDiff, GitDiffRequest, GitRemoteAction,
+    GitBranchRequest, GitCommitRequest, GitDiff, GitDiffRequest, GitMergePreview, GitRemoteAction,
     GitSelectionRequest, GitService, GitSnapshot,
 };
 use hub_state::{HubStateSnapshot, HubStateStore, SessionContext};
@@ -867,6 +867,46 @@ async fn run_git_branch(
     let root = operations.root()?;
     let git = git.inner().clone();
     tauri::async_runtime::spawn_blocking(move || git.branch(&root, &request))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn preview_git_merge(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    revision: String,
+    target: String,
+) -> Result<GitMergePreview, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || git.preview_merge(&root, &revision, &target))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn confirm_git_merge(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    confirmation_token: String,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || git.confirm_merge(&root, &confirmation_token))
+        .await
+        .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+async fn abort_git_merge(
+    operations: tauri::State<'_, OperationsState>,
+    git: tauri::State<'_, GitService>,
+    revision: String,
+) -> Result<GitSnapshot, String> {
+    let root = operations.root()?;
+    let git = git.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || git.abort_merge(&root, &revision))
         .await
         .map_err(|error| error.to_string())?
 }
@@ -1698,6 +1738,9 @@ pub fn run() {
             commit_git_changes,
             run_git_remote,
             run_git_branch,
+            preview_git_merge,
+            confirm_git_merge,
+            abort_git_merge,
             get_system_pulse,
             get_awake_state,
             set_awake,

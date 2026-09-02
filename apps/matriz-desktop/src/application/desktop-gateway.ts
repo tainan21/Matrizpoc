@@ -48,6 +48,7 @@ import type {
   GitDiff,
   GitRemoteRequest,
   GitBranchRequest,
+  GitMergePreview,
   UpdateInfo,
   UpdateProgress,
   InfrastructureSnapshot,
@@ -95,6 +96,9 @@ export interface DesktopGateway {
   gitCommit(request: GitCommitRequest): Promise<GitSnapshot>
   gitRemote(request: GitRemoteRequest): Promise<GitSnapshot>
   gitBranch(request: GitBranchRequest): Promise<GitSnapshot>
+  previewGitMerge(revision: string, target: string): Promise<GitMergePreview>
+  confirmGitMerge(confirmationToken: string): Promise<GitSnapshot>
+  abortGitMerge(revision: string): Promise<GitSnapshot>
   systemPulse(): Promise<SystemPulse>
   getAwakeState(): Promise<boolean>
   setAwake(enabled: boolean): Promise<boolean>

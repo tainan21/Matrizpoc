@@ -3,6 +3,7 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Output, Stdio},
     sync::{Arc, Mutex},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use serde::{Deserialize, Serialize};
@@ -120,6 +121,23 @@ pub struct GitDiff {
     pub truncated: bool,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GitMergePreview {
+    pub target: String,
+    pub commits: usize,
+    pub changed_files: usize,
+    pub confirmation_token: String,
+    pub expires_at: u128,
+}
+
+struct PendingMerge {
+    root: PathBuf,
+    revision: String,
+    target: String,
+    expires_at: Instant,
+}
+
 struct ObservedGit {
     root: PathBuf,
     snapshot: GitSnapshot,
@@ -129,6 +147,7 @@ struct ObservedGit {
 #[derive(Clone, Default)]
 pub struct GitService {
     observed: Arc<Mutex<Option<ObservedGit>>>,
+    pending_merges: Arc<Mutex<HashMap<String, PendingMerge>>>,
 }
 
 impl GitService {
@@ -242,6 +261,108 @@ impl GitService {
             GitBranchAction::Switch => vec!["switch".into(), "--".into(), request.name.clone()],
         };
         git_output(root, &args)?;
+        self.snapshot(root)
+    }
+
+    pub fn preview_merge(
+        &self,
+        root: &Path,
+        revision: &str,
+        target: &str,
+    ) -> Result<GitMergePreview, String> {
+        self.verify_revision(root, revision)?;
+        let observed = observe(root)?;
+        if !observed.snapshot.changes.is_empty() {
+            return Err("Merge preview requires a clean worktree".into());
+        }
+        if target == observed.snapshot.branch
+            || !observed
+                .snapshot
+                .branches
+                .iter()
+                .any(|branch| branch.name == target)
+        {
+            return Err("Merge target must be another observed local branch".into());
+        }
+        validate_branch_name(root, target)?;
+        let commits = git_output(
+            root,
+            &[
+                "rev-list".into(),
+                "--count".into(),
+                format!("HEAD..{target}"),
+            ],
+        )?
+        .parse()
+        .map_err(|_| "Unable to count merge commits")?;
+        let changed_files = git_output(
+            root,
+            &[
+                "diff".into(),
+                "--name-only".into(),
+                format!("HEAD...{target}"),
+            ],
+        )?
+        .lines()
+        .filter(|line| !line.is_empty())
+        .count();
+        let confirmation_token = uuid::Uuid::new_v4().to_string();
+        let ttl = Duration::from_secs(30);
+        self.pending_merges
+            .lock()
+            .map_err(|_| "Git merge lock poisoned")?
+            .insert(
+                confirmation_token.clone(),
+                PendingMerge {
+                    root: observed.root,
+                    revision: revision.to_owned(),
+                    target: target.to_owned(),
+                    expires_at: Instant::now() + ttl,
+                },
+            );
+        Ok(GitMergePreview {
+            target: target.to_owned(),
+            commits,
+            changed_files,
+            confirmation_token,
+            expires_at: SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap_or_default()
+                .saturating_add(ttl)
+                .as_millis(),
+        })
+    }
+
+    pub fn confirm_merge(&self, root: &Path, token: &str) -> Result<GitSnapshot, String> {
+        let pending = self
+            .pending_merges
+            .lock()
+            .map_err(|_| "Git merge lock poisoned")?
+            .remove(token)
+            .ok_or_else(|| "Merge confirmation is invalid or already used".to_owned())?;
+        if Instant::now() > pending.expires_at {
+            return Err("Merge confirmation expired".into());
+        }
+        if canonical_repository(root)? != pending.root {
+            return Err("Merge workspace changed".into());
+        }
+        self.verify_revision(root, &pending.revision)?;
+        git_output(root, &["merge".into(), "--no-edit".into(), pending.target])?;
+        self.snapshot(root)
+    }
+
+    pub fn abort_merge(&self, root: &Path, revision: &str) -> Result<GitSnapshot, String> {
+        self.verify_revision(root, revision)?;
+        let git_dir = git_output(root, &["rev-parse".into(), "--git-dir".into()])?;
+        let git_dir = if Path::new(&git_dir).is_absolute() {
+            PathBuf::from(git_dir)
+        } else {
+            root.join(git_dir)
+        };
+        if !git_dir.join("MERGE_HEAD").is_file() {
+            return Err("No merge is in progress".into());
+        }
+        git_output(root, &["merge".into(), "--abort".into()])?;
         self.snapshot(root)
     }
 

@@ -75,4 +75,18 @@ describe("GitView", () => {
     fireEvent.click(screen.getByRole("button", { name: "Criar branch" }))
     await waitFor(() => expect(gateway.gitBranch).toHaveBeenCalledWith({ revision: "rev-branch", action: "create", name: "feature/safe" }))
   })
+
+  it("previews a local merge before using its one-time confirmation", async () => {
+    const snapshot = { revision: "rev-merge", branch: "main", ahead: 0, behind: 0, changes: [], recent: [], branches: [{ name: "main", current: true }, { name: "feature", current: false }], reflog: [] }
+    const gateway = {
+      gitSnapshot: vi.fn().mockResolvedValue(snapshot),
+      previewGitMerge: vi.fn().mockResolvedValue({ target: "feature", commits: 2, changedFiles: 3, confirmationToken: "merge-token", expiresAt: Date.now() + 30_000 }),
+      confirmGitMerge: vi.fn().mockResolvedValue({ ...snapshot, revision: "rev-after" }),
+    } as unknown as DesktopGateway
+    render(<GitView gateway={gateway} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Preparar merge de feature" }))
+    expect(await screen.findByText("2 commits · 3 arquivos alterados")).toBeVisible()
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar merge" }))
+    await waitFor(() => expect(gateway.confirmGitMerge).toHaveBeenCalledWith("merge-token"))
+  })
 })

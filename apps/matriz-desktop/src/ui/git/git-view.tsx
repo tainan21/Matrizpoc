@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { GitDiff, GitSnapshot } from "../../domain/types"
+import type { GitDiff, GitMergePreview, GitSnapshot } from "../../domain/types"
 import { Icons } from "../icons"
 
 export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
@@ -10,6 +10,7 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
   const [diff, setDiff] = useState<GitDiff>()
   const [message, setMessage] = useState("")
   const [branchName, setBranchName] = useState("")
+  const [mergePreview, setMergePreview] = useState<GitMergePreview>()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string>()
 
@@ -123,6 +124,30 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
     }
   }
 
+  const previewMerge = async (target: string) => {
+    if (!snapshot || busy) return
+    setBusy(true); setError(undefined)
+    try { setMergePreview(await gateway.previewGitMerge(snapshot.revision, target)) }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Prévia de merge falhou") }
+    finally { setBusy(false) }
+  }
+
+  const confirmMerge = async () => {
+    if (!mergePreview || busy) return
+    setBusy(true); setError(undefined)
+    try { setSnapshot(await gateway.confirmGitMerge(mergePreview.confirmationToken)); setMergePreview(undefined) }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Merge falhou; revise o conflito e use abortar se necessário"); await refresh() }
+    finally { setBusy(false) }
+  }
+
+  const abortMerge = async () => {
+    if (!snapshot || busy || !window.confirm("Abortar o merge em andamento?")) return
+    setBusy(true); setError(undefined)
+    try { setSnapshot(await gateway.abortGitMerge(snapshot.revision)) }
+    catch (cause) { setError(cause instanceof Error ? cause.message : "Não foi possível abortar o merge") }
+    finally { setBusy(false) }
+  }
+
   return (
     <section className="git-view" aria-labelledby="git-title">
       <div className="section-head">
@@ -186,13 +211,15 @@ export function GitView({ gateway }: { readonly gateway: DesktopGateway }) {
         <section aria-label="Branches locais">
           <strong>BRANCHES LOCAIS</strong>
           <div><input aria-label="Nova branch local" value={branchName} maxLength={120} onChange={(event) => setBranchName(event.target.value)} /><button aria-label="Criar branch" disabled={busy || !!snapshot?.changes.length || !branchName.trim()} onClick={() => void branch("create", branchName)}>CRIAR</button></div>
-          {snapshot?.branches.map((item) => <div key={item.name}><code>{item.current ? "●" : "○"}</code><button disabled={busy || item.current || !!snapshot.changes.length} aria-label={`Trocar para ${item.name}`} onClick={() => void branch("switch", item.name)}>{item.name}</button><small>{item.upstream ?? "local"}</small></div>)}
+          {snapshot?.branches.map((item) => <div key={item.name}><code>{item.current ? "●" : "○"}</code><button disabled={busy || item.current || !!snapshot.changes.length} aria-label={`Trocar para ${item.name}`} onClick={() => void branch("switch", item.name)}>{item.name}</button><small>{item.upstream ?? "local"}</small>{!item.current ? <button disabled={busy || !!snapshot.changes.length} aria-label={`Preparar merge de ${item.name}`} onClick={() => void previewMerge(item.name)}>MERGE</button> : null}</div>)}
+          <button aria-label="Abortar merge" disabled={busy} onClick={() => void abortMerge()}>ABORTAR MERGE</button>
         </section>
         <section aria-label="Reflog recente">
           <strong>REFLOG RECENTE</strong>
           {snapshot?.reflog.map((entry, index) => <div key={`${entry.shortId}-${index}`}><code>{entry.shortId}</code><span>{entry.subject}</span></div>)}
         </section>
       </div>
+      {mergePreview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar merge Git"><div><small>PRÉVIA OBRIGATÓRIA</small><h2>Merge de {mergePreview.target}</h2><p>{mergePreview.commits} commits · {mergePreview.changedFiles} arquivos alterados</p></div><div><button onClick={() => setMergePreview(undefined)}>CANCELAR</button><button aria-label="Confirmar merge" onClick={() => void confirmMerge()}>CONFIRMAR</button></div></div> : null}
       <p className="area-note">Sem discard, stash, rebase, force-push ou reset destrutivo.</p>
     </section>
   )
