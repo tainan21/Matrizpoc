@@ -3,12 +3,9 @@ use std::{
     fs,
     path::PathBuf,
     sync::{Arc, Mutex},
-    time::{SystemTime, UNIX_EPOCH},
 };
 
 use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
-use uuid::Uuid;
 
 const VERSION: u32 = 1;
 
@@ -215,30 +212,8 @@ impl CommerceStore {
     }
 
     pub fn acquire(&self, package_id: &str) -> Result<CommerceSnapshot, String> {
-        let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
-        let package = catalog(package_id)?;
-        reject_builtin(package)?;
-        let mut state = self.read()?;
-        if state.owned.iter().any(|id| id == package_id) {
-            return Err("Package is already owned".into());
-        }
-        let balance = validate_state(&state)?;
-        if balance < package.price {
-            return Err("Insufficient Matriz Credits".into());
-        }
-        state.owned.push(package_id.into());
-        state.transactions.push(transaction(
-            -package.price,
-            if package.price == 0 {
-                "free-acquisition"
-            } else {
-                "acquisition"
-            },
-            package.name,
-            Some(package_id),
-        ));
-        self.write(&state)?;
-        Ok(snapshot_from(state))
+        catalog(package_id)?;
+        Err("Store commerce is read-only; local runtimes do not require acquisition".into())
     }
 
     pub fn install(
@@ -246,55 +221,19 @@ impl CommerceStore {
         package_id: &str,
         granted_permissions: &[&str],
     ) -> Result<CommerceSnapshot, String> {
-        let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
-        let package = catalog(package_id)?;
-        reject_builtin(package)?;
-        validate_permissions(package, granted_permissions)?;
-        let mut state = self.read()?;
-        if !state.owned.iter().any(|id| id == package_id) {
-            return Err("Package must be acquired before installation".into());
-        }
-        state
-            .installed
-            .insert(package_id.into(), package.version.into());
-        state
-            .receipts
-            .insert(package_id.into(), install_receipt(package));
-        self.write(&state)?;
-        Ok(snapshot_from(state))
+        let _ = granted_permissions;
+        catalog(package_id)?;
+        Err("Store commerce is read-only; installation requires a verified release".into())
     }
 
     pub fn repair(&self, package_id: &str) -> Result<CommerceSnapshot, String> {
-        let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
-        let package = catalog(package_id)?;
-        reject_builtin(package)?;
-        let mut state = self.read()?;
-        if !state.owned.iter().any(|id| id == package_id)
-            || !state.installed.contains_key(package_id)
-        {
-            return Err("Only an installed owned package can be repaired".into());
-        }
-        state
-            .installed
-            .insert(package_id.into(), package.version.into());
-        state
-            .receipts
-            .insert(package_id.into(), install_receipt(package));
-        self.write(&state)?;
-        Ok(snapshot_from(state))
+        catalog(package_id)?;
+        Err("Store commerce is read-only; repair requires a verified release".into())
     }
 
     pub fn uninstall(&self, package_id: &str) -> Result<CommerceSnapshot, String> {
-        let _guard = self.lock.lock().map_err(|_| "Commerce lock poisoned")?;
-        let package = catalog(package_id)?;
-        reject_builtin(package)?;
-        let mut state = self.read()?;
-        if state.installed.remove(package_id).is_none() {
-            return Err("Package is not installed".into());
-        }
-        state.receipts.remove(package_id);
-        self.write(&state)?;
-        Ok(snapshot_from(state))
+        catalog(package_id)?;
+        Err("Store commerce is read-only; removal requires an installed desktop product".into())
     }
 
     pub fn activate(&self, package_id: &str) -> Result<PackageActivationTarget, String> {
@@ -306,13 +245,6 @@ impl CommerceStore {
                 view: "hub".into(),
                 feature_id: feature_id.into(),
             });
-        }
-        let state = self.read()?;
-        if !state.installed.contains_key(package_id) {
-            return Err("Package must be installed before activation".into());
-        }
-        if !installation_is_verified(package, &state) {
-            return Err("Package trust must be repaired before activation".into());
         }
         let operation_id = format!("app.{}.web", package.app_id);
         crate::catalog::managed_operation(&operation_id)?;
@@ -341,42 +273,15 @@ impl CommerceStore {
         validate_state(&state)?;
         Ok(state)
     }
-    fn write(&self, state: &State) -> Result<(), String> {
-        validate_state(state)?;
-        let parent = self.path.parent().ok_or("Commerce path has no parent")?;
-        fs::create_dir_all(parent)
-            .map_err(|error| format!("Could not create commerce directory: {error}"))?;
-        let temp = parent.join(format!("commerce-{}.tmp", Uuid::new_v4()));
-        fs::write(
-            &temp,
-            serde_json::to_vec_pretty(state).map_err(|error| error.to_string())?,
-        )
-        .map_err(|error| format!("Could not write commerce state: {error}"))?;
-        fs::rename(temp, &self.path)
-            .map_err(|error| format!("Could not commit commerce state: {error}"))
-    }
 }
 
 fn default_state() -> State {
     State {
         version: VERSION,
-        transactions: vec![transaction(1_250, "grant", "Créditos iniciais", None)],
+        transactions: vec![],
         owned: vec![],
         installed: BTreeMap::new(),
         receipts: BTreeMap::new(),
-    }
-}
-fn transaction(amount: i64, kind: &str, title: &str, package_id: Option<&str>) -> Transaction {
-    Transaction {
-        id: Uuid::new_v4().to_string(),
-        occurred_at: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis(),
-        amount,
-        kind: kind.into(),
-        title: title.into(),
-        package_id: package_id.map(str::to_owned),
     }
 }
 fn catalog(id: &str) -> Result<CatalogPackage, String> {
@@ -393,13 +298,6 @@ fn builtin_feature(package: CatalogPackage) -> Option<&'static str> {
         "matriz.awake" => Some("matriz-awake"),
         "matriz.resume-session" => Some("resume-session"),
         _ => None,
-    }
-}
-fn reject_builtin(package: CatalogPackage) -> Result<(), String> {
-    if builtin_feature(package).is_some() {
-        Err("Built-in utilities are managed by Matriz Control".into())
-    } else {
-        Ok(())
     }
 }
 fn validate_state(state: &State) -> Result<i64, String> {
@@ -442,7 +340,7 @@ fn validate_state(state: &State) -> Result<i64, String> {
             _ => return Err("Commerce ledger contains an unsupported transaction".into()),
         }
     }
-    if grants != 1 || balance < 0 {
+    if grants > 1 || balance < 0 {
         return Err("Commerce ledger invariants failed".into());
     }
     let owned = state
@@ -473,22 +371,9 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
         .iter()
         .map(|package| {
             let built_in = builtin_feature(*package).is_some();
-            let receipt = if built_in {
-                None
-            } else {
-                state.receipts.get(package.id).cloned()
-            };
-            let trust_status = if built_in {
-                "verified"
-            } else if !state.installed.contains_key(package.id) {
-                "missing"
-            } else if installation_is_verified(*package, &state) {
-                "verified"
-            } else if receipt.is_some() {
-                "changed"
-            } else {
-                "missing"
-            };
+            let local_runtime = !built_in;
+            let receipt = None;
+            let trust_status = "verified";
             PackageView {
                 id: package.id,
                 name: package.name,
@@ -499,13 +384,15 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
                 app_id: package.app_id,
                 price: package.price,
                 permissions: package.permissions,
-                compatibility: "Matriz Control 0.1+ · Windows 10/11",
-                owned: built_in || state.owned.iter().any(|id| id == package.id),
-                installed: built_in || state.installed.contains_key(package.id),
+                compatibility: "Matriz Control 1.0+ · Windows 10/11",
+                owned: built_in || local_runtime,
+                installed: built_in || local_runtime,
                 trust_status,
                 built_in,
                 status: if built_in {
                     "Built-in / Enabled"
+                } else if local_runtime {
+                    "Installed / Local Runtime"
                 } else {
                     "Catalog"
                 },
@@ -520,75 +407,5 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
             transactions: state.transactions.into_iter().rev().collect(),
         },
         packages,
-    }
-}
-
-fn receipt_is_verified(package: CatalogPackage, receipt: &InstallReceipt) -> bool {
-    let mut expected_permissions = package.permissions.to_vec();
-    expected_permissions.sort_unstable();
-    receipt.package_id == package.id
-        && receipt.version == package.version
-        && receipt.manifest_digest == manifest_digest(package)
-        && receipt
-            .granted_permissions
-            .iter()
-            .map(String::as_str)
-            .collect::<Vec<_>>()
-            == expected_permissions
-}
-
-fn installation_is_verified(package: CatalogPackage, state: &State) -> bool {
-    state
-        .installed
-        .get(package.id)
-        .is_some_and(|version| version == package.version)
-        && state
-            .receipts
-            .get(package.id)
-            .is_some_and(|receipt| receipt_is_verified(package, receipt))
-}
-
-fn validate_permissions(package: CatalogPackage, granted: &[&str]) -> Result<(), String> {
-    let mut expected = package.permissions.to_vec();
-    let mut actual = granted.to_vec();
-    expected.sort_unstable();
-    actual.sort_unstable();
-    actual.dedup();
-    if actual != expected {
-        return Err("Granted permissions must exactly match the trusted package manifest".into());
-    }
-    Ok(())
-}
-
-fn manifest_digest(package: CatalogPackage) -> String {
-    let mut permissions = package.permissions.to_vec();
-    permissions.sort_unstable();
-    let canonical = format!(
-        "{}\n{}\n{}\n{}\n{}",
-        package.id,
-        package.name,
-        package.version,
-        package.app_id,
-        permissions.join("\n")
-    );
-    format!("{:x}", Sha256::digest(canonical.as_bytes()))
-}
-
-fn install_receipt(package: CatalogPackage) -> InstallReceipt {
-    let mut granted_permissions = package
-        .permissions
-        .iter()
-        .map(|value| (*value).to_string())
-        .collect::<Vec<_>>();
-    granted_permissions.sort();
-    InstallReceipt {
-        package_id: package.id.into(),
-        version: package.version.into(),
-        manifest_digest: manifest_digest(package),
-        granted_permissions,
-        installed_at: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap_or_default()
-            .as_millis(),
     }
 }

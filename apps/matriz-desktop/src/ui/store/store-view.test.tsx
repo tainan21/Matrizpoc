@@ -14,6 +14,15 @@ function snapshot(owned = false, installed = false): CommerceSnapshot {
 }
 
 describe("StoreView", () => {
+  it("keeps the legacy wallet read-only and never offers simulated acquisition", async () => {
+    const gateway = { commerceSnapshot: vi.fn().mockResolvedValue(snapshot()) } as unknown as DesktopGateway
+    render(<StoreView gateway={gateway} signal={vi.fn()} />)
+
+    expect(await screen.findByText("HISTÓRICO · SOMENTE LEITURA")).toBeVisible()
+    expect(screen.queryByRole("button", { name: /Adquirir Matriz Analytics/ })).not.toBeInTheDocument()
+    expect(screen.getByText("INDISPONÍVEL")).toBeVisible()
+  })
+
   it("opens a built-in utility in Hub without commerce or runtime actions", async () => {
     const builtIn: CommerceSnapshot = { wallet: { balance: 1250, currency: "M", transactions: [] }, packages: [{ id: "matriz.node-sweep", name: "Node Sweep", description: "Limpeza segura.", developer: "Matriz", version: "1.0.0", category: "Core Utility", appId: "matriz-desktop", price: 0, permissions: [], compatibility: "Matriz Control 1.0+", owned: true, installed: true, trustStatus: "verified", builtIn: true, status: "Built-in / Enabled" }] }
     const gateway = {
@@ -30,44 +39,6 @@ describe("StoreView", () => {
     expect(gateway.runtimeSnapshot).not.toHaveBeenCalled()
     expect(gateway.startManagedOperation).not.toHaveBeenCalled()
     expect(screen.queryByRole("button", { name: "Desinstalar Node Sweep" })).not.toBeInTheDocument()
-  })
-
-  it("keeps acquisition and installation as separate working transitions", async () => {
-    const gateway = {
-      commerceSnapshot: vi.fn().mockResolvedValue(snapshot()),
-      acquirePackage: vi.fn().mockResolvedValue(snapshot(true)),
-      installPackage: vi.fn().mockResolvedValue(snapshot(true, true)),
-      repairPackage: vi.fn().mockResolvedValue(snapshot(true, true)),
-      uninstallPackage: vi.fn().mockResolvedValue(snapshot(true)),
-      openRuntimeTarget: vi.fn().mockResolvedValue(undefined),
-    } as unknown as DesktopGateway
-    render(<StoreView gateway={gateway} signal={vi.fn()} />)
-
-    fireEvent.click(await screen.findByRole("button", { name: "Adquirir Matriz Analytics por 220 M" }))
-    await waitFor(() => expect(gateway.acquirePackage).toHaveBeenCalledWith("matriz.analytics"))
-    fireEvent.click(await screen.findByRole("button", { name: "Instalar Matriz Analytics" }))
-    expect(screen.getByRole("dialog", { name: "Permissões de Matriz Analytics" })).toBeVisible()
-    expect(screen.getByRole("button", { name: "Confirmar instalação de Matriz Analytics" })).toBeDisabled()
-    fireEvent.click(screen.getByRole("checkbox", { name: "Permitir runtime:observe" }))
-    fireEvent.click(screen.getByRole("button", { name: "Confirmar instalação de Matriz Analytics" }))
-    await waitFor(() => expect(gateway.installPackage).toHaveBeenCalledWith("matriz.analytics", ["runtime:observe"]))
-    expect(await screen.findByText("INSTALADO")).toBeVisible()
-  })
-
-  it("shows the native trust receipt and repairs a changed installation", async () => {
-    const base = snapshot(true, true)
-    const changed: CommerceSnapshot = { ...base, packages: base.packages.map((item) => ({ ...item, trustStatus: "changed" as const })) }
-    const gateway = {
-      commerceSnapshot: vi.fn().mockResolvedValue(changed),
-      repairPackage: vi.fn().mockResolvedValue(snapshot(true, true)),
-    } as unknown as DesktopGateway
-    render(<StoreView gateway={gateway} signal={vi.fn()} />)
-
-    fireEvent.click(await screen.findByRole("button", { name: "Inspecionar Matriz Analytics" }))
-    expect(screen.getByText("MANIFESTO ALTERADO")).toBeVisible()
-    fireEvent.click(screen.getByRole("button", { name: "Reparar Matriz Analytics" }))
-    await waitFor(() => expect(gateway.repairPackage).toHaveBeenCalledWith("matriz.analytics"))
-    expect(await screen.findByText("VERIFICADO")).toBeVisible()
   })
 
   it("starts an installed package runtime before opening it", async () => {
@@ -90,7 +61,7 @@ describe("StoreView", () => {
     expect(gateway.activatePackage).toHaveBeenCalledTimes(2)
   })
 
-  it("serializes package actions while native activation is pending", async () => {
+  it("serializes package open while native activation is pending", async () => {
     const target = { kind: "runtime" as const, packageId: "matriz.analytics", appId: "willdash" as const, operationId: "app.willdash.web" as const, routePath: "/" }
     let releaseActivation!: (value: typeof target) => void
     const activation = new Promise<typeof target>((resolve) => { releaseActivation = resolve })
@@ -101,15 +72,11 @@ describe("StoreView", () => {
       startManagedOperation: vi.fn(),
       restartRuntime: vi.fn(),
       openRuntimeTarget: vi.fn().mockResolvedValue(undefined),
-      uninstallPackage: vi.fn().mockResolvedValue(snapshot(true, false)),
     } as unknown as DesktopGateway
     render(<StoreView gateway={gateway} signal={vi.fn()} />)
 
     fireEvent.click(await screen.findByRole("button", { name: "Abrir Matriz Analytics" }))
-    const remove = screen.getByRole("button", { name: "Desinstalar Matriz Analytics" })
-    await waitFor(() => expect(remove).toBeDisabled())
-    fireEvent.click(remove)
-    expect(gateway.uninstallPackage).not.toHaveBeenCalled()
+    await waitFor(() => expect(screen.getByRole("button", { name: "Abrir Matriz Analytics" })).toBeDisabled())
 
     releaseActivation(target)
     await waitFor(() => expect(gateway.openRuntimeTarget).toHaveBeenCalled())
