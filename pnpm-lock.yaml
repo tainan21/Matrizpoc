@@ -1017,6 +1017,49 @@ importers:
         specifier: 2.1.2
         version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1(@noble/hashes@2.3.0))
 
+  apps/naevia:
+    dependencies:
+      react:
+        specifier: 19.2.0
+        version: 19.2.0
+      react-dom:
+        specifier: 19.2.0
+        version: 19.2.0(react@19.2.0)
+    devDependencies:
+      '@playwright/test':
+        specifier: 1.62.1
+        version: 1.62.1
+      '@types/node':
+        specifier: 22.7.5
+        version: 22.7.5
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 4.3.4
+        version: 4.3.4(vite@5.4.21(@types/node@22.7.5))
+      electron:
+        specifier: 44.1.1
+        version: 44.1.1
+      electron-builder:
+        specifier: 26.15.3
+        version: 26.15.3(electron-builder-squirrel-windows@26.15.3)
+      eslint:
+        specifier: 9.12.0
+        version: 9.12.0(jiti@2.7.0)
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vite:
+        specifier: 5.4.21
+        version: 5.4.21(@types/node@22.7.5)
+      vitest:
+        specifier: 2.1.2
+        version: 2.1.2(@types/node@22.7.5)(jsdom@30.0.1(@noble/hashes@2.3.0))
+
   apps/seumeiapp:
     dependencies:
       '@matriz/access-tenants':
@@ -4910,6 +4953,11 @@ packages:
 
   electron@44.0.0:
     resolution: {integrity: sha512-FkTqPrFPZYljdPI5b7KORGsJTd6FgUQDefl5MrU3Xz9R87pAj9JLreIjDqcRN8hJIkFHIou0o8kKzvcpT9qiRQ==}
+    engines: {node: '>= 22.12.0'}
+    hasBin: true
+
+  electron@44.1.1:
+    resolution: {integrity: sha512-N2WCq2sbOkqQgvXJYx2lS6UiO8bF+Yr67trDnS6JKa2WxTCRQsAjGl57SUtdW9h6r5PlduBFjIhxhgd3dzv1hg==}
     engines: {node: '>= 22.12.0'}
     hasBin: true
 
@@ -10579,6 +10627,14 @@ snapshots:
       - supports-color
 
   electron@44.0.0:
+    dependencies:
+      '@electron-internal/extract-zip': 1.0.5
+      '@electron/get': 5.1.0
+      '@types/node': 24.13.3
+    transitivePeerDependencies:
+      - supports-color
+
+  electron@44.1.1:
     dependencies:
       '@electron-internal/extract-zip': 1.0.5
       '@electron/get': 5.1.0
