@@ -31,15 +31,31 @@ const checks: readonly DoctorCheck[] = [
 ]
 
 describe("DoctorView", () => {
-  it("renders actionable diagnostic metadata without executing a remedy", () => {
+  it("previews and confirms a fixed remedy before navigating", async () => {
     const refresh = vi.fn().mockResolvedValue(undefined)
-    render(<DoctorView checks={checks} refresh={refresh} />)
+    const previewRemedy = vi.fn().mockResolvedValue({
+      remedyId: "install-webview2",
+      title: "Configurar WebView2",
+      summary: "Abra Ajustes para concluir a configuração.",
+      target: "settings",
+      confirmationToken: "doctor-token",
+      expiresAt: Date.now() + 30_000,
+    })
+    const confirmRemedy = vi.fn().mockResolvedValue({ target: "settings" })
+    const open = vi.fn()
+    render(<DoctorView checks={checks} refresh={refresh} previewRemedy={previewRemedy} confirmRemedy={confirmRemedy} open={open} />)
 
     expect(screen.getByRole("heading", { name: "DOCTOR" })).toBeVisible()
     expect(screen.getByText("1/2 prontos")).toBeVisible()
     expect(screen.getByText("Major 22")).toBeVisible()
-    expect(screen.getByText("Ação disponível após prévia segura")).toBeVisible()
-    expect(screen.queryByRole("button", { name: /corrigir/i })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: "Revisar correção de WebView2" }))
+    expect(await screen.findByText("Configurar WebView2")).toBeVisible()
+    expect(previewRemedy).toHaveBeenCalledWith("install-webview2")
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar correção" }))
+    expect(confirmRemedy).toHaveBeenCalledWith("doctor-token")
+    expect(await screen.findByText("Correção encaminhada com segurança.")).toBeVisible()
+    expect(open).toHaveBeenCalledWith("settings")
 
     fireEvent.click(screen.getByRole("button", { name: "Executar diagnóstico" }))
     expect(refresh).toHaveBeenCalledTimes(1)

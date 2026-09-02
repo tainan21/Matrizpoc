@@ -1,7 +1,9 @@
 use std::{
+    collections::HashMap,
     io::Read,
     path::{Path, PathBuf},
     process::{Command, Stdio},
+    sync::Mutex,
     thread,
     time::{Duration, Instant},
 };
@@ -37,6 +39,100 @@ pub struct WorkspacePulse {
     pub branch: String,
     pub changed_files: usize,
     pub clean: bool,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DoctorRemedyPreview {
+    pub remedy_id: String,
+    pub title: &'static str,
+    pub summary: &'static str,
+    pub target: &'static str,
+    pub confirmation_token: String,
+    pub expires_at: u128,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct DoctorRemedyResult {
+    pub target: &'static str,
+}
+
+#[derive(Clone, Copy)]
+struct RemedyDefinition {
+    title: &'static str,
+    summary: &'static str,
+    target: &'static str,
+}
+
+#[derive(Clone, Copy)]
+struct PendingRemedy {
+    definition: RemedyDefinition,
+    expires_at: Instant,
+}
+
+#[derive(Default)]
+pub struct DoctorRemedyService {
+    pending: Mutex<HashMap<String, PendingRemedy>>,
+}
+
+fn remedy_definition(remedy_id: &str) -> Option<RemedyDefinition> {
+    match remedy_id {
+        "install-webview2" => Some(RemedyDefinition { title: "Configurar WebView2", summary: "Abra Ajustes para revisar o runtime WebView2. Nenhum instalador será executado automaticamente.", target: "settings" }),
+        "select-workspace" => Some(RemedyDefinition { title: "Configurar workspace", summary: "Abra Ajustes e selecione uma raiz Matriz válida.", target: "settings" }),
+        "repair-toolchain" => Some(RemedyDefinition { title: "Revisar toolchain", summary: "Abra Ajustes para revisar as versões locais. O Doctor não executa comandos de instalação.", target: "settings" }),
+        "repair-terminal" => Some(RemedyDefinition { title: "Revisar Terminal", summary: "Abra Ajustes para validar workspace e shell antes de criar uma sessão.", target: "settings" }),
+        "repair-workbench" => Some(RemedyDefinition { title: "Abrir coworking", summary: "Abra Agentes para iniciar ou recuperar o Workbench pelo catálogo nativo.", target: "agents" }),
+        "repair-codex-runtime" => Some(RemedyDefinition { title: "Revisar runtime Codex", summary: "Abra Agentes para revisar a autoridade local do Codex e Workbench.", target: "agents" }),
+        "repair-infrastructure" => Some(RemedyDefinition { title: "Abrir infraestrutura", summary: "Abra Infra para revisar serviços locais e executar ações com confirmação.", target: "infra" }),
+        "repair-store" => Some(RemedyDefinition { title: "Abrir Store", summary: "Abra a Store para atualizar o catálogo ou revisar produtos instalados.", target: "store" }),
+        _ => None,
+    }
+}
+
+impl DoctorRemedyService {
+    pub fn preview(&self, remedy_id: &str) -> Result<DoctorRemedyPreview, String> {
+        let definition = remedy_definition(remedy_id)
+            .ok_or_else(|| "Doctor remedy is not allowlisted".to_owned())?;
+        let confirmation_token = uuid::Uuid::new_v4().to_string();
+        let ttl = Duration::from_secs(30);
+        self.pending
+            .lock()
+            .map_err(|_| "Doctor remedy state is unavailable")?
+            .insert(
+                confirmation_token.clone(),
+                PendingRemedy {
+                    definition,
+                    expires_at: Instant::now() + ttl,
+                },
+            );
+        Ok(DoctorRemedyPreview {
+            remedy_id: remedy_id.to_owned(),
+            title: definition.title,
+            summary: definition.summary,
+            target: definition.target,
+            confirmation_token,
+            expires_at: std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .saturating_add(ttl)
+                .as_millis(),
+        })
+    }
+
+    pub fn confirm(&self, token: &str) -> Result<DoctorRemedyResult, String> {
+        let pending = self
+            .pending
+            .lock()
+            .map_err(|_| "Doctor remedy state is unavailable")?
+            .remove(token)
+            .ok_or_else(|| "Doctor remedy confirmation is invalid or already used".to_owned())?;
+        if Instant::now() > pending.expires_at {
+            return Err("Doctor remedy confirmation expired".into());
+        }
+        Ok(DoctorRemedyResult {
+            target: pending.definition.target,
+        })
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -424,6 +520,7 @@ pub fn workspace_pulse(state: &OperationsState) -> Result<WorkspacePulse, String
 mod tests {
     use super::{
         corepack_pnpm_command, fixed_output, matches_major_version, resolve_codex_runtime,
+        DoctorRemedyService,
     };
 
     #[test]
@@ -484,5 +581,21 @@ mod tests {
                 .0,
             "plugin"
         );
+    }
+
+    #[test]
+    fn doctor_remedies_are_allowlisted_and_single_use() {
+        let service = DoctorRemedyService::default();
+        assert!(service.preview("run-anything").is_err());
+        let preview = service.preview("select-workspace").expect("preview");
+        assert_eq!(preview.target, "settings");
+        assert_eq!(
+            service
+                .confirm(&preview.confirmation_token)
+                .expect("confirm")
+                .target,
+            "settings"
+        );
+        assert!(service.confirm(&preview.confirmation_token).is_err());
     }
 }

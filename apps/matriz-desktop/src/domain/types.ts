@@ -122,6 +122,21 @@ export interface DoctorCheck {
   readonly remedyId?: string
 }
 
+export type DoctorRemedyTarget = "home" | "settings" | "agents" | "infra" | "store"
+
+export interface DoctorRemedyPreview {
+  readonly remedyId: string
+  readonly title: string
+  readonly summary: string
+  readonly target: DoctorRemedyTarget
+  readonly confirmationToken: string
+  readonly expiresAt: number
+}
+
+export interface DoctorRemedyResult {
+  readonly target: DoctorRemedyTarget
+}
+
 export interface WorkspacePulse {
   readonly branch: string
   readonly changedFiles: number

@@ -25,6 +25,8 @@ pub const COMMAND_NAMES: &[&str] = &[
     "open_target",
     "select_workspace",
     "run_doctor",
+    "preview_doctor_remedy",
+    "confirm_doctor_remedy",
     "get_workspace_pulse",
     "get_git_snapshot",
     "get_git_diff",

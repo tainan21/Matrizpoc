@@ -6,6 +6,8 @@ import type {
   TerminalReadiness,
   DesktopSnapshot,
   DoctorCheck,
+  DoctorRemedyPreview,
+  DoctorRemedyResult,
   GateId,
   GateResult,
   KillManyRequest,
@@ -82,6 +84,8 @@ export interface DesktopGateway {
   openTarget(targetId: QuickTargetId): Promise<void>
   selectWorkspace(path: string): Promise<string>
   doctor(): Promise<readonly DoctorCheck[]>
+  previewDoctorRemedy(remedyId: string): Promise<DoctorRemedyPreview>
+  confirmDoctorRemedy(confirmationToken: string): Promise<DoctorRemedyResult>
   workspacePulse(): Promise<WorkspacePulse>
   gitSnapshot(): Promise<GitSnapshot>
   gitDiff(request: GitDiffRequest): Promise<GitDiff>

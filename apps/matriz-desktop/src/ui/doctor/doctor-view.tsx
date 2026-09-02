@@ -1,16 +1,24 @@
 import { useState } from "react"
 
-import type { DoctorCheck } from "../../domain/types"
+import type { DoctorCheck, DoctorRemedyPreview, DoctorRemedyResult, DoctorRemedyTarget } from "../../domain/types"
 import { Icons } from "../icons"
 
 export function DoctorView({
   checks,
   refresh,
+  previewRemedy,
+  confirmRemedy,
+  open,
 }: {
   readonly checks: readonly DoctorCheck[]
   readonly refresh: () => Promise<unknown>
+  readonly previewRemedy: (remedyId: string) => Promise<DoctorRemedyPreview>
+  readonly confirmRemedy: (confirmationToken: string) => Promise<DoctorRemedyResult>
+  readonly open: (target: DoctorRemedyTarget) => void
 }) {
   const [busy, setBusy] = useState(false)
+  const [preview, setPreview] = useState<DoctorRemedyPreview>()
+  const [message, setMessage] = useState("")
   const ready = checks.filter(({ ok }) => ok).length
 
   const run = async () => {
@@ -18,6 +26,34 @@ export function DoctorView({
     setBusy(true)
     try {
       await refresh()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const review = async (remedyId: string) => {
+    if (busy) return
+    setBusy(true)
+    setMessage("")
+    try {
+      setPreview(await previewRemedy(remedyId))
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Não foi possível preparar a correção.")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const confirm = async () => {
+    if (!preview || busy) return
+    setBusy(true)
+    try {
+      const result = await confirmRemedy(preview.confirmationToken)
+      setPreview(undefined)
+      setMessage("Correção encaminhada com segurança.")
+      open(result.target)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "A confirmação expirou.")
     } finally {
       setBusy(false)
     }
@@ -59,12 +95,14 @@ export function DoctorView({
             <div className="doctor-check-policy">
               <small>ESPERADO</small>
               <span>{check.expected ?? "Disponível"}</span>
-              {check.remedyId ? <em>Ação disponível após prévia segura</em> : null}
+              {check.remedyId ? <button disabled={busy} aria-label={`Revisar correção de ${check.label}`} onClick={() => void review(check.remedyId!)}>REVISAR CORREÇÃO</button> : null}
             </div>
           </div>
         ))}
         {!checks.length ? <p className="area-note">Executando diagnóstico…</p> : null}
       </div>
+      {message ? <p role="status">{message}</p> : null}
+      {preview ? <div className="infra-confirm" role="dialog" aria-label="Confirmar correção do Doctor"><div><small>PRÉVIA OBRIGATÓRIA</small><h2>{preview.title}</h2><p>{preview.summary}</p></div><div><button disabled={busy} onClick={() => setPreview(undefined)}>CANCELAR</button><button disabled={busy} aria-label="Confirmar correção" onClick={() => void confirm()}>CONFIRMAR</button></div></div> : null}
     </section>
   )
 }

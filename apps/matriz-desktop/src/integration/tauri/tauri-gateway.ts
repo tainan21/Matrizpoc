@@ -75,6 +75,8 @@ export function createTauriGateway(
     openTarget: (targetId: QuickTargetId) => invoke<void>(commands.openTarget, { targetId }),
     selectWorkspace: (path) => invoke<string>(commands.selectWorkspace, { path }),
     doctor: () => invoke<readonly DoctorCheck[]>(commands.doctor),
+    previewDoctorRemedy: (remedyId) => invoke(commands.previewDoctorRemedy, { remedyId }),
+    confirmDoctorRemedy: (confirmationToken) => invoke(commands.confirmDoctorRemedy, { confirmationToken }),
     workspacePulse: () => invoke<WorkspacePulse>(commands.workspacePulse),
     gitSnapshot: () => invoke(commands.gitSnapshot),
     gitDiff: (request) => invoke(commands.gitDiff, { request }),

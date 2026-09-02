@@ -24,6 +24,8 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   openTarget: "open_target",
   selectWorkspace: "select_workspace",
   doctor: "run_doctor",
+  previewDoctorRemedy: "preview_doctor_remedy",
+  confirmDoctorRemedy: "confirm_doctor_remedy",
   workspacePulse: "get_workspace_pulse",
   gitSnapshot: "get_git_snapshot",
   gitDiff: "get_git_diff",

@@ -37,6 +37,7 @@ use std::{
 use activity::{ActivityEnvelope, ActivityHub};
 use awake::AwakeManager;
 use commerce::{CommerceSnapshot, CommerceStore, PackageActivationTarget};
+use doctor::{DoctorRemedyPreview, DoctorRemedyResult, DoctorRemedyService};
 use environment::{
     EnvironmentComparison, EnvironmentDocument, EnvironmentFile, EnvironmentPromotionRequest,
     EnvironmentSaveRequest, EnvironmentService,
@@ -749,6 +750,22 @@ async fn run_doctor(
     tauri::async_runtime::spawn_blocking(move || doctor::run_doctor(&state))
         .await
         .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
+fn preview_doctor_remedy(
+    remedies: tauri::State<'_, DoctorRemedyService>,
+    remedy_id: String,
+) -> Result<DoctorRemedyPreview, String> {
+    remedies.preview(&remedy_id)
+}
+
+#[tauri::command]
+fn confirm_doctor_remedy(
+    remedies: tauri::State<'_, DoctorRemedyService>,
+    confirmation_token: String,
+) -> Result<DoctorRemedyResult, String> {
+    remedies.confirm(&confirmation_token)
 }
 
 #[tauri::command]
@@ -1577,6 +1594,7 @@ pub fn run() {
         .manage(NodeSweepService::default())
         .manage(GitService::default())
         .manage(UpdateManager::default())
+        .manage(DoctorRemedyService::default())
         .setup(|app| {
             let default_config_dir = app.path().app_config_dir()?;
             let config_dir = resolve_acceptance_config_dir(
@@ -1657,6 +1675,8 @@ pub fn run() {
             run_runbook,
             open_target,
             run_doctor,
+            preview_doctor_remedy,
+            confirm_doctor_remedy,
             get_workspace_pulse,
             get_git_snapshot,
             get_git_diff,

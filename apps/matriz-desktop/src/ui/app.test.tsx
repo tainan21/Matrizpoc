@@ -51,6 +51,8 @@ function gateway(): DesktopGateway {
     openTarget: vi.fn().mockResolvedValue(undefined),
     selectWorkspace: vi.fn().mockResolvedValue("C:\\Apps\\matriz-infra-hub"),
     doctor: vi.fn().mockResolvedValue([]),
+    previewDoctorRemedy: vi.fn().mockResolvedValue({ remedyId: "select-workspace", title: "Configurar workspace", summary: "Abra Ajustes.", target: "settings", confirmationToken: "doctor-token", expiresAt: Date.now() + 30_000 }),
+    confirmDoctorRemedy: vi.fn().mockResolvedValue({ target: "settings" }),
     workspacePulse: vi.fn().mockResolvedValue({ branch: "main", changedFiles: 0, clean: true }),
     gitSnapshot: vi.fn().mockResolvedValue({ revision: "rev", branch: "main", ahead: 0, behind: 0, changes: [], recent: [], branches: [], reflog: [] }),
     gitDiff: vi.fn().mockResolvedValue({ changeId: "change", staged: false, lines: [], truncated: false }),
