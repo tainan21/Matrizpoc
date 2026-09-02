@@ -401,6 +401,17 @@ export interface RuntimePackageActivationTarget extends RuntimeTarget {
   readonly operationId: `app.${DesktopAppId}.web`
 }
 
+export interface TerminalReadiness {
+  readonly ready: boolean
+  readonly workspacePath?: string
+  readonly shellPath?: string
+  readonly shellLabel?: string
+  readonly conptyAvailable: boolean
+  readonly sessionCount: number
+  readonly sessionLimit: number
+  readonly reason?: string
+}
+
 export interface ControlPackageActivationTarget {
   readonly kind: "control"
   readonly packageId: string

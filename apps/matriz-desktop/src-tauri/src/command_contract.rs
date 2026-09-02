@@ -43,6 +43,7 @@ pub const COMMAND_NAMES: &[&str] = &[
     "write_settings",
     "hide_window",
     "quit_app",
+    "terminal_readiness",
     "create_terminal",
     "write_terminal",
     "resize_terminal",

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 
-import type { TerminalSession } from "../../domain/types"
+import type { TerminalReadiness, TerminalSession } from "../../domain/types"
 import type { TerminalState } from "./terminal-store"
 
 const STATUS_LABEL: Record<TerminalSession["status"], string> = {
@@ -13,7 +13,10 @@ const STATUS_LABEL: Record<TerminalSession["status"], string> = {
 
 export interface TerminalViewProps {
   readonly state: TerminalState
+  readonly readiness?: TerminalReadiness
+  readonly error?: string
   readonly create: () => void
+  readonly configureWorkspace?: () => void
   readonly activate: (sessionId: string) => void
   readonly interrupt: (sessionId: string) => void
   readonly close: (sessionId: string) => void
@@ -23,7 +26,10 @@ export interface TerminalViewProps {
 
 export function TerminalView({
   state,
+  readiness,
+  error,
   create,
+  configureWorkspace,
   activate,
   interrupt,
   close,
@@ -31,6 +37,7 @@ export function TerminalView({
   compact = false,
 }: TerminalViewProps) {
   const active = state.sessions.find(({ id }) => id === state.activeId)
+  const blocked = readiness?.ready === false && !active
 
   return (
     <section className={`terminal-view${compact ? " terminal-view--compact" : ""}`} aria-label="Terminal">
@@ -53,12 +60,14 @@ export function TerminalView({
           type="button"
           className="terminal-new"
           aria-label="Nova sessão PowerShell"
-          disabled={!state.canCreate}
+          disabled={!state.canCreate || blocked}
           onClick={create}
         >
           +
         </button>
       </div>
+
+      {error ? <p className="terminal-error" role="alert">{error}</p> : null}
 
       {active ? (
         <>
@@ -76,6 +85,15 @@ export function TerminalView({
             {renderPane(active)}
           </div>
         </>
+      ) : blocked ? (
+        <div className="terminal-empty terminal-empty--blocked" role="status">
+          <span aria-hidden="true">!</span>
+          <strong>WORKSPACE NECESSÁRIO</strong>
+          <p>Selecione o workspace Matriz para abrir o PowerShell.</p>
+          {configureWorkspace ? (
+            <button type="button" onClick={configureWorkspace}>Configurar workspace</button>
+          ) : null}
+        </div>
       ) : (
         <button type="button" className="terminal-empty" onClick={create}>
           <span>+</span>

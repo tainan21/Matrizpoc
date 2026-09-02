@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useReducer, useRef } from "react"
+import { useCallback, useEffect, useReducer, useRef, useState } from "react"
 
 import type { DesktopGateway } from "../../application/desktop-gateway"
-import type { TerminalSession } from "../../domain/types"
+import type { TerminalReadiness, TerminalSession } from "../../domain/types"
 import type { ManagedOperationId } from "../../domain/types"
 import { createTerminalState, terminalReducer } from "./terminal-store"
 
@@ -12,11 +12,17 @@ export function useTerminalRuntime(
   onDockOpenChange?: (open: boolean) => void,
 ) {
   const [state, dispatch] = useReducer(terminalReducer, undefined, () => createTerminalState())
+  const [readiness, setReadiness] = useState<TerminalReadiness>()
+  const [error, setError] = useState<string>()
   const sinks = useRef(new Map<string, OutputSink>())
   const sequences = useRef(new Map<string, number>())
   const closedSessions = useRef(new Set<string>())
   const dockOpenChange = useRef(onDockOpenChange)
   dockOpenChange.current = onDockOpenChange
+
+  const reportError = useCallback((cause: unknown) => {
+    setError(cause instanceof Error ? cause.message : String(cause))
+  }, [])
 
   const setDockOpen = useCallback((open: boolean) => {
     dispatch({ type: "dock", open })
@@ -27,8 +33,22 @@ export function useTerminalRuntime(
     dispatch({ type: "dock", open })
   }, [])
 
+  const refreshReadiness = useCallback(async () => {
+    try {
+      const next = await gateway.terminalReadiness()
+      setReadiness(next)
+      if (next.ready) setError(undefined)
+      return next
+    } catch (cause) {
+      const message = cause instanceof Error ? cause.message : String(cause)
+      setError(message)
+      throw cause
+    }
+  }, [gateway])
+
   useEffect(() => {
     let active = true
+    void refreshReadiness().catch(() => undefined)
     void gateway.listTerminals().then((sessions) => {
       if (active) dispatch({ type: "reconcile", sessions })
     })
@@ -60,14 +80,26 @@ export function useTerminalRuntime(
     return () => {
       active = false
     }
-  }, [gateway])
+  }, [gateway, refreshReadiness])
 
   const create = useCallback(async () => {
-    const session = await gateway.createTerminal()
-    dispatch({ type: "upsert", session })
-    dispatch({ type: "activate", sessionId: session.id })
-    setDockOpen(true)
-  }, [gateway, setDockOpen])
+    const current = readiness ?? await refreshReadiness()
+    if (!current.ready) {
+      setError(current.reason ?? "Terminal indisponível")
+      return
+    }
+    setError(undefined)
+    try {
+      const session = await gateway.createTerminal()
+      dispatch({ type: "upsert", session })
+      dispatch({ type: "activate", sessionId: session.id })
+      setDockOpen(true)
+      void refreshReadiness().catch(() => undefined)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+      throw cause
+    }
+  }, [gateway, readiness, refreshReadiness, setDockOpen])
 
   const close = useCallback(
     async (sessionId: string) => {
@@ -76,14 +108,24 @@ export function useTerminalRuntime(
         await gateway.closeTerminal(sessionId)
       } catch (error) {
         closedSessions.current.delete(sessionId)
+        reportError(error)
         throw error
       }
       sinks.current.delete(sessionId)
       sequences.current.delete(sessionId)
       dispatch({ type: "remove", sessionId })
     },
-    [gateway],
+    [gateway, reportError],
   )
+
+  const interrupt = useCallback(async (sessionId: string) => {
+    try {
+      await gateway.interruptTerminal(sessionId)
+    } catch (cause) {
+      reportError(cause)
+      throw cause
+    }
+  }, [gateway, reportError])
 
   const startOperation = useCallback(
     async (operationId: ManagedOperationId) => {
@@ -106,11 +148,15 @@ export function useTerminalRuntime(
 
   return {
     state,
+    readiness,
+    error,
+    refreshReadiness,
+    reportError,
     create,
     close,
     startOperation,
     activate: (sessionId: string) => dispatch({ type: "activate", sessionId }),
-    interrupt: (sessionId: string) => gateway.interruptTerminal(sessionId),
+    interrupt,
     setDockOpen,
     restoreDockOpen,
     register,

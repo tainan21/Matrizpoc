@@ -309,11 +309,11 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
         {view === "environments" ? <EnvironmentManager gateway={gateway} runtimes={runtimes} restart={gateway.restartRuntime} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "infra" ? <OperationalArea title="INFRA" eyebrow="LOCAL / SERVIÇOS" description="O cockpit local será habilitado serviço por serviço, com prévia e confirmação." /> : null}
         {view === "git" ? <GitView gateway={gateway} /> : null}
-        {view === "terminal" ? <TerminalView state={terminal.state} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />} /> : null}
+        {view === "terminal" ? <TerminalView state={terminal.state} readiness={terminal.readiness} error={terminal.error} configureWorkspace={() => chooseView("settings")} create={() => void createTerminal()} activate={terminal.activate} interrupt={(id) => void terminal.interrupt(id)} close={(id) => void terminal.close(id)} renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} reportError={terminal.reportError} />} /> : null}
         {view === "actions" ? <ActionsView pulse={pulse} gateway={gateway} runtimes={runtimes} activeGate={activeGate} setActiveGate={setActiveGate} feedback={safeFeedback} startOperation={terminal.startOperation} signal={(kind) => runtimeSignal(kind)} /> : null}
         {view === "store" ? <StoreView gateway={gateway} signal={(kind) => runtimeSignal(kind)} openControl={(featureId) => { setHubFeature(featureId); setView("hub") }} /> : null}
         {view === "doctor" ? <DoctorView checks={checks} refresh={() => gateway.doctor().then(setChecks)} /> : null}
-        {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); void safeFeedback.play("success") }} quit={() => { void safeFeedback.play("system.end"); void gateway.quit() }} /> : null}
+        {view === "settings" && desktop.settings ? <SettingsView settings={desktop.settings} workspacePath={workspacePath} setWorkspacePath={setWorkspacePath} save={saveSettings} selectWorkspace={async () => { const selected = await desktop.execute(() => gateway.selectWorkspace(workspacePath), "Workspace pronto"); setWorkspacePath(selected); desktop.setSettings({ ...desktop.settings!, workspacePath: selected }); await terminal.refreshReadiness(); void safeFeedback.play("success") }} quit={() => { void safeFeedback.play("system.end"); void gateway.quit() }} /> : null}
       </main>
 
       {view !== "terminal" ? (
@@ -324,11 +324,14 @@ export function ControlApp({ gateway, feedback, initialTheme = "matriz" }: { gat
           setOpen={terminal.setDockOpen}
           resize={setTerminalDockHeight}
           commitResize={commitTerminalDockHeight}
+          readiness={terminal.readiness}
+          error={terminal.error}
+          configureWorkspace={() => chooseView("settings")}
           create={() => void createTerminal()}
           activate={terminal.activate}
           interrupt={(id) => void terminal.interrupt(id)}
           close={(id) => void terminal.close(id)}
-          renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} />}
+          renderPane={(session) => <TerminalPane key={session.id} session={session} gateway={gateway} register={terminal.register} reportError={terminal.reportError} />}
         />
       ) : null}
 

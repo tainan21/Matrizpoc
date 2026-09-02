@@ -78,6 +78,15 @@ function gateway(): DesktopGateway {
     writeSettings: vi.fn().mockImplementation(async (settings) => settings),
     hide: vi.fn().mockResolvedValue(undefined),
     quit: vi.fn().mockResolvedValue(undefined),
+    terminalReadiness: vi.fn().mockResolvedValue({
+      ready: true,
+      workspacePath: "C:\\Apps\\matriz-infra-hub",
+      shellPath: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      shellLabel: "Windows PowerShell",
+      conptyAvailable: true,
+      sessionCount: 0,
+      sessionLimit: 6,
+    }),
     createTerminal: vi.fn().mockResolvedValue({
       id: "shell-1",
       title: "PowerShell",
@@ -206,6 +215,56 @@ describe("Matriz Control", () => {
     expect(await screen.findByRole("button", { name: "Recolher terminal inferior" })).toBeVisible()
     expect(screen.getByRole("separator", { name: "Redimensionar terminal inferior" })).toHaveAttribute("aria-valuenow", "360")
     expect(desktop.createTerminal).not.toHaveBeenCalled()
+  })
+
+  it("revalidates a blocked terminal after workspace setup without creating a session", async () => {
+    const desktop = gateway()
+    vi.mocked(desktop.readSettings).mockResolvedValue({
+      theme: "matriz",
+      closeToTray: true,
+      soundsEnabled: false,
+      volume: 0.45,
+      startWithWindows: false,
+      terminalDockOpen: false,
+      terminalDockHeight: 280,
+    })
+    vi.mocked(desktop.terminalReadiness)
+      .mockResolvedValueOnce({
+        ready: false,
+        conptyAvailable: true,
+        sessionCount: 0,
+        sessionLimit: 6,
+        reason: "Workspace Matriz ainda não foi selecionado.",
+      })
+      .mockResolvedValue({
+        ready: true,
+        workspacePath: "C:\\Apps\\matriz-infra-hub",
+        shellPath: "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        shellLabel: "Windows PowerShell",
+        conptyAvailable: true,
+        sessionCount: 0,
+        sessionLimit: 6,
+      })
+
+    render(<ControlApp gateway={desktop} feedback={{ play: vi.fn() }} />)
+    await screen.findByText("3000")
+
+    fireEvent.click(screen.getByRole("button", { name: "Terminal" }))
+    expect(await screen.findByText("Selecione o workspace Matriz para abrir o PowerShell.")).toBeVisible()
+    fireEvent.click(screen.getByRole("button", { name: "Configurar workspace" }))
+    expect(screen.getByRole("heading", { name: "AJUSTES" })).toBeVisible()
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Workspace" }), {
+      target: { value: "C:\\Apps\\matriz-infra-hub" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "USAR" }))
+
+    await waitFor(() => expect(desktop.terminalReadiness).toHaveBeenCalledTimes(2))
+    expect(desktop.createTerminal).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole("button", { name: "Terminal" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Nova sessão PowerShell" }))
+    await waitFor(() => expect(desktop.createTerminal).toHaveBeenCalledTimes(1))
   })
 
   it("keeps Início operable when one status source is unavailable", async () => {

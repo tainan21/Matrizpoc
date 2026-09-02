@@ -9,10 +9,12 @@ export function TerminalPane({
   session,
   gateway,
   register,
+  reportError,
 }: {
   readonly session: TerminalSession
   readonly gateway: DesktopGateway
   readonly register: (session: TerminalSession, sink: (data: string) => void) => () => void
+  readonly reportError: (cause: unknown) => void
 }) {
   const host = useRef<HTMLDivElement>(null)
   const initialSession = useRef(session).current
@@ -51,14 +53,18 @@ export function TerminalPane({
         terminal.loadAddon(fit)
         terminal.open(element)
         const unregister = register(initialSession, (data) => terminal.write(data))
-        const input = terminal.onData((data) =>
-          void gateway.writeTerminal(initialSession.id, data),
-        )
+        const input = terminal.onData((data) => {
+          void gateway.writeTerminal(initialSession.id, data).catch(reportError)
+        })
         const resize = new ResizeObserver(() => {
           cancelAnimationFrame(frame)
           frame = requestAnimationFrame(() => {
-            fit.fit()
-            void gateway.resizeTerminal(initialSession.id, terminal.cols, terminal.rows)
+            try {
+              fit.fit()
+              void gateway.resizeTerminal(initialSession.id, terminal.cols, terminal.rows).catch(reportError)
+            } catch (cause) {
+              reportError(cause)
+            }
           })
         })
         resize.observe(element)
@@ -71,14 +77,14 @@ export function TerminalPane({
           terminal.dispose()
         }
       },
-    )
+    ).catch(reportError)
 
     return () => {
       disposed = true
       cancelAnimationFrame(frame)
       disposeRuntime()
     }
-  }, [gateway, initialSession, register])
+  }, [gateway, initialSession, register, reportError])
 
   return <div className="xterm-host" ref={host} aria-label={`Saída de ${session.title}`} />
 }

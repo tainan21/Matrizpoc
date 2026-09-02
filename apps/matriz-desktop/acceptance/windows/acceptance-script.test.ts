@@ -17,6 +17,7 @@ const listenerScriptPath = path.join(testDirectory, "probe-listener.ps1")
 const installedRoot = path.join(process.env.LOCALAPPDATA ?? "", "Matriz Control")
 const installedExecutable = path.join(installedRoot, "matriz-control.exe")
 const outputRoot = path.join(workspaceRoot, "output", "matriz-control-acceptance", "script-test")
+const desktopVersion = (JSON.parse(readFileSync(path.join(appRoot, "package.json"), "utf8")) as { version: string }).version
 
 function runAcceptance(args: readonly string[]) {
   return spawnSync("pwsh", ["-NoProfile", "-File", scriptPath, ...args], {
@@ -52,7 +53,7 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
       schemaVersion: "v1",
       target: "installed-baseline",
       productName: "Matriz Control",
-      productVersion: "0.1.0",
+      productVersion: desktopVersion,
     })
     expect(after.mtimeMs).toBe(before.mtimeMs)
     expect(after.size).toBe(before.size)
@@ -125,7 +126,7 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
         },
       ],
     })
-    expect(result.stdout).toContain("Matriz Control_0.1.0_x64-setup.exe")
+    expect(result.stdout).toContain(`Matriz Control_${desktopVersion}_x64-setup.exe`)
   })
 
   it("plans install, launch and uninstall from resolved product paths", () => {

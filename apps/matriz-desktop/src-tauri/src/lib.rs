@@ -52,7 +52,7 @@ use state::NativeState;
 use system_pulse::{SystemPulse, SystemPulseService};
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
-use terminal::{TerminalEvent, TerminalManager, TerminalSession};
+use terminal::{TerminalEvent, TerminalManager, TerminalReadiness, TerminalSession};
 use workspace::OperationsState;
 
 pub use catalog::{
@@ -960,6 +960,14 @@ fn quit_app(app: tauri::AppHandle) {
 }
 
 #[tauri::command]
+fn terminal_readiness(
+    terminals: tauri::State<'_, TerminalManager>,
+    operations: tauri::State<'_, OperationsState>,
+) -> Result<TerminalReadiness, String> {
+    terminals.readiness(operations.root())
+}
+
+#[tauri::command]
 fn create_terminal(
     terminals: tauri::State<'_, TerminalManager>,
     operations: tauri::State<'_, OperationsState>,
@@ -1484,6 +1492,7 @@ pub fn run() {
             write_settings,
             hide_window,
             quit_app,
+            terminal_readiness,
             create_terminal,
             start_managed_operation,
             write_terminal,

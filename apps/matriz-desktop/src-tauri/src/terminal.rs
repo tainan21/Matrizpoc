@@ -53,6 +53,23 @@ pub struct TerminalSession {
     pub process_id: Option<u32>,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TerminalReadiness {
+    pub ready: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shell_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub shell_label: Option<String>,
+    pub conpty_available: bool,
+    pub session_count: usize,
+    pub session_limit: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reason: Option<String>,
+}
+
 #[derive(Clone, Debug, Serialize)]
 #[serde(
     rename_all = "camelCase",
@@ -101,6 +118,47 @@ impl TerminalManager {
     pub fn create_shell(&self, root: &Path) -> Result<TerminalSession, String> {
         let shell = preferred_shell();
         self.spawn(root, shell_label(&shell), "shell", None, &shell, &[])
+    }
+
+    pub fn readiness(
+        &self,
+        workspace: Result<PathBuf, String>,
+    ) -> Result<TerminalReadiness, String> {
+        let session_count = self
+            .sessions
+            .lock()
+            .map_err(|_| "Terminal lock poisoned")?
+            .len();
+        let (workspace_path, workspace_error) = match workspace {
+            Ok(path) => (Some(path.display().to_string()), None),
+            Err(error) => (None, Some(error)),
+        };
+        let shell = preferred_shell();
+        let shell_available = Path::new(&shell).is_file();
+        let conpty_available = native_pty_system()
+            .openpty(PtySize {
+                rows: 1,
+                cols: 2,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .is_ok();
+        let reason = workspace_error.or_else(|| {
+            (!shell_available)
+                .then(|| "PowerShell executable was not found".to_owned())
+                .or_else(|| (!conpty_available).then(|| "Windows ConPTY is unavailable".to_owned()))
+        });
+
+        Ok(TerminalReadiness {
+            ready: reason.is_none(),
+            workspace_path,
+            shell_path: shell_available.then_some(shell.clone()),
+            shell_label: shell_available.then(|| shell_label(&shell).to_owned()),
+            conpty_available,
+            session_count,
+            session_limit: MAX_SESSIONS,
+            reason,
+        })
     }
 
     pub fn start_managed(
@@ -555,7 +613,7 @@ pub fn bounded_tail(value: &str, maximum: usize) -> String {
 
 #[cfg(test)]
 mod shell_tests {
-    use super::{corepack_pnpm_command, preferred_shell};
+    use super::{corepack_pnpm_command, preferred_shell, TerminalManager, MAX_SESSIONS};
     use std::path::Path;
 
     #[cfg(windows)]
@@ -565,6 +623,25 @@ mod shell_tests {
         let path = Path::new(&shell);
         assert!(path.is_absolute(), "resolved shell was {shell}");
         assert!(path.is_file(), "resolved shell did not exist: {shell}");
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn readiness_explains_missing_workspace_without_starting_a_shell() {
+        let readiness = TerminalManager::default()
+            .readiness(Err("Matriz workspace has not been selected".to_owned()))
+            .expect("readiness");
+
+        assert!(!readiness.ready);
+        assert_eq!(readiness.workspace_path, None);
+        assert!(readiness.shell_path.is_some());
+        assert!(readiness.conpty_available);
+        assert_eq!(readiness.session_count, 0);
+        assert_eq!(readiness.session_limit, MAX_SESSIONS);
+        assert_eq!(
+            readiness.reason.as_deref(),
+            Some("Matriz workspace has not been selected")
+        );
     }
 
     #[cfg(windows)]

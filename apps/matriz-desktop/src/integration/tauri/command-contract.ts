@@ -42,6 +42,7 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   writeSettings: "write_settings",
   hide: "hide_window",
   quit: "quit_app",
+  terminalReadiness: "terminal_readiness",
   createTerminal: "create_terminal",
   writeTerminal: "write_terminal",
   resizeTerminal: "resize_terminal",

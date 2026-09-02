@@ -49,7 +49,9 @@ if ([string]::IsNullOrWhiteSpace($InstalledRoot)) {
   $InstalledRoot = $defaultInstalledRoot
 }
 $resolvedInstalledRoot = [IO.Path]::GetFullPath($InstalledRoot)
-$expectedInstaller = [IO.Path]::GetFullPath((Join-Path $workspaceRoot 'apps\matriz-desktop\src-tauri\target\release\bundle\nsis\Matriz Control_0.1.0_x64-setup.exe'))
+$desktopPackage = Get-Content -LiteralPath (Join-Path $workspaceRoot 'apps\matriz-desktop\package.json') -Raw | ConvertFrom-Json
+$expectedInstallerName = 'Matriz Control_{0}_x64-setup.exe' -f $desktopPackage.version
+$expectedInstaller = [IO.Path]::GetFullPath((Join-Path $workspaceRoot (Join-Path 'apps\matriz-desktop\src-tauri\target\release\bundle\nsis' $expectedInstallerName)))
 
 if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
   $plan = [ordered]@{

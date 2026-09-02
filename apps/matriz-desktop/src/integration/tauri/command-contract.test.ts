@@ -47,6 +47,7 @@ describe("Tauri command contract", () => {
       writeSettings: "write_settings",
       hide: "hide_window",
       quit: "quit_app",
+      terminalReadiness: "terminal_readiness",
       createTerminal: "create_terminal",
       writeTerminal: "write_terminal",
       resizeTerminal: "resize_terminal",
@@ -151,6 +152,7 @@ describe("Tauri command contract", () => {
     await gateway.writeSettings(settings)
     await gateway.hide()
     await gateway.quit()
+    await gateway.terminalReadiness()
     await gateway.createTerminal()
     await gateway.writeTerminal("term-1", "echo ok\r")
     await gateway.resizeTerminal("term-1", 120, 40)
@@ -235,6 +237,7 @@ describe("Tauri command contract", () => {
       { command: "write_settings", args: { settings } },
       { command: "hide_window", args: undefined },
       { command: "quit_app", args: undefined },
+      { command: "terminal_readiness", args: undefined },
       { command: "create_terminal", args: undefined },
       { command: "write_terminal", args: { sessionId: "term-1", data: "echo ok\r" } },
       {

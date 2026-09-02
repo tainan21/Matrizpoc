@@ -3,6 +3,7 @@ import type {
   ActivityEnvelope,
   DesktopAppId,
   DesktopSettings,
+  TerminalReadiness,
   DesktopSnapshot,
   DoctorCheck,
   GateId,
@@ -88,6 +89,7 @@ export interface DesktopGateway {
   writeSettings(settings: DesktopSettings): Promise<DesktopSettings>
   hide(): Promise<void>
   quit(): Promise<void>
+  terminalReadiness(): Promise<TerminalReadiness>
   createTerminal(): Promise<TerminalSession>
   writeTerminal(sessionId: string, data: string): Promise<void>
   resizeTerminal(sessionId: string, columns: number, rows: number): Promise<void>

@@ -84,6 +84,7 @@ export function createTauriGateway(
     writeSettings: (settings) => invoke<DesktopSettings>(commands.writeSettings, { settings }),
     hide: () => invoke<void>(commands.hide),
     quit: () => invoke<void>(commands.quit),
+    terminalReadiness: () => invoke(commands.terminalReadiness),
     createTerminal: () => invoke(commands.createTerminal),
     writeTerminal: (sessionId, data) => invoke<void>(commands.writeTerminal, { sessionId, data }),
     resizeTerminal: (sessionId, columns, rows) =>

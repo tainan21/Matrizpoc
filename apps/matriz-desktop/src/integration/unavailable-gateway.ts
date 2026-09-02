@@ -96,6 +96,13 @@ export const unavailableGateway: DesktopGateway = {
   writeSettings: async () => unavailable(),
   hide: async () => unavailable(),
   quit: async () => unavailable(),
+  terminalReadiness: async () => ({
+    ready: false,
+    conptyAvailable: false,
+    sessionCount: 0,
+    sessionLimit: 6,
+    reason: "Terminal nativo disponível somente no Matriz Control instalado",
+  }),
   createTerminal: async () => unavailable(),
   writeTerminal: async () => unavailable(),
   resizeTerminal: async () => unavailable(),
