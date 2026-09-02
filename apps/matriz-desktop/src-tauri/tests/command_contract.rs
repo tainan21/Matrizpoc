@@ -2,7 +2,7 @@ use matriz_desktop_native::command_contract::COMMAND_NAMES;
 
 #[test]
 fn native_inventory_has_one_entry_for_every_renderer_command() {
-    assert_eq!(COMMAND_NAMES.len(), 81);
+    assert_eq!(COMMAND_NAMES.len(), 91);
     let mut unique = COMMAND_NAMES.to_vec();
     unique.sort_unstable();
     unique.dedup();
@@ -52,4 +52,6 @@ fn native_inventory_keeps_sensitive_operations_explicit() {
     assert!(COMMAND_NAMES.contains(&"check_update"));
     assert!(COMMAND_NAMES.contains(&"download_update"));
     assert!(COMMAND_NAMES.contains(&"install_update"));
+    assert!(COMMAND_NAMES.contains(&"preview_store_install"));
+    assert!(COMMAND_NAMES.contains(&"confirm_store_install"));
 }

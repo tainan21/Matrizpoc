@@ -88,4 +88,6 @@ pub const COMMAND_NAMES: &[&str] = &[
     "repair_package",
     "uninstall_package",
     "activate_package",
+    "preview_store_install",
+    "confirm_store_install",
 ];

@@ -12,6 +12,7 @@ const VERSION: u32 = 1;
 #[derive(Clone, Debug)]
 pub struct CommerceStore {
     path: PathBuf,
+    receipts: PathBuf,
     lock: Arc<Mutex<()>>,
 }
 
@@ -68,6 +69,8 @@ pub struct PackageView {
     pub trust_status: &'static str,
     pub built_in: bool,
     pub status: &'static str,
+    pub installable: bool,
+    pub openable: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub receipt: Option<InstallReceipt>,
 }
@@ -250,8 +253,13 @@ const CATALOG: &[CatalogPackage] = &[
 
 impl CommerceStore {
     pub fn new(path: PathBuf) -> Self {
+        let receipts = path
+            .parent()
+            .unwrap_or_else(|| std::path::Path::new("."))
+            .join("store/receipts");
         Self {
             path,
+            receipts,
             lock: Arc::new(Mutex::new(())),
         }
     }
@@ -310,7 +318,8 @@ impl CommerceStore {
     }
 
     fn snapshot_unlocked(&self) -> Result<CommerceSnapshot, String> {
-        self.read().map(snapshot_from)
+        self.read()
+            .map(|state| snapshot_from(state, &self.receipts))
     }
     fn read(&self) -> Result<State, String> {
         if !self.path.exists() {
@@ -418,15 +427,36 @@ fn validate_state(state: &State) -> Result<i64, String> {
     }
     Ok(balance)
 }
-fn snapshot_from(state: State) -> CommerceSnapshot {
+fn snapshot_from(state: State, receipts_root: &std::path::Path) -> CommerceSnapshot {
     let balance = state.transactions.iter().map(|item| item.amount).sum();
     let packages = CATALOG
         .iter()
         .map(|package| {
             let built_in = builtin_feature(*package).is_some();
             let local_runtime = !built_in && package.id != "matriz.uninstall";
-            let receipt = None;
-            let trust_status = "verified";
+            let desktop_receipt = if package.id == "matriz.uninstall" {
+                fs::read(receipts_root.join("matriz.uninstall.json"))
+                    .ok()
+                    .and_then(|bytes| {
+                        serde_json::from_slice::<crate::store_release::StoreInstallReceipt>(&bytes)
+                            .ok()
+                    })
+            } else {
+                None
+            };
+            let receipt = desktop_receipt.as_ref().map(|item| InstallReceipt {
+                package_id: item.product_id.clone(),
+                version: item.version.clone(),
+                manifest_digest: item.sha256.clone(),
+                granted_permissions: vec![],
+                installed_at: item.installed_at,
+            });
+            let desktop_installed = desktop_receipt.is_some();
+            let trust_status = if package.id == "matriz.uninstall" && !desktop_installed {
+                "missing"
+            } else {
+                "verified"
+            };
             PackageView {
                 id: package.id,
                 name: package.name,
@@ -438,17 +468,21 @@ fn snapshot_from(state: State) -> CommerceSnapshot {
                 price: package.price,
                 permissions: package.permissions,
                 compatibility: "Matriz Control 1.0+ · Windows 10/11",
-                owned: built_in || local_runtime,
-                installed: built_in || local_runtime,
+                owned: built_in || local_runtime || desktop_installed,
+                installed: built_in || local_runtime || desktop_installed,
                 trust_status,
                 built_in,
                 status: if built_in {
                     "Built-in / Enabled"
                 } else if local_runtime {
                     "Installed / Local Runtime"
+                } else if desktop_installed {
+                    "Installed / Verified Release"
                 } else {
-                    "Catalog"
+                    "Available / Signed Release Required"
                 },
+                installable: package.id == "matriz.uninstall" && !desktop_installed,
+                openable: built_in || local_runtime,
                 receipt,
             }
         })

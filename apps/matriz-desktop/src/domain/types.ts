@@ -403,7 +403,7 @@ export interface StorePackage {
   readonly developer: string
   readonly version: string
   readonly category: string
-  readonly appId: DesktopAppId | "matriz-desktop"
+  readonly appId: DesktopAppId | "matriz-desktop" | "matriz-uninstall"
   readonly price: number
   readonly permissions: readonly string[]
   readonly compatibility: string
@@ -413,6 +413,8 @@ export interface StorePackage {
   readonly receipt?: PackageReceipt
   readonly builtIn?: boolean
   readonly status?: string
+  readonly installable?: boolean
+  readonly openable?: boolean
 }
 
 export interface PackageReceipt {
@@ -432,6 +434,24 @@ export interface RuntimePackageActivationTarget extends RuntimeTarget {
   readonly kind: "runtime"
   readonly packageId: string
   readonly operationId: `app.${DesktopAppId}.web`
+}
+
+export interface StoreInstallPreview {
+  readonly confirmationToken: string
+  readonly productId: string
+  readonly displayName: string
+  readonly version: string
+  readonly sizeBytes: number
+  readonly publisher: string
+}
+
+export interface StoreInstallReceipt {
+  readonly productId: string
+  readonly distributionProductId: string
+  readonly releaseId: string
+  readonly version: string
+  readonly sha256: string
+  readonly installedAt: number
 }
 
 export interface EnvironmentExport {

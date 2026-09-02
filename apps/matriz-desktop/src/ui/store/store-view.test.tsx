@@ -7,13 +7,37 @@ import type { DesktopGateway } from "../../application/desktop-gateway"
 import type { CommerceSnapshot } from "../../domain/types"
 import { StoreView } from "./store-view"
 
-afterEach(cleanup)
+afterEach(() => { cleanup(); vi.restoreAllMocks() })
 
 function snapshot(owned = false, installed = false): CommerceSnapshot {
   return { wallet: { balance: owned ? 1030 : 1250, currency: "M", transactions: [] }, packages: [{ id: "matriz.analytics", name: "Matriz Analytics", description: "Dashboards operacionais.", developer: "Matriz Team", version: "1.0.0", category: "Analytics", appId: "willdash", price: 220, permissions: ["runtime:observe"], compatibility: "Windows 10/11", owned, installed, trustStatus: installed ? "verified" : "missing", receipt: installed ? { packageId: "matriz.analytics", version: "1.0.0", manifestDigest: "abc", grantedPermissions: ["runtime:observe"], installedAt: 1 } : undefined }] }
 }
 
 describe("StoreView", () => {
+  it("installs an available desktop product only after an explicit preview confirmation", async () => {
+    const available: CommerceSnapshot = {
+      wallet: { balance: 0, currency: "M", transactions: [] },
+      packages: [{ id: "matriz.uninstall", name: "Matriz Uninstall", description: "Remoção controlada.", developer: "Matriz", version: "0.2.0", category: "Desktop Product", appId: "matriz-uninstall", price: 0, permissions: [], compatibility: "Windows 10/11", owned: false, installed: false, status: "Available / Signed Release Required", installable: true, openable: false }],
+    }
+    const installed: CommerceSnapshot = {
+      ...available,
+      packages: [{ ...available.packages[0], owned: true, installed: true, installable: false, status: "Installed / Verified Release" }],
+    }
+    const gateway = {
+      commerceSnapshot: vi.fn().mockResolvedValueOnce(available).mockResolvedValueOnce(installed),
+      previewStoreInstall: vi.fn().mockResolvedValue({ confirmationToken: "token-1", productId: "matriz.uninstall", displayName: "Matriz Uninstall", version: "0.2.0", sizeBytes: 42, publisher: "Matriz" }),
+      confirmStoreInstall: vi.fn().mockResolvedValue({ productId: "matriz.uninstall", distributionProductId: "matriz-uninstall-tauri", releaseId: "release-1", version: "0.2.0", sha256: "a".repeat(64), installedAt: 1 }),
+    } as unknown as DesktopGateway
+    vi.spyOn(window, "confirm").mockReturnValue(true)
+    render(<StoreView gateway={gateway} signal={vi.fn()} />)
+
+    fireEvent.click(await screen.findByRole("button", { name: "Instalar Matriz Uninstall" }))
+    await waitFor(() => expect(gateway.previewStoreInstall).toHaveBeenCalledWith("matriz.uninstall"))
+    await waitFor(() => expect(gateway.confirmStoreInstall).toHaveBeenCalledWith("token-1"))
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining("Publisher: Matriz"))
+    expect(await screen.findByText("INSTALADO")).toBeVisible()
+  })
+
   it("keeps the legacy wallet read-only and never offers simulated acquisition", async () => {
     const gateway = { commerceSnapshot: vi.fn().mockResolvedValue(snapshot()) } as unknown as DesktopGateway
     render(<StoreView gateway={gateway} signal={vi.fn()} />)

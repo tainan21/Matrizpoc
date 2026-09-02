@@ -29,6 +29,8 @@ import type {
   DirectoryListing,
   FilePreview,
   CommerceSnapshot,
+  StoreInstallPreview,
+  StoreInstallReceipt,
   PackageActivationTarget,
   EnvironmentComparison,
   EnvironmentPromotionRequest,
@@ -161,6 +163,8 @@ export interface DesktopGateway {
   uninstallPackage(packageId: string): Promise<CommerceSnapshot>
   repairPackage(packageId: string): Promise<CommerceSnapshot>
   activatePackage(packageId: string): Promise<PackageActivationTarget>
+  previewStoreInstall(packageId: string): Promise<StoreInstallPreview>
+  confirmStoreInstall(confirmationToken: string): Promise<StoreInstallReceipt>
   recoverRuntime(appId: DesktopAppId): Promise<RecoveryResult>
   runbookCatalog(): Promise<readonly RunbookDefinition[]>
   runRunbook(runbookId: RunbookDefinition["id"], appId: DesktopAppId): Promise<RunbookExecution>

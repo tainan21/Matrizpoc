@@ -43,6 +43,8 @@ describe("Matriz Desktop Windows workflows", () => {
 
     expect(releaseWorkflow).toContain("TAURI_SIGNING_PRIVATE_KEY")
     expect(releaseWorkflow).toContain("MATRIZ_CONTROL_UPDATER_PUBLIC_KEY")
+    expect(releaseWorkflow).toContain("MATRIZ_DISTRIBUTION_CATALOG_URL")
+    expect(releaseWorkflow).toContain("MATRIZ_DISTRIBUTION_PUBLIC_KEY")
     expect(releaseWorkflow).toContain("package:update")
     expect(releaseWorkflow).toContain("$name.sig")
     expect(releaseWorkflow).toContain("steps.artifact.outputs.signature")

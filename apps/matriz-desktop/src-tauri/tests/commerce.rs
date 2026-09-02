@@ -152,6 +152,7 @@ fn expanded_catalog_opens_web_apps_but_keeps_unsigned_desktop_products_unavailab
         .find(|item| item.id == "matriz.uninstall")
         .expect("desktop product");
     assert!(!uninstall.installed);
-    assert_eq!(uninstall.status, "Catalog");
+    assert_eq!(uninstall.status, "Available / Signed Release Required");
+    assert!(uninstall.installable);
     assert!(store.activate(uninstall.id).is_err());
 }

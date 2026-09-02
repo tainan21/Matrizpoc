@@ -32,8 +32,10 @@ jobs:
           TAURI_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_PUBLIC_KEY: ${{ vars.MATRIZ_CONTROL_UPDATER_PUBLIC_KEY }}
           UPDATER_ENDPOINT: ${{ vars.MATRIZ_CONTROL_UPDATER_ENDPOINT }}
+          STORE_CATALOG: ${{ vars.MATRIZ_DISTRIBUTION_CATALOG_URL }}
+          STORE_PUBLIC_KEY: ${{ vars.MATRIZ_DISTRIBUTION_PUBLIC_KEY }}
         run: |
-          foreach ($value in @($env:WINDOWS_CERTIFICATE,$env:MANIFEST_KEY,$env:HUB_URL,$env:HUB_TOKEN,$env:TAURI_KEY,$env:TAURI_PUBLIC_KEY,$env:UPDATER_ENDPOINT)) { if ([string]::IsNullOrWhiteSpace($value)) { throw "Release trust configuration is required" } }
+          foreach ($value in @($env:WINDOWS_CERTIFICATE,$env:MANIFEST_KEY,$env:HUB_URL,$env:HUB_TOKEN,$env:TAURI_KEY,$env:TAURI_PUBLIC_KEY,$env:UPDATER_ENDPOINT,$env:STORE_CATALOG,$env:STORE_PUBLIC_KEY)) { if ([string]::IsNullOrWhiteSpace($value)) { throw "Release trust configuration is required" } }
       - name: Build Authenticode and Tauri-signed artifacts
         env:
           WINDOWS_CERTIFICATE: ${{ secrets.MATRIZ_WINDOWS_SIGNING_CERTIFICATE }}
@@ -42,6 +44,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           MATRIZ_CONTROL_UPDATER_ENDPOINT: ${{ vars.MATRIZ_CONTROL_UPDATER_ENDPOINT }}
           MATRIZ_CONTROL_UPDATER_PUBLIC_KEY: ${{ vars.MATRIZ_CONTROL_UPDATER_PUBLIC_KEY }}
+          MATRIZ_DISTRIBUTION_CATALOG_URL: ${{ vars.MATRIZ_DISTRIBUTION_CATALOG_URL }}
+          MATRIZ_DISTRIBUTION_PUBLIC_KEY: ${{ vars.MATRIZ_DISTRIBUTION_PUBLIC_KEY }}
+          MATRIZ_DISTRIBUTION_RELEASE_HOSTS: ${{ vars.MATRIZ_DISTRIBUTION_RELEASE_HOSTS }}
         run: pnpm --filter @matriz/app-matriz-desktop package:update
       - name: Normalize and verify signed artifacts
         id: artifact

@@ -61,6 +61,7 @@ use recovery::{recovery_action, RecoveryAction, RecoveryResult};
 use runbooks::{RunbookDefinition, RunbookExecution, RunbookStepResult, RunbookTarget};
 use serde::{Deserialize, Serialize};
 use state::NativeState;
+use store_release::{StoreInstallAuthority, StoreInstallPreview, StoreInstallReceipt};
 use system_pulse::{SystemPulse, SystemPulseService};
 use tauri::Manager;
 use tauri_plugin_autostart::ManagerExt;
@@ -1454,6 +1455,22 @@ fn activate_package(
 }
 
 #[tauri::command(rename_all = "camelCase")]
+fn preview_store_install(
+    store: tauri::State<'_, StoreInstallAuthority>,
+    package_id: String,
+) -> Result<StoreInstallPreview, String> {
+    store.preview(&package_id)
+}
+
+#[tauri::command(rename_all = "camelCase")]
+fn confirm_store_install(
+    store: tauri::State<'_, StoreInstallAuthority>,
+    confirmation_token: String,
+) -> Result<StoreInstallReceipt, String> {
+    store.confirm(&confirmation_token)
+}
+
+#[tauri::command(rename_all = "camelCase")]
 fn write_terminal(
     terminals: tauri::State<'_, TerminalManager>,
     session_id: String,
@@ -1685,6 +1702,7 @@ pub fn run() {
             app.manage(settings);
             app.manage(HubStateStore::at(config_dir.join("hub-state.json")));
             app.manage(CommerceStore::new(config_dir.join("commerce.json")));
+            app.manage(StoreInstallAuthority::production(config_dir.join("store")));
             app.manage(EnvironmentExportStore::at(config_dir.join("exports")));
             let infrastructure_root = app
                 .path()
@@ -1821,7 +1839,9 @@ pub fn run() {
             install_package,
             repair_package,
             uninstall_package,
-            activate_package
+            activate_package,
+            preview_store_install,
+            confirm_store_install
         ])
         .run(tauri::generate_context!())
         .expect("Matriz Control native runtime failed");

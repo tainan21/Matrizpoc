@@ -183,9 +183,11 @@ export const unavailableGateway: DesktopGateway = {
   activatePackage: async (packageId) => {
     const item = demoCommerce(packageId, true).packages.find(({ id }) => id === packageId)
     if (!item) throw new Error("Package is not in the trusted Matriz catalog")
-    if (item.appId === "matriz-desktop") throw new Error("Built-in utility unavailable in browser preview")
+    if (item.appId === "matriz-desktop" || item.appId === "matriz-uninstall") throw new Error("Native product unavailable in browser preview")
     return { kind: "runtime", packageId, appId: item.appId, operationId: `app.${item.appId}.web`, routePath: "/" }
   },
+  previewStoreInstall: async () => unavailable(),
+  confirmStoreInstall: async () => unavailable(),
   recoverRuntime: async (appId) => ({ appId, status: "ready", sessionId: `demo-${appId}` }),
   runbookCatalog: async () => [
     { id: "validate-environment", label: "Validar ambiente", description: "ENV e Doctor em uma passagem.", steps: ["environment.validate", "doctor.run"] },

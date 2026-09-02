@@ -175,6 +175,8 @@ function gateway(): DesktopGateway {
     uninstallPackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
     repairPackage: vi.fn().mockResolvedValue({ wallet: { balance: 1000, currency: "M", transactions: [] }, packages: [] }),
     activatePackage: vi.fn().mockResolvedValue({ packageId: "matriz.components", appId: "matrizlib", operationId: "app.matrizlib.web", routePath: "/" }),
+    previewStoreInstall: vi.fn().mockRejectedValue(new Error("Store unavailable")),
+    confirmStoreInstall: vi.fn().mockRejectedValue(new Error("Store unavailable")),
     recoverRuntime: vi.fn().mockResolvedValue({ appId: "matriz-admin", status: "ready" }),
     runbookCatalog: vi.fn().mockResolvedValue([]),
     runRunbook: vi.fn().mockResolvedValue({ runbookId: "validate-environment", appId: "matriz-admin", status: "completed", steps: [] }),

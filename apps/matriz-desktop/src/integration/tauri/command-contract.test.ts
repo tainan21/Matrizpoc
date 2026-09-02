@@ -103,6 +103,8 @@ describe("Tauri command contract", () => {
       uninstallPackage: "uninstall_package",
       repairPackage: "repair_package",
       activatePackage: "activate_package",
+      previewStoreInstall: "preview_store_install",
+      confirmStoreInstall: "confirm_store_install",
       recoverRuntime: "recover_runtime",
       runbookCatalog: "get_runbook_catalog",
       runRunbook: "run_runbook",
@@ -225,6 +227,8 @@ describe("Tauri command contract", () => {
     await gateway.uninstallPackage("matriz.analytics")
     await gateway.repairPackage("matriz.analytics")
     await gateway.activatePackage("matriz.analytics")
+    await gateway.previewStoreInstall("matriz.uninstall")
+    await gateway.confirmStoreInstall("store-token")
     await gateway.recoverRuntime("matriz-admin")
     await gateway.runbookCatalog()
     await gateway.runRunbook("validate-environment", "matriz-admin")
@@ -325,6 +329,8 @@ describe("Tauri command contract", () => {
       { command: "uninstall_package", args: { packageId: "matriz.analytics" } },
       { command: "repair_package", args: { packageId: "matriz.analytics" } },
       { command: "activate_package", args: { packageId: "matriz.analytics" } },
+      { command: "preview_store_install", args: { packageId: "matriz.uninstall" } },
+      { command: "confirm_store_install", args: { confirmationToken: "store-token" } },
       { command: "recover_runtime", args: { appId: "matriz-admin" } },
       { command: "get_runbook_catalog", args: undefined },
       { command: "run_runbook", args: { runbookId: "validate-environment", appId: "matriz-admin" } },

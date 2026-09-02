@@ -98,6 +98,8 @@ export const TAURI_COMMAND_CONTRACT = Object.freeze({
   uninstallPackage: "uninstall_package",
   repairPackage: "repair_package",
   activatePackage: "activate_package",
+  previewStoreInstall: "preview_store_install",
+  confirmStoreInstall: "confirm_store_install",
   recoverRuntime: "recover_runtime",
   runbookCatalog: "get_runbook_catalog",
   runRunbook: "run_runbook",

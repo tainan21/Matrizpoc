@@ -59,6 +59,48 @@ pub struct StoreInstallManager {
     pending: Mutex<HashMap<String, PendingInstall>>,
 }
 
+pub struct StoreInstallAuthority {
+    manager: Option<StoreInstallManager>,
+    unavailable_reason: Option<String>,
+}
+
+impl StoreInstallAuthority {
+    pub fn production(root: PathBuf) -> Self {
+        match StoreInstallManager::production(root) {
+            Ok(manager) => Self {
+                manager: Some(manager),
+                unavailable_reason: None,
+            },
+            Err(reason) => Self {
+                manager: None,
+                unavailable_reason: Some(reason),
+            },
+        }
+    }
+
+    pub fn preview(&self, package_id: &str) -> Result<StoreInstallPreview, String> {
+        self.manager
+            .as_ref()
+            .ok_or_else(|| {
+                self.unavailable_reason
+                    .clone()
+                    .unwrap_or_else(|| "Instalação da Store está indisponível".into())
+            })?
+            .preview(package_id)
+    }
+
+    pub fn confirm(&self, confirmation_token: &str) -> Result<StoreInstallReceipt, String> {
+        self.manager
+            .as_ref()
+            .ok_or_else(|| {
+                self.unavailable_reason
+                    .clone()
+                    .unwrap_or_else(|| "Instalação da Store está indisponível".into())
+            })?
+            .confirm(confirmation_token)
+    }
+}
+
 pub struct WindowsStoreInstallHost {
     catalog_url: String,
     client: reqwest::blocking::Client,
