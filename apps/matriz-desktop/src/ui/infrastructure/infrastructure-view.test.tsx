@@ -118,4 +118,24 @@ describe("InfrastructureView", () => {
     await waitFor(() => expect(gateway.confirmInfrastructureAction).toHaveBeenCalledWith("backup-token"))
     expect(await screen.findByText("backup-a")).toBeVisible()
   })
+
+  it("restores a verified backup by opaque id after explicit confirmation", async () => {
+    const healthy = { ...snapshot, services: snapshot.services.map((service) => service.id === "postgres" ? { ...service, state: "healthy" as const } : service) }
+    const gateway = {
+      infrastructureSnapshot: vi.fn().mockResolvedValue(healthy),
+      previewInfrastructureAction: vi.fn()
+        .mockResolvedValueOnce({ confirmationToken: "backup-token", targetId: "postgres", actionId: "backup", title: "Criar backup", impact: [], expiresAt: Date.now() + 30_000 })
+        .mockResolvedValueOnce({ confirmationToken: "restore-token", targetId: "postgres", actionId: "restore", title: "Restaurar PostgreSQL", impact: [], expiresAt: Date.now() + 30_000 }),
+      confirmInfrastructureAction: vi.fn().mockResolvedValue(healthy),
+      infrastructureLogs: vi.fn().mockResolvedValue([]),
+      infrastructureBackups: vi.fn().mockResolvedValue([{ id: "backup-a", createdAt: 42, bytes: 13, sha256: "abc", integrity: "verified" }]),
+    } as unknown as DesktopGateway
+    render(<InfrastructureView gateway={gateway} />)
+    fireEvent.click(await screen.findByRole("button", { name: "Criar backup PostgreSQL" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar operação" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Restaurar backup-a" }))
+    expect(gateway.previewInfrastructureAction).toHaveBeenLastCalledWith({ targetId: "postgres", actionId: "restore", revision: "infra-rev-1", backupId: "backup-a" })
+    fireEvent.click(await screen.findByRole("button", { name: "Confirmar operação" }))
+    await waitFor(() => expect(gateway.confirmInfrastructureAction).toHaveBeenLastCalledWith("restore-token"))
+  })
 })

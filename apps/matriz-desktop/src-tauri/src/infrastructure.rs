@@ -52,6 +52,7 @@ pub enum InfrastructureAction {
     Restart,
     Provision,
     Backup,
+    Restore,
 }
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
@@ -76,6 +77,12 @@ pub trait InfrastructureHost: Send + Sync {
     fn logs(&self, service_id: InfrastructureServiceId) -> Result<Vec<String>, String>;
     fn applied_migrations(&self, _schema: &str) -> Result<Vec<AppliedMigration>, String> {
         Ok(Vec::new())
+    }
+    fn validate_backup(&self, _backup_id: &str) -> Result<(), String> {
+        Err("Restore indisponível neste host".into())
+    }
+    fn restore_backup(&self, _backup_id: &str) -> Result<(), String> {
+        Err("Restore indisponível neste host".into())
     }
 }
 
@@ -104,6 +111,8 @@ pub struct InfrastructurePreviewRequest {
     pub target_id: InfrastructureTargetId,
     pub action_id: InfrastructureAction,
     pub revision: String,
+    #[serde(default)]
+    pub backup_id: Option<String>,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -333,6 +342,34 @@ pub fn read_backup_catalog(root: &Path) -> Result<Vec<BackupRecord>, String> {
     Ok(records)
 }
 
+pub fn resolve_verified_backup(root: &Path, backup_id: &str) -> Result<PathBuf, String> {
+    if !backup_id.starts_with("backup-")
+        || backup_id.len() > 80
+        || !backup_id
+            .chars()
+            .all(|character| character.is_ascii_alphanumeric() || character == '-')
+    {
+        return Err("ID de backup inválido".into());
+    }
+    let record = read_backup_catalog(root)?
+        .into_iter()
+        .find(|record| record.id == backup_id)
+        .ok_or("Backup não encontrado no catálogo nativo")?;
+    if record.integrity != "verified" {
+        return Err("A integridade do backup não foi confirmada".into());
+    }
+    let root = root.canonicalize().map_err(|error| error.to_string())?;
+    let dump = root
+        .join("backups")
+        .join(format!("{backup_id}.dump"))
+        .canonicalize()
+        .map_err(|error| error.to_string())?;
+    if !dump.starts_with(&root) {
+        return Err("Backup fora do diretório gerenciado".into());
+    }
+    Ok(dump)
+}
+
 fn sha256_file(path: &Path) -> Result<String, String> {
     let mut file = File::open(path).map_err(|error| error.to_string())?;
     let mut digest = Sha256::new();
@@ -353,6 +390,7 @@ struct PendingAction {
     action_id: InfrastructureAction,
     revision: String,
     expires_at: u64,
+    backup_id: Option<String>,
 }
 
 pub struct InfrastructureManager {
@@ -415,6 +453,15 @@ impl InfrastructureManager {
             return Err("O snapshot de infraestrutura está desatualizado".into());
         }
         authorize(&current, request.target_id, request.action_id)?;
+        if request.action_id == InfrastructureAction::Restore {
+            let backup_id = request
+                .backup_id
+                .as_deref()
+                .ok_or("Restore exige um backupId opaco")?;
+            self.host.validate_backup(backup_id)?;
+        } else if request.backup_id.is_some() {
+            return Err("backupId só é aceito para restore".into());
+        }
         let token = uuid::Uuid::new_v4().to_string();
         let expires_at = (self.now)().saturating_add(30_000);
         self.pending
@@ -427,6 +474,7 @@ impl InfrastructureManager {
                     action_id: request.action_id,
                     revision: request.revision,
                     expires_at,
+                    backup_id: request.backup_id,
                 },
             );
         Ok(InfrastructureActionPreview {
@@ -461,7 +509,13 @@ impl InfrastructureManager {
             return Err("A infraestrutura mudou após a prévia; confirme novamente".into());
         }
         authorize(&current, pending.target_id, pending.action_id)?;
-        self.host.execute(pending.target_id, pending.action_id)?;
+        if pending.action_id == InfrastructureAction::Restore {
+            let backup_id = pending.backup_id.as_deref().ok_or("Restore sem backupId")?;
+            self.host.validate_backup(backup_id)?;
+            self.host.restore_backup(backup_id)?;
+        } else {
+            self.host.execute(pending.target_id, pending.action_id)?;
+        }
         self.snapshot()
     }
 
@@ -1041,6 +1095,139 @@ impl PortableInfrastructureHost {
         String::from_utf8(output.stdout).map_err(|_| "A resposta do PostgreSQL não é UTF-8".into())
     }
 
+    fn database_schema_count(&self, database: &str) -> Result<usize, String> {
+        let quoted = DATABASE_SCHEMAS
+            .iter()
+            .map(|schema| format!("'{schema}'"))
+            .collect::<Vec<_>>()
+            .join(",");
+        self.psql_output(
+            database,
+            &format!("SELECT count(*) FROM pg_namespace WHERE nspname IN ({quoted});"),
+        )?
+        .trim()
+        .parse()
+        .map_err(|_| "A validação dos schemas restaurados retornou um valor inválido".into())
+    }
+
+    fn run_database_tool(&self, executable: &Path, arguments: &[&str]) -> Result<(), String> {
+        let output = Command::new(executable)
+            .env("PGPASSWORD", self.secret("postgres-bootstrap")?)
+            .args(arguments)
+            .creation_flags(0x0800_0000)
+            .output()
+            .map_err(|error| error.to_string())?;
+        if output.status.success() {
+            Ok(())
+        } else {
+            Err(redact(&String::from_utf8_lossy(&output.stderr)))
+        }
+    }
+
+    fn restore_verified_backup(&self, backup_id: &str) -> Result<(), String> {
+        let dump = resolve_verified_backup(&self.root, backup_id)?;
+        self.create_backup()?;
+        let suffix = uuid::Uuid::new_v4().simple().to_string();
+        let temporary = format!("matriz_restore_{suffix}");
+        let quarantine = format!("matriz_quarantine_{suffix}");
+        let failed = format!("matriz_failed_{suffix}");
+        let bin = self.root.join("postgres/17.11/pgsql/bin");
+        let createdb = bin.join("createdb.exe");
+        let dropdb = bin.join("dropdb.exe");
+        let pg_restore = bin.join("pg_restore.exe");
+        for executable in [&createdb, &dropdb, &pg_restore] {
+            if !executable.is_file() {
+                return Err("Ferramentas portáteis de restore estão incompletas".into());
+            }
+        }
+        self.run_database_tool(
+            &createdb,
+            &[
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "55432",
+                "--username",
+                "matriz_provisioner",
+                "--owner",
+                "matriz_provisioner",
+                "--no-password",
+                &temporary,
+            ],
+        )?;
+        let validation = self
+            .run_database_tool(
+                &pg_restore,
+                &[
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    "55432",
+                    "--username",
+                    "matriz_provisioner",
+                    "--dbname",
+                    &temporary,
+                    "--no-password",
+                    "--exit-on-error",
+                    dump.to_str().ok_or("Caminho interno do backup inválido")?,
+                ],
+            )
+            .and_then(|_| {
+                let count = self.database_schema_count(&temporary)?;
+                if count == DATABASE_SCHEMAS.len() {
+                    Ok(())
+                } else {
+                    Err("O restore temporário não contém os oito schemas esperados".into())
+                }
+            });
+        if let Err(error) = validation {
+            let _ = self.run_database_tool(
+                &dropdb,
+                &[
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    "55432",
+                    "--username",
+                    "matriz_provisioner",
+                    "--if-exists",
+                    "--force",
+                    "--no-password",
+                    &temporary,
+                ],
+            );
+            return Err(error);
+        }
+        let swap = format!(
+            "BEGIN; SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname IN ('matriz','{temporary}') AND pid <> pg_backend_pid(); ALTER DATABASE matriz RENAME TO {quarantine}; ALTER DATABASE {temporary} RENAME TO matriz; COMMIT;"
+        );
+        self.psql_output("postgres", &swap)?;
+        if self.database_schema_count("matriz")? != DATABASE_SCHEMAS.len() {
+            let rollback = format!(
+                "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'matriz' AND pid <> pg_backend_pid(); ALTER DATABASE matriz RENAME TO {failed}; ALTER DATABASE {quarantine} RENAME TO matriz;"
+            );
+            let _ = self.psql_output("postgres", &rollback);
+            return Err(
+                "A validação após a troca falhou; o database anterior foi restaurado".into(),
+            );
+        }
+        self.run_database_tool(
+            &dropdb,
+            &[
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "55432",
+                "--username",
+                "matriz_provisioner",
+                "--if-exists",
+                "--force",
+                "--no-password",
+                &quarantine,
+            ],
+        )
+    }
+
     fn stop(&self, service_id: InfrastructureServiceId) -> Result<(), String> {
         let expected = self
             .executable(service_id)
@@ -1121,10 +1308,12 @@ impl InfrastructureHost for PortableInfrastructureHost {
     ) -> Result<(), String> {
         if matches!(
             action,
-            InfrastructureAction::Provision | InfrastructureAction::Backup
+            InfrastructureAction::Provision
+                | InfrastructureAction::Backup
+                | InfrastructureAction::Restore
         ) && target_id != InfrastructureTargetId::Postgres
         {
-            return Err("O provisionamento de dados só aceita o alvo PostgreSQL".into());
+            return Err("Operações de banco só aceitam o alvo PostgreSQL".into());
         }
         let services: Vec<_> = match target_id.service_id() {
             Some(service) => vec![service],
@@ -1153,6 +1342,9 @@ impl InfrastructureHost for PortableInfrastructureHost {
                 }
                 InfrastructureAction::Provision => self.provision_database()?,
                 InfrastructureAction::Backup => self.create_backup()?,
+                InfrastructureAction::Restore => {
+                    return Err("Restore exige backupId validado".into());
+                }
             }
         }
         Ok(())
@@ -1200,6 +1392,14 @@ impl InfrastructureHost for PortableInfrastructureHost {
                 })
             })
             .collect()
+    }
+
+    fn validate_backup(&self, backup_id: &str) -> Result<(), String> {
+        resolve_verified_backup(&self.root, backup_id).map(|_| ())
+    }
+
+    fn restore_backup(&self, backup_id: &str) -> Result<(), String> {
+        self.restore_verified_backup(backup_id)
     }
 }
 
@@ -1388,7 +1588,9 @@ fn authorize(
 ) -> Result<(), String> {
     if matches!(
         action,
-        InfrastructureAction::Provision | InfrastructureAction::Backup
+        InfrastructureAction::Provision
+            | InfrastructureAction::Backup
+            | InfrastructureAction::Restore
     ) {
         let postgres = snapshot
             .services
@@ -1441,6 +1643,7 @@ fn action_label(action: InfrastructureAction) -> &'static str {
         InfrastructureAction::Restart => "Reiniciar",
         InfrastructureAction::Provision => "Preparar",
         InfrastructureAction::Backup => "Criar backup de",
+        InfrastructureAction::Restore => "Restaurar",
     }
 }
 

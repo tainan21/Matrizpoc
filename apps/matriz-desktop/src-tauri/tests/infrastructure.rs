@@ -1,10 +1,10 @@
 use std::{collections::HashMap, sync::Mutex};
 
 use matriz_desktop_native::infrastructure::{
-    compare_migration_ledger, read_backup_catalog, read_migration_files, AppliedMigration,
-    InfrastructureAction, InfrastructureHost, InfrastructureInspection, InfrastructureManager,
-    InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureTargetId,
-    MigrationFileDigest, PortableInfrastructureHost,
+    compare_migration_ledger, read_backup_catalog, read_migration_files, resolve_verified_backup,
+    AppliedMigration, InfrastructureAction, InfrastructureHost, InfrastructureInspection,
+    InfrastructureManager, InfrastructurePreviewRequest, InfrastructureServiceId,
+    InfrastructureTargetId, MigrationFileDigest, PortableInfrastructureHost,
 };
 use sha2::Digest;
 
@@ -12,6 +12,7 @@ use sha2::Digest;
 struct FakeHost {
     states: Mutex<HashMap<InfrastructureServiceId, InfrastructureInspection>>,
     actions: Mutex<Vec<(InfrastructureTargetId, InfrastructureAction)>>,
+    restores: Mutex<Vec<String>>,
 }
 
 impl InfrastructureHost for FakeHost {
@@ -41,6 +42,19 @@ impl InfrastructureHost for FakeHost {
         Ok(vec![
             "postgresql://role:secret@127.0.0.1:55432/matriz".into()
         ])
+    }
+
+    fn validate_backup(&self, backup_id: &str) -> Result<(), String> {
+        if backup_id.starts_with("backup-") && !backup_id.contains(['/', '\\']) {
+            Ok(())
+        } else {
+            Err("backupId inválido".into())
+        }
+    }
+
+    fn restore_backup(&self, backup_id: &str) -> Result<(), String> {
+        self.restores.lock().unwrap().push(backup_id.into());
+        Ok(())
     }
 }
 
@@ -85,6 +99,7 @@ fn confirmation_is_single_use_and_revalidates_the_revision() {
             target_id: InfrastructureTargetId::Stack,
             action_id: InfrastructureAction::Install,
             revision: snapshot.revision.clone(),
+            backup_id: None,
         })
         .unwrap();
 
@@ -98,6 +113,7 @@ fn confirmation_is_single_use_and_revalidates_the_revision() {
             target_id: InfrastructureTargetId::Stack,
             action_id: InfrastructureAction::Install,
             revision: "stale".into(),
+            backup_id: None,
         })
         .unwrap_err()
         .contains("desatualizado"));
@@ -112,9 +128,51 @@ fn database_provisioning_requires_the_healthy_postgres_catalog_target() {
             target_id: InfrastructureTargetId::Nats,
             action_id: InfrastructureAction::Provision,
             revision: snapshot.revision,
+            backup_id: None,
         })
         .unwrap_err();
     assert!(error.contains("PostgreSQL saudável"));
+}
+
+#[test]
+fn restore_accepts_only_an_opaque_backup_id_and_requires_confirmation() {
+    let host = FakeHost::default();
+    host.states.lock().unwrap().insert(
+        InfrastructureServiceId::Postgres,
+        InfrastructureInspection {
+            installed: true,
+            running: true,
+            healthy: true,
+            owned: true,
+            observed_version: Some("17.11".into()),
+        },
+    );
+    let manager = InfrastructureManager::new(Box::new(host), || 1_000);
+    let snapshot = manager.snapshot().unwrap();
+    let error = manager
+        .preview(InfrastructurePreviewRequest {
+            target_id: InfrastructureTargetId::Postgres,
+            action_id: InfrastructureAction::Restore,
+            revision: snapshot.revision.clone(),
+            backup_id: Some(r"C:\backups\matriz.dump".into()),
+        })
+        .unwrap_err();
+    assert!(error.contains("backupId inválido"));
+
+    let preview = manager
+        .preview(InfrastructurePreviewRequest {
+            target_id: InfrastructureTargetId::Postgres,
+            action_id: InfrastructureAction::Restore,
+            revision: snapshot.revision,
+            backup_id: Some("backup-safe".into()),
+        })
+        .unwrap();
+    assert_eq!(preview.action_id, InfrastructureAction::Restore);
+    manager.confirm(&preview.confirmation_token).unwrap();
+    assert!(manager
+        .confirm(&preview.confirmation_token)
+        .unwrap_err()
+        .contains("uso único"));
 }
 
 #[test]
@@ -215,6 +273,27 @@ fn backup_catalog_revalidates_size_and_sha_without_exposing_paths() {
     std::fs::write(backups.join("backup-a.dump"), b"tampered").unwrap();
     let catalog = read_backup_catalog(root.path()).expect("read tampered backup");
     assert_eq!(catalog[0].integrity, "invalid");
+}
+
+#[test]
+fn restore_resolves_only_a_verified_opaque_backup_id() {
+    let root = tempfile::tempdir().unwrap();
+    let backups = root.path().join("backups");
+    std::fs::create_dir_all(&backups).unwrap();
+    std::fs::write(backups.join("backup-a.dump"), b"verified dump").unwrap();
+    let checksum = format!("{:x}", sha2::Sha256::digest(b"verified dump"));
+    std::fs::write(backups.join("backup-a.json"), format!(r#"{{"version":1,"id":"backup-a","fileName":"backup-a.dump","createdAt":42,"bytes":13,"sha256":"{checksum}"}}"#)).unwrap();
+    assert_eq!(
+        resolve_verified_backup(root.path(), "backup-a").unwrap(),
+        backups.join("backup-a.dump").canonicalize().unwrap()
+    );
+    assert!(resolve_verified_backup(root.path(), "../backup-a")
+        .unwrap_err()
+        .contains("ID"));
+    std::fs::write(backups.join("backup-a.dump"), b"tampered").unwrap();
+    assert!(resolve_verified_backup(root.path(), "backup-a")
+        .unwrap_err()
+        .contains("integridade"));
 }
 
 #[test]
