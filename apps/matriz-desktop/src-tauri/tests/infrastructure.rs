@@ -3,6 +3,7 @@ use std::{collections::HashMap, sync::Mutex};
 use matriz_desktop_native::infrastructure::{
     InfrastructureAction, InfrastructureHost, InfrastructureInspection, InfrastructureManager,
     InfrastructurePreviewRequest, InfrastructureServiceId, InfrastructureTargetId,
+    PortableInfrastructureHost,
 };
 
 #[derive(Default)]
@@ -105,4 +106,42 @@ fn logs_are_bounded_and_secrets_are_redacted() {
     let manager = InfrastructureManager::new(Box::new(FakeHost::default()), || 1_000);
     let logs = manager.logs(InfrastructureServiceId::Postgres).unwrap();
     assert_eq!(logs, ["postgresql://[REDACTED]@127.0.0.1:55432/matriz"]);
+}
+
+#[test]
+#[ignore = "downloads and executes the pinned official NATS artifact"]
+fn portable_nats_artifact_installs_starts_and_stops_under_a_temporary_root() {
+    use std::{
+        net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream},
+        thread,
+        time::Duration,
+    };
+
+    let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 54222);
+    assert!(
+        TcpStream::connect_timeout(&address, Duration::from_millis(200)).is_err(),
+        "NATS acceptance port is already occupied"
+    );
+    let root = tempfile::tempdir().expect("temporary infrastructure root");
+    let host = PortableInfrastructureHost::new(root.path().to_path_buf());
+    host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Install)
+        .expect("install pinned NATS");
+    assert!(root.path().join("nats/2.14.5/nats-server.exe").is_file());
+    host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Start)
+        .expect("start authenticated NATS");
+    for _ in 0..40 {
+        if host
+            .inspect(InfrastructureServiceId::Nats)
+            .is_ok_and(|state| state.healthy && state.owned)
+        {
+            break;
+        }
+        thread::sleep(Duration::from_millis(250));
+    }
+    let running = host
+        .inspect(InfrastructureServiceId::Nats)
+        .expect("inspect NATS");
+    assert!(running.healthy && running.owned);
+    host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Stop)
+        .expect("stop owned NATS");
 }
