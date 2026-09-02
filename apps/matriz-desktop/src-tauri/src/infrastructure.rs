@@ -2,6 +2,7 @@ use std::{
     collections::HashMap,
     fs::{self, File, OpenOptions},
     io::{self, Read},
+    net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream},
     path::{Path, PathBuf},
     process::{Command, Stdio},
     sync::{Arc, Mutex},
@@ -13,6 +14,12 @@ use std::os::windows::process::CommandExt;
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+use windows_sys::Win32::{
+    Foundation::LocalFree,
+    Security::Cryptography::{
+        CryptProtectData, CryptUnprotectData, CRYPTPROTECT_UI_FORBIDDEN, CRYPT_INTEGER_BLOB,
+    },
+};
 
 use crate::{
     ports,
@@ -293,6 +300,39 @@ impl PortableInfrastructureHost {
         }
     }
 
+    fn secret(&self, name: &str) -> Result<String, String> {
+        let vault = self.root.join("control/vault");
+        fs::create_dir_all(&vault).map_err(|error| error.to_string())?;
+        let path = vault.join(format!("{name}.dpapi"));
+        if path.is_file() {
+            return unprotect_secret(&fs::read(path).map_err(|error| error.to_string())?);
+        }
+        let secret = format!(
+            "mz_{}{}",
+            uuid::Uuid::new_v4().simple(),
+            uuid::Uuid::new_v4().simple()
+        );
+        let protected = protect_secret(secret.as_bytes())?;
+        let temporary = vault.join(format!(".{name}-{}.tmp", uuid::Uuid::new_v4()));
+        let mut output = OpenOptions::new()
+            .create_new(true)
+            .write(true)
+            .open(&temporary)
+            .map_err(|error| error.to_string())?;
+        use std::io::Write;
+        output
+            .write_all(&protected)
+            .map_err(|error| error.to_string())?;
+        output.sync_all().map_err(|error| error.to_string())?;
+        drop(output);
+        if path.exists() {
+            let _ = fs::remove_file(&temporary);
+            return unprotect_secret(&fs::read(path).map_err(|error| error.to_string())?);
+        }
+        fs::rename(&temporary, &path).map_err(|error| error.to_string())?;
+        Ok(secret)
+    }
+
     fn artifact(service_id: InfrastructureServiceId) -> ArtifactDefinition {
         match service_id {
             InfrastructureServiceId::Postgres => ArtifactDefinition {
@@ -379,6 +419,17 @@ impl PortableInfrastructureHost {
         let logs = self.root.join("nats/logs");
         fs::create_dir_all(&data).map_err(|error| error.to_string())?;
         fs::create_dir_all(&logs).map_err(|error| error.to_string())?;
+        let config = self.root.join("nats/nats.conf");
+        if !config.is_file() {
+            let password = self.secret("nats-control")?;
+            let verifier =
+                bcrypt::hash(password, bcrypt::DEFAULT_COST).map_err(|error| error.to_string())?;
+            let contents = format!(
+                "server_name: MatrizNats\nhost: 127.0.0.1\nport: 54222\nhttp: 127.0.0.1:58222\njetstream {{ store_dir: {:?} }}\nauthorization {{ users: [{{ user: \"matriz_control\", password: {:?}, permissions: {{ publish: [\"$JS.API.>\"], subscribe: [\"_INBOX.>\"] }} }}] }}\n",
+                data.to_string_lossy().replace('\\', "/"), verifier
+            );
+            write_new_file(&config, contents.as_bytes())?;
+        }
         let log = OpenOptions::new()
             .create(true)
             .append(true)
@@ -386,17 +437,173 @@ impl PortableInfrastructureHost {
             .map_err(|error| error.to_string())?;
         let stderr = log.try_clone().map_err(|error| error.to_string())?;
         Command::new(executable)
+            .args(["--config"])
+            .arg(config)
+            .stdin(Stdio::null())
+            .stdout(Stdio::from(log))
+            .stderr(Stdio::from(stderr))
+            .creation_flags(0x0800_0000)
+            .spawn()
+            .map_err(|error| error.to_string())?;
+        Ok(())
+    }
+
+    fn start_postgres(&self) -> Result<(), String> {
+        let bin = self.root.join("postgres/17.11/pgsql/bin");
+        let executable = bin.join("postgres.exe");
+        let initdb = bin.join("initdb.exe");
+        let psql = bin.join("psql.exe");
+        if !executable.is_file() || !initdb.is_file() || !psql.is_file() {
+            return Err("A instalação portátil do PostgreSQL está incompleta".into());
+        }
+        let data = self.root.join("postgres/data");
+        let logs = self.root.join("postgres/logs");
+        fs::create_dir_all(&logs).map_err(|error| error.to_string())?;
+        let password = self.secret("postgres-bootstrap")?;
+        if !data.join("PG_VERSION").is_file() {
+            fs::create_dir_all(&data).map_err(|error| error.to_string())?;
+            let password_file = self.root.join(format!(
+                "control/.postgres-password-{}.tmp",
+                uuid::Uuid::new_v4()
+            ));
+            write_new_file(&password_file, password.as_bytes())?;
+            let status = Command::new(&initdb)
+                .args(["-D"])
+                .arg(&data)
+                .args([
+                    "-U",
+                    "matriz_provisioner",
+                    "--auth-host=scram-sha-256",
+                    "--auth-local=scram-sha-256",
+                ])
+                .arg(format!("--pwfile={}", password_file.display()))
+                .args(["--encoding=UTF8", "--locale=C"])
+                .creation_flags(0x0800_0000)
+                .status()
+                .map_err(|error| error.to_string());
+            let _ = fs::remove_file(&password_file);
+            if !status
+                .map_err(|error| format!("Falha ao inicializar PostgreSQL: {error}"))?
+                .success()
+            {
+                return Err("A inicialização do PostgreSQL falhou".into());
+            }
+            use std::io::Write;
+            OpenOptions::new().append(true).open(data.join("postgresql.conf"))
+                .and_then(|mut file| file.write_all(b"\nlisten_addresses = '127.0.0.1'\nport = 55432\npassword_encryption = 'scram-sha-256'\nmax_connections = 80\n"))
+                .map_err(|error| error.to_string())?;
+            fs::write(data.join("pg_hba.conf"), b"local all all scram-sha-256\r\nhost all all 127.0.0.1/32 scram-sha-256\r\nhost all all ::1/128 reject\r\n")
+                .map_err(|error| error.to_string())?;
+        }
+        let log = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(logs.join("service.log"))
+            .map_err(|error| error.to_string())?;
+        let stderr = log.try_clone().map_err(|error| error.to_string())?;
+        Command::new(executable)
+            .args(["-D"])
+            .arg(&data)
+            .args(["-p", "55432"])
+            .stdin(Stdio::null())
+            .stdout(Stdio::from(log))
+            .stderr(Stdio::from(stderr))
+            .creation_flags(0x0800_0000)
+            .spawn()
+            .map_err(|error| error.to_string())?;
+        wait_for_port(55432, Duration::from_secs(20))?;
+        let exists = Command::new(psql)
+            .env("PGPASSWORD", &password)
             .args([
-                "--jetstream",
-                "--addr",
+                "--host",
                 "127.0.0.1",
                 "--port",
-                "54222",
-                "--http_port",
-                "58222",
-                "--store_dir",
+                "55432",
+                "--username",
+                "matriz_provisioner",
+                "--dbname",
+                "postgres",
+                "--no-password",
+                "--tuples-only",
+                "--no-align",
+                "--command",
+                "SELECT 1 FROM pg_database WHERE datname = 'matriz';",
             ])
-            .arg(data)
+            .creation_flags(0x0800_0000)
+            .output()
+            .map_err(|error| error.to_string())?;
+        if !exists.status.success() {
+            return Err("PostgreSQL iniciou, mas a autoridade local não autenticou".into());
+        }
+        if String::from_utf8_lossy(&exists.stdout).trim() != "1" {
+            let created = Command::new(bin.join("createdb.exe"))
+                .env("PGPASSWORD", password)
+                .args([
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    "55432",
+                    "--username",
+                    "matriz_provisioner",
+                    "--owner",
+                    "matriz_provisioner",
+                    "--no-password",
+                    "matriz",
+                ])
+                .creation_flags(0x0800_0000)
+                .status()
+                .map_err(|error| error.to_string())?;
+            if !created.success() {
+                return Err("PostgreSQL iniciou, mas o database matriz não foi criado".into());
+            }
+        }
+        Ok(())
+    }
+
+    fn start_garnet(&self) -> Result<(), String> {
+        let executable = self.executable(InfrastructureServiceId::Garnet);
+        if !executable.is_file() {
+            return Err("Garnet não está instalado".into());
+        }
+        let data = self.root.join("garnet/data");
+        let logs = self.root.join("garnet/logs");
+        fs::create_dir_all(&data).map_err(|error| error.to_string())?;
+        fs::create_dir_all(&logs).map_err(|error| error.to_string())?;
+        let secret = self.secret("garnet-hub")?;
+        let verifier = format!("{:x}", Sha256::digest(secret.as_bytes()));
+        let acl = self.root.join("garnet/users.acl");
+        if !acl.is_file() {
+            write_new_file(&acl, format!("user default off\r\nuser matriz_hub on #{verifier} -@all +get +set +del +expire +ping\r\n").as_bytes())?;
+        }
+        let log_path = logs.join("service.log");
+        let log = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&log_path)
+            .map_err(|error| error.to_string())?;
+        let stderr = log.try_clone().map_err(|error| error.to_string())?;
+        Command::new(executable)
+            .args([
+                "--bind",
+                "127.0.0.1",
+                "--port",
+                "46379",
+                "--memory",
+                "256m",
+                "--index",
+                "16m",
+                "--storage-tier",
+                "--aof",
+                "--recover",
+                "--logdir",
+            ])
+            .arg(&data)
+            .args(["--checkpointdir"])
+            .arg(&data)
+            .args(["--file-logger"])
+            .arg(&log_path)
+            .args(["--auth", "ACL", "--acl-file"])
+            .arg(acl)
             .stdin(Stdio::null())
             .stdout(Stdio::from(log))
             .stderr(Stdio::from(stderr))
@@ -492,23 +699,22 @@ impl InfrastructureHost for PortableInfrastructureHost {
                 InfrastructureServiceId::Nats,
             ],
         };
-        if action != InfrastructureAction::Install
-            && services
-                .iter()
-                .any(|service| *service != InfrastructureServiceId::Nats)
-        {
-            return Err(
-                "O lifecycle autenticado de PostgreSQL e Garnet ainda não foi habilitado".into(),
-            );
-        }
         for service in services {
             match action {
                 InfrastructureAction::Install => self.install(service)?,
-                InfrastructureAction::Start => self.start_nats()?,
+                InfrastructureAction::Start => match service {
+                    InfrastructureServiceId::Postgres => self.start_postgres()?,
+                    InfrastructureServiceId::Garnet => self.start_garnet()?,
+                    InfrastructureServiceId::Nats => self.start_nats()?,
+                },
                 InfrastructureAction::Stop => self.stop(service)?,
                 InfrastructureAction::Restart => {
                     self.stop(service)?;
-                    self.start_nats()?;
+                    match service {
+                        InfrastructureServiceId::Postgres => self.start_postgres()?,
+                        InfrastructureServiceId::Garnet => self.start_garnet()?,
+                        InfrastructureServiceId::Nats => self.start_nats()?,
+                    }
                 }
             }
         }
@@ -590,6 +796,34 @@ fn download_verified(artifact: &ArtifactDefinition, destination: &Path) -> Resul
         return Err("O SHA-256 do artefato não confere".into());
     }
     Ok(())
+}
+
+fn write_new_file(path: &Path, contents: &[u8]) -> Result<(), String> {
+    let parent = path.parent().ok_or("Destino local inválido")?;
+    fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    let mut file = OpenOptions::new()
+        .create_new(true)
+        .write(true)
+        .open(path)
+        .map_err(|error| error.to_string())?;
+    use std::io::Write;
+    file.write_all(contents)
+        .map_err(|error| error.to_string())?;
+    file.sync_all().map_err(|error| error.to_string())
+}
+
+fn wait_for_port(port: u16, timeout: Duration) -> Result<(), String> {
+    let started = std::time::Instant::now();
+    let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), port);
+    while started.elapsed() < timeout {
+        if TcpStream::connect_timeout(&address, Duration::from_millis(250)).is_ok() {
+            return Ok(());
+        }
+        std::thread::sleep(Duration::from_millis(200));
+    }
+    Err(format!(
+        "O serviço não respondeu na porta {port} dentro do limite"
+    ))
 }
 
 fn extract_verified_zip(archive_path: &Path, destination: &Path) -> Result<(), String> {
@@ -741,4 +975,80 @@ fn redact(line: &str) -> String {
         }
     }
     output
+}
+
+fn protect_secret(secret: &[u8]) -> Result<Vec<u8>, String> {
+    let input_length = u32::try_from(secret.len()).map_err(|_| "Credencial local inválida")?;
+    let input = CRYPT_INTEGER_BLOB {
+        cbData: input_length,
+        pbData: secret.as_ptr().cast_mut(),
+    };
+    let mut output = CRYPT_INTEGER_BLOB::default();
+    // SAFETY: DPAPI reads the bounded input during the call and allocates the output with LocalAlloc.
+    let protected = unsafe {
+        CryptProtectData(
+            &input,
+            std::ptr::null(),
+            std::ptr::null(),
+            std::ptr::null(),
+            std::ptr::null(),
+            CRYPTPROTECT_UI_FORBIDDEN,
+            &mut output,
+        )
+    };
+    if protected == 0 || output.pbData.is_null() {
+        return Err("O Windows não protegeu a credencial local".into());
+    }
+    // SAFETY: CryptProtectData returned a valid output buffer of cbData bytes.
+    let bytes =
+        unsafe { std::slice::from_raw_parts(output.pbData, output.cbData as usize) }.to_vec();
+    // SAFETY: DPAPI documents that the caller releases this buffer with LocalFree.
+    unsafe { LocalFree(output.pbData.cast()) };
+    Ok(bytes)
+}
+
+fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
+    let input_length = u32::try_from(protected.len()).map_err(|_| "Credencial local inválida")?;
+    let input = CRYPT_INTEGER_BLOB {
+        cbData: input_length,
+        pbData: protected.as_ptr().cast_mut(),
+    };
+    let mut output = CRYPT_INTEGER_BLOB::default();
+    // SAFETY: DPAPI reads the bounded encrypted input and allocates the output with LocalAlloc.
+    let unprotected = unsafe {
+        CryptUnprotectData(
+            &input,
+            std::ptr::null_mut(),
+            std::ptr::null(),
+            std::ptr::null(),
+            std::ptr::null(),
+            CRYPTPROTECT_UI_FORBIDDEN,
+            &mut output,
+        )
+    };
+    if unprotected == 0 || output.pbData.is_null() {
+        return Err("A credencial local protegida não pôde ser recuperada".into());
+    }
+    // SAFETY: CryptUnprotectData returned a valid output buffer of cbData bytes.
+    let bytes =
+        unsafe { std::slice::from_raw_parts(output.pbData, output.cbData as usize) }.to_vec();
+    // SAFETY: DPAPI documents that the caller releases this buffer with LocalFree.
+    unsafe { LocalFree(output.pbData.cast()) };
+    String::from_utf8(bytes).map_err(|_| "A credencial local protegida está corrompida".into())
+}
+
+#[cfg(test)]
+mod secret_tests {
+    use super::*;
+
+    #[test]
+    fn dpapi_secret_is_not_plaintext_and_round_trips_for_the_current_user() {
+        let plaintext = b"matriz-local-secret";
+        let protected = protect_secret(plaintext).expect("protect secret");
+        assert_ne!(protected, plaintext);
+        assert_eq!(
+            unprotect_secret(&protected).expect("unprotect secret"),
+            "matriz-local-secret"
+        );
+    }
 }
