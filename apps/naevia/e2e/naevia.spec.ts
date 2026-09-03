@@ -121,13 +121,23 @@ test("preserves concurrent tab creation and restores every tab after restart", a
         await Promise.all([window.naevia.createTab(activeCapsuleId), window.naevia.activateCapsule(activeCapsuleId)])
       })
       await expect(firstWindow.getByRole("tab")).toHaveCount(6)
+      await firstWindow.evaluate(async () => {
+        const snapshot = await window.naevia.snapshot()
+        const tabs = snapshot.tabs.filter((tab) => tab.capsuleId === snapshot.activeCapsuleId)
+        await Promise.all([
+          window.naevia.closeTab(tabs[0].id),
+          window.naevia.closeTab(tabs[1].id),
+          window.naevia.createTab(snapshot.activeCapsuleId),
+        ])
+      })
+      await expect(firstWindow.getByRole("tab")).toHaveCount(5)
     } finally { await first.close() }
 
     const second = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
     try {
       const secondWindow = await localWindow(second)
       await expect(secondWindow.getByRole("button", { name: "Persistente" })).toHaveClass(/active/)
-      await expect(secondWindow.getByRole("tab")).toHaveCount(6)
+      await expect(secondWindow.getByRole("tab")).toHaveCount(5)
     } finally { await second.close() }
   } finally {
     if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-restart-")) await rm(profile, { recursive: true, force: true })
