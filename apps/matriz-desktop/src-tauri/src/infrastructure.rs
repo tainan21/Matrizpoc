@@ -1786,7 +1786,7 @@ impl PortableInfrastructureHost {
                 &self.launch_receipt(service_id),
                 true,
             ) {
-                process.terminate()?;
+                self.stop_verified(service_id, process)?;
             }
             return Ok(());
         }
@@ -1802,9 +1802,32 @@ impl PortableInfrastructureHost {
             })
             .collect::<Result<Vec<_>, _>>()?;
         for process in processes {
-            process.terminate()?;
+            self.stop_verified(service_id, process)?;
         }
         Ok(())
+    }
+
+    fn stop_verified(
+        &self,
+        service: InfrastructureServiceId,
+        process: managed_process::VerifiedProcess,
+    ) -> Result<(), String> {
+        if service != InfrastructureServiceId::Postgres {
+            return process.terminate();
+        }
+        // PostgreSQL's Windows signal pipe requests a fast, clean shutdown.
+        // Keep the validated handle alive throughout the request and exit wait.
+        let pg_ctl = self.root.join("postgres/17.11/pgsql/bin/pg_ctl.exe");
+        let output = Command::new(pg_ctl)
+            .args(["kill", "INT", &process.pid().to_string()])
+            .stdin(Stdio::null())
+            .creation_flags(0x0800_0000)
+            .output()
+            .map_err(|error| error.to_string())?;
+        if !output.status.success() {
+            return Err("PostgreSQL recusou o pedido de encerramento limpo".into());
+        }
+        process.wait_for_exit(20_000)
     }
 }
 
@@ -2322,6 +2345,101 @@ fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
     // SAFETY: DPAPI documents that the caller releases this buffer with LocalFree.
     unsafe { LocalFree(output.pbData.cast()) };
     String::from_utf8(bytes).map_err(|_| "A credencial local protegida está corrompida".into())
+}
+
+#[cfg(test)]
+mod portable_database_tests {
+    use super::*;
+
+    #[test]
+    #[ignore = "downloads pinned PostgreSQL and mutates only its temporary cluster"]
+    fn postgres_portable_migrations_backup_restore_and_recovery() {
+        assert!(
+            !ports::enumerate_listeners()
+                .unwrap()
+                .iter()
+                .any(|row| row.port == 55432),
+            "PostgreSQL acceptance port must be free; never use an existing server"
+        );
+        struct HostGuard(PortableInfrastructureHost);
+        impl Drop for HostGuard {
+            fn drop(&mut self) {
+                let _ = self.0.stop(InfrastructureServiceId::Postgres);
+            }
+        }
+        let root = tempfile::tempdir().unwrap();
+        let fixture = HostGuard(PortableInfrastructureHost::new(root.path().to_path_buf()));
+        let host = &fixture.0;
+        host.install(InfrastructureServiceId::Postgres)
+            .expect("install pinned PostgreSQL");
+        host.start_postgres().expect("start temporary PostgreSQL");
+        let recovered = PortableInfrastructureHost::new(root.path().to_path_buf());
+        let state = recovered
+            .inspect(InfrastructureServiceId::Postgres)
+            .unwrap();
+        assert!(state.running && state.healthy && state.owned);
+        host.provision_database()
+            .expect("provision eight local schemas");
+        assert_eq!(host.database_schema_count("matriz").unwrap(), 8);
+        let workspace = tempfile::tempdir().unwrap();
+        for schema in DATABASE_SCHEMAS {
+            let migration = workspace
+                .path()
+                .join("prisma")
+                .join(schema)
+                .join("migrations/202609030001_acceptance");
+            fs::create_dir_all(&migration).unwrap();
+            fs::write(migration.join("migration.sql"),
+                "CREATE TABLE checkpoint (id integer PRIMARY KEY, label text NOT NULL);\nINSERT INTO checkpoint VALUES (1, 'before backup');\n").unwrap();
+        }
+        host.apply_workspace_migrations(workspace.path())
+            .expect("apply fixture migrations with guard backup");
+        for schema in DATABASE_SCHEMAS {
+            let applied = host.applied_migrations(schema).unwrap();
+            assert_eq!(applied.len(), 1);
+            assert!(applied[0].finished);
+        }
+        host.create_backup().expect("create logical backup");
+        let backups = read_backup_catalog(root.path()).unwrap();
+        let latest = backups.iter().max_by_key(|entry| entry.created_at).unwrap();
+        assert_eq!(latest.integrity, "verified");
+        host.psql_output(
+            "matriz",
+            "UPDATE hub.checkpoint SET label = 'after backup' WHERE id = 1;",
+        )
+        .unwrap();
+        host.restore_verified_backup(&latest.id)
+            .expect("restore via temporary database");
+        assert_eq!(
+            host.psql_output("matriz", "SELECT label FROM hub.checkpoint WHERE id = 1;")
+                .unwrap()
+                .trim(),
+            "before backup"
+        );
+        assert_eq!(host.database_schema_count("matriz").unwrap(), 8);
+        host.stop(InfrastructureServiceId::Postgres)
+            .expect("stop only the receipt-owned cluster");
+        let control = Command::new(
+            root.path()
+                .join("postgres/17.11/pgsql/bin/pg_controldata.exe"),
+        )
+        .arg(root.path().join("postgres/data"))
+        .env("LC_ALL", "C")
+        .creation_flags(0x0800_0000)
+        .output()
+        .unwrap();
+        assert!(control.status.success());
+        assert!(String::from_utf8_lossy(&control.stdout)
+            .lines()
+            .any(|line| line.starts_with("Database cluster state:")
+                && line.trim_end().ends_with("shut down")));
+        assert!(
+            !host
+                .inspect(InfrastructureServiceId::Postgres)
+                .unwrap()
+                .running
+        );
+    }
 }
 
 #[cfg(test)]

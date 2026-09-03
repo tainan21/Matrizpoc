@@ -57,6 +57,21 @@ adopted by executable path. They must be stopped explicitly outside this new
 ownership flow and then started through Control. This checkpoint does not certify
 full PostgreSQL/Garnet data operations or the overall release.
 
+### Live PostgreSQL checkpoint (2026-09-03)
+
+The explicitly opted-in native test downloaded the pinned PostgreSQL 17.11
+artifact into a temporary root, initialized a fresh cluster, recovered ownership
+from the launch receipt, provisioned eight schemas, applied eight synthetic
+migrations with guard backup, verified their ledgers, created a logical backup,
+changed a row and restored the earlier row through a temporary database.
+
+Its first run exposed premature stop confirmation. PostgreSQL now receives its
+own fast-shutdown signal through the bundled `pg_ctl`, while Control retains the
+verified process handle and waits for exit. The repeated journey passed and
+`pg_controldata` confirmed `shut down`, rather than crash recovery. No existing
+database was used. This is evidence for the native lifecycle and restore path,
+not acceptance of all repository migrations, local seed, Garnet or public release.
+
 The harness only accepts the official per-user install directory or an isolated
 acceptance root. It never kills unrelated listeners. If a catalog port is
 already occupied, the journey asserts the `EXTERNO` protected state and leaves

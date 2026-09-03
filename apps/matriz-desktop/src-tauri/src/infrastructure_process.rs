@@ -10,7 +10,7 @@ use windows_sys::Win32::{
     Foundation::{CloseHandle, FILETIME, HANDLE, WAIT_OBJECT_0},
     Storage::FileSystem::{MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH},
     System::Threading::{
-        GetProcessTimes, OpenProcess, QueryFullProcessImageNameW, TerminateProcess,
+        GetProcessId, GetProcessTimes, OpenProcess, QueryFullProcessImageNameW, TerminateProcess,
         WaitForSingleObject, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_SYNCHRONIZE,
         PROCESS_TERMINATE,
     },
@@ -89,6 +89,16 @@ impl Drop for VerifiedProcess {
 }
 
 impl VerifiedProcess {
+    pub(super) fn pid(&self) -> u32 {
+        unsafe { GetProcessId(self.0) }
+    }
+
+    pub(super) fn wait_for_exit(&self, timeout_ms: u32) -> Result<(), String> {
+        if unsafe { WaitForSingleObject(self.0, timeout_ms) } != WAIT_OBJECT_0 {
+            return Err("O processo validado ainda não confirmou encerramento".into());
+        }
+        Ok(())
+    }
     pub(super) fn recover(expected: &Path, path: &Path, stopping: bool) -> Option<Self> {
         let receipt: LaunchReceipt = serde_json::from_slice(&fs::read(path).ok()?).ok()?;
         Self::open(receipt.pid, expected, path, stopping).ok()
@@ -126,10 +136,7 @@ impl VerifiedProcess {
         if unsafe { TerminateProcess(self.0, 1) } == 0 {
             return Err("Windows recusou encerrar o processo validado".into());
         }
-        if unsafe { WaitForSingleObject(self.0, 5000) } != WAIT_OBJECT_0 {
-            return Err("O processo validado ainda não confirmou encerramento".into());
-        }
-        Ok(())
+        self.wait_for_exit(5000)
     }
 }
 
