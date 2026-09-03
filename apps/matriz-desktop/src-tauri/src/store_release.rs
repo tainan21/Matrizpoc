@@ -576,7 +576,7 @@ fn now() -> u128 {
 }
 
 #[cfg(windows)]
-fn verify_authenticode(path: &Path, publisher: &str) -> Result<(), String> {
+pub(crate) fn verify_authenticode(path: &Path, publisher: &str) -> Result<(), String> {
     use std::os::windows::process::CommandExt;
     let escaped = path.to_string_lossy().replace('\'', "''");
     let script = format!(
@@ -606,7 +606,7 @@ fn verify_authenticode(path: &Path, publisher: &str) -> Result<(), String> {
 }
 
 #[cfg(not(windows))]
-fn verify_authenticode(_path: &Path, _publisher: &str) -> Result<(), String> {
+pub(crate) fn verify_authenticode(_path: &Path, _publisher: &str) -> Result<(), String> {
     Err("Instalação da Store está disponível apenas no Windows".into())
 }
 

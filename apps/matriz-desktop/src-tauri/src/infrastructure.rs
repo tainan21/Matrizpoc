@@ -953,6 +953,12 @@ impl PortableInfrastructureHost {
 
     fn install(&self, service_id: InfrastructureServiceId) -> Result<(), String> {
         if self.executable(service_id).exists() {
+            if service_id == InfrastructureServiceId::Garnet {
+                crate::store_release::verify_authenticode(
+                    &self.executable(service_id),
+                    "Microsoft Corporation",
+                )?;
+            }
             return Ok(());
         }
         fs::create_dir_all(&self.root).map_err(|error| error.to_string())?;
@@ -997,6 +1003,12 @@ impl PortableInfrastructureHost {
         };
         if !expected_in_source(service_id, &source).is_file() {
             return Err("O arquivo verificado não contém o executável esperado".into());
+        }
+        if service_id == InfrastructureServiceId::Garnet {
+            crate::store_release::verify_authenticode(
+                &expected_in_source(service_id, &source),
+                "Microsoft Corporation",
+            )?;
         }
         let parent = target
             .parent()
@@ -1165,6 +1177,7 @@ impl PortableInfrastructureHost {
         if !executable.is_file() {
             return Err("Garnet não está instalado".into());
         }
+        crate::store_release::verify_authenticode(&executable, "Microsoft Corporation")?;
         let data = self.root.join("garnet/data");
         let logs = self.root.join("garnet/logs");
         fs::create_dir_all(&data).map_err(|error| error.to_string())?;
@@ -2350,6 +2363,84 @@ fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
 #[cfg(test)]
 mod portable_database_tests {
     use super::*;
+
+    #[test]
+    fn existing_unsigned_garnet_is_not_accepted_as_installed() {
+        let root = tempfile::tempdir().unwrap();
+        let host = PortableInfrastructureHost::new(root.path().to_path_buf());
+        let target = host.executable(InfrastructureServiceId::Garnet);
+        fs::create_dir_all(target.parent().unwrap()).unwrap();
+        fs::copy(std::env::current_exe().unwrap(), target).unwrap();
+        assert!(host.install(InfrastructureServiceId::Garnet).is_err());
+    }
+
+    #[test]
+    #[ignore = "downloads pinned Garnet and starts it only under a temporary root"]
+    fn garnet_portable_requires_authentication_and_recovers_owned_process() {
+        use std::io::{BufRead, BufReader, Write};
+        assert!(!ports::enumerate_listeners()
+            .unwrap()
+            .iter()
+            .any(|row| row.port == 46379));
+        struct HostGuard(PortableInfrastructureHost);
+        impl Drop for HostGuard {
+            fn drop(&mut self) {
+                let _ = self.0.stop(InfrastructureServiceId::Garnet);
+            }
+        }
+        let root = tempfile::tempdir().unwrap();
+        let fixture = HostGuard(PortableInfrastructureHost::new(root.path().to_path_buf()));
+        let host = &fixture.0;
+        host.install(InfrastructureServiceId::Garnet)
+            .expect("install pinned signed Garnet");
+        host.start_garnet().expect("start temporary Garnet");
+        wait_for_port(46379, Duration::from_secs(20)).expect("Garnet readiness");
+        let mut stream = TcpStream::connect("127.0.0.1:46379").unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .unwrap();
+        let mut reader = BufReader::new(stream.try_clone().unwrap());
+        stream.write_all(b"*1\r\n$4\r\nPING\r\n").unwrap();
+        let mut reply = String::new();
+        reader.read_line(&mut reply).unwrap();
+        assert!(
+            reply.starts_with("-NOAUTH"),
+            "anonymous cache access must be refused"
+        );
+        let password = host.secret("garnet-hub").unwrap();
+        write!(
+            stream,
+            "*3\r\n$4\r\nAUTH\r\n$10\r\nmatriz_hub\r\n${}\r\n{}\r\n",
+            password.len(),
+            password
+        )
+        .unwrap();
+        reply.clear();
+        reader.read_line(&mut reply).unwrap();
+        assert_eq!(reply, "+OK\r\n");
+        stream.write_all(b"*1\r\n$4\r\nPING\r\n").unwrap();
+        reply.clear();
+        reader.read_line(&mut reply).unwrap();
+        assert_eq!(reply, "+PONG\r\n");
+        drop(reader);
+        drop(stream);
+        let recovered = PortableInfrastructureHost::new(root.path().to_path_buf());
+        assert!(
+            recovered
+                .inspect(InfrastructureServiceId::Garnet)
+                .unwrap()
+                .owned
+        );
+        recovered
+            .stop(InfrastructureServiceId::Garnet)
+            .expect("stop receipt-owned Garnet");
+        assert!(
+            !host
+                .inspect(InfrastructureServiceId::Garnet)
+                .unwrap()
+                .running
+        );
+    }
 
     #[test]
     #[ignore = "downloads pinned PostgreSQL and mutates only its temporary cluster"]

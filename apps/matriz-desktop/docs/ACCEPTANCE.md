@@ -83,6 +83,17 @@ Unsigned files, wrong publishers, partial names and empty publishers are refused
 The helper runs hidden. This validates the native trust check, not publication,
 an entire signed Store installation or the Control updater chain.
 
+### Live Garnet checkpoint (2026-09-03)
+
+The pinned Garnet 2.1.5 package passed native installation, authenticated PING,
+anonymous-access refusal, ownership recovery and stop in a temporary root.
+Installation/promotion and startup now also require valid Authenticode with the
+exact `Microsoft Corporation` signer through the existing app-local verifier.
+A regression proved that the old installed-file shortcut accepted an unsigned
+replacement; it now refuses it. The real signed artifact passed again after
+enforcement. Cache persistence across restart and a full app/stack integration
+remain separate acceptance work.
+
 The harness only accepts the official per-user install directory or an isolated
 acceptance root. It never kills unrelated listeners. If a catalog port is
 already occupied, the journey asserts the `EXTERNO` protected state and leaves
