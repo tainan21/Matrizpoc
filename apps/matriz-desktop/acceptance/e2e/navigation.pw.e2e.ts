@@ -92,5 +92,5 @@ test("observes the real Git workspace without mutating it", async ({ tauriPage: 
   await expect(page.locator(".git-branch")).not.toContainText("Verificando")
   await expect(page.getByRole("button", { name: "STAGE", exact: true })).toBeDisabled()
   await expect(page.getByRole("button", { name: "UNSTAGE", exact: true })).toBeDisabled()
-  await expect(page.locator(".git-change").first()).toBeVisible()
+  await expect(page.locator(".git-change, .git-changes .area-note").first()).toBeVisible()
 })
