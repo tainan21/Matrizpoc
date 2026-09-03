@@ -1701,15 +1701,12 @@ impl PortableInfrastructureHost {
             "BEGIN; SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname IN ('matriz','{temporary}') AND pid <> pg_backend_pid(); ALTER DATABASE matriz RENAME TO {quarantine}; ALTER DATABASE {temporary} RENAME TO matriz; COMMIT;"
         );
         self.psql_output("postgres", &swap)?;
-        if self.database_schema_count("matriz")? != DATABASE_SCHEMAS.len() {
+        verify_database_after_swap(self.database_schema_count("matriz"), || {
             let rollback = format!(
                 "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'matriz' AND pid <> pg_backend_pid(); ALTER DATABASE matriz RENAME TO {failed}; ALTER DATABASE {quarantine} RENAME TO matriz;"
             );
-            let _ = self.psql_output("postgres", &rollback);
-            return Err(
-                "A validação após a troca falhou; o database anterior foi restaurado".into(),
-            );
-        }
+            self.psql_output("postgres", &rollback).map(|_| ())
+        })?;
         self.run_database_tool(
             &dropdb,
             &[
@@ -2191,6 +2188,21 @@ fn redact(line: &str) -> String {
     output
 }
 
+fn verify_database_after_swap(
+    schema_count: Result<usize, String>,
+    rollback: impl FnOnce() -> Result<(), String>,
+) -> Result<(), String> {
+    if matches!(schema_count, Ok(count) if count == DATABASE_SCHEMAS.len()) {
+        return Ok(());
+    }
+    // A failed verification query is also a failed restore verification. Never
+    // discard the previous database or report recovery without a successful swap.
+    match rollback() {
+        Ok(()) => Err("A validação após a troca falhou; o database anterior foi restaurado".into()),
+        Err(_) => Err("Falha na validação após a troca; a recuperação automática falhou. Os dados foram preservados e exigem recuperação manual".into()),
+    }
+}
+
 fn protect_secret(secret: &[u8]) -> Result<Vec<u8>, String> {
     let input_length = u32::try_from(secret.len()).map_err(|_| "Credencial local inválida")?;
     let input = CRYPT_INTEGER_BLOB {
@@ -2249,6 +2261,41 @@ fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
     // SAFETY: DPAPI documents that the caller releases this buffer with LocalFree.
     unsafe { LocalFree(output.pbData.cast()) };
     String::from_utf8(bytes).map_err(|_| "A credencial local protegida está corrompida".into())
+}
+
+#[cfg(test)]
+mod restore_tests {
+    use super::*;
+
+    #[test]
+    fn failed_post_restore_query_attempts_rollback_without_leaking_query_details() {
+        let mut called = false;
+        let result = verify_database_after_swap(Err("private query details".into()), || {
+            called = true;
+            Ok(())
+        });
+        assert!(called);
+        let message = result.unwrap_err();
+        assert!(message.contains("anterior foi restaurado"));
+        assert!(!message.contains("private query details"));
+    }
+
+    #[test]
+    fn failed_restore_rollback_never_claims_that_the_previous_database_was_restored() {
+        let message = verify_database_after_swap(Ok(0), || Err("private rollback details".into()))
+            .unwrap_err();
+        assert!(message.contains("recuperação automática falhou"));
+        assert!(!message.contains("anterior foi restaurado"));
+        assert!(!message.contains("private rollback details"));
+    }
+
+    #[test]
+    fn verified_restore_does_not_attempt_rollback() {
+        let result = verify_database_after_swap(Ok(DATABASE_SCHEMAS.len()), || {
+            panic!("a verified restore must not roll back")
+        });
+        assert!(result.is_ok());
+    }
 }
 
 #[cfg(test)]
