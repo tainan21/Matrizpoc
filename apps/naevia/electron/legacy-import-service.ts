@@ -1,7 +1,10 @@
-import { randomUUID } from "node:crypto"
-import { mkdir, readFile, realpath, rename, stat, writeFile } from "node:fs/promises"
+import { createHash, randomUUID } from "node:crypto"
+import { execFile } from "node:child_process"
+import { createReadStream } from "node:fs"
+import { lstat, mkdir, readFile, realpath, rename, stat, writeFile } from "node:fs/promises"
 import { createRequire } from "node:module"
 import { dirname, isAbsolute, join, relative } from "node:path"
+import { promisify } from "node:util"
 
 import { mapLegacyBrowserState } from "../src/legacy-import.js"
 import type { BrowserSnapshot, LegacyImportPreview, LegacyImportStatus } from "../src/shared.js"
@@ -23,15 +26,19 @@ export class LegacyImportService {
     private readonly currentSnapshot: () => Promise<BrowserSnapshot>,
     private readonly readLegacy: (database: string) => LegacyRows = readLegacySqlite,
     private readonly now: () => number = Date.now,
+    private readonly assertSourceClosed: () => Promise<void> = assertLegacyClosed,
   ) {}
 
   async preview(): Promise<LegacyImportPreview> {
     this.pending = undefined
+    try { await this.assertSourceClosed() }
+    catch (cause) { return { available: false, sourceLabel: "Matriz Control Electron", capsuleCount: 0, tabCount: 0, reason: (cause as Error).message } }
     const source = await this.findSource()
     if (!source) return { available: false, sourceLabel: "Matriz Control Electron", capsuleCount: 0, tabCount: 0, reason: "Perfil legado não encontrado ou vault não montado." }
     try {
       const rows = this.readLegacy(source.database)
       mapLegacyBrowserState(rows.capsules, rows.tabs, randomUUID)
+      if ((await this.validateDatabase(source.database)).signature !== source.signature) throw new Error("Origem alterada durante a leitura")
       const token = randomUUID()
       this.pending = { token, database: source.database, signature: source.signature, expiresAt: this.now() + 5 * 60_000 }
       return { available: true, sourceLabel: source.label, capsuleCount: rows.capsules.length, tabCount: rows.tabs.length, confirmationToken: token }
@@ -43,17 +50,22 @@ export class LegacyImportService {
   async confirm(token: string): Promise<LegacyImportStatus> {
     const pending = this.pending
     this.pending = undefined
-    if (!pending || pending.token !== token || pending.expiresAt < this.now()) throw new Error("Confirmação de importação inválida ou expirada")
+    if (!pending || pending.token !== token || pending.expiresAt <= this.now()) throw new Error("Confirmação de importação inválida ou expirada")
+    await this.assertSourceClosed()
     const source = await this.validateDatabase(pending.database)
     if (source.signature !== pending.signature) throw new Error("O perfil legado mudou; gere uma nova prévia")
     const rows = this.readLegacy(source.database)
     const imported = mapLegacyBrowserState(rows.capsules, rows.tabs, randomUUID)
+    await this.assertSourceClosed()
+    if ((await this.validateDatabase(source.database)).signature !== pending.signature) throw new Error("O perfil legado mudou; gere uma nova prévia")
     const importId = randomUUID()
     const backupPath = join(this.userData, "legacy-import", "backups", `${importId}.json`)
     await atomicJson(backupPath, { version: 1, snapshot: await this.currentSnapshot() })
     const importedAt = new Date(this.now()).toISOString()
     const journal = { version: 1, phase: "prepared", importId, importedAt, backupPath, sourceLabel: "Matriz Control Electron" }
     await atomicJson(this.journalPath(), journal)
+    await this.assertSourceClosed()
+    if ((await this.validateDatabase(source.database)).signature !== pending.signature) throw new Error("O perfil legado mudou; gere uma nova prévia")
     await this.replaceSnapshot(imported)
     await atomicJson(this.journalPath(), { ...journal, phase: "active" })
     return { canRollback: true, importedAt, message: `${imported.capsules.length} cápsulas importadas. A origem permaneceu intacta.` }
@@ -101,7 +113,20 @@ export class LegacyImportService {
       try { const canonicalRoot = await realpath(root); const child = relative(canonicalRoot, canonicalDatabase); return child !== "" && !child.startsWith("..") && !isAbsolute(child) } catch { return false }
     }))
     if (!insideKnownRoot.some(Boolean)) throw new Error("Banco legado fora das raízes permitidas")
-    return { database: canonicalDatabase, signature: `${info.size}:${info.mtimeMs}` }
+    // A non-empty WAL may contain committed data absent from browser.sqlite.
+    // Require a clean legacy shutdown instead of importing a partial database.
+    try {
+      const wal = await lstat(`${canonicalDatabase}-wal`)
+      if (wal.isSymbolicLink() || !wal.isFile() || wal.size > 0) throw new Error("Banco legado com transação pendente; abra e feche o legado antes de importar")
+    } catch (cause) { if ((cause as NodeJS.ErrnoException).code !== "ENOENT") throw cause }
+    const hash = createHash("sha256")
+    let bytes = 0
+    for await (const chunk of createReadStream(canonicalDatabase)) {
+      bytes += (chunk as Buffer).length
+      if (bytes > 256 * 1024 * 1024) throw new Error("Banco legado excedeu o limite de tamanho")
+      hash.update(chunk)
+    }
+    return { database: canonicalDatabase, signature: hash.digest("hex") }
   }
 
   private async validateBackup(path: string) {
@@ -111,6 +136,18 @@ export class LegacyImportService {
     if (!child || child.startsWith("..") || isAbsolute(child)) throw new Error("Backup fora do diretório permitido")
     return canonical
   }
+}
+
+async function assertLegacyClosed(): Promise<void> {
+  if (process.platform !== "win32") throw new Error("Verificação do legado disponível somente no Windows")
+  let output: string
+  try {
+    const result = await promisify(execFile)(join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tasklist.exe"),
+      ["/FI", "IMAGENAME eq Matriz Control Electron.exe", "/FO", "CSV", "/NH"],
+      { windowsHide: true, timeout: 5_000, maxBuffer: 512 * 1024, encoding: "utf8" })
+    output = result.stdout
+  } catch { throw new Error("Não foi possível verificar se o legado está fechado; importação bloqueada") }
+  if (output.split(/\r?\n/).some((line) => /^"Matriz Control Electron\.exe",/i.test(line.trim()))) throw new Error("Feche o Matriz Control Electron antes de importar")
 }
 
 async function atomicJson(path: string, value: unknown) {

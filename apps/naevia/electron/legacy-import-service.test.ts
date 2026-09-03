@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { mkdir, readFile, utimes, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { mkdtemp, rm } from "node:fs/promises"
@@ -61,7 +61,51 @@ describe("LegacyImportService", () => {
     await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("write failed")
     expect((await service.status()).canRollback).toBe(true)
   })
+
+  it("blocks preview and confirmation while the legacy application is open", async () => {
+    let running = true
+    const { service, current } = await importFixture(async () => {
+      if (running) throw new Error("Feche o Matriz Control Electron antes de importar")
+    })
+    expect(await service.preview()).toMatchObject({ available: false, reason: expect.stringContaining("Feche") })
+    running = false
+    const preview = await service.preview()
+    running = true
+    await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("Feche")
+    expect(current().capsules[0].name).toBe("Atual")
+  })
+
+  it("detects a same-size edit even when the original timestamp is restored", async () => {
+    const { service, database, current } = await importFixture()
+    const stamp = new Date("2020-01-01T00:00:00Z")
+    await utimes(database, stamp, stamp)
+    const preview = await service.preview()
+    await writeFile(database, "changed")
+    await utimes(database, stamp, stamp)
+    await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("mudou")
+    expect(current().capsules[0].name).toBe("Atual")
+  })
+
+  it("refuses a pending SQLite WAL without changing the target profile", async () => {
+    const { service, database, current } = await importFixture()
+    const preview = await service.preview()
+    await writeFile(`${database}-wal`, "pending transaction")
+    await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("pendente")
+    expect(current().capsules[0].name).toBe("Atual")
+  })
 })
+
+async function importFixture(assertClosed: () => Promise<void> = async () => undefined) {
+  const root = await mkdtemp(join(tmpdir(), "naevia-import-")); roots.push(root)
+  const legacyRoot = join(root, "legacy")
+  const database = join(legacyRoot, "vault", "browser.sqlite")
+  await mkdir(join(legacyRoot, "vault"), { recursive: true })
+  await writeFile(database, "fixture")
+  let state = snapshot("Atual")
+  const service = new LegacyImportService(join(root, "naevia"), [legacyRoot], async (next) => { state = next }, async () => state,
+    () => ({ capsules: [{ id: "old", name: "Legado", policy: "human" }], tabs: [] }), Date.now, assertClosed)
+  return { service, database, current: () => state }
+}
 
 function snapshot(name: string): BrowserSnapshot {
   return { capsules: [{ id: "00000000-0000-0000-0000-000000000001", name, policy: "human" }], tabs: [{ id: "00000000-0000-0000-0000-000000000002", capsuleId: "00000000-0000-0000-0000-000000000001", title: "Nova", url: "https://duckduckgo.com", active: true, loading: false }], activeCapsuleId: "00000000-0000-0000-0000-000000000001", activeTabId: "00000000-0000-0000-0000-000000000002" }
