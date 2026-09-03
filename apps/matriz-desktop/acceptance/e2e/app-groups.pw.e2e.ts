@@ -1,7 +1,7 @@
 import { chooseMode, selectAcceptanceWorkspace } from "../playwright/actions"
 import { expect, test } from "../playwright/fixtures"
 
-test("creates an app group and reorders its projects in the native workspace", async ({ tauriPage: page }) => {
+test("creates an app group and reorders its projects in the native workspace", async ({ tauriPage: page }, testInfo) => {
   await selectAcceptanceWorkspace(page)
   await chooseMode(page, "Apps")
 
@@ -9,6 +9,7 @@ test("creates an app group and reorders its projects in the native workspace", a
   await expect(page.getByRole("button", { name: "Iniciar grupo Matriz", exact: true })).toBeVisible()
   await expect(page.getByRole("button", { name: "Parar grupo Matriz", exact: true })).toBeVisible()
   await expect(page.getByRole("button", { name: "Mostrar relatório da sequência", exact: true })).toBeVisible()
+  await page.screenshot({ path: testInfo.outputPath("01-matriz-group.png"), fullPage: true })
 
   await page.getByRole("button", { name: "+ NOVO GRUPO", exact: true }).click()
   await page.getByRole("textbox", { name: "Nome do novo grupo" }).fill("Release")
@@ -21,11 +22,13 @@ test("creates an app group and reorders its projects in the native workspace", a
   await page.getByRole("button", { name: "+ ADICIONAR APP", exact: true }).click()
   await page.locator(".desktop-group-picker").getByRole("button", { name: /^Hub/ }).click()
   await page.locator(".desktop-group-picker").getByRole("button", { name: /^Workbench/ }).click()
+  await page.getByRole("button", { name: "FECHAR", exact: true }).click()
 
   const rows = page.locator(".runtime-row")
   await expect(rows).toHaveCount(2)
   await expect(rows.nth(0)).toContainText("Hub")
   await expect(rows.nth(1)).toContainText("Workbench")
+  await page.screenshot({ path: testInfo.outputPath("02-custom-group.png"), fullPage: true })
 
   const dragged = page.locator(".runtime-row-wrap").nth(1)
   const target = page.locator(".runtime-row-wrap").nth(0)
@@ -39,4 +42,5 @@ test("creates an app group and reorders its projects in the native workspace", a
   await expect(page.getByRole("button", { name: "Parar grupo Release", exact: true })).toBeEnabled()
   await page.getByRole("button", { name: "Mostrar relatório da sequência", exact: true }).click()
   await expect(page.getByRole("button", { name: "Mostrar relatório da sequência", exact: true })).toHaveAttribute("aria-expanded", "true")
+  await page.screenshot({ path: testInfo.outputPath("03-reordered-controls.png"), fullPage: true })
 })
