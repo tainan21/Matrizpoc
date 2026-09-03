@@ -26,6 +26,7 @@ jobs:
       - run: pnpm --filter @matriz/app-naevia test
       - run: pnpm --filter @matriz/app-naevia lint
       - run: pnpm --filter @matriz/app-naevia typecheck
+      - run: pnpm --filter @matriz/app-naevia build
       - run: pnpm --filter @matriz/app-naevia e2e
       - name: Require signing and Hub credentials
         shell: pwsh
@@ -55,12 +56,21 @@ jobs:
           Get-FileHash "release-output/$name" -Algorithm SHA256 | ForEach-Object { "$($_.Hash)  $name" } | Set-Content release-output/SHA256SUMS.txt
           "file=$name" >> $env:GITHUB_OUTPUT
           "version=$version" >> $env:GITHUB_OUTPUT
+      - name: Publish verified installer before registering it in Hub
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            release-output/*.exe
+            release-output/SHA256SUMS.txt
       - name: Register signed stable release in Hub
         env:
           MATRIZ_DISTRIBUTION_HUB_URL: ${{ vars.MATRIZ_DISTRIBUTION_HUB_URL }}
           MATRIZ_DISTRIBUTION_ADMIN_TOKEN: ${{ secrets.MATRIZ_DISTRIBUTION_ADMIN_TOKEN }}
           MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY: ${{ secrets.MATRIZ_DISTRIBUTION_MANIFEST_PRIVATE_KEY }}
         run: corepack pnpm exec tsx tooling/scripts/publish-distribution-release.ts naevia-electron ${{ steps.artifact.outputs.version }} release-output/${{ steps.artifact.outputs.file }} https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.artifact.outputs.file }}
-      - uses: softprops/action-gh-release@v2
+      - name: Publish signed distribution metadata
+        uses: softprops/action-gh-release@v2
         with:
-          files: release-output/*
+          fail_on_unmatched_files: true
+          files: release-output/*.distribution.json
