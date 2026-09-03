@@ -7,7 +7,7 @@ import { dirname, isAbsolute, join, relative } from "node:path"
 import { promisify } from "node:util"
 
 import { mapLegacyBrowserState } from "../src/legacy-import.js"
-import { parseBrowserSnapshot } from "./browser-repository.js"
+import { BrowserSnapshotChangedError, parseBrowserSnapshot } from "./browser-repository.js"
 import type { BrowserSnapshot, LegacyImportPreview, LegacyImportStatus } from "../src/shared.js"
 
 interface LegacyRows {
@@ -20,11 +20,12 @@ interface PendingImport { readonly token: string; readonly database: string; rea
 export class LegacyImportService {
   private pending?: PendingImport
   private inProgress = false
+  private journalQueue: Promise<void> = Promise.resolve()
 
   constructor(
     private readonly userData: string,
     private readonly legacyRoots: readonly string[],
-    private readonly replaceSnapshot: (snapshot: BrowserSnapshot) => Promise<void>,
+    private readonly replaceSnapshot: (snapshot: BrowserSnapshot, expected: BrowserSnapshot) => Promise<void>,
     private readonly currentSnapshot: () => Promise<BrowserSnapshot>,
     private readonly readLegacy: (database: string) => LegacyRows = readLegacySqlite,
     private readonly now: () => number = Date.now,
@@ -33,6 +34,10 @@ export class LegacyImportService {
 
   async preview(): Promise<LegacyImportPreview> {
     if (this.inProgress) return { available: false, sourceLabel: "Matriz Control Electron", capsuleCount: 0, tabCount: 0, reason: "Uma operação de importação está em andamento" }
+    return this.serialize(() => this.preparePreview())
+  }
+
+  private async preparePreview(): Promise<LegacyImportPreview> {
     this.pending = undefined
     if (await this.hasPendingRecovery()) return { available: false, sourceLabel: "Matriz Control Electron", capsuleCount: 0, tabCount: 0, reason: "Conclua o rollback ou a recuperação da importação anterior antes de importar novamente" }
     try { await this.assertSourceClosed() }
@@ -69,18 +74,27 @@ export class LegacyImportService {
     if ((await this.validateDatabase(source.database)).signature !== pending.signature) throw new Error("O perfil legado mudou; gere uma nova prévia")
     const importId = randomUUID()
     const backupPath = join(this.userData, "legacy-import", "backups", `${importId}.json`)
-    await atomicJson(backupPath, { version: 1, snapshot: parseBrowserSnapshot(await this.currentSnapshot()) })
+    const current = parseBrowserSnapshot(await this.currentSnapshot())
+    await atomicJson(backupPath, { version: 1, snapshot: current })
     const importedAt = new Date(this.now()).toISOString()
     const journal = { version: 1, phase: "prepared", importId, importedAt, backupPath, sourceLabel: "Matriz Control Electron" }
     await atomicJson(this.journalPath(), journal)
     await this.assertSourceClosed()
     if ((await this.validateDatabase(source.database)).signature !== pending.signature) throw new Error("O perfil legado mudou; gere uma nova prévia")
-    await this.replaceSnapshot(imported)
+    try { await this.replaceSnapshot(imported, current) }
+    catch (cause) {
+      if (cause instanceof BrowserSnapshotChangedError) await atomicJson(this.journalPath(), { ...journal, phase: "aborted", abortedAt: new Date(this.now()).toISOString() })
+      throw cause
+    }
     await atomicJson(this.journalPath(), { ...journal, phase: "active" })
     return { canRollback: true, importedAt, message: `${imported.capsules.length} cápsulas importadas. A origem permaneceu intacta.` }
   }
 
-  async status(): Promise<LegacyImportStatus> {
+  status(): Promise<LegacyImportStatus> {
+    return this.serialize(() => this.readStatus())
+  }
+
+  private async readStatus(): Promise<LegacyImportStatus> {
     try {
       const { journal } = await this.recovery()
       return { canRollback: true, importedAt: journal.importedAt, message: journal.phase === "active" ? "Importação concluída; rollback disponível." : "Operação interrompida; recuperação disponível." }
@@ -96,9 +110,14 @@ export class LegacyImportService {
   private async restoreBackup(): Promise<LegacyImportStatus> {
     const { journal, snapshot } = await this.recovery()
     const replacedProfileBackup = join(this.userData, "legacy-import", "backups", `rollback-${randomUUID()}.json`)
-    await atomicJson(replacedProfileBackup, { version: 1, snapshot: parseBrowserSnapshot(await this.currentSnapshot()) })
+    const current = parseBrowserSnapshot(await this.currentSnapshot())
+    await atomicJson(replacedProfileBackup, { version: 1, snapshot: current })
     await atomicJson(this.journalPath(), { ...journal, phase: "rollback_prepared", replacedProfileBackup })
-    await this.replaceSnapshot(snapshot)
+    try { await this.replaceSnapshot(snapshot, current) }
+    catch (cause) {
+      if (cause instanceof BrowserSnapshotChangedError) await atomicJson(this.journalPath(), journal)
+      throw cause
+    }
     await atomicJson(this.journalPath(), { version: 1, rolledBackAt: new Date(this.now()).toISOString(), replacedProfileBackup })
     return { canRollback: false, message: "Rollback concluído. O perfil anterior foi restaurado; uma cópia do perfil substituído foi preservada." }
   }
@@ -116,16 +135,23 @@ export class LegacyImportService {
   private async exclusive<T>(operation: () => Promise<T>): Promise<T> {
     if (this.inProgress) throw new Error("Uma operação de importação está em andamento")
     this.inProgress = true
-    try { return await operation() }
+    try { return await this.serialize(operation) }
     finally { this.inProgress = false }
+  }
+
+  private serialize<T>(operation: () => Promise<T>): Promise<T> {
+    const result = this.journalQueue.then(operation)
+    this.journalQueue = result.then(() => undefined, () => undefined)
+    return result
   }
 
   private journalPath() { return join(this.userData, "legacy-import", "journal.json") }
 
   private async hasPendingRecovery(): Promise<boolean> {
     try {
-      const journal = JSON.parse(await readFile(this.journalPath(), "utf8")) as { version: number; rolledBackAt?: string }
-      return !journal || journal.version !== 1 || typeof journal.rolledBackAt !== "string" || !Number.isFinite(Date.parse(journal.rolledBackAt))
+      const journal = JSON.parse(await readFile(this.journalPath(), "utf8")) as { version: number; phase?: string; rolledBackAt?: string; abortedAt?: string }
+      const completedAt = journal?.phase === "aborted" ? journal.abortedAt : journal?.rolledBackAt
+      return !journal || journal.version !== 1 || typeof completedAt !== "string" || !Number.isFinite(Date.parse(completedAt))
     } catch (cause) { return (cause as NodeJS.ErrnoException).code !== "ENOENT" }
   }
 

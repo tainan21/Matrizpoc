@@ -346,7 +346,7 @@ async function createWindow() {
   legacyImport = new LegacyImportService(
     app.getPath("userData"),
     [...(testLegacyRoot ? [testLegacyRoot] : []), join(appData, "Matriz Control Electron"), join(appData, "Matriz Control")],
-    (snapshot) => repository.replace(snapshot),
+    (snapshot, expected) => repository.replace(snapshot, expected),
     () => repository.snapshot(),
   )
   mainWindow = new BrowserWindow({

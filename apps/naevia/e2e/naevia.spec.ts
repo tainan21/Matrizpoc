@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto"
 import { createServer } from "node:http"
 import { DatabaseSync } from "node:sqlite"
 import type { AddressInfo } from "node:net"
+import type { BrowserSnapshot } from "../src/shared"
 import { tmpdir } from "node:os"
 import { basename, dirname, join } from "node:path"
 
@@ -174,6 +175,57 @@ test("attaches a loading tab before the server responds and keeps it usable afte
     if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-loading-")) await rm(profile, { recursive: true, force: true })
   }
 })
+
+for (const [phase, currentName] of [
+  ["prepared", "Antes"], ["prepared", "Importado"], ["active", "Importado"],
+  ["rollback_prepared", "Importado"], ["rollback_prepared", "Antes"],
+] as const) {
+  test(`recovers ${phase} with ${currentName} on disk only after explicit rollback`, async () => {
+    const profile = await mkdtemp(join(tmpdir(), "naevia-recovery-"))
+    const server = createServer((_request, response) => { response.setHeader("content-type", "text/html"); response.end("<title>Local</title><p>Recovery fixture</p>") })
+    let application: ElectronApplication | undefined
+    try {
+      await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
+      const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/`
+      const previous = recoverySnapshot("Antes", url)
+      const current = currentName === "Antes" ? previous : recoverySnapshot("Importado", url)
+      const backupPath = join(profile, "legacy-import", "backups", `${randomUUID()}.json`)
+      await mkdir(dirname(backupPath), { recursive: true })
+      await writeFile(backupPath, JSON.stringify({ version: 1, snapshot: previous }))
+      await writeFile(join(profile, "browser-state.json"), JSON.stringify({ version: 1, snapshot: current }))
+      await writeFile(join(profile, "legacy-import", "journal.json"), JSON.stringify({ version: 1, phase, importId: randomUUID(), importedAt: new Date().toISOString(), backupPath }))
+      application = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
+      const window = await localWindow(application)
+      await expect(window.getByRole("button", { name: currentName, exact: true })).toHaveClass(/active/)
+      await expect.poll(() => window.evaluate(async () => (await globalThis.window.naevia.snapshot()).tabs.every((tab) => !tab.loading))).toBe(true)
+      await window.getByRole("button", { name: "Importar legado" }).click()
+      await expect(window.getByText("Backup disponível")).toBeVisible()
+      window.once("dialog", (dialog) => dialog.accept())
+      await window.getByRole("button", { name: "Restaurar perfil anterior" }).click()
+      await expect.poll(() => window.evaluate(async () => ({
+        canRollback: (await globalThis.window.naevia.legacyImportStatus()).canRollback,
+        error: document.querySelector('[role="alert"]')?.textContent ?? "",
+      }))).toEqual({ canRollback: false, error: "" })
+      await expect(window.getByRole("button", { name: "Antes", exact: true })).toHaveClass(/active/)
+      await application.close()
+      application = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
+      const restarted = await localWindow(application)
+      await expect(restarted.getByRole("button", { name: "Antes", exact: true })).toHaveClass(/active/)
+      expect(await restarted.evaluate(async () => (await globalThis.window.naevia.legacyImportStatus()).canRollback)).toBe(false)
+    } finally {
+      if (application) await application.close()
+      server.closeAllConnections()
+      await new Promise<void>((resolve) => server.close(() => resolve()))
+      if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-recovery-")) await rm(profile, { recursive: true, force: true })
+    }
+  })
+}
+
+function recoverySnapshot(name: string, url: string): BrowserSnapshot {
+  const capsuleId = randomUUID()
+  const tabId = randomUUID()
+  return { capsules: [{ id: capsuleId, name, policy: "human" }], tabs: [{ id: tabId, capsuleId, title: "Local", url, active: true, loading: false }], activeCapsuleId: capsuleId, activeTabId: tabId }
+}
 
 function launchNaevia(env: NodeJS.ProcessEnv): Promise<ElectronApplication> {
   const executablePath = process.env.NAEVIA_BINARY

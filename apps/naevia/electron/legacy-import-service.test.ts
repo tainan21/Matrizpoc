@@ -5,6 +5,7 @@ import { mkdtemp, rm } from "node:fs/promises"
 import { afterEach, describe, expect, it } from "vitest"
 
 import { LegacyImportService } from "./legacy-import-service.js"
+import { BrowserRepository } from "./browser-repository.js"
 import type { BrowserSnapshot } from "../src/shared.js"
 
 const roots: string[] = []
@@ -143,6 +144,25 @@ describe("LegacyImportService", () => {
     const originalJournal = await readFile(journalPath, "utf8")
     expect(await service.preview()).toMatchObject({ available: false, reason: expect.stringContaining("rollback") })
     expect(await readFile(journalPath, "utf8")).toBe(originalJournal)
+  })
+
+  it("aborts a stale import without replacing a browsing edit made after backup", async () => {
+    const root = await mkdtemp(join(tmpdir(), "naevia-import-")); roots.push(root)
+    const legacyRoot = join(root, "legacy")
+    await mkdir(join(legacyRoot, "vault"), { recursive: true })
+    await writeFile(join(legacyRoot, "vault", "browser.sqlite"), "fixture")
+    const userData = join(root, "naevia")
+    const repository = new BrowserRepository(join(userData, "browser-state.json"))
+    let checks = 0
+    const service = new LegacyImportService(userData, [legacyRoot], (next, expected) => repository.replace(next, expected),
+      () => repository.snapshot(), () => ({ capsules: [{ id: "old", name: "Legado", policy: "human" }], tabs: [] }), Date.now,
+      async () => { if (++checks === 3) await repository.mutate((state) => { state.capsules[0] = { ...state.capsules[0], name: "Edição recente" } }) })
+    const preview = await service.preview()
+    checks = 0
+    await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("mudou")
+    expect((await repository.snapshot()).capsules[0].name).toBe("Edição recente")
+    expect((await service.status()).canRollback).toBe(false)
+    expect((await service.preview()).available).toBe(true)
   })
 })
 

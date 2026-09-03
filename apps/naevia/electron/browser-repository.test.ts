@@ -72,4 +72,15 @@ describe("BrowserRepository", () => {
     await expect(repository.mutate((state) => { state.capsules.push(state.capsules[0]) })).rejects.toThrow()
     expect(await repository.snapshot()).toEqual(original)
   })
+
+  it("refuses a replacement prepared from stale state without losing a newer edit", async () => {
+    const { path, repository } = await fixture()
+    const expected = await repository.snapshot()
+    const replacement = { ...expected, capsules: expected.capsules.map((capsule) => ({ ...capsule, name: "Imported" })) }
+    await repository.mutate((state) => { state.capsules[0] = { ...state.capsules[0], name: "Newer edit" } })
+    await expect(repository.replace(replacement, expected)).rejects.toThrow("mudou")
+    expect((await new BrowserRepository(path).snapshot()).capsules[0].name).toBe("Newer edit")
+    await repository.replace(replacement, await repository.snapshot())
+    expect((await new BrowserRepository(path).snapshot()).capsules[0].name).toBe("Imported")
+  })
 })

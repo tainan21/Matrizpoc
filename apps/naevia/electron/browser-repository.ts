@@ -6,6 +6,10 @@ import type { BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const documentVersion = 1
 
+export class BrowserSnapshotChangedError extends Error {
+  constructor() { super("O perfil mudou durante a operação; revise e tente novamente") }
+}
+
 export class BrowserRepository {
   private snapshotValue?: BrowserSnapshot
   private pending: Promise<void> = Promise.resolve()
@@ -31,10 +35,12 @@ export class BrowserRepository {
     })
   }
 
-  replace(snapshot: BrowserSnapshot) {
+  replace(snapshot: BrowserSnapshot, expected?: BrowserSnapshot) {
     const replacement = structuredClone(snapshot)
+    const baseline = expected ? structuredClone(expected) : undefined
     return this.enqueue(async () => {
       const validated = parseBrowserSnapshot(replacement)
+      if (baseline && JSON.stringify(parseBrowserSnapshot(baseline)) !== JSON.stringify(parseBrowserSnapshot(await this.currentSnapshot()))) throw new BrowserSnapshotChangedError()
       await this.write(validated)
       this.snapshotValue = validated
     })
