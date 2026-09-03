@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto"
 import { spawn } from "node:child_process"
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
+import { mkdir } from "node:fs/promises"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { app, BrowserWindow, ipcMain, session, shell, WebContentsView, type Session } from "electron"
@@ -11,10 +11,10 @@ import { storeProducts } from "../src/store-catalog.js"
 import { MAX_DOWNLOAD_BYTES, safeDownloadName, validDownloadUrl } from "../src/downloads.js"
 import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./terminal-host.js"
 import { LegacyImportService } from "./legacy-import-service.js"
+import { BrowserRepository } from "./browser-repository.js"
 import type { AgentPolicy, BrowserCommand, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
-const documentVersion = 1
 const views = new Map<string, WebContentsView>()
 let mainWindow: BrowserWindow | undefined
 let repository: BrowserRepository
@@ -29,61 +29,6 @@ let downloadDirectory = ""
 let legacyImport: LegacyImportService
 
 if (process.env.NAEVIA_USER_DATA_DIR) app.setPath("userData", process.env.NAEVIA_USER_DATA_DIR)
-
-class BrowserRepository {
-  private snapshotValue?: BrowserSnapshot
-  constructor(private readonly path: string) {}
-
-  async snapshot() {
-    if (!this.snapshotValue) this.snapshotValue = await this.read()
-    return structuredClone(this.snapshotValue)
-  }
-
-  async mutate(change: (snapshot: MutableSnapshot) => void) {
-    const snapshot = await this.snapshot()
-    const mutable = structuredClone(snapshot) as MutableSnapshot
-    change(mutable)
-    await this.write(mutable)
-    this.snapshotValue = mutable
-    return this.snapshot()
-  }
-
-  async replace(snapshot: BrowserSnapshot) {
-    await this.write(snapshot)
-    this.snapshotValue = structuredClone(snapshot)
-  }
-
-  private async read(): Promise<BrowserSnapshot> {
-    try {
-      const parsed = JSON.parse(await readFile(this.path, "utf8")) as { version: number; snapshot: BrowserSnapshot }
-      if (parsed.version !== documentVersion) throw new Error("unsupported state")
-      return parsed.snapshot
-    } catch {
-      const capsuleId = randomUUID()
-      const tabId = randomUUID()
-      return {
-        capsules: [{ id: capsuleId, name: "Pessoal", policy: "human" }],
-        tabs: [{ id: tabId, capsuleId, title: "Nova aba", url: "https://duckduckgo.com/", active: true, loading: false }],
-        activeCapsuleId: capsuleId,
-        activeTabId: tabId,
-      }
-    }
-  }
-
-  private async write(snapshot: BrowserSnapshot) {
-    await mkdir(dirname(this.path), { recursive: true })
-    const temporary = `${this.path}.${randomUUID()}.tmp`
-    await writeFile(temporary, `${JSON.stringify({ version: documentVersion, snapshot }, null, 2)}\n`, { flag: "wx" })
-    await rename(temporary, this.path)
-  }
-}
-
-interface MutableSnapshot {
-  capsules: CapsuleView[]
-  tabs: TabView[]
-  activeCapsuleId: string
-  activeTabId: string
-}
 
 function partition(capsuleId: string) {
   if (!/^[a-f0-9-]{36}$/.test(capsuleId)) throw new Error("Cápsula inválida")

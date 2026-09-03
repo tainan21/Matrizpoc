@@ -16,9 +16,21 @@ Verified in this checkpoint:
 - Installer SHA-256: `fec6544eff0a5ec73939eba70ad21b4c6269a2ac8a654274888115a83d9c599f`.
 - Installer is **NotSigned**: local acceptance only, not a publicly trusted release.
 
+## Concurrent persistence follow-up
+
+A real Electron regression creating three tabs concurrently reproduced an `EPERM` rename failure. The same repository also returned different initial capsule identities to simultaneous readers of a missing profile.
+
+`BrowserRepository` is now in its own app-local native module. Reads, mutations and replacements share one promise queue; failed writes do not publish uncommitted memory state or block subsequent operations. No persistence format, dependency or shared package changed.
+
+- 19 unit tests passed, including concurrent initialization/writes and recovery after a real filesystem write failure.
+- Lint, typecheck and production build passed.
+- The restart acceptance now preserves six tabs, including concurrent creation and capsule activation.
+- The latest NSIS passed `state-fix-cycle-1` and `state-fix-cycle-2`, all three real Electron tests in each cycle, followed by uninstall.
+- Latest installer SHA-256: `38f16d48fdfcfe3c3e3255be63ccd9a576215ad1ab312c93bb6d1e26e1aab456`. This supersedes the installer above and remains an unsigned local build.
+
 ## Remaining migration gates
 
-The current importer covers capsule and tab metadata plus a backup/rollback of the NAEVIA snapshot. It does **not** establish complete migration of Chromium partitions, credentials, vault VHDX/BitLocker, library or download history. Closed-source-process verification and stronger concurrent-state/recovery coverage also remain necessary.
+The current importer covers capsule and tab metadata plus a backup/rollback of the NAEVIA snapshot. It does **not** establish complete migration of Chromium partitions, credentials, vault VHDX/BitLocker, library or download history. Verification that the legacy process is closed, snapshot shape validation, and import-specific transaction/recovery coverage also remain necessary.
 
 The current Store panel displays the Hub catalog; it is not proof of a complete desktop installation lifecycle. Agent policy labels, advanced browser capabilities and the Workbench contextual surface require their own functional acceptance. The larger Control/infra/updater/release gates are not re-certified by these three browser tests.
 

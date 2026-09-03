@@ -97,24 +97,35 @@ test("opens the real Electron shell with secure browser chrome", async () => {
   }
 })
 
-test("restores capsules and tabs after a complete restart", async () => {
+test("preserves concurrent tab creation and restores every tab after restart", async () => {
   const profile = await mkdtemp(join(tmpdir(), "naevia-restart-"))
   try {
     const first = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
-    const firstWindow = await localWindow(first)
-    await firstWindow.getByRole("button", { name: "Nova cápsula" }).click()
-    await firstWindow.getByLabel("Nome").fill("Persistente")
-    await firstWindow.getByLabel("Política").selectOption("agent-safe")
-    await firstWindow.getByRole("button", { name: "Criar cápsula" }).click()
-    await firstWindow.getByRole("button", { name: "Nova aba", exact: true }).click()
-    await expect(firstWindow.getByRole("tab")).toHaveCount(2)
-    await first.close()
+    try {
+      const firstWindow = await localWindow(first)
+      await firstWindow.getByRole("button", { name: "Nova cápsula" }).click()
+      await firstWindow.getByLabel("Nome").fill("Persistente")
+      await firstWindow.getByLabel("Política").selectOption("agent-safe")
+      await firstWindow.getByRole("button", { name: "Criar cápsula" }).click()
+      await firstWindow.getByRole("button", { name: "Nova aba", exact: true }).click()
+      await expect(firstWindow.getByRole("tab")).toHaveCount(2)
+      await firstWindow.evaluate(async () => {
+        const { activeCapsuleId } = await window.naevia.snapshot()
+        await Promise.all(Array.from({ length: 3 }, () => window.naevia.createTab(activeCapsuleId)))
+      })
+      await expect(firstWindow.getByRole("tab")).toHaveCount(5)
+      await firstWindow.evaluate(async () => {
+        const { activeCapsuleId } = await window.naevia.snapshot()
+        await Promise.all([window.naevia.createTab(activeCapsuleId), window.naevia.activateCapsule(activeCapsuleId)])
+      })
+      await expect(firstWindow.getByRole("tab")).toHaveCount(6)
+    } finally { await first.close() }
 
     const second = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
     try {
       const secondWindow = await localWindow(second)
       await expect(secondWindow.getByRole("button", { name: "Persistente" })).toHaveClass(/active/)
-      await expect(secondWindow.getByRole("tab")).toHaveCount(2)
+      await expect(secondWindow.getByRole("tab")).toHaveCount(6)
     } finally { await second.close() }
   } finally {
     if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-restart-")) await rm(profile, { recursive: true, force: true })
