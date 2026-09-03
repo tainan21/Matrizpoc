@@ -53,6 +53,7 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect.poll(() => application.windows().map((candidate) => candidate.url())).toContain(`${origin}/`)
     const content = application.windows().find((candidate) => candidate.url() === `${origin}/`)
     if (!content) throw new Error("Conteúdo remoto de teste não abriu")
+    expect(await content.evaluate(() => typeof globalThis.window.naevia)).toBe("undefined")
     await content.getByRole("link", { name: "Baixar prova" }).click({ timeout: 10_000 })
     await window.getByRole("button", { name: "Downloads" }).click()
     await expect(window.getByText("proof.txt")).toBeVisible()
@@ -226,6 +227,47 @@ function recoverySnapshot(name: string, url: string): BrowserSnapshot {
   const tabId = randomUUID()
   return { capsules: [{ id: capsuleId, name, policy: "human" }], tabs: [{ id: tabId, capsuleId, title: "Local", url, active: true, loading: false }], activeCapsuleId: capsuleId, activeTabId: tabId }
 }
+
+test("rejects native requests from a second window even with the same local URL and preload", async () => {
+  const profile = await mkdtemp(join(tmpdir(), "naevia-ipc-"))
+  let application: ElectronApplication | undefined
+  try {
+    application = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
+    const chrome = await localWindow(application)
+    const result = await application.evaluate(async ({ app, BrowserWindow }) => {
+      const trusted = BrowserWindow.getAllWindows()[0]
+      const impostor = new BrowserWindow({ show: false, webPreferences: {
+        preload: `${app.getAppPath()}/dist-electron/electron/preload.cjs`,
+        sandbox: true, contextIsolation: true, nodeIntegration: false,
+      } })
+      try {
+        await impostor.loadURL(trusted.webContents.getURL())
+        return await impostor.webContents.executeJavaScript(`(async () => {
+          if (typeof window.naevia?.snapshot !== "function") throw new Error("Fixture preload bridge is missing");
+          const results = [];
+          for (const call of [() => window.naevia.snapshot(), () => window.naevia.createTerminal()]) {
+            try { await call(); results.push("allowed"); } catch { results.push("denied"); }
+          }
+          return results;
+        })()`)
+      } finally { impostor.destroy() }
+    })
+    expect(result).toEqual(["denied", "denied"])
+    expect(await chrome.evaluate(() => window.naevia.terminalSessions())).toEqual([])
+    expect((await chrome.evaluate(() => window.naevia.snapshot())).capsules).toHaveLength(1)
+    const blockedNavigation = await application.evaluate(({ BrowserWindow }) => new Promise<boolean>((resolve, reject) => {
+      const contents = BrowserWindow.getAllWindows()[0].webContents
+      const timeout = setTimeout(() => reject(new Error("Navigation guard was not exercised")), 3_000)
+      contents.once("will-navigate", (event) => { clearTimeout(timeout); resolve(event.defaultPrevented) })
+      void contents.executeJavaScript("window.location.href = 'http://127.0.0.1:9/foreign'").catch(reject)
+    }))
+    expect(blockedNavigation).toBe(true)
+    expect((await chrome.evaluate(() => window.naevia.snapshot())).capsules).toHaveLength(1)
+  } finally {
+    if (application) await application.close()
+    if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-ipc-")) await rm(profile, { recursive: true, force: true })
+  }
+})
 
 function launchNaevia(env: NodeJS.ProcessEnv): Promise<ElectronApplication> {
   const executablePath = process.env.NAEVIA_BINARY

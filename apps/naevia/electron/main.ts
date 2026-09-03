@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto"
 import { spawn } from "node:child_process"
 import { mkdir } from "node:fs/promises"
 import { dirname, join } from "node:path"
-import { fileURLToPath } from "node:url"
-import { app, BrowserWindow, ipcMain, session, shell, WebContentsView, type Session } from "electron"
+import { fileURLToPath, pathToFileURL } from "node:url"
+import { app, BrowserWindow, ipcMain, session, shell, WebContentsView, type Session, type IpcMainInvokeEvent } from "electron"
 
 import { navigationTarget } from "../src/navigation.js"
 import { activateCapsule, closeTab } from "../src/browser-state.js"
@@ -12,11 +12,13 @@ import { MAX_DOWNLOAD_BYTES, safeDownloadName, validDownloadUrl } from "../src/d
 import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./terminal-host.js"
 import { LegacyImportService } from "./legacy-import-service.js"
 import { BrowserRepository } from "./browser-repository.js"
+import { assertTrustedShell, isShellUrl } from "./trusted-shell.js"
 import type { AgentPolicy, BrowserCommand, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
 const views = new Map<string, WebContentsView>()
 let mainWindow: BrowserWindow | undefined
+let shellUrl = ""
 let repository: BrowserRepository
 let activeViewId = ""
 let panelState = { side: "none" as "none" | "store" | "workbench" | "library" | "migration", terminal: false }
@@ -190,8 +192,14 @@ function spawnTerminalProcess(): TerminalProcess {
 }
 
 function registerIpc() {
-  ipcMain.handle("naevia:snapshot", () => repository.snapshot())
-  ipcMain.handle("naevia:capsule:create", async (_event, input: unknown) => {
+  const handle = (channel: string, listener: (event: IpcMainInvokeEvent, input: unknown) => unknown) => {
+    ipcMain.handle(channel, (event, input: unknown) => {
+      assertTrustedShell(event, mainWindow, shellUrl)
+      return listener(event, input)
+    })
+  }
+  handle("naevia:snapshot", () => repository.snapshot())
+  handle("naevia:capsule:create", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
     const name = text(value?.name, "Nome", 50)
     const selectedPolicy = policy(value?.policy)
@@ -206,13 +214,13 @@ function registerIpc() {
     })
     await showActive(changed); publish(changed); return changed
   })
-  ipcMain.handle("naevia:capsule:activate", async (_event, input: unknown) => {
+  handle("naevia:capsule:activate", async (_event, input: unknown) => {
     const capsuleId = text((input as Record<string, unknown>)?.capsuleId, "Cápsula", 36)
     const selected = activateCapsule(await repository.snapshot(), capsuleId)
     const changed = await repository.mutate((state) => Object.assign(state, selected))
     await showActive(changed); publish(changed); return changed
   })
-  ipcMain.handle("naevia:tab:create", async (_event, input: unknown) => {
+  handle("naevia:tab:create", async (_event, input: unknown) => {
     const capsuleId = text((input as Record<string, unknown>)?.capsuleId, "Cápsula", 36)
     const snapshot = await repository.snapshot()
     if (!snapshot.capsules.some((item) => item.id === capsuleId)) throw new Error("Cápsula desconhecida")
@@ -223,7 +231,7 @@ function registerIpc() {
     })
     await showActive(changed); publish(changed); return changed
   })
-  ipcMain.handle("naevia:tab:activate", async (_event, input: unknown) => {
+  handle("naevia:tab:activate", async (_event, input: unknown) => {
     const tabId = text((input as Record<string, unknown>)?.tabId, "Aba", 36)
     const current = await repository.snapshot()
     const tab = current.tabs.find((item) => item.id === tabId)
@@ -234,7 +242,7 @@ function registerIpc() {
     })
     await showActive(changed); publish(changed); return changed
   })
-  ipcMain.handle("naevia:tab:close", async (_event, input: unknown) => {
+  handle("naevia:tab:close", async (_event, input: unknown) => {
     const tabId = text((input as Record<string, unknown>)?.tabId, "Aba", 36)
     const selected = closeTab(await repository.snapshot(), tabId)
     const view = views.get(tabId)
@@ -242,7 +250,7 @@ function registerIpc() {
     const changed = await repository.mutate((state) => Object.assign(state, selected))
     await showActive(changed); publish(changed); return changed
   })
-  ipcMain.handle("naevia:browser:command", async (_event, input: unknown) => {
+  handle("naevia:browser:command", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
     const tabId = text(value?.tabId, "Aba", 36)
     const snapshot = await repository.snapshot()
@@ -255,7 +263,7 @@ function registerIpc() {
     else if (command === "stop") contents.stop()
     else if (command === "devtools") contents.openDevTools({ mode: "detach" })
   })
-  ipcMain.handle("naevia:browser:kill-switch", async (_event, input: unknown) => {
+  handle("naevia:browser:kill-switch", async (_event, input: unknown) => {
     const enabled = (input as Record<string, unknown>)?.enabled
     if (typeof enabled !== "boolean") throw new Error("Kill switch inválido")
     killSwitchEnabled = enabled
@@ -265,7 +273,7 @@ function registerIpc() {
     }
     return killSwitchEnabled
   })
-  ipcMain.handle("naevia:tab:navigate", async (_event, input: unknown) => {
+  handle("naevia:tab:navigate", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
     const tabId = text(value?.tabId, "Aba", 36)
     const url = navigationTarget(text(value?.input, "Endereço", 2_048))
@@ -274,7 +282,7 @@ function registerIpc() {
     await (await ensureView(snapshot.tabs.find((tab) => tab.id === tabId)!)).webContents.loadURL(url)
     return repository.snapshot()
   })
-  ipcMain.handle("naevia:layout", async (_event, input: unknown) => {
+  handle("naevia:layout", async (_event, input: unknown) => {
     const value = input as Record<string, unknown>
     if (!['none', 'store', 'workbench', 'library', 'migration'].includes(String(value?.side)) || typeof value?.terminal !== "boolean") throw new Error("Layout inválido")
     const window = mainWindow
@@ -288,41 +296,41 @@ function registerIpc() {
       } catch { throw new Error("Workbench não está disponível em 127.0.0.1:3005") }
     }
   })
-  ipcMain.handle("naevia:store:catalog", async () => {
+  handle("naevia:store:catalog", async () => {
     const response = await fetch("http://127.0.0.1:3000/api/v1/distribution/catalog", { signal: AbortSignal.timeout(2_500), cache: "no-store" })
     if (!response.ok) throw new Error(`Matriz Hub indisponível (${response.status})`)
     return storeProducts(await response.json())
   })
-  ipcMain.handle("naevia:downloads:list", () => [...downloads.values()].map(({ view }) => view))
-  ipcMain.handle("naevia:downloads:show", (_event, input: unknown) => {
+  handle("naevia:downloads:list", () => [...downloads.values()].map(({ view }) => view))
+  handle("naevia:downloads:show", (_event, input: unknown) => {
     const id = text((input as Record<string, unknown>)?.downloadId, "Download", 36)
     const download = downloads.get(id)
     if (!download || download.view.status !== "completed") throw new Error("Download indisponível")
     shell.showItemInFolder(download.path)
   })
-  ipcMain.handle("naevia:legacy:preview", () => legacyImport.preview())
-  ipcMain.handle("naevia:legacy:status", () => legacyImport.status())
-  ipcMain.handle("naevia:legacy:confirm", async (_event, input: unknown) => {
+  handle("naevia:legacy:preview", () => legacyImport.preview())
+  handle("naevia:legacy:status", () => legacyImport.status())
+  handle("naevia:legacy:confirm", async (_event, input: unknown) => {
     const token = text((input as Record<string, unknown>)?.confirmationToken, "Confirmação", 36)
     const result = await legacyImport.confirm(token)
     await reloadBrowserViews()
     return result
   })
-  ipcMain.handle("naevia:legacy:rollback", async () => {
+  handle("naevia:legacy:rollback", async () => {
     const result = await legacyImport.rollback()
     await reloadBrowserViews()
     return result
   })
-  ipcMain.handle("naevia:terminal:list", () => terminalHost.list())
-  ipcMain.handle("naevia:terminal:create", () => { terminalHost.create(); return terminalHost.list() })
-  ipcMain.handle("naevia:terminal:write", (_event, input: unknown) => {
+  handle("naevia:terminal:list", () => terminalHost.list())
+  handle("naevia:terminal:create", () => { terminalHost.create(); return terminalHost.list() })
+  handle("naevia:terminal:write", (_event, input: unknown) => {
     const value = input as Record<string, unknown>
     const sessionId = text(value?.sessionId, "Sessão", 36)
     if (typeof value?.input !== "string") throw new Error("Entrada inválida")
     terminalHost.write(sessionId, value.input)
   })
-  ipcMain.handle("naevia:terminal:interrupt", (_event, input: unknown) => terminalHost.interrupt(text((input as Record<string, unknown>)?.sessionId, "Sessão", 36)))
-  ipcMain.handle("naevia:terminal:close", (_event, input: unknown) => { terminalHost.close(text((input as Record<string, unknown>)?.sessionId, "Sessão", 36)); return terminalHost.list() })
+  handle("naevia:terminal:interrupt", (_event, input: unknown) => terminalHost.interrupt(text((input as Record<string, unknown>)?.sessionId, "Sessão", 36)))
+  handle("naevia:terminal:close", (_event, input: unknown) => { terminalHost.close(text((input as Record<string, unknown>)?.sessionId, "Sessão", 36)); return terminalHost.list() })
   terminalHost.subscribe((sessions) => {
     const window = mainWindow
     if (window && !window.isDestroyed()) window.webContents.send("naevia:terminal:sessions", sessions)
@@ -355,10 +363,14 @@ async function createWindow() {
   })
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
   mainWindow.webContents.on("will-attach-webview", (event) => event.preventDefault())
+  mainWindow.webContents.on("will-navigate", (event, url) => { if (!isShellUrl(url, shellUrl)) event.preventDefault() })
+  mainWindow.webContents.on("will-redirect", (event, url) => { if (!isShellUrl(url, shellUrl)) event.preventDefault() })
   mainWindow.on("resize", layout)
   mainWindow.on("closed", () => { for (const view of views.values()) view.webContents.close(); views.clear(); workbenchView?.webContents.close(); workbenchView = undefined; mainWindow = undefined })
-  const devUrl = process.env.NAEVIA_DEV_URL
-  await (devUrl ? mainWindow.loadURL(devUrl) : mainWindow.loadFile(join(here, "../../dist/index.html")))
+  const devUrl = app.isPackaged ? undefined : process.env.NAEVIA_DEV_URL
+  if (devUrl && devUrl !== "http://127.0.0.1:1430/") throw new Error("Origem de desenvolvimento não autorizada")
+  shellUrl = devUrl ?? pathToFileURL(join(here, "../../dist/index.html")).href
+  await mainWindow.loadURL(shellUrl)
   const snapshot = await repository.snapshot()
   await showActive(snapshot)
 }
