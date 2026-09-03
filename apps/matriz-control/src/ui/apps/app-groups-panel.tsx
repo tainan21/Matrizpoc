@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState, type FormEvent } from "react"
 import type { TerminalProject } from "../../domain/terminal"
 import { APP_GROUPS_STORAGE_KEY, createGroupId, type AppGroup } from "./app-groups"
 
@@ -22,7 +22,7 @@ export function AppGroupPanel({ groups, activeGroupId, projects, workbenchAvaila
   const knownProjects = useMemo(() => [...projects.map((project) => project.id), ...(workbenchAvailable ? ["matriz-workbench"] : [])], [projects, workbenchAvailable])
   const available = knownProjects.filter((id) => !activeGroup?.projectIds.includes(id))
 
-  function submit(event: React.FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const trimmed = name.trim()
     if (!trimmed) return
@@ -48,7 +48,7 @@ function labelFor(id: string, projects: readonly TerminalProject[], workbenchAva
 }
 
 export function persistAppGroups(groups: readonly AppGroup[]) {
-  window.localStorage.setItem(APP_GROUPS_STORAGE_KEY, JSON.stringify(groups))
+  try { window.localStorage.setItem(APP_GROUPS_STORAGE_KEY, JSON.stringify(groups)) } catch { /* Browser privacy modes keep the current session usable. */ }
 }
 
 export function nextGroupId(name: string, groups: readonly AppGroup[]): string {

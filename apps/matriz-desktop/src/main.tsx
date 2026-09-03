@@ -11,6 +11,7 @@ import { unavailableGateway } from "./integration/unavailable-gateway"
 import { ControlApp, type Feedback } from "./ui/app"
 import { applyControlTheme, readCachedTheme } from "./ui/theme/control-theme"
 import "./ui/styles.css"
+import "./ui/app-groups.css"
 
 bootstrapMatrizDesktop()
 

@@ -4,6 +4,7 @@ import { ControlShell } from "../src/ui/control-shell"
 import "./globals.css"
 import "./browser.css"
 import "./operations.css"
+import "./app-groups.css"
 
 export const metadata: Metadata = { title: "Matriz Control", description: "Cockpit operacional local do ecossistema Matriz" }
 export default function RootLayout({ children }: { children: ReactNode }) { return <html lang="pt-BR"><body><ControlShell>{children}</ControlShell></body></html> }
