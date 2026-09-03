@@ -112,6 +112,14 @@ and restart, all three remained available. The server is stopped if provisioning
 fails. This does not yet prove an app worker publishing a committed outbox row or
 consumer inbox idempotency.
 
+Runtime launch now resolves only the selected catalog app's environment inside
+the native authority. Hub, Pay and Seumei receive their fixed loopback endpoints
+and DPAPI-backed database, cache, OIDC, session and NATS values without returning
+them to the renderer. New additive migrations grant each worker only
+`SELECT`, `UPDATE` and `DELETE` on its own outbox table. The live PostgreSQL test
+authenticated all three worker roles against those queues and confirmed that the
+Hub worker cannot read a regular Hub domain table.
+
 The harness only accepts the official per-user install directory or an isolated
 acceptance root. It never kills unrelated listeners. If a catalog port is
 already occupied, the journey asserts the `EXTERNO` protected state and leaves

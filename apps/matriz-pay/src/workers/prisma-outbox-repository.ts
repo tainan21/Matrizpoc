@@ -1,4 +1,4 @@
-import { getPayDb } from "@matriz/platform-db/pay"
+import { getPayWorkerDb } from "@matriz/platform-db/pay"
 import type { ClaimedOutboxEvent, PayOutboxRepository } from "./outbox-publisher"
 
 type OutboxRow = Readonly<{
@@ -10,10 +10,10 @@ type OutboxRow = Readonly<{
   attempts: number
 }>
 
-type Client = ReturnType<typeof getPayDb>
+type Client = ReturnType<typeof getPayWorkerDb>
 
 export class PrismaPayOutboxRepository implements PayOutboxRepository {
-  constructor(private readonly client: Client = getPayDb()) {}
+  constructor(private readonly client: Client = getPayWorkerDb()) {}
 
   async claim(input: { limit: number; lockUntil: Date; now: Date }): Promise<readonly ClaimedOutboxEvent[]> {
     const limit = Math.max(1, Math.min(100, Math.trunc(input.limit)))

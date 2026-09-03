@@ -2786,6 +2786,24 @@ mod portable_database_tests {
             let comparison = compare_migration_ledger(&files[*schema], &applied).unwrap();
             assert_eq!(comparison.state, "clean", "ledger {schema}");
         }
+        for schema in ["hub", "seumei", "pay"] {
+            let role = format!("matriz_{schema}_worker");
+            let password = host.secret(&format!("postgres-{role}")).unwrap();
+            host.psql_as(
+                &role,
+                &password,
+                &format!("SELECT count(*) FROM {schema}.outbox_events;"),
+            )
+            .unwrap_or_else(|error| panic!("worker {schema} cannot read its outbox: {error}"));
+        }
+        let hub_worker_password = host.secret("postgres-matriz_hub_worker").unwrap();
+        assert!(host
+            .psql_as(
+                "matriz_hub_worker",
+                &hub_worker_password,
+                "SELECT count(*) FROM hub.institutional_projects;",
+            )
+            .is_err());
         host.run_local_seed(&workspace)
             .expect("seed through the real local-only backend");
         assert_eq!(
