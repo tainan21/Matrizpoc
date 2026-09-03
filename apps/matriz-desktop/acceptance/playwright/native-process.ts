@@ -60,7 +60,9 @@ export async function removeTemporaryRoot(input: TemporaryRootRemovalInput): Pro
   }
   const remove = input.remove ?? ((path: string) => rm(path, { recursive: true, force: true }))
   const pause = input.pause ?? ((milliseconds: number) => new Promise<void>((resolvePause) => setTimeout(resolvePause, milliseconds)))
-  const attempts = input.attempts ?? 50
+  // WebView2 utility processes can retain EBWebView/lockfile briefly after the
+  // owning Tauri process exits, especially while another test runner is busy.
+  const attempts = input.attempts ?? 150
   let lastError: unknown
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     try {

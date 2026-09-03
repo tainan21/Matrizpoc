@@ -64,7 +64,7 @@ describe("native Playwright process", () => {
   it("allows a WebView2 subprocess time to release its profile lock", async () => {
     const busy = Object.assign(new Error("profile locked"), { code: "EBUSY" })
     const remove = vi.fn()
-    for (let attempt = 0; attempt < 25; attempt += 1) remove.mockRejectedValueOnce(busy)
+    for (let attempt = 0; attempt < 75; attempt += 1) remove.mockRejectedValueOnce(busy)
     remove.mockResolvedValueOnce(undefined)
 
     await expect(removeTemporaryRoot({
@@ -73,7 +73,7 @@ describe("native Playwright process", () => {
       remove,
       pause: async () => undefined,
     })).resolves.toBeUndefined()
-    expect(remove).toHaveBeenCalledTimes(26)
+    expect(remove).toHaveBeenCalledTimes(76)
   })
 })
 
