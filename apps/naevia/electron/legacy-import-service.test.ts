@@ -93,18 +93,70 @@ describe("LegacyImportService", () => {
     await expect(service.confirm(preview.confirmationToken!)).rejects.toThrow("pendente")
     expect(current().capsules[0].name).toBe("Atual")
   })
+
+  it("refuses a corrupted rollback snapshot without replacing the active profile", async () => {
+    const { service, current, userData } = await importFixture()
+    const preview = await service.preview()
+    await service.confirm(preview.confirmationToken!)
+    const journal = JSON.parse(await readFile(join(userData, "legacy-import", "journal.json"), "utf8"))
+    await writeFile(journal.backupPath, JSON.stringify({ version: 1, snapshot: null }))
+    await expect(service.rollback()).rejects.toThrow()
+    expect(current().capsules[0].name).toBe("Legado")
+    expect((await service.status()).canRollback).toBe(false)
+  })
+
+  it("rejects rollback while an import is replacing the profile", async () => {
+    let started!: () => void
+    let release!: () => void
+    const entered = new Promise<void>((resolve) => { started = resolve })
+    const gate = new Promise<void>((resolve) => { release = resolve })
+    let writes = 0
+    const { service } = await importFixture(async () => undefined, async () => {
+      if (++writes === 1) { started(); await gate }
+    })
+    const preview = await service.preview()
+    const importing = service.confirm(preview.confirmationToken!)
+    try {
+      await entered
+      await expect(service.rollback()).rejects.toThrow("andamento")
+      expect(await service.preview()).toMatchObject({ available: false, reason: expect.stringContaining("andamento") })
+    } finally { release(); await importing }
+    expect((await service.status()).canRollback).toBe(true)
+  })
+
+  it("retains a recovery copy of the imported profile before rolling back", async () => {
+    const { service, userData } = await importFixture()
+    const preview = await service.preview()
+    await service.confirm(preview.confirmationToken!)
+    await service.rollback()
+    const journal = JSON.parse(await readFile(join(userData, "legacy-import", "journal.json"), "utf8"))
+    expect(typeof journal.replacedProfileBackup).toBe("string")
+    const backup = JSON.parse(await readFile(journal.replacedProfileBackup, "utf8"))
+    expect(backup.snapshot.capsules[0].name).toBe("Legado")
+  })
+
+  it("does not overwrite an outstanding recovery journal with another import", async () => {
+    const { service, userData } = await importFixture()
+    const preview = await service.preview()
+    await service.confirm(preview.confirmationToken!)
+    const journalPath = join(userData, "legacy-import", "journal.json")
+    const originalJournal = await readFile(journalPath, "utf8")
+    expect(await service.preview()).toMatchObject({ available: false, reason: expect.stringContaining("rollback") })
+    expect(await readFile(journalPath, "utf8")).toBe(originalJournal)
+  })
 })
 
-async function importFixture(assertClosed: () => Promise<void> = async () => undefined) {
+async function importFixture(assertClosed: () => Promise<void> = async () => undefined, onReplace: () => Promise<void> = async () => undefined) {
   const root = await mkdtemp(join(tmpdir(), "naevia-import-")); roots.push(root)
   const legacyRoot = join(root, "legacy")
   const database = join(legacyRoot, "vault", "browser.sqlite")
   await mkdir(join(legacyRoot, "vault"), { recursive: true })
   await writeFile(database, "fixture")
   let state = snapshot("Atual")
-  const service = new LegacyImportService(join(root, "naevia"), [legacyRoot], async (next) => { state = next }, async () => state,
+  const userData = join(root, "naevia")
+  const service = new LegacyImportService(userData, [legacyRoot], async (next) => { await onReplace(); state = next }, async () => state,
     () => ({ capsules: [{ id: "old", name: "Legado", policy: "human" }], tabs: [] }), Date.now, assertClosed)
-  return { service, database, current: () => state }
+  return { service, database, userData, current: () => state }
 }
 
 function snapshot(name: string): BrowserSnapshot {

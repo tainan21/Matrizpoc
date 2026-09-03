@@ -7,6 +7,7 @@ import { dirname, isAbsolute, join, relative } from "node:path"
 import { promisify } from "node:util"
 
 import { mapLegacyBrowserState } from "../src/legacy-import.js"
+import { parseBrowserSnapshot } from "./browser-repository.js"
 import type { BrowserSnapshot, LegacyImportPreview, LegacyImportStatus } from "../src/shared.js"
 
 interface LegacyRows {
@@ -18,6 +19,7 @@ interface PendingImport { readonly token: string; readonly database: string; rea
 
 export class LegacyImportService {
   private pending?: PendingImport
+  private inProgress = false
 
   constructor(
     private readonly userData: string,
@@ -30,7 +32,9 @@ export class LegacyImportService {
   ) {}
 
   async preview(): Promise<LegacyImportPreview> {
+    if (this.inProgress) return { available: false, sourceLabel: "Matriz Control Electron", capsuleCount: 0, tabCount: 0, reason: "Uma operação de importação está em andamento" }
     this.pending = undefined
+    if (await this.hasPendingRecovery()) return { available: false, sourceLabel: "Matriz Control Electron", capsuleCount: 0, tabCount: 0, reason: "Conclua o rollback ou a recuperação da importação anterior antes de importar novamente" }
     try { await this.assertSourceClosed() }
     catch (cause) { return { available: false, sourceLabel: "Matriz Control Electron", capsuleCount: 0, tabCount: 0, reason: (cause as Error).message } }
     const source = await this.findSource()
@@ -47,20 +51,25 @@ export class LegacyImportService {
     }
   }
 
-  async confirm(token: string): Promise<LegacyImportStatus> {
+  confirm(token: string): Promise<LegacyImportStatus> {
+    return this.exclusive(() => this.confirmImport(token))
+  }
+
+  private async confirmImport(token: string): Promise<LegacyImportStatus> {
     const pending = this.pending
     this.pending = undefined
     if (!pending || pending.token !== token || pending.expiresAt <= this.now()) throw new Error("Confirmação de importação inválida ou expirada")
+    if (await this.hasPendingRecovery()) throw new Error("Conclua o rollback da importação anterior")
     await this.assertSourceClosed()
     const source = await this.validateDatabase(pending.database)
     if (source.signature !== pending.signature) throw new Error("O perfil legado mudou; gere uma nova prévia")
     const rows = this.readLegacy(source.database)
-    const imported = mapLegacyBrowserState(rows.capsules, rows.tabs, randomUUID)
+    const imported = parseBrowserSnapshot(mapLegacyBrowserState(rows.capsules, rows.tabs, randomUUID))
     await this.assertSourceClosed()
     if ((await this.validateDatabase(source.database)).signature !== pending.signature) throw new Error("O perfil legado mudou; gere uma nova prévia")
     const importId = randomUUID()
     const backupPath = join(this.userData, "legacy-import", "backups", `${importId}.json`)
-    await atomicJson(backupPath, { version: 1, snapshot: await this.currentSnapshot() })
+    await atomicJson(backupPath, { version: 1, snapshot: parseBrowserSnapshot(await this.currentSnapshot()) })
     const importedAt = new Date(this.now()).toISOString()
     const journal = { version: 1, phase: "prepared", importId, importedAt, backupPath, sourceLabel: "Matriz Control Electron" }
     await atomicJson(this.journalPath(), journal)
@@ -73,25 +82,52 @@ export class LegacyImportService {
 
   async status(): Promise<LegacyImportStatus> {
     try {
-      const journal = JSON.parse(await readFile(this.journalPath(), "utf8")) as { importedAt: string; backupPath: string }
-      await this.validateBackup(journal.backupPath)
-      return { canRollback: true, importedAt: journal.importedAt, message: "Importação concluída; rollback disponível." }
+      const { journal } = await this.recovery()
+      return { canRollback: true, importedAt: journal.importedAt, message: journal.phase === "active" ? "Importação concluída; rollback disponível." : "Operação interrompida; recuperação disponível." }
     } catch {
       return { canRollback: false, message: "Nenhuma importação ativa." }
     }
   }
 
-  async rollback(): Promise<LegacyImportStatus> {
-    const journal = JSON.parse(await readFile(this.journalPath(), "utf8")) as { backupPath: string }
+  rollback(): Promise<LegacyImportStatus> {
+    return this.exclusive(() => this.restoreBackup())
+  }
+
+  private async restoreBackup(): Promise<LegacyImportStatus> {
+    const { journal, snapshot } = await this.recovery()
+    const replacedProfileBackup = join(this.userData, "legacy-import", "backups", `rollback-${randomUUID()}.json`)
+    await atomicJson(replacedProfileBackup, { version: 1, snapshot: parseBrowserSnapshot(await this.currentSnapshot()) })
+    await atomicJson(this.journalPath(), { ...journal, phase: "rollback_prepared", replacedProfileBackup })
+    await this.replaceSnapshot(snapshot)
+    await atomicJson(this.journalPath(), { version: 1, rolledBackAt: new Date(this.now()).toISOString(), replacedProfileBackup })
+    return { canRollback: false, message: "Rollback concluído. O perfil anterior foi restaurado; uma cópia do perfil substituído foi preservada." }
+  }
+
+  private async recovery() {
+    const journal = JSON.parse(await readFile(this.journalPath(), "utf8")) as { version: number; phase: string; importedAt: string; backupPath: string }
+    if (!journal || journal.version !== 1 || !["prepared", "active", "rollback_prepared"].includes(journal.phase) ||
+        typeof journal.importedAt !== "string" || !Number.isFinite(Date.parse(journal.importedAt)) || typeof journal.backupPath !== "string") throw new Error("Journal de importação incompatível")
     const backupPath = await this.validateBackup(journal.backupPath)
     const backup = JSON.parse(await readFile(backupPath, "utf8")) as { version: number; snapshot: BrowserSnapshot }
-    if (backup.version !== 1) throw new Error("Backup de importação incompatível")
-    await this.replaceSnapshot(backup.snapshot)
-    await atomicJson(this.journalPath(), { version: 1, rolledBackAt: new Date(this.now()).toISOString() })
-    return { canRollback: false, message: "Rollback concluído. O perfil anterior foi restaurado." }
+    if (!backup || backup.version !== 1) throw new Error("Backup de importação incompatível")
+    return { journal, snapshot: parseBrowserSnapshot(backup.snapshot) }
+  }
+
+  private async exclusive<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.inProgress) throw new Error("Uma operação de importação está em andamento")
+    this.inProgress = true
+    try { return await operation() }
+    finally { this.inProgress = false }
   }
 
   private journalPath() { return join(this.userData, "legacy-import", "journal.json") }
+
+  private async hasPendingRecovery(): Promise<boolean> {
+    try {
+      const journal = JSON.parse(await readFile(this.journalPath(), "utf8")) as { version: number; rolledBackAt?: string }
+      return !journal || journal.version !== 1 || typeof journal.rolledBackAt !== "string" || !Number.isFinite(Date.parse(journal.rolledBackAt))
+    } catch (cause) { return (cause as NodeJS.ErrnoException).code !== "ENOENT" }
+  }
 
   private async findSource() {
     for (const root of this.legacyRoots) {
