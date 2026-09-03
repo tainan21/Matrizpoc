@@ -2528,6 +2528,12 @@ mod portable_database_tests {
         reply.clear();
         reader.read_line(&mut reply).unwrap();
         assert_eq!(reply, "+PONG\r\n");
+        stream
+            .write_all(b"*3\r\n$3\r\nSET\r\n$18\r\nmatriz:persistence\r\n$7\r\nhealthy\r\n")
+            .unwrap();
+        reply.clear();
+        reader.read_line(&mut reply).unwrap();
+        assert_eq!(reply, "+OK\r\n");
         drop(reader);
         drop(stream);
         let recovered = PortableInfrastructureHost::new(root.path().to_path_buf());
@@ -2540,6 +2546,36 @@ mod portable_database_tests {
         recovered
             .stop(InfrastructureServiceId::Garnet)
             .expect("stop receipt-owned Garnet");
+        host.start_garnet().expect("restart temporary Garnet");
+        wait_for_port(46379, Duration::from_secs(20)).expect("Garnet restart readiness");
+        let mut stream = TcpStream::connect("127.0.0.1:46379").unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .unwrap();
+        let mut reader = BufReader::new(stream.try_clone().unwrap());
+        write!(
+            stream,
+            "*3\r\n$4\r\nAUTH\r\n$10\r\nmatriz_hub\r\n${}\r\n{}\r\n",
+            password.len(),
+            password
+        )
+        .unwrap();
+        reply.clear();
+        reader.read_line(&mut reply).unwrap();
+        assert_eq!(reply, "+OK\r\n");
+        stream
+            .write_all(b"*2\r\n$3\r\nGET\r\n$18\r\nmatriz:persistence\r\n")
+            .unwrap();
+        reply.clear();
+        reader.read_line(&mut reply).unwrap();
+        assert_eq!(reply, "$7\r\n");
+        reply.clear();
+        reader.read_line(&mut reply).unwrap();
+        assert_eq!(reply, "healthy\r\n");
+        drop(reader);
+        drop(stream);
+        host.stop(InfrastructureServiceId::Garnet)
+            .expect("stop restarted Garnet");
         assert!(
             !host
                 .inspect(InfrastructureServiceId::Garnet)

@@ -91,8 +91,10 @@ Installation/promotion and startup now also require valid Authenticode with the
 exact `Microsoft Corporation` signer through the existing app-local verifier.
 A regression proved that the old installed-file shortcut accepted an unsigned
 replacement; it now refuses it. The real signed artifact passed again after
-enforcement. Cache persistence across restart and a full app/stack integration
-remain separate acceptance work.
+enforcement. A subsequent real journey wrote an authenticated cache value,
+stopped the receipt-owned process, restarted the same temporary instance with
+recovery enabled and read the exact value back before a clean second stop. Full
+app/stack integration remains separate acceptance work.
 
 The harness only accepts the official per-user install directory or an isolated
 acceptance root. It never kills unrelated listeners. If a catalog port is
