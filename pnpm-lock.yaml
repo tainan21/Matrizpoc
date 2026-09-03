@@ -263,7 +263,7 @@ importers:
         version: 2.11.1
       next:
         specifier: 16.2.12
-        version: 16.2.12(@playwright/test@1.62.1)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+        version: 16.2.12(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react:
         specifier: 19.2.0
         version: 19.2.0
@@ -693,6 +693,9 @@ importers:
       '@matriz/integration-api-contracts':
         specifier: workspace:*
         version: link:../../packages/integration/api-contracts
+      '@matriz/integration-event-delivery':
+        specifier: workspace:*
+        version: link:../../packages/integration/event-delivery
       '@matriz/integration-registry-core':
         specifier: workspace:*
         version: link:../../packages/integration/registry-core
@@ -708,6 +711,12 @@ importers:
       '@matriz/platform-db':
         specifier: workspace:*
         version: link:../../packages/platform/db
+      '@nats-io/jetstream':
+        specifier: 3.4.0
+        version: 3.4.0
+      '@nats-io/transport-node':
+        specifier: 3.4.0
+        version: 3.4.0
       '@tauri-apps/api':
         specifier: 2.11.1
         version: 2.11.1
@@ -12122,6 +12131,32 @@ snapshots:
 
   negotiator@1.0.0: {}
 
+  next@16.2.12(@babel/core@7.29.7)(@playwright/test@1.62.1)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      '@next/env': 16.2.12
+      '@swc/helpers': 0.5.15
+      baseline-browser-mapping: 2.11.19
+      caniuse-lite: 1.0.30001810
+      postcss: 8.5.26
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      styled-jsx: 5.1.6(@babel/core@7.29.7)(react@19.2.0)
+    optionalDependencies:
+      '@next/swc-darwin-arm64': 16.2.12
+      '@next/swc-darwin-x64': 16.2.12
+      '@next/swc-linux-arm64-gnu': 16.2.12
+      '@next/swc-linux-arm64-musl': 16.2.12
+      '@next/swc-linux-x64-gnu': 16.2.12
+      '@next/swc-linux-x64-musl': 16.2.12
+      '@next/swc-win32-arm64-msvc': 16.2.12
+      '@next/swc-win32-x64-msvc': 16.2.12
+      '@playwright/test': 1.62.1
+      sharp: 0.35.3(@types/node@22.7.5)
+    transitivePeerDependencies:
+      - '@babel/core'
+      - '@types/node'
+      - babel-plugin-macros
+
   next@16.2.12(@playwright/test@1.62.1)(@types/node@22.7.5)(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       '@next/env': 16.2.12
@@ -13068,6 +13103,13 @@ snapshots:
   style-to-object@1.0.14:
     dependencies:
       inline-style-parser: 0.2.7
+
+  styled-jsx@5.1.6(@babel/core@7.29.7)(react@19.2.0):
+    dependencies:
+      client-only: 0.0.1
+      react: 19.2.0
+    optionalDependencies:
+      '@babel/core': 7.29.7
 
   styled-jsx@5.1.6(react@19.2.0):
     dependencies:

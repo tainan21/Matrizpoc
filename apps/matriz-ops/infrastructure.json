@@ -9,6 +9,11 @@
   "events": { "transport": "nats-jetstream", "outbox": false, "inbox": true },
   "environment": { "keys": [
     { "name": "OPS_DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OPS_WORKER_DATABASE_URL", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "NATS_URL", "secret": false, "required": true, "source": "generated" },
+    { "name": "OPS_NATS_USERNAME", "secret": false, "required": true, "source": "generated" },
+    { "name": "OPS_NATS_PASSWORD", "secret": true, "required": true, "source": "control-vault" },
+    { "name": "OPS_INBOX_WORKER_ENABLED", "secret": false, "required": true, "source": "generated" },
     { "name": "MATRIZ_IDENTITY_ISSUER", "secret": false, "required": true, "source": "generated" },
     { "name": "OPS_OIDC_CLIENT_ID", "secret": false, "required": true, "source": "generated" },
     { "name": "OPS_OIDC_CALLBACK_URL", "secret": false, "required": true, "source": "generated" },

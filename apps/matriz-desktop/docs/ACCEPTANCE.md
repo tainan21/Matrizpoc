@@ -116,8 +116,11 @@ applies the repository migrations and creates a wallet through the real Pay
 domain API. The Pay worker claims that transaction's committed outbox row using
 its restricted database role, publishes it with the domain credential, waits for
 the JetStream ACK and only then records `publishedAt`. The test independently
-asserts one published database row and one message in `MATRIZ_PAY`. This closes
-the producer delivery gate; consumer inbox idempotency remains separate work.
+asserts one published database row and one message in `MATRIZ_PAY`. The same
+isolated stack runs the durable `MATRIZ_OPS_PAY` consumer with least-privilege
+credentials and proves that the Ops inbox row and read-only projection commit
+before JetStream acknowledgement. Duplicate delivery is suppressed
+transactionally by source event ID.
 
 Runtime launch now resolves only the selected catalog app's environment inside
 the native authority. Hub, Pay and Seumei receive their fixed loopback endpoints

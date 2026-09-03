@@ -1056,17 +1056,26 @@ impl PortableInfrastructureHost {
         fs::create_dir_all(&logs).map_err(|error| error.to_string())?;
         let config = self.root.join("nats/nats.conf");
         let users = [
-            ("matriz_control", "nats-control", "$JS.API.>"),
-            ("matriz_hub", "nats-hub", "matriz.v1.hub.>"),
-            ("matriz_pay", "nats-pay", "matriz.v1.pay.>"),
-            ("matriz_seumei", "nats-seumei", "matriz.v1.seumei.>"),
+            ("matriz_control", "nats-control", vec!["$JS.API.>"]),
+            ("matriz_hub", "nats-hub", vec!["matriz.v1.hub.>"]),
+            ("matriz_pay", "nats-pay", vec!["matriz.v1.pay.>"]),
+            ("matriz_seumei", "nats-seumei", vec!["matriz.v1.seumei.>"]),
+            (
+                "matriz_ops",
+                "nats-ops",
+                vec![
+                    "$JS.API.CONSUMER.INFO.MATRIZ_PAY.MATRIZ_OPS_PAY",
+                    "$JS.API.CONSUMER.MSG.NEXT.MATRIZ_PAY.MATRIZ_OPS_PAY",
+                    "$JS.ACK.MATRIZ_PAY.MATRIZ_OPS_PAY.>",
+                ],
+            ),
         ];
         let mut configured_users = Vec::with_capacity(users.len());
-        for (username, secret_name, publish_subject) in users {
+        for (username, secret_name, publish_subjects) in users {
             let verifier = bcrypt::hash(self.secret(secret_name)?, bcrypt::DEFAULT_COST)
                 .map_err(|error| error.to_string())?;
             configured_users.push(format!(
-                "{{ user: {username:?}, password: {verifier:?}, permissions: {{ publish: [{publish_subject:?}], subscribe: [\"_INBOX.>\"] }} }}"
+                "{{ user: {username:?}, password: {verifier:?}, permissions: {{ publish: {publish_subjects:?}, subscribe: [\"_INBOX.>\"] }} }}"
             ));
         }
         let contents = format!(
@@ -1165,26 +1174,33 @@ impl PortableInfrastructureHost {
                 .creation_flags(0x0800_0000),
         )?;
         wait_for_port(55432, Duration::from_secs(20))?;
-        let exists = Command::new(psql)
-            .env("PGPASSWORD", &password)
-            .args([
-                "--host",
-                "127.0.0.1",
-                "--port",
-                "55432",
-                "--username",
-                "matriz_provisioner",
-                "--dbname",
-                "postgres",
-                "--no-password",
-                "--tuples-only",
-                "--no-align",
-                "--command",
-                "SELECT 1 FROM pg_database WHERE datname = 'matriz';",
-            ])
-            .creation_flags(0x0800_0000)
-            .output()
-            .map_err(|error| error.to_string())?;
+        let ready_started = std::time::Instant::now();
+        let exists = loop {
+            let output = Command::new(&psql)
+                .env("PGPASSWORD", &password)
+                .args([
+                    "--host",
+                    "127.0.0.1",
+                    "--port",
+                    "55432",
+                    "--username",
+                    "matriz_provisioner",
+                    "--dbname",
+                    "postgres",
+                    "--no-password",
+                    "--tuples-only",
+                    "--no-align",
+                    "--command",
+                    "SELECT 1 FROM pg_database WHERE datname = 'matriz';",
+                ])
+                .creation_flags(0x0800_0000)
+                .output()
+                .map_err(|error| error.to_string())?;
+            if output.status.success() || ready_started.elapsed() >= Duration::from_secs(20) {
+                break output;
+            }
+            std::thread::sleep(Duration::from_millis(200));
+        };
         if !exists.status.success() {
             return Err(format!(
                 "PostgreSQL iniciou, mas a autoridade local não autenticou: {}",
@@ -2115,6 +2131,28 @@ impl InfrastructureHost for PortableInfrastructureHost {
                 ]);
                 environment.extend(common_identity("PAY", "matriz-pay", 3012, self)?);
             }
+            "matriz-ops" => {
+                environment.extend([
+                    ("OPS_DATABASE_URL".into(), database("ops", "runtime", self)?),
+                    (
+                        "OPS_WORKER_DATABASE_URL".into(),
+                        database("ops", "worker", self)?,
+                    ),
+                    ("NATS_URL".into(), "nats://127.0.0.1:54222".into()),
+                    ("OPS_NATS_USERNAME".into(), "matriz_ops".into()),
+                    ("OPS_NATS_PASSWORD".into(), self.secret("nats-ops")?),
+                    ("OPS_INBOX_WORKER_ENABLED".into(), "true".into()),
+                    (
+                        "MATRIZ_PAY_INTERNAL_URL".into(),
+                        "http://127.0.0.1:3012".into(),
+                    ),
+                    (
+                        "MATRIZ_OPS_SERVICE_TOKEN".into(),
+                        self.secret("ops-service")?,
+                    ),
+                ]);
+                environment.extend(common_identity("OPS", "matriz-ops", 3011, self)?);
+            }
             _ => return Ok(Vec::new()),
         }
         Ok(environment)
@@ -2292,6 +2330,29 @@ fn provision_nats_streams(password: &str) -> Result<(), String> {
                 ));
             }
         }
+    }
+    let consumer = serde_json::json!({
+        "stream_name": "MATRIZ_PAY",
+        "config": {
+            "durable_name": "MATRIZ_OPS_PAY",
+            "name": "MATRIZ_OPS_PAY",
+            "filter_subject": "matriz.v1.pay.>",
+            "ack_policy": "explicit",
+            "deliver_policy": "all",
+            "max_deliver": 10,
+            "ack_wait": 30_u64 * 1_000_000_000,
+        },
+    });
+    let result = nats_api_request(
+        password,
+        "$JS.API.CONSUMER.DURABLE.CREATE.MATRIZ_PAY.MATRIZ_OPS_PAY",
+        &consumer,
+    )?;
+    if let Some(error) = result.get("error") {
+        return Err(format!(
+            "NATS recusou o consumer MATRIZ_OPS_PAY: {}",
+            redact(&error.to_string())
+        ));
     }
     Ok(())
 }
@@ -2650,6 +2711,14 @@ mod portable_database_tests {
             .collect::<BTreeMap<_, _>>();
         assert_eq!(pay["PAY_NATS_USERNAME"], "matriz_pay");
         assert!(pay["PAY_WORKER_DATABASE_URL"].contains("matriz_pay_worker"));
+        let ops = host
+            .runtime_environment("matriz-ops")
+            .unwrap()
+            .into_iter()
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(ops["OPS_NATS_USERNAME"], "matriz_ops");
+        assert_eq!(ops["OPS_INBOX_WORKER_ENABLED"], "true");
+        assert!(ops["OPS_WORKER_DATABASE_URL"].contains("matriz_ops_worker"));
         for secret_key in [
             "HUB_NATS_PASSWORD",
             "HUB_CACHE_PASSWORD",
@@ -2912,6 +2981,43 @@ mod portable_database_tests {
         )
         .unwrap();
         assert_eq!(stream["state"]["messages"].as_u64(), Some(1));
+
+        let ops_args = vec![
+            "--filter".to_owned(),
+            "@matriz/app-matriz-ops".to_owned(),
+            "test".to_owned(),
+            "--".to_owned(),
+            "src/workers/delivery.integration.test.ts".to_owned(),
+        ];
+        let (ops_program, ops_arguments) = corepack_pnpm_command(&ops_args).unwrap();
+        let ops_output = Command::new(ops_program)
+            .args(ops_arguments)
+            .current_dir(&workspace)
+            .envs(host.runtime_environment("matriz-ops").unwrap())
+            .env("RUN_OPS_INBOX_INTEGRATION", "1")
+            .stdin(Stdio::null())
+            .creation_flags(0x0800_0000)
+            .output()
+            .expect("run Ops inbox integration");
+        assert!(
+            ops_output.status.success(),
+            "Ops inbox integration failed: {}",
+            redact(&format!(
+                "{}\n{}",
+                String::from_utf8_lossy(&ops_output.stdout),
+                String::from_utf8_lossy(&ops_output.stderr)
+            ))
+        );
+        assert_eq!(
+            host.psql_output(
+                "matriz",
+                "SELECT count(*) FROM ops.inbox_events; SELECT count(*) FROM ops.pay_event_projections;"
+            )
+            .unwrap()
+            .lines()
+            .collect::<Vec<_>>(),
+            vec!["1", "1"]
+        );
     }
 
     #[test]

@@ -36,3 +36,28 @@ model MatrizSchemaRelease {
 
   @@map("__matriz_schema_releases")
 }
+
+model OpsInboxEvent {
+  sourceEventId String   @id
+  eventName     String
+  eventVersion  String
+  sourceApp     String
+  occurredAt    DateTime
+  processedAt   DateTime @default(now())
+
+  @@index([eventName, occurredAt])
+  @@map("inbox_events")
+}
+
+model OpsPayEventProjection {
+  sourceEventId String   @id
+  eventName     String
+  walletId      String?
+  transactionId String?
+  occurredAt    DateTime
+  receivedAt    DateTime @default(now())
+
+  @@index([walletId, occurredAt])
+  @@index([eventName, occurredAt])
+  @@map("pay_event_projections")
+}
