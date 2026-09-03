@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "v1",
+  "appId": "naevia",
+  "classification": "tooling",
+  "runtime": { "kind": "desktop" },
+  "database": { "required": false, "tenancy": "none" },
+  "identity": { "required": false },
+  "cache": { "required": false, "namespaces": [] },
+  "events": { "transport": "none", "outbox": false, "inbox": false },
+  "environment": { "keys": [] },
+  "filesystem": { "required": false }
+}
