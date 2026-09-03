@@ -1,4 +1,4 @@
-import { _electron as electron, expect, test } from "@playwright/test"
+import { _electron as electron, expect, test, type ElectronApplication } from "@playwright/test"
 import { mkdir, mkdtemp, rm } from "node:fs/promises"
 import { createServer } from "node:http"
 import { DatabaseSync } from "node:sqlite"
@@ -22,7 +22,7 @@ test("opens the real Electron shell with secure browser chrome", async () => {
   })
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
   const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
-  const application = await electron.launch({ args: ["."], cwd: process.cwd(), env: { ...process.env, NAEVIA_USER_DATA_DIR: profile, NAEVIA_DOWNLOAD_DIR: join(profile, "downloads"), NAEVIA_E2E: "1", NAEVIA_LEGACY_ROOT: legacyRoot } })
+  const application = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile, NAEVIA_DOWNLOAD_DIR: join(profile, "downloads"), NAEVIA_E2E: "1", NAEVIA_LEGACY_ROOT: legacyRoot })
   try {
     await application.firstWindow()
     await expect.poll(() => application.windows().map((candidate) => candidate.url())).toContainEqual(expect.stringMatching(/\/dist\/index\.html$/))
@@ -31,12 +31,6 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect(window.getByLabel("NAEVIA")).toBeVisible()
     await expect(window.getByLabel("Pesquisar ou digitar endereço")).toHaveValue("https://duckduckgo.com/")
     await expect(window.getByRole("button", { name: "Nova aba", exact: true })).toBeVisible()
-    const screenshotRoot = join(process.cwd(), "..", "..", "output", "naevia-acceptance")
-    await mkdir(screenshotRoot, { recursive: true })
-    await application.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.setBounds({ width: 1440, height: 900 }))
-    await window.screenshot({ path: join(screenshotRoot, "wide.png") })
-    await application.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.setBounds({ width: 900, height: 700 }))
-    await window.screenshot({ path: join(screenshotRoot, "compact.png") })
     await window.getByRole("button", { name: "Importar legado" }).click()
     await expect(window.getByText("1 cápsulas · 1 abas")).toBeVisible()
     window.once("dialog", (dialog) => dialog.accept())
@@ -57,7 +51,9 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect.poll(() => application.windows().map((candidate) => candidate.url())).toContain(`${origin}/`)
     const content = application.windows().find((candidate) => candidate.url() === `${origin}/`)
     if (!content) throw new Error("Conteúdo remoto de teste não abriu")
-    await content.getByRole("link", { name: "Baixar prova" }).click()
+    // WebContentsView hit-testing is not exposed consistently by Playwright
+    // when Electron is launched from an installed NSIS location.
+    await content.getByRole("link", { name: "Baixar prova" }).dispatchEvent("click")
     await window.getByRole("button", { name: "Downloads" }).click()
     await expect(window.getByText("proof.txt")).toBeVisible()
     await window.getByRole("button", { name: "Store" }).click()
@@ -89,6 +85,12 @@ test("opens the real Electron shell with secure browser chrome", async () => {
       return session.fromPartition(`persist:naevia-${ids[1]}`).cookies.get({ url: "https://isolation.test", name: "proof" })
     }, capsuleIds)
     expect(leaked).toEqual([])
+    const screenshotRoot = join(process.cwd(), "..", "..", "output", "naevia-acceptance")
+    await mkdir(screenshotRoot, { recursive: true })
+    await application.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.setBounds({ width: 1440, height: 900 }))
+    await window.screenshot({ path: join(screenshotRoot, "wide.png") })
+    await application.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0]?.setBounds({ width: 900, height: 700 }))
+    await window.screenshot({ path: join(screenshotRoot, "compact.png") })
   } finally {
     await application.close()
     await new Promise<void>((resolve) => server.close(() => resolve()))
@@ -99,7 +101,7 @@ test("opens the real Electron shell with secure browser chrome", async () => {
 test("restores capsules and tabs after a complete restart", async () => {
   const profile = await mkdtemp(join(tmpdir(), "naevia-restart-"))
   try {
-    const first = await electron.launch({ args: ["."], cwd: process.cwd(), env: { ...process.env, NAEVIA_USER_DATA_DIR: profile } })
+    const first = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
     const firstWindow = await localWindow(first)
     await firstWindow.getByRole("button", { name: "Nova cápsula" }).click()
     await firstWindow.getByLabel("Nome").fill("Persistente")
@@ -109,7 +111,7 @@ test("restores capsules and tabs after a complete restart", async () => {
     await expect(firstWindow.getByRole("tab")).toHaveCount(2)
     await first.close()
 
-    const second = await electron.launch({ args: ["."], cwd: process.cwd(), env: { ...process.env, NAEVIA_USER_DATA_DIR: profile } })
+    const second = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
     try {
       const secondWindow = await localWindow(second)
       await expect(secondWindow.getByRole("button", { name: "Persistente" })).toHaveClass(/active/)
@@ -120,7 +122,13 @@ test("restores capsules and tabs after a complete restart", async () => {
   }
 })
 
-async function localWindow(application: Awaited<ReturnType<typeof electron.launch>>) {
+function launchNaevia(env: NodeJS.ProcessEnv): Promise<ElectronApplication> {
+  const executablePath = process.env.NAEVIA_BINARY
+  const definedEnvironment = Object.fromEntries(Object.entries(env).filter((entry): entry is [string, string] => typeof entry[1] === "string"))
+  return electron.launch(executablePath ? { executablePath, env: definedEnvironment } : { args: ["."], cwd: process.cwd(), env: definedEnvironment })
+}
+
+async function localWindow(application: ElectronApplication) {
   await application.firstWindow()
   await expect.poll(() => application.windows().map((candidate) => candidate.url())).toContainEqual(expect.stringMatching(/\/dist\/index\.html$/))
   const window = application.windows().find((candidate) => /\/dist\/index\.html$/.test(candidate.url()))

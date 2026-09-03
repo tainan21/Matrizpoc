@@ -14,7 +14,9 @@
     "build": "vite build && tsc -p tsconfig.electron.json",
     "start": "electron .",
     "e2e": "playwright test --config playwright.config.ts",
-    "package": "corepack pnpm build && electron-builder --win nsis --x64"
+    "package:binary": "corepack pnpm build && electron-builder --win nsis --x64",
+    "package": "pwsh -NoProfile -File ./scripts/package-naevia.ps1",
+    "acceptance:installed": "pwsh -NoProfile -File ./acceptance/windows/naevia-installed-acceptance.ps1"
   },
   "dependencies": {
     "react": "19.2.0",
