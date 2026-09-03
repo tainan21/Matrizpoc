@@ -587,8 +587,13 @@ fn select_workspace(
 }
 
 #[tauri::command(rename_all = "camelCase")]
-fn start_app(state: tauri::State<'_, OperationsState>, app_id: String) -> Result<(), String> {
-    state.start_app(&app_id)
+fn start_app(
+    state: tauri::State<'_, OperationsState>,
+    infrastructure: tauri::State<'_, Arc<InfrastructureManager>>,
+    app_id: String,
+) -> Result<(), String> {
+    let environment = infrastructure.runtime_environment(&app_id)?;
+    state.start_app_with_environment(&app_id, &environment)
 }
 
 #[tauri::command(rename_all = "camelCase")]

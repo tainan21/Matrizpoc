@@ -93,6 +93,9 @@ pub trait InfrastructureHost: Send + Sync {
     fn event_diagnostics(&self) -> Result<Vec<EventQueueDiagnostic>, String> {
         Ok(Vec::new())
     }
+    fn runtime_environment(&self, _app_id: &str) -> Result<Vec<(String, String)>, String> {
+        Ok(Vec::new())
+    }
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -612,6 +615,13 @@ impl InfrastructureManager {
             .into_iter()
             .rev()
             .collect())
+    }
+
+    pub(crate) fn runtime_environment(
+        &self,
+        app_id: &str,
+    ) -> Result<Vec<(String, String)>, String> {
+        self.host.runtime_environment(app_id)
     }
 
     pub fn migrations(&self, workspace: &Path) -> Result<DatabaseMigrationSnapshot, String> {
@@ -2017,6 +2027,99 @@ impl InfrastructureHost for PortableInfrastructureHost {
         }
     }
 
+    fn runtime_environment(&self, app_id: &str) -> Result<Vec<(String, String)>, String> {
+        let database = |schema: &str, role_kind: &str, host: &Self| -> Result<String, String> {
+            let role = format!("matriz_{schema}_{role_kind}");
+            let password = host.secret(&format!("postgres-{role}"))?;
+            Ok(format!(
+                "postgresql://{role}:{password}@127.0.0.1:55432/matriz?schema={schema}"
+            ))
+        };
+        let common_identity = |prefix: &str, client_id: &str, callback_port: u16, host: &Self| {
+            Ok::<_, String>(vec![
+                (
+                    "MATRIZ_IDENTITY_ISSUER".into(),
+                    "http://127.0.0.1:8080".into(),
+                ),
+                (format!("{prefix}_OIDC_CLIENT_ID"), client_id.into()),
+                (
+                    format!("{prefix}_OIDC_CALLBACK_URL"),
+                    format!("http://127.0.0.1:{callback_port}/api/auth/oidc/callback"),
+                ),
+                (
+                    format!("{prefix}_OIDC_CLIENT_SECRET"),
+                    host.secret(&format!("oidc-{client_id}"))?,
+                ),
+                (
+                    format!("{prefix}_SESSION_SECRET"),
+                    host.secret(&format!("session-{client_id}"))?,
+                ),
+            ])
+        };
+        let mut environment = vec![("MATRIZ_RUNTIME_PROFILE".into(), "local".into())];
+        match app_id {
+            "matriz-hub" => {
+                environment.extend([
+                    ("HUB_DATABASE_URL".into(), database("hub", "runtime", self)?),
+                    (
+                        "HUB_WORKER_DATABASE_URL".into(),
+                        database("hub", "worker", self)?,
+                    ),
+                    ("NATS_URL".into(), "nats://127.0.0.1:54222".into()),
+                    ("HUB_NATS_USERNAME".into(), "matriz_hub".into()),
+                    ("HUB_NATS_PASSWORD".into(), self.secret("nats-hub")?),
+                    ("HUB_OUTBOX_WORKER_ENABLED".into(), "true".into()),
+                    ("CACHE_URL".into(), "redis://127.0.0.1:46379".into()),
+                    ("HUB_CACHE_USERNAME".into(), "matriz_hub".into()),
+                    ("HUB_CACHE_PASSWORD".into(), self.secret("garnet-hub")?),
+                    ("HUB_CACHE_DEFAULT_TTL_SECONDS".into(), "300".into()),
+                ]);
+                environment.extend(common_identity("HUB", "matriz-hub", 3000, self)?);
+            }
+            "seumei" => {
+                environment.extend([
+                    (
+                        "SEUMEI_DATABASE_URL".into(),
+                        database("seumei", "runtime", self)?,
+                    ),
+                    (
+                        "SEUMEI_WORKER_DATABASE_URL".into(),
+                        database("seumei", "worker", self)?,
+                    ),
+                    ("NATS_URL".into(), "nats://127.0.0.1:54222".into()),
+                    ("SEUMEI_NATS_USERNAME".into(), "matriz_seumei".into()),
+                    ("SEUMEI_NATS_PASSWORD".into(), self.secret("nats-seumei")?),
+                    ("SEUMEI_OUTBOX_WORKER_ENABLED".into(), "true".into()),
+                    (
+                        "SEUMEI_IDENTITY_SERVICE_TOKEN".into(),
+                        self.secret("identity-seumei-service")?,
+                    ),
+                ]);
+                environment.extend(common_identity("SEUMEI", "seumei", 3008, self)?);
+            }
+            "matriz-pay" => {
+                environment.extend([
+                    ("PAY_DATABASE_URL".into(), database("pay", "runtime", self)?),
+                    (
+                        "PAY_WORKER_DATABASE_URL".into(),
+                        database("pay", "worker", self)?,
+                    ),
+                    ("NATS_URL".into(), "nats://127.0.0.1:54222".into()),
+                    ("PAY_NATS_USERNAME".into(), "matriz_pay".into()),
+                    ("PAY_NATS_PASSWORD".into(), self.secret("nats-pay")?),
+                    ("PAY_OUTBOX_WORKER_ENABLED".into(), "true".into()),
+                    (
+                        "MATRIZ_OPS_SERVICE_TOKEN".into(),
+                        self.secret("ops-service")?,
+                    ),
+                ]);
+                environment.extend(common_identity("PAY", "matriz-pay", 3012, self)?);
+            }
+            _ => return Ok(Vec::new()),
+        }
+        Ok(environment)
+    }
+
     fn applied_migrations(&self, schema: &str) -> Result<Vec<AppliedMigration>, String> {
         if !DATABASE_SCHEMAS.contains(&schema) {
             return Err("Schema fora do catálogo nativo".into());
@@ -2516,6 +2619,53 @@ fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
 #[cfg(test)]
 mod portable_database_tests {
     use super::*;
+
+    #[test]
+    fn runtime_environment_is_allowlisted_and_keeps_secrets_native() {
+        let root = tempfile::tempdir().unwrap();
+        let host = PortableInfrastructureHost::new(root.path().to_path_buf());
+        assert!(host.runtime_environment("unknown").unwrap().is_empty());
+        let hub = host
+            .runtime_environment("matriz-hub")
+            .unwrap()
+            .into_iter()
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(hub["NATS_URL"], "nats://127.0.0.1:54222");
+        assert_eq!(hub["HUB_NATS_USERNAME"], "matriz_hub");
+        assert_eq!(hub["CACHE_URL"], "redis://127.0.0.1:46379");
+        assert_eq!(hub["HUB_OIDC_CLIENT_ID"], "matriz-hub");
+        assert!(hub["HUB_DATABASE_URL"].contains("matriz_hub_runtime"));
+        assert!(hub["HUB_WORKER_DATABASE_URL"].contains("matriz_hub_worker"));
+        let seumei = host
+            .runtime_environment("seumei")
+            .unwrap()
+            .into_iter()
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(seumei["SEUMEI_NATS_USERNAME"], "matriz_seumei");
+        assert!(seumei["SEUMEI_WORKER_DATABASE_URL"].contains("matriz_seumei_worker"));
+        let pay = host
+            .runtime_environment("matriz-pay")
+            .unwrap()
+            .into_iter()
+            .collect::<BTreeMap<_, _>>();
+        assert_eq!(pay["PAY_NATS_USERNAME"], "matriz_pay");
+        assert!(pay["PAY_WORKER_DATABASE_URL"].contains("matriz_pay_worker"));
+        for secret_key in [
+            "HUB_NATS_PASSWORD",
+            "HUB_CACHE_PASSWORD",
+            "HUB_OIDC_CLIENT_SECRET",
+            "HUB_SESSION_SECRET",
+        ] {
+            assert!(hub[secret_key].len() >= 32);
+            let vault = fs::read_dir(root.path().join("control/vault"))
+                .unwrap()
+                .map(|entry| fs::read(entry.unwrap().path()).unwrap())
+                .collect::<Vec<_>>();
+            assert!(vault.iter().all(|bytes| !bytes
+                .windows(hub[secret_key].len())
+                .any(|window| window == hub[secret_key].as_bytes())));
+        }
+    }
 
     fn nats_publish_reply(username: &str, password: &str, subject: &str) -> String {
         let mut stream = TcpStream::connect("127.0.0.1:54222").unwrap();

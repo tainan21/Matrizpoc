@@ -61,7 +61,11 @@ impl OperationsState {
             .ok_or_else(|| "Matriz workspace has not been selected".into())
     }
 
-    pub fn start_app(&self, app_id: &str) -> Result<(), String> {
+    pub fn start_app_with_environment(
+        &self,
+        app_id: &str,
+        environment: &[(String, String)],
+    ) -> Result<(), String> {
         let app = app_definition(app_id)?;
         let root = self.root()?;
         let mut children = self.children.lock().map_err(|_| "App lock poisoned")?;
@@ -82,6 +86,9 @@ impl OperationsState {
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
+        for (key, value) in environment {
+            command.env(key, value);
+        }
         #[cfg(windows)]
         command.creation_flags(CREATE_NO_WINDOW);
         let child = command
