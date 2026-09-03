@@ -28,9 +28,23 @@ A real Electron regression creating three tabs concurrently reproduced an `EPERM
 - The latest NSIS passed `state-fix-cycle-1` and `state-fix-cycle-2`, all three real Electron tests in each cycle, followed by uninstall.
 - Latest installer SHA-256: `38f16d48fdfcfe3c3e3255be63ccd9a576215ad1ab312c93bb6d1e26e1aab456`. This supersedes the installer above and remains an unsigned local build.
 
+## Profile/import safety and release readiness follow-up
+
+- `e7454978`: validates profile identities, references, active tab and web URLs before persistence/replacement. A malformed saved profile is copied intact to a uniquely named recovery file before starting with a fresh snapshot; ordinary filesystem read errors are not treated as an empty profile.
+- `802b1ea8`: blocks import while the known installed `Matriz Control Electron.exe` is running, rechecks closure and SHA-256 at confirmation, and rejects non-empty SQLite WALs. The process check fails closed when unavailable. It does not identify arbitrary renamed binaries or development Electron instances.
+- `503fa7c2`: serializes import/rollback transactions, validates recovery snapshots, preserves the profile replaced by rollback, records rollback preparation before replacement, and refuses to overwrite an outstanding/corrupt recovery journal with another import.
+- `18d5d7d4`: compiles NAEVIA before CI Playwright acceptance and uploads the verified installer before registering its download URL in Hub. YAML parsing and local checks passed; the GitHub workflow itself has not been executed.
+- `af431e5a`: updates the security inventory for the existing updater GET endpoint. No test expectation or route implementation was weakened.
+
+Fresh verification: 29 NAEVIA unit tests, lint, typecheck, build, three real Electron Playwright tests, NSIS packaging, and two install/test/uninstall cycles (`import-safety-cycle-1`, `import-safety-cycle-2`). Global smoke: **404/404**, boundaries and desktop release matrix passed. The smoke suite logs an unavailable local PostgreSQL connection while successfully testing error containment; this is not evidence of live infrastructure acceptance.
+
+Latest local installer SHA-256: `aa164da357f182d77c5383638d946692d868b27d45a870e36cb4f35bdad86629`. It supersedes both hashes above and is copied to `artifacts/installers/naevia-1.0.0-windows-x64-setup.exe`. Authenticode status remains **NotSigned**.
+
+Public-release blocker: `gh secret list --repo tainan21/Matrizpoc` returned exit code 4 because GitHub CLI is unauthenticated. The required CI secret names are known from the workflow, but their provisioning has not been verified. No keys/tokens were read, no tag was created, and no release or push was attempted.
+
 ## Remaining migration gates
 
-The current importer covers capsule and tab metadata plus a backup/rollback of the NAEVIA snapshot. It does **not** establish complete migration of Chromium partitions, credentials, vault VHDX/BitLocker, library or download history. Verification that the legacy process is closed, snapshot shape validation, and import-specific transaction/recovery coverage also remain necessary.
+The current importer covers capsule and tab metadata plus a backup/rollback of the NAEVIA snapshot. It does **not** establish complete migration of Chromium partitions, credentials, vault VHDX/BitLocker, library or download history. The guards above improve this partial importer; they do not make it a complete migration. Reconciliation with ordinary browsing edits during import and crash/restart acceptance of every transaction phase remain necessary.
 
 The current Store panel displays the Hub catalog; it is not proof of a complete desktop installation lifecycle. Agent policy labels, advanced browser capabilities and the Workbench contextual surface require their own functional acceptance. The larger Control/infra/updater/release gates are not re-certified by these three browser tests.
 
