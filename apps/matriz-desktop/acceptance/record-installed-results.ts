@@ -20,17 +20,19 @@ if (!/^[a-f0-9]{64}$/.test(artifactSha256)) throw new Error("Invalid installer S
 if (!Number.isFinite(durationMs) || durationMs < 0) throw new Error("Invalid acceptance duration")
 
 const startedAt = new Date(Date.now() - durationMs).toISOString()
+// A successful Playwright process verifies its executed journeys, not every
+// contract ID. Leave cases unresolved until individual evidence is mapped.
 const results = ACCEPTANCE_CASES.map((acceptanceCase) => ({
   schemaVersion: "v1" as const,
   runId,
   id: acceptanceCase.id,
   target: "packaged-candidate" as const,
-  status: "pass" as const,
+  status: "blocked" as const,
   startedAt,
   durationMs,
   commit,
   artifactSha256,
-  summary: `${acceptanceCase.id} passed in the installed production candidate`,
+  summary: `${acceptanceCase.id} has no individual evidence mapping; suite success alone does not certify this case`,
   evidence: [
     `${runId}/e2e.log`,
     `${runId}/installation.json`,
@@ -44,8 +46,9 @@ await writeFile(path.join(outputRoot, "summary.json"), JSON.stringify({
   schemaVersion: "v1",
   runId,
   target: "packaged-candidate",
-  status: "pass",
-  passed: results.length,
+  status: "blocked",
+  passed: 0,
+  blocked: results.length,
   failed: 0,
   artifactSha256,
   commit,
