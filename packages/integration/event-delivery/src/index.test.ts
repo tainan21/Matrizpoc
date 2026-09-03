@@ -1,8 +1,12 @@
 import { describe, expect, it, vi } from "vitest"
 import {
+  DurableInboxConsumer,
   DurableOutboxPublisher,
   ManagedJetStreamTransport,
   type ClaimedOutboxEvent,
+  type InboxEnvelope,
+  type InboxMessage,
+  type InboxRepository,
   type OutboxRepository,
 } from "./index"
 
@@ -82,5 +86,94 @@ describe("ManagedJetStreamTransport", () => {
     )
     await transport.publish({ subject: "matriz.v1.seumei.establishment.selected", messageId: "outbox-1", data: { id: "outbox-1" } })
     expect(publish).toHaveBeenCalledWith(expect.any(String), expect.any(Uint8Array), { msgID: "outbox-1", timeout: 5_000 })
+  })
+})
+
+const inboxEnvelope: InboxEnvelope = {
+  id: "outbox-1",
+  name: "wallet.created",
+  version: "v1",
+  sourceApp: "matriz-pay",
+  tenantId: null,
+  occurredAt: "2026-08-30T12:00:00.000Z",
+  payload: { walletId: "wallet-1" },
+}
+
+function inboxMessage(data: unknown = inboxEnvelope): InboxMessage & { calls: string[] } {
+  const calls: string[] = []
+  return {
+    subject: "matriz.v1.pay.wallet.created",
+    data,
+    calls,
+    ack: async () => { calls.push("ack") },
+    retry: async () => { calls.push("retry") },
+    terminate: async () => { calls.push("terminate") },
+  }
+}
+
+describe("DurableInboxConsumer", () => {
+  it("ACKs only after the repository commits the handler effect", async () => {
+    const message = inboxMessage()
+    const calls: string[] = []
+    const repository: InboxRepository<string> = {
+      processOnce: async (envelope, handler) => {
+        calls.push(`begin:${envelope.id}`)
+        await handler("transaction")
+        calls.push("commit")
+        return "processed"
+      },
+    }
+    const consumer = new DurableInboxConsumer({
+      repository,
+      declaredEvents: ["wallet.created"],
+      handle: async (envelope, transaction) => { calls.push(`handle:${envelope.name}:${transaction}`) },
+    })
+
+    await expect(consumer.consume(message)).resolves.toBe("processed")
+    expect(calls).toEqual(["begin:outbox-1", "handle:wallet.created:transaction", "commit"])
+    expect(message.calls).toEqual(["ack"])
+  })
+
+  it("ACKs a duplicate without invoking its domain handler again", async () => {
+    const message = inboxMessage()
+    const handle = vi.fn()
+    const consumer = new DurableInboxConsumer({
+      repository: { processOnce: async () => "duplicate" },
+      declaredEvents: ["wallet.created"],
+      handle,
+    })
+
+    await expect(consumer.consume(message)).resolves.toBe("duplicate")
+    expect(handle).not.toHaveBeenCalled()
+    expect(message.calls).toEqual(["ack"])
+  })
+
+  it("requests retry and does not ACK when the database transaction fails", async () => {
+    const message = inboxMessage()
+    const consumer = new DurableInboxConsumer({
+      repository: { processOnce: async () => { throw new Error("private database detail") } },
+      declaredEvents: ["wallet.created"],
+      handle: async () => undefined,
+    })
+
+    await expect(consumer.consume(message)).resolves.toBe("retry")
+    expect(message.calls).toEqual(["retry"])
+  })
+
+  it("terminates malformed or undeclared messages without exposing them to the handler", async () => {
+    const malformed = inboxMessage({ payload: "not-an-envelope" })
+    const undeclared = inboxMessage({ ...inboxEnvelope, name: "wallet.unknown" })
+    const handle = vi.fn()
+    const consumer = new DurableInboxConsumer({
+      repository: { processOnce: async () => "processed" },
+      declaredEvents: ["wallet.created"],
+      handle,
+    })
+
+    await expect(consumer.consume(malformed)).resolves.toBe("terminated")
+    await expect(consumer.consume(undeclared)).resolves.toBe("terminated")
+    expect(handle).not.toHaveBeenCalled()
+    expect(malformed.calls).toEqual(["terminate"])
+    expect(undeclared.calls).toEqual(["terminate"])
   })
 })

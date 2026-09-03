@@ -19,6 +19,87 @@ export interface OutboxRepository {
   prune(publishedBefore: Date, deadLetteredBefore: Date): Promise<number>
 }
 
+export type InboxEnvelope = Readonly<{
+  id: string
+  name: string
+  version: string
+  sourceApp: string
+  tenantId: string | null
+  occurredAt: string
+  payload: Readonly<Record<string, unknown>>
+}>
+
+export interface InboxMessage {
+  readonly subject: string
+  readonly data: unknown
+  ack(): Promise<void>
+  retry(): Promise<void>
+  terminate(): Promise<void>
+}
+
+export interface InboxRepository<Transaction> {
+  processOnce(
+    envelope: InboxEnvelope,
+    handler: (transaction: Transaction) => Promise<void>,
+  ): Promise<"processed" | "duplicate">
+}
+
+export type DurableInboxConsumerOptions<Transaction> = Readonly<{
+  repository: InboxRepository<Transaction>
+  declaredEvents: readonly string[]
+  handle(envelope: InboxEnvelope, transaction: Transaction): Promise<void>
+}>
+
+export class DurableInboxConsumer<Transaction = unknown> {
+  private readonly declaredEvents: ReadonlySet<string>
+
+  constructor(private readonly options: DurableInboxConsumerOptions<Transaction>) {
+    this.declaredEvents = new Set(options.declaredEvents)
+  }
+
+  async consume(message: InboxMessage): Promise<"processed" | "duplicate" | "retry" | "terminated"> {
+    const envelope = parseInboxEnvelope(message.data, message.subject)
+    if (!envelope || !this.declaredEvents.has(envelope.name)) {
+      await message.terminate()
+      return "terminated"
+    }
+    try {
+      const result = await this.options.repository.processOnce(
+        envelope,
+        (transaction) => this.options.handle(envelope, transaction),
+      )
+      await message.ack()
+      return result
+    } catch {
+      await message.retry()
+      return "retry"
+    }
+  }
+}
+
+function parseInboxEnvelope(value: unknown, subject: string): InboxEnvelope | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null
+  const input = value as Record<string, unknown>
+  const id = boundedText(input.id, 200)
+  const name = boundedText(input.name, 120)
+  const version = boundedText(input.version, 30)
+  const sourceApp = boundedText(input.sourceApp, 100)
+  const occurredAt = boundedText(input.occurredAt, 40)
+  const tenantId = input.tenantId === null ? null : boundedText(input.tenantId, 200)
+  const payload = input.payload
+  if (!id || !name || !version || !sourceApp || !occurredAt || tenantId === undefined) return null
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return null
+  if (!Number.isFinite(Date.parse(occurredAt))) return null
+  if (!/^matriz\.v1\.[a-z0-9-]+\.[a-z0-9.-]+$/.test(subject) || !subject.endsWith(`.${name}`)) return null
+  return { id, name, version, sourceApp, tenantId, occurredAt, payload: payload as Readonly<Record<string, unknown>> }
+}
+
+function boundedText(value: unknown, maximum: number): string | undefined {
+  if (typeof value !== "string") return undefined
+  const text = value.trim()
+  return text && text.length <= maximum ? text : undefined
+}
+
 export type JetStreamMessage = Readonly<{
   subject: string
   messageId: string
