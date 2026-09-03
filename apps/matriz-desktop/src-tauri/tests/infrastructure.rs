@@ -13,6 +13,77 @@ use matriz_desktop_native::infrastructure::{
 };
 use sha2::Digest;
 
+#[test]
+#[ignore = "child fixture, invoked only by the ownership regression"]
+fn portable_listener_fixture() {
+    assert_eq!(
+        std::env::var("MATRIZ_OWNERSHIP_FIXTURE").as_deref(),
+        Ok("1")
+    );
+    let listener = std::net::TcpListener::bind("127.0.0.1:46379").unwrap();
+    for stream in listener.incoming() {
+        drop(stream.unwrap());
+    }
+}
+
+#[test]
+fn same_executable_without_launch_receipt_is_external() {
+    use std::{
+        fs,
+        os::windows::process::CommandExt,
+        process::{Command, Stdio},
+        time::{Duration, Instant},
+    };
+    struct ChildGuard(std::process::Child);
+    impl Drop for ChildGuard {
+        fn drop(&mut self) {
+            let _ = self.0.kill();
+            let _ = self.0.wait();
+        }
+    }
+    let reservation =
+        std::net::TcpListener::bind("127.0.0.1:46379").expect("fixture port must be free");
+    let root = tempfile::tempdir().unwrap();
+    let executable = root.path().join("garnet/2.1.5/Service/Garnet.worker.exe");
+    fs::create_dir_all(executable.parent().unwrap()).unwrap();
+    fs::copy(std::env::current_exe().unwrap(), &executable).unwrap();
+    drop(reservation);
+    let mut child = ChildGuard(
+        Command::new(&executable)
+            .args(["--ignored", "--exact", "portable_listener_fixture"])
+            .env("MATRIZ_OWNERSHIP_FIXTURE", "1")
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .creation_flags(0x0800_0000)
+            .spawn()
+            .unwrap(),
+    );
+    let deadline = Instant::now() + Duration::from_secs(10);
+    while std::net::TcpStream::connect("127.0.0.1:46379").is_err() {
+        assert!(
+            child.0.try_wait().unwrap().is_none(),
+            "fixture exited early"
+        );
+        assert!(Instant::now() < deadline, "fixture did not listen");
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    let host = PortableInfrastructureHost::new(root.path().to_path_buf());
+    let observed = host.inspect(InfrastructureServiceId::Garnet).unwrap();
+    assert!(observed.running);
+    assert!(
+        !observed.owned,
+        "an executable path is not proof Control started this process"
+    );
+    assert!(host
+        .execute(InfrastructureTargetId::Garnet, InfrastructureAction::Stop)
+        .is_err());
+    assert!(
+        child.0.try_wait().unwrap().is_none(),
+        "external process must survive stop"
+    );
+}
+
 #[derive(Default)]
 struct FakeHost {
     states: Mutex<HashMap<InfrastructureServiceId, InfrastructureInspection>>,

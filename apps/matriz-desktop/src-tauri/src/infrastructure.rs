@@ -21,11 +21,10 @@ use windows_sys::Win32::{
     },
 };
 
-use crate::{
-    ports,
-    processes::{ProcessTerminator, WindowsProcessTerminator},
-    terminal::corepack_pnpm_command,
-};
+use crate::{ports, terminal::corepack_pnpm_command};
+
+#[path = "infrastructure_process.rs"]
+mod managed_process;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -857,6 +856,36 @@ impl PortableInfrastructureHost {
         Self { root }
     }
 
+    fn launch_receipt(&self, service_id: InfrastructureServiceId) -> PathBuf {
+        self.root.join("control/processes").join(match service_id {
+            InfrastructureServiceId::Postgres => "postgres.json",
+            InfrastructureServiceId::Garnet => "garnet.json",
+            InfrastructureServiceId::Nats => "nats.json",
+        })
+    }
+
+    fn launch(
+        &self,
+        service_id: InfrastructureServiceId,
+        command: &mut Command,
+    ) -> Result<(), String> {
+        if self.inspect(service_id)?.running {
+            return Err("A porta do serviço já está ocupada; inicialização recusada".into());
+        }
+        let mut child = command.spawn().map_err(|error| error.to_string())?;
+        if let Err(error) = managed_process::record(
+            &child,
+            &self.executable(service_id),
+            &self.launch_receipt(service_id),
+        ) {
+            // Only this newly spawned child is affected if durable ownership cannot be recorded.
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(error);
+        }
+        Ok(())
+    }
+
     fn executable(&self, service_id: InfrastructureServiceId) -> PathBuf {
         match service_id {
             InfrastructureServiceId::Postgres => {
@@ -1005,15 +1034,16 @@ impl PortableInfrastructureHost {
             .open(logs.join("service.log"))
             .map_err(|error| error.to_string())?;
         let stderr = log.try_clone().map_err(|error| error.to_string())?;
-        Command::new(executable)
-            .args(["--config"])
-            .arg(config)
-            .stdin(Stdio::null())
-            .stdout(Stdio::from(log))
-            .stderr(Stdio::from(stderr))
-            .creation_flags(0x0800_0000)
-            .spawn()
-            .map_err(|error| error.to_string())?;
+        self.launch(
+            InfrastructureServiceId::Nats,
+            Command::new(executable)
+                .args(["--config"])
+                .arg(config)
+                .stdin(Stdio::null())
+                .stdout(Stdio::from(log))
+                .stderr(Stdio::from(stderr))
+                .creation_flags(0x0800_0000),
+        )?;
         Ok(())
     }
 
@@ -1070,16 +1100,17 @@ impl PortableInfrastructureHost {
             .open(logs.join("service.log"))
             .map_err(|error| error.to_string())?;
         let stderr = log.try_clone().map_err(|error| error.to_string())?;
-        Command::new(executable)
-            .args(["-D"])
-            .arg(&data)
-            .args(["-p", "55432"])
-            .stdin(Stdio::null())
-            .stdout(Stdio::from(log))
-            .stderr(Stdio::from(stderr))
-            .creation_flags(0x0800_0000)
-            .spawn()
-            .map_err(|error| error.to_string())?;
+        self.launch(
+            InfrastructureServiceId::Postgres,
+            Command::new(executable)
+                .args(["-D"])
+                .arg(&data)
+                .args(["-p", "55432"])
+                .stdin(Stdio::null())
+                .stdout(Stdio::from(log))
+                .stderr(Stdio::from(stderr))
+                .creation_flags(0x0800_0000),
+        )?;
         wait_for_port(55432, Duration::from_secs(20))?;
         let exists = Command::new(psql)
             .env("PGPASSWORD", &password)
@@ -1151,34 +1182,35 @@ impl PortableInfrastructureHost {
             .open(&log_path)
             .map_err(|error| error.to_string())?;
         let stderr = log.try_clone().map_err(|error| error.to_string())?;
-        Command::new(executable)
-            .args([
-                "--bind",
-                "127.0.0.1",
-                "--port",
-                "46379",
-                "--memory",
-                "256m",
-                "--index",
-                "16m",
-                "--storage-tier",
-                "--aof",
-                "--recover",
-                "--logdir",
-            ])
-            .arg(&data)
-            .args(["--checkpointdir"])
-            .arg(&data)
-            .args(["--file-logger"])
-            .arg(&log_path)
-            .args(["--auth", "ACL", "--acl-file"])
-            .arg(acl)
-            .stdin(Stdio::null())
-            .stdout(Stdio::from(log))
-            .stderr(Stdio::from(stderr))
-            .creation_flags(0x0800_0000)
-            .spawn()
-            .map_err(|error| error.to_string())?;
+        self.launch(
+            InfrastructureServiceId::Garnet,
+            Command::new(executable)
+                .args([
+                    "--bind",
+                    "127.0.0.1",
+                    "--port",
+                    "46379",
+                    "--memory",
+                    "256m",
+                    "--index",
+                    "16m",
+                    "--storage-tier",
+                    "--aof",
+                    "--recover",
+                    "--logdir",
+                ])
+                .arg(&data)
+                .args(["--checkpointdir"])
+                .arg(&data)
+                .args(["--file-logger"])
+                .arg(&log_path)
+                .args(["--auth", "ACL", "--acl-file"])
+                .arg(acl)
+                .stdin(Stdio::null())
+                .stdout(Stdio::from(log))
+                .stderr(Stdio::from(stderr))
+                .creation_flags(0x0800_0000),
+        )?;
         Ok(())
     }
 
@@ -1748,8 +1780,29 @@ impl PortableInfrastructureHost {
                 pids.push(listener.pid);
             }
         }
-        for pid in pids {
-            WindowsProcessTerminator.terminate(pid)?;
+        if pids.is_empty() {
+            if let Some(process) = managed_process::VerifiedProcess::recover(
+                &expected,
+                &self.launch_receipt(service_id),
+                true,
+            ) {
+                process.terminate()?;
+            }
+            return Ok(());
+        }
+        let processes = pids
+            .into_iter()
+            .map(|pid| {
+                managed_process::VerifiedProcess::open(
+                    pid,
+                    &expected,
+                    &self.launch_receipt(service_id),
+                    true,
+                )
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        for process in processes {
+            process.terminate()?;
         }
         Ok(())
     }
@@ -1767,17 +1820,25 @@ impl InfrastructureHost for PortableInfrastructureHost {
             .into_iter()
             .filter(|listener| ports.contains(&listener.port))
             .collect();
-        let running = !listeners.is_empty();
+        let recorded = expected.as_ref().is_some_and(|expected| {
+            managed_process::VerifiedProcess::recover(
+                expected,
+                &self.launch_receipt(service_id),
+                false,
+            )
+            .is_some()
+        });
+        let running = !listeners.is_empty() || recorded;
         let owned = if running {
             expected.as_ref().is_some_and(|expected| {
                 listeners.iter().all(|listener| {
-                    listener
-                        .executable_path
-                        .as_deref()
-                        .map(PathBuf::from)
-                        .and_then(|path| path.canonicalize().ok())
-                        .as_ref()
-                        == Some(expected)
+                    managed_process::VerifiedProcess::open(
+                        listener.pid,
+                        expected,
+                        &self.launch_receipt(service_id),
+                        false,
+                    )
+                    .is_ok()
                 })
             })
         } else {
@@ -2261,6 +2322,64 @@ fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
     // SAFETY: DPAPI documents that the caller releases this buffer with LocalFree.
     unsafe { LocalFree(output.pbData.cast()) };
     String::from_utf8(bytes).map_err(|_| "A credencial local protegida está corrompida".into())
+}
+
+#[cfg(test)]
+mod ownership_tests {
+    use super::*;
+
+    #[test]
+    #[ignore = "child fixture for receipt recovery"]
+    fn pending_service_fixture() {
+        assert_eq!(std::env::var("MATRIZ_PENDING_FIXTURE").as_deref(), Ok("1"));
+        std::thread::sleep(Duration::from_secs(60));
+    }
+
+    #[test]
+    fn recorded_process_without_ports_is_recovered_and_can_be_stopped() {
+        struct ChildGuard(std::process::Child);
+        impl Drop for ChildGuard {
+            fn drop(&mut self) {
+                let _ = self.0.kill();
+                let _ = self.0.wait();
+            }
+        }
+        let root = tempfile::tempdir().unwrap();
+        let host = PortableInfrastructureHost::new(root.path().to_path_buf());
+        let service = InfrastructureServiceId::Garnet;
+        assert!(!ports::enumerate_listeners()
+            .unwrap()
+            .iter()
+            .any(|row| row.port == 46379));
+        let executable = host.executable(service);
+        fs::create_dir_all(executable.parent().unwrap()).unwrap();
+        fs::copy(std::env::current_exe().unwrap(), &executable).unwrap();
+        let mut child = ChildGuard(
+            Command::new(&executable)
+                .args([
+                    "--ignored",
+                    "--exact",
+                    "infrastructure::ownership_tests::pending_service_fixture",
+                ])
+                .env("MATRIZ_PENDING_FIXTURE", "1")
+                .stdin(Stdio::null())
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .creation_flags(0x0800_0000)
+                .spawn()
+                .unwrap(),
+        );
+        managed_process::record(&child.0, &executable, &host.launch_receipt(service)).unwrap();
+        let recovered = PortableInfrastructureHost::new(root.path().to_path_buf());
+        let state = recovered.inspect(service).unwrap();
+        assert!(state.running && state.owned && !state.healthy);
+        // Refuse a duplicate launch even before the first service binds its port.
+        assert!(recovered
+            .launch(service, &mut Command::new(&executable))
+            .is_err());
+        recovered.stop(service).unwrap();
+        assert!(child.0.try_wait().unwrap().is_some());
+    }
 }
 
 #[cfg(test)]

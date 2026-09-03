@@ -38,6 +38,25 @@ using the old blanket verdict do not certify the current release.
 
 ## Safety
 
+### Portable process ownership checkpoint (2026-09-03)
+
+Portable services now record their native launch handle's PID, Windows creation
+time, canonical executable and SHA-256 in an atomic app-local receipt. Inspection
+and stopping revalidate that identity. Stop uses the same verified Windows handle
+through termination and waits for exit, rather than reopening a potentially reused
+PID. A live recorded service remains visible before its listening port is ready.
+
+Regression tests reproduced both previous failures: an externally started copy at
+the catalog executable path was treated as owned, and a recorded process without
+a port was treated as stopped. Both now pass, including external-process survival,
+receipt recovery, changed identity fields and corrupt receipts. The pinned real
+NATS install/start/inspect/stop integration also passed with the new receipts.
+
+Existing services started before launch receipts existed are deliberately not
+adopted by executable path. They must be stopped explicitly outside this new
+ownership flow and then started through Control. This checkpoint does not certify
+full PostgreSQL/Garnet data operations or the overall release.
+
 The harness only accepts the official per-user install directory or an isolated
 acceptance root. It never kills unrelated listeners. If a catalog port is
 already occupied, the journey asserts the `EXTERNO` protected state and leaves
