@@ -37,7 +37,7 @@ model, not as an endpoint profile. The closed global whitelist remains User,
 authentication credentials/challenges, OIDC clients and institutional catalog;
 tenant-owned operational records, including ExternalLinks, follow **items 9 and 17**.
 
-## HTTP Route Handlers — 237 entries
+## HTTP Route Handlers — 238 entries
 
 | ID | Source | Function/tool | Effect | Profile |
 | --- | --- | --- | --- | --- |
@@ -114,6 +114,7 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 | `HTTP:matriz-hub:GET:/api/v1/capabilities/themes` | `apps/matriz-hub/app/api/v1/capabilities/themes/route.ts:1` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/distribution/catalog` | `apps/matriz-hub/app/api/v1/distribution/catalog/route.ts:2` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/distribution/products/[productId]` | `apps/matriz-hub/app/api/v1/distribution/products/[productId]/route.ts:2` | `GET` | R | `APP-R` |
+| `HTTP:matriz-hub:GET:/api/v1/distribution/products/[productId]/updater/[target]/[currentVersion]` | `apps/matriz-hub/app/api/v1/distribution/products/[productId]/updater/[target]/[currentVersion]/route.ts:3` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:GET:/api/v1/telemetry/summary` | `apps/matriz-hub/app/api/v1/telemetry/summary/route.ts:6` | `GET` | R | `APP-R` |
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/challenge` | `apps/matriz-hub/app/api/auth/mock/challenge/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
 | `HTTP:matriz-hub:OPTIONS:/api/auth/mock/email` | `apps/matriz-hub/app/api/auth/mock/email/route.ts:6` | `OPTIONS` | R | `H-MOCK` |
@@ -398,4 +399,4 @@ tenant-owned operational records, including ExternalLinks, follow **items 9 and 
 
 ## Counts and zero-endpoint apps
 
-Current tracked-source count: **344** = 237 HTTP methods, 56 Server Actions, and 51 MCP tools.
+Current tracked-source count: **345** = 238 HTTP methods, 56 Server Actions, and 51 MCP tools.
