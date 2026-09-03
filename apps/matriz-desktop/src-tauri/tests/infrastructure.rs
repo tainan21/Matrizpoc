@@ -503,11 +503,13 @@ fn portable_nats_artifact_installs_starts_and_stops_under_a_temporary_root() {
         time::Duration,
     };
 
-    let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), 54222);
-    assert!(
-        TcpStream::connect_timeout(&address, Duration::from_millis(200)).is_err(),
-        "NATS acceptance port is already occupied"
-    );
+    for port in [54222, 58222] {
+        let address = SocketAddr::new(IpAddr::V4(Ipv4Addr::LOCALHOST), port);
+        assert!(
+            TcpStream::connect_timeout(&address, Duration::from_millis(200)).is_err(),
+            "NATS acceptance port {port} is already occupied"
+        );
+    }
     let root = tempfile::tempdir().expect("temporary infrastructure root");
     let host = PortableInfrastructureHost::new(root.path().to_path_buf());
     host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Install)
@@ -524,10 +526,10 @@ fn portable_nats_artifact_installs_starts_and_stops_under_a_temporary_root() {
         }
         thread::sleep(Duration::from_millis(250));
     }
-    let running = host
-        .inspect(InfrastructureServiceId::Nats)
-        .expect("inspect NATS");
+    let running = host.inspect(InfrastructureServiceId::Nats);
+    // Stop the owned process before asserting health, including failed health checks.
+    let stopped = host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Stop);
+    let running = running.expect("inspect NATS");
     assert!(running.healthy && running.owned);
-    host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Stop)
-        .expect("stop owned NATS");
+    stopped.expect("stop owned NATS");
 }
