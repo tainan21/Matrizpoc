@@ -291,6 +291,21 @@ const DATABASE_SCHEMAS: &[&str] = &[
     "pay",
 ];
 
+const LOCAL_OIDC_CLIENT_SECRETS: &[(&str, &str)] = &[
+    ("OIDC_CLIENT_SECRET_CONTRACTS", "oidc-contracts"),
+    ("OIDC_CLIENT_SECRET_MATRIZ_ADMIN", "oidc-matriz-admin"),
+    (
+        "OIDC_CLIENT_SECRET_MATRIZ_CLIENT_ADMIN",
+        "oidc-matriz-client-admin",
+    ),
+    ("OIDC_CLIENT_SECRET_MATRIZ_HUB", "oidc-matriz-hub"),
+    ("OIDC_CLIENT_SECRET_MATRIZ_OPS", "oidc-matriz-ops"),
+    ("OIDC_CLIENT_SECRET_MATRIZ_PAY", "oidc-matriz-pay"),
+    ("OIDC_CLIENT_SECRET_SEUMEI", "oidc-seumei"),
+    ("OIDC_CLIENT_SECRET_SPOT", "oidc-spot"),
+    ("OIDC_CLIENT_SECRET_WILLDASH", "oidc-willdash"),
+];
+
 pub fn read_migration_files(
     workspace: &Path,
 ) -> Result<BTreeMap<String, Vec<MigrationFileDigest>>, String> {
@@ -1145,7 +1160,10 @@ impl PortableInfrastructureHost {
             .output()
             .map_err(|error| error.to_string())?;
         if !exists.status.success() {
-            return Err("PostgreSQL iniciou, mas a autoridade local não autenticou".into());
+            return Err(format!(
+                "PostgreSQL iniciou, mas a autoridade local não autenticou: {}",
+                redact(&String::from_utf8_lossy(&exists.stderr))
+            ));
         }
         if String::from_utf8_lossy(&exists.stdout).trim() != "1" {
             let created = Command::new(bin.join("createdb.exe"))
@@ -1247,10 +1265,12 @@ impl PortableInfrastructureHost {
         for schema in schemas {
             let runtime = format!("matriz_{schema}_runtime");
             let migration = format!("matriz_{schema}_migration");
+            let worker = format!("matriz_{schema}_worker");
             let runtime_password = self.secret(&format!("postgres-{runtime}"))?;
             let migration_password = self.secret(&format!("postgres-{migration}"))?;
+            let worker_password = self.secret(&format!("postgres-{worker}"))?;
             sql.push_str(&format!(
-                "DO $matriz$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{runtime}') THEN CREATE ROLE {runtime} LOGIN PASSWORD '{runtime_password}'; ELSE ALTER ROLE {runtime} PASSWORD '{runtime_password}'; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{migration}') THEN CREATE ROLE {migration} LOGIN PASSWORD '{migration_password}'; ELSE ALTER ROLE {migration} PASSWORD '{migration_password}'; END IF; END $matriz$;\nCREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {migration};\nGRANT USAGE ON SCHEMA {schema} TO {runtime};\nALTER DEFAULT PRIVILEGES FOR ROLE {migration} IN SCHEMA {schema} GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {runtime};\nALTER DEFAULT PRIVILEGES FOR ROLE {migration} IN SCHEMA {schema} GRANT USAGE, SELECT ON SEQUENCES TO {runtime};\n"
+                "DO $matriz$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{runtime}') THEN CREATE ROLE {runtime} LOGIN NOINHERIT NOBYPASSRLS PASSWORD '{runtime_password}'; ELSE ALTER ROLE {runtime} LOGIN NOINHERIT NOBYPASSRLS PASSWORD '{runtime_password}'; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{migration}') THEN CREATE ROLE {migration} LOGIN NOINHERIT NOBYPASSRLS PASSWORD '{migration_password}'; ELSE ALTER ROLE {migration} LOGIN NOINHERIT NOBYPASSRLS PASSWORD '{migration_password}'; END IF; IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '{worker}') THEN CREATE ROLE {worker} LOGIN NOINHERIT NOBYPASSRLS PASSWORD '{worker_password}'; ELSE ALTER ROLE {worker} LOGIN NOINHERIT NOBYPASSRLS PASSWORD '{worker_password}'; END IF; END $matriz$;\nCREATE SCHEMA IF NOT EXISTS {schema} AUTHORIZATION {migration};\nGRANT USAGE ON SCHEMA {schema} TO {runtime};\nGRANT USAGE ON SCHEMA {schema} TO {worker};\nALTER DEFAULT PRIVILEGES FOR ROLE {migration} IN SCHEMA {schema} GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {runtime};\nALTER DEFAULT PRIVILEGES FOR ROLE {migration} IN SCHEMA {schema} GRANT USAGE, SELECT ON SEQUENCES TO {runtime};\n"
             ));
         }
         sql.push_str("COMMIT;\n");
@@ -1473,12 +1493,25 @@ impl PortableInfrastructureHost {
             "tooling/scripts/seed-local-dev.ts".to_owned(),
         ];
         let (program, arguments) = corepack_pnpm_command(&args)?;
-        let mut command = Command::new(program);
+        let node_directory = Path::new(&program)
+            .parent()
+            .ok_or("Diretório do Node.js inválido")?;
+        let system_root = std::env::var_os("SystemRoot")
+            .map(PathBuf::from)
+            .ok_or("Diretório do Windows indisponível")?;
+        let system32 = system_root.join("System32");
+        let mut command = Command::new(&program);
         command
             .args(arguments)
             .current_dir(workspace)
             .env_clear()
             .env("MATRIZ_ENVIRONMENT", "local")
+            .env("ComSpec", system32.join("cmd.exe"))
+            .env(
+                "Path",
+                std::env::join_paths([node_directory, system32.as_path()])
+                    .map_err(|_| "PATH interno do seed inválido")?,
+            )
             .stdin(Stdio::null())
             .creation_flags(0x0800_0000);
         for key in [
@@ -1488,6 +1521,10 @@ impl PortableInfrastructureHost {
             "TMP",
             "LOCALAPPDATA",
             "APPDATA",
+            "USERPROFILE",
+            "HOMEDRIVE",
+            "HOMEPATH",
+            "ProgramData",
             "ProgramFiles",
             "ProgramFiles(x86)",
         ] {
@@ -1495,6 +1532,7 @@ impl PortableInfrastructureHost {
                 command.env(key, value);
             }
         }
+        command.env("INIT_CWD", workspace).env("PWD", workspace);
         for schema in DATABASE_SCHEMAS {
             let role = format!("matriz_{schema}_runtime");
             let password = self.secret(&format!("postgres-{role}"))?;
@@ -1503,14 +1541,19 @@ impl PortableInfrastructureHost {
                 format!("postgresql://{role}:{password}@127.0.0.1:55432/matriz?schema={schema}"),
             );
         }
+        for (environment_key, secret_name) in LOCAL_OIDC_CLIENT_SECRETS {
+            command.env(environment_key, self.secret(secret_name)?);
+        }
         let output = command.output().map_err(|error| error.to_string())?;
         if output.status.success() {
             Ok(())
         } else {
-            Err(format!(
-                "Seed local falhou: {}",
-                redact(&String::from_utf8_lossy(&output.stderr))
-            ))
+            let detail = format!(
+                "{}\n{}",
+                String::from_utf8_lossy(&output.stderr),
+                String::from_utf8_lossy(&output.stdout)
+            );
+            Err(format!("Seed local falhou: {}", redact(detail.trim())))
         }
     }
 
@@ -2363,6 +2406,69 @@ fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
 #[cfg(test)]
 mod portable_database_tests {
     use super::*;
+
+    #[test]
+    #[ignore = "applies real repository migrations and seed only to a temporary PostgreSQL cluster"]
+    fn postgres_repository_migrations_seed_and_event_diagnostics() {
+        assert!(!ports::enumerate_listeners()
+            .unwrap()
+            .iter()
+            .any(|row| row.port == 55432));
+        struct HostGuard(PortableInfrastructureHost);
+        impl Drop for HostGuard {
+            fn drop(&mut self) {
+                let _ = self.0.stop(InfrastructureServiceId::Postgres);
+            }
+        }
+        let root = tempfile::tempdir().unwrap();
+        let fixture = HostGuard(PortableInfrastructureHost::new(root.path().to_path_buf()));
+        let host = &fixture.0;
+        let workspace = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../..")
+            .canonicalize()
+            .unwrap();
+        host.install(InfrastructureServiceId::Postgres)
+            .expect("install pinned PostgreSQL");
+        host.start_postgres().expect("start isolated PostgreSQL");
+        host.provision_database()
+            .expect("provision isolated roles and schemas");
+        host.apply_workspace_migrations(&workspace)
+            .expect("apply real repository migrations");
+        let files = read_migration_files(&workspace).unwrap();
+        for schema in DATABASE_SCHEMAS {
+            let applied = host.applied_migrations(schema).unwrap();
+            let comparison = compare_migration_ledger(&files[*schema], &applied).unwrap();
+            assert_eq!(comparison.state, "clean", "ledger {schema}");
+        }
+        host.run_local_seed(&workspace)
+            .expect("seed through the real local-only backend");
+        assert_eq!(
+            host.psql_output(
+                "matriz",
+                "SELECT count(*) FROM core.users WHERE id = 'user-local-owner';"
+            )
+            .unwrap()
+            .trim(),
+            "1"
+        );
+        assert_eq!(
+            host.psql_output(
+                "matriz",
+                "SELECT count(*) FROM spot.bands WHERE id = 'spot-band-local';"
+            )
+            .unwrap()
+            .trim(),
+            "1"
+        );
+        let queues = host.read_event_diagnostics().unwrap();
+        assert!(queues
+            .iter()
+            .any(|queue| queue.schema == "hub" && queue.queue == "outbox" && queue.available));
+        assert!(queues
+            .iter()
+            .any(|queue| queue.schema == "seumei" && queue.queue == "outbox" && queue.available));
+        host.stop(InfrastructureServiceId::Postgres).unwrap();
+    }
 
     #[test]
     fn existing_unsigned_garnet_is_not_accepted_as_installed() {

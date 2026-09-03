@@ -9,7 +9,8 @@ import { getWilldashDb } from "@matriz/platform-db/willdash"
 import { assertLocalSeedEnvironment } from "../local-infrastructure/local-seed-policy"
 import { infrastructureContractV1Schema, type InfrastructureContractV1 } from "../../packages/integration/infrastructure-contracts/src/index"
 import { readdir, readFile } from "node:fs/promises"
-import { resolve } from "node:path"
+import { dirname, resolve } from "node:path"
+import { fileURLToPath } from "node:url"
 import { buildLocalOidcClientRegistrations } from "../local-infrastructure/local-oidc-clients"
 
 const tenantId = "tenant-local-dev"
@@ -19,7 +20,7 @@ const deniedId = "user-local-denied"
 const productApps = ["matriz-hub", "spot", "seumei", "contracts", "willdash", "matriz-ops", "matriz-pay", "matriz-admin", "matriz-client-admin"] as const
 
 async function localContracts(): Promise<InfrastructureContractV1[]> {
-  const appsRoot = resolve(import.meta.dirname, "../../apps")
+  const appsRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../apps")
   const contracts: InfrastructureContractV1[] = []
   for (const entry of await readdir(appsRoot, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue
@@ -31,33 +32,36 @@ async function localContracts(): Promise<InfrastructureContractV1[]> {
 
 async function seedCore() {
   const core = getCoreDb()
-  await core.tenant.upsert({ where: { id: tenantId }, update: { name: "Empresa Local Matriz" }, create: { id: tenantId, slug: "empresa-local-matriz", name: "Empresa Local Matriz", brandColor: "#6d4aff" } })
-  const users = [
-    { id: ownerId, email: "owner@matriz.local", displayName: "Owner Local" },
-    { id: operatorId, email: "operator@matriz.local", displayName: "Operador Local" },
-    { id: deniedId, email: "sem-acesso@matriz.local", displayName: "Usuário sem acesso" },
-  ] as const
-  for (const user of users) await core.user.upsert({ where: { id: user.id }, update: { email: user.email, displayName: user.displayName, status: "ACTIVE" }, create: { ...user, status: "ACTIVE" } })
-  await core.platformOperator.upsert({ where: { userId: ownerId }, update: { role: "OWNER", active: true, revokedAt: null }, create: { userId: ownerId, role: "OWNER", active: true } })
-  await core.platformOperator.upsert({ where: { userId: operatorId }, update: { role: "OPERATOR", active: true, revokedAt: null }, create: { userId: operatorId, role: "OPERATOR", active: true } })
+  await core.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT set_config('matriz.tenant_id', ${tenantId}, true)`
+    await tx.tenant.upsert({ where: { id: tenantId }, update: { name: "Empresa Local Matriz" }, create: { id: tenantId, slug: "empresa-local-matriz", name: "Empresa Local Matriz", brandColor: "#6d4aff" } })
+    const users = [
+      { id: ownerId, email: "owner@matriz.local", displayName: "Owner Local" },
+      { id: operatorId, email: "operator@matriz.local", displayName: "Operador Local" },
+      { id: deniedId, email: "sem-acesso@matriz.local", displayName: "Usuário sem acesso" },
+    ] as const
+    for (const user of users) await tx.user.upsert({ where: { id: user.id }, update: { email: user.email, displayName: user.displayName, status: "ACTIVE" }, create: { ...user, status: "ACTIVE" } })
+    await tx.platformOperator.upsert({ where: { userId: ownerId }, update: { role: "OWNER", active: true, revokedAt: null }, create: { userId: ownerId, role: "OWNER", active: true } })
+    await tx.platformOperator.upsert({ where: { userId: operatorId }, update: { role: "OPERATOR", active: true, revokedAt: null }, create: { userId: operatorId, role: "OPERATOR", active: true } })
 
-  for (const userId of [ownerId, operatorId, deniedId]) {
-    const membership = await core.tenantMembership.upsert({
-      where: { tenantId_userId: { tenantId, userId } },
-      update: { revokedAt: null, tenantRoles: [userId === ownerId ? "OWNER" : "MEMBER"], acceptedAt: new Date(0) },
-      create: { tenantId, userId, tenantRoles: [userId === ownerId ? "OWNER" : "MEMBER"], acceptedAt: new Date(0) },
+    for (const userId of [ownerId, operatorId, deniedId]) {
+      const membership = await tx.tenantMembership.upsert({
+        where: { tenantId_userId: { tenantId, userId } },
+        update: { revokedAt: null, tenantRoles: [userId === ownerId ? "OWNER" : "MEMBER"], acceptedAt: new Date(0) },
+        create: { tenantId, userId, tenantRoles: [userId === ownerId ? "OWNER" : "MEMBER"], acceptedAt: new Date(0) },
+      })
+      if (userId !== deniedId) for (const appId of productApps) await tx.appGrant.upsert({
+        where: { tenantId_membershipId_appId: { tenantId, membershipId: membership.id, appId } },
+        update: { appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], capabilities: appId === "matriz-client-admin" ? ["client-admin.dashboard.read", "client-admin.refresh"] : [], revokedAt: null },
+        create: { tenantId, membershipId: membership.id, appId, appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], capabilities: appId === "matriz-client-admin" ? ["client-admin.dashboard.read", "client-admin.refresh"] : [] },
+      })
+    }
+    for (const appId of productApps) await tx.appRegistration.upsert({ where: { tenantId_appId: { tenantId, appId } }, update: { enabled: true }, create: { tenantId, appId, enabled: true, manifestVersion: "0.1.0" } })
+    for (const client of buildLocalOidcClientRegistrations(await localContracts(), process.env)) await tx.oidcClient.upsert({
+      where: { clientId: client.clientId },
+      update: client,
+      create: client,
     })
-    if (userId !== deniedId) for (const appId of productApps) await core.appGrant.upsert({
-      where: { tenantId_membershipId_appId: { tenantId, membershipId: membership.id, appId } },
-      update: { appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], capabilities: appId === "matriz-client-admin" ? ["client-admin.dashboard.read", "client-admin.refresh"] : [], revokedAt: null },
-      create: { tenantId, membershipId: membership.id, appId, appRoles: [userId === ownerId ? "OWNER" : "MEMBER"], capabilities: appId === "matriz-client-admin" ? ["client-admin.dashboard.read", "client-admin.refresh"] : [] },
-    })
-  }
-  for (const appId of productApps) await core.appRegistration.upsert({ where: { tenantId_appId: { tenantId, appId } }, update: { enabled: true }, create: { tenantId, appId, enabled: true, manifestVersion: "0.1.0" } })
-  for (const client of buildLocalOidcClientRegistrations(await localContracts(), process.env)) await core.oidcClient.upsert({
-    where: { clientId: client.clientId },
-    update: client,
-    create: client,
   })
 }
 
