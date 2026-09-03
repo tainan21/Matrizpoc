@@ -92,7 +92,10 @@ function ensureView(tab: TabView) {
   })
   view.webContents.on("will-attach-webview", (event) => event.preventDefault())
   view.webContents.on("did-start-loading", () => void updateTab(tab.id, { loading: true }))
-  view.webContents.on("did-stop-loading", () => void updateTab(tab.id, { loading: false, url: view.webContents.getURL() }))
+  view.webContents.on("did-stop-loading", () => {
+    const url = view.webContents.getURL()
+    void updateTab(tab.id, { loading: false, ...(/^https?:\/\//i.test(url) ? { url } : {}) })
+  })
   view.webContents.on("page-title-updated", (event, title) => { event.preventDefault(); void updateTab(tab.id, { title: title.slice(0, 120) || "Nova aba" }) })
   views.set(tab.id, view)
   // Attach the native surface without waiting for network completion. Stopping,
