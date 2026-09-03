@@ -2835,6 +2835,86 @@ mod portable_database_tests {
     }
 
     #[test]
+    #[ignore = "publishes a committed Pay outbox row through the real portable PostgreSQL and NATS stack"]
+    fn pay_outbox_reaches_jetstream_before_database_acknowledgement() {
+        for port in [55432, 54222, 58222] {
+            assert!(!ports::enumerate_listeners()
+                .unwrap()
+                .iter()
+                .any(|row| row.port == port));
+        }
+        struct HostGuard(PortableInfrastructureHost);
+        impl Drop for HostGuard {
+            fn drop(&mut self) {
+                let _ = self.0.stop(InfrastructureServiceId::Nats);
+                let _ = self.0.stop(InfrastructureServiceId::Postgres);
+            }
+        }
+        let root = tempfile::tempdir().unwrap();
+        let fixture = HostGuard(PortableInfrastructureHost::new(root.path().to_path_buf()));
+        let host = &fixture.0;
+        let workspace = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../..")
+            .canonicalize()
+            .unwrap();
+
+        host.install(InfrastructureServiceId::Postgres)
+            .expect("install pinned PostgreSQL");
+        host.start_postgres().expect("start isolated PostgreSQL");
+        host.provision_database()
+            .expect("provision isolated roles and schemas");
+        host.apply_workspace_migrations(&workspace)
+            .expect("apply real repository migrations");
+        host.install(InfrastructureServiceId::Nats)
+            .expect("install pinned NATS");
+        host.start_nats().expect("start and provision NATS");
+
+        let args = vec![
+            "--filter".to_owned(),
+            "@matriz/app-matriz-pay".to_owned(),
+            "test".to_owned(),
+            "--".to_owned(),
+            "src/workers/delivery.integration.test.ts".to_owned(),
+        ];
+        let (program, arguments) = corepack_pnpm_command(&args).unwrap();
+        let output = Command::new(program)
+            .args(arguments)
+            .current_dir(&workspace)
+            .envs(host.runtime_environment("matriz-pay").unwrap())
+            .env("RUN_PAY_DELIVERY_INTEGRATION", "1")
+            .stdin(Stdio::null())
+            .creation_flags(0x0800_0000)
+            .output()
+            .expect("run Pay delivery integration");
+        assert!(
+            output.status.success(),
+            "Pay delivery integration failed: {}",
+            redact(&format!(
+                "{}\n{}",
+                String::from_utf8_lossy(&output.stdout),
+                String::from_utf8_lossy(&output.stderr)
+            ))
+        );
+
+        assert_eq!(
+            host.psql_output(
+                "matriz",
+                "SELECT count(*) FROM pay.outbox_events WHERE \"publishedAt\" IS NOT NULL;"
+            )
+            .unwrap()
+            .trim(),
+            "1"
+        );
+        let stream = nats_api_request(
+            &host.secret("nats-control").unwrap(),
+            "$JS.API.STREAM.INFO.MATRIZ_PAY",
+            &serde_json::json!({}),
+        )
+        .unwrap();
+        assert_eq!(stream["state"]["messages"].as_u64(), Some(1));
+    }
+
+    #[test]
     fn existing_unsigned_garnet_is_not_accepted_as_installed() {
         let root = tempfile::tempdir().unwrap();
         let host = PortableInfrastructureHost::new(root.path().to_path_buf());
