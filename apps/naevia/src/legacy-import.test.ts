@@ -20,4 +20,16 @@ describe("legacy browser import", () => {
     expect(() => mapLegacyBrowserState([], [], crypto.randomUUID)).toThrow("Nenhuma cápsula válida")
     expect(() => mapLegacyBrowserState(Array.from({ length: 101 }, (_, id) => ({ id: String(id), name: "x", policy: "human" })), [], crypto.randomUUID)).toThrow("excede o limite")
   })
+
+  it("restores the selected legacy tab rather than the first tab in its capsule", () => {
+    const result = mapLegacyBrowserState(
+      [{ id: "capsule", name: "Trabalho", policy: "human" }],
+      [
+        { id: "first", capsuleId: "capsule", title: "Primeira", url: "https://example.test/first", active: false },
+        { id: "selected", capsuleId: "capsule", title: "Selecionada", url: "https://example.test/selected", active: true },
+      ], () => crypto.randomUUID(),
+    )
+    expect(result.tabs.find((tab) => tab.id === result.activeTabId)?.url).toBe("https://example.test/selected")
+    expect(result.tabs.filter((tab) => tab.active)).toHaveLength(1)
+  })
 })

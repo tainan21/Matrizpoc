@@ -16,17 +16,19 @@ export function mapLegacyBrowserState(
     return [{ id, name: capsule.name.trim(), policy: capsule.policy }]
   })
   if (!mappedCapsules.length) throw new Error("Nenhuma cápsula válida foi encontrada")
+  const tabIds = new Map<string, string>()
   const mappedTabs: TabView[] = tabs.flatMap((tab) => {
     const capsuleId = ids.get(tab.capsuleId)
     if (!capsuleId || !webUrl(tab.url)) return []
-    return [{ id: uuid(), capsuleId, title: tab.title.trim().slice(0, 120) || "Aba importada", url: tab.url, active: false, loading: false }]
+    const id = uuid(); tabIds.set(tab.id, id)
+    return [{ id, capsuleId, title: tab.title.trim().slice(0, 120) || "Aba importada", url: tab.url, active: false, loading: false }]
   })
   for (const capsule of mappedCapsules) {
     if (!mappedTabs.some((tab) => tab.capsuleId === capsule.id)) mappedTabs.push({ id: uuid(), capsuleId: capsule.id, title: "Nova aba", url: "https://duckduckgo.com/", active: false, loading: false })
   }
-  const preferredLegacy = tabs.find((tab) => tab.active)
-  const preferredCapsule = preferredLegacy ? ids.get(preferredLegacy.capsuleId) : undefined
-  const active = mappedTabs.find((tab) => tab.capsuleId === preferredCapsule) ?? mappedTabs[0]
+  const preferredLegacy = tabs.find((tab) => tab.active && tabIds.has(tab.id))
+  const preferredTabId = preferredLegacy ? tabIds.get(preferredLegacy.id) : undefined
+  const active = mappedTabs.find((tab) => tab.id === preferredTabId) ?? mappedTabs[0]
   return {
     capsules: mappedCapsules,
     tabs: mappedTabs.map((tab) => ({ ...tab, active: tab.id === active.id })),
