@@ -1,7 +1,7 @@
 use std::{
     collections::{BTreeMap, HashMap},
     fs::{self, File, OpenOptions},
-    io::{self, Read},
+    io::{self, BufRead, BufReader, Read, Write},
     net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream},
     path::{Path, PathBuf},
     process::{Command, Stdio},
@@ -1045,16 +1045,26 @@ impl PortableInfrastructureHost {
         fs::create_dir_all(&data).map_err(|error| error.to_string())?;
         fs::create_dir_all(&logs).map_err(|error| error.to_string())?;
         let config = self.root.join("nats/nats.conf");
-        if !config.is_file() {
-            let password = self.secret("nats-control")?;
-            let verifier =
-                bcrypt::hash(password, bcrypt::DEFAULT_COST).map_err(|error| error.to_string())?;
-            let contents = format!(
-                "server_name: MatrizNats\nhost: 127.0.0.1\nport: 54222\nhttp: 127.0.0.1:58222\njetstream {{ store_dir: {:?} }}\nauthorization {{ users: [{{ user: \"matriz_control\", password: {:?}, permissions: {{ publish: [\"$JS.API.>\"], subscribe: [\"_INBOX.>\"] }} }}] }}\n",
-                data.to_string_lossy().replace('\\', "/"), verifier
-            );
-            write_new_file(&config, contents.as_bytes())?;
+        let users = [
+            ("matriz_control", "nats-control", "$JS.API.>"),
+            ("matriz_hub", "nats-hub", "matriz.v1.hub.>"),
+            ("matriz_pay", "nats-pay", "matriz.v1.pay.>"),
+            ("matriz_seumei", "nats-seumei", "matriz.v1.seumei.>"),
+        ];
+        let mut configured_users = Vec::with_capacity(users.len());
+        for (username, secret_name, publish_subject) in users {
+            let verifier = bcrypt::hash(self.secret(secret_name)?, bcrypt::DEFAULT_COST)
+                .map_err(|error| error.to_string())?;
+            configured_users.push(format!(
+                "{{ user: {username:?}, password: {verifier:?}, permissions: {{ publish: [{publish_subject:?}], subscribe: [\"_INBOX.>\"] }} }}"
+            ));
         }
+        let contents = format!(
+            "server_name: MatrizNats\nhost: 127.0.0.1\nport: 54222\nhttp: 127.0.0.1:58222\njetstream {{ store_dir: {:?} }}\nauthorization {{ users: [{}] }}\n",
+            data.to_string_lossy().replace('\\', "/"),
+            configured_users.join(", ")
+        );
+        fs::write(&config, contents).map_err(|error| error.to_string())?;
         let log = OpenOptions::new()
             .create(true)
             .append(true)
@@ -1071,6 +1081,12 @@ impl PortableInfrastructureHost {
                 .stderr(Stdio::from(stderr))
                 .creation_flags(0x0800_0000),
         )?;
+        wait_for_port(54222, Duration::from_secs(20))?;
+        let password = self.secret("nats-control")?;
+        if let Err(error) = provision_nats_streams(&password) {
+            let _ = self.stop(InfrastructureServiceId::Nats);
+            return Err(error);
+        }
         Ok(())
     }
 
@@ -2150,6 +2166,100 @@ fn wait_for_port(port: u16, timeout: Duration) -> Result<(), String> {
     ))
 }
 
+fn provision_nats_streams(password: &str) -> Result<(), String> {
+    for domain in ["hub", "pay", "seumei"] {
+        let name = format!("MATRIZ_{}", domain.to_ascii_uppercase());
+        let payload = serde_json::json!({
+            "name": name,
+            "subjects": [format!("matriz.v1.{domain}.>")],
+            "retention": "limits",
+            "storage": "file",
+            "max_age": 30_u64 * 86_400 * 1_000_000_000,
+            "duplicate_window": 120_u64 * 1_000_000_000,
+        });
+        let updated =
+            nats_api_request(password, &format!("$JS.API.STREAM.UPDATE.{name}"), &payload)?;
+        if updated.get("error").is_some() {
+            let created =
+                nats_api_request(password, &format!("$JS.API.STREAM.CREATE.{name}"), &payload)?;
+            if let Some(error) = created.get("error") {
+                return Err(format!(
+                    "NATS recusou o stream {name}: {}",
+                    redact(&error.to_string())
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn nats_api_request(
+    password: &str,
+    subject: &str,
+    payload: &serde_json::Value,
+) -> Result<serde_json::Value, String> {
+    let mut stream = TcpStream::connect("127.0.0.1:54222")
+        .map_err(|error| format!("NATS não aceitou a conexão de provisionamento: {error}"))?;
+    stream
+        .set_read_timeout(Some(Duration::from_secs(5)))
+        .map_err(|error| error.to_string())?;
+    let inbox = format!("_INBOX.{}", uuid::Uuid::new_v4().simple());
+    let body = serde_json::to_vec(payload).map_err(|error| error.to_string())?;
+    let connect = serde_json::json!({
+        "user": "matriz_control",
+        "pass": password,
+        "verbose": false,
+        "pedantic": true,
+        "name": "matriz-control-provisioner",
+    });
+    write!(
+        stream,
+        "CONNECT {connect}\r\nSUB {inbox} 1\r\nPUB {subject} {inbox} {}\r\n",
+        body.len()
+    )
+    .and_then(|_| stream.write_all(&body))
+    .and_then(|_| stream.write_all(b"\r\nPING\r\n"))
+    .map_err(|error| error.to_string())?;
+
+    let mut reader = BufReader::new(stream);
+    loop {
+        let mut line = String::new();
+        if reader
+            .read_line(&mut line)
+            .map_err(|error| error.to_string())?
+            == 0
+        {
+            return Err("NATS encerrou o provisionamento sem resposta".into());
+        }
+        if line.starts_with("-ERR") {
+            return Err(format!("NATS recusou o provisionamento: {}", redact(&line)));
+        }
+        if !line.starts_with("MSG ") {
+            continue;
+        }
+        let length = line
+            .split_ascii_whitespace()
+            .last()
+            .and_then(|value| value.parse::<usize>().ok())
+            .ok_or("NATS retornou um frame de provisionamento inválido")?;
+        if length > 64 * 1024 {
+            return Err("NATS excedeu o limite da resposta de provisionamento".into());
+        }
+        let mut response = vec![0_u8; length];
+        reader
+            .read_exact(&mut response)
+            .map_err(|error| error.to_string())?;
+        let mut terminator = [0_u8; 2];
+        reader
+            .read_exact(&mut terminator)
+            .map_err(|error| error.to_string())?;
+        if terminator != *b"\r\n" {
+            return Err("NATS retornou um frame sem terminador".into());
+        }
+        return serde_json::from_slice(&response).map_err(|error| error.to_string());
+    }
+}
+
 fn current_time_millis() -> u64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -2406,6 +2516,92 @@ fn unprotect_secret(protected: &[u8]) -> Result<String, String> {
 #[cfg(test)]
 mod portable_database_tests {
     use super::*;
+
+    fn nats_publish_reply(username: &str, password: &str, subject: &str) -> String {
+        let mut stream = TcpStream::connect("127.0.0.1:54222").unwrap();
+        stream
+            .set_read_timeout(Some(Duration::from_secs(5)))
+            .unwrap();
+        let mut reader = BufReader::new(stream.try_clone().unwrap());
+        let mut line = String::new();
+        reader.read_line(&mut line).unwrap();
+        assert!(line.starts_with("INFO "));
+        let connect = serde_json::json!({
+            "user": username,
+            "pass": password,
+            "verbose": true,
+            "pedantic": true,
+        });
+        write!(stream, "CONNECT {connect}\r\nPING\r\n").unwrap();
+        line.clear();
+        reader.read_line(&mut line).unwrap();
+        assert_eq!(line, "+OK\r\n");
+        line.clear();
+        reader.read_line(&mut line).unwrap();
+        assert_eq!(line, "PONG\r\n");
+        write!(stream, "PUB {subject} 0\r\n\r\n").unwrap();
+        line.clear();
+        reader.read_line(&mut line).unwrap();
+        line
+    }
+
+    #[test]
+    #[ignore = "downloads pinned NATS and verifies real domain ACLs only under a temporary root"]
+    fn nats_portable_provisions_domain_streams_and_scoped_credentials() {
+        for port in [54222, 58222] {
+            assert!(!ports::enumerate_listeners()
+                .unwrap()
+                .iter()
+                .any(|row| row.port == port));
+        }
+        struct HostGuard(PortableInfrastructureHost);
+        impl Drop for HostGuard {
+            fn drop(&mut self) {
+                let _ = self.0.stop(InfrastructureServiceId::Nats);
+            }
+        }
+        let root = tempfile::tempdir().unwrap();
+        let fixture = HostGuard(PortableInfrastructureHost::new(root.path().to_path_buf()));
+        let host = &fixture.0;
+        host.install(InfrastructureServiceId::Nats)
+            .expect("install pinned NATS");
+        host.start_nats().expect("start and provision NATS");
+        for (username, secret_name, own_subject, foreign_subject) in [
+            (
+                "matriz_hub",
+                "nats-hub",
+                "matriz.v1.hub.test",
+                "matriz.v1.pay.test",
+            ),
+            (
+                "matriz_pay",
+                "nats-pay",
+                "matriz.v1.pay.test",
+                "matriz.v1.seumei.test",
+            ),
+            (
+                "matriz_seumei",
+                "nats-seumei",
+                "matriz.v1.seumei.test",
+                "matriz.v1.hub.test",
+            ),
+        ] {
+            let password = host.secret(secret_name).unwrap();
+            assert_eq!(
+                nats_publish_reply(username, &password, own_subject),
+                "+OK\r\n"
+            );
+            assert!(nats_publish_reply(username, &password, foreign_subject)
+                .starts_with("-ERR 'Permissions Violation"));
+        }
+        let monitoring: serde_json::Value =
+            reqwest::blocking::get("http://127.0.0.1:58222/jsz?streams=true")
+                .unwrap()
+                .json()
+                .unwrap();
+        assert_eq!(monitoring["streams"].as_u64(), Some(3));
+        host.stop(InfrastructureServiceId::Nats).unwrap();
+    }
 
     #[test]
     #[ignore = "applies real repository migrations and seed only to a temporary PostgreSQL cluster"]

@@ -96,6 +96,22 @@ stopped the receipt-owned process, restarted the same temporary instance with
 recovery enabled and read the exact value back before a clean second stop. Full
 app/stack integration remains separate acceptance work.
 
+### Live NATS checkpoint (2026-09-03)
+
+The pinned NATS 2.14.5 artifact now starts with four backend-generated,
+DPAPI-backed credentials: one provisioning identity and one publisher identity
+for Hub, Pay and Seumei. Each publisher can publish only to its own
+`matriz.v1.<domain>.>` subjects and subscribe to reply inboxes. A real protocol
+journey authenticated all three identities, accepted their own subjects and
+refused cross-domain publishes.
+
+Control provisions the three file-backed JetStream streams through the bounded
+NATS request/reply protocol after startup. The real monitoring endpoint reported
+exactly `MATRIZ_HUB`, `MATRIZ_PAY` and `MATRIZ_SEUMEI`; after a receipt-owned stop
+and restart, all three remained available. The server is stopped if provisioning
+fails. This does not yet prove an app worker publishing a committed outbox row or
+consumer inbox idempotency.
+
 The harness only accepts the official per-user install directory or an isolated
 acceptance root. It never kills unrelated listeners. If a catalog port is
 already occupied, the journey asserts the `EXTERNO` protected state and leaves

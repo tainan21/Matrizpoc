@@ -588,6 +588,22 @@ fn portable_nats_artifact_installs_starts_and_stops_under_a_temporary_root() {
     assert!(root.path().join("nats/2.14.5/nats-server.exe").is_file());
     host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Start)
         .expect("start authenticated NATS");
+    let config = std::fs::read_to_string(root.path().join("nats/nats.conf"))
+        .expect("read generated NATS config");
+    for expected in [
+        "matriz_control",
+        "matriz_hub",
+        "matriz_pay",
+        "matriz_seumei",
+        "matriz.v1.hub.>",
+        "matriz.v1.pay.>",
+        "matriz.v1.seumei.>",
+    ] {
+        assert!(
+            config.contains(expected),
+            "missing {expected} in NATS config"
+        );
+    }
     for _ in 0..40 {
         if host
             .inspect(InfrastructureServiceId::Nats)
@@ -598,9 +614,33 @@ fn portable_nats_artifact_installs_starts_and_stops_under_a_temporary_root() {
         thread::sleep(Duration::from_millis(250));
     }
     let running = host.inspect(InfrastructureServiceId::Nats);
+    let jetstream: serde_json::Value =
+        reqwest::blocking::get("http://127.0.0.1:58222/jsz?streams=true")
+            .expect("read NATS JetStream monitoring endpoint")
+            .json()
+            .expect("parse NATS JetStream monitoring response");
     // Stop the owned process before asserting health, including failed health checks.
     let stopped = host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Stop);
     let running = running.expect("inspect NATS");
     assert!(running.healthy && running.owned);
+    assert_eq!(jetstream["streams"].as_u64(), Some(3));
+    let mut names = jetstream["account_details"][0]["stream_detail"]
+        .as_array()
+        .expect("stream details")
+        .iter()
+        .filter_map(|stream| stream["name"].as_str())
+        .collect::<Vec<_>>();
+    names.sort_unstable();
+    assert_eq!(names, ["MATRIZ_HUB", "MATRIZ_PAY", "MATRIZ_SEUMEI"]);
     stopped.expect("stop owned NATS");
+    host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Start)
+        .expect("restart NATS with durable streams");
+    let after_restart: serde_json::Value =
+        reqwest::blocking::get("http://127.0.0.1:58222/jsz?streams=true")
+            .expect("read NATS after restart")
+            .json()
+            .expect("parse NATS after restart");
+    assert_eq!(after_restart["streams"].as_u64(), Some(3));
+    host.execute(InfrastructureTargetId::Nats, InfrastructureAction::Stop)
+        .expect("stop restarted NATS");
 }
