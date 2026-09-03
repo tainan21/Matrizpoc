@@ -42,10 +42,39 @@ Latest local installer SHA-256: `aa164da357f182d77c5383638d946692d868b27d45a870e
 
 Public-release blocker: `gh secret list --repo tainan21/Matrizpoc` returned exit code 4 because GitHub CLI is unauthenticated. The required CI secret names are known from the workflow, but their provisioning has not been verified. No keys/tokens were read, no tag was created, and no release or push was attempted.
 
+## Recovery, selected-tab and native sender follow-up
+
+- `9d868da7`: profile replacement compares the prepared snapshot with the current committed snapshot. An edit made while import prepares its backup now aborts replacement without losing the edit. Journal reads and writes share one queue; real Electron recovery tests exposed and eliminated concurrent journal rename failures.
+- `e9a1ad6d`: preserves the exact selected legacy tab, not merely the first tab in its capsule. The regression failed before the mapper correction.
+- `53e5e290`: all native IPC handlers require the live shell's top frame and exact local entry URL. An actual second Electron window with the same URL and preload could previously read the profile and create a terminal; both requests are now refused. Shell navigation to another document is blocked; ordinary remote browser content has no preload bridge. Packaged builds ignore the development-URL override.
+- `abc35b64`: extends the restart journey with concurrent closing and creation of tabs. This additional scenario passed without a production change.
+
+Fresh NAEVIA verification: **34 unit tests**, lint, typecheck, production build, and **nine real Electron tests**. Recovery coverage seeds five interrupted on-disk transaction states (`prepared` before/after replacement, `active`, and `rollback_prepared` before/after replacement), starts the actual app, requires explicit rollback, and verifies persistence after restart. This is not equivalent to fault injection at every filesystem instruction.
+
+The installer passed `recovery-ipc-cycle-1` and `recovery-ipc-cycle-2`, nine tests per cycle followed by successful uninstall. These installed cycles precede the test-only concurrent-close extension; that extension was separately verified in the development executable. Subsequent UI changes and their installed verification are recorded below.
+
+That checkpoint's installer SHA-256 was `e12add7280208548d955a3c43a88df45daf407358475bb1db60a7f046acfda65`. Authenticode remained **NotSigned**; this was not a public trusted release.
+
+Related Control verification in this follow-up: 126 frontend tests, lint, typecheck, Rust tests, formatting and Clippy with warnings denied; a fresh native build and 18 selected WebView2 tests covering shell/navigation, Hub/Store built-ins, Terminal, themes, responsive surfaces and exit. The app-runtime and native-Admin installer journeys were not rerun in this selection. The explicitly opted-in NATS portable integration also passed: pinned artifact installation, authenticated startup, owned health and stop under a temporary root. Both NATS ports were free afterward. This does not certify live PostgreSQL/Garnet, seed, restore or signed updater flows.
+
+Secondary-worktree comparison: the NATS implementation matches `main` after line-ending normalization; `main` additionally tests preservation of `NODE_ENV`. Other documents already match, and the previously absent in-progress operational audit was preserved in `050c9b9b`. The dirty secondary worktree was not discarded or force-removed. Its historical audit remains marked **IN PROGRESS**, not current acceptance evidence.
+
+Final local follow-up:
+
+- `82a2f244`: fixes the missing NAEVIA infrastructure contract found by the real global verifier. The browser declares no provisioned database, cache or broker. Verification now passes for 18 apps and eight schemas; desktop releases and boundaries are coherent. Global smoke: 404/404 (the PostgreSQL error-containment fixture still reports an unavailable local server as expected).
+- `4936074b`: corrects the unreadable default white New Tab button, reusing dark chrome colors and adding visible keyboard focus. A real Electron computed-style regression failed before correction.
+- The final NAEVIA package passed **both** `final-chrome-cycle-1` and `final-chrome-cycle-2`, **nine tests each**, including concurrent tab closing and the styling regression, followed by uninstall. Current SHA-256: `d801e6ee94a23e807abd7f99277bf0805644e554a1a743c4a65dc39971fc6591`. The fixed installer folder contains this artifact; it supersedes all hashes above and remains **NotSigned**.
+- `2e37041d`: Control restore verification now attempts recovery on a failed post-swap query and no longer reports successful recovery when rollback fails. Three focused Rust regressions cover those failures and verified success; the full Rust suite, format and Clippy passed. No real database restore was executed for this correction.
+- The resulting Control NSIS passed `restore-safety-cycle-1` and `restore-safety-cycle-2`: **28 actual Playwright journeys per installed cycle**, including app lifecycle and native Admin, followed by uninstall. These cycles used explicit isolated NSIS install → `e2e:run` → uninstall, not the old blanket contract-result recorder; the separate idle-performance phase was not repeated. Current installer SHA-256: `62b90799f70ec325a8ceb0614896ab53b2cac3d00330d44867e0baab485f3332`, copied to `artifacts/installers/Matriz-Control-1.1.0-windows-x64-setup.exe`. It remains **NotSigned**.
+- `3f9e9a41`: removes automatic certification of all 98 Control acceptance cases from suite exit alone. The regression reproduced the false blanket verdict; cases without individual evidence now remain blocked. Final Control frontend suite: **127/127**, with lint/typecheck passing. These reporting changes do not alter the installed product binary.
+- GitHub authentication was rechecked and remains unavailable. Signing secrets have not been verified; no push, tag or public release was attempted.
+
 ## Remaining migration gates
 
-The current importer covers capsule and tab metadata plus a backup/rollback of the NAEVIA snapshot. It does **not** establish complete migration of Chromium partitions, credentials, vault VHDX/BitLocker, library or download history. The guards above improve this partial importer; they do not make it a complete migration. Reconciliation with ordinary browsing edits during import and crash/restart acceptance of every transaction phase remain necessary.
+The current importer covers capsule and tab metadata plus a backup/rollback of the NAEVIA snapshot. It does **not** establish complete migration of Chromium partitions, credentials, vault VHDX/BitLocker, library or download history. The guards above improve this partial importer; they do not make it a complete migration. Concurrent-edit and seeded recovery coverage now exist; full-profile migration and broader interruption/failure coverage remain necessary.
 
-The current Store panel displays the Hub catalog; it is not proof of a complete desktop installation lifecycle. Agent policy labels, advanced browser capabilities and the Workbench contextual surface require their own functional acceptance. The larger Control/infra/updater/release gates are not re-certified by these three browser tests.
+The current Store panel displays the Hub catalog; it is not a complete desktop installation lifecycle. Agent policy enforcement, advanced browser capabilities and the Workbench contextual surface still need implementation and/or functional acceptance. The larger Control/infra/updater/release gates are not certified by the nine browser tests.
+
+Control's installed-result recorder previously marked every one of its 98 contract IDs as passed from suite exit alone. That blanket inference has been removed: unmapped cases remain blocked. Actual passing Playwright journeys and install/uninstall cycles are reported separately, not as proof that all 98 requirements were exercised. Completing the per-case evidence map is an additional release gate, alongside signed Store/updater upgrade acceptance and full portable database/cache/restore/seed and process-ownership verification.
 
 Keep the legacy source and releases intact. Do not perform cutover, create the final legacy tag or claim the overall plan is complete based only on installer cycles.
