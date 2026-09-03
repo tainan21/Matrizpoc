@@ -72,6 +72,17 @@ verified process handle and waits for exit. The repeated journey passed and
 database was used. This is evidence for the native lifecycle and restore path,
 not acceptance of all repository migrations, local seed, Garnet or public release.
 
+### Native Store signature checkpoint (2026-09-03)
+
+A regression using the Windows-signed PowerShell executable exposed two real
+verification failures: Windows PowerShell inherited incompatible PowerShell 7
+module paths, and its signature-status enum serialized as a number while Rust
+expected text. Verification now uses Windows PowerShell's own module discovery,
+explicit status serialization and an exact signer simple-name comparison.
+Unsigned files, wrong publishers, partial names and empty publishers are refused.
+The helper runs hidden. This validates the native trust check, not publication,
+an entire signed Store installation or the Control updater chain.
+
 The harness only accepts the official per-user install directory or an isolated
 acceptance root. It never kills unrelated listeners. If a catalog port is
 already occupied, the journey asserts the `EXTERNO` protected state and leaves

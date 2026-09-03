@@ -577,13 +577,17 @@ fn now() -> u128 {
 
 #[cfg(windows)]
 fn verify_authenticode(path: &Path, publisher: &str) -> Result<(), String> {
+    use std::os::windows::process::CommandExt;
     let escaped = path.to_string_lossy().replace('\'', "''");
     let script = format!(
-        "Get-AuthenticodeSignature -LiteralPath '{}' | Select-Object Status,@{{n='Subject';e={{$_.SignerCertificate.Subject}}}} | ConvertTo-Json -Compress",
+        "Get-AuthenticodeSignature -LiteralPath '{}' | Select-Object @{{n='Status';e={{$_.Status.ToString()}}}},@{{n='Signer';e={{if ($_.SignerCertificate) {{$_.SignerCertificate.GetNameInfo([System.Security.Cryptography.X509Certificates.X509NameType]::SimpleName, $false)}}}}}} | ConvertTo-Json -Compress",
         escaped
     );
     let output = Command::new("powershell.exe")
         .args(["-NoProfile", "-NonInteractive", "-Command", &script])
+        // A PowerShell 7 parent can export incompatible modules to Windows PowerShell.
+        .env_remove("PSModulePath")
+        .creation_flags(0x0800_0000)
         .output()
         .map_err(|error| format!("Não foi possível verificar Authenticode: {error}"))?;
     if !output.status.success() {
@@ -591,11 +595,10 @@ fn verify_authenticode(path: &Path, publisher: &str) -> Result<(), String> {
     }
     let result: serde_json::Value =
         serde_json::from_slice(&output.stdout).map_err(|_| "Resposta Authenticode inválida")?;
-    let subject = result["Subject"].as_str().unwrap_or_default();
+    let signer = result["Signer"].as_str().unwrap_or_default();
     if result["Status"] != "Valid"
-        || !subject
-            .to_ascii_lowercase()
-            .contains(&publisher.to_ascii_lowercase())
+        || publisher.is_empty()
+        || !signer.eq_ignore_ascii_case(publisher)
     {
         return Err("Authenticode ou publisher do instalador é inválido".into());
     }
@@ -641,4 +644,27 @@ fn verify_installed_identity(release: &VerifiedRelease) -> Result<(), String> {
 #[cfg(not(windows))]
 fn verify_installed_identity(_release: &VerifiedRelease) -> Result<(), String> {
     Err("Inspeção de instalação está disponível apenas no Windows".into())
+}
+
+#[cfg(all(test, windows))]
+mod native_signature_tests {
+    use super::*;
+
+    #[test]
+    fn accepts_a_real_valid_windows_signature_and_rejects_wrong_publisher() {
+        let executable = PathBuf::from(std::env::var_os("SystemRoot").unwrap())
+            .join("System32/WindowsPowerShell/v1.0/powershell.exe");
+        verify_authenticode(&executable, "Microsoft Windows").expect("known Windows signature");
+        assert!(verify_authenticode(&executable, "Unrelated Publisher").is_err());
+        assert!(
+            verify_authenticode(&executable, "Windows").is_err(),
+            "partial signer names must not grant trust"
+        );
+        assert!(
+            verify_authenticode(&executable, "").is_err(),
+            "empty publishers must not grant trust"
+        );
+        let unsigned = tempfile::NamedTempFile::new().unwrap();
+        assert!(verify_authenticode(unsigned.path(), "Microsoft Windows").is_err());
+    }
 }
