@@ -135,7 +135,7 @@ function publishDownloads() {
   if (window && !window.isDestroyed()) window.webContents.send("naevia:downloads", [...downloads.values()].map(({ view }) => view))
 }
 
-async function ensureView(tab: TabView) {
+function ensureView(tab: TabView) {
   const current = views.get(tab.id)
   if (current) return current
   const partitionName = partition(tab.capsuleId)
@@ -150,7 +150,11 @@ async function ensureView(tab: TabView) {
   view.webContents.on("did-stop-loading", () => void updateTab(tab.id, { loading: false, url: view.webContents.getURL() }))
   view.webContents.on("page-title-updated", (event, title) => { event.preventDefault(); void updateTab(tab.id, { title: title.slice(0, 120) || "Nova aba" }) })
   views.set(tab.id, view)
-  await view.webContents.loadURL(tab.url)
+  // Attach the native surface without waiting for network completion. Stopping,
+  // replacing or failing a navigation must not leave the tab detached forever.
+  void view.webContents.loadURL(tab.url).catch(() => {
+    // did-stop-loading publishes the state; the same view can navigate again.
+  })
   return view
 }
 
@@ -167,13 +171,13 @@ function publish(snapshot: BrowserSnapshot) {
   if (window && !window.isDestroyed()) window.webContents.send("naevia:snapshot", snapshot)
 }
 
-async function showActive(snapshot: BrowserSnapshot) {
+function showActive(snapshot: BrowserSnapshot) {
   const window = mainWindow
   if (!window || window.isDestroyed()) return
   const tab = snapshot.tabs.find((item) => item.id === snapshot.activeTabId)
   if (!tab) throw new Error("Aba ativa inválida")
   for (const view of views.values()) window.contentView.removeChildView(view)
-  const view = await ensureView(tab)
+  const view = ensureView(tab)
   if (window.isDestroyed()) return
   activeViewId = tab.id
   window.contentView.addChildView(view)

@@ -1,5 +1,6 @@
 import { _electron as electron, expect, test, type ElectronApplication } from "@playwright/test"
-import { mkdir, mkdtemp, rm } from "node:fs/promises"
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises"
+import { randomUUID } from "node:crypto"
 import { createServer } from "node:http"
 import { DatabaseSync } from "node:sqlite"
 import type { AddressInfo } from "node:net"
@@ -51,9 +52,7 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect.poll(() => application.windows().map((candidate) => candidate.url())).toContain(`${origin}/`)
     const content = application.windows().find((candidate) => candidate.url() === `${origin}/`)
     if (!content) throw new Error("Conteúdo remoto de teste não abriu")
-    // WebContentsView hit-testing is not exposed consistently by Playwright
-    // when Electron is launched from an installed NSIS location.
-    await content.getByRole("link", { name: "Baixar prova" }).dispatchEvent("click")
+    await content.getByRole("link", { name: "Baixar prova" }).click({ timeout: 10_000 })
     await window.getByRole("button", { name: "Downloads" }).click()
     await expect(window.getByText("proof.txt")).toBeVisible()
     await window.getByRole("button", { name: "Store" }).click()
@@ -119,6 +118,49 @@ test("restores capsules and tabs after a complete restart", async () => {
     } finally { await second.close() }
   } finally {
     if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-restart-")) await rm(profile, { recursive: true, force: true })
+  }
+})
+
+test("attaches a loading tab before the server responds and keeps it usable after stop", async () => {
+  const profile = await mkdtemp(join(tmpdir(), "naevia-loading-"))
+  let requestStarted = false
+  const server = createServer((request, response) => {
+    if (request.url === "/slow") { requestStarted = true; return }
+    response.setHeader("content-type", "text/html")
+    response.end('<button onclick="this.textContent=\'Clicked\'">Click me</button>')
+  })
+  let application: ElectronApplication | undefined
+  try {
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
+    const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`
+    const capsuleId = randomUUID()
+    const tabId = randomUUID()
+    await writeFile(join(profile, "browser-state.json"), JSON.stringify({ version: 1, snapshot: {
+      capsules: [{ id: capsuleId, name: "Local", policy: "human" }],
+      tabs: [{ id: tabId, capsuleId, title: "Slow", url: `${origin}/slow`, active: true, loading: false }],
+      activeCapsuleId: capsuleId, activeTabId: tabId,
+    } }))
+    application = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
+    const window = await localWindow(application)
+    await expect.poll(() => requestStarted).toBe(true)
+    await expect.poll(() => application!.evaluate(({ BrowserWindow }) => {
+      return BrowserWindow.getAllWindows()[0].contentView.children.some((view) => {
+        const bounds = view.getBounds()
+        return view.getVisible() && bounds.width > 0 && bounds.height > 0
+      })
+    })).toBe(true)
+    await window.getByRole("button", { name: "Parar", exact: true }).click()
+    await window.getByLabel("Pesquisar ou digitar endereço").fill(origin)
+    await window.getByLabel("Pesquisar ou digitar endereço").press("Enter")
+    await expect.poll(() => application!.windows().map((page) => page.url())).toContain(`${origin}/`)
+    const content = application.windows().find((page) => page.url() === `${origin}/`)!
+    await content.getByRole("button", { name: "Click me" }).click()
+    await expect(content.getByRole("button", { name: "Clicked" })).toBeVisible()
+  } finally {
+    if (application) await application.close()
+    server.closeAllConnections()
+    await new Promise<void>((resolve) => server.close(() => resolve()))
+    if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-loading-")) await rm(profile, { recursive: true, force: true })
   }
 })
 
