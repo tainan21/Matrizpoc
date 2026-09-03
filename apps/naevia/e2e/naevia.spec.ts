@@ -33,6 +33,7 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect(window.getByLabel("NAEVIA")).toBeVisible()
     await expect(window.getByLabel("Pesquisar ou digitar endereço")).toHaveValue("https://duckduckgo.com/")
     await expect(window.getByRole("button", { name: "Nova aba", exact: true })).toBeVisible()
+    await expect(window.getByRole("button", { name: "Nova aba", exact: true })).toHaveCSS("background-color", "rgba(0, 0, 0, 0)")
     await window.getByRole("button", { name: "Importar legado" }).click()
     await expect(window.getByText("1 cápsulas · 1 abas")).toBeVisible()
     window.once("dialog", (dialog) => dialog.accept())

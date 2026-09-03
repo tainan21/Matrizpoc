@@ -14,7 +14,9 @@ button { color: inherit; }
 .tabs .tab-close { width: 28px; min-width: 28px; height: 28px; padding: 0; border: 0; border-radius: 7px; background: transparent; color: #716a79; cursor: pointer; }
 .tabs .tab-close:hover { background: #2a2032; color: #e6dfee; }
 .tabs i { color: #65e2cf; font-size: 7px; }
-.tabs .new-tab { min-width: 34px; width: 34px; padding: 0; justify-content: center; border-radius: 8px; font-size: 18px; }
+.tabs .new-tab { flex: 0 0 34px; width: 34px; height: 34px; padding: 0; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #bba6d4; font-size: 18px; cursor: pointer; }
+.tabs .new-tab:hover { background: #1b1622; color: #eee9f5; }
+.tabs .new-tab:focus-visible { outline: 2px solid #9e72ff; outline-offset: -2px; }
 .nav-controls { position: absolute; left: 66px; bottom: 10px; height: 38px; display: flex; align-items: center; gap: 2px; }
 .nav-controls button { width: 30px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #8d8497; cursor: pointer; }
 .nav-controls button:hover { background: #1b1622; color: #eee9f5; }
