@@ -188,6 +188,65 @@ test("attaches a loading tab before the server responds and keeps it usable afte
   }
 })
 
+test("embeds the versioned Workbench coworking surface without exposing the NAEVIA bridge", async () => {
+  const profile = await mkdtemp(join(tmpdir(), "naevia-workbench-"))
+  const server = createServer((request, response) => {
+    if (request.url !== "/control") { response.statusCode = 404; response.end(); return }
+    response.setHeader("content-type", "text/html; charset=utf-8")
+    response.end('<title>Workbench Control</title><main><h1>Coworking Matriz</h1><p>workbench-control-v1</p></main>')
+  })
+  let application: ElectronApplication | undefined
+  try {
+    await new Promise<void>((resolve, reject) => {
+      server.once("error", reject)
+      server.listen(3005, "127.0.0.1", resolve)
+    })
+    application = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
+    const shell = await localWindow(application)
+    await shell.getByRole("button", { name: "Coworking" }).click()
+    await expect.poll(() => application!.windows().map((page) => page.url())).toContain("http://127.0.0.1:3005/control")
+    const coworking = application.windows().find((page) => page.url() === "http://127.0.0.1:3005/control")
+    if (!coworking) throw new Error("Superfície Workbench não foi anexada")
+    await expect(coworking.getByRole("heading", { name: "Coworking Matriz" })).toBeVisible()
+    expect(await coworking.evaluate(() => typeof globalThis.window.naevia)).toBe("undefined")
+    expect(await application.evaluate(({ BrowserWindow, WebContentsView }) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      return window.contentView.children.some((view) => (view as InstanceType<typeof WebContentsView>).webContents.getURL() === "http://127.0.0.1:3005/control" && view.getBounds().width === 340)
+    })).toBe(true)
+    await shell.getByRole("button", { name: "Coworking" }).click()
+    await expect.poll(() => application!.evaluate(({ BrowserWindow, WebContentsView }) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      return window.contentView.children.some((view) => (view as InstanceType<typeof WebContentsView>).webContents.getURL() === "http://127.0.0.1:3005/control")
+    })).toBe(false)
+  } finally {
+    if (application) await application.close()
+    server.closeAllConnections()
+    await new Promise<void>((resolve) => server.close(() => resolve()))
+    if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-workbench-")) await rm(profile, { recursive: true, force: true })
+  }
+})
+
+test("keeps browsing available when the Workbench runtime is offline", async () => {
+  const profile = await mkdtemp(join(tmpdir(), "naevia-workbench-offline-"))
+  let application: ElectronApplication | undefined
+  try {
+    application = await launchNaevia({ ...process.env, NAEVIA_USER_DATA_DIR: profile })
+    const shell = await localWindow(application)
+    const coworking = shell.getByRole("button", { name: "Coworking" })
+    await coworking.click()
+    await expect(shell.getByRole("alert")).toContainText("Workbench não está disponível")
+    await expect(coworking).not.toHaveClass(/active/)
+    expect(await application.evaluate(({ BrowserWindow, WebContentsView }) => {
+      const window = BrowserWindow.getAllWindows()[0]
+      const bounds = window.contentView.children.find((view) => (view as InstanceType<typeof WebContentsView>).webContents.getURL().startsWith("https://duckduckgo.com"))?.getBounds()
+      return bounds?.width === window.getContentSize()[0] - 52
+    })).toBe(true)
+  } finally {
+    if (application) await application.close()
+    if (dirname(profile) === tmpdir() && basename(profile).startsWith("naevia-workbench-offline-")) await rm(profile, { recursive: true, force: true })
+  }
+})
+
 for (const [phase, currentName] of [
   ["prepared", "Antes"], ["prepared", "Importado"], ["active", "Importado"],
   ["rollback_prepared", "Importado"], ["rollback_prepared", "Antes"],

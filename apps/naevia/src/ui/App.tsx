@@ -43,7 +43,8 @@ export function App() {
   }
   const panels = async (nextSide: typeof side, nextTerminal = terminal) => {
     setSide(nextSide); setTerminal(nextTerminal); setError("")
-    try { await window.naevia.setPanels({ side: nextSide, terminal: nextTerminal }) } catch (cause) { setError(String(cause)) }
+    try { await window.naevia.setPanels({ side: nextSide, terminal: nextTerminal }) }
+    catch (cause) { setSide(side); setTerminal(terminal); setError(String(cause)) }
   }
   const loadStore = async () => {
     setStoreStatus("Carregando catálogo real…")

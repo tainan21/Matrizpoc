@@ -286,6 +286,7 @@ function registerIpc() {
     const value = input as Record<string, unknown>
     if (!['none', 'store', 'workbench', 'library', 'migration'].includes(String(value?.side)) || typeof value?.terminal !== "boolean") throw new Error("Layout inválido")
     const window = mainWindow
+    const previous = panelState
     if (window && workbenchView) window.contentView.removeChildView(workbenchView)
     panelState = { side: value.side as typeof panelState.side, terminal: value.terminal }
     layout()
@@ -293,7 +294,11 @@ function registerIpc() {
       try {
         const view = await ensureWorkbenchView()
         if (panelState.side === "workbench" && !window.isDestroyed()) { window.contentView.addChildView(view); layout() }
-      } catch { throw new Error("Workbench não está disponível em 127.0.0.1:3005") }
+      } catch {
+        panelState = previous
+        layout()
+        throw new Error("Workbench não está disponível em 127.0.0.1:3005")
+      }
     }
   })
   handle("naevia:store:catalog", async () => {
