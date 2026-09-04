@@ -13,6 +13,7 @@ describe("acceptance evidence map", () => {
     expect(acceptanceIdsForJourney("recovers defaults from corrupt settings without destroying the source")).toEqual(["SET-002"])
     expect(acceptanceIdsForJourney("maps every canonical Matriz app to its fixed listener port")).toEqual(["PORT-002"])
     expect(acceptanceIdsForJourney("starts only the cataloged native build operation and releases it")).toEqual(["NATIVE-002"])
+    expect(acceptanceIdsForJourney("runs every fixed gate with evidence and interrupts only the selected gate")).toEqual(["ACT-001", "ACT-002"])
     expect(acceptanceIdsForJourney("similar terminal test")).toEqual([])
   })
 

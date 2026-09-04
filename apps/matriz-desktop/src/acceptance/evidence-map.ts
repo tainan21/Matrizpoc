@@ -18,6 +18,7 @@ const EXACT_JOURNEYS: Readonly<Record<string, readonly string[]>> = Object.freez
   "recovers defaults from corrupt settings without destroying the source": ["SET-002"],
   "maps every canonical Matriz app to its fixed listener port": ["PORT-002"],
   "starts only the cataloged native build operation and releases it": ["NATIVE-002"],
+  "runs every fixed gate with evidence and interrupts only the selected gate": ["ACT-001", "ACT-002"],
   "builds, installs, starts, and stops the canonical native app": ["NATIVE-001", "NATIVE-004", "NATIVE-005"],
   "rejects missing and tampered native installers before execution": ["NATIVE-003", "NATIVE-006"],
 })

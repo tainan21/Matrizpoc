@@ -209,6 +209,22 @@ impl TerminalManager {
                     return Ok(session.metadata.clone());
                 }
             }
+            if operation_id.starts_with("gate.") {
+                for session in sessions.values() {
+                    let session = session
+                        .lock()
+                        .map_err(|_| "Terminal session lock poisoned")?;
+                    if session.metadata.status == "running"
+                        && session
+                            .metadata
+                            .operation_id
+                            .as_deref()
+                            .is_some_and(|id| id.starts_with("gate."))
+                    {
+                        return Err("Another validation gate is already running".into());
+                    }
+                }
+            }
         }
         if sessions.len() >= MAX_SESSIONS {
             return Err(format!("Terminal session limit reached ({MAX_SESSIONS})"));
@@ -226,6 +242,20 @@ impl TerminalManager {
         let mut command = CommandBuilder::new(program);
         command.args(args);
         command.cwd(external_process_cwd(root));
+        if operation_id == Some("gate.prisma:validate") {
+            command.env(
+                "OPS_DATABASE_URL",
+                std::env::var_os("OPS_DATABASE_URL").unwrap_or_else(|| {
+                    "postgresql://validation:validation@127.0.0.1:1/validation?schema=ops".into()
+                }),
+            );
+            command.env(
+                "PAY_DATABASE_URL",
+                std::env::var_os("PAY_DATABASE_URL").unwrap_or_else(|| {
+                    "postgresql://validation:validation@127.0.0.1:1/validation?schema=pay".into()
+                }),
+            );
+        }
         let mut child = pair
             .slave
             .spawn_command(command)
@@ -529,6 +559,32 @@ fn resolve_executable(name: &str) -> Option<String> {
         .map(|path| path.display().to_string())
 }
 
+fn resolve_node_22_executable() -> Option<String> {
+    let output = Command::new("where.exe").arg("node.exe").output().ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(Path::new)
+        .filter(|path| path.is_absolute() && path.is_file())
+        .find(|path| {
+            Command::new(path)
+                .arg("--version")
+                .output()
+                .ok()
+                .filter(|result| result.status.success())
+                .is_some_and(|result| {
+                    String::from_utf8_lossy(&result.stdout)
+                        .trim()
+                        .starts_with("v22.")
+                })
+        })
+        .map(|path| path.display().to_string())
+}
+
 fn windows_powershell_fallback() -> String {
     std::env::var_os("SystemRoot")
         .map(std::path::PathBuf::from)
@@ -541,8 +597,8 @@ fn windows_powershell_fallback() -> String {
 }
 
 pub(crate) fn corepack_pnpm_command(args: &[String]) -> Result<(String, Vec<String>), String> {
-    let node = resolve_executable("node.exe")
-        .ok_or_else(|| "Node.js executable was not found".to_owned())?;
+    let node = resolve_node_22_executable()
+        .ok_or_else(|| "Compatible Node.js 22 executable was not found".to_owned())?;
     let corepack = Path::new(&node)
         .parent()
         .map(|directory| directory.join("node_modules/corepack/dist/corepack.js"))

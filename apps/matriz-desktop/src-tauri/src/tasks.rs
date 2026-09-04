@@ -2,7 +2,9 @@ use std::{process::Command, time::Instant};
 
 use serde::Serialize;
 
-use crate::{catalog::gate_definition, workspace::OperationsState};
+use crate::{
+    catalog::gate_definition, terminal::corepack_pnpm_command, workspace::OperationsState,
+};
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -30,8 +32,24 @@ pub fn run_gate(state: &OperationsState, gate_id: &str) -> Result<GateResult, St
     }
 
     let started = Instant::now();
-    let mut command = Command::new("pnpm.cmd");
-    command.current_dir(root).args(["run", gate.script]);
+    let (program, args) = corepack_pnpm_command(&["run".to_owned(), gate.script.to_owned()])?;
+    let mut command = Command::new(program);
+    command.current_dir(root).args(args).env("CI", "true");
+    if gate.id == "prisma:validate" {
+        command
+            .env(
+                "OPS_DATABASE_URL",
+                std::env::var_os("OPS_DATABASE_URL").unwrap_or_else(|| {
+                    "postgresql://validation:validation@127.0.0.1:1/validation?schema=ops".into()
+                }),
+            )
+            .env(
+                "PAY_DATABASE_URL",
+                std::env::var_os("PAY_DATABASE_URL").unwrap_or_else(|| {
+                    "postgresql://validation:validation@127.0.0.1:1/validation?schema=pay".into()
+                }),
+            );
+    }
     #[cfg(windows)]
     command.creation_flags(CREATE_NO_WINDOW);
     let result = command.output();
