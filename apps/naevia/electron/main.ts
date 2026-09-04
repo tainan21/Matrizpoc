@@ -13,6 +13,7 @@ import { TerminalHost, terminalEnvironment, type TerminalProcess } from "./termi
 import { LegacyImportService } from "./legacy-import-service.js"
 import { BrowserRepository } from "./browser-repository.js"
 import { assertTrustedShell, isShellUrl } from "./trusted-shell.js"
+import { policyAllows } from "./capsule-policy.js"
 import type { AgentPolicy, BrowserCommand, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -37,20 +38,21 @@ function partition(capsuleId: string) {
   return `persist:naevia-${capsuleId}`
 }
 
-function secureSession(partitionName: string) {
+function secureSession(partitionName: string, selectedPolicy: AgentPolicy) {
   const isolated = session.fromPartition(partitionName)
   isolated.setPermissionCheckHandler(() => false)
   isolated.setPermissionRequestHandler((_contents, _permission, callback) => callback(false))
   isolated.setDevicePermissionHandler(() => false)
   isolated.enableNetworkEmulation({ offline: killSwitchEnabled })
-  configureDownloads(isolated)
+  configureDownloads(isolated, selectedPolicy)
   return isolated
 }
 
-function configureDownloads(isolated: Session) {
+function configureDownloads(isolated: Session, selectedPolicy: AgentPolicy) {
   if (configuredDownloadSessions.has(isolated)) return
   configuredDownloadSessions.add(isolated)
   isolated.on("will-download", (_event, item) => {
+    if (!policyAllows(selectedPolicy, "downloads")) { item.cancel(); return }
     const source = item.getURL()
     const total = item.getTotalBytes()
     if (!validDownloadUrl(source) || total > MAX_DOWNLOAD_BYTES) { item.cancel(); return }
@@ -82,11 +84,11 @@ function publishDownloads() {
   if (window && !window.isDestroyed()) window.webContents.send("naevia:downloads", [...downloads.values()].map(({ view }) => view))
 }
 
-function ensureView(tab: TabView) {
+function ensureView(tab: TabView, selectedPolicy: AgentPolicy) {
   const current = views.get(tab.id)
   if (current) return current
   const partitionName = partition(tab.capsuleId)
-  secureSession(partitionName)
+  secureSession(partitionName, selectedPolicy)
   const view = new WebContentsView({ webPreferences: { partition: partitionName, sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true } })
   view.webContents.setWindowOpenHandler(() => ({ action: "deny" }))
   view.webContents.on("will-navigate", (event, url) => {
@@ -126,8 +128,10 @@ function showActive(snapshot: BrowserSnapshot) {
   if (!window || window.isDestroyed()) return
   const tab = snapshot.tabs.find((item) => item.id === snapshot.activeTabId)
   if (!tab) throw new Error("Aba ativa inválida")
+  const capsule = snapshot.capsules.find((item) => item.id === tab.capsuleId)
+  if (!capsule) throw new Error("Cápsula ativa inválida")
   for (const view of views.values()) window.contentView.removeChildView(view)
-  const view = ensureView(tab)
+  const view = ensureView(tab, capsule.policy)
   if (window.isDestroyed()) return
   activeViewId = tab.id
   window.contentView.addChildView(view)
@@ -255,13 +259,18 @@ function registerIpc() {
     const tabId = text(value?.tabId, "Aba", 36)
     const snapshot = await repository.snapshot()
     if (snapshot.activeTabId !== tabId) throw new Error("Somente a aba ativa pode ser controlada")
-    const contents = (await ensureView(snapshot.tabs.find((tab) => tab.id === tabId)!)).webContents
+    const tab = snapshot.tabs.find((item) => item.id === tabId)!
+    const capsule = snapshot.capsules.find((item) => item.id === tab.capsuleId)!
+    const contents = ensureView(tab, capsule.policy).webContents
     const command = browserCommand(value?.command)
     if (command === "back" && contents.navigationHistory.canGoBack()) contents.navigationHistory.goBack()
     else if (command === "forward" && contents.navigationHistory.canGoForward()) contents.navigationHistory.goForward()
     else if (command === "reload") contents.reload()
     else if (command === "stop") contents.stop()
-    else if (command === "devtools") contents.openDevTools({ mode: "detach" })
+    else if (command === "devtools") {
+      if (!policyAllows(capsule.policy, "devtools")) throw new Error("DevTools está disponível somente em cápsulas humanas")
+      contents.openDevTools({ mode: "detach" })
+    }
   })
   handle("naevia:browser:kill-switch", async (_event, input: unknown) => {
     const enabled = (input as Record<string, unknown>)?.enabled
@@ -279,7 +288,9 @@ function registerIpc() {
     const url = navigationTarget(text(value?.input, "Endereço", 2_048))
     const snapshot = await repository.snapshot()
     if (snapshot.activeTabId !== tabId) throw new Error("Somente a aba ativa pode navegar")
-    await (await ensureView(snapshot.tabs.find((tab) => tab.id === tabId)!)).webContents.loadURL(url)
+    const tab = snapshot.tabs.find((item) => item.id === tabId)!
+    const capsule = snapshot.capsules.find((item) => item.id === tab.capsuleId)!
+    await ensureView(tab, capsule.policy).webContents.loadURL(url)
     return repository.snapshot()
   })
   handle("naevia:layout", async (_event, input: unknown) => {
