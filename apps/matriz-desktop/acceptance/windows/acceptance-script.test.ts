@@ -45,7 +45,7 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
   it("records a clean tracked-artifacts gate after uninstall", () => {
     const source = readFileSync(scriptPath, "utf8")
 
-    expect(source).toContain("corepack pnpm verify:tracked-artifacts")
+    expect(source).toContain("corepack pnpm --dir $workspaceRoot verify:tracked-artifacts")
     expect(source).toContain("tracked-artifacts.json")
     expect(source).toContain("--tracked-artifacts-evidence")
   })

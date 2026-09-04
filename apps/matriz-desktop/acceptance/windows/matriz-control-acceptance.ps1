@@ -226,7 +226,7 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
   if ($completed) {
     $commit = (& git -C $workspaceRoot rev-parse HEAD).Trim()
     $trackedArtifactsLog = Join-Path $runOutput 'tracked-artifacts.log'
-    & corepack pnpm verify:tracked-artifacts *>&1 | Set-Content -LiteralPath $trackedArtifactsLog -Encoding utf8
+    & corepack pnpm --dir $workspaceRoot verify:tracked-artifacts *>&1 | Set-Content -LiteralPath $trackedArtifactsLog -Encoding utf8
     if ($LASTEXITCODE -ne 0) { throw "Tracked-artifacts verification failed with exit code $LASTEXITCODE" }
     [PSCustomObject]@{
       schemaVersion = 'v1'
