@@ -26,10 +26,12 @@ pub fn terminate_process_tree(pid: u32) -> Result<(), String> {
                 .map(|parent| (process.pid().as_u32(), parent.as_u32()))
         })
         .collect::<Vec<_>>();
-    for descendant in descendant_pids(pid, &relations) {
+    let descendants = descendant_pids(pid, &relations);
+    WindowsProcessTerminator.terminate(pid)?;
+    for descendant in descendants {
         WindowsProcessTerminator.terminate(descendant)?;
     }
-    WindowsProcessTerminator.terminate(pid)
+    Ok(())
 }
 
 fn descendant_pids(root: u32, relations: &[(u32, u32)]) -> Vec<u32> {
@@ -135,7 +137,7 @@ mod tests {
     }
 
     #[test]
-    fn descendants_are_terminated_deepest_first_without_cycles() {
+    fn descendant_snapshot_is_complete_without_cycles() {
         let descendants = descendant_pids(10, &[(11, 10), (12, 11), (13, 10), (10, 12)]);
         assert_eq!(descendants.len(), 3);
         assert_eq!(descendants.iter().filter(|&&pid| pid == 12).count(), 1);
