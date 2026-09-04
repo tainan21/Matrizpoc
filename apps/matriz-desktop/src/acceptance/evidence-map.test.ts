@@ -4,6 +4,7 @@ import { acceptanceIdsForJourney } from "./evidence-map"
 describe("acceptance evidence map", () => {
   it("maps only exact journeys with direct assertions", () => {
     expect(acceptanceIdsForJourney("streams cwd and Unicode output, then remains interactive after Ctrl+C")).toEqual(["TERM-001", "TERM-002", "TERM-003", "TERM-007"])
+    expect(acceptanceIdsForJourney("exits without orphaning terminal children or persisting terminal output")).toEqual(["TERM-010", "TERM-011"])
     expect(acceptanceIdsForJourney("similar terminal test")).toEqual([])
   })
 

@@ -1,5 +1,6 @@
 const EXACT_JOURNEYS: Readonly<Record<string, readonly string[]>> = Object.freeze({
   "exits through the product command instead of external process termination": ["LIFE-005"],
+  "exits without orphaning terminal children or persisting terminal output": ["TERM-010", "TERM-011"],
   "keeps the global bottom dock idle, resizable and persisted": ["TERM-006", "TERM-009", "NAV-002"],
   "streams cwd and Unicode output, then remains interactive after Ctrl+C": ["TERM-001", "TERM-002", "TERM-003", "TERM-007"],
   "enforces six tabs and releases every session through visible controls": ["TERM-004", "TERM-005", "TERM-008"],

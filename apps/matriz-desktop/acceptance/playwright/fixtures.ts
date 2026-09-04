@@ -9,13 +9,14 @@ import { fileURLToPath } from "node:url"
 import { createWebView2Environment, removeTemporaryRoot, waitForCdpEndpoint } from "./native-process"
 
 type NativeFixtures = {
+  tauriApp: Readonly<{ page: Page; processId: number; configDirectory: string }>
   tauriPage: Page
 }
 
 const defaultBinary = fileURLToPath(new URL("../../src-tauri/target/release/matriz-control.exe", import.meta.url))
 
 export const test = base.extend<NativeFixtures>({
-  tauriPage: async ({}, use) => {
+  tauriApp: async ({}, use) => {
     const root = await mkdtemp(join(tmpdir(), "matriz-control-playwright-"))
     const profileDirectory = join(root, "webview2")
     const configDirectory = join(root, "config")
@@ -48,13 +49,15 @@ export const test = base.extend<NativeFixtures>({
       if (!context) throw new Error("Matriz Control did not expose a WebView2 context")
       const page = context.pages()[0] ?? await context.waitForEvent("page")
       await page.waitForLoadState("domcontentloaded")
-      await use(page)
+      if (!child.pid) throw new Error("Matriz Control did not expose its process ID")
+      await use({ page, processId: child.pid, configDirectory })
     } finally {
       await browser?.close().catch(() => undefined)
       await stopOwnedProcess(child)
       await removeTemporaryRoot({ root })
     }
   },
+  tauriPage: async ({ tauriApp }, use) => use(tauriApp.page),
 })
 
 export { expect }
