@@ -37,6 +37,16 @@ are produced, hashes are recorded, and no unmanaged processes or ports remain.
 Public release is a separate operational gate. It must not be simulated with
 local unsigned installers.
 
+## Final immutable local candidates
+
+| Product | Version | SHA-256 | Installed acceptance |
+| --- | --- | --- | --- |
+| Matriz Control | 1.1.0 | `3d3b0c1c9b202ed61c0c90bc45017a2b408d29de26b0162ab156a216b2d9964b` | `closure-cycle-1` and `closure-cycle-2`, 41/41 real WebView2 journeys each, clean uninstall |
+| NAEVIA | 1.0.0 | `7e97128d315531cf2a5f84b7409c3a9b0df3ac7517cc761d9b0ffe7ffeae18d0` | `closure-cycle-1` and `closure-cycle-2`, 11/11 real Electron journeys each, clean uninstall |
+
+Both candidates are local and Authenticode status is `NotSigned`. They are
+accepted for local use, not certified as publicly trusted releases.
+
 ## Explicit v1 trade-offs
 
 - NAEVIA opens Control for Store operations; it does not duplicate installer authority.

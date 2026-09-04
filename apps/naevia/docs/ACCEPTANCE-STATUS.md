@@ -78,3 +78,12 @@ The Store panel displays the Hub catalog and can now open the fixed per-user Mat
 Control's installed-result recorder previously marked every one of its 98 contract IDs as passed from suite exit alone. That blanket inference has been removed. Installed Playwright now emits structured per-journey evidence, and only exact reviewed mappings become passing contract cases; unknown, failed, skipped and unmapped cases remain blocked. Completing the remaining per-case evidence map is still a release gate, alongside signed Store/updater upgrade acceptance. Portable PostgreSQL, Garnet and NATS lifecycle, repository migrations, local seed, backup/restore, process ownership and the Pay outbox-to-JetStream-to-Ops durable consumer path now have isolated real-stack evidence, including transactional inbox idempotency.
 
 Keep the legacy source and releases intact. Do not perform cutover, create the final legacy tag or claim the overall plan is complete based only on installer cycles.
+
+## Local sprint closure — 2026-09-04
+
+The v1 Store boundary now has a fixed-path handoff to the installed Matriz
+Control, which remains the sole installer authority. The final local NAEVIA
+candidate has SHA-256
+`7e97128d315531cf2a5f84b7409c3a9b0df3ac7517cc761d9b0ffe7ffeae18d0`.
+It passed `closure-cycle-1` and `closure-cycle-2`, 11/11 real Electron journeys
+in each cycle, followed by clean uninstall. The artifact remains `NotSigned`.
