@@ -59,6 +59,13 @@ impl<T: ProcessTerminator> NativeState<T> {
             .lock()
             .map_err(|_| "Snapshot lock poisoned")?
             .clone();
+        if request
+            .pids
+            .iter()
+            .any(|pid| crate::processes::is_current_or_ancestor(*pid))
+        {
+            return Err(TerminationError::ProtectedProcess.to_string());
+        }
         authorize_batch(
             &request.pids,
             &request.snapshot_id,
