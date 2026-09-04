@@ -7,7 +7,12 @@ import { expect, test } from "../playwright/fixtures"
 
 const execFileAsync = promisify(execFile)
 
-test("exits through the product command instead of external process termination", async ({ tauriPage: page }) => {
+test("exits through the product command instead of external process termination", async ({ tauriApp }) => {
+  const { page, processId, binary, startupMs } = tauriApp
+  expect(startupMs).toBeLessThan(15_000)
+  expect(page.context().pages()).toHaveLength(1)
+  await expect(page.getByRole("button", { name: "Início", exact: true })).toBeEnabled()
+  expect(await exactProcessIds(binary)).toEqual([processId])
   await chooseMode(page, "Ajustes")
   const quit = page.getByRole("button", { name: "SAIR DO CONTROL", exact: true })
   await expect(quit).toBeEnabled()
@@ -51,6 +56,14 @@ async function findPowerShellDescendant(rootPid: number): Promise<number | null>
     for (const process of processes) if (descendants.has(process.ParentProcessId)) descendants.add(process.ProcessId)
   }
   return processes.find((process) => descendants.has(process.ProcessId) && /^(pwsh|powershell)\.exe$/i.test(process.Name))?.ProcessId ?? null
+}
+
+async function exactProcessIds(binary: string): Promise<number[]> {
+  const escaped = binary.replace(/'/g, "''")
+  const script = `@(Get-CimInstance Win32_Process -Filter "Name = 'matriz-control.exe'" | Where-Object { $_.ExecutablePath -eq '${escaped}' } | Select-Object -ExpandProperty ProcessId) | ConvertTo-Json -Compress`
+  const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { windowsHide: true })
+  const parsed = JSON.parse(stdout || "[]") as number | number[]
+  return (Array.isArray(parsed) ? parsed : [parsed]).sort((left, right) => left - right)
 }
 
 async function processExists(pid: number): Promise<boolean> {

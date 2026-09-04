@@ -1,5 +1,5 @@
 const EXACT_JOURNEYS: Readonly<Record<string, readonly string[]>> = Object.freeze({
-  "exits through the product command instead of external process termination": ["LIFE-005"],
+  "exits through the product command instead of external process termination": ["LIFE-001", "LIFE-002", "LIFE-005", "LIFE-007"],
   "exits without orphaning terminal children or persisting terminal output": ["TERM-010", "TERM-011"],
   "keeps the global bottom dock idle, resizable and persisted": ["TERM-006", "TERM-009", "NAV-002"],
   "streams cwd and Unicode output, then remains interactive after Ctrl+C": ["TERM-001", "TERM-002", "TERM-003", "TERM-007"],
@@ -15,6 +15,7 @@ const EXACT_JOURNEYS: Readonly<Record<string, readonly string[]>> = Object.freez
   "keeps motion restrained and the terminal operable": ["A11Y-002", "VIS-002"],
   "observes and terminates only harness-owned listener snapshots": ["PORT-001", "PORT-003", "PORT-004", "PORT-005", "PORT-006", "PORT-007", "CMD-003"],
   "degrades optional Doctor checks and rejects gates after workspace loss": ["DOC-002", "ACT-003"],
+  "recovers defaults from corrupt settings without destroying the source": ["SET-002"],
   "builds, installs, starts, and stops the canonical native app": ["NATIVE-001", "NATIVE-004", "NATIVE-005"],
   "rejects missing and tampered native installers before execution": ["NATIVE-003", "NATIVE-006"],
 })

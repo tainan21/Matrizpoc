@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url"
 import { createWebView2Environment, removeTemporaryRoot, waitForCdpEndpoint } from "./native-process"
 
 type NativeFixtures = {
-  tauriApp: Readonly<{ page: Page; processId: number; configDirectory: string }>
+  tauriApp: Readonly<{ page: Page; processId: number; configDirectory: string; binary: string; startupMs: number }>
   tauriPage: Page
 }
 
@@ -23,6 +23,7 @@ export const test = base.extend<NativeFixtures>({
     await Promise.all([mkdir(profileDirectory), mkdir(configDirectory)])
     const cdpPort = await reserveLoopbackPort()
     const binary = process.env.MATRIZ_CONTROL_BINARY ?? defaultBinary
+    const startedAt = Date.now()
     const child = spawn(binary, [], {
       env: createWebView2Environment({
         baseEnvironment: process.env,
@@ -50,7 +51,7 @@ export const test = base.extend<NativeFixtures>({
       const page = context.pages()[0] ?? await context.waitForEvent("page")
       await page.waitForLoadState("domcontentloaded")
       if (!child.pid) throw new Error("Matriz Control did not expose its process ID")
-      await use({ page, processId: child.pid, configDirectory })
+      await use({ page, processId: child.pid, configDirectory, binary, startupMs: Date.now() - startedAt })
     } finally {
       await browser?.close().catch(() => undefined)
       await stopOwnedProcess(child)
