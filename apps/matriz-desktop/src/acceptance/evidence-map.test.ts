@@ -11,6 +11,7 @@ describe("acceptance evidence map", () => {
     expect(acceptanceIdsForJourney("degrades optional Doctor checks and rejects gates after workspace loss")).toEqual(["DOC-002", "ACT-003"])
     expect(acceptanceIdsForJourney("exits through the product command instead of external process termination")).toEqual(["LIFE-001", "LIFE-002", "LIFE-005", "LIFE-007"])
     expect(acceptanceIdsForJourney("recovers defaults from corrupt settings without destroying the source")).toEqual(["SET-002"])
+    expect(acceptanceIdsForJourney("maps every canonical Matriz app to its fixed listener port")).toEqual(["PORT-002"])
     expect(acceptanceIdsForJourney("similar terminal test")).toEqual([])
   })
 

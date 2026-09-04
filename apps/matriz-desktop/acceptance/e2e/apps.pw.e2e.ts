@@ -15,6 +15,16 @@ const apps = [
   { label: "Seumei", actionLabel: "Seumei", terminal: "SEUMEI / WEB" },
 ] as const
 
+test("maps every canonical Matriz app to its fixed listener port", async ({ tauriPage: page }) => {
+  await selectAcceptanceWorkspace(page)
+  await chooseMode(page, "Apps")
+  for (const [index, app] of apps.entries()) {
+    const row = page.locator(".runtime-row").filter({ hasText: app.label })
+    await expect(row).toHaveCount(1)
+    await expect(row).toContainText(`:${3000 + index}`)
+  }
+})
+
 async function terminalLabels(page: Page): Promise<readonly string[]> {
   return page.locator(".terminal-tabs [role='tab']").evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("aria-label") ?? ""))
 }
