@@ -1,12 +1,12 @@
 # Matriz Control — relatório de aceitação Windows
 
-Gerado em: 2026-09-04T13:22:41.849Z
+Gerado em: 2026-09-04T14:53:40.059Z
 
 ## Resultado executivo
 
 **Verdict: Not Ready**
 
-- Contrato instalado: 188/196 resultados verdes.
+- Contrato instalado: 190/196 resultados verdes.
 - Ciclos consecutivos completos: 0/2.
 - Mesmo artefato nos dois ciclos: sim.
 - Overflow horizontal: zero.
@@ -29,8 +29,8 @@ O candidato é o NSIS produzido pelo commit atual, instalado, exercitado dentro 
 
 | Ciclo | Casos | SHA-256 do instalador | Startup ≤ | RAM média | CPU idle | Desinstalado |
 |---|---:|---|---:|---:|---:|---|
-| acceptance-20260904-cycle1b | 94/98 | 3a6cad4dfd0cf962fd8c4fb38b6fcc5c7a04055186fac9f568f6bce310b66c10 | 665 ms | 40.78 MB | 0.2403% | sim |
-| acceptance-20260904-cycle2 | 94/98 | 3a6cad4dfd0cf962fd8c4fb38b6fcc5c7a04055186fac9f568f6bce310b66c10 | 554 ms | 40.71 MB | 0.2150% | sim |
+| acceptance-20260904-final1 | 95/98 | 98da4e558ecbfc8c469cb3a90c923aa70567fe3c1fbe9a9c3a313b71c2a01743 | 654 ms | 42.21 MB | 0.1946% | sim |
+| acceptance-20260904-final2 | 95/98 | 98da4e558ecbfc8c469cb3a90c923aa70567fe3c1fbe9a9c3a313b71c2a01743 | 659 ms | 42.30 MB | 0.2031% | sim |
 
 ## Produto validado
 
