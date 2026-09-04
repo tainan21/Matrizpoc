@@ -449,10 +449,24 @@ impl TerminalManager {
 
     pub fn close(&self, session_id: &str) -> Result<(), String> {
         let session = self.session(session_id)?;
-        let (pid, is_running) = session
+        let pid = session
             .lock()
-            .map(|session| (session.pid, session.metadata.status == "running"))
+            .map(|session| session.pid)
             .map_err(|_| "Terminal session lock poisoned".to_owned())?;
+        // Ctrl+C may complete a managed process just before its waiter publishes
+        // the final state. Give that owned waiter a brief chance to win before
+        // requesting PROCESS_TERMINATE for a process that is already exiting.
+        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(300);
+        let is_running = loop {
+            let running = session
+                .lock()
+                .map(|session| session.metadata.status == "running")
+                .map_err(|_| "Terminal session lock poisoned".to_owned())?;
+            if !running || std::time::Instant::now() >= deadline {
+                break running;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        };
         if is_running {
             WindowsProcessTerminator.terminate(pid)?;
         }

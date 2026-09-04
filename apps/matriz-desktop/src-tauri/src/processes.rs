@@ -37,6 +37,15 @@ pub fn is_current_or_ancestor(candidate: u32) -> bool {
 
 impl ProcessTerminator for WindowsProcessTerminator {
     fn terminate(&self, pid: u32) -> Result<(), String> {
+        let synchronization = unsafe { OpenProcess(PROCESS_SYNCHRONIZE, 0, pid) };
+        if !synchronization.is_null() {
+            let already_stopped =
+                unsafe { WaitForSingleObject(synchronization, 0) } == WAIT_OBJECT_0_RESULT;
+            unsafe { CloseHandle(synchronization) };
+            if already_stopped {
+                return Ok(());
+            }
+        }
         let handle = unsafe { OpenProcess(PROCESS_TERMINATE | PROCESS_SYNCHRONIZE, 0, pid) };
         if handle.is_null() {
             return Err(termination_failure(pid, unsafe { GetLastError() }));
