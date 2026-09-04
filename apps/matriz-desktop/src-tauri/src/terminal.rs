@@ -14,7 +14,7 @@ use uuid::Uuid;
 
 use crate::activity::ActivityHub;
 use crate::catalog::{ManagedOperationDefinition, ManagedOperationKind};
-use crate::processes::terminate_process_tree;
+use crate::processes::{terminate_process_tree, ManagedProcessJob};
 
 pub const MAX_SESSIONS: usize = 6;
 pub const MAX_CHUNK_BYTES: usize = 64 * 1024;
@@ -93,6 +93,7 @@ struct SessionRecord {
     metadata: TerminalSession,
     sequence: u64,
     pid: u32,
+    job: Option<ManagedProcessJob>,
     master: Option<Box<dyn MasterPty + Send>>,
     writer: Option<Box<dyn Write + Send>>,
 }
@@ -273,6 +274,7 @@ impl TerminalManager {
         let pid = child
             .process_id()
             .ok_or_else(|| "Terminal process did not expose a PID".to_owned())?;
+        let job = ManagedProcessJob::assign(pid).ok();
         let id = Uuid::new_v4().to_string();
         let metadata = TerminalSession {
             id: id.clone(),
@@ -289,6 +291,7 @@ impl TerminalManager {
             metadata: metadata.clone(),
             sequence: 0,
             pid,
+            job,
             master: Some(pair.master),
             writer: Some(writer),
         }));
@@ -449,9 +452,9 @@ impl TerminalManager {
 
     pub fn close(&self, session_id: &str) -> Result<(), String> {
         let session = self.session(session_id)?;
-        let pid = session
+        let (pid, has_job) = session
             .lock()
-            .map(|session| session.pid)
+            .map(|session| (session.pid, session.job.is_some()))
             .map_err(|_| "Terminal session lock poisoned".to_owned())?;
         // Ctrl+C may complete a managed process just before its waiter publishes
         // the final state. Give that owned waiter a brief chance to win before
@@ -467,7 +470,7 @@ impl TerminalManager {
             }
             std::thread::sleep(std::time::Duration::from_millis(10));
         };
-        if is_running {
+        if is_running && !has_job {
             terminate_process_tree(pid)?;
         }
         let (writer, master) = {
@@ -475,6 +478,7 @@ impl TerminalManager {
                 .lock()
                 .map_err(|_| "Terminal session lock poisoned".to_owned())?;
             session.metadata.status = "closing";
+            session.job.take();
             (session.writer.take(), session.master.take())
         };
         drop(writer);
@@ -516,9 +520,10 @@ impl TerminalManager {
             .unwrap_or_default();
         for session in sessions {
             if let Ok(mut session) = session.lock() {
-                if session.metadata.status == "running" {
+                if session.metadata.status == "running" && session.job.is_none() {
                     let _ = terminate_process_tree(session.pid);
                 }
+                session.job.take();
                 session.writer.take();
                 session.master.take();
             }

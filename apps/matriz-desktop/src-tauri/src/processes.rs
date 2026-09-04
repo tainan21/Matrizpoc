@@ -1,8 +1,14 @@
 use sysinfo::{Pid, System};
+use windows_sys::Win32::System::JobObjects::{
+    AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
+    SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
+    JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+};
 use windows_sys::Win32::{
     Foundation::{CloseHandle, GetLastError, ERROR_ACCESS_DENIED},
     System::Threading::{
-        OpenProcess, TerminateProcess, WaitForSingleObject, PROCESS_SYNCHRONIZE, PROCESS_TERMINATE,
+        OpenProcess, TerminateProcess, WaitForSingleObject, PROCESS_SET_QUOTA, PROCESS_SYNCHRONIZE,
+        PROCESS_TERMINATE,
     },
 };
 
@@ -14,6 +20,64 @@ pub trait ProcessTerminator: Send + Sync {
 
 #[derive(Default)]
 pub struct WindowsProcessTerminator;
+
+pub struct ManagedProcessJob(windows_sys::Win32::Foundation::HANDLE);
+
+unsafe impl Send for ManagedProcessJob {}
+
+impl ManagedProcessJob {
+    pub fn assign(pid: u32) -> Result<Self, String> {
+        let job = unsafe { CreateJobObjectW(std::ptr::null(), std::ptr::null()) };
+        if job.is_null() {
+            return Err(format!("Unable to create process job ({})", unsafe {
+                GetLastError()
+            }));
+        }
+        let mut limits = unsafe { std::mem::zeroed::<JOBOBJECT_EXTENDED_LIMIT_INFORMATION>() };
+        limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+        let configured = unsafe {
+            SetInformationJobObject(
+                job,
+                JobObjectExtendedLimitInformation,
+                &limits as *const _ as *const std::ffi::c_void,
+                std::mem::size_of_val(&limits) as u32,
+            )
+        };
+        if configured == 0 {
+            let error = unsafe { GetLastError() };
+            unsafe { CloseHandle(job) };
+            return Err(format!("Unable to configure process job ({error})"));
+        }
+        let process = unsafe { OpenProcess(PROCESS_SET_QUOTA | PROCESS_TERMINATE, 0, pid) };
+        if process.is_null() {
+            let error = unsafe { GetLastError() };
+            unsafe { CloseHandle(job) };
+            return Err(format!(
+                "Unable to open managed process {pid} for job assignment ({error})"
+            ));
+        }
+        let assigned = unsafe { AssignProcessToJobObject(job, process) };
+        let error = if assigned == 0 {
+            Some(unsafe { GetLastError() })
+        } else {
+            None
+        };
+        unsafe { CloseHandle(process) };
+        if let Some(error) = error {
+            unsafe { CloseHandle(job) };
+            return Err(format!(
+                "Unable to assign managed process {pid} to its job ({error})"
+            ));
+        }
+        Ok(Self(job))
+    }
+}
+
+impl Drop for ManagedProcessJob {
+    fn drop(&mut self) {
+        unsafe { CloseHandle(self.0) };
+    }
+}
 
 pub fn terminate_process_tree(pid: u32) -> Result<(), String> {
     let system = System::new_all();
