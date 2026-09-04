@@ -46,6 +46,15 @@ test("exits without orphaning terminal children or persisting terminal output", 
   expect(await persistedFilesContain(configDirectory, marker)).toBe(false)
 })
 
+test("closes the main window to tray without terminating Control", async ({ tauriApp }) => {
+  const { page, processId } = tauriApp
+  await expect(page.getByRole("button", { name: "Início", exact: true })).toBeEnabled()
+  await page.getByRole("button", { name: "Ocultar", exact: true }).click()
+  await page.waitForTimeout(500)
+  expect(await processExists(processId)).toBe(true)
+  await expect(page.getByRole("button", { name: "Hub", exact: true })).toBeEnabled()
+})
+
 async function findPowerShellDescendant(rootPid: number): Promise<number | null> {
   const script = "$p=Get-CimInstance Win32_Process|Select-Object ProcessId,ParentProcessId,Name;$p|ConvertTo-Json -Compress"
   const { stdout } = await execFileAsync("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], { windowsHide: true })
