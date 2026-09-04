@@ -84,7 +84,7 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     const agentContent = application.windows().filter((candidate) => candidate.url() === `${origin}/`).at(-1)
     if (!agentContent) throw new Error("Conteúdo remoto da cápsula agent-safe não abriu")
     await agentContent.getByRole("link", { name: "Baixar prova" }).click()
-    await expect.poll(() => window.evaluate(() => window.naevia.downloads().then((items) => items.length))).toBe(1)
+    await expect.poll(() => window.evaluate(() => globalThis.window.naevia.downloads().then((items) => items.length))).toBe(1)
     await window.getByRole("button", { name: "DevTools" }).click()
     await expect(window.getByText(/DevTools está disponível somente em cápsulas humanas/)).toBeVisible()
 
