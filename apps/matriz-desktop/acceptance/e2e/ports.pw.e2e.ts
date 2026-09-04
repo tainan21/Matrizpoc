@@ -39,9 +39,19 @@ test("observes and terminates only harness-owned listener snapshots", async ({ t
     await expect(invoke(page, "terminate_process", { request: { pid: process.pid, snapshotId: current.snapshotId } })).rejects.toThrow(/protected|refused|ancestor|system/i)
     expect(protectedServer.listening).toBe(true)
 
+    await refresh(page)
+    await page.keyboard.press("Control+K")
+    const deckOption = page.locator(".command-deck").getByRole("option").filter({ hasText: `PID ${first.child.pid}` })
+    await expect(deckOption).toHaveCount(1)
+    await deckOption.click()
+    expect(first.child.exitCode).toBeNull()
+    await expect(page.getByText("ENTER NOVAMENTE")).toBeVisible()
+    await deckOption.click()
+    await waitForExit(first.child)
+
     const finalSnapshot = await snapshot(page)
-    await invoke(page, "terminate_processes", { request: { pids: [first.child.pid, second.child.pid], snapshotId: finalSnapshot.snapshotId } })
-    await Promise.all([waitForExit(first.child), waitForExit(second.child)])
+    await invoke(page, "terminate_processes", { request: { pids: [second.child.pid], snapshotId: finalSnapshot.snapshotId } })
+    await waitForExit(second.child)
     await expect.poll(async () => (await snapshot(page)).ports.some(({ pid }) => pid === first.child.pid || pid === second.child.pid)).toBe(false)
   } finally {
     protectedServer.close()
@@ -62,7 +72,7 @@ async function listenerProcess(): Promise<{ child: ChildProcess; port: number }>
 
 async function refresh(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Atualizar", exact: true }).click()
-  await expect(page.locator("footer [role='status']")).not.toHaveText("Atualizando…")
+  await expect(page.locator("footer [role='status']")).toHaveText("Atualizado")
 }
 
 function snapshot(page: Page): Promise<Snapshot> {
