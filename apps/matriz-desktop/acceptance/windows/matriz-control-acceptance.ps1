@@ -202,11 +202,6 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
       Stop-Process -Id $measured.Id -Force -ErrorAction SilentlyContinue
     }
 
-    $commit = (& git -C $workspaceRoot rev-parse HEAD).Trim()
-    $durationMs = [Math]::Round(([DateTimeOffset]::UtcNow - $acceptanceStarted).TotalMilliseconds)
-    $resultRecorder = Join-Path $workspaceRoot 'apps\matriz-desktop\acceptance\record-installed-results.ts'
-    & corepack pnpm exec tsx $resultRecorder --run-id $RunId --output-root $runOutput --commit $commit --artifact-sha256 $actualHash --duration-ms $durationMs --playwright-evidence $playwrightEvidence
-    if ($LASTEXITCODE -ne 0) { throw "Result recording failed with exit code $LASTEXITCODE" }
     $completed = $true
   }
   finally {
@@ -228,6 +223,13 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
     uninstalled = -not (Test-Path -LiteralPath $productExecutable -PathType Leaf)
   }
   $lifecycle | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $runOutput 'lifecycle.json') -Encoding utf8
+  if ($completed) {
+    $commit = (& git -C $workspaceRoot rev-parse HEAD).Trim()
+    $durationMs = [Math]::Round(([DateTimeOffset]::UtcNow - $acceptanceStarted).TotalMilliseconds)
+    $resultRecorder = Join-Path $workspaceRoot 'apps\matriz-desktop\acceptance\record-installed-results.ts'
+    & corepack pnpm exec tsx $resultRecorder --run-id $RunId --output-root $runOutput --commit $commit --artifact-sha256 $actualHash --duration-ms $durationMs --playwright-evidence $playwrightEvidence --installation-evidence (Join-Path $runOutput 'installation.json') --lifecycle-evidence (Join-Path $runOutput 'lifecycle.json')
+    if ($LASTEXITCODE -ne 0) { throw "Result recording failed with exit code $LASTEXITCODE" }
+  }
   $lifecycle | ConvertTo-Json -Compress
   exit 0
 }

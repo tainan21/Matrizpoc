@@ -11,21 +11,26 @@ it("certifies only contract cases backed by passed mapped journeys", async () =>
   try {
     const script = fileURLToPath(new URL("./record-installed-results.ts", import.meta.url))
     const evidence = join(output, "playwright-evidence.json")
+    const installation = join(output, "installation.json")
+    const lifecycle = join(output, "lifecycle.json")
     await writeFile(evidence, JSON.stringify({ schemaVersion: "v1", status: "passed", journeys: [
       { title: "streams cwd and Unicode output, then remains interactive after Ctrl+C", status: "passed" },
       { title: "unknown broad suite", status: "passed" },
       { title: "builds, installs, starts, and stops the canonical native app", status: "failed" },
     ] }))
+    await writeFile(installation, JSON.stringify({ schemaVersion: "v1", runId: "evidence-test", mode: "Installed", target: "packaged-candidate", installerSha256: "a".repeat(64), productName: "Matriz Control" }))
+    await writeFile(lifecycle, JSON.stringify({ schemaVersion: "v1", runId: "evidence-test", status: "pass", installerSha256: "a".repeat(64), uninstalled: true }))
     const result = spawnSync(process.execPath, ["--import", "tsx", script,
       "--run-id", "evidence-test", "--output-root", output, "--commit", "test",
       "--artifact-sha256", "a".repeat(64), "--duration-ms", "100", "--playwright-evidence", evidence,
+      "--installation-evidence", installation, "--lifecycle-evidence", lifecycle,
     ], { cwd: resolve(dirname(script), ".."), encoding: "utf8" })
     expect(result.status, result.stderr).toBe(0)
     const results = JSON.parse(await readFile(join(output, "results.json"), "utf8")) as { id: string; status: string; summary: string }[]
     expect(results.length).toBeGreaterThan(0)
-    expect(results.filter((entry) => entry.status === "pass").map((entry) => entry.id)).toEqual(["TERM-001", "TERM-002", "TERM-003", "TERM-007"])
+    expect(results.filter((entry) => entry.status === "pass").map((entry) => entry.id)).toEqual(["TERM-001", "TERM-002", "TERM-003", "TERM-007", "INST-001", "INST-002", "INST-003", "INST-005"])
     expect(results.find((entry) => entry.id === "NATIVE-001")?.status).toBe("blocked")
     expect(results.find((entry) => entry.id === "LIFE-001")?.summary).toContain("individual evidence")
-    expect(JSON.parse(await readFile(join(output, "summary.json"), "utf8"))).toMatchObject({ status: "blocked", passed: 4, blocked: results.length - 4 })
+    expect(JSON.parse(await readFile(join(output, "summary.json"), "utf8"))).toMatchObject({ status: "blocked", passed: 8, blocked: results.length - 8 })
   } finally { await rm(output, { recursive: true, force: true }) }
 })
