@@ -36,7 +36,9 @@ test("persists settings across a complete Control relaunch", async ({ tauriApp }
     workspacePath: null,
   }
   await invoke(page, "write_settings", { settings: expected })
-  await invoke(page, "quit_app")
+  // A successful quit can destroy the WebView execution context before its
+  // promise response crosses CDP. Process termination below is the authority.
+  await invoke(page, "quit_app").catch(() => undefined)
   await expect.poll(() => processExists(processId)).toBe(false)
 
   const profileDirectory = join(configDirectory, "relaunch-webview2")
