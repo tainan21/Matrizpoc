@@ -78,7 +78,7 @@ ${runRows || "| nenhum | 0/98 | — | — | — | — | não |"}
 
 1. Portas e processos — inventário, PID, refresh, kill e kill-all autorizados por snapshot.
 2. Terminal — PowerShell/ConPTY real, seis abas, Unicode, Ctrl+C e encerramento limpo.
-3. Apps — catálogo de nove produtos; oito ciclos completos e proteção do Contracts como processo externo na porta 3003 neste ambiente.
+3. Apps — catálogo de nove produtos; nove ciclos completos de runtime e proteção de listeners externos.
 4. Ações — gates tipados de types, lint, smoke e Prisma com saída observável.
 5. Doctor — workspace, Node, pnpm e Git verificados localmente.
 6. Git pulse — branch e estado do worktree sem transformar o app em cliente Git genérico.
@@ -101,7 +101,7 @@ ${runRows || "| nenhum | 0/98 | — | — | — | — | não |"}
 - Instaladores só executam dentro do workspace após SHA-256 válido.
 - O harness instalado aceita somente o diretório oficial ou a raiz isolada de aceitação.
 - O terminal é a única superfície arbitrária e fica isolado em sessões ConPTY limitadas.
-- O instalador 0.1 permanece sem assinatura; distribuição pública deve aguardar signing e canal confiável.
+- O instalador 1.1 permanece sem assinatura; distribuição pública deve aguardar signing e canal confiável.
 
 ## Achados residuais
 
@@ -149,7 +149,7 @@ export async function loadReportInput(outputRoot, runIds) {
     generatedAt: new Date().toISOString(),
     baseline: await loadBaseline(outputRoot),
     packagedRuns,
-    findings: [{ severity: "minor", title: "Instalador 0.1 ainda não assinado", status: "aceito para distribuição interna" }],
+    findings: [{ severity: "minor", title: "Instalador 1.1 ainda não assinado", status: "aceito para distribuição interna" }],
   }
 }
 
@@ -159,7 +159,11 @@ async function main() {
   const workspaceRoot = path.resolve(appRoot, "../..")
   const outputRoot = path.join(workspaceRoot, "output", "matriz-control-acceptance")
   const destination = path.join(workspaceRoot, "docs", "audit", "2026-08-20-matriz-control-acceptance.md")
-  const input = await loadReportInput(outputRoot, ["final-1", "final-2"])
+  const requestedRunIds = process.argv.slice(2)
+  if (requestedRunIds.length !== 0 && requestedRunIds.length !== 2) {
+    throw new Error("Provide exactly two installed acceptance run IDs")
+  }
+  const input = await loadReportInput(outputRoot, requestedRunIds.length === 2 ? requestedRunIds : ["final-1", "final-2"])
   await writeFile(destination, generateReport(input), "utf8")
   process.stdout.write(`${destination}\n`)
 }

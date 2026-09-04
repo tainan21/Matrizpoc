@@ -10,7 +10,7 @@ The release contract validates the installed product, not only source code.
 4. Run the Playwright WebView2 gate with `corepack pnpm --filter @matriz/app-matriz-desktop e2e`.
 5. Run `acceptance:installed` twice with distinct `MATRIZ_ACCEPTANCE_RUN_ID` values.
 6. Confirm both lifecycle records say `pass` and `uninstalled: true`, with the same installer SHA-256.
-7. Generate the canonical Markdown report with `node apps/matriz-desktop/acceptance/generate-report.mjs`.
+7. Generate the canonical Markdown report with `node apps/matriz-desktop/acceptance/generate-report.mjs <first-run-id> <second-run-id>`.
 
 Evidence is written below `output/matriz-control-acceptance/` and remains
 ignored. The tracked report contains no machine-specific user path.

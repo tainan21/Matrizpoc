@@ -1,13 +1,13 @@
 # Matriz Control — relatório de aceitação Windows
 
-Gerado em: 2026-08-22T15:07:56.679Z
+Gerado em: 2026-09-04T13:22:41.849Z
 
 ## Resultado executivo
 
-**Verdict: Ready**
+**Verdict: Not Ready**
 
-- Contrato instalado: 196/196 resultados verdes.
-- Ciclos consecutivos completos: 2/2.
+- Contrato instalado: 188/196 resultados verdes.
+- Ciclos consecutivos completos: 0/2.
 - Mesmo artefato nos dois ciclos: sim.
 - Overflow horizontal: zero.
 - Controles sem nome acessível: zero.
@@ -19,8 +19,8 @@ Gerado em: 2026-08-22T15:07:56.679Z
 
 O baseline representa o aplicativo que já estava instalado antes da recuperação. Ele é evidência histórica e não certifica o candidato atual.
 
-- Versão: 0.1.0
-- SHA-256: 712F6F99217FD4832119516A01079E8D8FADACC08799152589239732C80B6442
+- Versão: 1.1.0
+- SHA-256: 4628E68E737C231C310266A647F61EB66A913B946AB1D159AB5AE6E12F1A78BB
 - Executável: %USERPROFILE%\AppData\Local\Matriz Control\matriz-control.exe
 
 ### Packaged candidate
@@ -29,14 +29,14 @@ O candidato é o NSIS produzido pelo commit atual, instalado, exercitado dentro 
 
 | Ciclo | Casos | SHA-256 do instalador | Startup ≤ | RAM média | CPU idle | Desinstalado |
 |---|---:|---|---:|---:|---:|---|
-| final-1 | 98/98 | fb1fe2acf0b7c9eabc4a4f3eacba300752d03a9d4b8ca53c23f5d2b958ccd4e4 | 471 ms | 30.47 MB | 0.0126% | sim |
-| final-2 | 98/98 | fb1fe2acf0b7c9eabc4a4f3eacba300752d03a9d4b8ca53c23f5d2b958ccd4e4 | 601 ms | 30.53 MB | 0.0211% | sim |
+| acceptance-20260904-cycle1b | 94/98 | 3a6cad4dfd0cf962fd8c4fb38b6fcc5c7a04055186fac9f568f6bce310b66c10 | 665 ms | 40.78 MB | 0.2403% | sim |
+| acceptance-20260904-cycle2 | 94/98 | 3a6cad4dfd0cf962fd8c4fb38b6fcc5c7a04055186fac9f568f6bce310b66c10 | 554 ms | 40.71 MB | 0.2150% | sim |
 
 ## Produto validado
 
 1. Portas e processos — inventário, PID, refresh, kill e kill-all autorizados por snapshot.
 2. Terminal — PowerShell/ConPTY real, seis abas, Unicode, Ctrl+C e encerramento limpo.
-3. Apps — catálogo de nove produtos; oito ciclos completos e proteção do Contracts como processo externo na porta 3003 neste ambiente.
+3. Apps — catálogo de nove produtos; nove ciclos completos de runtime e proteção de listeners externos.
 4. Ações — gates tipados de types, lint, smoke e Prisma com saída observável.
 5. Doctor — workspace, Node, pnpm e Git verificados localmente.
 6. Git pulse — branch e estado do worktree sem transformar o app em cliente Git genérico.
@@ -48,7 +48,7 @@ O candidato é o NSIS produzido pelo commit atual, instalado, exercitado dentro 
 
 - Viewports: 420×560, 760×700 e 1440×900.
 - Áreas: Portas, Apps, Terminal, Ações, Doctor e Ajustes.
-- Capturas por ciclo: 18.
+- Capturas por ciclo: 42.
 - Política de movimento: transições limitadas a 100 ms e removidas quando o sistema solicita redução.
 - Terminal largo: dock lateral; terminal compacto: área dedicada sempre acessível.
 
@@ -59,14 +59,14 @@ O candidato é o NSIS produzido pelo commit atual, instalado, exercitado dentro 
 - Instaladores só executam dentro do workspace após SHA-256 válido.
 - O harness instalado aceita somente o diretório oficial ou a raiz isolada de aceitação.
 - O terminal é a única superfície arbitrária e fica isolado em sessões ConPTY limitadas.
-- O instalador 0.1 permanece sem assinatura; distribuição pública deve aguardar signing e canal confiável.
+- O instalador 1.1 permanece sem assinatura; distribuição pública deve aguardar signing e canal confiável.
 
 ## Achados residuais
 
 | Severidade | Achado | Estado |
 |---|---|---|
-| minor | Instalador 0.1 ainda não assinado | aceito para distribuição interna |
+| minor | Instalador 1.1 ainda não assinado | aceito para distribuição interna |
 
 ## Conclusão
 
-O Matriz Control está pronto para uso local e distribuição interna controlada no Windows.
+O Matriz Control ainda não satisfaz o contrato de release; consulte os ciclos incompletos acima.
