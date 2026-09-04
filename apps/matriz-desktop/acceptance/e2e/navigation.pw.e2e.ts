@@ -66,6 +66,36 @@ test("persists compact settings across navigation", async ({ tauriPage: page }) 
   await expect(volume).toHaveValue("0.65")
 })
 
+test("keeps accessible navigation and catalog commands operational without sound", async ({ tauriPage: page }) => {
+  await chooseMode(page, "Ajustes")
+  const sounds = page.getByRole("checkbox", { name: "Sons" })
+  await sounds.setChecked(false)
+  await expect(sounds).not.toBeChecked()
+  await chooseMode(page, "Portas")
+  await expect(page.locator("main h1")).toHaveText("PORTAS")
+  await expect(page.locator("footer [role='status']")).toHaveAttribute("aria-live", "polite")
+  await expect(page.getByRole("button", { name: "Portas", exact: true })).toHaveAttribute("aria-current", "page")
+  await chooseMode(page, "Ajustes")
+  await expect(sounds).not.toBeChecked()
+
+  await page.keyboard.press("Control+K")
+  const search = page.getByLabel("Buscar ações")
+  await search.fill("sessao powershell")
+  const options = page.getByRole("option")
+  await expect(options).toHaveCount(1)
+  await expect(options.first()).toContainText("Nova sessão PowerShell")
+  await search.press("ArrowDown")
+  await expect(options.first()).toHaveAttribute("aria-selected", "true")
+
+  await search.fill("powershell encodedcommand arbitrario")
+  await expect(options).toHaveCount(0)
+  await expect(page.getByText("00 / SEM AÇÃO")).toBeVisible()
+  await search.press("Escape")
+
+  await expect(invoke(page, "open_target", { targetId: "arbitrary-path" })).rejects.toThrow(/unknown|target/i)
+  await expect(invoke(page, "start_managed_operation", { operationId: "shell.arbitrary" })).rejects.toThrow(/unknown|operation/i)
+})
+
 test("reports the real workspace, toolchain, and Git pulse", async ({ tauriPage: page }) => {
   await chooseMode(page, "Doctor")
   const checkRows = page.locator(".check-list > div")
@@ -94,3 +124,7 @@ test("observes the real Git workspace without mutating it", async ({ tauriPage: 
   await expect(page.getByRole("button", { name: "UNSTAGE", exact: true })).toBeDisabled()
   await expect(page.locator(".git-change, .git-changes .area-note").first()).toBeVisible()
 })
+
+function invoke<T>(page: import("@playwright/test").Page, command: string, args?: Record<string, unknown>): Promise<T> {
+  return page.evaluate(({ command, args }) => (window as unknown as { __TAURI_INTERNALS__: { invoke<TValue>(name: string, input?: Record<string, unknown>): Promise<TValue> } }).__TAURI_INTERNALS__.invoke<T>(command, args), { command, args })
+}

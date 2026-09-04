@@ -6,6 +6,7 @@ describe("acceptance evidence map", () => {
     expect(acceptanceIdsForJourney("streams cwd and Unicode output, then remains interactive after Ctrl+C")).toEqual(["TERM-001", "TERM-002", "TERM-003", "TERM-007"])
     expect(acceptanceIdsForJourney("exits without orphaning terminal children or persisting terminal output")).toEqual(["TERM-010", "TERM-011"])
     expect(acceptanceIdsForJourney("rejects missing and tampered native installers before execution")).toEqual(["NATIVE-003", "NATIVE-006"])
+    expect(acceptanceIdsForJourney("keeps accessible navigation and catalog commands operational without sound")).toEqual(["SET-003", "NAV-003", "A11Y-003", "CMD-002", "CMD-004", "JUMP-001"])
     expect(acceptanceIdsForJourney("similar terminal test")).toEqual([])
   })
 

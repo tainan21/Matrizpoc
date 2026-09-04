@@ -8,6 +8,7 @@ const EXACT_JOURNEYS: Readonly<Record<string, readonly string[]>> = Object.freez
   "navigates through the compact shell in one native window": ["NAV-001", "VIS-001"],
   "opens the command deck with Ctrl K and restores focus": ["CMD-001"],
   "persists compact settings across navigation": ["SET-001"],
+  "keeps accessible navigation and catalog commands operational without sound": ["SET-003", "NAV-003", "A11Y-003", "CMD-002", "CMD-004", "JUMP-001"],
   "reports the real workspace, toolchain, and Git pulse": ["DOC-001"],
   "observes the real Git workspace without mutating it": ["GIT-001"],
   "keeps every primary surface usable across supported window sizes": ["A11Y-001", "NAV-001", "VIS-001", "VIS-003"],
