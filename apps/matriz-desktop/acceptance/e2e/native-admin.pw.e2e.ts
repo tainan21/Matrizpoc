@@ -1,7 +1,11 @@
+import { mkdir, mkdtemp, writeFile } from "node:fs/promises"
+import { tmpdir } from "node:os"
+import { dirname, join } from "node:path"
 import type { Page } from "@playwright/test"
 
 import { chooseMode, selectAcceptanceWorkspace } from "../playwright/actions"
 import { expect, test } from "../playwright/fixtures"
+import { removeTemporaryRoot } from "../playwright/native-process"
 
 async function openNativeAdmin(page: Page): Promise<void> {
   await chooseMode(page, "Apps")
@@ -50,3 +54,27 @@ test("builds, installs, starts, and stops the canonical native app", async ({ ta
   await expect(open).toBeVisible({ timeout: 30_000 })
   await expect(page.locator(".runtime-context small")).toHaveText("INSTALLED")
 })
+
+test("rejects missing and tampered native installers before execution", async ({ tauriPage: page }) => {
+  const root = await mkdtemp(join(tmpdir(), "matriz-native-trust-"))
+  const installer = join(root, "apps", "matriz-admin", "desktop", "src-tauri", "target", "release", "bundle", "nsis", "Matriz Admin_0.1.0_x64-setup.exe")
+  try {
+    await Promise.all([
+      writeFile(join(root, "package.json"), "{}"),
+      writeFile(join(root, "pnpm-workspace.yaml"), "packages: []"),
+    ])
+    await invoke(page, "select_workspace", { path: root })
+    await expect(invoke(page, "install_native_app")).rejects.toThrow(/unavailable|installer/i)
+
+    await mkdir(dirname(installer), { recursive: true })
+    await writeFile(installer, "tampered fixture that must never execute")
+    await writeFile(`${installer}.sha256`, "0".repeat(64))
+    await expect(invoke(page, "install_native_app")).rejects.toThrow(/integrity|verification/i)
+  } finally {
+    await removeTemporaryRoot({ root })
+  }
+})
+
+function invoke<T>(page: Page, command: string, args?: Record<string, unknown>): Promise<T> {
+  return page.evaluate(({ command, args }) => (window as unknown as { __TAURI_INTERNALS__: { invoke<TValue>(name: string, input?: Record<string, unknown>): Promise<TValue> } }).__TAURI_INTERNALS__.invoke<T>(command, args), { command, args })
+}
