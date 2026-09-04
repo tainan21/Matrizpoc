@@ -14,6 +14,7 @@ const EXACT_JOURNEYS: Readonly<Record<string, readonly string[]>> = Object.freez
   "keeps every primary surface usable across supported window sizes": ["A11Y-001", "NAV-001", "VIS-001", "VIS-003"],
   "keeps motion restrained and the terminal operable": ["A11Y-002", "VIS-002"],
   "observes and terminates only harness-owned listener snapshots": ["PORT-001", "PORT-003", "PORT-004", "PORT-005", "PORT-006", "PORT-007", "CMD-003"],
+  "degrades optional Doctor checks and rejects gates after workspace loss": ["DOC-002", "ACT-003"],
   "builds, installs, starts, and stops the canonical native app": ["NATIVE-001", "NATIVE-004", "NATIVE-005"],
   "rejects missing and tampered native installers before execution": ["NATIVE-003", "NATIVE-006"],
 })

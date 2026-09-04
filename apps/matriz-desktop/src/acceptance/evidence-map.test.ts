@@ -8,6 +8,7 @@ describe("acceptance evidence map", () => {
     expect(acceptanceIdsForJourney("rejects missing and tampered native installers before execution")).toEqual(["NATIVE-003", "NATIVE-006"])
     expect(acceptanceIdsForJourney("keeps accessible navigation and catalog commands operational without sound")).toEqual(["SET-003", "NAV-003", "A11Y-003", "CMD-002", "CMD-004", "JUMP-001"])
     expect(acceptanceIdsForJourney("observes and terminates only harness-owned listener snapshots")).toEqual(["PORT-001", "PORT-003", "PORT-004", "PORT-005", "PORT-006", "PORT-007", "CMD-003"])
+    expect(acceptanceIdsForJourney("degrades optional Doctor checks and rejects gates after workspace loss")).toEqual(["DOC-002", "ACT-003"])
     expect(acceptanceIdsForJourney("similar terminal test")).toEqual([])
   })
 

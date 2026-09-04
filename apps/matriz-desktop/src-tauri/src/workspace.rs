@@ -54,11 +54,14 @@ impl OperationsState {
     }
 
     pub fn root(&self) -> Result<PathBuf, String> {
-        self.root
+        let root = self
+            .root
             .lock()
             .map_err(|_| "Workspace lock poisoned")?
             .clone()
-            .ok_or_else(|| "Matriz workspace has not been selected".into())
+            .ok_or_else(|| "Matriz workspace has not been selected".to_owned())?;
+        validate_workspace(&root)
+            .map_err(|error| format!("Selected Matriz workspace is no longer valid: {error}"))
     }
 
     pub fn start_app_with_environment(
@@ -201,6 +204,25 @@ mod tests {
             state.root().expect("restored root"),
             directory.path().canonicalize().expect("canonical fixture")
         );
+    }
+
+    #[test]
+    fn selected_workspace_is_revalidated_before_each_use() {
+        let directory = tempfile::tempdir().expect("workspace fixture");
+        fs::write(directory.path().join("package.json"), "{}").expect("package marker");
+        fs::write(directory.path().join("pnpm-workspace.yaml"), "packages: []")
+            .expect("workspace marker");
+        let state = OperationsState::default();
+        state
+            .select_workspace(directory.path())
+            .expect("valid selection");
+        fs::remove_file(directory.path().join("pnpm-workspace.yaml"))
+            .expect("remove workspace marker");
+
+        assert!(state
+            .root()
+            .expect_err("removed marker must invalidate the selection")
+            .contains("no longer valid"));
     }
 
     #[test]
