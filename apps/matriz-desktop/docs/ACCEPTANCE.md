@@ -9,6 +9,7 @@ The release contract validates the installed product, not only source code.
 3. Run `corepack pnpm --filter @matriz/app-matriz-desktop package` once.
 4. Run the Playwright WebView2 gate with `corepack pnpm --filter @matriz/app-matriz-desktop e2e`.
 5. Run `acceptance:installed` twice with distinct `MATRIZ_ACCEPTANCE_RUN_ID` values.
+   When certifying an upgrade, pass the canonical locally rebuilt `Matriz Control_1.0.0_x64-setup.exe` through `-UpgradeFromInstaller`; the harness installs 1.0.0, writes settings through its native bridge, upgrades to 1.1.0 and reads them back before the regular cycle.
 6. Confirm both lifecycle records say `pass` and `uninstalled: true`, with the same installer SHA-256.
 7. Generate the canonical Markdown report with `node apps/matriz-desktop/acceptance/generate-report.mjs <first-run-id> <second-run-id>`.
 

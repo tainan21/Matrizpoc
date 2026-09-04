@@ -50,6 +50,15 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
     expect(source).toContain("--tracked-artifacts-evidence")
   })
 
+  it("accepts only the canonical local 1.0.0 installer as an upgrade baseline", () => {
+    const source = readFileSync(scriptPath, "utf8")
+
+    expect(source).toContain("Matriz Control_1.0.0_x64-setup.exe")
+    expect(source).toContain("verify-installed-settings.ts")
+    expect(source).toContain("settingsPreserved = $true")
+    expect(source).toContain("--upgrade-evidence")
+  })
+
   it.runIf(existsSync(installedExecutable))("inspects the existing installation without modifying its executable", () => {
     const before = statSync(installedExecutable)
     const result = runAcceptance([

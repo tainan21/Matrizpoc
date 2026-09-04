@@ -9,6 +9,8 @@ param(
 
   [string]$RunId = $(if ([string]::IsNullOrWhiteSpace($env:MATRIZ_ACCEPTANCE_RUN_ID)) { 'acceptance-' + [DateTimeOffset]::UtcNow.ToString('yyyyMMdd-HHmmss') } else { $env:MATRIZ_ACCEPTANCE_RUN_ID }),
 
+  [string]$UpgradeFromInstaller,
+
   [switch]$PlanOnly
 )
 
@@ -144,6 +146,49 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
   $completed = $false
   try {
     Invoke-ExistingUninstaller
+    $upgradeEvidence = $null
+    if (-not [string]::IsNullOrWhiteSpace($UpgradeFromInstaller)) {
+      $resolvedUpgradeInstaller = [IO.Path]::GetFullPath($UpgradeFromInstaller)
+      $allowedUpgradeInstaller = [IO.Path]::GetFullPath((Join-Path $workspaceRoot 'apps\matriz-desktop\src-tauri\target\release\bundle\nsis\Matriz Control_1.0.0_x64-setup.exe'))
+      if ($resolvedUpgradeInstaller -ne $allowedUpgradeInstaller -or -not (Test-Path -LiteralPath $resolvedUpgradeInstaller -PathType Leaf)) {
+        throw 'Upgrade baseline must be the canonical locally rebuilt Matriz Control 1.0.0 installer'
+      }
+      $upgradeConfigRoot = [IO.Path]::GetFullPath((Join-Path $env:TEMP (Join-Path 'MatrizControlUpgradeAcceptance' $RunId)))
+      $upgradeTempPrefix = [IO.Path]::GetFullPath($env:TEMP).TrimEnd('\') + '\'
+      if (-not $upgradeConfigRoot.StartsWith($upgradeTempPrefix, [StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe upgrade acceptance config path' }
+      New-Item -ItemType Directory -Force -Path $upgradeConfigRoot | Out-Null
+      $settingsDriver = Join-Path $workspaceRoot 'apps\matriz-desktop\acceptance\verify-installed-settings.ts'
+      try {
+        $baselineInstall = Start-Process -FilePath $resolvedUpgradeInstaller -ArgumentList @('/S', "/D=$resolvedInstalledRoot") -Wait -PassThru
+        if ($baselineInstall.ExitCode -ne 0) { throw "Baseline install failed with exit code $($baselineInstall.ExitCode)" }
+        & corepack pnpm exec tsx $settingsDriver --binary $productExecutable --config-directory $upgradeConfigRoot --mode write | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Could not persist settings through the installed 1.0.0 bridge' }
+        $upgradeInstall = Start-Process -FilePath $expectedInstaller -ArgumentList @('/S', "/D=$resolvedInstalledRoot") -Wait -PassThru
+        if ($upgradeInstall.ExitCode -ne 0) { throw "Upgrade install failed with exit code $($upgradeInstall.ExitCode)" }
+        & corepack pnpm exec tsx $settingsDriver --binary $productExecutable --config-directory $upgradeConfigRoot --mode read | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw 'Settings did not survive the installed 1.0.0 to 1.1.0 upgrade' }
+        $upgradeEvidence = Join-Path $runOutput 'upgrade.json'
+        [PSCustomObject]@{
+          schemaVersion = 'v1'
+          runId = $RunId
+          status = 'pass'
+          fromVersion = '1.0.0'
+          fromInstallerSha256 = (Get-FileHash -LiteralPath $resolvedUpgradeInstaller -Algorithm SHA256).Hash.ToLowerInvariant()
+          toVersion = $desktopPackage.version
+          toInstallerSha256 = $actualHash
+          settingsPreserved = $true
+        } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $upgradeEvidence -Encoding utf8
+      }
+      finally {
+        Stop-ExactControlProcesses
+        Invoke-ExistingUninstaller
+        if (Test-Path -LiteralPath $upgradeConfigRoot) { Remove-Item -LiteralPath $upgradeConfigRoot -Recurse -Force }
+        $upgradeParent = Split-Path -Parent $upgradeConfigRoot
+        foreach ($profile in @(Get-ChildItem -LiteralPath $upgradeParent -Directory -Filter ((Split-Path -Leaf $upgradeConfigRoot) + '-webview2-*') -ErrorAction SilentlyContinue)) {
+          Remove-Item -LiteralPath $profile.FullName -Recurse -Force
+        }
+      }
+    }
     $install = Start-Process -FilePath $expectedInstaller -ArgumentList @('/S', "/D=$resolvedInstalledRoot") -Wait -PassThru
     if ($install.ExitCode -ne 0) { throw "Install failed with exit code $($install.ExitCode)" }
     if (-not (Test-Path -LiteralPath $productExecutable -PathType Leaf) -or -not (Test-Path -LiteralPath $productUninstaller -PathType Leaf)) {
@@ -236,7 +281,9 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
     } | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $runOutput 'tracked-artifacts.json') -Encoding utf8
     $durationMs = [Math]::Round(([DateTimeOffset]::UtcNow - $acceptanceStarted).TotalMilliseconds)
     $resultRecorder = Join-Path $workspaceRoot 'apps\matriz-desktop\acceptance\record-installed-results.ts'
-    & corepack pnpm exec tsx $resultRecorder --run-id $RunId --output-root $runOutput --commit $commit --artifact-sha256 $actualHash --duration-ms $durationMs --playwright-evidence $playwrightEvidence --installation-evidence (Join-Path $runOutput 'installation.json') --lifecycle-evidence (Join-Path $runOutput 'lifecycle.json') --tracked-artifacts-evidence (Join-Path $runOutput 'tracked-artifacts.json')
+    $recorderArguments = @('pnpm', 'exec', 'tsx', $resultRecorder, '--run-id', $RunId, '--output-root', $runOutput, '--commit', $commit, '--artifact-sha256', $actualHash, '--duration-ms', $durationMs, '--playwright-evidence', $playwrightEvidence, '--installation-evidence', (Join-Path $runOutput 'installation.json'), '--lifecycle-evidence', (Join-Path $runOutput 'lifecycle.json'), '--tracked-artifacts-evidence', (Join-Path $runOutput 'tracked-artifacts.json'))
+    if (-not [string]::IsNullOrWhiteSpace($upgradeEvidence)) { $recorderArguments += @('--upgrade-evidence', $upgradeEvidence) }
+    & corepack @recorderArguments
     if ($LASTEXITCODE -ne 0) { throw "Result recording failed with exit code $LASTEXITCODE" }
   }
   $lifecycle | ConvertTo-Json -Compress
