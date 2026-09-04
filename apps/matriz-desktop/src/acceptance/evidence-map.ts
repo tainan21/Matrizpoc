@@ -17,6 +17,7 @@ const EXACT_JOURNEYS: Readonly<Record<string, readonly string[]>> = Object.freez
   "degrades optional Doctor checks and rejects gates after workspace loss": ["DOC-002", "ACT-003"],
   "recovers defaults from corrupt settings without destroying the source": ["SET-002"],
   "closes the main window to tray without terminating Control": ["LIFE-003"],
+  "persists settings across a complete Control relaunch": ["LIFE-008"],
   "maps every canonical Matriz app to its fixed listener port": ["PORT-002"],
   "starts only the cataloged native build operation and releases it": ["NATIVE-002"],
   "runs every fixed gate with evidence and interrupts only the selected gate": ["ACT-001", "ACT-002"],
