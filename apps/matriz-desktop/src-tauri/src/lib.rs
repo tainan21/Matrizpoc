@@ -1043,9 +1043,7 @@ fn hide_window(app: tauri::AppHandle, preview: tauri::State<'_, PreviewManager>)
 
 #[tauri::command]
 fn quit_app(app: tauri::AppHandle) {
-    app.state::<AwakeManager>().shutdown();
-    app.state::<TerminalManager>().shutdown();
-    app.exit(0);
+    shell::exit_app(&app);
 }
 
 #[tauri::command]
