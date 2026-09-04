@@ -19,11 +19,11 @@ async function terminalLabels(page: Page): Promise<readonly string[]> {
   return page.locator(".terminal-tabs [role='tab']").evaluateAll((tabs) => tabs.map((tab) => tab.getAttribute("aria-label") ?? ""))
 }
 
-async function startAndStop(page: Page, label: string, actionLabel: string, terminal: string): Promise<void> {
+async function startAndStop(page: Page, label: string, actionLabel: string, terminal: string): Promise<boolean> {
   await chooseMode(page, "Apps")
   const row = page.locator(".runtime-row").filter({ hasText: label })
   await row.click()
-  if ((await row.locator("small").innerText()).includes("EXTERNO")) return
+  if ((await row.locator("small").innerText()).includes("EXTERNO")) return false
   const start = page.getByRole("button", { name: `Iniciar ${actionLabel}`, exact: true })
   await start.scrollIntoViewIfNeeded()
   await expect(start).toBeVisible()
@@ -47,12 +47,13 @@ async function startAndStop(page: Page, label: string, actionLabel: string, term
 
   await chooseMode(page, "Terminal")
   await expect.poll(async () => (await terminalLabels(page)).some((item) => item.startsWith(terminal))).toBe(false)
+  return true
 }
 
 for (const app of apps) {
   test(`starts, owns, stops, and restarts ${app.label}`, async ({ tauriPage: page }) => {
     await selectAcceptanceWorkspace(page)
-    await startAndStop(page, app.label, app.actionLabel, app.terminal)
-    await startAndStop(page, app.label, app.actionLabel, app.terminal)
+    if (!await startAndStop(page, app.label, app.actionLabel, app.terminal)) test.skip(true, `${app.label} is externally owned and its managed lifecycle was not exercised`)
+    expect(await startAndStop(page, app.label, app.actionLabel, app.terminal)).toBe(true)
   })
 }

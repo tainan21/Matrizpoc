@@ -8,7 +8,7 @@ export default defineConfig({
   timeout: 900_000,
   expect: { timeout: 20_000 },
   outputDir: "../../output/playwright/matriz-control",
-  reporter: [["line"]],
+  reporter: [["line"], ["./acceptance/playwright/evidence-reporter.ts"]],
   use: {
     screenshot: "only-on-failure",
     trace: "retain-on-failure",

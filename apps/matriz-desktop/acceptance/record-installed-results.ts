@@ -1,7 +1,9 @@
 import { mkdir, writeFile } from "node:fs/promises"
+import { readFile } from "node:fs/promises"
 import path from "node:path"
 
 import { ACCEPTANCE_CASES } from "../src/acceptance/catalog"
+import { acceptanceIdsForJourney } from "../src/acceptance/evidence-map"
 
 function argument(name: string): string {
   const index = process.argv.indexOf(name)
@@ -15,28 +17,39 @@ const outputRoot = path.resolve(argument("--output-root"))
 const commit = argument("--commit")
 const artifactSha256 = argument("--artifact-sha256").toLowerCase()
 const durationMs = Number(argument("--duration-ms"))
+const evidencePath = path.resolve(argument("--playwright-evidence"))
 
 if (!/^[a-f0-9]{64}$/.test(artifactSha256)) throw new Error("Invalid installer SHA-256")
 if (!Number.isFinite(durationMs) || durationMs < 0) throw new Error("Invalid acceptance duration")
+if (path.dirname(evidencePath) !== outputRoot) throw new Error("Playwright evidence must belong to the acceptance run")
 
 const startedAt = new Date(Date.now() - durationMs).toISOString()
-// A successful Playwright process verifies its executed journeys, not every
-// contract ID. Leave cases unresolved until individual evidence is mapped.
+const evidenceDocument = JSON.parse(await readFile(evidencePath, "utf8")) as { schemaVersion?: unknown; status?: unknown; journeys?: unknown }
+if (evidenceDocument.schemaVersion !== "v1" || evidenceDocument.status !== "passed" || !Array.isArray(evidenceDocument.journeys)) throw new Error("Invalid Playwright evidence")
+const passedIds = new Set<string>()
+for (const journey of evidenceDocument.journeys) {
+  if (!journey || typeof journey !== "object" || (journey as { status?: unknown }).status !== "passed" || typeof (journey as { title?: unknown }).title !== "string") continue
+  for (const id of acceptanceIdsForJourney((journey as { title: string }).title)) passedIds.add(id)
+}
+const evidenceFile = `${runId}/playwright-evidence.json`
 const results = ACCEPTANCE_CASES.map((acceptanceCase) => ({
   schemaVersion: "v1" as const,
   runId,
   id: acceptanceCase.id,
   target: "packaged-candidate" as const,
-  status: "blocked" as const,
+  status: passedIds.has(acceptanceCase.id) ? "pass" as const : "blocked" as const,
   startedAt,
   durationMs,
   commit,
   artifactSha256,
-  summary: `${acceptanceCase.id} has no individual evidence mapping; suite success alone does not certify this case`,
+  summary: passedIds.has(acceptanceCase.id)
+    ? `${acceptanceCase.id} passed through an explicitly mapped installed Playwright journey`
+    : `${acceptanceCase.id} has no individual evidence mapping; suite success alone does not certify this case`,
   evidence: [
     `${runId}/e2e.log`,
     `${runId}/installation.json`,
     `${runId}/performance.json`,
+    ...(passedIds.has(acceptanceCase.id) ? [evidenceFile] : []),
   ],
 }))
 
@@ -47,8 +60,8 @@ await writeFile(path.join(outputRoot, "summary.json"), JSON.stringify({
   runId,
   target: "packaged-candidate",
   status: "blocked",
-  passed: 0,
-  blocked: results.length,
+  passed: results.filter((result) => result.status === "pass").length,
+  blocked: results.filter((result) => result.status === "blocked").length,
   failed: 0,
   artifactSha256,
   commit,

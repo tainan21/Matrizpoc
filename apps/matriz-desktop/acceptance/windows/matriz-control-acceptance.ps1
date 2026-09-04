@@ -177,6 +177,9 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
     $previousRunId = $env:MATRIZ_ACCEPTANCE_RUN_ID
     $env:MATRIZ_CONTROL_BINARY = $productExecutable
     $env:MATRIZ_ACCEPTANCE_RUN_ID = $RunId
+    $previousEvidencePath = $env:MATRIZ_ACCEPTANCE_EVIDENCE_PATH
+    $playwrightEvidence = Join-Path $runOutput 'playwright-evidence.json'
+    $env:MATRIZ_ACCEPTANCE_EVIDENCE_PATH = $playwrightEvidence
     try {
       & corepack pnpm --filter '@matriz/app-matriz-desktop' e2e:run *>&1 | Tee-Object -FilePath (Join-Path $runOutput 'e2e.log')
       $e2eExit = $LASTEXITCODE
@@ -184,6 +187,7 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
     finally {
       $env:MATRIZ_CONTROL_BINARY = $previousBinary
       $env:MATRIZ_ACCEPTANCE_RUN_ID = $previousRunId
+      $env:MATRIZ_ACCEPTANCE_EVIDENCE_PATH = $previousEvidencePath
     }
     if ($e2eExit -ne 0) { throw "Installed E2E failed with exit code $e2eExit" }
 
@@ -201,7 +205,7 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
     $commit = (& git -C $workspaceRoot rev-parse HEAD).Trim()
     $durationMs = [Math]::Round(([DateTimeOffset]::UtcNow - $acceptanceStarted).TotalMilliseconds)
     $resultRecorder = Join-Path $workspaceRoot 'apps\matriz-desktop\acceptance\record-installed-results.ts'
-    & corepack pnpm exec tsx $resultRecorder --run-id $RunId --output-root $runOutput --commit $commit --artifact-sha256 $actualHash --duration-ms $durationMs
+    & corepack pnpm exec tsx $resultRecorder --run-id $RunId --output-root $runOutput --commit $commit --artifact-sha256 $actualHash --duration-ms $durationMs --playwright-evidence $playwrightEvidence
     if ($LASTEXITCODE -ne 0) { throw "Result recording failed with exit code $LASTEXITCODE" }
     $completed = $true
   }

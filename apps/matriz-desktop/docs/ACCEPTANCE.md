@@ -19,10 +19,12 @@ ignored. The tracked report contains no machine-specific user path.
 
 A zero exit code from Playwright proves only its executed journeys. The old
 recorder incorrectly marked all 98 catalog cases as passed from that exit code.
-It now records them as `blocked` until individual case evidence is explicitly
-mapped. A successful install/test/uninstall cycle must not be presented as
-complete contract or public-release acceptance. Historical generated reports
-using the old blanket verdict do not certify the current release.
+The installed Playwright reporter now records each completed journey separately.
+Only exact journeys with a reviewed acceptance-ID mapping become `pass`; failed,
+skipped, unknown and still-unmapped cases remain `blocked`. A successful
+install/test/uninstall cycle must not be presented as complete contract or
+public-release acceptance while any required case remains blocked. Historical
+generated reports using the old blanket verdict do not certify the current release.
 
 ## Coverage
 
