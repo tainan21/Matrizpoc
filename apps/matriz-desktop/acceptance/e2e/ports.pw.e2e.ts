@@ -1,6 +1,7 @@
 import { spawn, type ChildProcess } from "node:child_process"
 import { createServer, type Server } from "node:net"
 import { once } from "node:events"
+import { fileURLToPath } from "node:url"
 import type { Page } from "@playwright/test"
 import { chooseMode } from "../playwright/actions"
 import { expect, test } from "../playwright/fixtures"
@@ -59,6 +60,21 @@ test("observes and terminates only harness-owned listener snapshots", async ({ t
   }
 })
 
+test("reports access denial without requesting elevation", async ({ tauriPage: page }) => {
+  const fixture = await accessDeniedListenerProcess()
+  try {
+    await chooseMode(page, "Portas")
+    await refresh(page)
+    const current = await snapshot(page)
+    expect(current.ports).toContainEqual(expect.objectContaining({ pid: fixture.child.pid, port: fixture.port }))
+    await expect(invoke(page, "terminate_process", { request: { pid: fixture.child.pid, snapshotId: current.snapshotId } })).rejects.toThrow(/access denied.*will not request elevation.*owning app/i)
+    expect(fixture.child.exitCode).toBeNull()
+  } finally {
+    fixture.child.stdin?.write("stop\n")
+    await waitForExit(fixture.child)
+  }
+})
+
 async function listenerProcess(): Promise<{ child: ChildProcess; port: number }> {
   const child = spawn(process.execPath, ["-e", "require('net').createServer().listen(0,'127.0.0.1',function(){console.log(this.address().port)})"], { stdio: ["ignore", "pipe", "pipe"], windowsHide: true })
   const [chunk] = await Promise.race([
@@ -68,6 +84,18 @@ async function listenerProcess(): Promise<{ child: ChildProcess; port: number }>
   const port = Number.parseInt(String(chunk).replace(/\x1b\[[0-9;]*m/g, "").trim(), 10)
   if (!child.pid || !Number.isInteger(port)) throw new Error(`Listener fixture did not report a PID and port (pid=${child.pid ?? "missing"}, stdout=${JSON.stringify(String(chunk))})`)
   return { child, port }
+}
+
+async function accessDeniedListenerProcess(): Promise<{ child: ChildProcess; port: number }> {
+  const script = fileURLToPath(new URL("../windows/access-denied-listener.ps1", import.meta.url))
+  const child = spawn("pwsh.exe", ["-NoProfile", "-File", script, "-Port", "0"], { stdio: ["pipe", "pipe", "pipe"], windowsHide: true })
+  const [chunk] = await Promise.race([
+    once(child.stdout!, "data"),
+    once(child, "exit").then(([code]) => { throw new Error(`Access-denied listener exited before readiness (${code})`) }),
+  ])
+  const ready = JSON.parse(String(chunk).trim()) as { pid: number; port: number }
+  if (!child.pid || ready.pid !== child.pid || !Number.isInteger(ready.port)) throw new Error("Access-denied listener did not report its owned PID and port")
+  return { child, port: ready.port }
 }
 
 async function refresh(page: Page): Promise<void> {

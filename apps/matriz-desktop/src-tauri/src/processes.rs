@@ -39,7 +39,7 @@ impl ProcessTerminator for WindowsProcessTerminator {
     fn terminate(&self, pid: u32) -> Result<(), String> {
         let handle = unsafe { OpenProcess(PROCESS_TERMINATE | PROCESS_SYNCHRONIZE, 0, pid) };
         if handle.is_null() {
-            return Err(format!("Process {pid} cannot be opened for termination"));
+            return Err(termination_failure(pid, unsafe { GetLastError() }));
         }
         let terminated = unsafe { TerminateProcess(handle, 1) };
         let error = if terminated == 0 {
