@@ -14,7 +14,7 @@ use uuid::Uuid;
 
 use crate::activity::ActivityHub;
 use crate::catalog::{ManagedOperationDefinition, ManagedOperationKind};
-use crate::processes::{ProcessTerminator, WindowsProcessTerminator};
+use crate::processes::terminate_process_tree;
 
 pub const MAX_SESSIONS: usize = 6;
 pub const MAX_CHUNK_BYTES: usize = 64 * 1024;
@@ -468,7 +468,7 @@ impl TerminalManager {
             std::thread::sleep(std::time::Duration::from_millis(10));
         };
         if is_running {
-            WindowsProcessTerminator.terminate(pid)?;
+            terminate_process_tree(pid)?;
         }
         let (writer, master) = {
             let mut session = session
@@ -517,7 +517,7 @@ impl TerminalManager {
         for session in sessions {
             if let Ok(mut session) = session.lock() {
                 if session.metadata.status == "running" {
-                    let _ = WindowsProcessTerminator.terminate(session.pid);
+                    let _ = terminate_process_tree(session.pid);
                 }
                 session.writer.take();
                 session.master.take();

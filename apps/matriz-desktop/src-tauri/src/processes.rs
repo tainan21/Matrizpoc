@@ -15,6 +15,38 @@ pub trait ProcessTerminator: Send + Sync {
 #[derive(Default)]
 pub struct WindowsProcessTerminator;
 
+pub fn terminate_process_tree(pid: u32) -> Result<(), String> {
+    let system = System::new_all();
+    let relations = system
+        .processes()
+        .values()
+        .filter_map(|process| {
+            process
+                .parent()
+                .map(|parent| (process.pid().as_u32(), parent.as_u32()))
+        })
+        .collect::<Vec<_>>();
+    for descendant in descendant_pids(pid, &relations) {
+        WindowsProcessTerminator.terminate(descendant)?;
+    }
+    WindowsProcessTerminator.terminate(pid)
+}
+
+fn descendant_pids(root: u32, relations: &[(u32, u32)]) -> Vec<u32> {
+    let mut result = Vec::new();
+    let mut frontier = vec![root];
+    while let Some(parent) = frontier.pop() {
+        for &(child, candidate_parent) in relations {
+            if candidate_parent == parent && child != root && !result.contains(&child) {
+                result.push(child);
+                frontier.push(child);
+            }
+        }
+    }
+    result.reverse();
+    result
+}
+
 pub fn is_current_or_ancestor(candidate: u32) -> bool {
     let current = std::process::id();
     if candidate == current {
@@ -100,5 +132,18 @@ mod tests {
         assert!(message.contains("Access denied"));
         assert!(message.contains("will not request elevation"));
         assert!(message.contains("owning app"));
+    }
+
+    #[test]
+    fn descendants_are_terminated_deepest_first_without_cycles() {
+        let descendants = descendant_pids(10, &[(11, 10), (12, 11), (13, 10), (10, 12)]);
+        assert_eq!(descendants.len(), 3);
+        assert_eq!(descendants.iter().filter(|&&pid| pid == 12).count(), 1);
+        assert!(
+            descendants.iter().position(|&pid| pid == 12)
+                < descendants.iter().position(|&pid| pid == 11)
+        );
+        assert!(descendants.contains(&13));
+        assert!(!descendants.contains(&10));
     }
 }
