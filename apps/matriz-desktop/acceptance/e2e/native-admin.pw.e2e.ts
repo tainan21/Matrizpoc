@@ -75,6 +75,16 @@ test("rejects missing and tampered native installers before execution", async ({
   }
 })
 
+test("starts only the cataloged native build operation and releases it", async ({ tauriPage: page }) => {
+  await selectAcceptanceWorkspace(page)
+  const session = await invoke<{ id: string; kind: string; operationId: string; status: string }>(page, "start_managed_operation", { operationId: "app.matriz-admin.native.build" })
+  expect(session).toMatchObject({ kind: "managed", operationId: "app.matriz-admin.native.build", status: "running" })
+  expect(await invoke<{ id: string }[]>(page, "list_terminals")).toContainEqual(expect.objectContaining({ id: session.id }))
+  await invoke(page, "interrupt_terminal", { sessionId: session.id })
+  await invoke(page, "close_terminal", { sessionId: session.id })
+  expect(await invoke<unknown[]>(page, "list_terminals")).toHaveLength(0)
+})
+
 function invoke<T>(page: Page, command: string, args?: Record<string, unknown>): Promise<T> {
   return page.evaluate(({ command, args }) => (window as unknown as { __TAURI_INTERNALS__: { invoke<TValue>(name: string, input?: Record<string, unknown>): Promise<TValue> } }).__TAURI_INTERNALS__.invoke<T>(command, args), { command, args })
 }
