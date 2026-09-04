@@ -1667,15 +1667,11 @@ pub fn run() {
     let terminals = TerminalManager::with_activity(activity.clone());
     let builder = tauri::Builder::default()
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(shell::shortcut_plugin())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             None,
         ));
-    let builder = if acceptance_mode() {
-        builder
-    } else {
-        builder.plugin(shell::shortcut_plugin())
-    };
     builder
         .manage(NativeState::new())
         .manage(OperationsState::discover())
@@ -1719,6 +1715,11 @@ pub fn run() {
                 unix_time_millis,
             )));
             shell::install_tray(app.handle())?;
+            if !acceptance_mode() {
+                if let Err(error) = shell::install_shortcut(app.handle()) {
+                    eprintln!("{error}");
+                }
+            }
             Ok(())
         })
         .on_window_event(|window, event| {

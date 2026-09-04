@@ -3,7 +3,7 @@ use tauri::{
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
     AppHandle, Manager, Runtime, WebviewWindow,
 };
-use tauri_plugin_global_shortcut::ShortcutState;
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutState};
 
 use crate::{AwakeManager, PreviewManager, TerminalManager};
 
@@ -85,15 +85,21 @@ pub fn install_tray(app: &AppHandle) -> tauri::Result<()> {
 }
 
 pub fn shortcut_plugin<R: Runtime>() -> tauri::plugin::TauriPlugin<R> {
-    tauri_plugin_global_shortcut::Builder::new()
-        .with_shortcut("Ctrl+Shift+M")
-        .expect("valid Matriz Control shortcut")
-        .with_handler(|app, _, event| {
+    tauri_plugin_global_shortcut::Builder::new().build()
+}
+
+pub fn install_shortcut<R: Runtime>(app: &AppHandle<R>) -> Result<(), String> {
+    app.global_shortcut()
+        .on_shortcut("Ctrl+Shift+M", |app, _, event| {
             if event.state() == ShortcutState::Pressed {
                 toggle_window(app);
             }
         })
-        .build()
+        .map_err(shortcut_registration_error)
+}
+
+fn shortcut_registration_error(error: impl std::fmt::Display) -> String {
+    format!("Ctrl+Shift+M indisponível: {error}. Use o ícone da bandeja para mostrar o Control.")
 }
 
 #[cfg(test)]
@@ -105,5 +111,13 @@ mod tests {
         assert_eq!(tray_action("show"), Some(TrayAction::Show));
         assert_eq!(tray_action("exit"), Some(TrayAction::Exit));
         assert_eq!(tray_action("arbitrary"), None);
+    }
+
+    #[test]
+    fn shortcut_failure_explains_the_non_global_fallback() {
+        assert_eq!(
+            shortcut_registration_error("atalho em uso"),
+            "Ctrl+Shift+M indisponível: atalho em uso. Use o ícone da bandeja para mostrar o Control."
+        );
     }
 }
