@@ -7,7 +7,7 @@ import { join } from "node:path"
 import type { Page } from "@playwright/test"
 
 import { chooseMode } from "../playwright/actions"
-import { expect, test } from "../playwright/fixtures"
+import { expect, test, waitForTauriBridge } from "../playwright/fixtures"
 import { createWebView2Environment, waitForCdpEndpoint } from "../playwright/native-process"
 
 test("recovers defaults from corrupt settings without destroying the source", async ({ tauriApp }) => {
@@ -55,6 +55,7 @@ test("persists settings across a complete Control relaunch", async ({ tauriApp }
     const relaunchedPage = browser.contexts()[0]?.pages()[0]
     if (!relaunchedPage) throw new Error("Relaunched Control did not expose its main page")
     await relaunchedPage.waitForLoadState("domcontentloaded")
+    await waitForTauriBridge(relaunchedPage)
     expect(await invoke(relaunchedPage, "read_settings")).toMatchObject(expected)
   } finally {
     await browser.close()

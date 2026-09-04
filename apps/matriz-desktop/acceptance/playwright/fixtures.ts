@@ -50,6 +50,7 @@ export const test = base.extend<NativeFixtures>({
       if (!context) throw new Error("Matriz Control did not expose a WebView2 context")
       const page = context.pages()[0] ?? await context.waitForEvent("page")
       await page.waitForLoadState("domcontentloaded")
+      await waitForTauriBridge(page)
       if (!child.pid) throw new Error("Matriz Control did not expose its process ID")
       await use({ page, processId: child.pid, configDirectory, binary, startupMs: Date.now() - startedAt })
     } finally {
@@ -96,4 +97,10 @@ async function stopOwnedProcess(child: ChildProcess): Promise<void> {
 
 function boundedOutput(current: string, next: string): string {
   return `${current}${next}`.slice(-16_384)
+}
+
+export async function waitForTauriBridge(page: Page): Promise<void> {
+  await page.waitForFunction(() => Boolean((window as unknown as {
+    __TAURI_INTERNALS__?: { invoke?: unknown }
+  }).__TAURI_INTERNALS__?.invoke))
 }
