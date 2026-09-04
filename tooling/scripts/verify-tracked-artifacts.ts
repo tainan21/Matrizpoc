@@ -8,7 +8,16 @@ import { execFileSync } from "node:child_process"
 import { resolve } from "node:path"
 
 const ROOT = resolve(__dirname, "..", "..")
-const FORBIDDEN_PATHS = ["apps/matriz-control/dist/**"]
+const FORBIDDEN_PATHS = [
+  "apps/**/dist/**",
+  "apps/**/target/**",
+  "output/**",
+  "**/.env",
+  "**/*.pem",
+  "**/*.key",
+  "**/*.pfx",
+  "**/*.p12",
+]
 
 function trackedFiles(pathspec: string): string[] {
   return execFileSync("git", ["ls-files", "--", pathspec], {
@@ -23,9 +32,9 @@ function trackedFiles(pathspec: string): string[] {
 const violations = FORBIDDEN_PATHS.flatMap(trackedFiles)
 
 if (violations.length > 0) {
-  console.error("[verify-tracked-artifacts] generated Matriz Control artifacts are tracked:")
+  console.error("[verify-tracked-artifacts] generated artifacts or secret-bearing files are tracked:")
   for (const path of violations) console.error(`  ${path}`)
   process.exit(1)
 }
 
-console.log("[verify-tracked-artifacts] no generated Matriz Control artifacts are tracked")
+console.log("[verify-tracked-artifacts] no generated artifacts or secret-bearing files are tracked")

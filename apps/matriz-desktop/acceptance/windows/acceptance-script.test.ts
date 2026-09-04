@@ -42,6 +42,14 @@ describe.runIf(process.platform === "win32")("Windows acceptance script", () => 
     expect(source).toContain("while ((Test-Path -LiteralPath $productExecutable -PathType Leaf)")
   })
 
+  it("records a clean tracked-artifacts gate after uninstall", () => {
+    const source = readFileSync(scriptPath, "utf8")
+
+    expect(source).toContain("corepack pnpm verify:tracked-artifacts")
+    expect(source).toContain("tracked-artifacts.json")
+    expect(source).toContain("--tracked-artifacts-evidence")
+  })
+
   it.runIf(existsSync(installedExecutable))("inspects the existing installation without modifying its executable", () => {
     const before = statSync(installedExecutable)
     const result = runAcceptance([

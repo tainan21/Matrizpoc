@@ -225,9 +225,18 @@ if ($Mode -eq 'Package' -or $Mode -eq 'Installed') {
   $lifecycle | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath (Join-Path $runOutput 'lifecycle.json') -Encoding utf8
   if ($completed) {
     $commit = (& git -C $workspaceRoot rev-parse HEAD).Trim()
+    $trackedArtifactsLog = Join-Path $runOutput 'tracked-artifacts.log'
+    & corepack pnpm verify:tracked-artifacts *>&1 | Set-Content -LiteralPath $trackedArtifactsLog -Encoding utf8
+    if ($LASTEXITCODE -ne 0) { throw "Tracked-artifacts verification failed with exit code $LASTEXITCODE" }
+    [PSCustomObject]@{
+      schemaVersion = 'v1'
+      runId = $RunId
+      status = 'pass'
+      commit = $commit
+    } | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $runOutput 'tracked-artifacts.json') -Encoding utf8
     $durationMs = [Math]::Round(([DateTimeOffset]::UtcNow - $acceptanceStarted).TotalMilliseconds)
     $resultRecorder = Join-Path $workspaceRoot 'apps\matriz-desktop\acceptance\record-installed-results.ts'
-    & corepack pnpm exec tsx $resultRecorder --run-id $RunId --output-root $runOutput --commit $commit --artifact-sha256 $actualHash --duration-ms $durationMs --playwright-evidence $playwrightEvidence --installation-evidence (Join-Path $runOutput 'installation.json') --lifecycle-evidence (Join-Path $runOutput 'lifecycle.json')
+    & corepack pnpm exec tsx $resultRecorder --run-id $RunId --output-root $runOutput --commit $commit --artifact-sha256 $actualHash --duration-ms $durationMs --playwright-evidence $playwrightEvidence --installation-evidence (Join-Path $runOutput 'installation.json') --lifecycle-evidence (Join-Path $runOutput 'lifecycle.json') --tracked-artifacts-evidence (Join-Path $runOutput 'tracked-artifacts.json')
     if ($LASTEXITCODE -ne 0) { throw "Result recording failed with exit code $LASTEXITCODE" }
   }
   $lifecycle | ConvertTo-Json -Compress
