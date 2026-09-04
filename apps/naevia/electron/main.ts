@@ -14,6 +14,7 @@ import { LegacyImportService } from "./legacy-import-service.js"
 import { BrowserRepository } from "./browser-repository.js"
 import { assertTrustedShell, isShellUrl } from "./trusted-shell.js"
 import { policyAllows } from "./capsule-policy.js"
+import { openControlStore } from "./control-store-handoff.js"
 import type { AgentPolicy, BrowserCommand, BrowserSnapshot, CapsuleView, TabView } from "../src/shared.js"
 
 const here = dirname(fileURLToPath(import.meta.url))
@@ -317,6 +318,7 @@ function registerIpc() {
     if (!response.ok) throw new Error(`Matriz Hub indisponível (${response.status})`)
     return storeProducts(await response.json())
   })
+  handle("naevia:store:open-control", async () => openControlStore(process.env.LOCALAPPDATA, (path) => shell.openPath(path)))
   handle("naevia:downloads:list", () => [...downloads.values()].map(({ view }) => view))
   handle("naevia:downloads:show", (_event, input: unknown) => {
     const id = text((input as Record<string, unknown>)?.downloadId, "Download", 36)

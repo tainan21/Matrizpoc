@@ -60,6 +60,7 @@ test("opens the real Electron shell with secure browser chrome", async () => {
     await expect(window.getByText("proof.txt")).toBeVisible()
     await window.getByRole("button", { name: "Store" }).click()
     await expect(window.getByRole("heading", { name: "Matriz Store" })).toBeVisible()
+    await expect(window.getByRole("button", { name: "Abrir no Matriz Control" })).toBeVisible()
     await window.getByRole("button", { name: "Terminal" }).click()
     await expect(window.getByText("Nenhuma sessão aberta.")).toBeVisible()
     await window.getByRole("button", { name: "Nova sessão PowerShell" }).click()

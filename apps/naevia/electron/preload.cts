@@ -39,6 +39,7 @@ interface NaeviaBridge {
   closeTerminal(sessionId: string): Promise<readonly TerminalSessionView[]>
   subscribeTerminals(listener: (sessions: readonly TerminalSessionView[]) => void): () => void
   storeCatalog(): Promise<readonly StoreProductView[]>
+  openControlStore(): Promise<{ readonly opened: true }>
   downloads(): Promise<readonly DownloadView[]>
   showDownload(downloadId: string): Promise<void>
   subscribeDownloads(listener: (downloads: readonly DownloadView[]) => void): () => void
@@ -71,6 +72,7 @@ const bridge: NaeviaBridge = {
     return () => ipcRenderer.off("naevia:terminal:sessions", handler)
   },
   storeCatalog: () => ipcRenderer.invoke("naevia:store:catalog"),
+  openControlStore: () => ipcRenderer.invoke("naevia:store:open-control"),
   downloads: () => ipcRenderer.invoke("naevia:downloads:list"),
   showDownload: (downloadId) => ipcRenderer.invoke("naevia:downloads:show", { downloadId }),
   subscribeDownloads: (listener) => {
