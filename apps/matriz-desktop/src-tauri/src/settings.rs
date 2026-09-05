@@ -16,6 +16,10 @@ pub enum DesktopTheme {
     ReactorAcid,
     AuroraLiquid,
     IndustrialEmber,
+    DraculaDark,
+    TerminalGreen,
+    QuietDepth,
+    SoftGraphite,
 }
 
 impl Default for DesktopTheme {
@@ -163,5 +167,21 @@ mod tests {
     #[test]
     fn default_settings_start_with_the_matriz_theme() {
         assert_eq!(DesktopSettings::default().theme, DesktopTheme::Matriz);
+    }
+
+    #[test]
+    fn persists_all_programming_themes() {
+        for (wire_value, expected) in [
+            ("dracula-dark", DesktopTheme::DraculaDark),
+            ("terminal-green", DesktopTheme::TerminalGreen),
+            ("quiet-depth", DesktopTheme::QuietDepth),
+            ("soft-graphite", DesktopTheme::SoftGraphite),
+        ] {
+            let json = format!(
+                r#"{{"version":1,"settings":{{"theme":"{wire_value}","closeToTray":true,"soundsEnabled":true,"volume":0.45,"startWithWindows":false}}}}"#,
+            );
+            let document: SettingsDocument = serde_json::from_str(&json).expect("theme should deserialize");
+            assert_eq!(document.settings.theme, expected);
+        }
     }
 }

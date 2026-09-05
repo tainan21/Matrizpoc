@@ -11,6 +11,10 @@ const themes = [
   ["Reator Ácido", "reactor-acid"],
   ["Aurora Líquida", "aurora-liquid"],
   ["Brasa Industrial", "industrial-ember"],
+  ["Dracula Dark", "dracula-dark"],
+  ["Terminal Green", "terminal-green"],
+  ["Quiet Depth", "quiet-depth"],
+  ["Soft Graphite", "soft-graphite"],
 ] as const
 
 test("applies and restores every operational theme through native settings", async ({ tauriPage: page }) => {
@@ -30,6 +34,6 @@ test("applies and restores every operational theme through native settings", asy
   expect(observedAccents.size).toBe(themes.length)
   await page.waitForTimeout(150)
   await page.reload({ waitUntil: "domcontentloaded" })
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "industrial-ember")
-  await expect(page.locator(".control-shell")).toHaveAttribute("data-theme", "industrial-ember")
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "soft-graphite")
+  await expect(page.locator(".control-shell")).toHaveAttribute("data-theme", "soft-graphite")
 })

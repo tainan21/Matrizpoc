@@ -47,6 +47,10 @@ describe("MatrizLib token contract", () => {
       "reactor-acid",
       "aurora-liquid",
       "industrial-ember",
+      "dracula-dark",
+      "terminal-green",
+      "quiet-depth",
+      "soft-graphite",
     ])
     for (const theme of operationalThemes) {
       const section = tokensCss.match(new RegExp(`\\[data-matrizlib\\]\\[data-theme="${theme.id}"\\]\\s*\\{([\\s\\S]*?)\\n\\}`))
