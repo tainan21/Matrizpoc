@@ -5,6 +5,10 @@ export const CONTROL_THEMES = [
   { id: "reactor-acid", label: "Reator Ácido", description: "Preto, verde elétrico e âmbar." },
   { id: "aurora-liquid", label: "Aurora Líquida", description: "Azul-ciano e magenta em contraste." },
   { id: "industrial-ember", label: "Brasa Industrial", description: "Grafite, laranja e vermelho." },
+  { id: "dracula-dark", label: "Dracula Dark", description: "Roxo, rosa e amarelo no clássico tema Dracula." },
+  { id: "terminal-green", label: "Terminal Green", description: "Preto profundo e verde fosforescente." },
+  { id: "quiet-depth", label: "Quiet Depth", description: "Azul ardósia escuro para foco prolongado." },
+  { id: "soft-graphite", label: "Soft Graphite", description: "Grafite calmo, menta suave e âmbar legível." },
 ] as const
 
 export type ControlTheme = (typeof CONTROL_THEMES)[number]["id"]

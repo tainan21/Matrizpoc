@@ -125,6 +125,10 @@ h2 { margin: 22px 0 8px; color: #8e849c; font-size: 9px; letter-spacing: .18em; 
 .control-theme-options i[data-theme-swatch="reactor-acid"] { background:linear-gradient(135deg,#050806,#b7ff21 60%,#ffb02e); }
 .control-theme-options i[data-theme-swatch="aurora-liquid"] { background:linear-gradient(135deg,#42e8ff,#e34eff); }
 .control-theme-options i[data-theme-swatch="industrial-ember"] { background:linear-gradient(135deg,#211a16,#ff842e 60%,#ff4e3f); }
+.control-theme-options i[data-theme-swatch="dracula-dark"] { background:linear-gradient(135deg,#191a21,#bd93f9 58%,#ff79c6); }
+.control-theme-options i[data-theme-swatch="terminal-green"] { background:linear-gradient(135deg,#050805,#39ff88 60%,#f2d66b); }
+.control-theme-options i[data-theme-swatch="quiet-depth"] { background:linear-gradient(135deg,#0b1118,#7bc4d8 60%,#83b6ff); }
+.control-theme-options i[data-theme-swatch="soft-graphite"] { background:linear-gradient(135deg,#0d0f12,#a7d8c0 60%,#e5c875); }
 .control-theme-options span { display:grid; gap:3px; min-width:0; }
 .control-theme-options b { font-size:10px; }
 .control-theme-options small { color:var(--muted); font-size:8px; line-height:1.3; }

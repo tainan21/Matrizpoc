@@ -2,7 +2,7 @@ import type { MatrizAppId } from "@matriz/foundation-constants"
 import { semanticFeedbackColors, type SemanticTokenName } from "./tokens"
 
 export interface OperationalTheme {
-  readonly id: "matriz" | "reactor-acid" | "aurora-liquid" | "industrial-ember"
+  readonly id: "matriz" | "reactor-acid" | "aurora-liquid" | "industrial-ember" | "dracula-dark" | "terminal-green" | "quiet-depth" | "soft-graphite"
   readonly label: string
   readonly description: string
   readonly tokens: Readonly<Record<SemanticTokenName, string>>
@@ -31,6 +31,30 @@ export const operationalThemes = [
     id: "industrial-ember", label: "Brasa Industrial", description: "Grafite, laranja e vermelho.",
     tokens: {
       "--matriz-color-canvas": "#0d0c0b", "--matriz-color-surface": "#151211", "--matriz-color-text": "#fff4eb", "--matriz-color-text-muted": "#b3a096", "--matriz-color-border": "#4a342a", "--matriz-color-action": "#ff842e", "--matriz-color-action-text": "#130700", "--matriz-color-focus": "#ffc14d", "--matriz-color-success": "#8ce6a2", "--matriz-color-warning": "#ffc14d", "--matriz-color-danger": "#ff6a5e", "--matriz-color-info": "#8dc9ff",
+    },
+  },
+  {
+    id: "dracula-dark", label: "Dracula Dark", description: "Roxo, rosa e amarelo no clássico tema Dracula.",
+    tokens: {
+      "--matriz-color-canvas": "#191a21", "--matriz-color-surface": "#282a36", "--matriz-color-text": "#f8f8f2", "--matriz-color-text-muted": "#bdc0cc", "--matriz-color-border": "#4b4e61", "--matriz-color-action": "#bd93f9", "--matriz-color-action-text": "#191a21", "--matriz-color-focus": "#8be9fd", "--matriz-color-success": "#50fa7b", "--matriz-color-warning": "#ffb86c", "--matriz-color-danger": "#ff5555", "--matriz-color-info": "#8be9fd",
+    },
+  },
+  {
+    id: "terminal-green", label: "Terminal Green", description: "Preto profundo, verde fosforescente e foco técnico.",
+    tokens: {
+      "--matriz-color-canvas": "#050805", "--matriz-color-surface": "#0a100b", "--matriz-color-text": "#d7ffd7", "--matriz-color-text-muted": "#8bd18b", "--matriz-color-border": "#2d5a35", "--matriz-color-action": "#39ff88", "--matriz-color-action-text": "#050805", "--matriz-color-focus": "#7dffae", "--matriz-color-success": "#39ff88", "--matriz-color-warning": "#f2d66b", "--matriz-color-danger": "#ff6b6b", "--matriz-color-info": "#73d9ff",
+    },
+  },
+  {
+    id: "quiet-depth", label: "Quiet Depth", description: "Azul ardósia escuro para foco prolongado e telas grandes.",
+    tokens: {
+      "--matriz-color-canvas": "#0b1118", "--matriz-color-surface": "#101a24", "--matriz-color-text": "#edf4fa", "--matriz-color-text-muted": "#a6b5c4", "--matriz-color-border": "#334657", "--matriz-color-action": "#7bc4d8", "--matriz-color-action-text": "#071015", "--matriz-color-focus": "#a8dbe7", "--matriz-color-success": "#72d6b0", "--matriz-color-warning": "#f0c678", "--matriz-color-danger": "#ff8190", "--matriz-color-info": "#83b6ff",
+    },
+  },
+  {
+    id: "soft-graphite", label: "Soft Graphite", description: "Grafite calmo, menta suave e âmbar legível.",
+    tokens: {
+      "--matriz-color-canvas": "#0d0f12", "--matriz-color-surface": "#14181c", "--matriz-color-text": "#edf1ef", "--matriz-color-text-muted": "#a6b0aa", "--matriz-color-border": "#35403c", "--matriz-color-action": "#a7d8c0", "--matriz-color-action-text": "#0b110e", "--matriz-color-focus": "#c6ead8", "--matriz-color-success": "#86ddb5", "--matriz-color-warning": "#e5c875", "--matriz-color-danger": "#f08b8b", "--matriz-color-info": "#8fb4e6",
     },
   },
 ] as const satisfies readonly OperationalTheme[]
